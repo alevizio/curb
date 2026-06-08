@@ -11,7 +11,10 @@ calendar reminder before the next sweep.
 ## Stack (intentionally minimal)
 - Single static file: `index.html`. No build step, no framework, no bundler.
 - Vanilla JS + Leaflet 1.9.4 (from cdnjs) for the map.
-- Basemap: CARTO Voyager raster tiles (keyless). Google-ish look without a paid key.
+- Basemap: official Google Map Tiles API when `GMAPS_KEY` (or `window.GMAPS_KEY`) is set —
+  session-token flow in `initBasemap()`, viewport attribution refreshed on moveend. Falls
+  back to keyless CARTO Voyager raster tiles when no key / on any failure. The Google key is a
+  client key (referrer-restrict it). Leaflet stays the map engine either way.
 - Everything is client-side. Data is fetched live from DataSF (Socrata) at runtime.
 - Design system: fonts Anton (display) + Hanken Grotesk (body); "transit signage"
   aesthetic; color tokens in :root (--green clear / --amber soon / --red now /

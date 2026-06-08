@@ -198,11 +198,52 @@ const MIN_ZOOM_DATA=15;
 const OFFSET=5; // metres each side of centreline
 // Web Push: VAPID *public* key (safe to ship to the client). Matches VAPID_PRIVATE_KEY on the server.
 const VAPID_PUBLIC_KEY="BNh-13Y456HR3O_-AvNP_kEIIui1YvbEumSFLF0l-VD94H_qtGpAQPush_WycVNXYbnt6s9UVC8FXI9-crT-8Ao";
+// Google Map Tiles API key (optional). When set, the basemap uses official Google tiles; otherwise it
+// falls back to keyless CARTO. This is a CLIENT key — restrict it by HTTP referrer + API in Google Cloud
+// Console. Set it here, or define window.GMAPS_KEY before this script (e.g. a gitignored config.js).
+const GMAPS_KEY=((typeof window!=='undefined'&&window.GMAPS_KEY)||"").trim();
 
-const map=L.map('map',{zoomControl:false,attributionControl:true}).setView([37.7749,-122.4194],13);
+const map=L.map('map',{zoomControl:false,attributionControl:true}).setView([37.7749,-122.4194],15);
 L.control.zoom({position:'bottomleft'}).addTo(map);
-L.tileLayer('https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
-  subdomains:'abcd',maxZoom:20,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+
+// Basemap: official Google Map Tiles API when GMAPS_KEY is set, else keyless CARTO (Google-style) fallback.
+function addCarto(){
+  return L.tileLayer('https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    {subdomains:'abcd',maxZoom:20,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+}
+(async function initBasemap(){
+  if(!GMAPS_KEY){ addCarto(); return; }
+  try{
+    // 1) Create a session token for 2D roadmap tiles (free; tiles are billed).
+    const ctrl=new AbortController(), to=setTimeout(()=>ctrl.abort(),3000);
+    const sres=await fetch('https://tile.googleapis.com/v1/createSession?key='+encodeURIComponent(GMAPS_KEY),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({mapType:'roadmap',language:'en-US',region:'US'}),signal:ctrl.signal});
+    clearTimeout(to);
+    if(!sres.ok) throw new Error('createSession '+sres.status);
+    const {session}=await sres.json();
+    if(!session) throw new Error('no session');
+    // 2) Tile layer (Leaflet fills {z}/{x}/{y}; session+key are baked in).
+    L.tileLayer(`https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${session}&key=${encodeURIComponent(GMAPS_KEY)}`,
+      {maxZoom:20}).addTo(map);
+    // 3) Google requires showing the per-viewport attribution; refresh it on pan/zoom.
+    let cur='© Google';
+    map.attributionControl.addAttribution(cur);
+    const refresh=async()=>{
+      try{
+        const b=map.getBounds();
+        const r=await fetch('https://tile.googleapis.com/tile/v1/viewport?session='+session+'&key='+encodeURIComponent(GMAPS_KEY)
+          +'&zoom='+map.getZoom()+'&north='+b.getNorth()+'&south='+b.getSouth()+'&east='+b.getEast()+'&west='+b.getWest());
+        if(!r.ok) return; const d=await r.json(); const next=d.copyright||cur;
+        if(next!==cur){ map.attributionControl.removeAttribution(cur); map.attributionControl.addAttribution(next); cur=next; }
+      }catch(_){}
+    };
+    refresh(); map.on('moveend',refresh);
+  }catch(e){
+    addCarto(); // never leave the user with a blank map
+    if(typeof toast==='function') toast('Google basemap unavailable — showing fallback map.');
+  }
+})();
 
 const rppLayer=L.layerGroup().addTo(map);  // under
 const segLayer=L.layerGroup().addTo(map);  // over
