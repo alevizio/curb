@@ -2,10 +2,10 @@
 
 San Francisco street-parking rules on a map: street sweeping schedules, the next
 sweep time per curb side, metered-street info, and residential permit (RPP) zones.
-One-tap calendar reminder before the next sweep, and a PWA/push scaffold for true
+One-tap calendar reminder before the next sweep, plus a PWA with true Web Push
 move-your-car alerts.
 
-Static front-end (no build) + serverless API stubs for Web Push.
+Static front-end (no build) + serverless API routes (Vercel) for Web Push.
 
 ## Run locally
 ```bash
@@ -39,6 +39,17 @@ Setup (one time):
 
 iOS: Web Push only works once CURB is installed to the Home Screen (the app shows an
 "Add to Home Screen" hint for un-installed iPhones).
+
+## Map basemap (Google Maps, optional)
+With a Google **Map Tiles API** key the basemap uses official Google tiles; without one it
+falls back to keyless CARTO Voyager. The key is a *client* key — **restrict it by HTTP referrer
++ API** in Google Cloud Console (add `http://localhost:3000/*`, `https://*.vercel.app/*`, and
+your domain).
+
+The key is kept out of this public repo:
+- **Local:** copy `config.example.js` → `config.js` (gitignored) and paste your key.
+- **Deployed:** set `GMAPS_KEY` in your Vercel env. `api/config.js` serves it to the client and
+  `vercel.json` rewrites `/config.js` → `/api/config`, so nothing changes in `index.html`.
 
 ## Data
 - Street sweeping: DataSF `yhqp-riqs`

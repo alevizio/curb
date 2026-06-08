@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/config.js", "destination": "/api/config" }
+  ],
   "crons": [
     { "path": "/api/send-notifications", "schedule": "*/15 * * * *" }
   ]

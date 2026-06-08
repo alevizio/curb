@@ -13,8 +13,11 @@ calendar reminder before the next sweep.
 - Vanilla JS + Leaflet 1.9.4 (from cdnjs) for the map.
 - Basemap: official Google Map Tiles API when `GMAPS_KEY` (or `window.GMAPS_KEY`) is set —
   session-token flow in `initBasemap()`, viewport attribution refreshed on moveend. Falls
-  back to keyless CARTO Voyager raster tiles when no key / on any failure. The Google key is a
-  client key (referrer-restrict it). Leaflet stays the map engine either way.
+  back to keyless CARTO Voyager raster tiles when no key / on any failure. Leaflet stays the
+  map engine either way. The Google key is a client key (referrer-restrict it) kept OUT of the
+  public repo: local dev reads a gitignored `config.js` (from `config.example.js`); on Vercel,
+  `api/config.js` emits `window.GMAPS_KEY` from the `GMAPS_KEY` env var and `vercel.json`
+  rewrites `/config.js` → `/api/config`.
 - Everything is client-side. Data is fetched live from DataSF (Socrata) at runtime.
 - Design system: fonts Anton (display) + Hanken Grotesk (body); "transit signage"
   aesthetic; color tokens in :root (--green clear / --amber soon / --red now /
