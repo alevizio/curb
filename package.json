@@ -1,0 +1,15 @@
+{
+  "name": "curb",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "SF street parking rules on a map (sweeping, meters, permit zones) + push alerts.",
+  "scripts": {
+    "dev": "npx serve .",
+    "deploy": "vercel"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.34.3",
+    "web-push": "^3.6.7"
+  }
+}

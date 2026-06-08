@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "curb",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", ".", "-l", "4317"],
+      "port": 4317
+    }
+  ]
+}

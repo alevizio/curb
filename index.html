@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>CURB Map — SF parking near you</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#E0322E">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CURB">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{
+    --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
+    --green:#1F9E5A; --amber:#E08A1E; --red:#E0322E; --gray:#8C8678; --meter:#2F5BD0;
+    --shadow:5px 5px 0 var(--ink);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
+  #map{position:fixed;inset:0;background:#dfe7ee;z-index:0}
+  .leaflet-container{font-family:'Hanken Grotesk',sans-serif}
+
+  .top{position:fixed;top:0;left:0;right:0;z-index:600;padding:12px 12px 0;
+    pointer-events:none;display:flex;flex-direction:column;gap:8px}
+  .barrow{display:flex;gap:8px;align-items:center;pointer-events:auto}
+  .logo{font-family:'Anton',sans-serif;font-size:26px;letter-spacing:.01em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);padding:6px 11px;border-radius:11px;line-height:1;flex:none;box-shadow:var(--shadow)}
+  .logo .o{color:var(--red)}
+  .field{flex:1;display:flex;align-items:center;background:var(--paper);border:2.5px solid var(--ink);
+    border-radius:11px;box-shadow:var(--shadow);overflow:hidden}
+  .field svg{margin-left:12px;width:18px;height:18px;flex:none}
+  #q{flex:1;border:0;background:transparent;outline:none;font:inherit;font-size:16px;font-weight:600;padding:11px 12px 11px 8px;min-width:0}
+  #q::placeholder{color:#938d7c;font-weight:500}
+
+  .metarow{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
+  .legend{display:flex;gap:4px;flex-wrap:wrap;pointer-events:auto;background:rgba(242,236,223,.92);
+    backdrop-filter:blur(4px);border:2px solid var(--ink);border-radius:10px;padding:6px 8px;box-shadow:var(--shadow);font-size:11px;font-weight:700}
+  .lg{display:flex;align-items:center;gap:4px}
+  .lg i{width:14px;height:5px;border-radius:3px;display:inline-block}
+  .toggle{pointer-events:auto;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    background:rgba(242,236,223,.92);border:2px solid var(--ink);border-radius:10px;padding:6px 9px;cursor:pointer;
+    box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .toggle .sw{width:13px;height:13px;border-radius:4px;border:2px solid var(--ink);background:transparent}
+  .toggle.on{background:var(--meter);color:#fff;border-color:var(--meter)}
+  .toggle.on .sw{background:#fff;border-color:#fff}
+
+  .locate{position:fixed;right:14px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:600;
+    width:54px;height:54px;border-radius:50%;border:2.5px solid var(--ink);background:var(--paper);
+    box-shadow:var(--shadow);cursor:pointer;display:grid;place-items:center;transition:transform .1s}
+  .locate:active{transform:translateY(2px)}
+  .locate svg{width:24px;height:24px}
+  .locate.loading svg{animation:spin 1s linear infinite}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));
+    z-index:700;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 15px;border-radius:10px;
+    max-width:88vw;text-align:center;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
+  .toast.show{opacity:1}
+
+  .hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:550;background:var(--paper);
+    border:2.5px solid var(--ink);border-radius:14px;box-shadow:var(--shadow);padding:16px 20px;text-align:center;
+    max-width:78vw;pointer-events:none;transition:opacity .3s}
+  .hint .big{font-family:'Anton',sans-serif;font-size:24px;text-transform:uppercase;line-height:.95}
+  .hint p{font-size:13.5px;color:var(--ink-soft);margin-top:6px}
+
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
+    border-radius:22px 22px 0 0;box-shadow:0 -6px 0 var(--ink);padding:8px 16px calc(20px + env(safe-area-inset-bottom));
+    transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:74dvh;overflow-y:auto}
+  .sheet.open{transform:translateY(0)}
+  .grab{width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3);margin:4px auto 12px}
+  .sheet-close{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);
+    background:var(--paper);font-size:18px;cursor:pointer;line-height:1}
+  .verdict{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+  .verdict .kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft)}
+  .verdict .head{font-family:'Anton',sans-serif;font-size:34px;line-height:.95;text-transform:uppercase}
+  .verdict.now .head{color:var(--red)} .verdict.soon .head{color:var(--amber)} .verdict.ok .head{color:var(--green)}
+  .where{font-size:15px;font-weight:700;margin:8px 0 2px}
+  .where .blk{color:var(--ink-soft);font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:8px;padding:5px 10px}
+  .chip.meter{color:var(--meter);background:rgba(47,91,208,.1);border:1.5px solid rgba(47,91,208,.4)}
+  .chip.rpp{color:#fff;background:var(--meter);border:1.5px solid var(--meter)}
+  .chip .d{width:8px;height:8px;border-radius:50%;background:currentColor}
+  .sides{margin-top:12px;display:flex;flex-direction:column;gap:9px}
+  .srow{display:flex;gap:11px;align-items:center;border:2px solid var(--ink);border-radius:12px;padding:9px 11px;background:#fff}
+  .srow.active{border-color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+  .badge{flex:none;width:62px;text-align:center;background:var(--ink);color:var(--paper);border-radius:8px;padding:7px 2px}
+  .badge.now{background:var(--red)}
+  .badge .d{font-family:'Anton',sans-serif;font-size:18px;line-height:1;text-transform:uppercase}
+  .badge .t{font-size:9.5px;font-weight:700;margin-top:1px}
+  .smeta{flex:1;min-width:0}
+  .smeta .nm{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .smeta .nx{font-size:13.5px;font-weight:700;margin-top:2px}
+  .smeta .nx.red{color:var(--red)} .smeta .nx.amber{color:var(--amber)} .smeta .nx.green{color:var(--green)}
+  .weeks{display:flex;gap:4px;margin-top:5px}
+  .wk{font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--ink)}
+  .wk.off{opacity:.22;border-style:dashed} .wk.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .btn{flex:1 1 0;min-width:132px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:2.5px solid var(--ink);border-radius:12px;
+    padding:13px;background:var(--ink);color:var(--paper);box-shadow:var(--shadow);transition:transform .1s;
+    display:flex;align-items:center;justify-content:center;gap:7px;text-align:center}
+  .btn:active{transform:translateY(2px);box-shadow:none}
+  .btn.alt{background:var(--paper);color:var(--ink)}
+  .btn.on{background:var(--green);color:var(--ink);border-color:var(--ink)}
+  .btn.busy{opacity:.65;pointer-events:none}
+  .note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5;text-align:center}
+  .you-dot{width:18px;height:18px;background:var(--meter);border:3px solid #fff;border-radius:50%;
+    box-shadow:0 0 0 2px var(--meter),0 0 12px rgba(47,91,208,.6)}
+
+  /* iOS "Add to Home Screen" hint (push only works once installed standalone) */
+  .ios-mask{position:fixed;inset:0;z-index:800;background:rgba(23,21,15,.45);backdrop-filter:blur(2px);
+    display:grid;place-items:end center;padding:0 12px calc(16px + env(safe-area-inset-bottom));opacity:0;
+    pointer-events:none;transition:opacity .25s}
+  .ios-mask.open{opacity:1;pointer-events:auto}
+  .ios-card{position:relative;width:100%;max-width:440px;background:var(--paper);border:3px solid var(--ink);
+    border-radius:18px;box-shadow:var(--shadow);padding:18px 18px 16px;transform:translateY(12px);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+  .ios-mask.open .ios-card{transform:translateY(0)}
+  .ios-card .kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft)}
+  .ios-card .ios-head{font-family:'Anton',sans-serif;font-size:26px;line-height:.95;text-transform:uppercase;margin:2px 0 8px}
+  .ios-steps{list-style:none;display:flex;flex-direction:column;gap:9px;margin:10px 0 4px}
+  .ios-steps li{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;line-height:1.3}
+  .ios-steps .n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--paper);
+    font-size:13px;font-weight:800;display:grid;place-items:center}
+  .ios-steps .shareglyph{display:inline-grid;place-items:center;width:20px;height:20px;color:var(--meter);vertical-align:-4px}
+  .ios-note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="top">
+  <div class="barrow">
+    <div class="logo">CURB</div>
+    <div class="field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Search a street…">
+    </div>
+  </div>
+  <div class="metarow">
+    <div class="legend">
+      <span class="lg"><i style="background:var(--green)"></i>Clear</span>
+      <span class="lg"><i style="background:var(--amber)"></i>Soon</span>
+      <span class="lg"><i style="background:var(--red)"></i>Now/&lt;3h</span>
+      <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit</span>
+    </div>
+    <button class="toggle" id="rppToggle"><span class="sw"></span>Permit zones</button>
+  </div>
+</div>
+
+<div class="hint" id="hint">
+  <div class="big">Find your spot</div>
+  <p>Tap locate, search a street, or tap the map where you parked.</p>
+</div>
+
+<button class="locate" id="locate" aria-label="Use my location">
+  <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+</button>
+
+<div class="toast" id="toast"></div>
+
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <button class="sheet-close" id="sheetClose">×</button>
+  <div id="sheetBody"></div>
+</div>
+
+<div class="ios-mask" id="iosHint" role="dialog" aria-modal="true" aria-labelledby="iosHintHead">
+  <div class="ios-card">
+    <button class="sheet-close" id="iosClose" aria-label="Close">×</button>
+    <span class="kicker">iPhone setup</span>
+    <div class="ios-head" id="iosHintHead">Install CURB for alerts</div>
+    <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.45">Apple only allows push notifications once CURB lives on your Home Screen as an app.</p>
+    <ol class="ios-steps">
+      <li><span class="n">1</span><span>Tap the <b>Share</b> button
+        <span class="shareglyph"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m8 7 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></span>
+        in Safari's toolbar</span></li>
+      <li><span class="n">2</span><span>Choose <b>Add to Home Screen</b></span></li>
+      <li><span class="n">3</span><span>Open CURB from its new icon, then tap <b>🔔 Sweep alerts</b></span></li>
+    </ol>
+    <p class="ios-note">Already a Home Screen app? Make sure you opened it from the icon (not Safari), then try again.</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const SWEEP="https://data.sfgov.org/resource/yhqp-riqs.json";
+const METER="https://data.sfgov.org/resource/8vzz-qzz9.json";
+const RPP="https://data.sfgov.org/resource/hi6h-neyh.json";
+const DAYIDX={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
+const DAYLBL=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MIN_ZOOM_DATA=15;
+const OFFSET=5; // metres each side of centreline
+// Web Push: VAPID *public* key (safe to ship to the client). Matches VAPID_PRIVATE_KEY on the server.
+const VAPID_PUBLIC_KEY="BNh-13Y456HR3O_-AvNP_kEIIui1YvbEumSFLF0l-VD94H_qtGpAQPush_WycVNXYbnt6s9UVC8FXI9-crT-8Ao";
+
+const map=L.map('map',{zoomControl:false,attributionControl:true}).setView([37.7749,-122.4194],13);
+L.control.zoom({position:'bottomleft'}).addTo(map);
+L.tileLayer('https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+  subdomains:'abcd',maxZoom:20,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+
+const rppLayer=L.layerGroup().addTo(map);  // under
+const segLayer=L.layerGroup().addTo(map);  // over
+let youMarker=null;
+let segCache=[];   // {group, side}
+let rppCache=[];   // {latlngs, area, hrlimit, days, from, to, regulation, exceptions}
+let fetchTok=0, rppOn=false;
+
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function normDay(s){if(!s)return null;const k=s.trim().toLowerCase().slice(0,3);return (k in DAYIDX)?DAYIDX[k]:null}
+function fmtHour(h){h=parseInt(h,10);if(isNaN(h))return '';const ap=h>=12?'PM':'AM';let hh=h%12;if(hh===0)hh=12;return hh+ap}
+
+function nextSweep(rec){
+  const dow=normDay(rec.weekday); if(dow===null)return null;
+  const weeks=[rec.week1,rec.week2,rec.week3,rec.week4,rec.week5].map(v=>String(v)==="1");
+  const fromH=parseInt(rec.fromhour,10); if(isNaN(fromH))return null;
+  let toH=parseInt(rec.tohour,10); if(isNaN(toH))toH=fromH+1;
+  const now=new Date();
+  for(let i=0;i<70;i++){
+    const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);
+    if(d.getDay()!==dow)continue;
+    const occ=Math.ceil(d.getDate()/7);
+    if(occ<1||occ>5||!weeks[occ-1])continue;
+    const start=new Date(d.getFullYear(),d.getMonth(),d.getDate(),fromH,0,0);
+    const end=new Date(d.getFullYear(),d.getMonth(),d.getDate(),toH,0,0);
+    if(i===0&&now>=end)continue;
+    return {start,end};
+  }
+  return null;
+}
+function statusFor(ns){
+  if(!ns)return {rank:1,color:getCSS('--gray')};
+  const now=new Date();
+  if(now>=ns.start&&now<ns.end)return {rank:5,color:getCSS('--red')};
+  const hrs=(ns.start-now)/36e5;
+  if(hrs<3)return {rank:5,color:getCSS('--red')};
+  if(hrs<24)return {rank:4,color:getCSS('--amber')};
+  return {rank:2,color:getCSS('--green')};
+}
+function relPhrase(ns){
+  if(!ns)return {txt:'see posted sign',cls:'green'};
+  const now=new Date();
+  if(now>=ns.start&&now<ns.end)return {txt:'Sweeping now · until '+fmtHour(ns.end.getHours()),cls:'red'};
+  const hrs=(ns.start-now)/36e5, days=Math.floor(hrs/24);
+  const when=DAYLBL[ns.start.getDay()]+' '+(ns.start.getMonth()+1)+'/'+ns.start.getDate()+', '+fmtHour(ns.start.getHours())+'–'+fmtHour(ns.end.getHours());
+  const rel = hrs<1?'in <1 hr':hrs<24?('in '+Math.round(hrs)+' hr'):days===1?'tomorrow':('in '+days+' days');
+  const cls = hrs<3?'red':hrs<24?'amber':'green';
+  return {txt:when+' · '+rel,cls,when:ns.start};
+}
+
+/* perpendicular offset of a polyline by N metres (sign = side) */
+function offsetLine(latlngs, meters, sign){
+  if(!sign||latlngs.length<2)return latlngs;
+  const lat0=latlngs[0][0], lng0=latlngs[0][1];
+  const cos=Math.cos(lat0*Math.PI/180)||1;
+  const X=([la,lo])=>[(lo-lng0)*cos*111320,(la-lat0)*111320];
+  const toLL=([x,y])=>[lat0+y/111320, lng0+x/(cos*111320)];
+  const p=latlngs.map(X);
+  return p.map((pt,i)=>{
+    const a=p[Math.max(0,i-1)], b=p[Math.min(p.length-1,i+1)];
+    let dx=b[0]-a[0], dy=b[1]-a[1]; const n=Math.hypot(dx,dy)||1; dx/=n; dy/=n;
+    return [pt[0]+(-dy)*meters*sign, pt[1]+dx*meters*sign];
+  }).map(toLL);
+}
+
+/* ---------- viewport loading ---------- */
+async function loadViewport(){
+  const z=map.getZoom(), hint=document.getElementById('hint');
+  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();segCache=[];rppCache=[];hint.style.opacity='1';return;}
+  hint.style.opacity='0';
+  const b=map.getBounds().pad(0.15);
+  const poly=`POLYGON((${b.getWest()} ${b.getSouth()}, ${b.getEast()} ${b.getSouth()}, ${b.getEast()} ${b.getNorth()}, ${b.getWest()} ${b.getNorth()}, ${b.getWest()} ${b.getSouth()}))`;
+  const my=++fetchTok;
+  try{
+    const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,line`
+      +`&$where=intersects(line,'${poly}')&$limit=2500`;
+    const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
+    if(my!==fetchTok)return;
+    drawSegments(data);
+  }catch(e){ if(my===fetchTok) toast("Couldn't load that area — pan and try again."); }
+  if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
+}
+
+function drawSegments(rows){
+  segLayer.clearLayers(); segCache=[];
+  const byCnn={};
+  rows.forEach(r=>{(byCnn[r.cnn]=byCnn[r.cnn]||{cnn:r.cnn,rows:[]}).rows.push(r)});
+  Object.values(byCnn).forEach(grp=>{
+    const geom=grp.rows.find(r=>r.line&&r.line.coordinates);
+    if(!geom)return;
+    const center=geom.line.coordinates.map(c=>[c[1],c[0]]);
+    // group rows by curb side
+    const sides={};
+    grp.rows.forEach(r=>{const k=r.blockside||r.cnnrightleft||'C';
+      (sides[k]=sides[k]||{key:k,blockside:r.blockside,lr:r.cnnrightleft,rows:[]}).rows.push(r)});
+    const arr=Object.values(sides);
+    const signs={};
+    if(arr.length===1){signs[arr[0].key]=0;}
+    else{
+      arr.forEach((s,i)=>{signs[s.key]= s.lr==='R'?1 : s.lr==='L'?-1 : (i===0?-1:1);});
+      if(arr.length===2){const v=Object.values(signs); if(v[0]===v[1]) signs[arr[1].key]=-(v[0]||1);}
+    }
+    const group={cnn:grp.cnn, corridor:grp.rows[0].corridor, limits:grp.rows[0].limits, sides:[]};
+    arr.forEach(s=>{
+      let best=null,rank=0,color=getCSS('--gray');
+      s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank){rank=st.rank;color=st.color;best=ns}});
+      const ll=offsetLine(center, OFFSET, signs[s.key]);
+      const side={key:s.key, blockside:s.blockside, rows:s.rows, ns:best, color, latlngs:ll, mid:ll[Math.floor(ll.length/2)]};
+      group.sides.push(side);
+      const click=()=>openSheet(group, s.key);
+      L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round'}).on('click',click).addTo(segLayer);
+      L.polyline(ll,{color:'#000',opacity:0,weight:16}).on('click',click).addTo(segLayer);
+      segCache.push({group, side});
+    });
+  });
+}
+
+async function loadRpp(poly, my){
+  try{
+    const url=RPP+`?$select=rpparea1,hrlimit,days,from_time,to_time,regulation,exceptions,shape`
+      +`&$where=intersects(shape,'${poly}') AND rpparea1 IS NOT NULL&$limit=2500`;
+    const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
+    if(my!==fetchTok)return;
+    rppLayer.clearLayers(); rppCache=[];
+    data.forEach(rec=>{
+      const g=rec.shape; if(!g||!g.coordinates)return;
+      const lines = g.type==='MultiLineString'? g.coordinates : [g.coordinates];
+      lines.forEach(coords=>{
+        const ll=coords.map(c=>[c[1],c[0]]);
+        L.polyline(ll,{color:getCSS('--meter'),weight:11,opacity:.20,lineCap:'round',interactive:false}).addTo(rppLayer);
+        rppCache.push({latlngs:ll, area:rec.rpparea1, hrlimit:rec.hrlimit, days:rec.days, from:rec.from_time, to:rec.to_time, regulation:rec.regulation, exceptions:rec.exceptions});
+      });
+    });
+  }catch(e){}
+}
+function nearestRpp(mid){
+  if(!mid||!rppCache.length)return null;
+  let best=null,bd=Infinity;
+  rppCache.forEach(s=>s.latlngs.forEach(([la,lo])=>{const d=(la-mid[0])**2+(lo-mid[1])**2; if(d<bd){bd=d;best=s}}));
+  return bd<6e-8?best:null; // ~27 m
+}
+
+/* ---------- bottom sheet ---------- */
+function openSheet(group, activeKey){
+  const active=group.sides.find(s=>s.key===activeKey)||group.sides[0];
+  const ns=active.ns, now=new Date();
+  let vClass='ok',kicker='Park until',head='—';
+  if(!ns){kicker='Schedule';head='Posted sign';}
+  else if(now>=ns.start&&now<ns.end){vClass='now';kicker='Restricted';head='Sweeping now';}
+  else{const hrs=(ns.start-now)/36e5;vClass=hrs<3?'now':hrs<24?'soon':'ok';head=DAYLBL[ns.start.getDay()]+' '+fmtHour(ns.start.getHours());}
+
+  const ordered=[active, ...group.sides.filter(s=>s!==active)];
+  const sidesHtml=ordered.map(s=>{
+    const r=s.rows[0]; const rp=relPhrase(s.ns);
+    const weeks=[r.week1,r.week2,r.week3,r.week4,r.week5].map(x=>String(x)==="1");
+    const allW=weeks.every(Boolean);
+    const wkHtml=weeks.map((on,i)=>`<span class="wk ${on?'on':'off'}">${i+1}</span>`).join('');
+    const act=s.ns&&now>=s.ns.start&&now<s.ns.end;
+    const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
+    return `<div class="srow ${s===active?'active':''}">
+      <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div></div>
+      <div class="smeta">
+        <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
+        <div class="nx ${rp.cls}">${rp.txt}</div>
+        ${allW?'':`<div class="weeks">${wkHtml}</div>`}
+      </div></div>`;
+  }).join('');
+
+  const rp=nearestRpp(active.mid);
+  const rppHtml = rp ? `<span class="chip rpp" title="SFMTA permit data (2017)">Permit Zone ${rp.area} · ${rp.hrlimit?rp.hrlimit+'hr limit':''} ${rp.days||''} ${rp.from?rp.from+(rp.to?'–'+rp.to:''):''} · holders exempt</span>` : '';
+  const canRemind = ns && relPhrase(ns).when;
+  // Spot for push alerts: the tapped side's block + its next sweep (see api/save-subscription.js).
+  const spot = ns ? {
+    corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
+    nextSweepISO: ns.start.toISOString(), leadMinutes: 30
+  } : null;
+  const alertOn = alertSpotMatches(spot);
+
+  document.getElementById('sheetBody').innerHTML=`
+    <div class="verdict ${vClass}"><span class="kicker">${kicker}</span><span class="head">${head}</span></div>
+    <div class="where">${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></div>
+    <div class="chips"><span class="chip meter" id="meterChip" style="display:none"><span class="d"></span></span>${rppHtml}</div>
+    <div class="sides">${sidesHtml}</div>
+    <div class="actions">
+      ${canRemind?`<button class="btn" id="remindBtn">＋ Reminder</button>`:''}
+      ${canRemind?`<button class="btn ${alertOn?'on':'alt'}" id="alertBtn">${alertOn?'✓ Alerts on':'🔔 Sweep alerts'}</button>`:''}
+      <button class="btn alt" id="centerBtn">Center</button>
+    </div>
+    <div class="note">Both alerts fire <b>~30 min before</b> sweeping. Live from DataSF — the <b>posted sign</b> is the source of truth; temporary signs &amp; holidays override this. Permit data is SFMTA's 2017 set and may be incomplete.</div>`;
+
+  if(canRemind){
+    document.getElementById('remindBtn').onclick=()=>downloadICS(group.corridor||'SF',group.limits||'',ns);
+    document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
+  }
+  document.getElementById('centerBtn').onclick=()=>map.fitBounds(L.polyline(active.latlngs).getBounds(),{maxZoom:18,padding:[60,60]});
+  loadMeterChip(group.corridor||'');
+  document.getElementById('sheet').classList.add('open');
+}
+document.getElementById('sheetClose').onclick=()=>document.getElementById('sheet').classList.remove('open');
+
+async function loadMeterChip(street){
+  const slot=document.getElementById('meterChip'); if(!slot||!street)return;
+  const base=street.toUpperCase().replace(/ (ST|AVE|BLVD|WAY|DR|RD)$/,'').replace(/'/g,"''");
+  try{
+    const url=METER+`?$select=count(objectid) as c&$where=upper(street_name) like '%${base}%' AND on_offstreet_type='ON'`;
+    const r=await fetch(url); if(!r.ok)return; const d=await r.json();
+    const c=parseInt(d[0]?.c||0,10);
+    if(c>0){slot.style.display='inline-flex';slot.innerHTML=`<span class="d"></span>Metered · ~${c.toLocaleString()} meters on ${street}`;}
+  }catch(e){}
+}
+
+function downloadICS(street,block,ns){
+  const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CURB//SF Sweeping//EN','CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT','UID:curb-'+Date.now()+'@sweep','DTSTAMP:'+dt(new Date()),
+    'DTSTART:'+dt(ns.start),'DTEND:'+dt(ns.end),
+    'SUMMARY:🧹 Move car — street sweeping ('+street+')','LOCATION:'+street+' · '+block,
+    'DESCRIPTION:Street sweeping starts now. Move your car. Block: '+block,
+    'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:Move your car in 30 min','END:VALARM',
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download='sweep-reminder.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('Reminder downloaded — open it to add to your calendar.');
+}
+
+/* ---------- push alerts (Web Push) ---------- */
+function urlBase64ToUint8Array(s){
+  const pad='='.repeat((4-s.length%4)%4);
+  const b64=(s+pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(b64), arr=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+function isIOS(){
+  return /iP(hone|ad|od)/.test(navigator.userAgent) ||
+    (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); // iPadOS masquerades as Mac
+}
+function isStandalone(){
+  return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
+}
+function pushSupported(){
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+// Key includes nextSweepISO: the button only reads "on" for the *exact* sweep the server is armed
+// for. Once that sweep passes the side rolls to the next occurrence, the key changes, and the button
+// reverts to "🔔 Sweep alerts" — a real cue to re-tap and re-arm (the server has no recurrence rule).
+function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}
+function savedAlertKey(){try{return localStorage.getItem('curbAlertKey')||'';}catch(_){return '';}}
+function alertSpotMatches(spot){const k=spotKey(spot);return !!spot && k!=='' && savedAlertKey()===k;}
+function showIosHint(){document.getElementById('iosHint').classList.add('open');}
+function hideIosHint(){document.getElementById('iosHint').classList.remove('open');}
+
+async function onAlertTap(spot, btn){
+  if(!spot){toast('No upcoming sweep on this side to alert on.');return;}
+  // iOS only delivers Web Push when the site is installed to the Home Screen (standalone).
+  if(isIOS() && !isStandalone()){ showIosHint(); return; }
+  if(!pushSupported()){ toast('This browser does not support push alerts — use ＋ Reminder instead.'); return; }
+  if(Notification.permission==='denied'){ toast('Notifications are blocked. Re-enable them in your browser settings, then retry.'); return; }
+
+  const original=btn.textContent;
+  btn.classList.add('busy'); btn.textContent='Enabling…';
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){ toast('Allow notifications to get move-your-car alerts.'); throw new Error('permission-'+perm); }
+    const reg=await navigator.serviceWorker.ready;
+    const appKey=urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+    let sub=await reg.pushManager.getSubscription();
+    if(sub){
+      // Self-heal if this endpoint was minted for a different VAPID key (e.g. rotated). Only act when
+      // the existing key is exposed and provably differs — otherwise keep the subscription as-is.
+      const cur=sub.options&&sub.options.applicationServerKey?new Uint8Array(sub.options.applicationServerKey):null;
+      if(cur&&(cur.length!==appKey.length||!cur.every((b,i)=>b===appKey[i]))){
+        try{await sub.unsubscribe();}catch(_){}
+        sub=null;
+      }
+    }
+    if(!sub){
+      sub=await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:appKey});
+    }
+    const res=await fetch('/api/save-subscription',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({subscription:sub.toJSON(), spot})
+    });
+    if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.note||d.error||('save failed ('+res.status+')')); }
+    try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}
+    btn.classList.remove('busy','alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on';
+    toast('Sweep alert set for '+(spot.corridor||'this block')+" — we'll ping you ~30 min before.");
+  }catch(err){
+    const on=alertSpotMatches(spot);
+    btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.toggle('alt',!on);
+    btn.textContent=on?'✓ Alerts on':original;
+    if(!/^permission-/.test(String(err&&err.message))) toast('Could not enable alerts — '+((err&&err.message)||'try again')+'.');
+  }
+}
+
+/* ---------- locate / tap ---------- */
+document.getElementById('locate').onclick=()=>{
+  const btn=document.getElementById('locate');
+  if(!navigator.geolocation)return locateFail();
+  btn.classList.add('loading');
+  navigator.geolocation.getCurrentPosition(
+    p=>{btn.classList.remove('loading');placeYou(p.coords.latitude,p.coords.longitude,true);},
+    e=>{btn.classList.remove('loading');locateFail();},
+    {enableHighAccuracy:true,timeout:9000,maximumAge:30000});
+};
+function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
+function placeYou(lat,lng,fly){
+  if(youMarker)map.removeLayer(youMarker);
+  youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
+  if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
+  setTimeout(()=>{const n=nearestSeg(lat,lng); if(n)openSheet(n.group,n.side.key);}, fly?900:300);
+}
+function nearestSeg(lat,lng){
+  let best=null,bd=Infinity;
+  segCache.forEach(o=>o.side.latlngs.forEach(([la,lo])=>{const d=(la-lat)**2+(lo-lng)**2; if(d<bd){bd=d;best=o}}));
+  return best;
+}
+map.on('click',e=>{ if(map.getZoom()<MIN_ZOOM_DATA){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
+
+/* ---------- RPP toggle ---------- */
+document.getElementById('rppToggle').onclick=function(){
+  rppOn=!rppOn; this.classList.toggle('on',rppOn);
+  document.getElementById('rppLegend').style.display=rppOn?'flex':'none';
+  loadViewport();
+  if(rppOn)toast('Permit zones (RPP) shaded blue. Tap a block for area & hours.');
+};
+
+/* ---------- search ---------- */
+let stimer=null;
+document.getElementById('q').addEventListener('keydown',ev=>{if(ev.key==='Enter')doSearch();});
+document.getElementById('q').addEventListener('input',()=>{clearTimeout(stimer);stimer=setTimeout(doSearch,500);});
+async function doSearch(){
+  const v=document.getElementById('q').value.trim(); if(v.length<2)return;
+  const Q=v.toUpperCase().replace(/'/g,"''");
+  try{
+    const url=SWEEP+`?$select=corridor,line&$where=upper(corridor) like '%${Q}%' AND line IS NOT NULL&$limit=1`;
+    const r=await fetch(url); const d=await r.json();
+    if(d.length&&d[0].line){const c=d[0].line.coordinates[0];map.flyTo([c[1],c[0]],17,{duration:.8});}
+    else toast('No street matched "'+v+'".');
+  }catch(e){toast('Search failed — try again.');}
+}
+
+/* ---------- misc ---------- */
+let tt=null;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),4200);}
+let mvt=null;
+map.on('moveend',()=>{clearTimeout(mvt);mvt=setTimeout(loadViewport,250);});
+map.whenReady(()=>setTimeout(loadViewport,400));
+
+/* iOS install hint: close on × or backdrop tap; auto-show once for un-installed iOS Safari. */
+document.getElementById('iosClose').onclick=hideIosHint;
+document.getElementById('iosHint').addEventListener('click',e=>{ if(e.target.id==='iosHint') hideIosHint(); });
+(function maybeIosHint(){
+  if(!(isIOS() && !isStandalone())) return;
+  let shown=''; try{shown=localStorage.getItem('curbIosHintShown')||'';}catch(_){}
+  if(shown) return;
+  setTimeout(()=>{ showIosHint(); try{localStorage.setItem('curbIosHintShown','1');}catch(_){} }, 1600);
+})();
+</script>
+<script>
+  // PWA: register the service worker (no-op in sandboxed previews; works when served/deployed).
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>
