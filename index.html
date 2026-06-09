@@ -194,6 +194,7 @@
 const SWEEP="https://data.sfgov.org/resource/yhqp-riqs.json";
 const METER="https://data.sfgov.org/resource/8vzz-qzz9.json";
 const RPP="https://data.sfgov.org/resource/hi6h-neyh.json";
+const ADDR="https://data.sfgov.org/resource/3mea-di5p.json";
 const DAYIDX={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
 const DAYLBL=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MIN_ZOOM_DATA=15;
@@ -307,8 +308,29 @@ function offsetLine(latlngs, meters, sign){
   return p.map((pt,i)=>{
     const a=p[Math.max(0,i-1)], b=p[Math.min(p.length-1,i+1)];
     let dx=b[0]-a[0], dy=b[1]-a[1]; const n=Math.hypot(dx,dy)||1; dx/=n; dy/=n;
-    return [pt[0]+(-dy)*meters*sign, pt[1]+dx*meters*sign];
+    return [pt[0]+dy*meters*sign, pt[1]+(-dx)*meters*sign];
   }).map(toLL);
+}
+function metersProject(origin, p){
+  const cos=Math.cos(origin[0]*Math.PI/180)||1;
+  return [(p[1]-origin[1])*cos*111320,(p[0]-origin[0])*111320];
+}
+function distSqToLineMeters(lat,lng,latlngs){
+  if(!latlngs.length)return Infinity;
+  if(latlngs.length===1){
+    const p=metersProject([lat,lng],latlngs[0]);
+    return p[0]*p[0]+p[1]*p[1];
+  }
+  const origin=[lat,lng];
+  let best=Infinity;
+  for(let i=1;i<latlngs.length;i++){
+    const a=metersProject(origin,latlngs[i-1]), b=metersProject(origin,latlngs[i]);
+    const vx=b[0]-a[0], vy=b[1]-a[1], len2=vx*vx+vy*vy||1;
+    const t=Math.max(0,Math.min(1,(-a[0]*vx-a[1]*vy)/len2));
+    const x=a[0]+vx*t, y=a[1]+vy*t, d=x*x+y*y;
+    if(d<best)best=d;
+  }
+  return best;
 }
 
 /* ---------- viewport loading ---------- */
@@ -384,8 +406,8 @@ async function loadRpp(poly, my){
 function nearestRpp(mid){
   if(!mid||!rppCache.length)return null;
   let best=null,bd=Infinity;
-  rppCache.forEach(s=>s.latlngs.forEach(([la,lo])=>{const d=(la-mid[0])**2+(lo-mid[1])**2; if(d<bd){bd=d;best=s}}));
-  return bd<6e-8?best:null; // ~27 m
+  rppCache.forEach(s=>{const d=distSqToLineMeters(mid[0],mid[1],s.latlngs); if(d<bd){bd=d;best=s}});
+  return bd<27*27?best:null;
 }
 
 /* ---------- bottom sheet ---------- */
@@ -554,15 +576,27 @@ document.getElementById('locate').onclick=()=>{
     {enableHighAccuracy:true,timeout:9000,maximumAge:30000});
 };
 function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
-function placeYou(lat,lng,fly){
+function placeYou(lat,lng,fly,cnnHint){
   if(youMarker)map.removeLayer(youMarker);
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
-  setTimeout(()=>{const n=nearestSeg(lat,lng); if(n)openSheet(n.group,n.side.key);}, fly?900:300);
+  setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);
 }
-function nearestSeg(lat,lng){
+function openNearestWhenReady(lat,lng,cnnHint,tries){
+  const n=nearestSeg(lat,lng,cnnHint);
+  if(n){openSheet(n.group,n.side.key);return;}
+  if(tries<8)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,tries+1),250);
+  else if(cnnHint){
+    const fallback=nearestSeg(lat,lng);
+    if(fallback)openSheet(fallback.group,fallback.side.key);
+  }
+}
+function nearestSeg(lat,lng,cnnHint){
+  const wanted=cnnHint?String(cnnHint):'';
+  let pool=wanted?segCache.filter(o=>String(o.group.cnn)===wanted):segCache;
+  if(wanted&&!pool.length)return null;
   let best=null,bd=Infinity;
-  segCache.forEach(o=>o.side.latlngs.forEach(([la,lo])=>{const d=(la-lat)**2+(lo-lng)**2; if(d<bd){bd=d;best=o}}));
+  pool.forEach(o=>{const d=distSqToLineMeters(lat,lng,o.side.latlngs); if(d<bd){bd=d;best=o}});
   return best;
 }
 map.on('click',e=>{ if(map.getZoom()<MIN_ZOOM_DATA){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
@@ -579,9 +613,38 @@ document.getElementById('rppToggle').onclick=function(){
 let stimer=null;
 document.getElementById('q').addEventListener('keydown',ev=>{if(ev.key==='Enter')doSearch();});
 document.getElementById('q').addEventListener('input',()=>{clearTimeout(stimer);stimer=setTimeout(doSearch,500);});
+function soql(s){return String(s).replace(/'/g,"''");}
+function normalizedAddressQuery(v){
+  let s=v.trim().replace(/[,#].*$/,'').replace(/\s+/g,' ');
+  const m=s.match(/^(\d{1,6})\s+(.+)$/); if(!m)return null;
+  let street=m[2].toUpperCase().replace(/[.]/g,'').trim();
+  const suffixes={
+    STREET:'ST',ST:'ST',AVENUE:'AVE',AVE:'AVE',BOULEVARD:'BLVD',BLVD:'BLVD',
+    ROAD:'RD',RD:'RD',DRIVE:'DR',DR:'DR',WAY:'WAY',LANE:'LN',LN:'LN',
+    COURT:'CT',CT:'CT',PLACE:'PL',PL:'PL',TERRACE:'TER',TER:'TER'
+  };
+  const parts=street.split(' ');
+  const last=parts[parts.length-1];
+  if(suffixes[last])parts.pop();
+  street=parts.join(' ').trim();
+  return street?{number:m[1],street}:null;
+}
 async function doSearch(){
   const v=document.getElementById('q').value.trim(); if(v.length<2)return;
-  const Q=v.toUpperCase().replace(/'/g,"''");
+  const addr=normalizedAddressQuery(v);
+  if(addr){
+    try{
+      const url=ADDR+`?$select=address,address_number,street_name,street_type,latitude,longitude,cnn`
+        +`&$where=address_number=${addr.number} AND upper(street_name)='${soql(addr.street)}'&$limit=1`;
+      const r=await fetch(url); const d=await r.json();
+      if(d.length&&d[0].latitude&&d[0].longitude){
+        document.getElementById('q').value=d[0].address||v;
+        placeYou(parseFloat(d[0].latitude),parseFloat(d[0].longitude),true,d[0].cnn);
+        return;
+      }
+    }catch(e){}
+  }
+  const Q=soql(v.toUpperCase());
   try{
     const url=SWEEP+`?$select=corridor,line&$where=upper(corridor) like '%${Q}%' AND line IS NOT NULL&$limit=1`;
     const r=await fetch(url); const d=await r.json();

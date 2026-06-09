@@ -55,6 +55,7 @@ The key is kept out of this public repo:
 - Street sweeping: DataSF `yhqp-riqs`
 - Parking meters: DataSF `8vzz-qzz9`
 - Parking regulations / RPP: DataSF `hi6h-neyh` (2017 set; may be incomplete)
+- Address search: DataSF `3mea-di5p` (Enterprise Addressing System, updated nightly)
 
 The posted street sign is always the source of truth. There is no live
 space-availability data for SF (SFpark sensors retired in 2014).
