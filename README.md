@@ -10,9 +10,9 @@ Static front-end (no build) + serverless API routes (Vercel) for Web Push.
 ## Run locally
 ```bash
 npm install            # for the web-push dep used by the API
-npm run dev            # = npx serve .  (serves on a localhost origin)
+npm run dev            # = npx serve . -l 3000  (http://localhost:3000)
 ```
-Open the printed URL. A localhost origin is needed for geolocation + service worker.
+Open http://localhost:3000. A localhost origin is needed for geolocation + service worker.
 
 ## Deploy
 ```bash
