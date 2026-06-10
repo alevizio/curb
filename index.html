@@ -81,7 +81,9 @@
     scrollbar-width:none;padding:2px 0 4px}
   .dayrow::-webkit-scrollbar{display:none}
   .datechip{flex:none;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
-    background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink)}
+    background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink);
+    border:0;cursor:pointer}
+  .datechip.on{background:var(--red)}
   .dchip{flex:none;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
     background:rgba(242,236,223,.92);color:var(--ink);border:2px solid var(--ink);border-radius:10px;
     padding:7px 11px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
@@ -144,9 +146,16 @@
 
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
     border-radius:22px 22px 0 0;box-shadow:0 -6px 0 var(--ink);padding:8px 16px calc(20px + env(safe-area-inset-bottom));
-    transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:74dvh;overflow-y:auto}
+    transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1),max-height .28s cubic-bezier(.2,.8,.2,1);
+    max-height:74dvh;overflow-y:auto}
   .sheet.open{transform:translateY(0)}
-  .grab{width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3);margin:4px auto 12px}
+  /* mobile: open at a peek so the map stays visible; the grab button expands */
+  @media (max-width:767px){
+    .sheet.open{max-height:46dvh}
+    .sheet.open.tall{max-height:84dvh}
+  }
+  .grab{display:block;width:74px;height:21px;padding:8px 16px;margin:0 auto 4px;border:0;background:transparent;cursor:grab}
+  .grab i{display:block;width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3)}
   .sheet-close{position:absolute;top:12px;right:14px;width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);
     background:var(--paper);font-size:18px;cursor:pointer;line-height:1}
   .sheet-close::after{content:'';position:absolute;inset:-7px}  /* 44px hit area, same visual */
@@ -154,8 +163,14 @@
   .verdict .kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft)}
   .verdict .head{font-family:'Anton',sans-serif;font-size:34px;line-height:.95;text-transform:uppercase}
   .verdict.now .head{color:var(--red-text)} .verdict.soon .head{color:var(--amber-text)} .verdict.ok .head{color:var(--green-text)}
-  .where{font-size:15px;font-weight:700;margin:8px 0 2px}
+  .where{font-size:15px;font-weight:700;margin:8px 0 2px;display:flex;align-items:center;gap:8px}
   .where .blk{color:var(--ink-soft);font-weight:600}
+  .where .wtxt{flex:1;min-width:0}
+  .centerico{flex:none;width:34px;height:34px;border:2px solid var(--ink);border-radius:9px;background:var(--paper);
+    color:var(--ink);cursor:pointer;display:grid;place-items:center;box-shadow:2px 2px 0 var(--ink)}
+  .centerico:active{transform:translate(1px,1px);box-shadow:none}
+  .ic{width:17px;height:17px;flex:none;vertical-align:-3px}
+  .ic.s{width:13px;height:13px;vertical-align:-2px}
   .chips{display:flex;flex-wrap:wrap;gap:7px}  /* margin lives on chips so an empty row adds no gap */
   .chips .chip{margin-top:10px}
   .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:8px;padding:5px 10px}
@@ -180,6 +195,10 @@
   .wk{font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--ink)}
   .wk.off{opacity:.22;border-style:dashed} .wk.on{background:var(--green-text);color:#fff;border-color:var(--green-text)}
   .actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .calchoice{display:flex;gap:9px;margin-top:9px;flex-basis:100%}
+  .calchoice[hidden]{display:none}
+  .calchoice .btn{font-size:13px;padding:11px}
+  .btn .vsep{margin-left:2px;padding:2px 4px;border-left:2px solid rgba(23,21,15,.25);opacity:.8}
   .btn{flex:1 1 0;min-width:132px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:2.5px solid var(--ink);border-radius:12px;
     padding:13px;background:var(--ink);color:var(--paper);box-shadow:var(--shadow);transition:transform .1s;
     display:flex;align-items:center;justify-content:center;gap:7px;text-align:center}
@@ -189,6 +208,11 @@
   .btn.on{background:var(--green);color:var(--ink);border-color:var(--ink)}
   .btn.busy{opacity:.65;pointer-events:none}
   .note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5;text-align:center}
+  .noted{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5;text-align:center}
+  .noted summary{cursor:pointer;list-style:none;font-weight:600}
+  .noted summary::-webkit-details-marker{display:none}
+  .noted summary b{color:var(--meter)}
+  .noted p{margin-top:7px;text-align:left}
   .you-dot{width:18px;height:18px;background:var(--meter);border:3px solid #fff;border-radius:50%;
     box-shadow:0 0 0 2px var(--meter),0 0 12px rgba(47,91,208,.6)}
 
@@ -230,7 +254,7 @@
   /* "Real-world" enforcement callout in the sheet (from citation history) */
   .enf{display:flex;gap:9px;align-items:flex-start;margin-top:10px;border:2px solid var(--ink);border-radius:12px;
     padding:9px 11px;background:rgba(224,50,46,.07)}
-  .enf .tgt{font-size:17px;line-height:1.1;flex:none}
+  .enf .tgt{flex:none;color:var(--red-text)} .enf .tgt .ic{width:19px;height:19px}
   .enf .etxt{font-size:12.5px;font-weight:700;line-height:1.35}
   .enf .etxt b{color:var(--red-text)}
   .enf .esub{font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:1px}
@@ -288,7 +312,7 @@
     </div>
   </div>
   <div class="dayrow" aria-label="Filter by sweep day">
-    <span class="datechip" id="dateChip"></span>
+    <button class="datechip" id="dateChip" aria-pressed="false" title="Show only today's sweeping"></button>
     <button class="dchip on" data-day="all">All</button>
     <button class="dchip" data-day="1">Mon</button>
     <button class="dchip" data-day="2">Tue</button>
@@ -310,7 +334,7 @@
   <div class="big">CURB<span>.</span></div>
   <p>Every curb in SF, colored by its <b>next street sweep</b>:</p>
   <div class="wkey">
-    <span class="k"><i style="background:var(--green)"></i>clear — park away</span>
+    <span class="k"><i style="background:var(--green)"></i>clear — you're fine</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps within a day</span>
     <span class="k"><i style="background:var(--red)"></i>now / under 3 hours</span>
   </div>
@@ -322,7 +346,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="sheet" id="sheet" role="dialog" aria-label="Parking details for this block">
-  <div class="grab"></div>
+  <button class="grab" id="grabBtn" aria-label="Expand details" aria-expanded="false"><i></i></button>
   <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
   <div id="sheetBody"></div>
 </div>
@@ -719,12 +743,19 @@ function previewHtml(group, side){
     <div class="tip-where">${fmtRange(group.cnn)}${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></div>
     <div class="tip-side">${side.blockside||'Curbside'} · sweeps ${day} ${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div>
     <div class="tip-next ${rp.cls}">${rp.txt}</div>
-    ${e?`<div class="tip-enf">🎯 Ticketed ~${fmtMin(e.avg)} · earliest ${fmtMin(e.lo)}</div>`:''}
+    ${e?`<div class="tip-enf">${ICONS.target} Ticketed ~${fmtMin(e.avg)} · earliest ${fmtMin(e.lo)}</div>`:''}
     ${rpp?`<div class="tip-rpp">Permit Zone ${rpp.area}${rpp.hrlimit?' · '+rpp.hrlimit+'hr limit':''} · holders exempt</div>`:''}
     <div class="tip-cta">Click for details &amp; alerts</div>`;
 }
 
 /* ---------- bottom sheet ---------- */
+// Drawn glyphs (stroke style matches the search/nav icons) — emoji stays only in toasts/push copy.
+const ICONS={
+  bell:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  cal:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>',
+  target:'<svg class="ic s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
+  center:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+};
 function openSheet(group, activeKey){
   const active=group.sides.find(s=>s.key===activeKey)||group.sides[0];
   const ns=active.ns, now=new Date();
@@ -748,7 +779,7 @@ function openSheet(group, activeKey){
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.txt}</div>
-        ${e&&s!==active?`<div class="enfline">🎯 Ticketed ~${fmtMin(e.avg)} <span>· earliest ${fmtMin(e.lo)} · ${e.n} tickets</span></div>`:''}
+        ${e&&s!==active?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· earliest ${fmtMin(e.lo)} · ${e.n} tickets</span></div>`:''}
         ${allW?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
@@ -770,29 +801,45 @@ function openSheet(group, activeKey){
     const fromMin=active.row?parseInt(active.row.fromhour,10)*60:ae.avg;
     const into=Math.max(0,ae.avg-fromMin);
     const intoTxt=into<60?into+' min':Math.floor(into/60)+'h'+(into%60?' '+(into%60)+'m':'');
-    enfHtml=`<div class="enf"><span class="tgt">🎯</span><div>
+    enfHtml=`<div class="enf"><span class="tgt" aria-hidden="true">${ICONS.target}</span><div>
       <div class="etxt">Real-world: tickets here usually land <b>~${fmtMin(ae.avg)}</b> — about ${intoTxt} into the window.</div>
       <div class="esub">Earliest seen ${fmtMin(ae.lo)} · latest ${fmtMin(ae.hi)} · ${ae.n} tickets over ~2 yrs.</div>
     </div></div>`;
   }
 
+  const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   document.getElementById('sheetBody').innerHTML=`
     <div class="verdict ${vClass}"><span class="kicker">${kicker}</span><span class="head">${head}</span></div>
-    <div class="where"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></div>
+    <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span>
+      <button class="centerico" id="centerBtn" aria-label="Center map on this block">${ICONS.center}</button></div>
     ${enfHtml}
+    <div class="actions">
+      ${canRemind?`<button class="btn ${alertOn?'on':''}" id="alertBtn">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}
+      ${canRemind?`<button class="btn alt" id="calBtn">${ICONS.cal} Calendar${calPref?'<span class="vsep" id="calMore" title="Change calendar type">▾</span>':''}</button>`:''}
+      ${canRemind?`<div class="calchoice" id="calChoice" hidden>
+        <button class="btn alt" id="calGoogle">Google Calendar</button>
+        <button class="btn alt" id="calICS">Apple / .ics</button>
+      </div>`:''}
+    </div>
     <div class="chips"><span class="chip meter" id="meterChip" style="display:none"><span class="d"></span></span>${rppHtml}</div>
     <div class="sides">${sidesHtml}</div>
-    <div class="actions">
-      ${canRemind?`<button class="btn" id="remindBtn">＋ Reminder</button>`:''}
-      ${canRemind?`<button class="btn alt" id="gcalBtn">📅 Google Cal</button>`:''}
-      ${canRemind?`<button class="btn ${alertOn?'on':'alt'}" id="alertBtn">${alertOn?'✓ Alerts on':'🔔 Sweep alerts'}</button>`:''}
-      <button class="btn alt" id="centerBtn">Center</button>
-    </div>
-    <div class="note">${ae?'🎯 "Ticketed" times are when SFMTA actually wrote street-cleaning tickets here (~2 yrs of citations) — a guide, never a guarantee. ':''}＋Reminder &amp; 🔔 alerts fire <b>~30 min before</b> sweeping; Google Cal uses your calendar's default notifications. Live from DataSF — the <b>posted sign</b> is the source of truth; temporary signs &amp; holidays override this. Permit data is SFMTA's 2017 set and may be incomplete.</div>`;
+    <details class="noted">
+      <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b>Data notes ▸</b></summary>
+      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts and .ics reminders fire <b>~30 min before</b> sweeping; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
+    </details>`;
 
   if(canRemind){
-    document.getElementById('remindBtn').onclick=()=>downloadICS(group.corridor||'SF',group.limits||'',ns);
-    document.getElementById('gcalBtn').onclick=()=>openGoogleCal(group.corridor||'SF',group.limits||'',ns);
+    const doCal=k=>{try{localStorage.setItem('curbCalPref',k);}catch(_){}
+      document.getElementById('calChoice').hidden=true;
+      k==='google'?openGoogleCal(group.corridor||'SF',group.limits||'',ns):downloadICS(group.corridor||'SF',group.limits||'',ns);};
+    document.getElementById('calBtn').onclick=()=>{
+      const p=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
+      p?doCal(p):document.getElementById('calChoice').hidden=false;
+    };
+    const more=document.getElementById('calMore');
+    if(more)more.onclick=e=>{e.stopPropagation();document.getElementById('calChoice').hidden=false;};
+    document.getElementById('calGoogle').onclick=()=>doCal('google');
+    document.getElementById('calICS').onclick=()=>doCal('ics');
     document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
   }
   document.getElementById('centerBtn').onclick=()=>map.fitBounds(L.polyline(active.latlngs).getBounds(),{maxZoom:18,padding:[60,60]});
@@ -804,7 +851,12 @@ function openSheet(group, activeKey){
   });
   loadMeterChip(group.corridor||'');
   fillRange(group.cnn);
-  document.getElementById('sheet').classList.add('open');
+  const sheetEl=document.getElementById('sheet');
+  if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
+    sheetEl.classList.remove('tall');
+    document.getElementById('grabBtn').setAttribute('aria-expanded','false');
+  }
+  sheetEl.classList.add('open');
   if(!onboarded())markOnboarded();  // the first verdict IS the aha — welcome's job is done
   try{
     if(canRemind&&!localStorage.getItem('curbFirstSheet')){
@@ -814,6 +866,10 @@ function openSheet(group, activeKey){
   }catch(_){}
 }
 document.getElementById('sheetClose').onclick=()=>document.getElementById('sheet').classList.remove('open');
+document.getElementById('grabBtn').onclick=function(){
+  const tall=document.getElementById('sheet').classList.toggle('tall');
+  this.setAttribute('aria-expanded',tall);
+};
 
 async function loadMeterChip(street){
   const slot=document.getElementById('meterChip'); if(!slot||!street)return;
@@ -890,7 +946,7 @@ async function onAlertTap(spot, btn){
   if(!pushSupported()){ toast('This browser does not support push alerts — use ＋ Reminder instead.'); return; }
   if(Notification.permission==='denied'){ toast('Notifications are blocked. Re-enable them in your browser settings, then retry.'); return; }
 
-  const original=btn.textContent;
+  const original=btn.innerHTML;  // innerHTML: the label carries an inline SVG glyph
   btn.classList.add('busy'); btn.textContent='Enabling…';
   try{
     const perm=await Notification.requestPermission();
@@ -921,8 +977,8 @@ async function onAlertTap(spot, btn){
     toast('Sweep alert set for '+(spot.corridor||'this block')+" — we'll ping you ~30 min before.");
   }catch(err){
     const on=alertSpotMatches(spot);
-    btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.toggle('alt',!on);
-    btn.textContent=on?'✓ Alerts on':original;
+    btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.remove('alt');
+    if(on)btn.textContent='✓ Alerts on'; else btn.innerHTML=original;
     if(!/^permission-/.test(String(err&&err.message))) toast('Could not enable alerts — '+((err&&err.message)||'try again')+'.');
   }
 }
@@ -991,13 +1047,21 @@ function setDayFilter(v){
     const on=v==null?x.dataset.day==='all':parseInt(x.dataset.day,10)===v;
     x.classList.toggle('on',on); x.setAttribute('aria-pressed',on);
   });
+  const dc=document.getElementById('dateChip'), today=(v!==null&&v===new Date().getDay());
+  dc.classList.toggle('on',today); dc.setAttribute('aria-pressed',today);
   drawSegments(lastRows);
 }
 (function initDayRow(){
   const now=new Date();
   const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('dateChip').textContent=
-    'Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate();
+  const dateChip=document.getElementById('dateChip');
+  dateChip.textContent='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate();
+  // the date chip IS the today filter — removes the today/chip duplication
+  dateChip.onclick=()=>{
+    const t=new Date().getDay();
+    document.getElementById('sheet').classList.remove('open');
+    setDayFilter(dayFilter===t?null:t);
+  };
   dayChips=[...document.querySelectorAll('.dchip')];
   dayChips.forEach(b=>{
     if(b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===now.getDay())b.classList.add('today');

@@ -132,6 +132,13 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   a 🎯 callout + per-side line, tooltip shows a compact `tip-enf`. Keyed by cnn → JS dow.
   Degrades silently if the JSON is absent (e.g. before deploy). Rebuild with
   `npm run build:enforcement`.
+- **Sheet structure (post-distill, don't regress)**: mobile opens at a 46dvh PEEK
+  (`.sheet.open`, `.tall` expands via the grab button); order is verdict → where(+center
+  icon) → 🎯 callout → actions → chips → sides → `<details>` data-notes. Exactly TWO
+  actions: 🔔 Sweep alerts (the one filled primary) and Calendar (one button; first tap
+  shows a Google/.ics chooser, remembered in `curbCalPref`, ▾ reopens it). UI glyphs are
+  inline SVGs (`ICONS`) — emoji only in toasts/push copy. The date chip IS the today
+  filter (toggles `dayFilter` to today).
 - **Canonical domain is `curb.guide`** — all og/twitter meta URLs + the OG card footer use
   it (absolute). Add `https://curb.guide/*` to the Google Maps key referrer allowlist.
 - **Socrata gotcha**: any `$where` containing `%` wildcards must be percent-encoded
