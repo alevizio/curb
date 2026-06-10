@@ -55,9 +55,20 @@ The key is kept out of this public repo:
 - Street sweeping: DataSF `yhqp-riqs`
 - Parking meters: DataSF `8vzz-qzz9`
 - Parking regulations / RPP: DataSF `hi6h-neyh` (2017 set; may be incomplete)
-- Address search: DataSF `3mea-di5p` (Enterprise Addressing System, updated nightly)
+- Address search + block ranges: DataSF `3mea-di5p` (Enterprise Addressing System, nightly)
+- Loading / color-curb zones: DataSF `6cqg-dxku` (Meter Operating Schedules) ⋈ meters
+- Enforcement history: DataSF `ab4h-6ztd` (parking citations) — precomputed into
+  `data/enforcement.json` by `npm run build:enforcement` (see `scripts/build-enforcement.mjs`)
 
-The posted street sign is always the source of truth. There is no live
-space-availability data for SF (SFpark sensors retired in 2014).
+The posted street sign is always the source of truth. "Ticketed ~" times are historical
+guidance from past citations, not a guarantee. There is no live space-availability data
+for SF (SFpark sensors retired in 2014).
 
-See `CLAUDE.md` for architecture, data schemas, and the roadmap.
+See `CLAUDE.md` for architecture and data schemas, `docs/` for the sweeper-data research
+and ready-to-send public-records requests.
+
+## Regenerating derived assets
+```bash
+npm run og                  # rebuild og.png (1200x630 social card) from og/template.html
+npm run build:enforcement   # rebuild data/enforcement.json from ~2yr of citations (~2 min)
+```

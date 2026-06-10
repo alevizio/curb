@@ -4,6 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>CURB Map — SF parking near you</title>
+<meta name="description" content="SF street parking, block by block — sweeping schedules, next-sweep times, permit zones, and move-your-car alerts. Live from DataSF.">
+<!-- Social cards: og.png is a static 1200x630 asset regenerated via `npm run og` (og/template.html). URLs must stay absolute. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CURB">
+<meta property="og:title" content="CURB — Know where to park in SF">
+<meta property="og:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts. Live from DataSF.">
+<meta property="og:url" content="https://curb.guide/">
+<meta property="og:image" content="https://curb.guide/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:alt" content="CURB — SF street parking map with green, amber and red curb lines showing sweeping status">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CURB — Know where to park in SF">
+<meta name="twitter:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts.">
+<meta name="twitter:image" content="https://curb.guide/og.png">
+<meta name="twitter:image:alt" content="CURB — SF street parking map with colored curb lines">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E0322E">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -51,13 +68,38 @@
   .toggle .sw{width:13px;height:13px;border-radius:4px;border:2px solid var(--ink);background:transparent}
   .toggle.on{background:var(--meter);color:#fff;border-color:var(--meter)}
   .toggle.on .sw{background:#fff;border-color:#fff}
+  .toggles{display:flex;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none}
+  .toggle.load.on{background:var(--amber);border-color:var(--amber);color:var(--ink)}
+  .toggle.load.on .sw{background:var(--ink);border-color:var(--ink)}
 
-  .locate{position:fixed;right:14px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:600;
-    width:54px;height:54px;border-radius:50%;border:2.5px solid var(--ink);background:var(--paper);
-    box-shadow:var(--shadow);cursor:pointer;display:grid;place-items:center;transition:transform .1s}
-  .locate:active{transform:translateY(2px)}
-  .locate svg{width:24px;height:24px}
-  .locate.loading svg{animation:spin 1s linear infinite}
+  .dayrow{display:flex;gap:6px;align-items:center;pointer-events:auto;overflow-x:auto;
+    scrollbar-width:none;padding:2px 0 4px}
+  .dayrow::-webkit-scrollbar{display:none}
+  .datechip{flex:none;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink)}
+  .dchip{flex:none;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+    background:rgba(242,236,223,.92);color:var(--ink);border:2px solid var(--ink);border-radius:10px;
+    padding:7px 11px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+  .dchip.on{background:var(--ink);color:var(--paper)}
+  .dchip.today{position:relative}
+  .dchip.today::after{content:'';position:absolute;top:-4px;right:-4px;width:9px;height:9px;border-radius:50%;
+    background:var(--red);border:1.5px solid var(--paper)}
+
+  .field .loc{flex:none;align-self:stretch;width:46px;display:grid;place-items:center;border:0;
+    border-left:2.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+  .field .loc:active{background:var(--ink);color:var(--paper)}
+  .field .loc svg{width:19px;height:19px}
+  .field .loc.loading svg{animation:spin 1s linear infinite}
+
+  /* Leaflet zoom +/- restyled to the signage language */
+  .leaflet-control-zoom.leaflet-bar{border:0;box-shadow:none;display:flex;flex-direction:column;gap:8px}
+  .leaflet-control-zoom.leaflet-bar a{width:42px;height:42px;background:var(--paper);color:var(--ink);
+    border:2.5px solid var(--ink);border-radius:11px!important;box-shadow:var(--shadow);
+    font:800 22px/38px 'Hanken Grotesk',sans-serif;text-align:center}
+  .leaflet-control-zoom.leaflet-bar a:hover{background:#fff;color:var(--ink)}
+  .leaflet-control-zoom.leaflet-bar a:active{transform:translate(2px,2px);box-shadow:none}
+  .leaflet-control-zoom.leaflet-bar a.leaflet-disabled{opacity:.4}
+  .leaflet-bottom.leaflet-left .leaflet-control-zoom{margin:0 0 24px 14px}
 
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));
     z-index:700;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 15px;border-radius:10px;
@@ -131,6 +173,56 @@
   .ios-steps .shareglyph{display:inline-grid;place-items:center;width:20px;height:20px;color:var(--meter);vertical-align:-4px}
   .ios-note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Hover preview tooltip (hover-capable pointers only — bound in drawSegments) */
+  .leaflet-tooltip.curbtip{background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:12px;
+    box-shadow:3px 3px 0 var(--ink);padding:9px 12px;white-space:normal;width:max-content;max-width:280px;
+    font-family:'Hanken Grotesk',sans-serif;line-height:1.3}
+  .leaflet-tooltip.curbtip::before{display:none}
+  .curbtip .tip-head{font-family:'Anton',sans-serif;font-size:17px;line-height:1;text-transform:uppercase;margin-bottom:4px}
+  .curbtip.now .tip-head{color:var(--red)} .curbtip.soon .tip-head{color:var(--amber)} .curbtip.ok .tip-head{color:var(--green)}
+  .curbtip .tip-where{font-size:12px;font-weight:700}
+  .curbtip .tip-where .blk{color:var(--ink-soft);font-weight:600}
+  .curbtip .tip-side{font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-top:3px}
+  .curbtip .tip-next{font-size:12px;font-weight:700;margin-top:2px}
+  .curbtip .tip-next.red{color:var(--red)} .curbtip .tip-next.amber{color:var(--amber)} .curbtip .tip-next.green{color:var(--green)}
+  .curbtip .tip-rpp{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;background:var(--meter);border-radius:6px;padding:2px 7px;margin-top:5px}
+  .curbtip .tip-enf{font-size:11.5px;font-weight:800;color:var(--ink);background:rgba(224,50,46,.12);
+    border:1.5px solid rgba(224,50,46,.45);border-radius:7px;padding:3px 8px;margin-top:5px;display:inline-block}
+  .curbtip .tip-cta{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-top:6px}
+
+  /* "Real-world" enforcement callout in the sheet (from citation history) */
+  .enf{display:flex;gap:9px;align-items:flex-start;margin-top:10px;border:2px solid var(--ink);border-radius:12px;
+    padding:9px 11px;background:rgba(224,50,46,.07)}
+  .enf .tgt{font-size:17px;line-height:1.1;flex:none}
+  .enf .etxt{font-size:12.5px;font-weight:700;line-height:1.35}
+  .enf .etxt b{color:var(--red)}
+  .enf .esub{font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:1px}
+  .smeta .enfline{font-size:11.5px;font-weight:700;color:var(--red);margin-top:3px}
+  .smeta .enfline span{color:var(--ink-soft);font-weight:600}
+
+  /* Loading / color-curb zone markers + popup */
+  .loaddot{border-radius:50%;border:2px solid var(--ink);box-shadow:1px 1px 0 var(--ink)}
+  .leaflet-popup.loadpop .leaflet-popup-content-wrapper{background:var(--paper);border:2.5px solid var(--ink);
+    border-radius:12px;box-shadow:var(--shadow);color:var(--ink)}
+  .leaflet-popup.loadpop .leaflet-popup-tip{background:var(--paper);border:2.5px solid var(--ink)}
+  .leaflet-popup.loadpop .leaflet-popup-content{margin:10px 13px;font-family:'Hanken Grotesk',sans-serif}
+  .loadpop .lp-h{font-family:'Anton',sans-serif;font-size:15px;text-transform:uppercase;line-height:1;margin-bottom:4px}
+  .loadpop .lp-m{font-size:12.5px;font-weight:700}
+  .loadpop .lp-s{font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-top:2px}
+
+  /* ---- Desktop: dock the sheet as a floating card, constrain the search cluster ---- */
+  @media (min-width:768px){
+    .top{left:16px;right:auto;top:14px;width:min(480px,calc(100vw - 32px));padding:0}
+    .sheet{left:16px;right:auto;bottom:16px;width:min(420px,calc(100vw - 32px));
+      border:3px solid var(--ink);border-radius:18px;box-shadow:var(--shadow);
+      padding:14px 18px 18px;max-height:calc(100dvh - 190px);  /* never rides over the top cluster */
+      transform:translateY(calc(100% + 40px))}
+    .grab{display:none}
+    .dayrow{flex-wrap:wrap;overflow:visible}  /* no hidden scroll on mouse — chips wrap instead */
+    /* zoom lives bottomright on desktop (see map init) — clear the attribution strip */
+    .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0 16px 30px 0}
+  }
 </style>
 </head>
 <body>
@@ -142,6 +234,9 @@
     <div class="field">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
       <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Search a street…">
+      <button class="loc" id="locate" aria-label="Use my location">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="m3 11 19-9-9 19-2-8-8-2z"/></svg>
+      </button>
     </div>
   </div>
   <div class="metarow">
@@ -151,7 +246,21 @@
       <span class="lg"><i style="background:var(--red)"></i>Now/&lt;3h</span>
       <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit</span>
     </div>
-    <button class="toggle" id="rppToggle"><span class="sw"></span>Permit zones</button>
+    <div class="toggles">
+      <button class="toggle" id="rppToggle"><span class="sw"></span>Permit zones</button>
+      <button class="toggle load" id="loadToggle"><span class="sw"></span>Loading zones</button>
+    </div>
+  </div>
+  <div class="dayrow" aria-label="Filter by sweep day">
+    <span class="datechip" id="dateChip"></span>
+    <button class="dchip on" data-day="all">All</button>
+    <button class="dchip" data-day="1">Mon</button>
+    <button class="dchip" data-day="2">Tue</button>
+    <button class="dchip" data-day="3">Wed</button>
+    <button class="dchip" data-day="4">Thu</button>
+    <button class="dchip" data-day="5">Fri</button>
+    <button class="dchip" data-day="6">Sat</button>
+    <button class="dchip" data-day="0">Sun</button>
   </div>
 </div>
 
@@ -159,10 +268,6 @@
   <div class="big">Find your spot</div>
   <p>Tap locate, search a street, or tap the map where you parked.</p>
 </div>
-
-<button class="locate" id="locate" aria-label="Use my location">
-  <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-</button>
 
 <div class="toast" id="toast"></div>
 
@@ -195,6 +300,7 @@ const SWEEP="https://data.sfgov.org/resource/yhqp-riqs.json";
 const METER="https://data.sfgov.org/resource/8vzz-qzz9.json";
 const RPP="https://data.sfgov.org/resource/hi6h-neyh.json";
 const ADDR="https://data.sfgov.org/resource/3mea-di5p.json";
+const LOADRULES="https://data.sfgov.org/resource/6cqg-dxku.json"; // metered color-curb operating schedules
 const DAYIDX={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
 const DAYLBL=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MIN_ZOOM_DATA=15;
@@ -205,9 +311,30 @@ const VAPID_PUBLIC_KEY="BNh-13Y456HR3O_-AvNP_kEIIui1YvbEumSFLF0l-VD94H_qtGpAQPus
 // falls back to keyless CARTO. This is a CLIENT key — restrict it by HTTP referrer + API in Google Cloud
 // Console. Set it here, or define window.GMAPS_KEY before this script (e.g. a gitignored config.js).
 const GMAPS_KEY=((typeof window!=='undefined'&&window.GMAPS_KEY)||"").trim();
+// Basemap style: "Parchment Draft" (styledmap.com) — warm paper tones that match the app's
+// paper/ink palette. Applied via the Map Tiles createSession `styles` field (roadmap only);
+// the keyless CARTO fallback is NOT styled.
+const MAP_STYLE=[
+  {elementType:'geometry',stylers:[{color:'#fbf7ef'}]},
+  {elementType:'labels.text.fill',stylers:[{color:'#5a4b3c'}]},
+  {elementType:'labels.text.stroke',stylers:[{color:'#fbf7ef'}]},
+  {featureType:'administrative',elementType:'geometry.stroke',stylers:[{color:'#d7c4a5'}]},
+  {featureType:'poi',stylers:[{visibility:'off'}]},
+  // Roads stay neutral near-paper (NOT the theme's orange-tan): the curb lines are drawn
+  // on top of them and the amber "soon" tier must keep ~3:1 contrast — don't warm these.
+  {featureType:'road',elementType:'geometry',stylers:[{color:'#f6f1e6'}]},
+  {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#d8d2c4'}]},
+  {featureType:'water',elementType:'geometry.fill',stylers:[{color:'#ded1b7'}]}
+];
+
+const mqDesktop=window.matchMedia('(min-width:768px)');
+const CAN_HOVER=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
 const map=L.map('map',{zoomControl:false,attributionControl:true}).setView([37.7749,-122.4194],15);
-L.control.zoom({position:'bottomleft'}).addTo(map);
+// Desktop: the sheet docks bottom-left as a card, so zoom lives bottom-right; track
+// resizes/rotation so the control never ends up under the open sheet.
+const zoomCtl=L.control.zoom({position:mqDesktop.matches?'bottomright':'bottomleft'}).addTo(map);
+mqDesktop.addEventListener('change',e=>zoomCtl.setPosition(e.matches?'bottomright':'bottomleft'));
 
 // Basemap: official Google Map Tiles API when GMAPS_KEY is set, else keyless CARTO (Google-style) fallback.
 function addCarto(){
@@ -221,7 +348,7 @@ function addCarto(){
     const ctrl=new AbortController(), to=setTimeout(()=>ctrl.abort(),3000);
     const sres=await fetch('https://tile.googleapis.com/v1/createSession?key='+encodeURIComponent(GMAPS_KEY),{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({mapType:'roadmap',language:'en-US',region:'US'}),signal:ctrl.signal});
+      body:JSON.stringify({mapType:'roadmap',language:'en-US',region:'US',styles:MAP_STYLE}),signal:ctrl.signal});
     clearTimeout(to);
     if(!sres.ok) throw new Error('createSession '+sres.status);
     const {session}=await sres.json();
@@ -249,11 +376,31 @@ function addCarto(){
 })();
 
 const rppLayer=L.layerGroup().addTo(map);  // under
+const loadLayer=L.layerGroup().addTo(map); // middle (loading/color-curb dots)
 const segLayer=L.layerGroup().addTo(map);  // over
 let youMarker=null;
 let segCache=[];   // {group, side}
 let rppCache=[];   // {latlngs, area, hrlimit, days, from, to, regulation, exceptions}
 let fetchTok=0, rppOn=false;
+let loadOn=false, loadCache=null;  // loadCache=[{lat,lng,color,label,days,from,to,limit}] (loaded once)
+let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without a sweep that day are hidden
+let lastRows=[];     // raw sweep rows from the last viewport fetch, for redraws on filter change
+let rangeCache={};   // cnn -> {lo,hi} street-number range (EAS); accumulates across pans (static data)
+
+/* ---------- enforcement history (precomputed; data/enforcement.json) ---------- */
+// ENF[cnn][dow] = [n, avgMin, loMin, hiMin] — when this block is ACTUALLY ticketed,
+// from 2yr of street-cleaning citations. Lazy-loaded; absent until fetched / if missing.
+let ENF=null, enfTried=false;
+async function loadEnforcement(){
+  if(ENF||enfTried)return; enfTried=true;
+  try{const r=await fetch('data/enforcement.json',{cache:'force-cache'}); if(r.ok)ENF=await r.json();}catch(_){}
+}
+function enfFor(cnn,dow){
+  if(!ENF||dow==null)return null;
+  const b=ENF[cnn]; const a=b&&b[dow];
+  return a?{n:a[0],avg:a[1],lo:a[2],hi:a[3]}:null;
+}
+function fmtMin(m){let h=Math.floor(m/60),mm=m%60;const ap=h>=12?'p':'a';h=h%12;if(h===0)h=12;return h+':'+String(mm).padStart(2,'0')+ap;}
 
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
 function normDay(s){if(!s)return null;const k=s.trim().toLowerCase().slice(0,3);return (k in DAYIDX)?DAYIDX[k]:null}
@@ -336,7 +483,7 @@ function distSqToLineMeters(lat,lng,latlngs){
 /* ---------- viewport loading ---------- */
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
-  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();segCache=[];rppCache=[];hint.style.opacity='1';return;}
+  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];hint.style.opacity='1';return;}
   hint.style.opacity='0';
   const b=map.getBounds().pad(0.15);
   const poly=`POLYGON((${b.getWest()} ${b.getSouth()}, ${b.getEast()} ${b.getSouth()}, ${b.getEast()} ${b.getNorth()}, ${b.getWest()} ${b.getNorth()}, ${b.getWest()} ${b.getSouth()}))`;
@@ -346,9 +493,77 @@ async function loadViewport(){
       +`&$where=intersects(line,'${poly}')&$limit=2500`;
     const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
     if(my!==fetchTok)return;
+    lastRows=data;
     drawSegments(data);
   }catch(e){ if(my===fetchTok) toast("Couldn't load that area — pan and try again."); }
+  loadRanges(poly);
   if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
+  if(loadOn) drawLoadZones(); else loadLayer.clearLayers();
+}
+
+/* ---------- loading / color-curb zones (metered; 6cqg-dxku ⋈ meter coords) ---------- */
+const LOAD_COLORS={White:'#ffffff',Yellow:'#E0A21E',Red:'#E0322E',Green:'#1F9E5A',Orange:'#E2731E'};
+const LOAD_LABEL={White:'Passenger loading',Yellow:'Commercial loading',Red:'Truck loading (6-wheel)',Green:'Short-term parking',Orange:'Bus loading'};
+async function ensureLoadCache(){
+  if(loadCache)return loadCache;
+  // Meter coords keyed by post_id (one fetch), then the color-curb operating rules (one fetch).
+  const [meters,rules]=await Promise.all([
+    fetch(METER+`?$select=post_id,latitude,longitude&$where=`+encodeURIComponent(`latitude IS NOT NULL AND on_offstreet_type='ON'`)+`&$limit=50000`).then(r=>r.json()),
+    fetch(LOADRULES+`?$select=post_id,applied_color_rule,days_applied,from_time,to_time,time_limit,priority&$where=`+encodeURIComponent(`applied_color_rule like 'White%' OR applied_color_rule like 'Yellow%' OR applied_color_rule like 'Red%' OR applied_color_rule like 'Green%' OR applied_color_rule like 'Orange%'`)+`&$limit=50000`).then(r=>r.json())
+  ]);
+  const loc={}; meters.forEach(m=>{if(m.post_id&&m.latitude)loc[m.post_id]=[+m.latitude,+m.longitude];});
+  const best={};  // one rule per post_id (lowest priority number = primary)
+  rules.forEach(x=>{
+    const ll=loc[x.post_id]; if(!ll)return;
+    const pr=parseInt(x.priority,10)||9;
+    if(best[x.post_id]&&best[x.post_id]._pr<=pr)return;
+    const color=(x.applied_color_rule||'').split(' ')[0];
+    best[x.post_id]={lat:ll[0],lng:ll[1],color,label:LOAD_LABEL[color]||x.applied_color_rule,
+      days:x.days_applied||'',from:x.from_time||'',to:x.to_time||'',limit:x.time_limit||'',_pr:pr};
+  });
+  loadCache=Object.values(best);
+  return loadCache;
+}
+async function drawLoadZones(){
+  try{ await ensureLoadCache(); }catch(e){ toast('Loading zones unavailable right now.'); return; }
+  loadLayer.clearLayers();
+  if(map.getZoom()<MIN_ZOOM_DATA)return;
+  const b=map.getBounds();
+  loadCache.forEach(z=>{
+    if(!b.contains([z.lat,z.lng]))return;
+    const m=L.circleMarker([z.lat,z.lng],{radius:5,color:'#17150F',weight:2,
+      fillColor:LOAD_COLORS[z.color]||'#888',fillOpacity:1,className:'loaddot'});
+    const days=z.days&&z.days.length>14?'daily':z.days;
+    const hrs=z.from?`${z.from}–${z.to}`:'';
+    const lim=z.limit&&z.limit!=='0 minutes'?` · ${z.limit}`:'';
+    m.bindPopup(`<div class="lp-h" style="color:${z.color==='White'?'#17150F':LOAD_COLORS[z.color]}">${z.color} curb</div>`
+      +`<div class="lp-m">${z.label}</div>`
+      +`<div class="lp-s">${[days,hrs].filter(Boolean).join(' · ')}${lim}</div>`
+      +`<div class="lp-s">Posted sign is the source of truth.</div>`,{className:'loadpop',maxWidth:240});
+    m.addTo(loadLayer);
+  });
+}
+
+/* ---------- street-number ranges (EAS; cnn keys match the sweeping dataset) ---------- */
+async function loadRanges(poly){
+  try{
+    const url=ADDR+`?$select=cnn,min(address_number) as lo,max(address_number) as hi`
+      +`&$group=cnn&$where=intersects(point,'${poly}')&$limit=5000`;
+    const r=await fetch(url); if(!r.ok)return; const d=await r.json();
+    d.forEach(x=>{if(x.cnn&&x.lo)rangeCache[x.cnn]={lo:x.lo,hi:x.hi}});
+  }catch(e){}
+}
+function fmtRange(cnn){const g=rangeCache[cnn];return g?(g.lo===g.hi?g.lo:g.lo+'–'+g.hi)+' ':'';}
+async function fillRange(cnn){
+  if(!cnn)return;
+  if(!rangeCache[cnn]){
+    try{
+      const r=await fetch(ADDR+`?$select=min(address_number) as lo,max(address_number) as hi&$where=cnn='${soql(String(cnn))}'`);
+      const d=await r.json(); if(d[0]&&d[0].lo)rangeCache[cnn]={lo:d[0].lo,hi:d[0].hi};
+    }catch(e){}
+  }
+  const el=document.getElementById('rangeSlot');
+  if(el&&rangeCache[cnn])el.textContent=fmtRange(cnn);
 }
 
 function drawSegments(rows){
@@ -372,17 +587,33 @@ function drawSegments(rows){
     }
     const group={cnn:grp.cnn, corridor:grp.rows[0].corridor, limits:grp.rows[0].limits, sides:[]};
     arr.forEach(s=>{
-      let best=null,rank=0,color=getCSS('--gray');
-      s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank){rank=st.rank;color=st.color;best=ns}});
+      // Day filter is a VISIBILITY lens only: it decides whether a side is drawn, but
+      // status/color/sheet/alerts always come from the FULL rule set — a filtered view
+      // must never arm a reminder for the wrong sweep (multi-day blocks are common).
+      if(dayFilter!=null&&!s.rows.some(r=>normDay(r.weekday)===dayFilter))return;
+      let best=null,bestRow=s.rows[0],rank=0,color=getCSS('--gray');
+      s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank){rank=st.rank;color=st.color;best=ns;bestRow=r}});
       const ll=offsetLine(center, OFFSET, signs[s.key]);
-      const side={key:s.key, blockside:s.blockside, rows:s.rows, ns:best, color, latlngs:ll, mid:ll[Math.floor(ll.length/2)]};
+      const side={key:s.key, blockside:s.blockside, rows:s.rows, row:bestRow, ns:best, color, latlngs:ll, mid:ll[Math.floor(ll.length/2)]};
       group.sides.push(side);
       const click=()=>openSheet(group, s.key);
-      L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round'}).on('click',click).addTo(segLayer);
-      L.polyline(ll,{color:'#000',opacity:0,weight:16}).on('click',click).addTo(segLayer);
+      const vis=L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round'}).on('click',click).addTo(segLayer);
+      const hit=L.polyline(ll,{color:'#000',opacity:0,weight:16}).on('click',click).addTo(segLayer);
+      if(CAN_HOVER){
+        hit.bindTooltip(()=>previewHtml(group,side),
+          {sticky:true,direction:'top',offset:[0,-12],opacity:1,className:'curbtip '+verdictClass(side.ns)});
+        // content re-renders per open with a fresh Date, but className is frozen at bind
+        // time — re-sync the verdict color class so the headline can't go stale.
+        hit.on('tooltipopen',e=>{const el=e.tooltip.getElement();
+          if(el){el.classList.remove('now','soon','ok');el.classList.add(verdictClass(side.ns));}});
+        hit.on('mouseover',()=>vis.setStyle({weight:9,opacity:1}));
+        hit.on('mouseout',()=>vis.setStyle({weight:5,opacity:.95}));
+      }
       segCache.push({group, side});
     });
   });
+  if(dayFilter!=null&&rows.length&&!segCache.length)
+    toast('No '+DAYLBL[dayFilter]+' sweeping on these blocks — tap "All" to reset.');
 }
 
 async function loadRpp(poly, my){
@@ -397,7 +628,12 @@ async function loadRpp(poly, my){
       const lines = g.type==='MultiLineString'? g.coordinates : [g.coordinates];
       lines.forEach(coords=>{
         const ll=coords.map(c=>[c[1],c[0]]);
-        L.polyline(ll,{color:getCSS('--meter'),weight:11,opacity:.20,lineCap:'round',interactive:false}).addTo(rppLayer);
+        // RPP applies to BOTH curb sides of the block — draw an offset blue band on each
+        // side (hugging both curbs like the sweep lines) instead of one centerline lane.
+        const mcolor=getCSS('--meter');
+        [1,-1].forEach(sign=>{
+          L.polyline(offsetLine(ll,OFFSET,sign),{color:mcolor,weight:8,opacity:.18,lineCap:'round',interactive:false}).addTo(rppLayer);
+        });
         rppCache.push({latlngs:ll, area:rec.rpparea1, hrlimit:rec.hrlimit, days:rec.days, from:rec.from_time, to:rec.to_time, regulation:rec.regulation, exceptions:rec.exceptions});
       });
     });
@@ -410,28 +646,55 @@ function nearestRpp(mid){
   return bd<27*27?best:null;
 }
 
+/* ---------- hover preview (hover-capable pointers) ---------- */
+function verdictClass(ns){
+  if(!ns)return 'ok';
+  const now=new Date();
+  if(now>=ns.start&&now<ns.end)return 'now';
+  const hrs=(ns.start-now)/36e5;
+  return hrs<3?'now':hrs<24?'soon':'ok';
+}
+function previewHtml(group, side){
+  const ns=side.ns, now=new Date();
+  const head=!ns?'Posted sign':(now>=ns.start&&now<ns.end)?'Sweeping now':DAYLBL[ns.start.getDay()]+' '+fmtHour(ns.start.getHours());
+  const rp=relPhrase(ns);
+  const r=side.row||side.rows[0];  // the rule that produced ns — rows[0] can be a different weekday
+  const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
+  const rpp=nearestRpp(side.mid);
+  const e=enfFor(group.cnn, normDay(r.weekday));
+  return `<div class="tip-head">${head}</div>
+    <div class="tip-where">${fmtRange(group.cnn)}${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></div>
+    <div class="tip-side">${side.blockside||'Curbside'} · sweeps ${day} ${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div>
+    <div class="tip-next ${rp.cls}">${rp.txt}</div>
+    ${e?`<div class="tip-enf">🎯 Ticketed ~${fmtMin(e.avg)} · earliest ${fmtMin(e.lo)}</div>`:''}
+    ${rpp?`<div class="tip-rpp">Permit Zone ${rpp.area}${rpp.hrlimit?' · '+rpp.hrlimit+'hr limit':''} · holders exempt</div>`:''}
+    <div class="tip-cta">Click for details &amp; alerts</div>`;
+}
+
 /* ---------- bottom sheet ---------- */
 function openSheet(group, activeKey){
   const active=group.sides.find(s=>s.key===activeKey)||group.sides[0];
   const ns=active.ns, now=new Date();
-  let vClass='ok',kicker='Park until',head='—';
+  let vClass=verdictClass(ns),kicker='Park until',head='—';
   if(!ns){kicker='Schedule';head='Posted sign';}
-  else if(now>=ns.start&&now<ns.end){vClass='now';kicker='Restricted';head='Sweeping now';}
-  else{const hrs=(ns.start-now)/36e5;vClass=hrs<3?'now':hrs<24?'soon':'ok';head=DAYLBL[ns.start.getDay()]+' '+fmtHour(ns.start.getHours());}
+  else if(now>=ns.start&&now<ns.end){kicker='Restricted';head='Sweeping now';}
+  else{head=DAYLBL[ns.start.getDay()]+' '+fmtHour(ns.start.getHours());}
 
   const ordered=[active, ...group.sides.filter(s=>s!==active)];
   const sidesHtml=ordered.map(s=>{
-    const r=s.rows[0]; const rp=relPhrase(s.ns);
+    const r=s.row||s.rows[0]; const rp=relPhrase(s.ns);
     const weeks=[r.week1,r.week2,r.week3,r.week4,r.week5].map(x=>String(x)==="1");
     const allW=weeks.every(Boolean);
     const wkHtml=weeks.map((on,i)=>`<span class="wk ${on?'on':'off'}">${i+1}</span>`).join('');
     const act=s.ns&&now>=s.ns.start&&now<s.ns.end;
     const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
+    const e=enfFor(group.cnn, normDay(r.weekday));
     return `<div class="srow ${s===active?'active':''}">
       <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div></div>
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.txt}</div>
+        ${e?`<div class="enfline">🎯 Ticketed ~${fmtMin(e.avg)} <span>· earliest ${fmtMin(e.lo)} · ${e.n} tickets</span></div>`:''}
         ${allW?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
@@ -446,24 +709,41 @@ function openSheet(group, activeKey){
   } : null;
   const alertOn = alertSpotMatches(spot);
 
+  // Real-world enforcement callout for the active side (from citation history).
+  const ae=enfFor(group.cnn, active.row&&normDay(active.row.weekday));
+  let enfHtml='';
+  if(ae){
+    const fromMin=active.row?parseInt(active.row.fromhour,10)*60:ae.avg;
+    const into=Math.max(0,ae.avg-fromMin);
+    const intoTxt=into<60?into+' min':Math.floor(into/60)+'h'+(into%60?' '+(into%60)+'m':'');
+    enfHtml=`<div class="enf"><span class="tgt">🎯</span><div>
+      <div class="etxt">Real-world: tickets here usually land <b>~${fmtMin(ae.avg)}</b> — about ${intoTxt} into the window.</div>
+      <div class="esub">Earliest seen ${fmtMin(ae.lo)} · latest ${fmtMin(ae.hi)} · ${ae.n} tickets over ~2 yrs.</div>
+    </div></div>`;
+  }
+
   document.getElementById('sheetBody').innerHTML=`
     <div class="verdict ${vClass}"><span class="kicker">${kicker}</span><span class="head">${head}</span></div>
-    <div class="where">${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></div>
+    <div class="where"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></div>
+    ${enfHtml}
     <div class="chips"><span class="chip meter" id="meterChip" style="display:none"><span class="d"></span></span>${rppHtml}</div>
     <div class="sides">${sidesHtml}</div>
     <div class="actions">
       ${canRemind?`<button class="btn" id="remindBtn">＋ Reminder</button>`:''}
+      ${canRemind?`<button class="btn alt" id="gcalBtn">📅 Google Cal</button>`:''}
       ${canRemind?`<button class="btn ${alertOn?'on':'alt'}" id="alertBtn">${alertOn?'✓ Alerts on':'🔔 Sweep alerts'}</button>`:''}
       <button class="btn alt" id="centerBtn">Center</button>
     </div>
-    <div class="note">Both alerts fire <b>~30 min before</b> sweeping. Live from DataSF — the <b>posted sign</b> is the source of truth; temporary signs &amp; holidays override this. Permit data is SFMTA's 2017 set and may be incomplete.</div>`;
+    <div class="note">${ae?'🎯 "Ticketed" times are when SFMTA actually wrote street-cleaning tickets here (~2 yrs of citations) — a guide, never a guarantee. ':''}＋Reminder &amp; 🔔 alerts fire <b>~30 min before</b> sweeping; Google Cal uses your calendar's default notifications. Live from DataSF — the <b>posted sign</b> is the source of truth; temporary signs &amp; holidays override this. Permit data is SFMTA's 2017 set and may be incomplete.</div>`;
 
   if(canRemind){
     document.getElementById('remindBtn').onclick=()=>downloadICS(group.corridor||'SF',group.limits||'',ns);
+    document.getElementById('gcalBtn').onclick=()=>openGoogleCal(group.corridor||'SF',group.limits||'',ns);
     document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
   }
   document.getElementById('centerBtn').onclick=()=>map.fitBounds(L.polyline(active.latlngs).getBounds(),{maxZoom:18,padding:[60,60]});
   loadMeterChip(group.corridor||'');
+  fillRange(group.cnn);
   document.getElementById('sheet').classList.add('open');
 }
 document.getElementById('sheetClose').onclick=()=>document.getElementById('sheet').classList.remove('open');
@@ -472,7 +752,9 @@ async function loadMeterChip(street){
   const slot=document.getElementById('meterChip'); if(!slot||!street)return;
   const base=street.toUpperCase().replace(/ (ST|AVE|BLVD|WAY|DR|RD)$/,'').replace(/'/g,"''");
   try{
-    const url=METER+`?$select=count(objectid) as c&$where=upper(street_name) like '%${base}%' AND on_offstreet_type='ON'`;
+    // $where must be percent-encoded: the raw % wildcards otherwise make an invalid URL (request dies before CORS).
+    const url=METER+`?$select=count(objectid) as c&$where=`
+      +encodeURIComponent(`upper(street_name) like '%${base}%' AND on_offstreet_type='ON'`);
     const r=await fetch(url); if(!r.ok)return; const d=await r.json();
     const c=parseInt(d[0]?.c||0,10);
     if(c>0){slot.style.display='inline-flex';slot.innerHTML=`<span class="d"></span>Metered · ~${c.toLocaleString()} meters on ${street}`;}
@@ -492,6 +774,19 @@ function downloadICS(street,block,ns){
   a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download='sweep-reminder.ics';
   document.body.appendChild(a); a.click(); a.remove();
   toast('Reminder downloaded — open it to add to your calendar.');
+}
+
+function openGoogleCal(street,block,ns){
+  // Floating wall-clock times pinned to SF via ctz — sweep times are inherently local to SF,
+  // and without ctz Google interprets them in the viewer's calendar timezone (hours off for visitors).
+  const dt=d=>d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')
+    +'T'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'00';
+  const u='https://calendar.google.com/calendar/render?action=TEMPLATE'
+    +'&text='+encodeURIComponent('🧹 Move car — street sweeping ('+street+')')
+    +'&dates='+dt(ns.start)+'/'+dt(ns.end)+'&ctz=America/Los_Angeles'
+    +'&location='+encodeURIComponent(street+' · '+block)
+    +'&details='+encodeURIComponent('Street sweeping starts. Move your car.\nBlock: '+block);
+  window.open(u,'_blank','noopener');
 }
 
 /* ---------- push alerts (Web Push) ---------- */
@@ -577,6 +872,9 @@ document.getElementById('locate').onclick=()=>{
 };
 function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
 function placeYou(lat,lng,fly,cnnHint){
+  // "Where I parked" must see every curb side — a day filter could otherwise snap
+  // the pin to the wrong (still-visible) side of the street.
+  if(dayFilter!=null)setDayFilter(null);
   if(youMarker)map.removeLayer(youMarker);
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
@@ -601,12 +899,45 @@ function nearestSeg(lat,lng,cnnHint){
 }
 map.on('click',e=>{ if(map.getZoom()<MIN_ZOOM_DATA){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
 
+/* ---------- day filter + today's date ---------- */
+let dayChips=[];
+function setDayFilter(v){
+  dayFilter=v;
+  dayChips.forEach(x=>{
+    const on=v==null?x.dataset.day==='all':parseInt(x.dataset.day,10)===v;
+    x.classList.toggle('on',on); x.setAttribute('aria-pressed',on);
+  });
+  drawSegments(lastRows);
+}
+(function initDayRow(){
+  const now=new Date();
+  const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dateChip').textContent=
+    'Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate();
+  dayChips=[...document.querySelectorAll('.dchip')];
+  dayChips.forEach(b=>{
+    if(b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===now.getDay())b.classList.add('today');
+    b.setAttribute('aria-pressed',b.classList.contains('on'));
+    b.onclick=()=>{
+      const v=b.dataset.day==='all'?null:parseInt(b.dataset.day,10);
+      document.getElementById('sheet').classList.remove('open');
+      setDayFilter((v!==null&&v===dayFilter)?null:v);  // tapping the active day again clears it
+    };
+  });
+})();
+
 /* ---------- RPP toggle ---------- */
 document.getElementById('rppToggle').onclick=function(){
   rppOn=!rppOn; this.classList.toggle('on',rppOn);
   document.getElementById('rppLegend').style.display=rppOn?'flex':'none';
   loadViewport();
   if(rppOn)toast('Permit zones (RPP) shaded blue. Tap a block for area & hours.');
+};
+document.getElementById('loadToggle').onclick=function(){
+  loadOn=!loadOn; this.classList.toggle('on',loadOn);
+  if(loadOn){ this.classList.add('busy'); drawLoadZones().finally(()=>this.classList.remove('busy'));
+    toast('Loading zones: 🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus. Tap a dot for hours. (Metered zones only — paint-only curbs aren\'t in city data.)');
+  } else loadLayer.clearLayers();
 };
 
 /* ---------- search ---------- */
@@ -659,6 +990,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 let mvt=null;
 map.on('moveend',()=>{clearTimeout(mvt);mvt=setTimeout(loadViewport,250);});
 map.whenReady(()=>setTimeout(loadViewport,400));
+loadEnforcement();  // background; populates the "real-world ticket time" lines once ready
 
 /* iOS install hint: close on × or backdrop tap; auto-show once for un-installed iOS Safari. */
 document.getElementById('iosClose').onclick=hideIosHint;
