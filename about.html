@@ -25,6 +25,9 @@
     --green:#1F9E5A; --amber:#E08A1E; --red:#E0322E; --meter:#2F5BD0;
     --green-text:#157A44; --amber-text:#8F5A06; --red-text:#C22A26;
     --sign:#FFFDF6;
+    /* authentic SF sign palette (street-cleaning red, time-limit green, permit discs) */
+    --sign-red:#C42127; --sign-green:#0B6E4F; --disc-blue:#1D69A5; --disc-green:#1F8A4C;
+    --rail:#3B372E;
     --shadow:5px 5px 0 var(--ink);
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -64,22 +67,36 @@
   .sub b{color:var(--ink)}
   .ctas{display:flex;gap:13px;flex-wrap:wrap}
 
-  /* the street-sign artifact (pure CSS) */
-  .post{justify-self:center;display:flex;flex-direction:column;align-items:center;position:relative}
-  .pole{position:absolute;top:8px;bottom:-10px;width:9px;border-radius:5px;z-index:0;
-    background:linear-gradient(90deg,#9b958a,#c9c3b6 45%,#8e887d)}
-  .sign{position:relative;z-index:1;width:min(252px,100%);background:var(--sign);border:3px solid var(--ink);
-    border-radius:10px;padding:20px 18px 16px;text-align:center;transform:rotate(-1.6deg);
-    box-shadow:6px 6px 0 var(--ink)}
-  .sign .no{font-family:'Anton',sans-serif;font-size:36px;line-height:.95;color:var(--red-text);text-transform:uppercase}
-  .sign .when{font-family:'Anton',sans-serif;font-size:24px;margin-top:8px;text-transform:uppercase}
-  .sign .what{font-weight:800;font-size:13px;letter-spacing:.18em;margin-top:9px;color:var(--red-text);text-transform:uppercase}
-  .sign .arrow{font-weight:800;font-size:12px;letter-spacing:.1em;margin-top:10px;border-top:2px solid var(--ink);
-    padding-top:9px;color:var(--ink-soft);text-transform:uppercase}
-  .bolt,.sign::before{content:'';position:absolute;top:8px;left:50%;width:8px;height:8px;border-radius:50%;
-    background:#b9b3a6;border:1.5px solid var(--ink);transform:translateX(-50%)}
-  .plate{position:relative;z-index:1;width:min(218px,90%);margin-top:14px;background:var(--ink);color:var(--paper);
-    border-radius:9px;padding:13px 14px 11px;text-align:center;transform:rotate(1.2deg);box-shadow:5px 5px 0 rgba(23,21,15,.25)}
+  /* the street-sign stack — faithful to the real SF signs (red cleaning / green time-limit) */
+  .post{justify-self:center;display:flex;flex-direction:column;align-items:center;position:relative;gap:12px}
+  .rail{position:absolute;top:-6px;bottom:-14px;width:11px;border-radius:3px;z-index:0;
+    background:linear-gradient(90deg,#2e2b24,var(--rail) 45%,#262420)}
+  .rail.r1{left:14%}.rail.r2{right:14%}
+  .sign{position:relative;z-index:1;width:min(258px,100%);background:var(--sign);
+    border-radius:10px;padding:16px 16px 13px;text-align:center;box-shadow:6px 6px 0 rgba(23,21,15,.35)}
+  .sign::before{content:'';position:absolute;top:7px;left:50%;width:8px;height:8px;border-radius:50%;
+    background:#b9b3a6;border:1.5px solid rgba(0,0,0,.55);transform:translateX(-50%)}
+  .sign.red{border:3.5px solid var(--sign-red);color:var(--sign-red);transform:rotate(-1.4deg)}
+  .sign.grn{border:3.5px solid var(--sign-green);color:var(--sign-green);transform:rotate(.9deg)}
+  .s-no{font-family:'Anton',sans-serif;font-size:33px;line-height:1;letter-spacing:.01em}
+  .s-time{font-family:'Anton',sans-serif;font-size:30px;line-height:1;margin-top:7px}
+  .s-time small{font-size:14px;letter-spacing:.04em}
+  .s-time .to{font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:800;text-transform:lowercase;padding:0 2px}
+  .s-days{font-family:'Anton',sans-serif;font-size:16.5px;margin-top:7px;letter-spacing:.02em}
+  .s-sub{font-weight:800;font-size:10.5px;letter-spacing:.14em;margin-top:2px}
+  .s-what{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.06em;margin-top:8px}
+  .g-head{display:flex;align-items:center;justify-content:center;gap:9px}
+  .g-2{font-family:'Anton',sans-serif;font-size:54px;line-height:.9}
+  .g-hr{font-family:'Anton',sans-serif;font-size:19px;line-height:1.02;text-align:left}
+  .g-rule{border:0;border-top:2.5px solid var(--sign-green);margin:10px 6px 9px}
+  .g-exc{font-weight:800;font-size:11.5px;letter-spacing:.08em}
+  .g-area{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:6px;
+    font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.05em}
+  .disc{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#fff;
+    font-family:'Anton',sans-serif;font-size:14px}
+  .disc.b{background:var(--disc-blue)} .disc.g{background:var(--disc-green)}
+  .plate{position:relative;z-index:1;width:min(220px,90%);background:var(--ink);color:var(--paper);
+    border-radius:9px;padding:13px 14px 11px;text-align:center;transform:rotate(-.8deg);box-shadow:5px 5px 0 rgba(23,21,15,.25)}
   .plate::before{content:'';position:absolute;top:6px;left:50%;width:7px;height:7px;border-radius:50%;
     background:#b9b3a6;border:1.5px solid #000;transform:translateX(-50%)}
   .plate .t{font-family:'Anton',sans-serif;font-size:19px;line-height:1.05;text-transform:uppercase}
@@ -169,13 +186,22 @@
       </div>
     </div>
 
-    <div class="post rise d2" role="img" aria-label="A street-cleaning sign reading No Parking, Tuesday 9 to 11 AM — with a CURB plate underneath reading: tickets land around 9:14 AM">
-      <div class="pole"></div>
-      <div class="sign">
-        <div class="no">No Parking</div>
-        <div class="when">Tue · 9–11 AM</div>
-        <div class="what">Street Cleaning</div>
-        <div class="arrow">← this block</div>
+    <div class="post rise d2" role="img" aria-label="A real SF sign pole: a red street-cleaning sign reading No Parking, 9 to 11 AM, Tuesday, Street Cleaning; below it a green sign reading 2 Hour Parking, 8 AM to 6 PM, Monday through Friday, except vehicles with Area K and M permits; and a CURB plate reading: tickets land around 9:14 AM">
+      <div class="rail r1"></div><div class="rail r2"></div>
+      <div class="sign red">
+        <div class="s-no">NO PARKING</div>
+        <div class="s-time">9 <small>A.M.</small> <span class="to">to</span> 11 <small>A.M.</small></div>
+        <div class="s-days">TUESDAY</div>
+        <div class="s-sub">EVERY WEEK</div>
+        <div class="s-what">STREET CLEANING</div>
+      </div>
+      <div class="sign grn">
+        <div class="g-head"><span class="g-2">2</span><span class="g-hr">HOUR<br>PARKING</span></div>
+        <div class="s-time">8 <small>A.M.</small> <span class="to">to</span> 6 <small>P.M.</small></div>
+        <div class="s-days">MON <span class="to">thru</span> FRI</div>
+        <hr class="g-rule">
+        <div class="g-exc">EXCEPT VEHICLES WITH</div>
+        <div class="g-area">AREA <i class="disc b">K</i> <i class="disc g">M</i> PERMITS</div>
       </div>
       <div class="plate">
         <div class="t">Tickets land <em>~9:14 am</em></div>

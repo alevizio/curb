@@ -125,6 +125,10 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
 - **Google Cal button** (`openGoogleCal`): template URL with floating wall-clock times
   pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
   reflects that; only .ics and push promise the 30-min lead.
+- **Permit-area browser** (`areaSel` → `showArea()`, `areaLayer`): dropdown of all RPP
+  areas (fetched once, `^[A-Z]{1,2}$` filters junk values); selecting fetches that area
+  citywide (≤2500 rows), draws a blue zoom-scaled highlight, fitBounds, and toasts the
+  area's most-common rule phrased as "typically … (2017 data — check signs)".
 - **Loading/color-curb layer** (`loadToggle` → `loadOn`, `loadLayer`): toggle loads
   `6cqg-dxku` ⋈ meter coords ONCE (`loadCache`), renders colored dots per viewport; tap →
   popup with days/hours/limit. Metered zones only (note in the toggle toast).
