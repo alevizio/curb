@@ -39,6 +39,22 @@ calendar reminder before the next sweep.
    Fields: regulation, rpparea1 (permit-area letter), hrlimit, days, from_time,
    to_time, exceptions, shape (GeoJSON MultiLineString). STALE: this is SFMTA's
    2017 set, flagged by the city as not comprehensively updated. Treat as a hint.
+   NOTE: RPP covers BOTH curbs — rendered as ONE street-wide centerline ribbon UNDER the
+   curb lines, with zoom-scaled weight (rppWeight(): 4px@z15 → 26px@z18 ≈ curb-to-curb).
+   Do NOT draw offset bands per side: they stack into a blue blanket at low zoom and
+   collide with the ±5m curb lines at high zoom (tried 2026-06-09, looked broken).
+4. Loading / color-curb zones — `6cqg-dxku` (Meter Operating Schedules)
+   Field `applied_color_rule` carries the regulation + days_applied/from_time/to_time/
+   time_limit (White=passenger, Yellow=commercial, Red=truck, Green=short-term, Orange=bus).
+   `cap_color` is UNRELIABLE (white zones show Grey caps) — match on applied_color_rule.
+   No geometry → join to meter coords by `post_id` (8vzz-qzz9 lat/long). Metered zones
+   only; paint-only curbs aren't published. Loaded once on toggle, rendered per-viewport.
+5. Parking citations — `ab4h-6ztd` (23.8M rows, daily, ~2-5 day lag)
+   STR CLEAN (TRC7.2.22) + ST CLEANIN (T37C) = street-cleaning tickets, minute-resolution.
+   NOT geocoded since ~2021 (address strings only, zero-padded + typos). CURB joins
+   citation address → CNN via EAS (3mea-di5p), keyed by stripZeros(number)|street_name.
+   Precomputed offline into `data/enforcement.json` — see `scripts/build-enforcement.mjs`
+   and `docs/sweeper-data-research.md`. Powers the "🎯 Ticketed ~9:14a" lines.
 
 ### Spatial queries (verified working)
 - Segments in viewport: `?$where=intersects(line,'POLYGON((lng lat, ...))')&$limit=2500`
@@ -62,6 +78,11 @@ calendar reminder before the next sweep.
 
 ## File map
 - index.html — the entire app (HTML + CSS + JS in one file).
+- og/template.html + og.png — static 1200x630 social card (regenerate with `npm run og`
+  after design-token changes; meta tags live in index.html `<head>`, URLs absolute).
+- scripts/build-enforcement.mjs + data/enforcement.json — precomputed citation enforcement
+  times (`npm run build:enforcement`).
+- docs/ — sweeper-data research + ready-to-send public-records requests.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy
@@ -80,10 +101,59 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
 - Persist the user's saved spot/schedule (localStorage is fine post-deploy; note it
   is intentionally NOT used in the in-chat artifact version).
 
+## UI features added 2026-06-09 (constraints — don't regress)
+- **Basemap style**: Google tiles are styled with `MAP_STYLE` ("Parchment Draft" from
+  styledmap.com, passed via createSession `styles`). Roads are deliberately neutral
+  near-paper (#f6f1e6/#d8d2c4), NOT the theme's orange-tan — the amber "soon" curb lines
+  must keep ~3:1 contrast against the road fill. CARTO fallback stays unstyled.
+- **Desktop layout** (`@media min-width:768px`): the bottom sheet docks as a floating
+  card bottom-left; top search cluster capped at 480px; zoom control moves bottomright
+  (tracked live via `mqDesktop` change listener, not a one-time check).
+- **Hover previews**: curb polylines bind a sticky Leaflet tooltip (`previewHtml`) on
+  hover-capable pointers only (`CAN_HOVER`). The "sweeps DAY h–h" line must use
+  `side.row` (the rule that produced `side.ns`), never `rows[0]` — multi-day sides are
+  ~22% of SF and the tooltip otherwise contradicts itself.
+- **Day filter** (`.dchip` row + `dayFilter`): a VISIBILITY lens only. It decides which
+  sides are drawn; `side.rows`/`side.ns`/color/sheet/alerts always come from the FULL
+  rule set, so a filtered view can never arm a reminder for the wrong sweep.
+  `placeYou()` resets the filter — "where I parked" must see every curb side.
+- **Locate** lives inside the search field (`.field .loc`, navigation glyph); there is
+  no floating FAB anymore.
+- **Google Cal button** (`openGoogleCal`): template URL with floating wall-clock times
+  pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
+  reflects that; only .ics and push promise the 30-min lead.
+- **Google Cal button** (`openGoogleCal`): template URL with floating wall-clock times
+  pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
+  reflects that; only .ics and push promise the 30-min lead.
+- **Permit-area browser** (`areaSel` → `showArea()`, `areaLayer`): dropdown of all RPP
+  areas (fetched once, `^[A-Z]{1,2}$` filters junk values); selecting fetches that area
+  citywide (≤2500 rows), draws a blue zoom-scaled highlight, fitBounds, and toasts the
+  area's most-common rule phrased as "typically … (2017 data — check signs)".
+- **Loading/color-curb layer** (`loadToggle` → `loadOn`, `loadLayer`): toggle loads
+  `6cqg-dxku` ⋈ meter coords ONCE (`loadCache`), renders colored dots per viewport; tap →
+  popup with days/hours/limit. Metered zones only (note in the toggle toast).
+- **Enforcement overlay** (`ENF`/`enfFor`): lazy-loads `data/enforcement.json`; sheet shows
+  a 🎯 callout + per-side line, tooltip shows a compact `tip-enf`. Keyed by cnn → JS dow.
+  Degrades silently if the JSON is absent (e.g. before deploy). Rebuild with
+  `npm run build:enforcement`.
+- **Sheet structure (post-distill, don't regress)**: mobile opens at a 46dvh PEEK
+  (`.sheet.open`, `.tall` expands via the grab button); order is verdict → where(+center
+  icon) → 🎯 callout → actions → chips → sides → `<details>` data-notes. Exactly TWO
+  actions: 🔔 Sweep alerts (the one filled primary) and Calendar (one button; first tap
+  shows a Google/.ics chooser, remembered in `curbCalPref`, ▾ reopens it). UI glyphs are
+  inline SVGs (`ICONS`) — emoji only in toasts/push copy. The date chip IS the today
+  filter (toggles `dayFilter` to today).
+- **Canonical domain is `curb.guide`** — all og/twitter meta URLs + the OG card footer use
+  it (absolute). Add `https://curb.guide/*` to the Google Maps key referrer allowlist.
+- **Socrata gotcha**: any `$where` containing `%` wildcards must be percent-encoded
+  (see loadMeterChip) or the request dies before CORS and fails silently. Page big tables
+  with a `:id` cursor (`:id > 'last'`), NOT deep `$offset` (times out past ~400k).
+
 ## Other backlog ideas
 - Pin meters per-block (requires spatial join of meters to sweeping segments;
   currently street-level count only).
-- Color-curb zones (red/yellow/white/green/blue) — not in current datasets here.
+- Inferred sweeper-route animation from schedule adjacency + citation ordering, and a
+  records-request push for FleetRoute/AVL — see `docs/sweeper-data-research.md`.
 
 ---
 

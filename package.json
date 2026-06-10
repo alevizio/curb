@@ -6,6 +6,8 @@
   "description": "SF street parking rules on a map (sweeping, meters, permit zones) + push alerts.",
   "scripts": {
     "dev": "npx serve . -l 3000",
+    "og": "sh og/render.sh",
+    "build:enforcement": "node scripts/build-enforcement.mjs",
     "deploy": "vercel"
   },
   "dependencies": {

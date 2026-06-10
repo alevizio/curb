@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CURB — Know where to park in SF</title>
+<meta name="description" content="San Francisco street sweeping, block by block — including when tickets actually land. Free, no accounts, live from SF open data.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CURB">
+<meta property="og:title" content="CURB — Know where to park in SF">
+<meta property="og:description" content="Street sweeping rules block by block — including when tickets actually land. Live from SF open data.">
+<meta property="og:url" content="https://curb.guide/about">
+<meta property="og:image" content="https://curb.guide/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CURB — SF street parking map with green, amber and red curb lines showing sweeping status">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://curb.guide/og.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
+    --green:#1F9E5A; --amber:#E08A1E; --red:#E0322E; --meter:#2F5BD0;
+    --green-text:#157A44; --amber-text:#8F5A06; --red-text:#C22A26;
+    --sign:#FFFDF6;
+    /* authentic SF sign palette (street-cleaning red, time-limit green, permit discs) */
+    --sign-red:#C42127; --sign-green:#0B6E4F; --disc-blue:#1D69A5; --disc-green:#1F8A4C;
+    --pop-green:#9FE3B5; --pop-blue:#BFD9F2; --pop-red:#F6A39C; --pop-amber:#F3D9A4;
+    --rail:#3B372E;
+    --shadow:5px 5px 0 var(--ink);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;
+    font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--ink);color:var(--paper)}
+  :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 clamp(20px,4.5vw,48px)}
+  a{color:inherit}
+
+  /* signage primitives */
+  .chip{display:inline-block;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.02em;
+    background:var(--ink);color:var(--paper);border-radius:12px;line-height:1;text-decoration:none}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:16px;text-decoration:none;
+    border:2.5px solid var(--ink);border-radius:13px;padding:14px 22px;background:var(--ink);color:var(--paper);
+    box-shadow:var(--shadow);transition:transform .12s}
+  .btn:hover{transform:translateY(-1px)} .btn:active{transform:translate(2px,2px);box-shadow:none}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .rule{border:0;border-top:2.5px solid var(--ink);margin:0}
+
+  /* masthead */
+  header{padding:26px 0 0}
+  .mast{display:flex;align-items:center;gap:14px}
+  .logo{font-size:27px;padding:9px 14px;box-shadow:3px 3px 0 var(--ink)}
+  .logo span{color:var(--red)}
+  .url{font-weight:800;letter-spacing:.01em;color:var(--ink-soft)}
+  .mast .btn{margin-left:auto;padding:11px 16px;font-size:14px}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,64px);
+    align-items:center;padding:clamp(44px,8vh,86px) 0 clamp(40px,7vh,72px)}
+  h1{font-family:'Anton',sans-serif;text-transform:uppercase;line-height:.92;letter-spacing:.005em;
+    font-size:clamp(52px,8.2vw,104px)}
+  h1 .dot{color:var(--red)}
+  .sub{font-size:clamp(18px,2vw,21px);font-weight:600;color:var(--ink-soft);max-width:30em;margin:22px 0 30px}
+  .sub b{color:var(--ink)}
+  .ctas{display:flex;gap:13px;flex-wrap:wrap}
+
+  /* the street-sign stack — faithful to the real SF signs (red cleaning / green time-limit) */
+  .post{justify-self:center;display:flex;flex-direction:column;align-items:center;position:relative;gap:12px}
+  .rail{position:absolute;top:-6px;bottom:-14px;width:11px;border-radius:3px;z-index:0;
+    background:linear-gradient(90deg,#2e2b24,var(--rail) 45%,#262420)}
+  .rail.r1{left:14%}.rail.r2{right:14%}
+  .sign{position:relative;z-index:1;width:min(258px,100%);background:var(--sign);
+    border-radius:10px;padding:16px 16px 13px;text-align:center;box-shadow:6px 6px 0 rgba(23,21,15,.35)}
+  .sign::before{content:'';position:absolute;top:7px;left:50%;width:8px;height:8px;border-radius:50%;
+    background:#b9b3a6;border:1.5px solid rgba(0,0,0,.55);transform:translateX(-50%)}
+  .sign.red{border:3.5px solid var(--sign-red);color:var(--sign-red);transform:rotate(-1.4deg)}
+  .sign.grn{border:3.5px solid var(--sign-green);color:var(--sign-green);transform:rotate(.9deg)}
+  .s-no{font-family:'Anton',sans-serif;font-size:33px;line-height:1;letter-spacing:.01em}
+  .s-time{font-family:'Anton',sans-serif;font-size:30px;line-height:1;margin-top:7px}
+  .s-time small{font-size:14px;letter-spacing:.04em}
+  .s-time .to{font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:800;text-transform:lowercase;padding:0 2px}
+  .s-days{font-family:'Anton',sans-serif;font-size:16.5px;margin-top:7px;letter-spacing:.02em}
+  .s-sub{font-weight:800;font-size:10.5px;letter-spacing:.14em;margin-top:2px}
+  .s-what{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.06em;margin-top:8px}
+  .g-head{display:flex;align-items:center;justify-content:center;gap:9px}
+  .g-2{font-family:'Anton',sans-serif;font-size:54px;line-height:.9}
+  .g-hr{font-family:'Anton',sans-serif;font-size:19px;line-height:1.02;text-align:left}
+  .g-rule{border:0;border-top:2.5px solid var(--sign-green);margin:10px 6px 9px}
+  .g-exc{font-weight:800;font-size:11.5px;letter-spacing:.08em}
+  .g-area{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:6px;
+    font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.05em}
+  .disc{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#fff;font-style:normal;
+    font-family:'Anton',sans-serif;font-size:14px}
+  .disc.b{background:var(--disc-blue)} .disc.g{background:var(--disc-green)}
+  .plate{position:relative;z-index:1;width:min(220px,90%);background:var(--ink);color:var(--paper);
+    border-radius:9px;padding:13px 14px 11px;text-align:center;transform:rotate(-.8deg);box-shadow:5px 5px 0 rgba(23,21,15,.25)}
+  .plate::before{content:'';position:absolute;top:6px;left:50%;width:7px;height:7px;border-radius:50%;
+    background:#b9b3a6;border:1.5px solid #000;transform:translateX(-50%)}
+  .plate .t{font-family:'Anton',sans-serif;font-size:19px;line-height:1.05;text-transform:uppercase}
+  .plate .t em{font-style:normal;color:#FFC94A}
+  .plate .s{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:6px;opacity:.75}
+
+  /* proof — the real-data strip */
+  .proof{border:3px solid var(--ink);border-radius:18px;background:var(--sign);box-shadow:var(--shadow);
+    padding:clamp(22px,3.5vw,34px);margin:8px 0 0}
+  .proof .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .proof h2{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(28px,4.6vw,46px);line-height:.98;margin:8px 0 6px}
+  .proof h2 b{color:var(--red-text)}
+  .proof .src{font-size:13.5px;font-weight:600;color:var(--ink-soft)}
+  .bar{position:relative;margin:34px 0 6px;height:64px}
+  .bar .track{position:absolute;left:0;right:0;top:26px;height:14px;border:2.5px solid var(--ink);border-radius:8px;background:var(--paper)}
+  .bar .zone{position:absolute;left:0;top:26px;height:14px;width:32.5%;border:2.5px solid var(--ink);border-radius:8px 4px 4px 8px;
+    background:repeating-linear-gradient(-55deg,var(--red),var(--red) 7px,#EE6B5E 7px,#EE6B5E 14px)}
+  .bar .med{position:absolute;left:11.7%;top:14px;width:4px;height:38px;background:var(--ink);border-radius:2px}
+  .bar .med::after{content:'median ticket · 9:14am';position:absolute;left:10px;top:-4px;white-space:nowrap;
+    font-size:12.5px;font-weight:800}
+  .bar .tick{position:absolute;top:48px;font-size:12px;font-weight:700;color:var(--ink-soft);transform:translateX(-50%)}
+  .legendline{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;font-weight:700;margin-top:14px}
+  .legendline i{display:inline-block;width:22px;height:11px;border:2px solid var(--ink);border-radius:5px;vertical-align:-1px;margin-right:7px}
+  .legendline .z i{background:repeating-linear-gradient(-55deg,var(--red),var(--red) 5px,#EE6B5E 5px,#EE6B5E 10px)}
+  .legendline .w i{background:var(--paper)}
+
+  /* how it works — numbered notice, not cards */
+  .how{padding:clamp(48px,8vh,84px) 0 clamp(28px,4vh,40px)}
+  .how .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .how h2{font-family:'Anton',sans-serif;font-size:clamp(34px,5vw,52px);text-transform:uppercase;line-height:.95;margin:6px 0 0}
+  .steps{margin-top:34px}
+  .step{display:grid;grid-template-columns:auto 1fr;gap:clamp(18px,3vw,34px);align-items:start;
+    padding:26px 0;border-top:2.5px solid var(--ink)}
+  .step:last-child{border-bottom:2.5px solid var(--ink)}
+  .step .n{font-family:'Anton',sans-serif;font-size:clamp(40px,5vw,56px);line-height:.9;color:var(--red-text);min-width:1.4em}
+  .step h3{font-family:'Anton',sans-serif;font-size:clamp(21px,2.6vw,27px);text-transform:uppercase;line-height:1}
+  .step p{margin-top:7px;color:var(--ink-soft);font-weight:600;max-width:42em}
+  .step p b{color:var(--ink)}
+  .swatches{display:inline-flex;gap:10px;margin-left:4px;vertical-align:-2px}
+  .swatches i{width:26px;height:9px;border-radius:5px;display:inline-block}
+  .pushpill{display:inline-block;background:var(--ink);color:var(--paper);border-radius:9px;
+    padding:6px 11px;font-size:13px;font-weight:800;transform:rotate(-.6deg)}
+  .ic{width:15px;height:15px;vertical-align:-2.5px}
+
+  /* footer */
+  footer{margin-top:clamp(44px,7vh,72px);border-top:3px solid var(--ink);background:var(--ink);color:var(--paper)}
+  .foot{display:flex;flex-wrap:wrap;gap:18px 36px;align-items:center;padding:30px 0 34px;font-weight:700;font-size:14.5px}
+  .foot .fine{flex-basis:100%;font-weight:600;font-size:13px;color:rgba(242,236,223,.66);line-height:1.6}
+  .foot a{color:var(--paper);text-underline-offset:3px}
+  .foot .mark{font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.02em}
+  .foot .mark span{color:var(--red)}
+
+  /* load-in: one staggered reveal */
+  @media (prefers-reduced-motion:no-preference){
+    .rise{opacity:0;transform:translateY(16px);animation:rise .8s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.2s}.d4{animation-delay:.3s}
+    @keyframes rise{to{opacity:1;transform:none}}
+  }
+
+  @media (max-width:840px){
+    .hero{grid-template-columns:1fr;padding-top:34px}
+    .post{justify-self:start;margin-left:6px}
+    .mast .btn{display:none}  /* hero CTA is two scrolls of thumb away */
+    .bar .med::after{top:-26px;left:-4px}
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap rise">
+  <div class="mast">
+    <a class="chip logo" href="/" aria-label="CURB — open the map">CURB<span>.</span></a>
+    <span class="url">curb.guide</span>
+    <a class="btn" href="/">Open the map →</a>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <div>
+      <h1 class="rise d1">Know where<br>to park<span class="dot">.</span></h1>
+      <p class="sub rise d2">San Francisco street sweeping, block by block — including the part no sign
+        tells you: <b>when tickets actually land</b>. Free, no accounts, live from SF open data.</p>
+      <div class="ctas rise d3">
+        <a class="btn" href="/">Open the map →</a>
+        <a class="btn ghost" href="#how">How it works</a>
+      </div>
+    </div>
+
+    <div class="post rise d2" role="img" aria-label="A real SF sign pole: a red street-cleaning sign reading No Parking, 9 to 11 AM, Tuesday, Street Cleaning; below it a green sign reading 2 Hour Parking, 8 AM to 6 PM, Monday through Friday, except vehicles with Area K and M permits; and a CURB plate reading: tickets land around 9:14 AM">
+      <div class="rail r1"></div><div class="rail r2"></div>
+      <div class="sign red">
+        <div class="s-no">NO PARKING</div>
+        <div class="s-time">9 <small>A.M.</small> <span class="to">to</span> 11 <small>A.M.</small></div>
+        <div class="s-days">TUESDAY</div>
+        <div class="s-sub">EVERY WEEK</div>
+        <div class="s-what">STREET CLEANING</div>
+      </div>
+      <div class="sign grn">
+        <div class="g-head"><span class="g-2">2</span><span class="g-hr">HOUR<br>PARKING</span></div>
+        <div class="s-time">8 <small>A.M.</small> <span class="to">to</span> 6 <small>P.M.</small></div>
+        <div class="s-days">MON <span class="to">thru</span> FRI</div>
+        <hr class="g-rule">
+        <div class="g-exc">EXCEPT VEHICLES WITH</div>
+        <div class="g-area">AREA <i class="disc b">K</i> <i class="disc g">M</i> PERMITS</div>
+      </div>
+      <div class="plate">
+        <div class="t">Tickets land <em>~9:14 am</em></div>
+        <div class="s">curb.guide · from 1.2M citations</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="proof rise d4">
+      <div class="k">A real block — 214–255 Steiner St</div>
+      <h2>The sign says 9–11. <b>The tickets say 9:14.</b></h2>
+      <p class="src">203 street-cleaning citations on this block over two years: the earliest at 9:00am sharp,
+        90% written by 9:39am. The posted two-hour window is real — the risk is not evenly spread inside it.</p>
+      <div class="bar" role="img" aria-label="Timeline of the 9 to 11 AM window. Tickets cluster between 9:00 and 9:39, with the median at 9:14 AM.">
+        <div class="track"></div>
+        <div class="zone"></div>
+        <div class="med"></div>
+        <span class="tick" style="left:0%">9am</span>
+        <span class="tick" style="left:25%">9:30</span>
+        <span class="tick" style="left:50%">10am</span>
+        <span class="tick" style="left:75%">10:30</span>
+        <span class="tick" style="left:100%">11am</span>
+      </div>
+      <div class="legendline">
+        <span class="z"><i></i>when tickets are written here</span>
+        <span class="w"><i></i>posted window</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap how" id="how">
+    <div class="k">How it works</div>
+    <h2>Three moves. No tickets.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="n">01</div>
+        <div>
+          <h3>Open the map</h3>
+          <p>Every curb in SF, colored by what's coming:
+            <span class="swatches" aria-hidden="true"><i style="background:var(--green)"></i><i style="background:var(--amber)"></i><i style="background:var(--red)"></i></span>
+            <b>green</b> is clear, <b>amber</b> sweeps within a day, <b>red</b> means move it.
+            Permit zones and loading zones are one toggle away.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <div>
+          <h3>Tap where you parked</h3>
+          <p>Get the verdict for that exact curb side: the next sweep, the permit rules — and the
+            <b><svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-red)" fill-rule="evenodd" d="M7 0c3.866 0 7 3.13401 7 7 0 3.866 -3.134 7 -7 7 -3.86599 0 -7 -3.134 -7 -7 0 -3.86599 3.13401 -7 7 -7Z" clip-rule="evenodd" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M11.1335 0.0181543c0.1736 0.0480843 0.3079 0.1858317 0.3516 0.3605897l0.4272 1.708956 1.709 0.42724c0.1747 0.04369 0.3125 0.17801 0.3606 0.3516 0.0481 0.1736 -0.001 0.35965 -0.1283 0.48702l-2 2.00001c-0.1242 0.12419 -0.3045 0.17411 -0.4749 0.13151l-1.58391 -0.39599 -2.35285 2.35285c-0.24408 0.24408 -0.6398 0.24408 -0.88388 0 -0.24408 -0.24408 -0.24408 -0.6398 0 -0.88388L8.91092 4.2052l-0.39598 -1.58392c-0.0426 -0.17039 0.00733 -0.35063 0.13152 -0.47482L10.6465 0.146458c0.1273 -0.127375 0.3134 -0.1763881 0.487 -0.1283037ZM7 0c0.34518 0 0.625 0.279822 0.625 0.625S7.34518 1.25 7 1.25C3.82436 1.25 1.25 3.82436 1.25 7c0 3.1756 2.57436 5.75 5.75 5.75 3.1756 0 5.75 -2.5744 5.75 -5.75 0 -0.34518 0.2798 -0.625 0.625 -0.625S14 6.65482 14 7c0 3.866 -3.134 7 -7 7 -3.86599 0 -7 -3.134 -7 -7 0 -3.86599 3.13401 -7 7 -7Zm-0.49213 4.04816c0.12583 0.32142 -0.03273 0.684 -0.35415 0.80983 -0.35659 0.1396 -0.67275 0.36588 -0.9199 0.65837 -0.24715 0.2925 -0.41749 0.64199 -0.49563 1.01686 -0.07813 0.37488 -0.06159 0.76332 0.04813 1.1302 0.10973 0.36687 0.30916 0.70061 0.58029 0.97104 0.27112 0.27042 0.60537 0.469 0.97253 0.57778 0.36716 0.10878 0.75564 0.12432 1.13031 0.04522 0.37468 -0.0791 0.72373 -0.25034 1.01559 -0.49824 0.29185 -0.24791 0.51732 -0.56465 0.656 -0.92159 0.125 -0.32175 0.48717 -0.48124 0.80891 -0.35623 0.32175 0.125 0.48125 0.48717 0.35625 0.80892 -0.2139 0.5506 -0.56173 1.0392 -1.01194 1.42161 -0.45021 0.38237 -0.98865 0.64657 -1.56661 0.76857s-1.17722 0.098 -1.74359 -0.0698c-0.56636 -0.1677 -1.08197 -0.47407 -1.5002 -0.89122 -0.41822 -0.41715 -0.72587 -0.93197 -0.89513 -1.4979 -0.16925 -0.56594 -0.19476 -1.16513 -0.07424 -1.74341 0.12053 -0.57827 0.3833 -1.11738 0.76454 -1.56858 0.38125 -0.45119 0.86895 -0.80024 1.419 -1.01558 0.32143 -0.12583 0.684 0.03273 0.80984 0.35415Z" clip-rule="evenodd" stroke-width="1"></path></g></svg> real ticket time</b>,
+            reconstructed from two years of SFMTA citations on that block.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <div>
+          <h3>Get pinged first</h3>
+          <p>One tap sets a <span class="pushpill"><svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-green)" d="M11 6.125c0 -1.06087 -0.4214 -2.07828 -1.17157 -2.82843C9.07828 2.54643 8.06087 2.125 7 2.125s-2.07828 0.42143 -2.82843 1.17157C3.42143 4.04672 3 5.06413 3 6.125v3.25c0 0.39782 -0.15804 0.7794 -0.43934 1.0607s-0.66284 0.4393 -1.06066 0.4393h11c-0.3978 0 -0.7794 -0.158 -1.0607 -0.4393S11 9.77282 11 9.375v-3.25Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M3.63265 0.260417c0.20135 0.280365 0.1373 0.670875 -0.14307 0.872233 -0.69259 0.49741 -1.25691 1.15246 -1.64633 1.91105 -0.38942 0.75859 -0.59277 1.59895 -0.59325 2.45165 -0.0002 0.34518 -0.280176 0.62485 -0.625354 0.62465C0.279468 6.1198 -0.000195384 5.83982 0 5.49465c0.000595272 -1.05101 0.251236 -2.0868 0.731219 -3.02181C1.2112 1.53784 1.90675 0.730443 2.76042 0.117354c0.28036 -0.2013534 0.67087 -0.1373022 0.87223 0.143063ZM7 1.5c-1.22663 0 -2.40301 0.48728 -3.27037 1.35463C2.86228 3.72199 2.375 4.89837 2.375 6.125v3.25c0 0.23206 -0.09219 0.45462 -0.25628 0.61872 -0.1641 0.16408 -0.38666 0.25628 -0.61872 0.25628 -0.34518 0 -0.625 0.2798 -0.625 0.625s0.27982 0.625 0.625 0.625h11c0.3452 0 0.625 -0.2798 0.625 -0.625s-0.2798 -0.625 -0.625 -0.625c-0.2321 0 -0.4546 -0.0922 -0.6187 -0.25628 -0.1641 -0.1641 -0.2563 -0.38665 -0.2563 -0.61872v-3.25c0 -1.22663 -0.4873 -2.40301 -1.3546 -3.27037C9.40301 1.98728 8.22663 1.5 7 1.5Zm3.375 7.875c0 0.30467 0.0654 0.6026 0.1885 0.875H3.43649c0.12308 -0.2724 0.18851 -0.57033 0.18851 -0.875v-3.25c0 -0.89511 0.35558 -1.75355 0.98851 -2.38649C5.24645 3.10558 6.10489 2.75 7 2.75c0.89511 0 1.75355 0.35558 2.38649 0.98851 0.63291 0.63294 0.98851 1.49138 0.98851 2.38649v3.25ZM6 12.5c-0.41421 0 -0.75 0.3358 -0.75 0.75s0.33579 0.75 0.75 0.75h2c0.41421 0 0.75 -0.3358 0.75 -0.75s-0.33579 -0.75 -0.75 -0.75H6ZM11.2396 0.117354c-0.2804 -0.2013534 -0.6709 -0.1373022 -0.8722 0.143063 -0.2014 0.280365 -0.1373 0.670875 0.143 0.872233 0.6926 0.49741 1.2569 1.15246 1.6463 1.91105 0.3895 0.75859 0.5928 1.59895 0.5933 2.45165 0.0002 0.34518 0.2802 0.62485 0.6254 0.62465 0.3451 -0.0002 0.6248 -0.28018 0.6246 -0.62535 -0.0006 -1.05101 -0.2512 -2.0868 -0.7312 -3.02181 -0.48 -0.935 -1.1756 -1.742397 -2.0292 -2.355486Z" clip-rule="evenodd" stroke-width="1"></path></g></svg> push alert ~30 min before</span> your block is swept —
+            or drop it into your calendar. Works as an app from your home screen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mark">CURB<span>.</span></span>
+    <a href="/">Open the map</a>
+    <a href="https://data.sfgov.org" rel="noopener">Data: DataSF</a>
+    <a href="https://github.com/alevizio/curb" rel="noopener">Source</a>
+    <span class="fine">The posted sign is always the source of truth — temporary signs and holidays override
+      everything here. Ticket times are historical guidance from public citation records, never a guarantee.
+      No accounts, no tracking, no ads. Made in San Francisco.</span>
+  </div>
+</footer>
+
+</body>
+</html>
