@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CURB — Know where to park in SF</title>
+<meta name="description" content="San Francisco street sweeping, block by block — including when tickets actually land. Free, no accounts, live from SF open data.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CURB">
+<meta property="og:title" content="CURB — Know where to park in SF">
+<meta property="og:description" content="Street sweeping rules block by block — including when tickets actually land. Live from SF open data.">
+<meta property="og:url" content="https://curb.guide/about">
+<meta property="og:image" content="https://curb.guide/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CURB — SF street parking map with green, amber and red curb lines showing sweeping status">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://curb.guide/og.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
+    --green:#1F9E5A; --amber:#E08A1E; --red:#E0322E; --meter:#2F5BD0;
+    --green-text:#157A44; --amber-text:#8F5A06; --red-text:#C22A26;
+    --sign:#FFFDF6;
+    --shadow:5px 5px 0 var(--ink);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;
+    font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--ink);color:var(--paper)}
+  :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 clamp(20px,4.5vw,48px)}
+  a{color:inherit}
+
+  /* signage primitives */
+  .chip{display:inline-block;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.02em;
+    background:var(--ink);color:var(--paper);border-radius:12px;line-height:1;text-decoration:none}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:16px;text-decoration:none;
+    border:2.5px solid var(--ink);border-radius:13px;padding:14px 22px;background:var(--ink);color:var(--paper);
+    box-shadow:var(--shadow);transition:transform .12s}
+  .btn:hover{transform:translateY(-1px)} .btn:active{transform:translate(2px,2px);box-shadow:none}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .rule{border:0;border-top:2.5px solid var(--ink);margin:0}
+
+  /* masthead */
+  header{padding:26px 0 0}
+  .mast{display:flex;align-items:center;gap:14px}
+  .logo{font-size:27px;padding:9px 14px;box-shadow:3px 3px 0 var(--ink)}
+  .logo span{color:var(--red)}
+  .url{font-weight:800;letter-spacing:.01em;color:var(--ink-soft)}
+  .mast .btn{margin-left:auto;padding:11px 16px;font-size:14px}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,64px);
+    align-items:center;padding:clamp(44px,8vh,86px) 0 clamp(40px,7vh,72px)}
+  h1{font-family:'Anton',sans-serif;text-transform:uppercase;line-height:.92;letter-spacing:.005em;
+    font-size:clamp(52px,8.2vw,104px)}
+  h1 .dot{color:var(--red)}
+  .sub{font-size:clamp(18px,2vw,21px);font-weight:600;color:var(--ink-soft);max-width:30em;margin:22px 0 30px}
+  .sub b{color:var(--ink)}
+  .ctas{display:flex;gap:13px;flex-wrap:wrap}
+
+  /* the street-sign artifact (pure CSS) */
+  .post{justify-self:center;display:flex;flex-direction:column;align-items:center;position:relative}
+  .pole{position:absolute;top:8px;bottom:-10px;width:9px;border-radius:5px;z-index:0;
+    background:linear-gradient(90deg,#9b958a,#c9c3b6 45%,#8e887d)}
+  .sign{position:relative;z-index:1;width:min(252px,100%);background:var(--sign);border:3px solid var(--ink);
+    border-radius:10px;padding:20px 18px 16px;text-align:center;transform:rotate(-1.6deg);
+    box-shadow:6px 6px 0 var(--ink)}
+  .sign .no{font-family:'Anton',sans-serif;font-size:36px;line-height:.95;color:var(--red-text);text-transform:uppercase}
+  .sign .when{font-family:'Anton',sans-serif;font-size:24px;margin-top:8px;text-transform:uppercase}
+  .sign .what{font-weight:800;font-size:13px;letter-spacing:.18em;margin-top:9px;color:var(--red-text);text-transform:uppercase}
+  .sign .arrow{font-weight:800;font-size:12px;letter-spacing:.1em;margin-top:10px;border-top:2px solid var(--ink);
+    padding-top:9px;color:var(--ink-soft);text-transform:uppercase}
+  .bolt,.sign::before{content:'';position:absolute;top:8px;left:50%;width:8px;height:8px;border-radius:50%;
+    background:#b9b3a6;border:1.5px solid var(--ink);transform:translateX(-50%)}
+  .plate{position:relative;z-index:1;width:min(218px,90%);margin-top:14px;background:var(--ink);color:var(--paper);
+    border-radius:9px;padding:13px 14px 11px;text-align:center;transform:rotate(1.2deg);box-shadow:5px 5px 0 rgba(23,21,15,.25)}
+  .plate::before{content:'';position:absolute;top:6px;left:50%;width:7px;height:7px;border-radius:50%;
+    background:#b9b3a6;border:1.5px solid #000;transform:translateX(-50%)}
+  .plate .t{font-family:'Anton',sans-serif;font-size:19px;line-height:1.05;text-transform:uppercase}
+  .plate .t em{font-style:normal;color:#FFC94A}
+  .plate .s{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:6px;opacity:.75}
+
+  /* proof — the real-data strip */
+  .proof{border:3px solid var(--ink);border-radius:18px;background:var(--sign);box-shadow:var(--shadow);
+    padding:clamp(22px,3.5vw,34px);margin:8px 0 0}
+  .proof .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .proof h2{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(24px,3.4vw,34px);line-height:1;margin:6px 0 4px}
+  .proof h2 b{color:var(--red-text)}
+  .proof .src{font-size:13.5px;font-weight:600;color:var(--ink-soft)}
+  .bar{position:relative;margin:34px 0 6px;height:64px}
+  .bar .track{position:absolute;left:0;right:0;top:26px;height:14px;border:2.5px solid var(--ink);border-radius:8px;background:var(--paper)}
+  .bar .zone{position:absolute;left:0;top:26px;height:14px;width:32.5%;border:2.5px solid var(--ink);border-radius:8px 4px 4px 8px;
+    background:repeating-linear-gradient(-55deg,var(--red),var(--red) 7px,#EE6B5E 7px,#EE6B5E 14px)}
+  .bar .med{position:absolute;left:11.7%;top:14px;width:4px;height:38px;background:var(--ink);border-radius:2px}
+  .bar .med::after{content:'median ticket · 9:14am';position:absolute;left:10px;top:-4px;white-space:nowrap;
+    font-size:12.5px;font-weight:800}
+  .bar .tick{position:absolute;top:48px;font-size:12px;font-weight:700;color:var(--ink-soft);transform:translateX(-50%)}
+  .legendline{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;font-weight:700;margin-top:14px}
+  .legendline i{display:inline-block;width:22px;height:11px;border:2px solid var(--ink);border-radius:5px;vertical-align:-1px;margin-right:7px}
+  .legendline .z i{background:repeating-linear-gradient(-55deg,var(--red),var(--red) 5px,#EE6B5E 5px,#EE6B5E 10px)}
+  .legendline .w i{background:var(--paper)}
+
+  /* how it works — numbered notice, not cards */
+  .how{padding:clamp(48px,8vh,84px) 0 clamp(28px,4vh,40px)}
+  .how .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .how h2{font-family:'Anton',sans-serif;font-size:clamp(34px,5vw,52px);text-transform:uppercase;line-height:.95;margin:6px 0 0}
+  .steps{margin-top:34px}
+  .step{display:grid;grid-template-columns:auto 1fr;gap:clamp(18px,3vw,34px);align-items:start;
+    padding:26px 0;border-top:2.5px solid var(--ink)}
+  .step:last-child{border-bottom:2.5px solid var(--ink)}
+  .step .n{font-family:'Anton',sans-serif;font-size:clamp(40px,5vw,56px);line-height:.9;color:var(--red-text);min-width:1.4em}
+  .step h3{font-family:'Anton',sans-serif;font-size:clamp(21px,2.6vw,27px);text-transform:uppercase;line-height:1}
+  .step p{margin-top:7px;color:var(--ink-soft);font-weight:600;max-width:42em}
+  .step p b{color:var(--ink)}
+  .swatches{display:inline-flex;gap:10px;margin-left:4px;vertical-align:-2px}
+  .swatches i{width:26px;height:9px;border-radius:5px;display:inline-block}
+  .pushpill{display:inline-block;background:var(--ink);color:var(--paper);border-radius:9px;
+    padding:6px 11px;font-size:13px;font-weight:800;transform:rotate(-.6deg)}
+
+  /* footer */
+  footer{margin-top:clamp(44px,7vh,72px);border-top:3px solid var(--ink);background:var(--ink);color:var(--paper)}
+  .foot{display:flex;flex-wrap:wrap;gap:18px 36px;align-items:center;padding:30px 0 34px;font-weight:700;font-size:14.5px}
+  .foot .fine{flex-basis:100%;font-weight:600;font-size:13px;color:rgba(242,236,223,.66);line-height:1.6}
+  .foot a{color:var(--paper);text-underline-offset:3px}
+  .foot .mark{font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.02em}
+  .foot .mark span{color:var(--red)}
+
+  /* load-in: one staggered reveal */
+  @media (prefers-reduced-motion:no-preference){
+    .rise{opacity:0;transform:translateY(16px);animation:rise .8s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.2s}.d4{animation-delay:.3s}
+    @keyframes rise{to{opacity:1;transform:none}}
+  }
+
+  @media (max-width:840px){
+    .hero{grid-template-columns:1fr;padding-top:34px}
+    .post{justify-self:start;margin-left:6px}
+    .mast .btn{display:none}  /* hero CTA is two scrolls of thumb away */
+    .bar .med::after{top:-26px;left:-4px}
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap rise">
+  <div class="mast">
+    <a class="chip logo" href="/" aria-label="CURB — open the map">CURB<span>.</span></a>
+    <span class="url">curb.guide</span>
+    <a class="btn" href="/">Open the map →</a>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <div>
+      <h1 class="rise d1">Know where<br>to park<span class="dot">.</span></h1>
+      <p class="sub rise d2">San Francisco street sweeping, block by block — including the part no sign
+        tells you: <b>when tickets actually land</b>. Free, no accounts, live from SF open data.</p>
+      <div class="ctas rise d3">
+        <a class="btn" href="/">Open the map →</a>
+        <a class="btn ghost" href="#how">How it works</a>
+      </div>
+    </div>
+
+    <div class="post rise d2" role="img" aria-label="A street-cleaning sign reading No Parking, Tuesday 9 to 11 AM — with a CURB plate underneath reading: tickets land around 9:14 AM">
+      <div class="pole"></div>
+      <div class="sign">
+        <div class="no">No Parking</div>
+        <div class="when">Tue · 9–11 AM</div>
+        <div class="what">Street Cleaning</div>
+        <div class="arrow">← this block</div>
+      </div>
+      <div class="plate">
+        <div class="t">Tickets land <em>~9:14 am</em></div>
+        <div class="s">curb.guide · from 1.2M citations</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="proof rise d4">
+      <div class="k">A real block — 214–255 Steiner St</div>
+      <h2>The sign says 9–11. <b>The tickets say 9:14.</b></h2>
+      <p class="src">203 street-cleaning citations on this block over two years: the earliest at 9:00am sharp,
+        90% written by 9:39am. The posted two-hour window is real — the risk is not evenly spread inside it.</p>
+      <div class="bar" role="img" aria-label="Timeline of the 9 to 11 AM window. Tickets cluster between 9:00 and 9:39, with the median at 9:14 AM.">
+        <div class="track"></div>
+        <div class="zone"></div>
+        <div class="med"></div>
+        <span class="tick" style="left:0%">9am</span>
+        <span class="tick" style="left:25%">9:30</span>
+        <span class="tick" style="left:50%">10am</span>
+        <span class="tick" style="left:75%">10:30</span>
+        <span class="tick" style="left:100%">11am</span>
+      </div>
+      <div class="legendline">
+        <span class="z"><i></i>when tickets are written here</span>
+        <span class="w"><i></i>posted window</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap how" id="how">
+    <div class="k">How it works</div>
+    <h2>Three moves. No tickets.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="n">01</div>
+        <div>
+          <h3>Open the map</h3>
+          <p>Every curb in SF, colored by what's coming:
+            <span class="swatches" aria-hidden="true"><i style="background:var(--green)"></i><i style="background:var(--amber)"></i><i style="background:var(--red)"></i></span>
+            <b>green</b> is clear, <b>amber</b> sweeps within a day, <b>red</b> means move it.
+            Permit zones and loading zones are one toggle away.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <div>
+          <h3>Tap where you parked</h3>
+          <p>Get the verdict for that exact curb side: the next sweep, the permit rules — and the
+            <b>🎯 real ticket time</b>, reconstructed from two years of SFMTA citations on that block.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <div>
+          <h3>Get pinged first</h3>
+          <p>One tap sets a <span class="pushpill">🔔 push alert ~30 min before</span> your block is swept —
+            or drop it into your calendar. Works as an app from your home screen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mark">CURB<span>.</span></span>
+    <a href="/">Open the map</a>
+    <a href="https://data.sfgov.org" rel="noopener">Data: DataSF</a>
+    <a href="https://github.com/alevizio/curb" rel="noopener">Source</a>
+    <span class="fine">The posted sign is always the source of truth — temporary signs and holidays override
+      everything here. Ticket times are historical guidance from public citation records, never a guarantee.
+      No accounts, no tracking, no ads. Made in San Francisco.</span>
+  </div>
+</footer>
+
+</body>
+</html>

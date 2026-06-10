@@ -116,6 +116,8 @@
     max-width:78vw;pointer-events:none;transition:opacity .3s}
   .hint .big{font-family:'Anton',sans-serif;font-size:24px;text-transform:uppercase;line-height:.95}
   .hint p{font-size:13.5px;color:var(--ink-soft);margin-top:6px}
+  .hint .hint-about{margin-top:10px;font-weight:800}
+  .hint .hint-about a{pointer-events:auto;color:var(--meter);text-underline-offset:3px}
 
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
     border-radius:22px 22px 0 0;box-shadow:0 -6px 0 var(--ink);padding:8px 16px calc(20px + env(safe-area-inset-bottom));
@@ -278,6 +280,7 @@
 <div class="hint" id="hint">
   <div class="big">Find your spot</div>
   <p>Tap locate, search a street, or tap the map where you parked.</p>
+  <p class="hint-about"><a href="/about">New here? What CURB does →</a></p>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -494,8 +497,8 @@ function distSqToLineMeters(lat,lng,latlngs){
 /* ---------- viewport loading ---------- */
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
-  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];hint.style.opacity='1';return;}
-  hint.style.opacity='0';
+  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];hint.style.opacity='1';hint.style.visibility='visible';return;}
+  hint.style.opacity='0';hint.style.visibility='hidden';  // opacity alone leaves the about-link invisibly clickable
   const b=map.getBounds().pad(0.15);
   const poly=`POLYGON((${b.getWest()} ${b.getSouth()}, ${b.getEast()} ${b.getSouth()}, ${b.getEast()} ${b.getNorth()}, ${b.getWest()} ${b.getNorth()}, ${b.getWest()} ${b.getSouth()}))`;
   const my=++fetchTok;
