@@ -67,26 +67,35 @@
   #q{flex:1;border:0;background:transparent;outline:none;font:inherit;font-size:16px;font-weight:600;padding:11px 12px 11px 8px;min-width:0}
   #q::placeholder{color:#938d7c;font-weight:500}
 
-  .metarow{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
-  .legend{display:flex;gap:4px;flex-wrap:wrap;pointer-events:auto;background:rgba(242,236,223,.92);
-    backdrop-filter:blur(4px);border:2px solid var(--ink);border-radius:10px;padding:6px 8px;box-shadow:var(--shadow);font-size:11px;font-weight:700}
-  .lg{display:flex;align-items:center;gap:4px}
-  .lg i{width:14px;height:5px;border-radius:3px;display:inline-block}
-  .toggle{pointer-events:auto;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-    background:rgba(242,236,223,.92);border:2px solid var(--ink);border-radius:10px;padding:9px 11px;cursor:pointer;
-    box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;white-space:nowrap}
-  .toggle .sw{width:13px;height:13px;border-radius:4px;border:2px solid var(--ink);background:transparent}
+  /* ---- layers control (top-right corner, Google-Maps style) ---- */
+  .layers{position:fixed;right:12px;top:calc(116px + env(safe-area-inset-top));z-index:620}
+  .layersbtn{font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink);background:rgba(242,236,223,.95);border:2px solid var(--ink);border-radius:11px;
+    padding:10px 12px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:7px}
+  .layersbtn[aria-expanded="true"]{background:var(--ink);color:var(--paper)}
+  #layerBadges{display:inline-flex;gap:4px;align-items:center}
+  #layerBadges:empty{display:none}
+  .lbdot{width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor;display:inline-block}
+  .lbdisc{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 2px;border-radius:8px;
+    color:#fff;font-family:'Anton',sans-serif;font-style:normal;font-size:10px}
+  .layerspanel{position:absolute;right:0;top:calc(100% + 8px);width:252px;background:var(--paper);
+    border:2.5px solid var(--ink);border-radius:14px;box-shadow:var(--shadow);padding:12px;z-index:700;
+    max-height:calc(100dvh - 200px);overflow-y:auto}
+  .lp-sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);
+    margin:12px 0 7px}
+  .lp-sec:first-child{margin-top:0}
+  .lkey{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700}
+  .lg{display:flex;align-items:center;gap:7px}
+  .lg i{width:18px;height:5px;border-radius:3px;display:inline-block;flex:none}
+  .toggle{font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:10px;padding:9px 11px;cursor:pointer;
+    display:flex;align-items:center;gap:7px;white-space:nowrap;width:100%;margin-top:6px}
+  .toggle:first-of-type{margin-top:0}
+  .toggle .sw{width:13px;height:13px;border-radius:4px;border:2px solid var(--ink);background:transparent;flex:none}
   .toggle.on{background:var(--meter);color:#fff;border-color:var(--meter)}
   .toggle.on .sw{background:#fff;border-color:#fff}
-  .toggles{display:flex;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none}
   .toggle.load.on{background:var(--amber);border-color:var(--amber);color:var(--ink)}
   .toggle.load.on .sw{background:var(--ink);border-color:var(--ink)}
-  /* permit-area picker: discs exactly like the sign — colored circle + letter */
-  .areawrap{position:relative;pointer-events:auto}
-  .areabtn{gap:7px}
-  .areabtn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-  .areapanel{position:absolute;right:0;top:calc(100% + 8px);width:244px;background:var(--paper);
-    border:2.5px solid var(--ink);border-radius:12px;box-shadow:var(--shadow);padding:11px;z-index:700}
   .agrid{display:flex;flex-wrap:wrap;gap:7px}
   .adot{width:31px;height:31px;border-radius:50%;border:2px solid rgba(23,21,15,.3);color:#fff;
     font-family:'Anton',sans-serif;font-style:normal;font-size:13.5px;cursor:pointer;display:grid;place-items:center;padding:0}
@@ -298,13 +307,13 @@
 
   /* ---- Desktop: dock the sheet as a floating card, constrain the search cluster ---- */
   @media (min-width:768px){
-    .top{left:16px;right:auto;top:14px;width:min(480px,calc(100vw - 32px));padding:0}
+    .top{left:16px;right:auto;top:14px;width:min(564px,calc(100vw - 200px));padding:0}
+    .layers{top:14px;right:16px}  /* true top-right corner — the search cluster leaves it free */
     .sheet{left:16px;right:auto;bottom:16px;width:min(420px,calc(100vw - 32px));
       border:3px solid var(--ink);border-radius:18px;box-shadow:var(--shadow);
-      padding:14px 18px 18px;max-height:calc(100dvh - 190px);  /* never rides over the top cluster */
+      padding:14px 18px 18px;max-height:calc(100dvh - 150px);
       transform:translateY(calc(100% + 40px))}
     .grab{display:none}
-    .dayrow{flex-wrap:wrap;overflow:visible}  /* no hidden scroll on mouse — chips wrap instead */
     /* zoom lives bottomright on desktop (see map init) — clear the attribution strip */
     .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0 16px 30px 0}
   }
@@ -324,28 +333,6 @@
       </button>
     </div>
   </div>
-  <div class="metarow">
-    <div class="legend">
-      <span class="lg"><i style="background:var(--green)"></i>Clear</span>
-      <span class="lg"><i style="background:var(--amber)"></i>Soon</span>
-      <span class="lg"><i style="background:var(--red)"></i>Now/&lt;3h</span>
-      <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit</span>
-    </div>
-    <div class="toggles">
-      <button class="toggle" id="rppToggle" aria-pressed="false"><span class="sw"></span>Permit zones</button>
-      <button class="toggle load" id="loadToggle" aria-pressed="false"><span class="sw"></span>Loading zones</button>
-      <div class="areawrap">
-        <button class="toggle areabtn" id="areaBtn" aria-expanded="false" aria-haspopup="true">
-          <span class="adisc" id="areaBtnDisc" hidden></span><span id="areaBtnLbl">Permit area</span>
-          <svg class="ic s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div class="areapanel" id="areaPanel" hidden aria-label="Permit areas">
-          <div class="agrid" id="areaGrid"></div>
-          <button class="aclear" id="areaClear" hidden>Clear highlight</button>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="dayrow" aria-label="Filter by sweep day">
     <button class="datechip" id="dateChip" aria-pressed="false" title="Show only today's sweeping"></button>
     <button class="dchip on" data-day="all">All</button>
@@ -356,6 +343,29 @@
     <button class="dchip" data-day="5">Fri</button>
     <button class="dchip" data-day="6">Sat</button>
     <button class="dchip" data-day="0">Sun</button>
+  </div>
+</div>
+
+<!-- layers control: everything map-related lives in one corner, Google-Maps style -->
+<div class="layers">
+  <button class="layersbtn" id="layersBtn" aria-expanded="false" aria-haspopup="true" aria-label="Map layers">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
+    <span class="lb-txt">Layers</span><span id="layerBadges"></span>
+  </button>
+  <div class="layerspanel" id="layersPanel" hidden aria-label="Map layers and legend">
+    <div class="lp-sec">Curb colors</div>
+    <div class="lkey">
+      <span class="lg"><i style="background:var(--green)"></i>Clear</span>
+      <span class="lg"><i style="background:var(--amber)"></i>Sweeps within a day</span>
+      <span class="lg"><i style="background:var(--red)"></i>Now / under 3 hours</span>
+      <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit zone band</span>
+    </div>
+    <div class="lp-sec">Layers</div>
+    <button class="toggle" id="rppToggle" aria-pressed="false"><span class="sw"></span>Permit zones</button>
+    <button class="toggle load" id="loadToggle" aria-pressed="false"><span class="sw"></span>Loading zones</button>
+    <div class="lp-sec">Highlight a permit area</div>
+    <div class="agrid" id="areaGrid"></div>
+    <button class="aclear" id="areaClear" hidden>Clear area highlight</button>
   </div>
 </div>
 
@@ -1115,6 +1125,7 @@ function setDayFilter(v){
 document.getElementById('rppToggle').onclick=function(){
   rppOn=!rppOn; this.classList.toggle('on',rppOn); this.setAttribute('aria-pressed',rppOn);
   document.getElementById('rppLegend').style.display=rppOn?'flex':'none';
+  refreshLayerBadges();
   loadViewport();
   if(rppOn)toast('Permit zones (RPP) shaded blue. Tap a block for area & hours.');
 };
@@ -1124,11 +1135,23 @@ let areaTok=0, curArea='';
 // sign-disc palette (blue/green/red/orange/purple), deterministic per letter.
 const AREA_COLORS=['#1D69A5','#1F8A4C','#C42127','#D97818','#6B4FA0'];
 function areaColor(a){let h=0;for(const c of String(a))h+=c.charCodeAt(0);return AREA_COLORS[h%AREA_COLORS.length];}
-(function initAreaPicker(){
-  const btn=document.getElementById('areaBtn'), panel=document.getElementById('areaPanel');
+function closeLayersPanel(){
+  document.getElementById('layersPanel').hidden=true;
+  document.getElementById('layersBtn').setAttribute('aria-expanded','false');
+}
+// active-layer badges on the Layers button: blue dot = permit, amber dot = loading, disc = area
+function refreshLayerBadges(){
+  let h='';
+  if(rppOn)h+='<i class="lbdot" style="background:var(--meter)"></i>';
+  if(loadOn)h+='<i class="lbdot" style="background:var(--amber)"></i>';
+  if(curArea)h+=`<i class="lbdisc" style="background:${areaColor(curArea)}">${curArea}</i>`;
+  document.getElementById('layerBadges').innerHTML=h;
+}
+(function initLayersPanel(){
+  const btn=document.getElementById('layersBtn'), panel=document.getElementById('layersPanel');
   btn.onclick=()=>{const open=panel.hidden; panel.hidden=!open; btn.setAttribute('aria-expanded',open);};
-  document.addEventListener('click',e=>{ if(!panel.hidden&&!e.target.closest('.areawrap')){panel.hidden=true;btn.setAttribute('aria-expanded','false');} });
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!panel.hidden){panel.hidden=true;btn.setAttribute('aria-expanded','false');} });
+  document.addEventListener('click',e=>{ if(!panel.hidden&&!e.target.closest('.layers'))closeLayersPanel(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!panel.hidden)closeLayersPanel(); });
   document.getElementById('areaClear').onclick=()=>showArea('');
   (async()=>{
     try{
@@ -1145,15 +1168,12 @@ function areaColor(a){let h=0;for(const c of String(a))h+=c.charCodeAt(0);return
   })();
 })();
 async function showArea(letter){
-  const my=++areaTok, btn=document.getElementById('areaBtn'), panel=document.getElementById('areaPanel');
+  const my=++areaTok;
   curArea=letter; areaLayer.clearLayers();
-  btn.classList.toggle('on',!!letter);
-  document.getElementById('areaBtnLbl').textContent=letter?('Area '+letter):'Permit area';
-  const disc=document.getElementById('areaBtnDisc');
-  disc.hidden=!letter; if(letter){disc.textContent=letter;disc.style.background=areaColor(letter);}
   document.getElementById('areaClear').hidden=!letter;
   document.querySelectorAll('.adot').forEach(x=>x.classList.toggle('sel',x.dataset.a===letter));
-  panel.hidden=true; btn.setAttribute('aria-expanded','false');
+  refreshLayerBadges();
+  closeLayersPanel();
   if(!letter)return;
   try{
     const r=await fetch(RPP+`?$select=shape,hrlimit,days,from_time,to_time&$where=rpparea1='${soql(letter)}'&$limit=2500`);
@@ -1177,6 +1197,7 @@ async function showArea(letter){
 
 document.getElementById('loadToggle').onclick=function(){
   loadOn=!loadOn; this.classList.toggle('on',loadOn); this.setAttribute('aria-pressed',loadOn);
+  refreshLayerBadges();
   if(loadOn){ this.classList.add('busy'); drawLoadZones().finally(()=>this.classList.remove('busy'));
     toast('Loading zones: 🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus. Tap a dot for hours. (Metered zones only — paint-only curbs aren\'t in city data.)');
   } else loadLayer.clearLayers();
