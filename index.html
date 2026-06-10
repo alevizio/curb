@@ -125,7 +125,8 @@
   .verdict.now .head{color:var(--red)} .verdict.soon .head{color:var(--amber)} .verdict.ok .head{color:var(--green)}
   .where{font-size:15px;font-weight:700;margin:8px 0 2px}
   .where .blk{color:var(--ink-soft);font-weight:600}
-  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}  /* margin lives on chips so an empty row adds no gap */
+  .chips .chip{margin-top:10px}
   .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:8px;padding:5px 10px}
   .chip.meter{color:var(--meter);background:rgba(47,91,208,.1);border:1.5px solid rgba(47,91,208,.4)}
   .chip.rpp{color:#fff;background:var(--meter);border:1.5px solid var(--meter)}
@@ -133,6 +134,9 @@
   .sides{margin-top:12px;display:flex;flex-direction:column;gap:9px}
   .srow{display:flex;gap:11px;align-items:center;border:2px solid var(--ink);border-radius:12px;padding:9px 11px;background:#fff}
   .srow.active{border-color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+  .srow.tap{cursor:pointer;transition:box-shadow .12s,transform .12s}  /* other sides switch the active side */
+  @media (hover:hover){.srow.tap:hover{box-shadow:3px 3px 0 var(--ink)}}
+  .srow.tap:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
   .badge{flex:none;width:62px;text-align:center;background:var(--ink);color:var(--paper);border-radius:8px;padding:7px 2px}
   .badge.now{background:var(--red)}
   .badge .d{font-family:'Anton',sans-serif;font-size:18px;line-height:1;text-transform:uppercase}
@@ -148,6 +152,7 @@
   .btn{flex:1 1 0;min-width:132px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:2.5px solid var(--ink);border-radius:12px;
     padding:13px;background:var(--ink);color:var(--paper);box-shadow:var(--shadow);transition:transform .1s;
     display:flex;align-items:center;justify-content:center;gap:7px;text-align:center}
+  @media (hover:hover){.btn:hover{transform:translateY(-1px)}}
   .btn:active{transform:translateY(2px);box-shadow:none}
   .btn.alt{background:var(--paper);color:var(--ink)}
   .btn.on{background:var(--green);color:var(--ink);border-color:var(--ink)}
@@ -400,7 +405,7 @@ function enfFor(cnn,dow){
   const b=ENF[cnn]; const a=b&&b[dow];
   return a?{n:a[0],avg:a[1],lo:a[2],hi:a[3]}:null;
 }
-function fmtMin(m){let h=Math.floor(m/60),mm=m%60;const ap=h>=12?'p':'a';h=h%12;if(h===0)h=12;return h+':'+String(mm).padStart(2,'0')+ap;}
+function fmtMin(m){let h=Math.floor(m/60),mm=m%60;const ap=h>=12?'pm':'am';h=h%12;if(h===0)h=12;return h+':'+String(mm).padStart(2,'0')+ap;}
 
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
 function normDay(s){if(!s)return null;const k=s.trim().toLowerCase().slice(0,3);return (k in DAYIDX)?DAYIDX[k]:null}
@@ -689,12 +694,13 @@ function openSheet(group, activeKey){
     const act=s.ns&&now>=s.ns.start&&now<s.ns.end;
     const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
     const e=enfFor(group.cnn, normDay(r.weekday));
-    return `<div class="srow ${s===active?'active':''}">
+    // The active side's enforcement is shown in the callout above — only repeat it on the other sides.
+    return `<div class="srow ${s===active?'active':'tap'}" data-side="${s.key}">
       <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div></div>
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.txt}</div>
-        ${e?`<div class="enfline">🎯 Ticketed ~${fmtMin(e.avg)} <span>· earliest ${fmtMin(e.lo)} · ${e.n} tickets</span></div>`:''}
+        ${e&&s!==active?`<div class="enfline">🎯 Ticketed ~${fmtMin(e.avg)} <span>· earliest ${fmtMin(e.lo)} · ${e.n} tickets</span></div>`:''}
         ${allW?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
@@ -742,6 +748,8 @@ function openSheet(group, activeKey){
     document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
   }
   document.getElementById('centerBtn').onclick=()=>map.fitBounds(L.polyline(active.latlngs).getBounds(),{maxZoom:18,padding:[60,60]});
+  // Tapping another side's row makes it the active side (re-renders the sheet around it).
+  document.querySelectorAll('#sheetBody .srow.tap').forEach(el=>{el.onclick=()=>openSheet(group, el.dataset.side);});
   loadMeterChip(group.corridor||'');
   fillRange(group.cnn);
   document.getElementById('sheet').classList.add('open');
