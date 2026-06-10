@@ -37,8 +37,13 @@
   :root{
     --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
     --green:#1F9E5A; --amber:#E08A1E; --red:#E0322E; --gray:#8C8678; --meter:#2F5BD0;
+    /* darker "inked" siblings for TEXT on paper — the bright tokens above are for map
+       lines/badges only (they fail WCAG AA as text: amber 2.28:1, green 2.93:1) */
+    --green-text:#157A44; --amber-text:#8F5A06; --red-text:#C22A26;
     --shadow:5px 5px 0 var(--ink);
   }
+  :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
+  .field:focus-within{outline:3px solid var(--meter);outline-offset:2px}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
@@ -63,7 +68,7 @@
   .lg{display:flex;align-items:center;gap:4px}
   .lg i{width:14px;height:5px;border-radius:3px;display:inline-block}
   .toggle{pointer-events:auto;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-    background:rgba(242,236,223,.92);border:2px solid var(--ink);border-radius:10px;padding:6px 9px;cursor:pointer;
+    background:rgba(242,236,223,.92);border:2px solid var(--ink);border-radius:10px;padding:9px 11px;cursor:pointer;
     box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;white-space:nowrap}
   .toggle .sw{width:13px;height:13px;border-radius:4px;border:2px solid var(--ink);background:transparent}
   .toggle.on{background:var(--meter);color:#fff;border-color:var(--meter)}
@@ -117,12 +122,13 @@
     transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:74dvh;overflow-y:auto}
   .sheet.open{transform:translateY(0)}
   .grab{width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3);margin:4px auto 12px}
-  .sheet-close{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);
+  .sheet-close{position:absolute;top:12px;right:14px;width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);
     background:var(--paper);font-size:18px;cursor:pointer;line-height:1}
+  .sheet-close::after{content:'';position:absolute;inset:-7px}  /* 44px hit area, same visual */
   .verdict{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
   .verdict .kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft)}
   .verdict .head{font-family:'Anton',sans-serif;font-size:34px;line-height:.95;text-transform:uppercase}
-  .verdict.now .head{color:var(--red)} .verdict.soon .head{color:var(--amber)} .verdict.ok .head{color:var(--green)}
+  .verdict.now .head{color:var(--red-text)} .verdict.soon .head{color:var(--amber-text)} .verdict.ok .head{color:var(--green-text)}
   .where{font-size:15px;font-weight:700;margin:8px 0 2px}
   .where .blk{color:var(--ink-soft);font-weight:600}
   .chips{display:flex;flex-wrap:wrap;gap:7px}  /* margin lives on chips so an empty row adds no gap */
@@ -144,10 +150,10 @@
   .smeta{flex:1;min-width:0}
   .smeta .nm{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
   .smeta .nx{font-size:13.5px;font-weight:700;margin-top:2px}
-  .smeta .nx.red{color:var(--red)} .smeta .nx.amber{color:var(--amber)} .smeta .nx.green{color:var(--green)}
+  .smeta .nx.red{color:var(--red-text)} .smeta .nx.amber{color:var(--amber-text)} .smeta .nx.green{color:var(--green-text)}
   .weeks{display:flex;gap:4px;margin-top:5px}
   .wk{font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--ink)}
-  .wk.off{opacity:.22;border-style:dashed} .wk.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .wk.off{opacity:.22;border-style:dashed} .wk.on{background:var(--green-text);color:#fff;border-color:var(--green-text)}
   .actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
   .btn{flex:1 1 0;min-width:132px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:2.5px solid var(--ink);border-radius:12px;
     padding:13px;background:var(--ink);color:var(--paper);box-shadow:var(--shadow);transition:transform .1s;
@@ -185,12 +191,12 @@
     font-family:'Hanken Grotesk',sans-serif;line-height:1.3}
   .leaflet-tooltip.curbtip::before{display:none}
   .curbtip .tip-head{font-family:'Anton',sans-serif;font-size:17px;line-height:1;text-transform:uppercase;margin-bottom:4px}
-  .curbtip.now .tip-head{color:var(--red)} .curbtip.soon .tip-head{color:var(--amber)} .curbtip.ok .tip-head{color:var(--green)}
+  .curbtip.now .tip-head{color:var(--red-text)} .curbtip.soon .tip-head{color:var(--amber-text)} .curbtip.ok .tip-head{color:var(--green-text)}
   .curbtip .tip-where{font-size:12px;font-weight:700}
   .curbtip .tip-where .blk{color:var(--ink-soft);font-weight:600}
   .curbtip .tip-side{font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-top:3px}
   .curbtip .tip-next{font-size:12px;font-weight:700;margin-top:2px}
-  .curbtip .tip-next.red{color:var(--red)} .curbtip .tip-next.amber{color:var(--amber)} .curbtip .tip-next.green{color:var(--green)}
+  .curbtip .tip-next.red{color:var(--red-text)} .curbtip .tip-next.amber{color:var(--amber-text)} .curbtip .tip-next.green{color:var(--green-text)}
   .curbtip .tip-rpp{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;background:var(--meter);border-radius:6px;padding:2px 7px;margin-top:5px}
   .curbtip .tip-enf{font-size:11.5px;font-weight:800;color:var(--ink);background:rgba(224,50,46,.12);
     border:1.5px solid rgba(224,50,46,.45);border-radius:7px;padding:3px 8px;margin-top:5px;display:inline-block}
@@ -201,9 +207,9 @@
     padding:9px 11px;background:rgba(224,50,46,.07)}
   .enf .tgt{font-size:17px;line-height:1.1;flex:none}
   .enf .etxt{font-size:12.5px;font-weight:700;line-height:1.35}
-  .enf .etxt b{color:var(--red)}
+  .enf .etxt b{color:var(--red-text)}
   .enf .esub{font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:1px}
-  .smeta .enfline{font-size:11.5px;font-weight:700;color:var(--red);margin-top:3px}
+  .smeta .enfline{font-size:11.5px;font-weight:700;color:var(--red-text);margin-top:3px}
   .smeta .enfline span{color:var(--ink-soft);font-weight:600}
 
   /* Loading / color-curb zone markers + popup */
@@ -252,8 +258,8 @@
       <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit</span>
     </div>
     <div class="toggles">
-      <button class="toggle" id="rppToggle"><span class="sw"></span>Permit zones</button>
-      <button class="toggle load" id="loadToggle"><span class="sw"></span>Loading zones</button>
+      <button class="toggle" id="rppToggle" aria-pressed="false"><span class="sw"></span>Permit zones</button>
+      <button class="toggle load" id="loadToggle" aria-pressed="false"><span class="sw"></span>Loading zones</button>
     </div>
   </div>
   <div class="dayrow" aria-label="Filter by sweep day">
@@ -274,11 +280,11 @@
   <p>Tap locate, search a street, or tap the map where you parked.</p>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<div class="sheet" id="sheet">
+<div class="sheet" id="sheet" role="dialog" aria-label="Parking details for this block">
   <div class="grab"></div>
-  <button class="sheet-close" id="sheetClose">×</button>
+  <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
   <div id="sheetBody"></div>
 </div>
 
@@ -698,7 +704,7 @@ function openSheet(group, activeKey){
     const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
     const e=enfFor(group.cnn, normDay(r.weekday));
     // The active side's enforcement is shown in the callout above — only repeat it on the other sides.
-    return `<div class="srow ${s===active?'active':'tap'}" data-side="${s.key}">
+    return `<div class="srow ${s===active?'active':'tap'}" data-side="${s.key}"${s===active?'':` role="button" tabindex="0" aria-label="Switch to the ${s.blockside||'other'} side"`}>
       <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div></div>
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
@@ -752,7 +758,11 @@ function openSheet(group, activeKey){
   }
   document.getElementById('centerBtn').onclick=()=>map.fitBounds(L.polyline(active.latlngs).getBounds(),{maxZoom:18,padding:[60,60]});
   // Tapping another side's row makes it the active side (re-renders the sheet around it).
-  document.querySelectorAll('#sheetBody .srow.tap').forEach(el=>{el.onclick=()=>openSheet(group, el.dataset.side);});
+  document.querySelectorAll('#sheetBody .srow.tap').forEach(el=>{
+    const go=()=>openSheet(group, el.dataset.side);
+    el.onclick=go;
+    el.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();}};
+  });
   loadMeterChip(group.corridor||'');
   fillRange(group.cnn);
   document.getElementById('sheet').classList.add('open');
@@ -877,20 +887,37 @@ document.getElementById('locate').onclick=()=>{
   if(!navigator.geolocation)return locateFail();
   btn.classList.add('loading');
   navigator.geolocation.getCurrentPosition(
-    p=>{btn.classList.remove('loading');placeYou(p.coords.latitude,p.coords.longitude,true);},
+    p=>{btn.classList.remove('loading');try{localStorage.setItem('curbLocOK','1');}catch(_){}
+      placeYou(p.coords.latitude,p.coords.longitude,true);},
     e=>{btn.classList.remove('loading');locateFail();},
     {enableHighAccuracy:true,timeout:9000,maximumAge:30000});
 };
 function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
-function placeYou(lat,lng,fly,cnnHint){
+// quiet=true: center + dot only (launch auto-position) — no sheet, the user may not be at their car.
+function placeYou(lat,lng,fly,cnnHint,quiet){
   // "Where I parked" must see every curb side — a day filter could otherwise snap
   // the pin to the wrong (still-visible) side of the street.
-  if(dayFilter!=null)setDayFilter(null);
+  if(!quiet&&dayFilter!=null)setDayFilter(null);
   if(youMarker)map.removeLayer(youMarker);
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
-  setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);
+  if(!quiet)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);
 }
+
+/* Auto-position on launch — ONLY when permission is already granted, so no permission
+   prompt ever fires by itself. Permissions API where available; older Safari falls back
+   to a flag set after the first successful manual locate. */
+(async function autoLocate(){
+  if(!navigator.geolocation)return;
+  let granted=false;
+  try{ granted=(await navigator.permissions.query({name:'geolocation'})).state==='granted'; }
+  catch(_){ try{granted=localStorage.getItem('curbLocOK')==='1';}catch(_){} }
+  if(!granted)return;
+  navigator.geolocation.getCurrentPosition(
+    p=>placeYou(p.coords.latitude,p.coords.longitude,true,null,true),
+    ()=>{},  // silent: launch convenience, never an error
+    {enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+})();
 function openNearestWhenReady(lat,lng,cnnHint,tries){
   const n=nearestSeg(lat,lng,cnnHint);
   if(n){openSheet(n.group,n.side.key);return;}
@@ -939,13 +966,13 @@ function setDayFilter(v){
 
 /* ---------- RPP toggle ---------- */
 document.getElementById('rppToggle').onclick=function(){
-  rppOn=!rppOn; this.classList.toggle('on',rppOn);
+  rppOn=!rppOn; this.classList.toggle('on',rppOn); this.setAttribute('aria-pressed',rppOn);
   document.getElementById('rppLegend').style.display=rppOn?'flex':'none';
   loadViewport();
   if(rppOn)toast('Permit zones (RPP) shaded blue. Tap a block for area & hours.');
 };
 document.getElementById('loadToggle').onclick=function(){
-  loadOn=!loadOn; this.classList.toggle('on',loadOn);
+  loadOn=!loadOn; this.classList.toggle('on',loadOn); this.setAttribute('aria-pressed',loadOn);
   if(loadOn){ this.classList.add('busy'); drawLoadZones().finally(()=>this.classList.remove('busy'));
     toast('Loading zones: 🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus. Tap a dot for hours. (Metered zones only — paint-only curbs aren\'t in city data.)');
   } else loadLayer.clearLayers();
