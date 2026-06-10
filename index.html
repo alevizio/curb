@@ -621,6 +621,10 @@ function drawSegments(rows){
     toast('No '+DAYLBL[dayFilter]+' sweeping on these blocks — tap "All" to reset.');
 }
 
+// Ribbon weight in px so the band spans roughly curb-to-curb (±6m) at each zoom.
+function rppWeight(){const z=map.getZoom();return z>=18?26:z>=17?14:z>=16?7:4;}
+map.on('zoomend',()=>rppLayer.eachLayer(l=>l.setStyle&&l.setStyle({weight:rppWeight()})));
+
 async function loadRpp(poly, my){
   try{
     const url=RPP+`?$select=rpparea1,hrlimit,days,from_time,to_time,regulation,exceptions,shape`
@@ -633,12 +637,11 @@ async function loadRpp(poly, my){
       const lines = g.type==='MultiLineString'? g.coordinates : [g.coordinates];
       lines.forEach(coords=>{
         const ll=coords.map(c=>[c[1],c[0]]);
-        // RPP applies to BOTH curb sides of the block — draw an offset blue band on each
-        // side (hugging both curbs like the sweep lines) instead of one centerline lane.
-        const mcolor=getCSS('--meter');
-        [1,-1].forEach(sign=>{
-          L.polyline(offsetLine(ll,OFFSET,sign),{color:mcolor,weight:8,opacity:.18,lineCap:'round',interactive:false}).addTo(rppLayer);
-        });
+        // RPP covers BOTH curbs: one street-wide centerline ribbon UNDER the curb lines
+        // (rppLayer sits below segLayer). Width scales with zoom so it spans the curb-to-curb
+        // area at every level — two offset bands would stack into a blue blanket at low zoom
+        // and collide with the ±5m curb lines at high zoom.
+        L.polyline(ll,{color:getCSS('--meter'),weight:rppWeight(),opacity:.14,lineCap:'round',interactive:false}).addTo(rppLayer);
         rppCache.push({latlngs:ll, area:rec.rpparea1, hrlimit:rec.hrlimit, days:rec.days, from:rec.from_time, to:rec.to_time, regulation:rec.regulation, exceptions:rec.exceptions});
       });
     });

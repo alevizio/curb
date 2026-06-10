@@ -39,8 +39,10 @@ calendar reminder before the next sweep.
    Fields: regulation, rpparea1 (permit-area letter), hrlimit, days, from_time,
    to_time, exceptions, shape (GeoJSON MultiLineString). STALE: this is SFMTA's
    2017 set, flagged by the city as not comprehensively updated. Treat as a hint.
-   NOTE: RPP applies to BOTH curb sides — drawn as two OFFSET blue bands (not one
-   centerline) so it visually hugs both curbs like the sweep lines.
+   NOTE: RPP covers BOTH curbs — rendered as ONE street-wide centerline ribbon UNDER the
+   curb lines, with zoom-scaled weight (rppWeight(): 4px@z15 → 26px@z18 ≈ curb-to-curb).
+   Do NOT draw offset bands per side: they stack into a blue blanket at low zoom and
+   collide with the ±5m curb lines at high zoom (tried 2026-06-09, looked broken).
 4. Loading / color-curb zones — `6cqg-dxku` (Meter Operating Schedules)
    Field `applied_color_rule` carries the regulation + days_applied/from_time/to_time/
    time_limit (White=passenger, Yellow=commercial, Red=truck, Green=short-term, Orange=bus).
