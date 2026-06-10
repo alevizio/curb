@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!-- OG image art board (1200x630). Regenerate og.png with: npm run og
+     Keep in sync with the design tokens in index.html. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
+    --green:#1F9E5A; --amber:#E08A1E; --red:#E0322E; --meter:#2F5BD0;
+    --parchment:#fbf7ef; --road:#f6f1e6; --road-edge:#d8d2c4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1200px;height:630px;overflow:hidden;background:var(--paper);
+    font-family:'Hanken Grotesk',sans-serif;color:var(--ink);
+    display:flex;align-items:stretch;gap:48px;padding:56px 64px}
+  .left{flex:1;display:flex;flex-direction:column;justify-content:space-between}
+  .logo{font-family:'Anton',sans-serif;font-size:44px;letter-spacing:.01em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);padding:10px 20px;border-radius:16px;line-height:1;
+    box-shadow:7px 7px 0 var(--ink);width:fit-content}
+  .logo span{color:var(--red)}
+  h1{font-family:'Anton',sans-serif;font-size:94px;line-height:.95;text-transform:uppercase;margin:24px 0 16px}
+  h1 .hl{color:var(--red)}
+  .sub{font-size:25px;font-weight:600;color:var(--ink-soft);line-height:1.35;max-width:560px}
+  .legend{display:flex;gap:14px;margin-top:26px}
+  .lg{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.04em;background:var(--paper);border:3px solid var(--ink);border-radius:14px;
+    padding:10px 16px;box-shadow:5px 5px 0 var(--ink)}
+  .lg i{width:34px;height:10px;border-radius:6px;display:inline-block}
+  .url{font-size:24px;font-weight:800;letter-spacing:.02em}
+  .url b{color:var(--meter)}
+  /* parchment map vignette */
+  .map{flex:none;width:420px;border:4px solid var(--ink);border-radius:24px;
+    box-shadow:10px 10px 0 var(--ink);background:var(--parchment);position:relative;overflow:hidden}
+  .road{position:absolute;background:#efe8d9}
+  .road.v{width:54px;top:-10px;bottom:-10px}
+  .road.h{height:54px;left:-10px;right:-10px}
+  .curb{position:absolute;height:11px;border-radius:6px}
+  .curb.v{width:11px;height:auto}
+  .dot{position:absolute;width:30px;height:30px;border-radius:50%;background:var(--meter);
+    border:5px solid #fff;box-shadow:0 0 0 3px var(--meter)}
+</style>
+</head>
+<body>
+  <div class="left">
+    <div>
+      <div class="logo">CURB<span>.</span></div>
+      <h1>Know where<br>to park<span class="hl">.</span></h1>
+      <p class="sub">SF street parking, block by block — sweeping schedules, permit zones &amp; move-your-car alerts.</p>
+      <div class="legend">
+        <span class="lg"><i style="background:var(--green)"></i>Clear</span>
+        <span class="lg"><i style="background:var(--amber)"></i>Soon</span>
+        <span class="lg"><i style="background:var(--red)"></i>Now</span>
+      </div>
+    </div>
+    <div class="url">curb.guide · <b>live from DataSF</b></div>
+  </div>
+
+  <div class="map">
+    <!-- roads -->
+    <div class="road v" style="left:84px"></div>
+    <div class="road v" style="left:258px"></div>
+    <div class="road h" style="top:96px"></div>
+    <div class="road h" style="top:268px"></div>
+    <div class="road h" style="top:440px"></div>
+    <!-- curb lines hugging the road edges -->
+    <div class="curb" style="left:-8px;width:80px;top:80px;background:var(--green)"></div>
+    <div class="curb" style="left:150px;width:96px;top:80px;background:var(--amber)"></div>
+    <div class="curb" style="left:316px;width:120px;top:80px;background:var(--green)"></div>
+    <div class="curb" style="left:-8px;width:80px;top:162px;background:var(--red)"></div>
+    <div class="curb" style="left:150px;width:96px;top:162px;background:var(--green)"></div>
+    <div class="curb" style="left:316px;width:120px;top:162px;background:var(--green)"></div>
+    <div class="curb" style="left:-8px;width:80px;top:252px;background:var(--amber)"></div>
+    <div class="curb" style="left:150px;width:96px;top:252px;background:var(--green)"></div>
+    <div class="curb" style="left:316px;width:120px;top:252px;background:var(--red)"></div>
+    <div class="curb" style="left:-8px;width:80px;top:334px;background:var(--green)"></div>
+    <div class="curb" style="left:150px;width:96px;top:334px;background:var(--amber)"></div>
+    <div class="curb" style="left:316px;width:120px;top:334px;background:var(--green)"></div>
+    <div class="curb" style="left:-8px;width:80px;top:424px;background:var(--green)"></div>
+    <div class="curb" style="left:150px;width:96px;top:424px;background:var(--red)"></div>
+    <div class="curb" style="left:316px;width:120px;top:424px;background:var(--amber)"></div>
+    <div class="curb" style="left:-8px;width:80px;top:506px;background:var(--amber)"></div>
+    <div class="curb" style="left:150px;width:96px;top:506px;background:var(--green)"></div>
+    <div class="curb" style="left:316px;width:120px;top:506px;background:var(--green)"></div>
+    <div class="curb v" style="left:68px;top:120px;height:130px;background:var(--green)"></div>
+    <div class="curb v" style="left:156px;top:120px;height:130px;background:var(--red)"></div>
+    <div class="curb v" style="left:242px;top:292px;height:130px;background:var(--green)"></div>
+    <div class="curb v" style="left:330px;top:292px;height:130px;background:var(--amber)"></div>
+    <!-- you-are-here -->
+    <div class="dot" style="left:196px;top:296px"></div>
+  </div>
+</body>
+</html>
