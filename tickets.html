@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The SF Parking Ticket Economy — Every Fine Since 2008 | CURB</title>
+<meta name="description" content="23.8 million parking tickets, mapped and counted: what San Francisco fines every year, what the tickets are for, which neighborhoods pay most — from public SFMTA data.">
+<link rel="canonical" href="https://curb.guide/tickets">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CURB">
+<meta property="og:title" content="The SF Parking Ticket Economy — every fine since 2008">
+<meta property="og:description" content="23.8M tickets counted: what SF fines each year, what for, and which neighborhoods pay most. Public SFMTA data, visualized.">
+<meta property="og:url" content="https://curb.guide/tickets">
+<meta property="og:image" content="https://curb.guide/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://curb.guide/og.png">
+<meta name="theme-color" content="#E0322E">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
+    --green:#1F9E5A; --amber:#E08A1E; --red:#E0322E; --meter:#2F5BD0;
+    --green-text:#157A44; --amber-text:#8F5A06; --red-text:#C22A26;
+    --sign:#FFFDF6; --shadow:5px 5px 0 var(--ink);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;
+    font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--ink);color:var(--paper)}
+  :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 clamp(20px,4.5vw,48px)}
+  a{color:inherit}
+
+  header{padding:26px 0 0}
+  .mast{display:flex;align-items:center;gap:14px}
+  .logo{display:inline-block;font-family:'Anton',sans-serif;font-size:27px;background:var(--ink);color:var(--paper);
+    padding:9px 14px;border-radius:11px;line-height:1;box-shadow:3px 3px 0 var(--ink);text-decoration:none}
+  .logo span{color:var(--red)}
+  .url{font-weight:800;color:var(--ink-soft)}
+  .mast .btn{margin-left:auto;padding:11px 16px;font-size:14px}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:16px;text-decoration:none;
+    border:2.5px solid var(--ink);border-radius:13px;padding:14px 22px;background:var(--ink);color:var(--paper);
+    box-shadow:var(--shadow);transition:transform .12s}
+  .btn:hover{transform:translateY(-1px)} .btn:active{transform:translate(2px,2px);box-shadow:none}
+  .btn.ghost{background:transparent;color:var(--ink)}
+
+  .hero{padding:clamp(40px,8vh,80px) 0 clamp(24px,4vh,40px);text-align:left}
+  .kicker{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)}
+  .big{font-family:'Anton',sans-serif;font-size:clamp(64px,13vw,150px);line-height:.9;color:var(--red-text);margin:10px 0 6px}
+  h1{font-family:'Anton',sans-serif;font-size:clamp(28px,4.6vw,44px);line-height:.98;text-transform:uppercase}
+  .sub{font-size:clamp(17px,2vw,20px);font-weight:600;color:var(--ink-soft);max-width:38em;margin-top:16px}
+  .sub b{color:var(--ink)}
+
+  section{padding:clamp(30px,6vh,56px) 0 0}
+  .sec-k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  h2{font-family:'Anton',sans-serif;font-size:clamp(26px,4.4vw,42px);line-height:.98;text-transform:uppercase;margin:6px 0 8px}
+  h2 b{color:var(--red-text)}
+  .lede{font-weight:600;color:var(--ink-soft);max-width:46em}
+  .lede b{color:var(--ink)}
+
+  .panel{border:3px solid var(--ink);border-radius:18px;background:var(--sign);box-shadow:var(--shadow);
+    padding:clamp(16px,3vw,28px);margin-top:18px;overflow:hidden}
+  svg text{font-family:'Hanken Grotesk',sans-serif;font-weight:700}
+  svg .anton{font-family:'Anton',sans-serif}
+
+  .statrow{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+  .stat{flex:1 1 180px;border:2.5px solid var(--ink);border-radius:14px;background:var(--sign);
+    box-shadow:3px 3px 0 var(--ink);padding:14px 16px}
+  .stat .v{font-family:'Anton',sans-serif;font-size:clamp(26px,3.6vw,38px);line-height:1}
+  .stat .v.red{color:var(--red-text)} .stat .v.green{color:var(--green-text)} .stat .v.amber{color:var(--amber-text)}
+  .stat .l{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:5px}
+
+  .note{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-top:12px;line-height:1.55}
+  .note b{color:var(--ink)}
+
+  .ctxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:18px}
+  .ctx{border:2.5px solid var(--ink);border-radius:14px;background:var(--sign);box-shadow:3px 3px 0 var(--ink);padding:16px}
+  .ctx h3{font-family:'Anton',sans-serif;font-size:18px;text-transform:uppercase;line-height:1.05;margin-bottom:7px}
+  .ctx p{font-size:13.5px;font-weight:600;color:var(--ink-soft);line-height:1.5}
+  .ctx p b{color:var(--ink)}
+
+  .cta-band{margin-top:clamp(40px,7vh,64px);background:var(--ink);color:var(--paper);border-radius:20px;
+    box-shadow:var(--shadow);padding:clamp(24px,4vw,40px);display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .cta-band h2{color:var(--paper);margin:0}
+  .cta-band .btn{background:var(--red);border-color:var(--red)}
+  .cta-band p{flex-basis:100%;font-weight:600;color:rgba(242,236,223,.8);font-size:14.5px}
+
+  footer{margin-top:clamp(40px,7vh,60px);border-top:3px solid var(--ink);padding:24px 0 36px;
+    font-size:13px;font-weight:600;color:var(--ink-soft);line-height:1.6}
+  footer a{color:var(--meter)}
+
+  @media (prefers-reduced-motion:no-preference){
+    .rise{opacity:0;transform:translateY(14px);animation:rise .7s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.06s}.d2{animation-delay:.12s}
+    @keyframes rise{to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<header class="wrap rise">
+  <div class="mast">
+    <a class="logo" href="/">CURB<span>.</span></a>
+    <span class="url">curb.guide/tickets</span>
+    <a class="btn" href="/">Open the map →</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="kicker rise">The ticket economy · public SFMTA data, 2008–today</div>
+    <div class="big rise d1" id="bigTotal">$—</div>
+    <h1 class="rise d1">in parking fines. <span id="bigCount">—</span> million tickets.</h1>
+    <p class="sub rise d2">Every parking citation San Francisco writes is public record. We counted all of
+      them — every year, every violation type, every neighborhood — so you can see exactly how the
+      ticket economy works. <b>And how to stop funding it.</b></p>
+  </div>
+
+  <section id="years">
+    <div class="sec-k">The history</div>
+    <h2>A nine-figure habit, every single year</h2>
+    <p class="lede">Assessed parking fines by year. Watch the <b>2020 pandemic crater</b> (enforcement was
+      fully suspended that spring) — and how fast the totals climbed back past every pre-COVID year.</p>
+    <div class="panel"><svg id="chartYears" width="100%" height="320" role="img" aria-label="Bar chart of assessed parking fines per year since 2008"></svg></div>
+    <div class="statrow" id="yearStats"></div>
+  </section>
+
+  <section id="what">
+    <div class="sec-k">The menu</div>
+    <h2>What the tickets are for</h2>
+    <p class="lede">Citations since 2021 by violation type. <b>Street cleaning isn't just first — it's
+      bigger than the next two combined.</b></p>
+    <div class="panel"><svg id="chartViol" width="100%" height="430" role="img" aria-label="Horizontal bar chart of citation counts by violation type"></svg></div>
+  </section>
+
+  <section id="sweep">
+    <div class="sec-k">The flagship fine</div>
+    <h2>Street cleaning: <b>the city's #1 ticket</b></h2>
+    <p class="lede">The fine has more than doubled since 2008 while the rules stayed the same. The posted
+      window says two hours — <b>the median block gets every ticket inside a 22-minute span.</b></p>
+    <div class="panel"><svg id="chartSweep" width="100%" height="300" role="img" aria-label="Street cleaning tickets per year with average fine line"></svg></div>
+    <div class="statrow" id="sweepStats"></div>
+  </section>
+
+  <section id="when">
+    <div class="sec-k">The clock</div>
+    <h2>When the tickets land</h2>
+    <p class="lede">Street-cleaning citations by hour (since 2024). The overnight commercial sweeps are
+      real — <b>and so is the morning rush</b>.</p>
+    <div class="panel"><svg id="chartHour" width="100%" height="260" role="img" aria-label="Histogram of street cleaning tickets by hour of day"></svg></div>
+  </section>
+
+  <section id="where">
+    <div class="sec-k">The map</div>
+    <h2>Which neighborhoods pay</h2>
+    <p class="lede">Street-cleaning fines by neighborhood over the last two years, matched block-by-block
+      from the city's address records.</p>
+    <div class="panel"><svg id="chartHoods" width="100%" height="520" role="img" aria-label="Horizontal bar chart of street cleaning fines by neighborhood"></svg></div>
+    <p class="note" id="streetsNote"></p>
+  </section>
+
+  <section id="context">
+    <div class="sec-k">The context</div>
+    <h2>Where the money goes</h2>
+    <div class="ctxgrid" id="ctxGrid">
+      <div class="ctx"><h3>$40 → $105 in 17 years</h3>
+        <p>The street-cleaning fine has been <b>indexed to inflation + agency labor costs every year
+        since 2009</b> — but the last two hikes (+7.8% in 2024, +8.2% in 2025) were approved
+        <b>"in excess of" that index</b> to help close SFMTA's deficit. $8.50 of every ticket is
+        state-mandated courthouse surcharges. The schedule holds $105 through mid-2028.</p></div>
+      <div class="ctx"><h3>It funds Muni</h3>
+        <p>By City Charter (§8A.105), parking fines flow into the <b>Municipal Transportation Fund</b> —
+        they help pay for transit. The Controller's books show <b>$84–96M actually collected per
+        year</b> recently — about 6–7% of SFMTA's ~$1.5B operating budget, against a projected
+        <b>$307M+ deficit</b>.</p></div>
+      <div class="ctx"><h3>1.4–1.75× other cities</h3>
+        <p>SF's $105 street-cleaning ticket vs <b>Los Angeles $73</b> (unchanged since 2012),
+        <b>New York $65</b>, <b>Chicago $60</b>. SF's COVID pause shows in the chart — enforcement
+        was suspended entirely from mid-March to June 2020.</p></div>
+      <div class="ctx"><h3>If you can't pay</h3>
+        <p>SF's Financial Justice Project offers a <b>$5-enrollment payment plan</b> ($25–50/month,
+        up to 18 months, late penalties wiped on completion) and <b>free community service</b> for
+        qualifying residents. About <b>a third of first-level appeals succeed</b> — contesting a wrong
+        ticket is not hopeless.</p></div>
+    </div>
+    <p class="note"><b>Honesty notes:</b> all dollar figures are fines <b>issued</b> (assessed at the
+      fine printed on each citation) — not what the city collects. Actual collections run lower:
+      the Controller books <b>$84–96M/yr</b> in parking-fine revenue, 16% of 2018–23 tickets still
+      carried unpaid balances as of late 2023, and ~2–3% of citations are dismissed on appeal.
+      Neighborhood totals cover street-cleaning tickets only, matched via the city's address base
+      (~60% of rows match cleanly). Data: DataSF <code>ab4h-6ztd</code>; sources for all context
+      claims in the <a href="https://github.com/alevizio/curb">repo</a>.</p>
+  </section>
+
+  <div class="cta-band">
+    <h2>Don't be a data point.</h2>
+    <a class="btn" href="/">Open the live map →</a>
+    <p>CURB shows every SF block's sweeping schedule — and the time tickets actually land on it, from this
+      same citation data. Free, no accounts, push alerts before your block is swept.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Built from public records by <a href="/about">CURB</a> · Data: <a href="https://data.sfgov.org" rel="noopener">DataSF</a> ·
+    <a href="https://github.com/alevizio/curb" rel="noopener">Source</a> · The posted sign is always the source of truth.
+    Figures update with the data; methodology in the <a href="https://github.com/alevizio/curb" rel="noopener">repo</a>.</div>
+</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt$=v=>v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+Math.round(v/1e3)+'K';
+const fmtN=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'K':String(v);
+const INK='#17150F',SOFT='#4A4536',RED='#C22A26',GREEN='#157A44',AMBER='#8F5A06',PAPER='#F2ECDF';
+const VNAMES={'STR CLEAN':'Street cleaning','ST CLEANIN':'Street cleaning (legacy)','MTR OUT DT':'Expired meter',
+ 'RES/OT':'Permit area overstay','PRK METER':'Meter violation','METER DTN':'Meter (downtown)','RESIDENTL':'Permit area',
+ 'PRK MTR #1':'Meter violation','DBL PARK':'Double parking','RED ZONE':'Red zone','TOW ZONE':'Tow-away zone',
+ 'YEL ZONE':'Yellow zone','DRIVEWAY':'Blocked driveway','SIDEWALK':'On the sidewalk','ON SIDEWLK':'On the sidewalk',
+ 'HYD':'Fire hydrant','WHITE ZN':'White zone','STREET CLN':'Street cleaning'};
+const vname=v=>VNAMES[v]||v;
+
+function svgEl(s){const d=document.createElementNS('http://www.w3.org/2000/svg','g');d.innerHTML=s;return d;}
+function draw(id,inner){const svg=$(id);svg.innerHTML=inner;}
+
+fetch('data/stats.json').then(r=>r.json()).then(S=>{
+  const yearly=S.yearly.filter(r=>r.y>=2009&&r.y<=2026);   // 2008 is partial in the dataset
+  const totalRev=S.yearly.reduce((s,r)=>s+r.rev,0), totalN=S.yearly.reduce((s,r)=>s+r.n,0);
+  $('bigTotal').textContent=fmt$(totalRev);
+  $('bigCount').textContent=(totalN/1e6).toFixed(1);
+
+  // --- yearly bars ---
+  {
+    const W=960,H=320,P={l:54,r:8,t:18,b:38},n=yearly.length;
+    const bw=(W-P.l-P.r)/n, max=Math.max(...yearly.map(r=>r.rev));
+    let s='';
+    [0,.5,1].forEach(f=>{const y=P.t+(H-P.t-P.b)*(1-f);
+      s+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="${SOFT}" stroke-opacity=".25" stroke-width="1.5"/>`
+        +`<text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="11" fill="${SOFT}">${fmt$(max*f)}</text>`;});
+    yearly.forEach((r,i)=>{
+      const h=(H-P.t-P.b)*(r.rev/max), x=P.l+i*bw, isCovid=r.y===2020||r.y===2021;
+      s+=`<rect x="${x+2}" y="${H-P.b-h}" width="${bw-5}" height="${h}" rx="3"
+        fill="${isCovid?AMBER:RED}"/>`;
+      if(r.y%2===1||r.y===2026)s+=`<text x="${x+bw/2}" y="${H-P.b+16}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
+    });
+    const covid=yearly.find(r=>r.y===2020);
+    if(covid){const i=yearly.indexOf(covid),x=P.l+i*bw+bw/2;
+      s+=`<text x="${x}" y="${P.t+10}" text-anchor="middle" font-size="11" font-weight="800" fill="${AMBER}">covid ↓</text>`;}
+    draw('chartYears',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
+    const last=yearly.find(r=>r.y===2025)||yearly[yearly.length-2];
+    $('yearStats').innerHTML=`
+      <div class="stat"><div class="v red">${fmt$(last.rev)}</div><div class="l">assessed in ${last.y}</div></div>
+      <div class="stat"><div class="v">${fmtN(last.n)}</div><div class="l">tickets in ${last.y}</div></div>
+      <div class="stat"><div class="v amber">${fmt$(last.rev/365)}</div><div class="l">per day</div></div>
+      <div class="stat"><div class="v green">${fmt$(last.rev/last.n)}</div><div class="l">average ticket</div></div>`;
+  }
+
+  // --- violations (merge the two street-cleaning codes) ---
+  {
+    const merged={}; S.byViolation.forEach(r=>{const k=vname(r.v);merged[k]=merged[k]||{n:0,rev:0};merged[k].n+=r.n;merged[k].rev+=r.rev;});
+    const rows=Object.entries(merged).map(([v,o])=>({v,...o})).sort((a,b)=>b.n-a.n).slice(0,10);
+    const W=960,rh=40,P={l:8,r:8,t:6},H=P.t+rows.length*rh+6;
+    const max=rows[0].n; let s='';
+    rows.forEach((r,i)=>{
+      const y=P.t+i*rh, w=(W-260)*(r.n/max), sweep=r.v.startsWith('Street cleaning');
+      s+=`<rect x="200" y="${y+6}" width="${Math.max(w,4)}" height="${rh-14}" rx="5" fill="${sweep?RED:INK}" fill-opacity="${sweep?1:.82}"/>
+        <text x="192" y="${y+rh/2+4}" text-anchor="end" font-size="13" fill="${INK}">${r.v}</text>
+        <text x="${204+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12.5" font-weight="800" fill="${sweep?RED:SOFT}">${fmtN(r.n)} · ${fmt$(r.rev)}</text>`;
+    });
+    $('chartViol').setAttribute('height',H);
+    draw('chartViol',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
+  }
+
+  // --- sweep per year + avg fine ---
+  {
+    const ys=S.yearlySweep.filter(r=>r.y>=2009&&r.y<=2026);
+    const W=960,H=300,P={l:54,r:60,t:16,b:36},n=ys.length;
+    const bw=(W-P.l-P.r)/n,maxN=Math.max(...ys.map(r=>r.n)),maxA=Math.max(...ys.map(r=>r.avg));
+    let s='';
+    ys.forEach((r,i)=>{
+      const h=(H-P.t-P.b)*(r.n/maxN),x=P.l+i*bw;
+      s+=`<rect x="${x+2}" y="${H-P.b-h}" width="${bw-5}" height="${h}" rx="3" fill="${INK}" fill-opacity=".85"/>`;
+      if(r.y%2===1||r.y===2026)s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
+    });
+    const pts=ys.map((r,i)=>`${P.l+i*bw+bw/2},${P.t+(H-P.t-P.b)*(1-r.avg/maxA)}`).join(' ');
+    s+=`<polyline points="${pts}" fill="none" stroke="${RED}" stroke-width="3.5" stroke-linejoin="round"/>`;
+    const lastY=ys[ys.length-1],ly=P.t+(H-P.t-P.b)*(1-lastY.avg/maxA);
+    s+=`<text x="${W-P.r+6}" y="${ly+4}" font-size="13" font-weight="800" fill="${RED}">$${Math.round(lastY.avg)}</text>`;
+    const firstY=ys[0],fy=P.t+(H-P.t-P.b)*(1-firstY.avg/maxA);
+    s+=`<text x="${P.l-8}" y="${fy+4}" text-anchor="end" font-size="13" font-weight="800" fill="${RED}">$${Math.round(firstY.avg)}</text>`;
+    draw('chartSweep',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
+    const recent=ys.find(r=>r.y===2025)||ys[ys.length-2];
+    $('sweepStats').innerHTML=`
+      <div class="stat"><div class="v">${fmtN(recent.n)}</div><div class="l">sweep tickets in ${recent.y}</div></div>
+      <div class="stat"><div class="v red">${fmt$(recent.rev)}</div><div class="l">assessed in ${recent.y}</div></div>
+      <div class="stat"><div class="v amber">$${Math.round(firstY.avg)} → $${Math.round(lastY.avg)}</div><div class="l">avg fine, ${firstY.y} → ${lastY.y}</div></div>
+      <div class="stat"><div class="v green">22 min</div><div class="l">median block's full ticket span</div></div>`;
+  }
+
+  // --- hour histogram ---
+  {
+    const hs=S.sweepHour;const W=960,H=260,P={l:14,r:14,t:24,b:34};
+    const bw=(W-P.l-P.r)/24,max=Math.max(...hs.map(r=>r.n));
+    let s='';
+    for(let h=0;h<24;h++){
+      const r=hs.find(x=>x.h===h)||{n:0};
+      const bh=(H-P.t-P.b)*(r.n/max),x=P.l+h*bw;
+      const col=h<6?AMBER:(h>=8&&h<12?RED:INK);
+      s+=`<rect x="${x+2}" y="${H-P.b-bh}" width="${bw-5}" height="${Math.max(bh,2)}" rx="3" fill="${col}" fill-opacity=".9"/>`;
+      if(h%3===0)s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p'}</text>`;
+    }
+    s+=`<text x="${P.l+2*bw}" y="${P.t-6}" font-size="11.5" font-weight="800" fill="${AMBER}">overnight commercial</text>`;
+    s+=`<text x="${P.l+9.4*bw}" y="${P.t-6}" font-size="11.5" font-weight="800" fill="${RED}">morning residential</text>`;
+    draw('chartHour',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
+  }
+
+  // --- neighborhoods ---
+  {
+    const rows=S.hoods.slice(0,15);
+    const W=960,rh=32,P={t:4},H=P.t+rows.length*rh+6,max=rows[0].rev;
+    let s='';
+    rows.forEach((r,i)=>{
+      const y=P.t+i*rh,w=(W-300)*(r.rev/max);
+      s+=`<rect x="226" y="${y+5}" width="${Math.max(w,4)}" height="${rh-11}" rx="4" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>
+        <text x="218" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
+        <text x="${230+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>`;
+    });
+    $('chartHoods').setAttribute('height',H);
+    draw('chartHoods',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
+    const ts=S.topStreets.slice(0,8);
+    $('streetsNote').innerHTML='<b>The heaviest streets (2 yrs of sweeping fines):</b> '+
+      ts.map(t=>`${t.street.charAt(0)+t.street.slice(1).toLowerCase()} (${fmt$(t.rev)})`).join(' · ');
+  }
+}).catch(()=>{document.querySelectorAll('.panel').forEach(p=>p.innerHTML='<p class="note">Couldn\'t load the data — refresh to retry.</p>');});
+</script>
+</body>
+</html>

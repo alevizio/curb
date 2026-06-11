@@ -153,6 +153,8 @@
   .aclear{display:block;width:100%;margin-top:10px;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;
     letter-spacing:.05em;border:2px solid var(--ink);border-radius:9px;background:var(--paper);padding:8px;cursor:pointer}
   .aclear[hidden]{display:none}
+  .lp-link{display:block;margin-top:12px;padding-top:11px;border-top:1.5px solid rgba(23,21,15,.15);
+    font-size:11.5px;font-weight:800;color:var(--red-text);text-decoration:none;text-transform:uppercase;letter-spacing:.03em}
 
   /* vertical padding leaves room for the chips' hit-expansion (overflow-x clips pseudos) */
   .dayrow{display:flex;gap:6px;align-items:center;pointer-events:auto;overflow-x:auto;
@@ -451,6 +453,7 @@
     <div class="lp-sec">Highlight a permit area</div>
     <div class="agrid" id="areaGrid"></div>
     <button class="aclear" id="areaClear" hidden>Clear area highlight</button>
+    <a class="lp-link" href="/tickets">The ticket economy → what SF fines, by year &amp; neighborhood</a>
   </div>
 </div>
 
