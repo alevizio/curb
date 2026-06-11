@@ -40,6 +40,11 @@
 <!-- Optional local key injection (config.js is gitignored; absent in the public repo → CARTO fallback). -->
 <script src="config.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://data.sfgov.org">
+<link rel="preconnect" href="https://tile.googleapis.com">
+<link rel="preconnect" href="https://a.basemap.cartocdn.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
@@ -724,21 +729,29 @@ async function ensureOverview(){
     week1:m&1?'1':'0',week2:m&2?'1':'0',week3:m&4?'1':'0',week4:m&8?'1':'0',week5:m&16?'1':'0'}))}));
   return OVR;
 }
+let ovrDrawTok=0;
 async function drawOverview(){
   try{await ensureOverview();}catch(e){return;}  // on failure the "find your spot" hint stays
   const key=String(dayFilter)+'|'+statusOn.green+statusOn.amber+statusOn.red+'|'+Math.floor(Date.now()/6e5);
   if(key!==ovrKey){
     ovrKey=key;
+    const my=++ovrDrawTok;
     overviewLayer.clearLayers();
-    OVR.forEach(b=>{
-      let rules=b.rules;
-      if(dayFilter!=null){rules=rules.filter(r=>normDay(r.weekday)===dayFilter);if(!rules.length)return;}
-      let rank=0,color=getCSS('--gray');
-      rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
-      const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
-      if(cls!=='gray'&&!statusOn[cls])return;
-      L.polyline([b.a,b.z],{renderer:overviewRenderer,color,weight:2,opacity:.8,interactive:false}).addTo(overviewLayer);
-    });
+    // chunked across frames: 12k synchronous polylines is a visible main-thread stall on phones
+    const CHUNK=1500;
+    for(let i=0;i<OVR.length;i+=CHUNK){
+      if(my!==ovrDrawTok)return;  // superseded by a newer filter change mid-draw
+      OVR.slice(i,i+CHUNK).forEach(b=>{
+        let rules=b.rules;
+        if(dayFilter!=null){rules=rules.filter(r=>normDay(r.weekday)===dayFilter);if(!rules.length)return;}
+        let rank=0,color=getCSS('--gray');
+        rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
+        const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
+        if(cls!=='gray'&&!statusOn[cls])return;
+        L.polyline([b.a,b.z],{renderer:overviewRenderer,color,weight:2,opacity:.8,interactive:false}).addTo(overviewLayer);
+      });
+      if(i+CHUNK<OVR.length)await new Promise(r=>requestAnimationFrame(r));
+    }
   }
   if(!map.hasLayer(overviewLayer))overviewLayer.addTo(map);
   const hint=document.getElementById('hint');
@@ -829,6 +842,18 @@ const LOAD_COLORS={White:'#ffffff',Yellow:'#E0A21E',Red:'#E0322E',Green:'#1F9E5A
 const LOAD_LABEL={White:'Passenger loading',Yellow:'Commercial loading',Red:'Truck loading (6-wheel)',Green:'Short-term parking',Orange:'Bus loading'};
 async function ensureLoadCache(){
   if(loadCache)return loadCache;
+  // Precomputed static asset first (one cached CDN file, ~250KB wired vs ~3MB live).
+  try{
+    const r=await fetch('data/zones.json',{cache:'force-cache'});
+    if(r.ok){
+      const d=await r.json();
+      meterPts=d.meters;
+      loadCache=d.zones.map(([lat,lng,color,days,from,to,limit])=>({lat,lng,color,
+        label:LOAD_LABEL[color]||color,days,from,to,limit}));
+      return loadCache;
+    }
+  }catch(_){}
+  // Fallback: live Socrata joins (e.g. asset missing on an old deploy).
   // Meter coords keyed by post_id (one fetch), then the color-curb operating rules (one fetch).
   const [meters,rules]=await Promise.all([
     fetch(METER+`?$select=post_id,latitude,longitude&$where=`+encodeURIComponent(`latitude IS NOT NULL AND on_offstreet_type='ON'`)+`&$limit=50000`).then(r=>r.json()),

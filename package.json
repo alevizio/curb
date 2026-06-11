@@ -9,7 +9,8 @@
     "og": "sh og/render.sh",
     "build:enforcement": "node scripts/build-enforcement.mjs",
     "deploy": "vercel",
-    "build:overview": "node scripts/build-overview.mjs"
+    "build:overview": "node scripts/build-overview.mjs",
+    "build:zones": "node scripts/build-zones.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.34.3",

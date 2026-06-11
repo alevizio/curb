@@ -151,6 +151,12 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   filter (toggles `dayFilter` to today).
 - **Canonical domain is `curb.guide`** — all og/twitter meta URLs + the OG card footer use
   it (absolute). Add `https://curb.guide/*` to the Google Maps key referrer allowlist.
+- **Performance invariants**: head carries preconnects to every data origin (fonts.gstatic,
+  cdnjs, data.sfgov.org, tile.googleapis.com, carto). The citywide overview draws in
+  1,500-line chunks across frames (`drawOverview`, token-guarded) — never synchronously.
+  Meters/loading zones load from the static `data/zones.json` (regen: `npm run build:zones`);
+  the live Socrata join survives only as a fallback. Static data assets: enforcement.json,
+  overview.json, zones.json — all `npm run build:*`, refresh every few months.
 - **Socrata gotcha**: any `$where` containing `%` wildcards must be percent-encoded
   (see loadMeterChip) or the request dies before CORS and fails silently. Page big tables
   with a `:id` cursor (`:id > 'last'`), NOT deep `$offset` (times out past ~400k).
