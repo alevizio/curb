@@ -8,7 +8,8 @@
     "dev": "npx serve . -l 3000",
     "og": "sh og/render.sh",
     "build:enforcement": "node scripts/build-enforcement.mjs",
-    "deploy": "vercel"
+    "deploy": "vercel",
+    "build:overview": "node scripts/build-overview.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.34.3",

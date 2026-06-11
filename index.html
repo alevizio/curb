@@ -553,6 +553,9 @@ const meterRenderer=L.canvas({padding:.3}); // thousands of dots — SVG would c
 let meterOn=false, meterPts=null;           // [[lat,lng],...] every active on-street meter
 const routeLayer=L.layerGroup().addTo(map); // inferred truck routes (from citation times)
 let routeOn=false;
+const overviewLayer=L.layerGroup();         // citywide endpoints layer for zoom < 15
+const overviewRenderer=L.canvas({padding:.3});
+let OVR=null, ovrKey='';                    // data/overview.json blocks + render cache key
 let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without a sweep that day are hidden
 let statusOn={green:true,amber:true,red:true};  // legend toggles: show/hide curb lines by status
 let lastRows=[];     // raw sweep rows from the last viewport fetch, for redraws on filter change
@@ -654,7 +657,11 @@ function distSqToLineMeters(lat,lng,latlngs){
 /* ---------- viewport loading ---------- */
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
-  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];hint.style.opacity='1';hint.style.visibility='visible';return;}
+  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];
+    hint.style.opacity='1';hint.style.visibility='visible';
+    drawOverview();  // citywide endpoints take over below data zoom (hides the hint when ready)
+    return;}
+  if(map.hasLayer(overviewLayer))map.removeLayer(overviewLayer);  // detail zoom: live data resumes
   hint.style.opacity='0';hint.style.visibility='hidden';  // opacity alone leaves the about-link invisibly clickable
   const b=map.getBounds().pad(0.15);
   const poly=`POLYGON((${b.getWest()} ${b.getSouth()}, ${b.getEast()} ${b.getSouth()}, ${b.getEast()} ${b.getNorth()}, ${b.getWest()} ${b.getNorth()}, ${b.getWest()} ${b.getSouth()}))`;
@@ -671,6 +678,37 @@ async function loadViewport(){
   if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
   if(loadOn) drawLoadZones(); else loadLayer.clearLayers();
   if(meterOn) drawMeters(); else meterLayer.clearLayers();
+}
+
+/* ---------- citywide overview (zoom < 15): block endpoints + rules, colored live ---------- */
+async function ensureOverview(){
+  if(OVR)return OVR;
+  const r=await fetch('data/overview.json',{cache:'force-cache'}); if(!r.ok)throw 0;
+  const d=await r.json();
+  OVR=d.b.map(b=>({a:[b[1],b[0]],z:[b[3],b[2]],rules:b[4].map(([dw,f,t,m])=>({
+    weekday:DAYLBL[dw],fromhour:String(f),tohour:String(t),
+    week1:m&1?'1':'0',week2:m&2?'1':'0',week3:m&4?'1':'0',week4:m&8?'1':'0',week5:m&16?'1':'0'}))}));
+  return OVR;
+}
+async function drawOverview(){
+  try{await ensureOverview();}catch(e){return;}  // on failure the "find your spot" hint stays
+  const key=String(dayFilter)+'|'+statusOn.green+statusOn.amber+statusOn.red+'|'+Math.floor(Date.now()/6e5);
+  if(key!==ovrKey){
+    ovrKey=key;
+    overviewLayer.clearLayers();
+    OVR.forEach(b=>{
+      let rules=b.rules;
+      if(dayFilter!=null){rules=rules.filter(r=>normDay(r.weekday)===dayFilter);if(!rules.length)return;}
+      let rank=0,color=getCSS('--gray');
+      rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
+      const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
+      if(cls!=='gray'&&!statusOn[cls])return;
+      L.polyline([b.a,b.z],{renderer:overviewRenderer,color,weight:2,opacity:.8,interactive:false}).addTo(overviewLayer);
+    });
+  }
+  if(!map.hasLayer(overviewLayer))overviewLayer.addTo(map);
+  const hint=document.getElementById('hint');
+  hint.style.opacity='0';hint.style.visibility='hidden';  // the overview replaces the empty-map hint
 }
 
 /* ---------- inferred truck routes: connect blocks in ticket-time order ---------- */
@@ -1239,6 +1277,7 @@ function setDayFilter(v){
   const dc=document.getElementById('dateChip'), today=(v!==null&&v===new Date().getDay());
   dc.classList.toggle('on',today); dc.setAttribute('aria-pressed',today);
   drawSegments(lastRows);
+  if(map.getZoom()<MIN_ZOOM_DATA)drawOverview();  // recolor the citywide view too
 }
 (function initDayRow(){
   const now=new Date();
@@ -1313,6 +1352,7 @@ function refreshLayerBadges(){
     const k=b.dataset.st; statusOn[k]=!statusOn[k];
     b.classList.toggle('on',statusOn[k]); b.setAttribute('aria-pressed',statusOn[k]);
     refreshLayerBadges(); drawSegments(lastRows);
+    if(map.getZoom()<MIN_ZOOM_DATA)drawOverview();
   };});
   (async()=>{
     try{
