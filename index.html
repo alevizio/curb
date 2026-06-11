@@ -589,12 +589,12 @@ let rppCache=[];   // {latlngs, area, hrlimit, days, from, to, regulation, excep
 let fetchTok=0, rppOn=false;
 let loadOn=false, loadCache=null;  // loadCache=[{lat,lng,color,label,days,from,to,limit}] (loaded once)
 const meterLayer=L.layerGroup().addTo(map); // all metered posts (grey dots, canvas-rendered)
-const meterRenderer=L.canvas({padding:.3}); // thousands of dots — SVG would crawl
+const meterRenderer=L.canvas({padding:.3}).addTo(map); // pinned: 1.9.4 canvas freeze if containers are recreated (leaflet#9542)
 let meterOn=false, meterPts=null;           // [[lat,lng],...] every active on-street meter
 const routeLayer=L.layerGroup().addTo(map); // inferred truck routes (from citation times)
 let routeOn=false;
 const overviewLayer=L.layerGroup();         // citywide endpoints layer for zoom < 15
-const overviewRenderer=L.canvas({padding:.3});
+const overviewRenderer=L.canvas({padding:.3}).addTo(map);  // pinned (see meterRenderer note)
 let OVR=null, ovrKey='';                    // data/overview.json blocks + render cache key
 let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without a sweep that day are hidden
 let statusOn={green:true,amber:true,red:true};  // legend toggles: show/hide curb lines by status
@@ -627,13 +627,14 @@ function nextSweep(rec){
   const fromH=parseInt(rec.fromhour,10); if(isNaN(fromH))return null;
   let toH=parseInt(rec.tohour,10); if(isNaN(toH))toH=fromH+1;
   const now=new Date();
-  for(let i=0;i<70;i++){
+  for(let i=0;i<150;i++){  // 150d covers the 119-day max week5 gap
     const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);
     if(d.getDay()!==dow)continue;
     const occ=Math.ceil(d.getDate()/7);
     if(occ<1||occ>5||!weeks[occ-1])continue;
     const start=new Date(d.getFullYear(),d.getMonth(),d.getDate(),fromH,0,0);
-    const end=new Date(d.getFullYear(),d.getMonth(),d.getDate(),toH,0,0);
+    let end=new Date(d.getFullYear(),d.getMonth(),d.getDate(),toH,0,0);
+    if(+end<=+start)end=new Date(+start+36e5);  // DST spring-forward can collapse 2-3am windows
     if(i===0&&now>=end)continue;
     return {start,end};
   }
@@ -702,7 +703,7 @@ async function loadViewport(){
     hint.style.opacity='1';hint.style.visibility='visible';
     drawOverview();  // citywide endpoints take over below data zoom (hides the hint when ready)
     return;}
-  if(map.hasLayer(overviewLayer))map.removeLayer(overviewLayer);  // detail zoom: live data resumes
+  if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}  // token bump: kill in-flight chunked draws
   hint.style.opacity='0';hint.style.visibility='hidden';  // opacity alone leaves the about-link invisibly clickable
   const b=map.getBounds().pad(0.15);
   const poly=`POLYGON((${b.getWest()} ${b.getSouth()}, ${b.getEast()} ${b.getSouth()}, ${b.getEast()} ${b.getNorth()}, ${b.getWest()} ${b.getNorth()}, ${b.getWest()} ${b.getSouth()}))`;
