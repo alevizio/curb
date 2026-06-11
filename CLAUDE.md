@@ -135,6 +135,9 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   Bottom-left: the tappable curb-color legend (.legend2/.lst — show/hide per status;
   hollow dashed swatch = hidden) + the sheet. Toggling Truck routes below z15
   auto-zooms to 16 (citywide view has no street data); routeLayer clears on zoom-out.
+  Truck routes read `segCacheAll` (every side passing the day filter), NOT `segCache`
+  (status-filtered, drives taps/nearest) — hiding all curb colors must leave routes
+  visible on their own. Keep both caches cleared together (drawSegments start + z<15).
 - **Permit-area browser** (`#areaGrid` discs → `showArea()`, `areaLayer`): disc grid of
   all RPP areas (fetched once, `^[A-Z]{1,2}$` filters junk; colors via `areaColor()` from
   the sign-disc palette — same color drives disc, badge, map highlight, and sheet chip);
