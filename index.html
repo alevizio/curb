@@ -317,6 +317,29 @@
   .ios-note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
   @keyframes spin{to{transform:rotate(360deg)}}
 
+  /* ---- motion (gated: transform/opacity only, exponential ease-outs) ---- */
+  @media (prefers-reduced-motion:no-preference){
+    .layerspanel:not([hidden]){animation:panelin .2s cubic-bezier(.16,1,.3,1);transform-origin:top right}
+    .sug:not([hidden]){animation:panelin .16s cubic-bezier(.16,1,.3,1);transform-origin:top left}
+    .calchoice:not([hidden]){animation:panelin .18s cubic-bezier(.16,1,.3,1);transform-origin:top left}
+    #layerBadges i{animation:bpop .18s cubic-bezier(.16,1,.3,1)}
+    .abigdisc{animation:discin .32s cubic-bezier(.16,1,.3,1)}
+    .aboundary{animation:fadein .5s ease-out}
+    .rarrow{animation:fadein .3s both}
+    .rstart,.rend{animation:fadein .3s both .22s}
+    .toggle{transition:background-color .15s,color .15s,border-color .15s}
+    .toggle:active,.dchip:active,.adot:active{transform:translate(1px,1px)}
+    .toast{transform:translate(-50%,5px);transition:opacity .25s,transform .25s}
+    .toast.show{transform:translate(-50%,0)}
+    /* hover weight bumps + opacity changes glide instead of snapping (SVG pane only;
+       the heavy overview/meter layers are canvas and unaffected) */
+    .leaflet-overlay-pane svg path{transition:stroke-width .15s ease,opacity .2s ease}
+  }
+  @keyframes panelin{from{opacity:0;transform:scale(.96) translateY(-5px)}}
+  @keyframes bpop{from{opacity:0;transform:scale(.4)}}
+  @keyframes discin{from{opacity:0;transform:scale(.55)}}
+  @keyframes fadein{from{opacity:0}}
+
   /* Hover preview tooltip (hover-capable pointers only — bound in drawSegments) */
   .leaflet-tooltip.curbtip{background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:12px;
     box-shadow:3px 3px 0 var(--ink);padding:9px 12px;white-space:normal;width:max-content;max-width:280px;
@@ -776,7 +799,7 @@ function drawRoutes(){
         const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI+90;  // triangle points up by default
         L.marker([(pts[i-1][0]+pts[i][0])/2,(pts[i-1][1]+pts[i][1])/2],{interactive:false,
           icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],
-            html:`<div class="rarrow" style="transform:rotate(${ang}deg)"></div>`})}).addTo(routeLayer);
+            html:`<div class="rarrow" style="transform:rotate(${ang}deg);animation-delay:${Math.min(i*14,210)}ms"></div>`})}).addTo(routeLayer);
       }
       L.marker(pts[0],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
         html:`<div class="rstart">START ~${fmtMin(run[0].t)}</div>`})}).addTo(routeLayer);
@@ -1405,7 +1428,7 @@ async function showArea(letter){
       const cx=hull.reduce((s,p)=>s+p[0],0)/hull.length, cy=hull.reduce((s,p)=>s+p[1],0)/hull.length;
       const grown=hull.map(p=>[cx+(p[0]-cx)*1.045, cy+(p[1]-cy)*1.045]);
       L.polygon(grown,{color:col,weight:3.5,dashArray:'10 8',fillColor:col,fillOpacity:.07,
-        lineJoin:'round',interactive:false}).addTo(areaLayer);
+        lineJoin:'round',interactive:false,className:'aboundary'}).addTo(areaLayer);
       L.marker([cx,cy],{interactive:false,icon:L.divIcon({className:'',iconSize:[46,46],iconAnchor:[23,23],
         html:`<div class="abigdisc" style="background:${col}">${letter}</div>`})}).addTo(areaLayer);
     }
