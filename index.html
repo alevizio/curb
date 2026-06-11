@@ -62,8 +62,19 @@
     box-shadow:var(--shadow);border:0;cursor:pointer}
   .logo:active{transform:translate(2px,2px);box-shadow:none}
   .logo .o{color:var(--red)}
-  .field{flex:1;display:flex;align-items:center;background:var(--paper);border:2.5px solid var(--ink);
+  .fwrap{flex:1;position:relative;min-width:0}
+  .field{display:flex;align-items:center;background:var(--paper);border:2.5px solid var(--ink);
     border-radius:11px;box-shadow:var(--shadow);overflow:hidden}
+  /* search autocomplete dropdown */
+  .sug{position:absolute;left:0;right:0;top:calc(100% + 7px);background:var(--paper);border:2.5px solid var(--ink);
+    border-radius:12px;box-shadow:var(--shadow);overflow:hidden;z-index:660}
+  .sugi{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:0;background:transparent;
+    font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;text-align:left}
+  .sugi+.sugi{border-top:1.5px solid rgba(23,21,15,.12)}
+  .sugi.sel,.sugi:hover{background:#fff}
+  .sugi .k{flex:none;width:9px;height:9px;border-radius:3px}
+  .sugi .k.addr{background:var(--meter)} .sugi .k.st{background:var(--ink)}
+  .sugi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .field svg{margin-left:12px;width:18px;height:18px;flex:none}
   #q{flex:1;border:0;background:transparent;outline:none;font:inherit;font-size:16px;font-weight:600;padding:11px 12px 11px 8px;min-width:0}
   #q::placeholder{color:#938d7c;font-weight:500}
@@ -342,12 +353,16 @@
 <div class="top">
   <div class="barrow">
     <button class="logo" id="logoBtn" aria-label="About CURB — what the colors mean">CURB</button>
+    <div class="fwrap">
     <div class="field">
       <svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-amber)" d="M6 11.375c2.96853 0 5.375 -2.40647 5.375 -5.375S8.96853 0.625 6 0.625 0.625 3.03147 0.625 6 3.03147 11.375 6 11.375Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M1.25 6c0 -2.62335 2.12665 -4.75 4.75 -4.75S10.75 3.37665 10.75 6 8.62335 10.75 6 10.75 1.25 8.62335 1.25 6ZM6 0C2.68629 0 0 2.68629 0 6s2.68629 6 6 6c1.20461 0 2.3263 -0.355 3.26617 -0.9661l2.60003 2.6001c0.4881 0.4881 1.2796 0.4881 1.7678 0 0.4881 -0.4882 0.4881 -1.2797 0 -1.7678l-2.6001 -2.60003C11.645 8.3263 12 7.20461 12 6c0 -3.31371 -2.68629 -6 -6 -6Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>
-      <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Search a street…">
+      <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Search a street…"
+        role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="sug">
       <button class="loc" id="locate" aria-label="Use my location">
         <svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-blue)" d="M8.83989 12.7568 12.9737 1.57116c0.0174 -0.04707 0.0263 -0.09685 0.0263 -0.14703C13 1.18989 12.8101 1 12.5759 1h-0.0073c-0.0455 0 -0.0906 0.00717 -0.1338 0.02126L1.26195 4.66458C1.10572 4.71553 1 4.8612 1 5.02552c0 0.13846 0.07537 0.26593 0.19669 0.33266l4.51046 2.48075c0.19007 0.10454 0.34099 0.26804 0.43 0.46585l2.01407 4.47572c0.06012 0.1336 0.19299 0.2195 0.33948 0.2195 0.15583 0 0.29517 -0.0971 0.34919 -0.2432Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="m12.241 0.427083 0.0081 -0.00258c0.7792 -0.246979 1.6273 0.507009 1.3109 1.363367l-0.0013 0.00331L9.42613 12.9735c-0.14471 0.3915 -0.51798 0.6515 -0.93543 0.6515 -0.39243 0 -0.74839 -0.2301 -0.90943 -0.588L5.56966 8.56676c-0.00083 -0.00179 -0.00164 -0.00359 -0.00246 -0.00539 -0.03338 -0.07418 -0.08997 -0.1355 -0.16125 -0.1747 -0.00263 -0.00144 -0.00524 -0.00291 -0.00784 -0.00438L0.895489 5.90585C0.574456 5.72928 0.375 5.39194 0.375 5.02556c0 -0.43485 0.279762 -0.82034 0.69319 -0.95515L12.241 0.427083ZM6.70395 8.04144c-0.14347 -0.31485 -0.38367 -0.57566 -0.6856 -0.74449 -0.00331 -0.0019 -0.00664 -0.00377 -0.01 -0.00562L1.99383 5.08335l10.25097 -3.3427L8.46773 11.9608 6.7071 8.04834c-0.00104 -0.00231 -0.00209 -0.00461 -0.00315 -0.0069Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>
       </button>
+    </div>
+    <div class="sug" id="sug" hidden role="listbox" aria-label="Search suggestions"></div>
     </div>
   </div>
   <div class="dayrow" aria-label="Filter by sweep day">
@@ -1298,10 +1313,69 @@ document.getElementById('routeToggle').onclick=function(){
   } else routeLayer.clearLayers();
 };
 
-/* ---------- search ---------- */
-let stimer=null;
-document.getElementById('q').addEventListener('keydown',ev=>{if(ev.key==='Enter')doSearch();});
-document.getElementById('q').addEventListener('input',()=>{clearTimeout(stimer);stimer=setTimeout(doSearch,500);});
+/* ---------- search + autocomplete ---------- */
+// Typing shows suggestions (street names instantly from a one-time corridor list;
+// addresses live from EAS); Enter or a pick navigates — the map never flies mid-keystroke.
+let sugTimer=null, sugIdx=-1, sugItems=[], corridors=null;
+async function ensureCorridors(){
+  if(corridors)return;
+  try{
+    const r=await fetch(SWEEP+`?$select=corridor&$group=corridor&$limit=4000`);
+    corridors=(await r.json()).map(x=>x.corridor).filter(Boolean);
+  }catch(_){corridors=[];}
+}
+function hideSug(){
+  const s=document.getElementById('sug');
+  s.hidden=true; s.innerHTML=''; sugIdx=-1; sugItems=[];
+  document.getElementById('q').setAttribute('aria-expanded','false');
+}
+function renderSug(){
+  const s=document.getElementById('sug');
+  if(!sugItems.length){hideSug();return;}
+  s.innerHTML=sugItems.map((it,i)=>
+    `<button class="sugi${i===sugIdx?' sel':''}" role="option" aria-selected="${i===sugIdx}" data-i="${i}">
+      <i class="k ${it.kind==='addr'?'addr':'st'}"></i><span>${it.t}</span></button>`).join('');
+  s.hidden=false;
+  document.getElementById('q').setAttribute('aria-expanded','true');
+  s.querySelectorAll('.sugi').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>pickSug(+b.dataset.i);});
+}
+function pickSug(i){
+  const it=sugItems[i]; if(!it)return;
+  document.getElementById('q').value=it.t;
+  hideSug();
+  if(it.kind==='addr'&&it.d&&it.d.latitude){placeYou(+it.d.latitude,+it.d.longitude,true,it.d.cnn);}
+  else doSearch();
+}
+async function updateSug(){
+  const v=document.getElementById('q').value.trim();
+  if(v.length<2){hideSug();return;}
+  await ensureCorridors();
+  const items=[];
+  const addr=normalizedAddressQuery(v);
+  if(addr){
+    try{
+      const r=await fetch(ADDR+`?$select=address,latitude,longitude,cnn&$where=`
+        +encodeURIComponent(`address like '${soql(addr.number+' '+addr.street)}%'`)+`&$limit=4&$order=address`);
+      (await r.json()).forEach(d=>items.push({t:d.address,kind:'addr',d}));
+    }catch(_){}
+  }
+  if(v===document.getElementById('q').value.trim()){  // drop stale async results
+    const q=v.toUpperCase();
+    corridors.filter(c=>c.toUpperCase().includes(q)).slice(0,addr&&items.length?3:6)
+      .forEach(c=>items.push({t:c,kind:'street'}));
+    sugItems=items; sugIdx=-1; renderSug();
+  }
+}
+document.getElementById('q').addEventListener('keydown',ev=>{
+  const open=!document.getElementById('sug').hidden;
+  if(ev.key==='ArrowDown'&&open){ev.preventDefault();sugIdx=Math.min(sugIdx+1,sugItems.length-1);renderSug();}
+  else if(ev.key==='ArrowUp'&&open){ev.preventDefault();sugIdx=Math.max(sugIdx-1,-1);renderSug();}
+  else if(ev.key==='Escape'&&open){hideSug();}
+  else if(ev.key==='Enter'){ev.preventDefault(); if(open&&sugIdx>=0)pickSug(sugIdx); else {hideSug();doSearch();}}
+});
+document.getElementById('q').addEventListener('input',()=>{clearTimeout(sugTimer);sugTimer=setTimeout(updateSug,220);});
+document.getElementById('q').addEventListener('focus',ensureCorridors);
+document.addEventListener('click',e=>{if(!e.target.closest('.fwrap'))hideSug();});
 function soql(s){return String(s).replace(/'/g,"''");}
 function normalizedAddressQuery(v){
   let s=v.trim().replace(/[,#].*$/,'').replace(/\s+/g,' ');
