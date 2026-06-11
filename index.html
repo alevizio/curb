@@ -614,7 +614,8 @@ const areaLayer=L.layerGroup().addTo(map); // selected permit-area highlight (ci
 const loadLayer=L.layerGroup().addTo(map); // middle (loading/color-curb dots)
 const segLayer=L.layerGroup().addTo(map);  // over
 let youMarker=null;
-let segCache=[];   // {group, side}
+let segCache=[];   // {group, side} — VISIBLE sides only (status+day filtered; taps/nearest)
+let segCacheAll=[];// every side passing the day filter — feeds truck routes, immune to color toggles
 let rppCache=[];   // {latlngs, area, hrlimit, days, from, to, regulation, exceptions}
 let fetchTok=0, rppOn=false;
 let loadOn=false, loadCache=null;  // loadCache=[{lat,lng,color,label,days,from,to,limit}] (loaded once)
@@ -729,7 +730,7 @@ function distSqToLineMeters(lat,lng,latlngs){
 /* ---------- viewport loading ---------- */
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
-  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];
+  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();segCache=[];segCacheAll=[];rppCache=[];lastRows=[];
     hint.style.opacity='1';hint.style.visibility='visible';
     drawOverview();  // citywide endpoints take over below data zoom (hides the hint when ready)
     return;}
@@ -803,7 +804,7 @@ function drawRoutes(){
   if(!routeOn||!ENF)return 0;
   const dow=dayFilter!=null?dayFilter:new Date().getDay();
   const groups={};
-  segCache.forEach(o=>{
+  segCacheAll.forEach(o=>{
     const r=(o.side.rows||[]).find(x=>normDay(x.weekday)===dow); if(!r)return;
     const e=enfFor(o.group.cnn,dow); if(!e)return;
     // per-SIDE runs: mixing both curb sides of a corridor made the path zig-zag between them
@@ -951,7 +952,7 @@ async function fillRange(cnn){
 }
 
 function drawSegments(rows){
-  segLayer.clearLayers(); segCache=[];
+  segLayer.clearLayers(); segCache=[]; segCacheAll=[];
   const byCnn={};
   rows.forEach(r=>{(byCnn[r.cnn]=byCnn[r.cnn]||{cnn:r.cnn,rows:[]}).rows.push(r)});
   Object.values(byCnn).forEach(grp=>{
@@ -977,13 +978,14 @@ function drawSegments(rows){
       if(dayFilter!=null&&!s.rows.some(r=>normDay(r.weekday)===dayFilter))return;
       let best=null,bestRow=s.rows[0],rank=0,color=getCSS('--gray');
       s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank){rank=st.rank;color=st.color;best=ns;bestRow=r}});
-      // status filter (Layers panel legend): a visibility lens like the day filter —
-      // gray "posted sign" sides always show (tiny minority, never misleading).
-      const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
-      if(cls!=='gray'&&!statusOn[cls])return;
       const ll=offsetLine(center, OFFSET, signs[s.key]);
       const side={key:s.key, blockside:s.blockside, rows:s.rows, row:bestRow, ns:best, color, latlngs:ll, mid:ll[Math.floor(ll.length/2)]};
       group.sides.push(side);
+      segCacheAll.push({group, side});  // routes layer reads this — color toggles never starve it
+      // status filter (legend): a visibility lens for the CURB LINES only —
+      // gray "posted sign" sides always show (tiny minority, never misleading).
+      const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
+      if(cls!=='gray'&&!statusOn[cls])return;
       const click=()=>openSheet(group, s.key);
       const vis=L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round'}).on('click',click).addTo(segLayer);
       const hit=L.polyline(ll,{color:'#000',opacity:0,weight:16}).on('click',click).addTo(segLayer);
