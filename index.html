@@ -109,30 +109,32 @@
   .layerspanel{position:absolute;right:0;top:calc(100% + 8px);width:252px;background:var(--paper);
     border:2.5px solid var(--ink);border-radius:14px;box-shadow:var(--shadow);padding:12px;z-index:700;
     max-height:calc(100dvh - 200px);overflow-y:auto}
+  .lp-head{display:flex;align-items:center;gap:8px;font-family:'Anton',sans-serif;font-size:15px;
+    text-transform:uppercase;letter-spacing:.04em;padding-bottom:10px;border-bottom:2.5px solid var(--ink)}
+  .lp-head .ic{width:15px;height:15px}
+  .lp-x{margin-left:auto;width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);
+    background:var(--paper);font-size:14px;line-height:1;cursor:pointer;flex:none}
   .lp-sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);
-    margin:12px 0 7px}
-  .lp-sec:first-child{margin-top:0}
-  .lkey{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700}
-  .lg{display:flex;align-items:center;gap:7px}
-  /* status rows use the SAME toggle component as the layers — swatch filled when shown */
-  .toggle.st.on[data-st="green"] .sw{background:var(--green);border-color:var(--green)}
-  .toggle.st.on[data-st="amber"] .sw{background:var(--amber);border-color:var(--amber)}
-  .toggle.st.on[data-st="red"] .sw{background:var(--red);border-color:var(--red)}
-  .toggle.st:not(.on){color:var(--ink-soft)}
-  .lg i{width:18px;height:5px;border-radius:3px;display:inline-block;flex:none}
-  .toggle{font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-    color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:10px;padding:9px 11px;cursor:pointer;
-    display:flex;align-items:center;gap:7px;white-space:nowrap;width:100%;margin-top:6px}
-  .toggle:first-of-type{margin-top:0}
-  .toggle .sw{width:13px;height:13px;border-radius:4px;border:2px solid var(--ink);background:transparent;flex:none}
-  .toggle.on{background:var(--meter);color:#fff;border-color:var(--meter)}
-  .toggle.on .sw{background:#fff;border-color:#fff}
-  .toggle.load.on{background:var(--amber);border-color:var(--amber);color:var(--ink)}
-  .toggle.load.on .sw{background:var(--ink);border-color:var(--ink)}
-  .toggle.mtr.on{background:var(--gray);border-color:var(--gray);color:#fff}
-  .toggle.mtr.on .sw{background:#fff;border-color:#fff}
-  .toggle.rte.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-  .toggle.rte.on .sw{background:var(--paper);border-color:var(--paper)}
+    margin:13px 0 3px}
+  /* rows: [map symbol] [label] [eye] — symbol always shows the layer's true map look (the legend),
+     the eye is show/hide. Off rows dim but stay readable, so the color key never disappears. */
+  .toggle{display:flex;align-items:center;gap:10px;width:100%;padding:8px 5px;border:0;background:transparent;
+    font:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;border-radius:9px;text-align:left}
+  @media (hover:hover){.toggle:hover{background:rgba(23,21,15,.06)}}
+  .toggle .lbl{flex:1;min-width:0}
+  .toggle:not(.on) .sym,.toggle:not(.on) .lbl{opacity:.42}
+  .sym{flex:none;width:28px;display:inline-flex;align-items:center;justify-content:center;gap:2px}
+  .sym.line{height:7px;border-radius:4px}
+  .sym.line.g{background:var(--green)} .sym.line.a{background:var(--amber)} .sym.line.r{background:var(--red)}
+  .sym.band{height:10px;border-radius:5px;background:var(--meter);opacity:.5}
+  .sym b{display:inline-block;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink)}
+  .sym.dot b{width:10px;height:10px;background:var(--gray)}
+  .beta{flex:none;font-style:normal;font-family:'Anton',sans-serif;font-size:9px;letter-spacing:.07em;
+    text-transform:uppercase;background:var(--amber);color:var(--ink);padding:3px 6px;border-radius:6px}
+  .eye{flex:none;width:20px;height:20px;background:center/18px no-repeat;opacity:.9;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317150F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/><circle cx='12' cy='12' r='3'/></svg>")}
+  .toggle:not(.on) .eye{opacity:.45;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317150F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.7 5.07A9.6 9.6 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68'/><path d='M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61'/><path d='m2 2 20 20'/><path d='M9.9 9.9a3 3 0 0 0 4.2 4.2'/></svg>")}
   /* inferred truck-route decorations */
   .rarrow{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;
     border-bottom:13px solid var(--ink);
@@ -438,19 +440,21 @@
     <span class="lb-txt">Layers</span><span id="layerBadges"></span>
   </button>
   <div class="layerspanel" id="layersPanel" hidden aria-label="Map layers and legend">
-    <div class="lp-sec">Curb colors — show / hide</div>
-    <button class="toggle st on" data-st="green" aria-pressed="true"><span class="sw"></span>Clear</button>
-    <button class="toggle st on" data-st="amber" aria-pressed="true"><span class="sw"></span>Sweeps within a day</button>
-    <button class="toggle st on" data-st="red" aria-pressed="true"><span class="sw"></span>Now / under 3 hours</button>
-    <div class="lkey">
-      <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit zone band</span>
+    <div class="lp-head">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
+      <span>Layers</span>
+      <button class="lp-x" id="lpClose" aria-label="Close">×</button>
     </div>
-    <div class="lp-sec">Layers</div>
-    <button class="toggle" id="rppToggle" aria-pressed="false"><span class="sw"></span>Permit zones</button>
-    <button class="toggle load" id="loadToggle" aria-pressed="false"><span class="sw"></span>Loading zones</button>
-    <button class="toggle mtr" id="meterToggle" aria-pressed="false"><span class="sw"></span>Metered parking</button>
-    <button class="toggle rte" id="routeToggle" aria-pressed="false"><span class="sw"></span>Truck route · beta</button>
-    <div class="lp-sec">Highlight a permit area</div>
+    <div class="lp-sec">Curb colors</div>
+    <button class="toggle st on" data-st="green" aria-pressed="true"><i class="sym line g"></i><span class="lbl">Clear — until its next sweep</span><span class="eye" aria-hidden="true"></span></button>
+    <button class="toggle st on" data-st="amber" aria-pressed="true"><i class="sym line a"></i><span class="lbl">Sweeps within a day</span><span class="eye" aria-hidden="true"></span></button>
+    <button class="toggle st on" data-st="red" aria-pressed="true"><i class="sym line r"></i><span class="lbl">Now / under 3 hours</span><span class="eye" aria-hidden="true"></span></button>
+    <div class="lp-sec">More layers</div>
+    <button class="toggle" id="rppToggle" aria-pressed="false"><i class="sym band"></i><span class="lbl">Permit zones</span><span class="eye" aria-hidden="true"></span></button>
+    <button class="toggle load" id="loadToggle" aria-pressed="false"><i class="sym"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#E0322E"></b></i><span class="lbl">Loading zones</span><span class="eye" aria-hidden="true"></span></button>
+    <button class="toggle mtr" id="meterToggle" aria-pressed="false"><i class="sym dot"><b></b></i><span class="lbl">Metered parking</span><span class="eye" aria-hidden="true"></span></button>
+    <button class="toggle rte" id="routeToggle" aria-pressed="false"><i class="sym"><svg width="28" height="12" viewBox="0 0 28 12" aria-hidden="true"><line x1="1" y1="6" x2="19" y2="6" stroke="#17150F" stroke-width="2.4" stroke-dasharray="4 3"/><path d="M20 1.5 27 6l-7 4.5z" fill="#17150F"/></svg></i><span class="lbl">Truck routes</span><em class="beta">Beta</em><span class="eye" aria-hidden="true"></span></button>
+    <div class="lp-sec">Permit areas</div>
     <div class="agrid" id="areaGrid"></div>
     <button class="aclear" id="areaClear" hidden>Clear area highlight</button>
     <a class="lp-link" href="/tickets">The ticket economy → what SF fines, by year &amp; neighborhood</a>
@@ -1410,7 +1414,6 @@ function setDayFilter(v){
 /* ---------- RPP toggle ---------- */
 document.getElementById('rppToggle').onclick=function(){
   rppOn=!rppOn; this.classList.toggle('on',rppOn); this.setAttribute('aria-pressed',rppOn);
-  document.getElementById('rppLegend').style.display=rppOn?'flex':'none';
   refreshLayerBadges();
   loadViewport();
   if(rppOn)toast('Permit zones (RPP) shaded blue. Tap a block for area & hours.');
@@ -1453,6 +1456,7 @@ function refreshLayerBadges(){
   document.addEventListener('click',e=>{ if(!panel.hidden&&!e.target.closest('.layers'))closeLayersPanel(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!panel.hidden)closeLayersPanel(); });
   document.getElementById('areaClear').onclick=()=>showArea('');
+  document.getElementById('lpClose').onclick=closeLayersPanel;
   document.querySelectorAll('.toggle.st').forEach(b=>{b.onclick=()=>{
     const k=b.dataset.st; statusOn[k]=!statusOn[k];
     b.classList.toggle('on',statusOn[k]); b.setAttribute('aria-pressed',statusOn[k]);

@@ -126,9 +126,11 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
   reflects that; only .ics and push promise the 30-min lead.
 - **Corner layout (Google-Maps style — don't re-scatter)**: top-left = logo + search +
-  ONE day-chip row; top-right = the `.layers` control (button + `#layersPanel` holding
-  the color legend, Permit/Loading toggles, and the permit-area disc grid). Active layers
-  show as badges on the button (`refreshLayerBadges()`). Bottom-right zoom, bottom-left
+  ONE day-chip row; top-right = the `.layers` control (button + `#layersPanel`). Panel rows are
+  [map-symbol] [label] [eye] — the symbol ALWAYS shows the layer's true map appearance
+  (it IS the legend; off rows dim to .42 but stay readable), the eye toggles visibility.
+  Truck routes carries an amber .beta chip (font-style:normal — no italics rule). Active
+  layers show as badges on the button (`refreshLayerBadges()`). Bottom-right zoom, bottom-left
   sheet. The legend lives ONLY in the panel.
 - **Permit-area browser** (`#areaGrid` discs → `showArea()`, `areaLayer`): disc grid of
   all RPP areas (fetched once, `^[A-Z]{1,2}$` filters junk; colors via `areaColor()` from
