@@ -98,9 +98,11 @@
   .lp-sec:first-child{margin-top:0}
   .lkey{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700}
   .lg{display:flex;align-items:center;gap:7px}
-  .lgt{border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;color:var(--ink);
-    cursor:pointer;padding:4px 0;text-align:left;width:100%}
-  .lgt:not(.on){opacity:.4;text-decoration:line-through}
+  /* status rows use the SAME toggle component as the layers — swatch filled when shown */
+  .toggle.st.on[data-st="green"] .sw{background:var(--green);border-color:var(--green)}
+  .toggle.st.on[data-st="amber"] .sw{background:var(--amber);border-color:var(--amber)}
+  .toggle.st.on[data-st="red"] .sw{background:var(--red);border-color:var(--red)}
+  .toggle.st:not(.on){color:var(--ink-soft)}
   .lg i{width:18px;height:5px;border-radius:3px;display:inline-block;flex:none}
   .toggle{font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
     color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:10px;padding:9px 11px;cursor:pointer;
@@ -116,8 +118,10 @@
   .toggle.rte.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
   .toggle.rte.on .sw{background:var(--paper);border-color:var(--paper)}
   /* inferred truck-route decorations */
-  .rarrow{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;
-    border-bottom:11px solid var(--ink);opacity:.85}
+  .rarrow{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;
+    border-bottom:13px solid var(--ink);
+    filter:drop-shadow(1px 0 0 var(--sign-white)) drop-shadow(-1px 0 0 var(--sign-white))
+           drop-shadow(0 1px 0 var(--sign-white)) drop-shadow(0 -1px 0 var(--sign-white))}
   .rstart,.rend{transform:translate(-50%,-150%);color:#fff;font-size:10px;font-weight:800;
     padding:3px 8px;border-radius:7px;white-space:nowrap;width:max-content;box-shadow:2px 2px 0 rgba(23,21,15,.3)}
   .rstart{background:var(--green-text)}
@@ -392,11 +396,11 @@
     <span class="lb-txt">Layers</span><span id="layerBadges"></span>
   </button>
   <div class="layerspanel" id="layersPanel" hidden aria-label="Map layers and legend">
-    <div class="lp-sec">Curb colors — tap to show/hide</div>
+    <div class="lp-sec">Curb colors — show / hide</div>
+    <button class="toggle st on" data-st="green" aria-pressed="true"><span class="sw"></span>Clear</button>
+    <button class="toggle st on" data-st="amber" aria-pressed="true"><span class="sw"></span>Sweeps within a day</button>
+    <button class="toggle st on" data-st="red" aria-pressed="true"><span class="sw"></span>Now / under 3 hours</button>
     <div class="lkey">
-      <button class="lg lgt on" data-st="green" aria-pressed="true"><i style="background:var(--green)"></i>Clear</button>
-      <button class="lg lgt on" data-st="amber" aria-pressed="true"><i style="background:var(--amber)"></i>Sweeps within a day</button>
-      <button class="lg lgt on" data-st="red" aria-pressed="true"><i style="background:var(--red)"></i>Now / under 3 hours</button>
       <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit zone band</span>
     </div>
     <div class="lp-sec">Layers</div>
@@ -688,7 +692,7 @@ function drawRoutes(){
   });
   let drawn=0;
   Object.values(groups).forEach(arr=>{
-    if(arr.length<4)return;
+    if(arr.length<3)return;
     // Order stops SPATIALLY along the corridor (project onto the farthest-pair axis) —
     // per-block time averages are too noisy to order by, but reliable for DIRECTION.
     let ai=0,bi=1,maxD=-1;
@@ -704,7 +708,7 @@ function drawRoutes(){
     let cov=0,vs=0,vt=0;
     arr.forEach(x=>{cov+=(x.s-ms)*(x.t-mt);vs+=(x.s-ms)**2;vt+=(x.t-mt)**2;});
     const corr=cov/(Math.sqrt(vs*vt)||1);
-    if(Math.abs(corr)<0.4)return;
+    if(Math.abs(corr)<0.35)return;
     if(corr<0)arr.reverse();
     // split where blocks are missing (>300m jump would cut across the neighborhood)
     const runs=[[arr[0]]];
@@ -713,9 +717,11 @@ function drawRoutes(){
       else runs[runs.length-1].push(arr[i]);
     }
     runs.forEach(run=>{
-      if(run.length<4)return;
+      if(run.length<3)return;
       const pts=run.map(x=>x.mid);
-      L.polyline(pts,{color:'#17150F',weight:2.5,dashArray:'6 7',opacity:.75,interactive:false}).addTo(routeLayer);
+      // paper casing under the ink dash so the route reads on top of the busy curb colors
+      L.polyline(pts,{color:'#FFFDF6',weight:7,opacity:.9,lineCap:'round',interactive:false}).addTo(routeLayer);
+      L.polyline(pts,{color:'#17150F',weight:3,dashArray:'7 8',opacity:.9,interactive:false}).addTo(routeLayer);
       for(let i=1;i<pts.length;i++){
         const pa=map.latLngToContainerPoint(pts[i-1]), pb=map.latLngToContainerPoint(pts[i]);
         const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI+90;  // triangle points up by default
@@ -1180,7 +1186,7 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
   if(!quiet&&dayFilter!=null)setDayFilter(null);
   if(!quiet&&(!statusOn.green||!statusOn.amber||!statusOn.red)){
     statusOn={green:true,amber:true,red:true};
-    document.querySelectorAll('.lgt').forEach(b=>{b.classList.add('on');b.setAttribute('aria-pressed','true');});
+    document.querySelectorAll('.toggle.st').forEach(b=>{b.classList.add('on');b.setAttribute('aria-pressed','true');});
     refreshLayerBadges(); drawSegments(lastRows);
   }
   if(youMarker)map.removeLayer(youMarker);
@@ -1303,7 +1309,7 @@ function refreshLayerBadges(){
   document.addEventListener('click',e=>{ if(!panel.hidden&&!e.target.closest('.layers'))closeLayersPanel(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!panel.hidden)closeLayersPanel(); });
   document.getElementById('areaClear').onclick=()=>showArea('');
-  document.querySelectorAll('.lgt').forEach(b=>{b.onclick=()=>{
+  document.querySelectorAll('.toggle.st').forEach(b=>{b.onclick=()=>{
     const k=b.dataset.st; statusOn[k]=!statusOn[k];
     b.classList.toggle('on',statusOn[k]); b.setAttribute('aria-pressed',statusOn[k]);
     refreshLayerBadges(); drawSegments(lastRows);
