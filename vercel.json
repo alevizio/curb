@@ -1,7 +1,8 @@
 {
   "rewrites": [
     { "source": "/config.js", "destination": "/api/config" },
-    { "source": "/about", "destination": "/about.html" }
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/b/:cnn", "destination": "/api/block?cnn=:cnn" }
   ],
   "crons": [
     { "path": "/api/send-notifications", "schedule": "*/15 * * * *" }
