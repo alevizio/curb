@@ -89,6 +89,7 @@
   .sugi.sel,.sugi:hover{background:#fff}
   .sugi .k{flex:none;width:9px;height:9px;border-radius:3px}
   .sugi .k.addr{background:var(--meter)} .sugi .k.st{background:var(--ink)}
+  .sugi.none{cursor:default;color:var(--ink-soft);font-weight:600;white-space:normal}
   .sugi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .field svg{margin-left:12px;width:18px;height:18px;flex:none}
   #q{flex:1;border:0;background:transparent;outline:none;font:inherit;font-size:16px;font-weight:600;padding:11px 12px 11px 8px;min-width:0}
@@ -247,7 +248,7 @@
   .verdict.now .head{color:var(--red-text)} .verdict.soon .head{color:var(--amber-text)} .verdict.ok .head{color:var(--green-text)}
   .where{font-size:15px;font-weight:700;margin:8px 0 2px;display:flex;align-items:center;gap:8px}
   .where .blk{color:var(--ink-soft);font-weight:600}
-  .where .wtxt{flex:1;min-width:0}
+  .where .wtxt{flex:1;min-width:0;overflow-wrap:break-word}
   .centerico{flex:none;width:34px;height:34px;border:2px solid var(--ink);border-radius:9px;background:var(--paper);
     color:var(--ink);cursor:pointer;display:grid;place-items:center;box-shadow:2px 2px 0 var(--ink)}
   .centerico:active{transform:translate(1px,1px);box-shadow:none}
@@ -597,6 +598,7 @@ const overviewRenderer=L.canvas({padding:.3});
 let OVR=null, ovrKey='';                    // data/overview.json blocks + render cache key
 let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without a sweep that day are hidden
 let statusOn={green:true,amber:true,red:true};  // legend toggles: show/hide curb lines by status
+let noCovToasted=false;  // out-of-coverage notice fires once per session
 let lastRows=[];     // raw sweep rows from the last viewport fetch, for redraws on filter change
 let rangeCache={};   // cnn -> {lo,hi} street-number range (EAS); accumulates across pans (static data)
 
@@ -711,6 +713,8 @@ async function loadViewport(){
     const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
     if(my!==fetchTok)return;
     lastRows=data;
+    if(!data.length&&!noCovToasted){noCovToasted=true;
+      toast('No street-sweeping data here — CURB covers San Francisco.');}
     drawSegments(data);
   }catch(e){ if(my===fetchTok) toast("Couldn't load that area — pan and try again."); }
   loadRanges(poly);
@@ -965,8 +969,15 @@ function drawSegments(rows){
       segCache.push({group, side});
     });
   });
-  if(dayFilter!=null&&rows.length&&!segCache.length)
-    toast('No '+DAYLBL[dayFilter]+' sweeping on these blocks — tap "All" to reset.');
+  if(rows.length&&!segCache.length){  // a filter combination emptied the map — say which one
+    const hidden=['green','amber','red'].filter(k=>!statusOn[k]);
+    if(dayFilter!=null&&hidden.length)
+      toast('Nothing matches the '+DAYLBL[dayFilter]+' filter with curb colors hidden — reset in Layers or tap "All".');
+    else if(dayFilter!=null)
+      toast('No '+DAYLBL[dayFilter]+' sweeping on these blocks — tap "All" to reset.');
+    else if(hidden.length)
+      toast('All matching curb colors are hidden — re-show them in Layers.');
+  }
   if(routeOn)drawRoutes();  // routes derive from the drawn segments — redraw together
 }
 
@@ -1500,23 +1511,25 @@ async function ensureCorridors(){
   if(corridors)return;
   try{
     const r=await fetch(SWEEP+`?$select=corridor&$group=corridor&$limit=4000`);
+    if(!r.ok)throw 0;
     corridors=(await r.json()).map(x=>x.corridor).filter(Boolean);
-  }catch(_){corridors=[];}
+  }catch(_){corridors=null;}  // stay null so the next keystroke retries — don't die for the session
 }
 function hideSug(){
   const s=document.getElementById('sug');
   s.hidden=true; s.innerHTML=''; sugIdx=-1; sugItems=[];
   document.getElementById('q').setAttribute('aria-expanded','false');
 }
-function renderSug(){
+function renderSug(showEmpty){
   const s=document.getElementById('sug');
-  if(!sugItems.length){hideSug();return;}
-  s.innerHTML=sugItems.map((it,i)=>
+  if(!sugItems.length&&!showEmpty){hideSug();return;}
+  s.innerHTML=sugItems.length?sugItems.map((it,i)=>
     `<button class="sugi${i===sugIdx?' sel':''}" role="option" aria-selected="${i===sugIdx}" data-i="${i}">
-      <i class="k ${it.kind==='addr'?'addr':'st'}"></i><span>${it.t}</span></button>`).join('');
+      <i class="k ${it.kind==='addr'?'addr':'st'}"></i><span>${it.t}</span></button>`).join('')
+    :`<div class="sugi none">No matching SF street — try an address like “214 Steiner St”.</div>`;
   s.hidden=false;
   document.getElementById('q').setAttribute('aria-expanded','true');
-  s.querySelectorAll('.sugi').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>pickSug(+b.dataset.i);});
+  s.querySelectorAll('button.sugi').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>pickSug(+b.dataset.i);});
 }
 function pickSug(i){
   const it=sugItems[i]; if(!it)return;
@@ -1540,9 +1553,11 @@ async function updateSug(){
   }
   if(v===document.getElementById('q').value.trim()){  // drop stale async results
     const q=v.toUpperCase();
-    corridors.filter(c=>c.toUpperCase().includes(q)).slice(0,addr&&items.length?3:6)
+    (corridors||[]).filter(c=>c.toUpperCase().includes(q)).slice(0,addr&&items.length?3:6)
       .forEach(c=>items.push({t:c,kind:'street'}));
-    sugItems=items; sugIdx=-1; renderSug();
+    sugItems=items; sugIdx=-1;
+    // a real query with zero hits gets told so — silence is indistinguishable from broken
+    renderSug(!items.length&&v.length>=3&&corridors!==null);
   }
 }
 document.getElementById('q').addEventListener('keydown',ev=>{
@@ -1602,6 +1617,8 @@ let mvt=null;
 map.on('moveend',()=>{clearTimeout(mvt);mvt=setTimeout(loadViewport,250);});
 map.whenReady(()=>setTimeout(loadViewport,400));
 loadEnforcement();  // background; populates the "real-world ticket time" lines once ready
+window.addEventListener('offline',()=>toast("You're offline — showing cached data; sweep times may be stale."));
+window.addEventListener('online',()=>{toast('Back online — refreshing.');loadViewport();});
 
 /* First-run onboarding: one welcome card until dismissed or the first curb is tapped.
    The sheet itself is the "aha" — we never tour past it. Tracked, never repeated. */
