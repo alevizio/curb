@@ -44,7 +44,7 @@
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://data.sfgov.org">
 <link rel="preconnect" href="https://tile.googleapis.com">
-<link rel="preconnect" href="https://a.basemap.cartocdn.com">
+<link rel="preconnect" href="https://a.basemaps.cartocdn.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
@@ -133,8 +133,17 @@
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317150F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/><circle cx='12' cy='12' r='3'/></svg>")}
   .toggle:not(.on) .eye{opacity:.45;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317150F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.7 5.07A9.6 9.6 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68'/><path d='M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61'/><path d='m2 2 20 20'/><path d='M9.9 9.9a3 3 0 0 0 4.2 4.2'/></svg>")}
+  /* desktop control tooltips (data-tip), signage style */
+  @media (hover:hover) and (pointer:fine){
+    [data-tip]{position:relative}
+    [data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;
+      transform:translateX(-50%);background:var(--ink);color:var(--paper);font-family:'Hanken Grotesk',sans-serif;
+      font-size:11px;font-weight:700;letter-spacing:0;text-transform:none;padding:5px 9px;border-radius:7px;
+      white-space:nowrap;z-index:900;pointer-events:none;box-shadow:2px 2px 0 rgba(23,21,15,.3)}
+    [data-tip-pos="b"]:hover::after{bottom:auto;top:calc(100% + 8px)}
+  }
   /* curb-color legend, pinned to the map bottom-left; rows tap to show/hide */
-  .legend2{position:fixed;left:12px;bottom:calc(186px + env(safe-area-inset-bottom));z-index:600;
+  .legend2{position:fixed;left:12px;bottom:calc(126px + env(safe-area-inset-bottom));z-index:600;
     background:rgba(242,236,223,.95);border:2px solid var(--ink);border-radius:11px;box-shadow:var(--shadow);
     padding:6px 8px;display:flex;flex-direction:column;gap:1px}
   .lst{display:flex;align-items:center;gap:7px;border:0;background:transparent;font:inherit;font-size:11px;
@@ -186,13 +195,11 @@
   .dchip.today::after{content:'';position:absolute;top:-4px;right:-4px;width:9px;height:9px;border-radius:50%;
     background:var(--red);border:1.5px solid var(--paper)}
 
-  /* locate: floats with the zoom pill (Google Maps placement) */
-  .loc{position:fixed;left:14px;bottom:calc(126px + env(safe-area-inset-bottom));z-index:600;
-    width:46px;height:46px;border-radius:12px;border:2.5px solid var(--ink);background:var(--paper);
-    color:var(--ink);cursor:pointer;display:grid;place-items:center;box-shadow:var(--shadow)}
-  .loc:active{background:var(--ink);color:var(--paper)}
-  .loc svg{width:20px;height:20px;margin:0}
-  .loc.loading svg{animation:spin 1s linear infinite}
+  .field .loc{flex:none;align-self:stretch;width:46px;display:grid;place-items:center;border:0;
+    border-left:2.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+  .field .loc:active{background:var(--ink);color:var(--paper)}
+  .field .loc svg{width:19px;height:19px;margin:0}  /* .field svg margin-left is for the magnifier only */
+  .field .loc.loading svg{animation:spin 1s linear infinite}
 
   /* Leaflet zoom: one joined +/- pill (Google Maps style, signage skin) */
   .leaflet-control-zoom.leaflet-bar{border:2.5px solid var(--ink);border-radius:12px;box-shadow:var(--shadow);
@@ -410,7 +417,6 @@
     .grab{display:none}
     /* zoom lives bottomright on desktop (see map init) — clear the attribution strip */
     .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0 16px 30px 0}
-    .loc{left:auto;right:16px;bottom:147px}
   }
 </style>
 </head>
@@ -420,18 +426,21 @@
 
 <div class="top">
   <div class="barrow">
-    <button class="logo" id="logoBtn" aria-label="About CURB — what the colors mean">CURB</button>
+    <button class="logo" id="logoBtn" aria-label="About CURB — what the colors mean" data-tip="What is CURB? Colors &amp; how it works" data-tip-pos="b">CURB</button>
     <div class="fwrap">
     <div class="field">
       <svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-amber)" d="M6 11.375c2.96853 0 5.375 -2.40647 5.375 -5.375S8.96853 0.625 6 0.625 0.625 3.03147 0.625 6 3.03147 11.375 6 11.375Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M1.25 6c0 -2.62335 2.12665 -4.75 4.75 -4.75S10.75 3.37665 10.75 6 8.62335 10.75 6 10.75 1.25 8.62335 1.25 6ZM6 0C2.68629 0 0 2.68629 0 6s2.68629 6 6 6c1.20461 0 2.3263 -0.355 3.26617 -0.9661l2.60003 2.6001c0.4881 0.4881 1.2796 0.4881 1.7678 0 0.4881 -0.4882 0.4881 -1.2797 0 -1.7678l-2.6001 -2.60003C11.645 8.3263 12 7.20461 12 6c0 -3.31371 -2.68629 -6 -6 -6Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>
       <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Search a street…"
         role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="sug">
+      <button class="loc" id="locate" aria-label="Use my location" data-tip="Use my location" data-tip-pos="b">
+        <svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-blue)" d="M8.83989 12.7568 12.9737 1.57116c0.0174 -0.04707 0.0263 -0.09685 0.0263 -0.14703C13 1.18989 12.8101 1 12.5759 1h-0.0073c-0.0455 0 -0.0906 0.00717 -0.1338 0.02126L1.26195 4.66458C1.10572 4.71553 1 4.8612 1 5.02552c0 0.13846 0.07537 0.26593 0.19669 0.33266l4.51046 2.48075c0.19007 0.10454 0.34099 0.26804 0.43 0.46585l2.01407 4.47572c0.06012 0.1336 0.19299 0.2195 0.33948 0.2195 0.15583 0 0.29517 -0.0971 0.34919 -0.2432Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="m12.241 0.427083 0.0081 -0.00258c0.7792 -0.246979 1.6273 0.507009 1.3109 1.363367l-0.0013 0.00331L9.42613 12.9735c-0.14471 0.3915 -0.51798 0.6515 -0.93543 0.6515 -0.39243 0 -0.74839 -0.2301 -0.90943 -0.588L5.56966 8.56676c-0.00083 -0.00179 -0.00164 -0.00359 -0.00246 -0.00539 -0.03338 -0.07418 -0.08997 -0.1355 -0.16125 -0.1747 -0.00263 -0.00144 -0.00524 -0.00291 -0.00784 -0.00438L0.895489 5.90585C0.574456 5.72928 0.375 5.39194 0.375 5.02556c0 -0.43485 0.279762 -0.82034 0.69319 -0.95515L12.241 0.427083ZM6.70395 8.04144c-0.14347 -0.31485 -0.38367 -0.57566 -0.6856 -0.74449 -0.00331 -0.0019 -0.00664 -0.00377 -0.01 -0.00562L1.99383 5.08335l10.25097 -3.3427L8.46773 11.9608 6.7071 8.04834c-0.00104 -0.00231 -0.00209 -0.00461 -0.00315 -0.0069Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>
+      </button>
     </div>
     <div class="sug" id="sug" hidden role="listbox" aria-label="Search suggestions"></div>
     </div>
   </div>
   <div class="dayrow" aria-label="Filter by sweep day">
-    <button class="datechip" id="dateChip" aria-pressed="false" title="Show only today's sweeping"></button>
+    <button class="datechip" id="dateChip" aria-pressed="false" data-tip="Show only today's sweeping" data-tip-pos="b"></button>
     <button class="dchip on" data-day="all">All</button>
     <button class="dchip" data-day="1">Mon</button>
     <button class="dchip" data-day="2">Tue</button>
@@ -445,7 +454,7 @@
 
 <!-- layers control: everything map-related lives in one corner, Google-Maps style -->
 <div class="layers">
-  <button class="layersbtn" id="layersBtn" aria-expanded="false" aria-haspopup="true" aria-label="Map layers">
+  <button class="layersbtn" id="layersBtn" aria-expanded="false" aria-haspopup="true" aria-label="Map layers" data-tip="Layers, legend &amp; permit areas" data-tip-pos="b">
     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
     <span class="lb-txt">Layers</span><span id="layerBadges"></span>
   </button>
@@ -469,14 +478,11 @@
 
 <!-- curb-color legend: always on the map (bottom-left), rows tap to show/hide -->
 <div class="legend2" aria-label="Curb colors">
-  <button class="lst on" data-st="green" aria-pressed="true"><i style="background:var(--green)"></i>Clear</button>
+  <button class="lst on" data-st="green" aria-pressed="true" data-tip="Tap to show / hide"><i style="background:var(--green)"></i>Clear</button>
   <button class="lst on" data-st="amber" aria-pressed="true"><i style="background:var(--amber)"></i>Soon · within 24h</button>
   <button class="lst on" data-st="red" aria-pressed="true"><i style="background:var(--red)"></i>Now · under 3h</button>
 </div>
 
-<button class="loc" id="locate" aria-label="Use my location">
-  <svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-blue)" d="M8.83989 12.7568 12.9737 1.57116c0.0174 -0.04707 0.0263 -0.09685 0.0263 -0.14703C13 1.18989 12.8101 1 12.5759 1h-0.0073c-0.0455 0 -0.0906 0.00717 -0.1338 0.02126L1.26195 4.66458C1.10572 4.71553 1 4.8612 1 5.02552c0 0.13846 0.07537 0.26593 0.19669 0.33266l4.51046 2.48075c0.19007 0.10454 0.34099 0.26804 0.43 0.46585l2.01407 4.47572c0.06012 0.1336 0.19299 0.2195 0.33948 0.2195 0.15583 0 0.29517 -0.0971 0.34919 -0.2432Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="m12.241 0.427083 0.0081 -0.00258c0.7792 -0.246979 1.6273 0.507009 1.3109 1.363367l-0.0013 0.00331L9.42613 12.9735c-0.14471 0.3915 -0.51798 0.6515 -0.93543 0.6515 -0.39243 0 -0.74839 -0.2301 -0.90943 -0.588L5.56966 8.56676c-0.00083 -0.00179 -0.00164 -0.00359 -0.00246 -0.00539 -0.03338 -0.07418 -0.08997 -0.1355 -0.16125 -0.1747 -0.00263 -0.00144 -0.00524 -0.00291 -0.00784 -0.00438L0.895489 5.90585C0.574456 5.72928 0.375 5.39194 0.375 5.02556c0 -0.43485 0.279762 -0.82034 0.69319 -0.95515L12.241 0.427083ZM6.70395 8.04144c-0.14347 -0.31485 -0.38367 -0.57566 -0.6856 -0.74449 -0.00331 -0.0019 -0.00664 -0.00377 -0.01 -0.00562L1.99383 5.08335l10.25097 -3.3427L8.46773 11.9608 6.7071 8.04834c-0.00104 -0.00231 -0.00209 -0.00461 -0.00315 -0.0069Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>
-</button>
 
 <div class="hint" id="hint">
   <div class="big">Find your spot</div>
@@ -501,7 +507,7 @@
 
 <div class="sheet" id="sheet" role="dialog" aria-label="Parking details for this block">
   <button class="grab" id="grabBtn" aria-label="Expand details" aria-expanded="false"><i></i></button>
-  <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
+  <button class="sheet-close" id="sheetClose" aria-label="Close" data-tip="Close">×</button>
   <div id="sheetBody"></div>
 </div>
 
@@ -566,7 +572,7 @@ mqDesktop.addEventListener('change',e=>zoomCtl.setPosition(e.matches?'bottomrigh
 
 // Basemap: official Google Map Tiles API when GMAPS_KEY is set, else keyless CARTO (Google-style) fallback.
 function addCarto(){
-  return L.tileLayer('https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     {subdomains:'abcd',maxZoom:20,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
 }
 (async function initBasemap(){
@@ -1128,8 +1134,8 @@ function openSheet(group, activeKey){
   document.getElementById('sheetBody').innerHTML=`
     <div class="verdict ${vClass}"><span class="kicker">${kicker}</span><span class="head">${head}</span></div>
     <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span>
-      <button class="centerico" id="shareBtn" aria-label="Share this block">${ICONS.share}</button>
-      <button class="centerico" id="centerBtn" aria-label="Center map on this block">${ICONS.center}</button></div>
+      <button class="centerico" id="shareBtn" aria-label="Share this block" data-tip="Share this block">${ICONS.share}</button>
+      <button class="centerico" id="centerBtn" aria-label="Center map on this block" data-tip="Center on this block">${ICONS.center}</button></div>
     ${enfHtml}
     <div class="actions">
       ${canRemind?`<button class="btn ${alertOn?'on':''}" id="alertBtn">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}
