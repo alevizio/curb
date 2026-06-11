@@ -98,6 +98,9 @@
   .lp-sec:first-child{margin-top:0}
   .lkey{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700}
   .lg{display:flex;align-items:center;gap:7px}
+  .lgt{border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;color:var(--ink);
+    cursor:pointer;padding:4px 0;text-align:left;width:100%}
+  .lgt:not(.on){opacity:.4;text-decoration:line-through}
   .lg i{width:18px;height:5px;border-radius:3px;display:inline-block;flex:none}
   .toggle{font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
     color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:10px;padding:9px 11px;cursor:pointer;
@@ -115,14 +118,18 @@
   /* inferred truck-route decorations */
   .rarrow{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;
     border-bottom:11px solid var(--ink);opacity:.85}
-  .rstart{transform:translate(-50%,-150%);background:var(--ink);color:var(--paper);font-size:10px;font-weight:800;
+  .rstart,.rend{transform:translate(-50%,-150%);color:#fff;font-size:10px;font-weight:800;
     padding:3px 8px;border-radius:7px;white-space:nowrap;width:max-content;box-shadow:2px 2px 0 rgba(23,21,15,.3)}
+  .rstart{background:var(--green-text)}
+  .rend{background:var(--red-text)}
   .agrid{display:flex;flex-wrap:wrap;gap:9px}
   .adot{width:34px;height:34px;border-radius:50%;border:2px solid rgba(23,21,15,.3);color:#fff;position:relative;
     font-family:'Anton',sans-serif;font-style:normal;font-size:13.5px;cursor:pointer;display:grid;place-items:center;padding:0}
   .adot::after{content:'';position:absolute;inset:-4px}
   .adot.two{font-size:10.5px}
   .adot.sel{outline:3px solid var(--ink);outline-offset:1px}
+  .abigdisc{width:46px;height:46px;border-radius:50%;color:#fff;font-family:'Anton',sans-serif;font-style:normal;
+    font-size:21px;display:grid;place-items:center;border:3px solid var(--ink);box-shadow:3px 3px 0 rgba(23,21,15,.35)}
   .aclear{display:block;width:100%;margin-top:10px;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;
     letter-spacing:.05em;border:2px solid var(--ink);border-radius:9px;background:var(--paper);padding:8px;cursor:pointer}
   .aclear[hidden]{display:none}
@@ -385,11 +392,11 @@
     <span class="lb-txt">Layers</span><span id="layerBadges"></span>
   </button>
   <div class="layerspanel" id="layersPanel" hidden aria-label="Map layers and legend">
-    <div class="lp-sec">Curb colors</div>
+    <div class="lp-sec">Curb colors — tap to show/hide</div>
     <div class="lkey">
-      <span class="lg"><i style="background:var(--green)"></i>Clear</span>
-      <span class="lg"><i style="background:var(--amber)"></i>Sweeps within a day</span>
-      <span class="lg"><i style="background:var(--red)"></i>Now / under 3 hours</span>
+      <button class="lg lgt on" data-st="green" aria-pressed="true"><i style="background:var(--green)"></i>Clear</button>
+      <button class="lg lgt on" data-st="amber" aria-pressed="true"><i style="background:var(--amber)"></i>Sweeps within a day</button>
+      <button class="lg lgt on" data-st="red" aria-pressed="true"><i style="background:var(--red)"></i>Now / under 3 hours</button>
       <span class="lg" id="rppLegend" style="display:none"><i style="background:var(--meter);opacity:.45;height:8px"></i>Permit zone band</span>
     </div>
     <div class="lp-sec">Layers</div>
@@ -543,6 +550,7 @@ let meterOn=false, meterPts=null;           // [[lat,lng],...] every active on-s
 const routeLayer=L.layerGroup().addTo(map); // inferred truck routes (from citation times)
 let routeOn=false;
 let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without a sweep that day are hidden
+let statusOn={green:true,amber:true,red:true};  // legend toggles: show/hide curb lines by status
 let lastRows=[];     // raw sweep rows from the last viewport fetch, for redraws on filter change
 let rangeCache={};   // cnn -> {lo,hi} street-number range (EAS); accumulates across pans (static data)
 
@@ -665,6 +673,7 @@ async function loadViewport(){
 // For the selected day, blocks on the same corridor + posted window are sorted by their
 // historical average ticket time (ENF) — the resulting path approximates the truck's run.
 // Estimate from public citations, NOT live tracking (see docs/sweeper-data-research.md).
+function distM(p,q){const kx=Math.cos(p[0]*Math.PI/180)*111320;const dx=(p[1]-q[1])*kx,dy=(p[0]-q[0])*111320;return Math.hypot(dx,dy);}
 function drawRoutes(){
   routeLayer.clearLayers();
   if(!routeOn||!ENF)return 0;
@@ -673,26 +682,53 @@ function drawRoutes(){
   segCache.forEach(o=>{
     const r=(o.side.rows||[]).find(x=>normDay(x.weekday)===dow); if(!r)return;
     const e=enfFor(o.group.cnn,dow); if(!e)return;
-    const k=(o.group.corridor||'?')+'|'+r.fromhour;
+    // per-SIDE runs: mixing both curb sides of a corridor made the path zig-zag between them
+    const k=(o.group.corridor||'?')+'|'+r.fromhour+'|'+(o.side.blockside||o.side.key);
     (groups[k]=groups[k]||[]).push({mid:o.side.mid,t:e.avg});
   });
   let drawn=0;
   Object.values(groups).forEach(arr=>{
-    if(arr.length<3)return;  // need a few stops for a meaningful run
-    arr.sort((a,b)=>a.t-b.t);
-    const pts=arr.map(x=>x.mid);
-    L.polyline(pts,{color:'#17150F',weight:2.5,dashArray:'6 7',opacity:.75,interactive:false}).addTo(routeLayer);
-    for(let i=1;i<pts.length;i++){
-      const pa=map.latLngToContainerPoint(pts[i-1]), pb=map.latLngToContainerPoint(pts[i]);
-      const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI+90;  // triangle points up by default
-      L.marker([(pts[i-1][0]+pts[i][0])/2,(pts[i-1][1]+pts[i][1])/2],{interactive:false,
-        icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],
-          html:`<div class="rarrow" style="transform:rotate(${ang}deg)"></div>`})}).addTo(routeLayer);
+    if(arr.length<4)return;
+    // Order stops SPATIALLY along the corridor (project onto the farthest-pair axis) —
+    // per-block time averages are too noisy to order by, but reliable for DIRECTION.
+    let ai=0,bi=1,maxD=-1;
+    for(let i=0;i<arr.length;i++)for(let j=i+1;j<arr.length;j++){
+      const d=distM(arr[i].mid,arr[j].mid); if(d>maxD){maxD=d;ai=i;bi=j;}
     }
-    if(arr.length>=5)  // label only substantial runs — every run labelled reads as soup
+    const A=arr[ai].mid,B=arr[bi].mid;
+    const kx=Math.cos(A[0]*Math.PI/180)*111320, ax=(B[1]-A[1])*kx, ay=(B[0]-A[0])*111320;
+    arr.forEach(x=>{x.s=(x.mid[1]-A[1])*kx*ax+(x.mid[0]-A[0])*111320*ay;});
+    arr.sort((p,q)=>p.s-q.s);
+    // direction = sign of time-vs-position correlation; weak correlation = no confident run
+    const n=arr.length, mt=arr.reduce((s,x)=>s+x.t,0)/n, ms=arr.reduce((s,x)=>s+x.s,0)/n;
+    let cov=0,vs=0,vt=0;
+    arr.forEach(x=>{cov+=(x.s-ms)*(x.t-mt);vs+=(x.s-ms)**2;vt+=(x.t-mt)**2;});
+    const corr=cov/(Math.sqrt(vs*vt)||1);
+    if(Math.abs(corr)<0.4)return;
+    if(corr<0)arr.reverse();
+    // split where blocks are missing (>300m jump would cut across the neighborhood)
+    const runs=[[arr[0]]];
+    for(let i=1;i<arr.length;i++){
+      if(distM(arr[i-1].mid,arr[i].mid)>300)runs.push([arr[i]]);
+      else runs[runs.length-1].push(arr[i]);
+    }
+    runs.forEach(run=>{
+      if(run.length<4)return;
+      const pts=run.map(x=>x.mid);
+      L.polyline(pts,{color:'#17150F',weight:2.5,dashArray:'6 7',opacity:.75,interactive:false}).addTo(routeLayer);
+      for(let i=1;i<pts.length;i++){
+        const pa=map.latLngToContainerPoint(pts[i-1]), pb=map.latLngToContainerPoint(pts[i]);
+        const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI+90;  // triangle points up by default
+        L.marker([(pts[i-1][0]+pts[i][0])/2,(pts[i-1][1]+pts[i][1])/2],{interactive:false,
+          icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],
+            html:`<div class="rarrow" style="transform:rotate(${ang}deg)"></div>`})}).addTo(routeLayer);
+      }
       L.marker(pts[0],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
-        html:`<div class="rstart">starts ~${fmtMin(arr[0].t)}</div>`})}).addTo(routeLayer);
-    drawn++;
+        html:`<div class="rstart">START ~${fmtMin(run[0].t)}</div>`})}).addTo(routeLayer);
+      L.marker(pts[pts.length-1],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
+        html:`<div class="rend">END ~${fmtMin(run[run.length-1].t)}</div>`})}).addTo(routeLayer);
+      drawn++;
+    });
   });
   return drawn;
 }
@@ -803,6 +839,10 @@ function drawSegments(rows){
       if(dayFilter!=null&&!s.rows.some(r=>normDay(r.weekday)===dayFilter))return;
       let best=null,bestRow=s.rows[0],rank=0,color=getCSS('--gray');
       s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank){rank=st.rank;color=st.color;best=ns;bestRow=r}});
+      // status filter (Layers panel legend): a visibility lens like the day filter —
+      // gray "posted sign" sides always show (tiny minority, never misleading).
+      const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
+      if(cls!=='gray'&&!statusOn[cls])return;
       const ll=offsetLine(center, OFFSET, signs[s.key]);
       const side={key:s.key, blockside:s.blockside, rows:s.rows, row:bestRow, ns:best, color, latlngs:ll, mid:ll[Math.floor(ll.length/2)]};
       group.sides.push(side);
@@ -1135,9 +1175,14 @@ document.getElementById('locate').onclick=()=>{
 function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
 // quiet=true: center + dot only (launch auto-position) — no sheet, the user may not be at their car.
 function placeYou(lat,lng,fly,cnnHint,quiet){
-  // "Where I parked" must see every curb side — a day filter could otherwise snap
-  // the pin to the wrong (still-visible) side of the street.
+  // "Where I parked" must see every curb side — a day or status filter could otherwise
+  // snap the pin to the wrong (still-visible) side of the street.
   if(!quiet&&dayFilter!=null)setDayFilter(null);
+  if(!quiet&&(!statusOn.green||!statusOn.amber||!statusOn.red)){
+    statusOn={green:true,amber:true,red:true};
+    document.querySelectorAll('.lgt').forEach(b=>{b.classList.add('on');b.setAttribute('aria-pressed','true');});
+    refreshLayerBadges(); drawSegments(lastRows);
+  }
   if(youMarker)map.removeLayer(youMarker);
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
@@ -1226,6 +1271,16 @@ let areaTok=0, curArea='';
 // sign-disc palette (blue/green/red/orange/purple), deterministic per letter.
 const AREA_COLORS=['#1D69A5','#1F8A4C','#C42127','#D97818','#6B4FA0'];
 function areaColor(a){let h=0;for(const c of String(a))h+=c.charCodeAt(0);return AREA_COLORS[h%AREA_COLORS.length];}
+// Andrew's monotone chain — fine at neighborhood scale ([lat,lng] treated as planar)
+function convexHull(points){
+  const p=[...points].sort((a,b)=>a[1]-b[1]||a[0]-b[0]);
+  if(p.length<3)return p;
+  const cross=(o,a,b)=>(a[1]-o[1])*(b[0]-o[0])-(a[0]-o[0])*(b[1]-o[1]);
+  const lo=[],hi=[];
+  for(const pt of p){while(lo.length>1&&cross(lo[lo.length-2],lo[lo.length-1],pt)<=0)lo.pop();lo.push(pt);}
+  for(const pt of p.reverse()){while(hi.length>1&&cross(hi[hi.length-2],hi[hi.length-1],pt)<=0)hi.pop();hi.push(pt);}
+  return lo.slice(0,-1).concat(hi.slice(0,-1));
+}
 function closeLayersPanel(){
   document.getElementById('layersPanel').hidden=true;
   document.getElementById('layersBtn').setAttribute('aria-expanded','false');
@@ -1237,6 +1292,8 @@ function refreshLayerBadges(){
   if(loadOn)h+='<i class="lbdot" style="background:var(--amber)"></i>';
   if(meterOn)h+='<i class="lbdot" style="background:var(--gray)"></i>';
   if(routeOn)h+='<i class="lbdot" style="background:var(--ink)"></i>';
+  if(!statusOn.green||!statusOn.amber||!statusOn.red)
+    h+='<i class="lbdot" style="background:transparent;border-style:dashed"></i>';
   if(curArea)h+=`<i class="lbdisc" style="background:${areaColor(curArea)}">${curArea}</i>`;
   document.getElementById('layerBadges').innerHTML=h;
 }
@@ -1246,6 +1303,11 @@ function refreshLayerBadges(){
   document.addEventListener('click',e=>{ if(!panel.hidden&&!e.target.closest('.layers'))closeLayersPanel(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!panel.hidden)closeLayersPanel(); });
   document.getElementById('areaClear').onclick=()=>showArea('');
+  document.querySelectorAll('.lgt').forEach(b=>{b.onclick=()=>{
+    const k=b.dataset.st; statusOn[k]=!statusOn[k];
+    b.classList.toggle('on',statusOn[k]); b.setAttribute('aria-pressed',statusOn[k]);
+    refreshLayerBadges(); drawSegments(lastRows);
+  };});
   (async()=>{
     try{
       const r=await fetch(RPP+`?$select=rpparea1,count(*) as n&$where=rpparea1 IS NOT NULL&$group=rpparea1&$order=rpparea1`);
@@ -1275,9 +1337,21 @@ async function showArea(letter){
     d.forEach(rec=>{
       const g=rec.shape; if(!g||!g.coordinates)return;
       const lines=g.type==='MultiLineString'?g.coordinates:[g.coordinates];
-      lines.forEach(c=>{const ll=c.map(p=>[p[1],p[0]]); pts.push(ll[0],ll[ll.length-1]);
-        L.polyline(ll,{color:col,weight:rppWeight(),opacity:.4,lineCap:'round',interactive:false}).addTo(areaLayer);});
+      lines.forEach(c=>{const ll=c.map(p=>[p[1],p[0]]); pts.push(...ll);
+        L.polyline(ll,{color:col,weight:rppWeight(),opacity:.3,lineCap:'round',interactive:false}).addTo(areaLayer);});
     });
+    // territory boundary: convex hull around the area's blocks (expanded ~4% for breathing
+    // room), drawn as a bold dashed border + faint wash + a big sign-disc at the centroid —
+    // the scattered street highlights alone don't read as "this is the area".
+    if(pts.length>2){
+      const hull=convexHull(pts);
+      const cx=hull.reduce((s,p)=>s+p[0],0)/hull.length, cy=hull.reduce((s,p)=>s+p[1],0)/hull.length;
+      const grown=hull.map(p=>[cx+(p[0]-cx)*1.045, cy+(p[1]-cy)*1.045]);
+      L.polygon(grown,{color:col,weight:3.5,dashArray:'10 8',fillColor:col,fillOpacity:.07,
+        lineJoin:'round',interactive:false}).addTo(areaLayer);
+      L.marker([cx,cy],{interactive:false,icon:L.divIcon({className:'',iconSize:[46,46],iconAnchor:[23,23],
+        html:`<div class="abigdisc" style="background:${col}">${letter}</div>`})}).addTo(areaLayer);
+    }
     if(pts.length)map.fitBounds(L.latLngBounds(pts),{padding:[40,40],maxZoom:16});
     // most common rule in the area = the headline summary (2017 data — phrased as "typically")
     const tally={};
