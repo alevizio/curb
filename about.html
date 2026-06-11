@@ -3,8 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>CURB — Know where to park in SF</title>
-<meta name="description" content="San Francisco street sweeping, block by block — including when tickets actually land. Free, no accounts, live from SF open data.">
+<title>About CURB — SF Street Sweeping Schedules & Real Ticket Times</title>
+<meta name="description" content="How CURB works: SF street sweeping schedules block by block, permit areas, and ticket times rebuilt from 1.2M real citations. Free — open the live map.">
+<link rel="canonical" href="https://curb.guide/about">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"CURB",
+ "url":"https://curb.guide/","applicationCategory":"UtilitiesApplication",
+ "operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+ "description":"San Francisco street sweeping schedules block by block, residential permit areas, and real-world parking-ticket times reconstructed from public SFMTA citation data.",
+ "image":"https://curb.guide/og.png"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+ {"@type":"Question","name":"When does street sweeping happen in San Francisco?",
+  "acceptedAnswer":{"@type":"Answer","text":"Most residential blocks are swept weekly or twice a month in a fixed weekday window (for example, Tuesday 9–11am); many commercial corridors are swept overnight. Every block has its own schedule — CURB shows the exact rule for any curb when you tap it on the map."}},
+ {"@type":"Question","name":"When do street-cleaning parking tickets actually get written?",
+  "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from two years of SFMTA citations — on a typical 9–11am block, the median ticket lands around 9:14am. The posted sign is always the source of truth."}},
+ {"@type":"Question","name":"Is CURB free?",
+  "acceptedAnswer":{"@type":"Answer","text":"Yes. CURB is free, with no account, no ads, and no tracking. It runs entirely on public San Francisco open data (DataSF)."}},
+ {"@type":"Question","name":"What are San Francisco's residential permit parking areas?",
+  "acceptedAnswer":{"@type":"Answer","text":"About 30 lettered RPP areas limit non-permit parking — typically to 2 hours, Monday–Friday 8am–6pm; permit holders are exempt. CURB maps every area's boundary and typical rule from the Layers panel."}},
+ {"@type":"Question","name":"Can CURB remind me before street sweeping?",
+  "acceptedAnswer":{"@type":"Answer","text":"Yes. One tap sets a push alert about 30 minutes before your block is swept, or adds the sweep to your calendar. On iPhone, install CURB to your Home Screen to receive push alerts."}}
+]}
+</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
 <meta property="og:title" content="CURB — Know where to park in SF">
@@ -126,8 +148,8 @@
 
   /* how it works — numbered notice, not cards */
   .how{padding:clamp(48px,8vh,84px) 0 clamp(28px,4vh,40px)}
-  .how .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
-  .how h2{font-family:'Anton',sans-serif;font-size:clamp(34px,5vw,52px);text-transform:uppercase;line-height:.95;margin:6px 0 0}
+  .how .k,.faq .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .how h2,.faq h2{font-family:'Anton',sans-serif;font-size:clamp(34px,5vw,52px);text-transform:uppercase;line-height:.95;margin:6px 0 0}
   .steps{margin-top:34px}
   .step{display:grid;grid-template-columns:auto 1fr;gap:clamp(18px,3vw,34px);align-items:start;
     padding:26px 0;border-top:2.5px solid var(--ink)}
@@ -141,6 +163,14 @@
   .pushpill{display:inline-block;background:var(--ink);color:var(--paper);border-radius:9px;
     padding:6px 11px;font-size:13px;font-weight:800;transform:rotate(-.6deg)}
   .ic{width:15px;height:15px;vertical-align:-2.5px}
+
+  /* faq */
+  .faq{padding:clamp(36px,6vh,64px) 0 0}
+  .qa{padding:22px 0;border-top:2.5px solid var(--ink)}
+  .qa:last-of-type{border-bottom:2.5px solid var(--ink)}
+  .qa h3{font-family:'Anton',sans-serif;font-size:clamp(18px,2.2vw,23px);text-transform:uppercase;line-height:1.05}
+  .qa p{margin-top:7px;color:var(--ink-soft);font-weight:600;max-width:52em}
+  .qa p b{color:var(--ink)}
 
   /* footer */
   footer{margin-top:clamp(44px,7vh,72px);border-top:3px solid var(--ink);background:var(--ink);color:var(--paper)}
@@ -264,6 +294,41 @@
           <p>One tap sets a <span class="pushpill"><svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-green)" d="M11 6.125c0 -1.06087 -0.4214 -2.07828 -1.17157 -2.82843C9.07828 2.54643 8.06087 2.125 7 2.125s-2.07828 0.42143 -2.82843 1.17157C3.42143 4.04672 3 5.06413 3 6.125v3.25c0 0.39782 -0.15804 0.7794 -0.43934 1.0607s-0.66284 0.4393 -1.06066 0.4393h11c-0.3978 0 -0.7794 -0.158 -1.0607 -0.4393S11 9.77282 11 9.375v-3.25Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M3.63265 0.260417c0.20135 0.280365 0.1373 0.670875 -0.14307 0.872233 -0.69259 0.49741 -1.25691 1.15246 -1.64633 1.91105 -0.38942 0.75859 -0.59277 1.59895 -0.59325 2.45165 -0.0002 0.34518 -0.280176 0.62485 -0.625354 0.62465C0.279468 6.1198 -0.000195384 5.83982 0 5.49465c0.000595272 -1.05101 0.251236 -2.0868 0.731219 -3.02181C1.2112 1.53784 1.90675 0.730443 2.76042 0.117354c0.28036 -0.2013534 0.67087 -0.1373022 0.87223 0.143063ZM7 1.5c-1.22663 0 -2.40301 0.48728 -3.27037 1.35463C2.86228 3.72199 2.375 4.89837 2.375 6.125v3.25c0 0.23206 -0.09219 0.45462 -0.25628 0.61872 -0.1641 0.16408 -0.38666 0.25628 -0.61872 0.25628 -0.34518 0 -0.625 0.2798 -0.625 0.625s0.27982 0.625 0.625 0.625h11c0.3452 0 0.625 -0.2798 0.625 -0.625s-0.2798 -0.625 -0.625 -0.625c-0.2321 0 -0.4546 -0.0922 -0.6187 -0.25628 -0.1641 -0.1641 -0.2563 -0.38665 -0.2563 -0.61872v-3.25c0 -1.22663 -0.4873 -2.40301 -1.3546 -3.27037C9.40301 1.98728 8.22663 1.5 7 1.5Zm3.375 7.875c0 0.30467 0.0654 0.6026 0.1885 0.875H3.43649c0.12308 -0.2724 0.18851 -0.57033 0.18851 -0.875v-3.25c0 -0.89511 0.35558 -1.75355 0.98851 -2.38649C5.24645 3.10558 6.10489 2.75 7 2.75c0.89511 0 1.75355 0.35558 2.38649 0.98851 0.63291 0.63294 0.98851 1.49138 0.98851 2.38649v3.25ZM6 12.5c-0.41421 0 -0.75 0.3358 -0.75 0.75s0.33579 0.75 0.75 0.75h2c0.41421 0 0.75 -0.3358 0.75 -0.75s-0.33579 -0.75 -0.75 -0.75H6ZM11.2396 0.117354c-0.2804 -0.2013534 -0.6709 -0.1373022 -0.8722 0.143063 -0.2014 0.280365 -0.1373 0.670875 0.143 0.872233 0.6926 0.49741 1.2569 1.15246 1.6463 1.91105 0.3895 0.75859 0.5928 1.59895 0.5933 2.45165 0.0002 0.34518 0.2802 0.62485 0.6254 0.62465 0.3451 -0.0002 0.6248 -0.28018 0.6246 -0.62535 -0.0006 -1.05101 -0.2512 -2.0868 -0.7312 -3.02181 -0.48 -0.935 -1.1756 -1.742397 -2.0292 -2.355486Z" clip-rule="evenodd" stroke-width="1"></path></g></svg> push alert ~30 min before</span> your block is swept —
             or drop it into your calendar. Works as an app from your home screen.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap faq" id="faq">
+    <div class="k">Questions, answered</div>
+    <h2>The fine print, in plain words.</h2>
+    <div class="steps" style="margin-top:26px">
+      <div class="qa">
+        <h3>When does street sweeping happen in San Francisco?</h3>
+        <p>Most residential blocks are swept <b>weekly or twice a month</b> in a fixed weekday window (for
+          example, Tuesday 9–11am); many commercial corridors are swept overnight. Every block has its own
+          schedule — CURB shows the exact rule for any curb when you tap it on the map.</p>
+      </div>
+      <div class="qa">
+        <h3>When do street-cleaning parking tickets actually get written?</h3>
+        <p>Usually in the <b>first 30–40 minutes</b> of the posted window, not spread across it. CURB
+          reconstructs each block's real ticket times from two years of SFMTA citations — on a typical
+          9–11am block, the median ticket lands around 9:14am. The posted sign is always the source of truth.</p>
+      </div>
+      <div class="qa">
+        <h3>Is CURB free?</h3>
+        <p>Yes. CURB is <b>free, with no account, no ads, and no tracking</b>. It runs entirely on public
+          San Francisco open data (DataSF).</p>
+      </div>
+      <div class="qa">
+        <h3>What are San Francisco's residential permit parking areas?</h3>
+        <p>About <b>30 lettered RPP areas</b> limit non-permit parking — typically to 2 hours, Monday–Friday
+          8am–6pm; permit holders are exempt. CURB maps every area's boundary and typical rule from the
+          Layers panel.</p>
+      </div>
+      <div class="qa">
+        <h3>Can CURB remind me before street sweeping?</h3>
+        <p>Yes. One tap sets a <b>push alert about 30 minutes before</b> your block is swept, or adds the
+          sweep to your calendar. On iPhone, install CURB to your Home Screen to receive push alerts.</p>
       </div>
     </div>
   </section>

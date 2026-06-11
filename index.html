@@ -3,8 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>CURB Map — SF parking near you</title>
-<meta name="description" content="SF street parking, block by block — sweeping schedules, next-sweep times, permit zones, and move-your-car alerts. Live from DataSF.">
+<title>SF Street Cleaning Map — When Tickets Actually Land | CURB</title>
+<meta name="description" content="Free SF street sweeping map: every block's cleaning schedule, permit areas, and the times tickets actually land — with move-your-car alerts. Tap your curb.">
+<link rel="canonical" href="https://curb.guide/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"CURB",
+ "alternateName":"CURB — SF Street Cleaning Map","url":"https://curb.guide/",
+ "applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)",
+ "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+ "description":"San Francisco street sweeping schedules block by block, residential permit areas, metered and loading zones, and real-world parking-ticket times reconstructed from public SFMTA citation data — with push alerts before your block is swept.",
+ "image":"https://curb.guide/og.png"}
+</script>
 <!-- Social cards: og.png is a static 1200x630 asset regenerated via `npm run og` (og/template.html). URLs must stay absolute. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
@@ -48,6 +57,7 @@
   :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
   .field:focus-within{outline:3px solid var(--meter);outline-offset:2px}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  .srh{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
   html,body{height:100%}
   body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
   #map{position:fixed;inset:0;background:#dfe7ee;z-index:0}
@@ -359,6 +369,7 @@
 </style>
 </head>
 <body>
+<h1 class="srh">San Francisco street cleaning map — sweeping schedules, permit areas, and real ticket times by block</h1>
 <div id="map"></div>
 
 <div class="top">
