@@ -130,8 +130,11 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   [map-symbol] [label] [eye] — the symbol ALWAYS shows the layer's true map appearance
   (it IS the legend; off rows dim to .42 but stay readable), the eye toggles visibility.
   Truck routes carries an amber .beta chip (font-style:normal — no italics rule). Active
-  layers show as badges on the button (`refreshLayerBadges()`). Bottom-right zoom, bottom-left
-  sheet. The legend lives ONLY in the panel.
+  layers show as badges on the button (`refreshLayerBadges()`). Bottom-right: locate button
+  stacked above the JOINED +/- zoom pill (one bordered container, divider between).
+  Bottom-left: the tappable curb-color legend (.legend2/.lst — show/hide per status;
+  hollow dashed swatch = hidden) + the sheet. Toggling Truck routes below z15
+  auto-zooms to 16 (citywide view has no street data); routeLayer clears on zoom-out.
 - **Permit-area browser** (`#areaGrid` discs → `showArea()`, `areaLayer`): disc grid of
   all RPP areas (fetched once, `^[A-Z]{1,2}$` filters junk; colors via `areaColor()` from
   the sign-disc palette — same color drives disc, badge, map highlight, and sheet chip);
