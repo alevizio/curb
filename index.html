@@ -53,7 +53,8 @@
   #map{position:fixed;inset:0;background:#dfe7ee;z-index:0}
   .leaflet-container{font-family:'Hanken Grotesk',sans-serif}
 
-  .top{position:fixed;top:0;left:0;right:0;z-index:600;padding:12px 12px 0;
+  .top{position:fixed;top:0;left:0;right:0;z-index:600;
+    padding:calc(12px + env(safe-area-inset-top)) 12px 0;  /* viewport-fit=cover: stay clear of the notch */
     pointer-events:none;display:flex;flex-direction:column;gap:8px}
   .barrow{display:flex;gap:8px;align-items:center;pointer-events:auto}
   .logo{font-family:'Anton',sans-serif;font-size:26px;letter-spacing:.01em;text-transform:uppercase;
@@ -96,17 +97,28 @@
   .toggle.on .sw{background:#fff;border-color:#fff}
   .toggle.load.on{background:var(--amber);border-color:var(--amber);color:var(--ink)}
   .toggle.load.on .sw{background:var(--ink);border-color:var(--ink)}
-  .agrid{display:flex;flex-wrap:wrap;gap:7px}
-  .adot{width:31px;height:31px;border-radius:50%;border:2px solid rgba(23,21,15,.3);color:#fff;
+  .toggle.mtr.on{background:var(--gray);border-color:var(--gray);color:#fff}
+  .toggle.mtr.on .sw{background:#fff;border-color:#fff}
+  .toggle.rte.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+  .toggle.rte.on .sw{background:var(--paper);border-color:var(--paper)}
+  /* inferred truck-route decorations */
+  .rarrow{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;
+    border-bottom:11px solid var(--ink);opacity:.85}
+  .rstart{transform:translate(-50%,-150%);background:var(--ink);color:var(--paper);font-size:10px;font-weight:800;
+    padding:3px 8px;border-radius:7px;white-space:nowrap;width:max-content;box-shadow:2px 2px 0 rgba(23,21,15,.3)}
+  .agrid{display:flex;flex-wrap:wrap;gap:9px}
+  .adot{width:34px;height:34px;border-radius:50%;border:2px solid rgba(23,21,15,.3);color:#fff;position:relative;
     font-family:'Anton',sans-serif;font-style:normal;font-size:13.5px;cursor:pointer;display:grid;place-items:center;padding:0}
+  .adot::after{content:'';position:absolute;inset:-4px}
   .adot.two{font-size:10.5px}
   .adot.sel{outline:3px solid var(--ink);outline-offset:1px}
   .aclear{display:block;width:100%;margin-top:10px;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;
     letter-spacing:.05em;border:2px solid var(--ink);border-radius:9px;background:var(--paper);padding:8px;cursor:pointer}
   .aclear[hidden]{display:none}
 
+  /* vertical padding leaves room for the chips' hit-expansion (overflow-x clips pseudos) */
   .dayrow{display:flex;gap:6px;align-items:center;pointer-events:auto;overflow-x:auto;
-    scrollbar-width:none;padding:2px 0 4px}
+    scrollbar-width:none;padding:6px 0 8px}
   .dayrow::-webkit-scrollbar{display:none}
   .datechip{flex:none;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
     background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink);
@@ -116,6 +128,10 @@
     background:rgba(242,236,223,.92);color:var(--ink);border:2px solid var(--ink);border-radius:10px;
     padding:7px 11px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
   .dchip.on{background:var(--ink);color:var(--paper)}
+  /* invisible hit-area expansion to ~44px effective targets (visuals unchanged);
+     .dchip uses ::before because .dchip.today::after is the red today-dot */
+  .dchip,.datechip,.logo{position:relative}
+  .dchip::before,.datechip::after,.logo::after{content:'';position:absolute;inset:-5px}
   .dchip.today{position:relative}
   .dchip.today::after{content:'';position:absolute;top:-4px;right:-4px;width:9px;height:9px;border-radius:50%;
     background:var(--red);border:1.5px solid var(--paper)}
@@ -123,18 +139,18 @@
   .field .loc{flex:none;align-self:stretch;width:46px;display:grid;place-items:center;border:0;
     border-left:2.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
   .field .loc:active{background:var(--ink);color:var(--paper)}
-  .field .loc svg{width:19px;height:19px}
+  .field .loc svg{width:19px;height:19px;margin:0}  /* .field svg margin-left is for the magnifier only */
   .field .loc.loading svg{animation:spin 1s linear infinite}
 
   /* Leaflet zoom +/- restyled to the signage language */
   .leaflet-control-zoom.leaflet-bar{border:0;box-shadow:none;display:flex;flex-direction:column;gap:8px}
   .leaflet-control-zoom.leaflet-bar a{width:42px;height:42px;background:var(--paper);color:var(--ink);
     border:2.5px solid var(--ink);border-radius:11px!important;box-shadow:var(--shadow);
-    font:800 22px/38px 'Hanken Grotesk',sans-serif;text-align:center}
+    font:800 22px/1 'Hanken Grotesk',sans-serif;display:grid;place-items:center}
   .leaflet-control-zoom.leaflet-bar a:hover{background:#fff;color:var(--ink)}
   .leaflet-control-zoom.leaflet-bar a:active{transform:translate(2px,2px);box-shadow:none}
   .leaflet-control-zoom.leaflet-bar a.leaflet-disabled{opacity:.4}
-  .leaflet-bottom.leaflet-left .leaflet-control-zoom{margin:0 0 24px 14px}
+  .leaflet-bottom.leaflet-left .leaflet-control-zoom{margin:0 0 calc(24px + env(safe-area-inset-bottom)) 14px}
 
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));
     z-index:700;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 15px;border-radius:10px;
@@ -146,8 +162,9 @@
     max-width:78vw;pointer-events:none;transition:opacity .3s}
   .hint .big{font-family:'Anton',sans-serif;font-size:24px;text-transform:uppercase;line-height:.95}
   .hint p{font-size:13.5px;color:var(--ink-soft);margin-top:6px}
-  .hint .hint-about{margin-top:10px;font-weight:800}
-  .hint .hint-about a{pointer-events:auto;color:var(--meter);text-underline-offset:3px}
+  .hint .hint-about{margin-top:4px;font-weight:800}
+  .hint .hint-about a{pointer-events:auto;color:var(--meter);text-underline-offset:3px;
+    display:inline-block;padding:9px 8px}  /* 16px text -> ~38px tappable row */
 
   /* first-run welcome — shown once, until dismissed or the first curb is tapped */
   .welcome{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:560;background:var(--paper);
@@ -363,6 +380,8 @@
     <div class="lp-sec">Layers</div>
     <button class="toggle" id="rppToggle" aria-pressed="false"><span class="sw"></span>Permit zones</button>
     <button class="toggle load" id="loadToggle" aria-pressed="false"><span class="sw"></span>Loading zones</button>
+    <button class="toggle mtr" id="meterToggle" aria-pressed="false"><span class="sw"></span>Metered parking</button>
+    <button class="toggle rte" id="routeToggle" aria-pressed="false"><span class="sw"></span>Truck route · beta</button>
     <div class="lp-sec">Highlight a permit area</div>
     <div class="agrid" id="areaGrid"></div>
     <button class="aclear" id="areaClear" hidden>Clear area highlight</button>
@@ -503,6 +522,11 @@ let segCache=[];   // {group, side}
 let rppCache=[];   // {latlngs, area, hrlimit, days, from, to, regulation, exceptions}
 let fetchTok=0, rppOn=false;
 let loadOn=false, loadCache=null;  // loadCache=[{lat,lng,color,label,days,from,to,limit}] (loaded once)
+const meterLayer=L.layerGroup().addTo(map); // all metered posts (grey dots, canvas-rendered)
+const meterRenderer=L.canvas({padding:.3}); // thousands of dots — SVG would crawl
+let meterOn=false, meterPts=null;           // [[lat,lng],...] every active on-street meter
+const routeLayer=L.layerGroup().addTo(map); // inferred truck routes (from citation times)
+let routeOn=false;
 let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without a sweep that day are hidden
 let lastRows=[];     // raw sweep rows from the last viewport fetch, for redraws on filter change
 let rangeCache={};   // cnn -> {lo,hi} street-number range (EAS); accumulates across pans (static data)
@@ -603,7 +627,7 @@ function distSqToLineMeters(lat,lng,latlngs){
 /* ---------- viewport loading ---------- */
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
-  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];hint.style.opacity='1';hint.style.visibility='visible';return;}
+  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();segCache=[];rppCache=[];lastRows=[];hint.style.opacity='1';hint.style.visibility='visible';return;}
   hint.style.opacity='0';hint.style.visibility='hidden';  // opacity alone leaves the about-link invisibly clickable
   const b=map.getBounds().pad(0.15);
   const poly=`POLYGON((${b.getWest()} ${b.getSouth()}, ${b.getEast()} ${b.getSouth()}, ${b.getEast()} ${b.getNorth()}, ${b.getWest()} ${b.getNorth()}, ${b.getWest()} ${b.getSouth()}))`;
@@ -619,6 +643,56 @@ async function loadViewport(){
   loadRanges(poly);
   if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
   if(loadOn) drawLoadZones(); else loadLayer.clearLayers();
+  if(meterOn) drawMeters(); else meterLayer.clearLayers();
+}
+
+/* ---------- inferred truck routes: connect blocks in ticket-time order ---------- */
+// For the selected day, blocks on the same corridor + posted window are sorted by their
+// historical average ticket time (ENF) — the resulting path approximates the truck's run.
+// Estimate from public citations, NOT live tracking (see docs/sweeper-data-research.md).
+function drawRoutes(){
+  routeLayer.clearLayers();
+  if(!routeOn||!ENF)return 0;
+  const dow=dayFilter!=null?dayFilter:new Date().getDay();
+  const groups={};
+  segCache.forEach(o=>{
+    const r=(o.side.rows||[]).find(x=>normDay(x.weekday)===dow); if(!r)return;
+    const e=enfFor(o.group.cnn,dow); if(!e)return;
+    const k=(o.group.corridor||'?')+'|'+r.fromhour;
+    (groups[k]=groups[k]||[]).push({mid:o.side.mid,t:e.avg});
+  });
+  let drawn=0;
+  Object.values(groups).forEach(arr=>{
+    if(arr.length<3)return;  // need a few stops for a meaningful run
+    arr.sort((a,b)=>a.t-b.t);
+    const pts=arr.map(x=>x.mid);
+    L.polyline(pts,{color:'#17150F',weight:2.5,dashArray:'6 7',opacity:.75,interactive:false}).addTo(routeLayer);
+    for(let i=1;i<pts.length;i++){
+      const pa=map.latLngToContainerPoint(pts[i-1]), pb=map.latLngToContainerPoint(pts[i]);
+      const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI+90;  // triangle points up by default
+      L.marker([(pts[i-1][0]+pts[i][0])/2,(pts[i-1][1]+pts[i][1])/2],{interactive:false,
+        icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],
+          html:`<div class="rarrow" style="transform:rotate(${ang}deg)"></div>`})}).addTo(routeLayer);
+    }
+    if(arr.length>=5)  // label only substantial runs — every run labelled reads as soup
+      L.marker(pts[0],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
+        html:`<div class="rstart">starts ~${fmtMin(arr[0].t)}</div>`})}).addTo(routeLayer);
+    drawn++;
+  });
+  return drawn;
+}
+
+/* ---------- metered parking layer (grey dots; canvas for volume) ---------- */
+async function drawMeters(){
+  try{ await ensureLoadCache(); }catch(e){ toast('Meter data unavailable right now.'); return; }
+  meterLayer.clearLayers();
+  if(map.getZoom()<MIN_ZOOM_DATA||!meterPts)return;
+  const b=map.getBounds();
+  meterPts.forEach(p=>{
+    if(!b.contains(p))return;
+    L.circleMarker(p,{renderer:meterRenderer,radius:3,color:'#17150F',weight:1,
+      fillColor:getCSS('--gray'),fillOpacity:.85,interactive:false}).addTo(meterLayer);
+  });
 }
 
 /* ---------- loading / color-curb zones (metered; 6cqg-dxku ⋈ meter coords) ---------- */
@@ -632,6 +706,7 @@ async function ensureLoadCache(){
     fetch(LOADRULES+`?$select=post_id,applied_color_rule,days_applied,from_time,to_time,time_limit,priority&$where=`+encodeURIComponent(`applied_color_rule like 'White%' OR applied_color_rule like 'Yellow%' OR applied_color_rule like 'Red%' OR applied_color_rule like 'Green%' OR applied_color_rule like 'Orange%'`)+`&$limit=50000`).then(r=>r.json())
   ]);
   const loc={}; meters.forEach(m=>{if(m.post_id&&m.latitude)loc[m.post_id]=[+m.latitude,+m.longitude];});
+  meterPts=Object.values(loc);  // every active on-street meter — powers the Metered layer too
   const best={};  // one rule per post_id (lowest priority number = primary)
   rules.forEach(x=>{
     const ll=loc[x.post_id]; if(!ll)return;
@@ -734,6 +809,7 @@ function drawSegments(rows){
   });
   if(dayFilter!=null&&rows.length&&!segCache.length)
     toast('No '+DAYLBL[dayFilter]+' sweeping on these blocks — tap "All" to reset.');
+  if(routeOn)drawRoutes();  // routes derive from the drawn segments — redraw together
 }
 
 // Ribbon weight in px so the band spans roughly curb-to-curb (±6m) at each zoom.
@@ -1144,6 +1220,8 @@ function refreshLayerBadges(){
   let h='';
   if(rppOn)h+='<i class="lbdot" style="background:var(--meter)"></i>';
   if(loadOn)h+='<i class="lbdot" style="background:var(--amber)"></i>';
+  if(meterOn)h+='<i class="lbdot" style="background:var(--gray)"></i>';
+  if(routeOn)h+='<i class="lbdot" style="background:var(--ink)"></i>';
   if(curArea)h+=`<i class="lbdisc" style="background:${areaColor(curArea)}">${curArea}</i>`;
   document.getElementById('layerBadges').innerHTML=h;
 }
@@ -1201,6 +1279,23 @@ document.getElementById('loadToggle').onclick=function(){
   if(loadOn){ this.classList.add('busy'); drawLoadZones().finally(()=>this.classList.remove('busy'));
     toast('Loading zones: 🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus. Tap a dot for hours. (Metered zones only — paint-only curbs aren\'t in city data.)');
   } else loadLayer.clearLayers();
+};
+document.getElementById('meterToggle').onclick=function(){
+  meterOn=!meterOn; this.classList.toggle('on',meterOn); this.setAttribute('aria-pressed',meterOn);
+  refreshLayerBadges();
+  if(meterOn){ this.classList.add('busy'); drawMeters().finally(()=>this.classList.remove('busy'));
+    toast('Metered curbs shown as grey dots — check the meter for hours & rates.');
+  } else meterLayer.clearLayers();
+};
+document.getElementById('routeToggle').onclick=function(){
+  routeOn=!routeOn; this.classList.toggle('on',routeOn); this.setAttribute('aria-pressed',routeOn);
+  refreshLayerBadges();
+  if(routeOn){
+    const dow=dayFilter!=null?dayFilter:new Date().getDay();
+    const n=drawRoutes();
+    toast(n?`Inferred ${DAYLBL[dow]} sweep runs from 2 yrs of ticket times — dashed path, arrows show direction. Pick a day chip to change day. An estimate, never live.`
+           :`No ${DAYLBL[dow]} runs to infer here — try another day chip or zoom to a residential area.`);
+  } else routeLayer.clearLayers();
 };
 
 /* ---------- search ---------- */
