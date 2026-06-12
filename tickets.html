@@ -163,6 +163,18 @@
     <p class="note" id="streetsNote"></p>
   </section>
 
+  <section id="surge">
+    <div class="sec-k">The comeback</div>
+    <h2>Where tickets surged</h2>
+    <p class="lede">The pandemic lull is over. Same six months, five years apart — December–May 2020–21
+      against 2025–26, every violation type, matched to neighborhoods through the city's address records.
+      <a href="https://sfstandard.com/2026/06/11/mapped-sf-parking-tickets-have-surged-since-pandemic/"
+        rel="noopener">The SF Standard mapped the same comeback</a> from SFMTA's books.</p>
+    <div class="panel"><svg id="chartSurge" width="100%" height="430" role="img"
+      aria-label="Diverging bar chart of percentage change in parking citations by neighborhood, six months of 2020 to 21 versus 2025 to 26"></svg></div>
+    <p class="note" id="surgeNote"></p>
+  </section>
+
   <section id="context">
     <div class="sec-k">The context</div>
     <h2>Where the money goes</h2>
@@ -332,6 +344,31 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
     const ts=S.topStreets.slice(0,8);
     $('streetsNote').innerHTML='<b>The heaviest streets (2 yrs of sweeping fines):</b> '+
       ts.map(t=>`${t.street.charAt(0)+t.street.slice(1).toLowerCase()} (${fmt$(t.rev)})`).join(' · ');
+  }
+
+  // --- surge: same six months, five years apart (diverging bars) ---
+  if(S.hoodSurge){
+    const GRN='#157A44';
+    const ranked=S.hoodSurge.rows.filter(r=>r.pct!=null);
+    const rows=[...ranked.slice(0,10),...ranked.slice(-3)];   // biggest risers + every decliner end
+    const W=960,rh=30,P={t:6},H=P.t+rows.length*rh+10,maxA=Math.max(...rows.map(r=>Math.abs(r.pct)));
+    const X0=330,XW=W-X0-170;
+    let s=`<line x1="${X0}" y1="0" x2="${X0}" y2="${H}" stroke="${INK}" stroke-width="1.5" stroke-dasharray="3 4" opacity=".45"/>`;
+    rows.forEach((r,i)=>{
+      const y=P.t+i*rh,w=Math.max(XW*(Math.abs(r.pct)/maxA),3),pos=r.pct>=0;
+      if(i===10)s+=`<line x1="0" y1="${y+1}" x2="${W}" y2="${y+1}" stroke="${SOFT}" stroke-width="1" stroke-dasharray="2 5" opacity=".6"/>`;
+      s+=`<rect x="${pos?X0:X0-w}" y="${y+5}" width="${w}" height="${rh-10}" rx="4" fill="${pos?RED:GRN}" fill-opacity="${i<3||!pos?1:.8}"/>
+        <text x="${X0-w*(pos?0:1)-10}" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
+        <text x="${X0+(pos?w:0)+8}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}%</text>
+        <text x="${X0+(pos?w:0)+62}" y="${y+rh/2+4}" font-size="11" fill="${SOFT}">${fmtN(r.then)} → ${fmtN(r.now)}</text>`;
+    });
+    $('chartSurge').setAttribute('height',H);
+    draw('chartSurge',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
+    const grayed=S.hoodSurge.rows.filter(r=>r.pct==null).map(r=>r.hood);
+    $('surgeNote').innerHTML=`<b>${ranked.length} neighborhoods ranked.</b> Areas with under `+
+      `${S.hoodSurge.minN.toLocaleString()} citations in either window aren't ranked`+
+      (grayed.length?` (${grayed.join(', ')})`:'')+`. DataSF citations matched to neighborhoods via the
+      city's address records — unmatched addresses are excluded, so counts are conservative.`;
   }
 }).catch(()=>{document.querySelectorAll('.panel').forEach(p=>p.innerHTML='<p class="note">Couldn\'t load the data — refresh to retry.</p>');});
 </script>

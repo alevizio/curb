@@ -166,6 +166,29 @@
     padding:6px 11px;font-size:13px;font-weight:800;transform:rotate(-.6deg)}
   .ic{width:15px;height:15px;vertical-align:-2.5px}
 
+  /* maker's note — one human, one grudge, kept tiny */
+  .maker{padding:clamp(44px,7vh,72px) 0 0}
+  .maker .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .maker h2{font-family:'Anton',sans-serif;font-size:clamp(28px,4.2vw,44px);text-transform:uppercase;line-height:.97;margin:8px 0 0}
+  .maker p{margin-top:14px;color:var(--ink-soft);font-weight:600;line-height:1.55;max-width:40em}
+  .maker p b{color:var(--ink)}
+  .maker .sig{display:inline-block;margin-top:18px;background:var(--ink);color:var(--paper);border-radius:9px;
+    padding:8px 13px;font-size:13px;font-weight:800;transform:rotate(-.6deg);box-shadow:4px 4px 0 rgba(23,21,15,.22)}
+
+  /* press — the same citations, reported */
+  .press{padding:clamp(40px,6vh,68px) 0 0}
+  .press .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .press h2{font-family:'Anton',sans-serif;font-size:clamp(30px,4.4vw,48px);text-transform:uppercase;line-height:.96;margin:6px 0 0}
+  .press .lede{margin-top:12px;color:var(--ink-soft);font-weight:600;max-width:44em}
+  .press .lede b{color:var(--ink)}
+  .presslist{margin-top:24px}
+  .pressrow{display:block;padding:15px 2px 17px;border-top:2px solid rgba(23,21,15,.3);text-decoration:none;color:var(--ink)}
+  .pressrow:last-of-type{border-bottom:2px solid rgba(23,21,15,.3)}
+  .pressrow .o{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft)}
+  .pressrow b{display:block;font-size:clamp(16px,2vw,19px);font-weight:800;line-height:1.25;margin-top:3px}
+  .pressrow:hover b,.pressrow:focus-visible b{color:var(--red-text)}
+  .pressrow p{font-size:13.5px;color:var(--ink-soft);font-weight:600;margin-top:4px;max-width:46em}
+
   /* faq */
   .faq{padding:clamp(36px,6vh,64px) 0 0}
   .qa{padding:22px 0;border-top:2.5px solid var(--ink)}
@@ -300,6 +323,15 @@
     </div>
   </section>
 
+  <section class="wrap maker">
+    <div class="k">Why this exists</div>
+    <h2>I park on the street.<br>The street kept winning<span class="dot">.</span></h2>
+    <p>CURB began with one orange envelope too many. I park on the street like half this city, and I was
+      done donating to the SFMTA one windshield at a time — so I pulled the city's own data and built
+      <b>the map I wished existed</b>. Now the curb talks first.</p>
+    <div class="sig">— Alejandro · parked on the Tuesday side</div>
+  </section>
+
   <section class="wrap faq" id="faq">
     <div class="k">Questions, answered</div>
     <h2>The fine print, in plain words.</h2>
@@ -342,6 +374,40 @@
         <p>Yes. One tap sets a <b>push alert about 30 minutes before</b> your block is swept, or adds the
           sweep to your calendar. On iPhone, install CURB to your Home Screen to receive push alerts.</p>
       </div>
+    </div>
+  </section>
+
+  <section class="wrap press" id="press">
+    <div class="k">In the news</div>
+    <h2>The paper trail<span class="dot">.</span></h2>
+    <p class="lede">Reporters keep pulling the same thread CURB is built on — <b>SFMTA's own citation
+      records</b>. The recent coverage, if you want the full story:</p>
+    <div class="presslist">
+      <a class="pressrow" href="https://sfstandard.com/2026/06/11/mapped-sf-parking-tickets-have-surged-since-pandemic/" rel="noopener">
+        <span class="o">The SF Standard · June 2026</span>
+        <b>Mapped: Where SF parking tickets have surged most since the pandemic</b>
+        <p>Neighborhood by neighborhood, the post-pandemic enforcement comeback — Mission Bay leads, the Ingleside is the rare place tickets fell.</p>
+      </a>
+      <a class="pressrow" href="https://sfstandard.com/2026/06/10/san-francisco-parking-tickets/" rel="noopener">
+        <span class="o">The SF Standard · June 2026</span>
+        <b>SF parking tickets are back with a vengeance</b>
+        <p>Citations are back at pre-pandemic levels — and enforcement is shifting into nights and Saturdays.</p>
+      </a>
+      <a class="pressrow" href="https://www.sfexaminer.com/news/the-city/heres-san-francisco-californias-most-given-parking-ticket/article_686ed228-b877-11ed-9fa5-f743086e695c.html" rel="noopener">
+        <span class="o">SF Examiner · 2023</span>
+        <b>California's most issued parking ticket is right at home in SF</b>
+        <p>Street sweeping is the city's number-one ticket — half a million a year, more than Los Angeles writes.</p>
+      </a>
+      <a class="pressrow" href="https://sfstandard.com/2025/05/14/parking-crackdown-enraging-to-some-too-soft-for-others/" rel="noopener">
+        <span class="o">The SF Standard · 2025</span>
+        <b>SF's parking battles heat up</b>
+        <p>A fully staffed enforcement push, district by district — and the old "no ticket once the sweeper has passed" grace quietly eroding.</p>
+      </a>
+      <a class="pressrow" href="https://missionlocal.org/2025/09/want-to-avoid-s-f-parking-cops-a-23-year-olds-app-can-help/" rel="noopener">
+        <span class="o">Mission Local · 2025</span>
+        <b>SF pulls the plug on an app tracking parking cops</b>
+        <p>A live citation tracker drew 50,000 visitors in a day before the city cut its data feed — the appetite for this information is real.</p>
+      </a>
     </div>
   </section>
 </main>

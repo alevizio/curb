@@ -104,11 +104,45 @@ for (;;) {
   if (rows.length < 50000) break;
 }
 
+// ---- neighborhood surge: same six-month window five years apart (all violation types) ----
+// Mirrors SF Standard's June 2026 analysis (Dec-May 2020-21 vs 2025-26, SFMTA citations).
+log('neighborhood surge: streaming two six-month windows…');
+const SURGE_WINDOWS = [['2020-12-01', '2021-06-01', 'then'], ['2025-12-01', '2026-06-01', 'now']];
+const surge = new Map(); // hood -> { then, now }
+for (const [a, b, key] of SURGE_WINDOWS) {
+  let cur = '', n = 0;
+  for (;;) {
+    const rows = await soda(CITES, {
+      '$select': ':id,citation_location',
+      '$where': `citation_issued_datetime >= '${a}' AND citation_issued_datetime < '${b}'`
+        + (cur ? ` AND :id > '${cur}'` : ''),
+      '$order': ':id', '$limit': 50000,
+    });
+    if (!rows.length) break;
+    for (const r of rows) {
+      n++;
+      const p = parseLoc(r.citation_location); if (!p) continue;
+      const hood = hoodOf.get(`${p.num}|${p.name}`); if (!hood) continue;
+      const h = surge.get(hood) || { then: 0, now: 0 }; h[key]++; surge.set(hood, h);
+    }
+    cur = rows[rows.length - 1][':id'];
+    log(`  surge ${key}: ${n}`);
+    if (rows.length < 50000) break;
+  }
+}
+const SURGE_MIN = 1000; // under this in either window the % is noise — grayed out, pct null
+const hoodSurge = {
+  windows: { then: 'Dec 2020 – May 2021', now: 'Dec 2025 – May 2026' }, minN: SURGE_MIN,
+  rows: [...surge.entries()].map(([hood, v]) => ({ hood, then: v.then, now: v.now,
+    pct: (v.then >= SURGE_MIN && v.now >= SURGE_MIN) ? Math.round((v.now - v.then) / v.then * 100) : null }))
+    .sort((p, q) => (q.pct ?? -999) - (p.pct ?? -999)),
+};
+
 const out = {
   _meta: { generated: new Date().toISOString(), source: 'DataSF ab4h-6ztd ⋈ 3mea-di5p',
     note: 'rev = fines ISSUED (assessed), not collected. hoods/topStreets = street-cleaning only, last ~2yr.',
     hood_window_since: SINCE },
-  yearly, yearlySweep, byViolation, sweepHour, sweepDow,
+  yearly, yearlySweep, byViolation, sweepHour, sweepDow, hoodSurge,
   hoods: [...hoods.entries()].map(([k, v]) => ({ hood: k, n: v.n, rev: Math.round(v.rev) }))
     .sort((a, b) => b.n - a.n),
   topStreets: [...streets.entries()].map(([k, v]) => ({ street: k, n: v.n, rev: Math.round(v.rev) }))
