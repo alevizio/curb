@@ -182,6 +182,14 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   shows a Google/.ics chooser, remembered in `curbCalPref`, ▾ reopens it). UI glyphs are
   inline SVGs (`ICONS`) — emoji only in toasts/push copy. The date chip IS the today
   filter (toggles `dayFilter` to today).
+  DENSITY RULES (2026-06-12 de-dup pass — each number appears ONCE): side rows use
+  `relPhrase().short` (date + countdown only — the sign badge beside them owns
+  day + window; never render the window twice); the 🎯 callout is exactly two lines
+  (avg + minutes-into-window, then earliest + sample size — "latest seen" was cut as
+  noise); other-side enfline = avg + count only (deep stats live in the callout when
+  that side is active); meter chip says "Metered street" with the meter count in its
+  title attr; the data-notes summary keeps "Data notes ▸" in a nowrap span (orphan
+  arrow bug).
 - **Canonical domain is `curb.guide`** — all og/twitter meta URLs + the OG card footer use
   it (absolute). Add `https://curb.guide/*` to the Google Maps key referrer allowlist.
 - **Overview fallback (`ovMode`, don't regress)**: detail mode is gated by a `count(*)`

@@ -395,6 +395,7 @@
   .noted summary{cursor:pointer;list-style:none;font-weight:600}
   .noted summary::-webkit-details-marker{display:none}
   .noted summary b{color:var(--meter)}
+  .noted summary .dn{white-space:nowrap}
   .noted p{margin-top:7px;text-align:left}
   .you-dot{width:18px;height:18px;background:var(--meter);border:3px solid #fff;border-radius:50%;
     box-shadow:0 0 0 2px var(--meter),0 0 12px rgba(47,91,208,.6)}
@@ -808,14 +809,16 @@ function statusFor(ns){
   return {rank:2,color:getCSS('--green')};
 }
 function relPhrase(ns){
-  if(!ns)return {txt:'see posted sign',cls:'green'};
+  if(!ns)return {txt:'see posted sign',short:'see posted sign',cls:'green'};
   const now=new Date();
-  if(now>=ns.start&&now<ns.end)return {txt:'Sweeping now · until '+fmtHour(ns.end.getHours()),cls:'red'};
+  if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.end.getHours());return {txt:t,short:t,cls:'red'};}
   const hrs=(ns.start-now)/36e5, days=Math.floor(hrs/24);
   const when=DAYLBL[ns.start.getDay()]+' '+(ns.start.getMonth()+1)+'/'+ns.start.getDate()+', '+fmtHour(ns.start.getHours())+'–'+fmtHour(ns.end.getHours());
   const rel = hrs<1?'in <1 hr':hrs<24?('in '+Math.round(hrs)+' hr'):days===1?'tomorrow':('in '+days+' days');
   const cls = hrs<3?'red':hrs<24?'amber':'green';
-  return {txt:when+' · '+rel,cls,when:ns.start};
+  // short = date + countdown only (the sign badge beside it already shows day + window)
+  const short=DAYLBL[ns.start.getDay()]+' '+(ns.start.getMonth()+1)+'/'+ns.start.getDate()+' · '+rel;
+  return {txt:when+' · '+rel,short,cls,when:ns.start};
 }
 
 /* perpendicular offset of a polyline by N metres (sign = side) */
@@ -1289,8 +1292,8 @@ function openSheet(group, activeKey){
       <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div><div class="sc">STREET CLEANING</div></div>
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
-        <div class="nx ${rp.cls}">${rp.txt}</div>
-        ${e&&s!==active?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· earliest ${fmtMin(e.lo)} · ${e.n} tickets</span></div>`:''}
+        <div class="nx ${rp.cls}">${rp.short||rp.txt}</div>
+        ${e&&s!==active?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· ${e.n} tickets</span></div>`:''}
         ${allW?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
@@ -1313,8 +1316,8 @@ function openSheet(group, activeKey){
     const into=Math.max(0,ae.avg-fromMin);
     const intoTxt=into<60?into+' min':Math.floor(into/60)+'h'+(into%60?' '+(into%60)+'m':'');
     enfHtml=`<div class="enf"><span class="tgt" aria-hidden="true">${ICONS.target}</span><div>
-      <div class="etxt">Real-world: tickets here usually land <b>~${fmtMin(ae.avg)}</b> — about ${intoTxt} into the window.</div>
-      <div class="esub">Earliest seen ${fmtMin(ae.lo)} · latest ${fmtMin(ae.hi)} · ${ae.n} tickets over ~2 yrs.</div>
+      <div class="etxt">Tickets here usually land <b>~${fmtMin(ae.avg)}</b> — ${intoTxt} into the window.</div>
+      <div class="esub">Earliest seen ${fmtMin(ae.lo)} · from ${ae.n} tickets over ~2 yrs.</div>
     </div></div>`;
   }
 
@@ -1336,7 +1339,7 @@ function openSheet(group, activeKey){
     <div class="chips"><span class="chip meter" id="meterChip" style="display:none"><span class="d"></span></span>${rppHtml}</div>
     <div class="sides">${sidesHtml}</div>
     <details class="noted">
-      <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b>Data notes ▸</b></summary>
+      <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
       <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts and .ics reminders fire <b>~30 min before</b> sweeping; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
     </details>`;
 
@@ -1408,7 +1411,8 @@ async function loadMeterChip(street){
       +encodeURIComponent(`upper(street_name) like '%${base}%' AND on_offstreet_type='ON'`);
     const r=await fetch(url); if(!r.ok)return; const d=await r.json();
     const c=parseInt(d[0]?.c||0,10);
-    if(c>0){slot.style.display='inline-flex';slot.innerHTML=`<span class="d"></span>Metered · ~${c.toLocaleString()} meters on ${street}`;}
+    if(c>0){slot.style.display='inline-flex';slot.innerHTML=`<span class="d"></span>Metered street`;
+      slot.title=`~${c.toLocaleString()} meters on ${street} — check the meter for hours & rates`;}
   }catch(e){}
 }
 
