@@ -116,23 +116,31 @@
     background:var(--paper);font-size:14px;line-height:1;cursor:pointer;flex:none}
   .lp-sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);
     margin:13px 0 3px}
-  /* rows: [map symbol] [label] [eye] — symbol always shows the layer's true map look (the legend),
-     the eye is show/hide. Off rows dim but stay readable, so the color key never disappears. */
-  .toggle{display:flex;align-items:center;gap:10px;width:100%;padding:8px 5px;border:0;background:transparent;
-    font:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;border-radius:9px;text-align:left}
-  @media (hover:hover){.toggle:hover{background:rgba(23,21,15,.06)}}
-  .toggle .lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .toggle:not(.on) .sym,.toggle:not(.on) .lbl{opacity:.42}
-  .sym{flex:none;width:28px;display:inline-flex;align-items:center;justify-content:center;gap:2px}
-  .sym.band{height:10px;border-radius:5px;background:var(--meter);opacity:.5}
-  .sym b{display:inline-block;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink)}
-  .sym.dot b{width:10px;height:10px;background:var(--gray)}
+  /* layer tiles, Google-Maps style: a 2-col grid of preview tiles. Tap toggles the overlay;
+     active tile fills ink. Previews always show the layer's true map look. */
+  .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .ltile{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:11px 6px 9px;
+    font:inherit;font-size:11px;font-weight:800;color:var(--ink);background:var(--sign-white);
+    border:2.5px solid var(--ink);border-radius:12px;cursor:pointer;text-align:center}
+  .ltile .prev{height:20px;display:flex;align-items:center;justify-content:center;gap:3px}
+  .ltile .band{width:30px;height:10px;border-radius:5px;background:var(--meter);opacity:.65;display:block}
+  .ltile .prev b{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink);display:inline-block}
+  .ltile .mdot{background:var(--gray)}
+  .ltile .tl{line-height:1.15}
+  .ltile.on{background:var(--ink);color:var(--paper);box-shadow:3px 3px 0 rgba(23,21,15,.35)}
+  .ltile.on .prev b{border-color:var(--paper)}
+  .ltile.busy{opacity:.6;pointer-events:none}
+  .ltile:active{transform:translate(1px,1px)}
   .beta{flex:none;font-style:normal;font-family:'Anton',sans-serif;font-size:9px;letter-spacing:.07em;
     text-transform:uppercase;background:var(--amber);color:var(--ink);padding:3px 6px;border-radius:6px}
-  .eye{flex:none;width:20px;height:20px;background:center/18px no-repeat;opacity:.9;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317150F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/><circle cx='12' cy='12' r='3'/></svg>")}
-  .toggle:not(.on) .eye{opacity:.45;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317150F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.7 5.07A9.6 9.6 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68'/><path d='M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61'/><path d='m2 2 20 20'/><path d='M9.9 9.9a3 3 0 0 0 4.2 4.2'/></svg>")}
+  .ltile .beta{position:absolute;top:-9px;right:-5px;box-shadow:1.5px 1.5px 0 var(--ink)}
+  /* permit-area picker: one dropdown + the chosen area's sign disc */
+  .arearow{display:flex;align-items:center;gap:9px;margin-top:8px}
+  .adisc{flex:none;min-width:26px;height:26px;padding:0 3px;border-radius:13px;color:#fff;display:grid;
+    place-items:center;font-family:'Anton',sans-serif;font-size:13px}
+  .adisc[hidden]{display:none}
+  .legsel{flex:1;min-width:0;font:inherit;font-size:12.5px;font-weight:800;color:var(--ink);
+    background:var(--sign-white);border:2px solid var(--ink);border-radius:9px;padding:7px 8px;cursor:pointer}
   /* desktop control tooltips (data-tip), signage style */
   @media (hover:hover) and (pointer:fine){
     [data-tip]{position:relative}
@@ -152,9 +160,19 @@
   .lst:not(.on){opacity:.45}
   .lst:not(.on) i{background:transparent!important;border:1.5px dashed var(--ink)}
   @media (min-width:768px){.legend2{left:16px;bottom:16px}}
+  /* overlay rows join the legend while their layer is on; tap a row to switch the layer off */
+  #ovlLeg:not(:empty){margin-top:3px;padding-top:4px;border-top:1.5px solid rgba(23,21,15,.18);
+    display:flex;flex-direction:column;gap:1px}
+  .lov{display:flex;align-items:center;gap:4px}
+  .lst i.dots{display:flex;gap:2px;width:auto;height:auto;background:transparent;border-radius:0}
+  .lst i.dots b{width:7px;height:7px;border-radius:50%;border:1.2px solid var(--ink)}
+  .lst i.mdot{width:9px;height:9px;border-radius:50%;background:var(--gray);border:1.5px solid var(--ink);margin:0 5px}
+  .legsel.mini{flex:none;font-size:11px;font-weight:800;padding:3px 4px;border-width:1.5px;border-radius:7px;
+    max-width:104px;background:var(--paper)}
   /* route-day line in the legend: routes are per-day, so name the day they're for */
   .rtday{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--ink);
     white-space:nowrap;padding:5px 4px 2px;margin-top:3px;border-top:1.5px solid rgba(23,21,15,.18)}
+  .rtday[hidden]{display:none}
   .rtday .sw{width:20px;height:0;border-top:2.5px dashed var(--ink);flex:none}
   .rtday b{font-weight:800}
   .rtday .rtto{color:var(--ink-soft);font-weight:700}
@@ -189,17 +207,8 @@
     padding:3px 8px;border-radius:7px;white-space:nowrap;width:max-content;box-shadow:2px 2px 0 rgba(23,21,15,.3)}
   .rstart{background:var(--green-text)}
   .rend{background:var(--red-text)}
-  .agrid{display:flex;flex-wrap:wrap;gap:9px}
-  .adot{width:34px;height:34px;border-radius:50%;border:2px solid rgba(23,21,15,.3);color:#fff;position:relative;
-    font-family:'Anton',sans-serif;font-style:normal;font-size:13.5px;cursor:pointer;display:grid;place-items:center;padding:0}
-  .adot::after{content:'';position:absolute;inset:-4px}
-  .adot.two{font-size:10.5px}
-  .adot.sel{outline:3px solid var(--ink);outline-offset:1px}
   .abigdisc{width:46px;height:46px;border-radius:50%;color:#fff;font-family:'Anton',sans-serif;font-style:normal;
     font-size:21px;display:grid;place-items:center;border:3px solid var(--ink);box-shadow:3px 3px 0 rgba(23,21,15,.35)}
-  .aclear{display:block;width:100%;margin-top:10px;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.05em;border:2px solid var(--ink);border-radius:9px;background:var(--paper);padding:8px;cursor:pointer}
-  .aclear[hidden]{display:none}
   .lp-link{display:block;margin-top:12px;padding-top:11px;border-top:1.5px solid rgba(23,21,15,.15);
     font-size:11.5px;font-weight:800;color:var(--red-text);text-decoration:none;text-transform:uppercase;letter-spacing:.03em}
 
@@ -384,8 +393,8 @@
     .aboundary{animation:fadein .5s ease-out}
     .rarrow{animation:fadein .3s both}
     .rstart,.rend{animation:fadein .3s both .22s}
-    .toggle{transition:background-color .15s,color .15s,border-color .15s}
-    .toggle:active,.dchip:active,.adot:active{transform:translate(1px,1px)}
+    .ltile{transition:background-color .15s,color .15s,border-color .15s}
+    .dchip:active{transform:translate(1px,1px)}
     .toast{transform:translate(-50%,5px);transition:opacity .25s,transform .25s}
     .toast.show{transform:translate(-50%,0)}
     /* hover weight bumps + opacity changes glide instead of snapping (SVG pane only;
@@ -507,7 +516,7 @@
 
 <!-- layers control: everything map-related lives in one corner, Google-Maps style -->
 <div class="layers">
-  <button class="layersbtn" id="layersBtn" aria-expanded="false" aria-haspopup="true" aria-label="Map layers" data-tip="Layers, legend &amp; permit areas" data-tip-pos="b">
+  <button class="layersbtn" id="layersBtn" aria-expanded="false" aria-haspopup="true" aria-label="Map layers" data-tip="Map layers &amp; permit areas" data-tip-pos="b">
     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
     <span class="lb-txt">Layers</span><span id="layerBadges"></span>
   </button>
@@ -517,22 +526,29 @@
       <span>Layers</span>
       <button class="lp-x" id="lpClose" aria-label="Close">×</button>
     </div>
-    <div class="lp-sec">Map layers</div>
-    <button class="toggle" id="rppToggle" aria-pressed="false"><i class="sym band"></i><span class="lbl">Permit zones</span><span class="eye" aria-hidden="true"></span></button>
-    <button class="toggle load" id="loadToggle" aria-pressed="false"><i class="sym"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#E0322E"></b></i><span class="lbl">Loading zones</span><span class="eye" aria-hidden="true"></span></button>
-    <button class="toggle mtr" id="meterToggle" aria-pressed="false"><i class="sym dot"><b></b></i><span class="lbl">Metered parking</span><span class="eye" aria-hidden="true"></span></button>
-    <button class="toggle rte" id="routeToggle" aria-pressed="false"><i class="sym"><svg width="28" height="12" viewBox="0 0 28 12" aria-hidden="true"><line x1="1" y1="6" x2="19" y2="6" stroke="#17150F" stroke-width="2.4" stroke-dasharray="4 3"/><path d="M20 1.5 27 6l-7 4.5z" fill="#17150F"/></svg></i><span class="lbl">Truck routes</span><em class="beta">Beta</em><span class="eye" aria-hidden="true"></span></button>
+    <div class="lp-sec">Map details</div>
+    <div class="lgrid">
+      <button class="ltile" id="rppToggle" aria-pressed="false"><span class="prev"><i class="band"></i></span><span class="tl">Permit zones</span></button>
+      <button class="ltile" id="loadToggle" aria-pressed="false"><span class="prev"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#E0322E"></b></span><span class="tl">Loading zones</span></button>
+      <button class="ltile" id="meterToggle" aria-pressed="false"><span class="prev"><b class="mdot"></b></span><span class="tl">Meters</span></button>
+      <button class="ltile" id="routeToggle" aria-pressed="false"><em class="beta">Beta</em><span class="prev"><svg width="30" height="12" viewBox="0 0 28 12" aria-hidden="true"><line x1="1" y1="6" x2="19" y2="6" stroke="currentColor" stroke-width="2.4" stroke-dasharray="4 3"/><path d="M20 1.5 27 6l-7 4.5z" fill="currentColor"/></svg></span><span class="tl">Truck routes</span></button>
+    </div>
     <div class="lp-sec">Permit areas</div>
-    <div class="agrid" id="areaGrid"></div>
-    <button class="aclear" id="areaClear" hidden>Clear area highlight</button>
+    <div class="arearow">
+      <span class="adisc" id="areaDisc" hidden aria-hidden="true"></span>
+      <select class="legsel" id="areaSelPanel" aria-label="Highlight a permit area">
+        <option value="">Browse an area…</option>
+      </select>
+    </div>
   </div>
 </div>
 
 <!-- curb-color legend: always on the map (bottom-left), rows tap to show/hide -->
-<div class="legend2" aria-label="Curb colors">
+<div class="legend2" aria-label="Map legend">
   <button class="lst on" data-st="green" aria-pressed="true" data-tip="Tap to show / hide"><i style="background:var(--green)"></i>Clear</button>
   <button class="lst on" data-st="amber" aria-pressed="true"><i style="background:var(--amber)"></i>Soon · within 24h</button>
   <button class="lst on" data-st="red" aria-pressed="true"><i style="background:var(--red)"></i>Now · under 3h</button>
+  <div id="ovlLeg"></div>
   <div class="rtday" id="rtDayLeg" hidden role="note"><span class="sw" aria-hidden="true"></span><span id="rtDayLbl">Truck route</span></div>
 </div>
 
@@ -1537,7 +1553,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)dayRollove
 /* ---------- RPP toggle ---------- */
 document.getElementById('rppToggle').onclick=function(){
   rppOn=!rppOn; this.classList.toggle('on',rppOn); this.setAttribute('aria-pressed',rppOn);
-  refreshLayerBadges();
+  refreshLayerBadges(); renderOvlLegend();
   loadViewport();
   if(rppOn)toast('Permit zones (RPP) shaded blue. Tap a block for area & hours.');
 };
@@ -1593,14 +1609,37 @@ function refreshLayerBadges(){
   if(curArea)h+=`<i class="lbdisc" style="background:${areaColor(curArea)}">${curArea}</i>`;
   document.getElementById('layerBadges').innerHTML=h;
 }
+// the legend mirrors whatever is on the map: each active overlay gets a row with its true
+// map symbol. Tapping a row switches that layer off; the permit row carries the area dropdown.
+let AREAS=[];
+function areaOpts(ph){
+  return `<option value="">${ph}</option>`+AREAS.map(a=>`<option value="${a}"${a===curArea?' selected':''}>Area ${a}</option>`).join('');
+}
+function renderOvlLegend(){
+  const el=document.getElementById('ovlLeg');
+  let h='';
+  if(rppOn){
+    const col=curArea?areaColor(curArea):'var(--meter)';
+    h+=`<div class="lov"><button class="lst on" data-ovl="rpp" data-tip="Tap to hide permit zones"><i style="background:${col};height:8px"></i>Permits</button>
+      <select class="legsel mini" id="areaSelLeg" aria-label="Permit area">${areaOpts('All areas')}</select></div>`;
+  }
+  if(loadOn)h+=`<div class="lov"><button class="lst on" data-ovl="load" data-tip="Tap to hide loading zones"><i class="dots"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#E0322E"></b></i>Loading zones</button></div>`;
+  if(meterOn)h+=`<div class="lov"><button class="lst on" data-ovl="meter" data-tip="Tap to hide meters"><i class="mdot"></i>Metered curbs</button></div>`;
+  el.innerHTML=h;
+  const sel=document.getElementById('areaSelLeg');
+  if(sel)sel.onchange=()=>showArea(sel.value);
+  el.querySelectorAll('[data-ovl]').forEach(b=>{b.onclick=()=>
+    document.getElementById({rpp:'rppToggle',load:'loadToggle',meter:'meterToggle'}[b.dataset.ovl]).click();});
+}
 (function initLayersPanel(){
   const btn=document.getElementById('layersBtn'), panel=document.getElementById('layersPanel');
   btn.onclick=()=>{const open=panel.hidden; panel.hidden=!open; btn.setAttribute('aria-expanded',open);};
   document.addEventListener('click',e=>{ if(!panel.hidden&&!e.target.closest('.layers'))closeLayersPanel(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!panel.hidden)closeLayersPanel(); });
-  document.getElementById('areaClear').onclick=()=>showArea('');
   document.getElementById('lpClose').onclick=closeLayersPanel;
-  document.querySelectorAll('.lst').forEach(b=>{b.onclick=()=>{
+  const pSel=document.getElementById('areaSelPanel');
+  pSel.onchange=()=>showArea(pSel.value);
+  document.querySelectorAll('.legend2 .lst[data-st]').forEach(b=>{b.onclick=()=>{
     const k=b.dataset.st; statusOn[k]=!statusOn[k];
     b.classList.toggle('on',statusOn[k]); b.setAttribute('aria-pressed',statusOn[k]);
     refreshLayerBadges(); drawSegments(lastRows);
@@ -1609,24 +1648,23 @@ function refreshLayerBadges(){
   (async()=>{
     try{
       const r=await fetch(RPP+`?$select=rpparea1,count(*) as n&$where=rpparea1 IS NOT NULL&$group=rpparea1&$order=rpparea1`);
-      const d=await r.json(), grid=document.getElementById('areaGrid');
-      d.filter(x=>/^[A-Z]{1,2}$/.test(x.rpparea1||'')).forEach(x=>{
-        const a=x.rpparea1, b=document.createElement('button');
-        b.className='adot'+(a.length>1?' two':''); b.dataset.a=a; b.textContent=a;
-        b.style.background=areaColor(a); b.setAttribute('aria-label','Area '+a);
-        b.onclick=()=>showArea(curArea===a?'':a);
-        grid.appendChild(b);
-      });
+      const d=await r.json();
+      AREAS=d.map(x=>x.rpparea1).filter(a=>/^[A-Z]{1,2}$/.test(a||''));
+      pSel.innerHTML=areaOpts('Browse an area…');
+      renderOvlLegend();
     }catch(e){}
   })();
 })();
 async function showArea(letter){
   const my=++areaTok;
   curArea=letter; areaLayer.clearLayers();
-  document.getElementById('areaClear').hidden=!letter;
-  document.querySelectorAll('.adot').forEach(x=>x.classList.toggle('sel',x.dataset.a===letter));
-  refreshLayerBadges();
-  closeLayersPanel();
+  const pSel=document.getElementById('areaSelPanel'); if(pSel)pSel.value=letter;
+  const lSel=document.getElementById('areaSelLeg'); if(lSel)lSel.value=letter;
+  const disc=document.getElementById('areaDisc');
+  disc.hidden=!letter;
+  if(letter){disc.textContent=letter;disc.style.background=areaColor(letter);}
+  refreshLayerBadges(); renderOvlLegend();
+  if(letter)closeLayersPanel();
   if(!letter)return;
   try{
     const r=await fetch(RPP+`?$select=shape,hrlimit,days,from_time,to_time&$where=rpparea1='${soql(letter)}'&$limit=2500`);
@@ -1662,14 +1700,14 @@ async function showArea(letter){
 
 document.getElementById('loadToggle').onclick=function(){
   loadOn=!loadOn; this.classList.toggle('on',loadOn); this.setAttribute('aria-pressed',loadOn);
-  refreshLayerBadges();
+  refreshLayerBadges(); renderOvlLegend();
   if(loadOn){ this.classList.add('busy'); drawLoadZones().finally(()=>this.classList.remove('busy'));
     toast('Loading zones: 🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus. Tap a dot for hours. (Metered zones only — paint-only curbs aren\'t in city data.)');
   } else loadLayer.clearLayers();
 };
 document.getElementById('meterToggle').onclick=function(){
   meterOn=!meterOn; this.classList.toggle('on',meterOn); this.setAttribute('aria-pressed',meterOn);
-  refreshLayerBadges();
+  refreshLayerBadges(); renderOvlLegend();
   if(meterOn){ this.classList.add('busy'); drawMeters().finally(()=>this.classList.remove('busy'));
     toast('Metered curbs shown as grey dots — check the meter for hours & rates.');
   } else meterLayer.clearLayers();

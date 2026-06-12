@@ -136,23 +136,30 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   day mode the route shows today's run, so the label appends "today" — don't let All mode
   imply an all-days route (there is no such thing; one run per day per corridor).
 - **Corner layout (Google-Maps style — don't re-scatter)**: top-left = logo + search + info
-  ⓘ button + ONE day-chip row; top-right = the `.layers` control (button + `#layersPanel`). Panel rows are
-  [map-symbol] [label] [eye] — the symbol ALWAYS shows the layer's true map appearance
-  (it IS the legend; off rows dim to .42 but stay readable), the eye toggles visibility.
+  ⓘ button + ONE day-chip row; top-right = the `.layers` control (button + `#layersPanel`).
+  The panel is a Google-style 2-col TILE GRID (`.lgrid`/`.ltile`: preview symbol + label;
+  active tile fills ink) — previews ALWAYS show the layer's true map appearance.
   Truck routes carries an amber .beta chip (font-style:normal — no italics rule). Active
   layers show as badges on the button (`refreshLayerBadges()`). Bottom-right: locate button
   stacked above the JOINED +/- zoom pill (one bordered container, divider between).
   Bottom-left: the tappable curb-color legend (.legend2/.lst — show/hide per status;
-  hollow dashed swatch = hidden) + the sheet. Toggling Truck routes below z15
+  hollow dashed swatch = hidden) + `#ovlLeg`, the DYNAMIC legend: every active overlay
+  gets a row with its true symbol (`renderOvlLegend()`, called from all four toggles +
+  `showArea`); tapping a row clicks the matching tile (single source of toggle logic).
+  The permit row carries an inline area `<select>` (`#areaSelLeg`), mirrored by the
+  panel's `#areaSelPanel` — both sync in `showArea`. Toggling Truck routes below z15
   auto-zooms to 16 (citywide view has no street data); routeLayer clears on zoom-out.
   Truck routes read `segCacheAll` (every side passing the day filter), NOT `segCache`
   (status-filtered, drives taps/nearest) — hiding all curb colors must leave routes
   visible on their own. Keep both caches cleared together (drawSegments start + z<15).
-- **Permit-area browser** (`#areaGrid` discs → `showArea()`, `areaLayer`): disc grid of
-  all RPP areas (fetched once, `^[A-Z]{1,2}$` filters junk; colors via `areaColor()` from
-  the sign-disc palette — same color drives disc, badge, map highlight, and sheet chip);
-  selecting fetches that area citywide (≤2500 rows), draws a zoom-scaled highlight,
-  fitBounds, and toasts the area's most-common rule as "typically … (2017 data)".
+  Gotcha: the `hidden` attribute loses to any author `display:` rule — elements styled
+  display:flex/grid need an explicit `[hidden]{display:none}` (rtday + adisc bit us).
+- **Permit-area browser** (`showArea()`, `areaLayer`): area list fetched once into
+  `AREAS` (`^[A-Z]{1,2}$` filters junk; colors via `areaColor()` from the sign-disc
+  palette — same color drives disc, badge, legend swatch, map highlight, and sheet chip);
+  selecting from either dropdown fetches that area citywide (≤2500 rows), draws a
+  zoom-scaled highlight + hull boundary + big disc, fitBounds, and toasts the area's
+  most-common rule as "typically … (2017 data)".
 - **Loading/color-curb layer** (`loadToggle` → `loadOn`, `loadLayer`): toggle loads
   `6cqg-dxku` ⋈ meter coords ONCE (`loadCache`), renders colored dots per viewport; tap →
   popup with days/hours/limit. Metered zones only (note in the toggle toast).
