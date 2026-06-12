@@ -1,11 +1,28 @@
 # CURB
 
-San Francisco street-parking rules on a map: street sweeping schedules, the next
-sweep time per curb side, metered-street info, and residential permit (RPP) zones.
-One-tap calendar reminder before the next sweep, plus a PWA with true Web Push
-move-your-car alerts.
+**Know where to park in SF.** Live at **[curb.guide](https://curb.guide)**.
 
-Static front-end (no build) + serverless API routes (Vercel) for Web Push.
+[![License: MIT](https://img.shields.io/badge/license-MIT-2F5BD0)](LICENSE)
+[![Live](https://img.shields.io/badge/live-curb.guide-1F9E5A)](https://curb.guide)
+[![Data: DataSF](https://img.shields.io/badge/data-DataSF-E0322E)](https://data.sfgov.org)
+
+![CURB — every SF curb colored by its next street sweep](og.png)
+
+San Francisco posts a 2-hour street-cleaning window. We matched **650,000+ real
+citations** to their exact blocks: on the median block, every ticket lands inside a
+**22-minute span**. CURB puts that on a map — every curb in SF colored by its next
+sweep, with the posted schedule AND the times tickets are actually written there,
+plus permit (RPP) areas, meters, loading zones (including the unmetered white school
+zones the city doesn't publish on DataSF), and one-tap Web Push move-your-car alerts.
+
+The whole app is **one static `index.html`** — vanilla JS + Leaflet, no framework, no
+build step — plus a few Vercel serverless functions for push and share pages, and
+precomputed JSON data assets rebuilt by `scripts/build-*.mjs`. Everything runs on
+free tiers. Free, no accounts, no ads, no cookies.
+
+Read the data story: **[curb.guide/tickets](https://curb.guide/tickets)** · How it
+works: **[curb.guide/about](https://curb.guide/about)** · Contributions welcome —
+see [CONTRIBUTING.md](CONTRIBUTING.md) · Security: [SECURITY.md](SECURITY.md)
 
 ## Run locally
 ```bash
@@ -57,8 +74,15 @@ The key is kept out of this public repo:
 - Parking regulations / RPP: DataSF `hi6h-neyh` (2017 set; may be incomplete)
 - Address search + block ranges: DataSF `3mea-di5p` (Enterprise Addressing System, nightly)
 - Loading / color-curb zones: DataSF `6cqg-dxku` (Meter Operating Schedules) ⋈ meters
+- Unmetered white zones (passenger loading, school zones): SFMTA Digital Curb on the
+  city ArcGIS hub — snapshot via `npm run build:whitezones` (data DataSF excludes)
 - Enforcement history: DataSF `ab4h-6ztd` (parking citations) — precomputed into
   `data/enforcement.json` by `npm run build:enforcement` (see `scripts/build-enforcement.mjs`)
+- /tickets aggregates: `npm run build:stats` → `data/stats.json` (yearly fines,
+  violations, hour histograms, neighborhood totals + five-year surge)
+
+All DataSF datasets are published under the Open Data Commons PDDL; the code here is
+MIT (see [LICENSE](LICENSE)).
 
 The posted street sign is always the source of truth. "Ticketed ~" times are historical
 guidance from past citations, not a guarantee. There is no live space-availability data

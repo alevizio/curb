@@ -1,0 +1,25 @@
+name: Bug report
+description: Something is broken — map, alerts, layers, share pages
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device + browser
+      placeholder: "iPhone 15, Safari (installed as PWA)"
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors (if on desktop)
+      description: Open DevTools → Console, paste anything red
+      render: text

@@ -1,0 +1,37 @@
+name: Wrong data on my block
+description: The map disagrees with the posted sign — schedule, permit area, zone, or ticket time looks off
+title: "[data] "
+labels: ["data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The posted sign always wins — if CURB disagrees with it, we want to know.
+        Most mismatches come from the upstream city data, but we track every report.
+  - type: input
+    id: block
+    attributes:
+      label: Block
+      description: Street + cross streets (or a curb.guide/b/... share link)
+      placeholder: "Valencia St between 18th and 19th, east side"
+    validations:
+      required: true
+  - type: input
+    id: sign
+    attributes:
+      label: What the posted sign says
+      placeholder: "Street cleaning Tue 9–11am, 2nd & 4th week"
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: What CURB shows
+      placeholder: "Tue 9–11am every week"
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Photo of the sign helps a lot. Temporary signs (construction, events) override everything and aren't in city data.
