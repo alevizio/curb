@@ -13,14 +13,18 @@ _Ready-to-post assets. Stats computed 2026-06-11 from data/enforcement.json
   90% written by 9:39.
 - Fine: **$105** (verified against 208k tickets YTD 2026).
 
-## Sequence
-| Day | Channel | Asset |
-|---|---|---|
-| Tue | r/sanfrancisco | post below |
-| Thu (8–10am ET) | Show HN | post + tech comment below |
-| Following Tue 12:01am PT | Product Hunt | listing below |
-| Same week | Press pitch | email below (SF Standard, Mission Local, SFGate) |
-| Rolling | Nextdoor | per-neighborhood template |
+## Sequence — pinned calendar (set 2026-06-12)
+| Date | Channel | Asset | Notes |
+|---|---|---|---|
+| Sat–Sun Jun 13–14 | Pre-flight | checklist below | GSC + analytics + cache priming + fresh data |
+| Mon Jun 15 | Press pitch v2 | §4b | The SF Standard surge story is hot NOW — don't wait for Reddit |
+| Tue Jun 16, ~9am PT | r/sanfrancisco | §1 | Morning post catches commute + lunch browsing |
+| Thu Jun 18, 8–10am ET | Show HN | §2 | Link to /about; tech comment ready |
+| Thu–Fri Jun 18–19 | Press pitch v1 | §4 | Now with "as discussed on HN/Reddit" social proof if it hit |
+| Tue Jun 23, 12:01am PT | Product Hunt | §3 | Maker comment immediately; X thread same morning |
+| Week of Jun 22 | Nextdoor | §5 | 2–3 neighborhoods/day, personalize the hood stat |
+| Fri Jun 26 | Retro | — | What hit, what didn't, queue month-2 calendar |
+
 *Respond to every comment, everywhere, fast. That is most of the work.*
 
 ---
@@ -133,6 +137,34 @@ Happy to share the full per-neighborhood numbers, methodology, or anything else.
 
 ---
 
+## 4b · Press pitch v2 — the surge tie-in (send FIRST, Mon Jun 15)
+_To the SF Standard reporters behind the June 10–11 ticket-surge stories (bylines are
+on the two articles linked at curb.guide/about#press) + Mission Local._
+
+**Subject:** Three follow-ups to your parking-ticket surge story (with data + a free map)
+
+Hi [name],
+
+Loved the surge piece — I'd been building on the same DataSF citations and your map
+matched my numbers almost exactly (I get Ingleside -14% vs your -13%). Three things
+I have that might make follow-ups:
+
+1. **The "2-hour window" is really ~22 minutes.** I matched ~650k street-cleaning
+   citations to their exact blocks: on the median block every ticket lands in a
+   22-minute span. Per-block, on a free public map (curb.guide).
+2. **My own neighborhood cut of your surge analysis** — same windows, all violation
+   types, address-matched: Mission Bay +112%, FiDi +69%, only three neighborhoods
+   declining. Chart + methodology: curb.guide/tickets
+3. **The school white zones SFMTA doesn't publish.** Their open-data parking dataset
+   literally excludes "non-metered color curb." I found the inventory exposed on the
+   city's ArcGIS and put all 1,975 passenger-loading zones (627 near schools) on the
+   map — first time they're publicly browsable.
+
+All public data, free, no ads. Happy to share any cut of the numbers.
+[name] · curb.guide · github.com/alevizio/curb
+
+---
+
 ## 5 · Nextdoor template (per neighborhood)
 **Title:** When street sweeping tickets ACTUALLY happen in [Neighborhood] — free map
 
@@ -153,7 +185,39 @@ all city open data. Curious if it matches what you've seen on your street.
 4. The data nobody publishes: the city HAS live sweeper GPS (it's in their systems
    inventory). NYC publishes theirs by law. SF doesn't. So this is prediction, not
    tracking — built from the tickets themselves.
-5. [sign-stack image] Open data → fewer $105 surprises. curb.guide
+5. Bonus layer: SFMTA's open data excludes painted white zones. Found the inventory
+   on the city's GIS — all 1,975 passenger-loading zones are on the map now, school
+   drop-off zones included. [white-zone popup screenshot]
+6. [sign-stack image] Open data → fewer $105 surprises. curb.guide
+
+---
+
+## 7 · Demo video — 60 seconds, one take (record before PH day)
+Cmd+Shift+5 full-screen capture at 2x, clean profile, cursor large; captions burned in
+(80% watch muted). Gifski for the 15s social cut.
+
+| t | Shot | Caption overlay |
+|---|---|---|
+| 0–5s | Zoomed Mission view, curbs colored; idle 1 beat | "Every SF curb, colored by its next street sweep" |
+| 5–15s | Tap a red block → sheet opens on the verdict | "Tap where you parked. Red = sweeping soon." |
+| 15–30s | Scroll sheet to the 🎯 ticket-time line | "The sign says 9–11am. The tickets say 9:14." |
+| 30–40s | Tap the alert bell → "✓ Alerts on" toast | "One tap = a push alert ~30 min before the sweeper" |
+| 40–50s | Layers panel → permit zones + a white school zone popup | "Permit areas, meters — even the school zones the city doesn't publish" |
+| 50–60s | Zoom out citywide, hold on the full map | "Free. No account. curb.guide" |
+
+15s cut for X/PH gallery: shots 1, 2, 3, 6.
+
+---
+
+## 8 · Post-launch content calendar (4 weeks, ~3 posts/wk on X + 1 long elsewhere)
+| Week | Mon | Wed | Fri |
+|---|---|---|---|
+| Jun 23 | PH launch thread (§6) | Behind-the-scenes: one-file app, $0 infra | Launch metrics, transparent numbers |
+| Jun 30 | Data drop: weirdest white zones found | "How I found the unpublished school zones" (long: blog/HN) | Neighborhood spotlight #1 (surge chart crop) |
+| Jul 7 | Most-ticketed block in SF | Reply roundup: "does my block match?" stories | Neighborhood spotlight #2 |
+| Jul 14 | Month-1 retro: visits, alerts set, lessons | "Which city next?" poll (note demand per city) | July data refresh delta thread |
+Repurpose every X thread: same content → Reddit comment, Nextdoor variant, IndieHackers
+milestone post. One asset, four surfaces.
 
 ---
 
@@ -162,7 +226,7 @@ all city open data. Curious if it matches what you've seen on your street.
 - [ ] Analytics decision made & wired (currently flying blind) — **still open**
 - [ ] Prime social caches: opengraph.xyz on / and /about
 - [ ] Search Console verified + sitemap submitted
-- [ ] Fresh data: `npm run build:enforcement && npm run build:overview && npm run build:zones`
+- [ ] Fresh data: `npm run build:enforcement && npm run build:overview && npm run build:zones && npm run build:whitezones && npm run build:stats`
 - [ ] Cron/push smoke test (the end-to-end push test is still pending)
 - [ ] Reply templates ready for "is this legal?" (public records; sign is source of truth)
   and "do this for my city" (top request — note which cities get asked)
