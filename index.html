@@ -1022,11 +1022,39 @@ async function ensureLoadCache(){
   loadCache=Object.values(best);
   return loadCache;
 }
+// Unmetered white curbs (passenger/accessible loading, incl. school zones) — SFMTA Digital
+// Curb snapshot built by scripts/build-white-zones.mjs. Fills the gap hi6h-neyh excludes.
+let whiteCache=null;
+async function ensureWhiteCache(){
+  if(whiteCache)return whiteCache;
+  try{
+    const r=await fetch('data/white-zones.json',{cache:'force-cache'});
+    whiteCache=r.ok?(await r.json()).zones:[];
+  }catch(_){whiteCache=[];}
+  return whiteCache;
+}
 async function drawLoadZones(){
-  try{ await ensureLoadCache(); }catch(e){ toast('Loading zones unavailable right now.'); return; }
+  try{ await ensureLoadCache(); await ensureWhiteCache(); }catch(e){ toast('Loading zones unavailable right now.'); return; }
   loadLayer.clearLayers();
   if(ovMode||map.getZoom()<MIN_ZOOM_DATA)return;
   const b=map.getBounds(), lr=map.getZoom()>=17?5:4;  // slightly smaller at low zoom
+  // white curb segments first, under the meter dots
+  const ww=map.getZoom()>=17?4:3;
+  whiteCache.forEach(z=>{
+    if(!z.line.some(p=>b.contains(p)))return;
+    L.polyline(z.line,{color:'#17150F',weight:ww+3,opacity:.85,lineCap:'round',interactive:false}).addTo(loadLayer);
+    const w=L.polyline(z.line,{color:'#FFFDF6',weight:ww,opacity:1,lineCap:'round'});
+    const head=z.cat==='A'?'Accessible loading':'Passenger loading';
+    const sched=(z.sched||[]).map(s=>`<div class="lp-s">${s.d}${s.f?` · ${s.f}–${s.t}`:''}${s.mx?` · max ${s.mx}`:''}</div>`).join('');
+    w.bindPopup(`<div class="lp-h">White curb</div>`
+      +`<div class="lp-m">${head}${z.sch?' · 🏫 '+z.sch:''}</div>`
+      +`<div class="lp-s">${z.st}${z.x1?` (${z.x1} – ${z.x2})`:''}${z.side?` · ${z.side} side`:''}${z.ft?` · ${z.ft} ft`:''}</div>`
+      +sched
+      +(z.spec?`<div class="lp-s" style="margin-top:5px">${z.spec}</div>`:'')
+      +`<div class="lp-s" style="margin-top:5px">SFMTA Digital Curb data — the posted sign is the source of truth.</div>`,
+      {className:'loadpop',maxWidth:260});
+    w.addTo(loadLayer);
+  });
   loadCache.forEach(z=>{
     if(!b.contains([z.lat,z.lng]))return;
     const m=L.circleMarker([z.lat,z.lng],{radius:lr,color:'#17150F',weight:2,
@@ -1762,7 +1790,7 @@ document.getElementById('loadToggle').onclick=function(){
   loadOn=!loadOn; this.classList.toggle('on',loadOn); this.setAttribute('aria-pressed',loadOn);
   refreshLayerBadges(); renderOvlLegend();
   if(loadOn){ this.classList.add('busy'); drawLoadZones().finally(()=>this.classList.remove('busy'));
-    toast('Loading zones: 🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus. Tap a dot for hours. (Metered zones only — paint-only curbs aren\'t in city data.)');
+    toast('Loading zones: dots = metered curbs (🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus). White curb lines = passenger loading, school zones included. Tap anything for hours.');
   } else loadLayer.clearLayers();
 };
 document.getElementById('meterToggle').onclick=function(){
