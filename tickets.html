@@ -243,7 +243,8 @@ const VNAMES={'STR CLEAN':'Street cleaning','ST CLEANIN':'Street cleaning (legac
  'RES/OT':'Permit area overstay','PRK METER':'Meter violation','METER DTN':'Meter (downtown)','RESIDENTL':'Permit area',
  'PRK MTR #1':'Meter violation','DBL PARK':'Double parking','RED ZONE':'Red zone','TOW ZONE':'Tow-away zone',
  'YEL ZONE':'Yellow zone','DRIVEWAY':'Blocked driveway','SIDEWALK':'On the sidewalk','ON SIDEWLK':'On the sidewalk',
- 'HYD':'Fire hydrant','WHITE ZN':'White zone','STREET CLN':'Street cleaning'};
+ 'HYD':'Fire hydrant','WHITE ZN':'White zone','STREET CLN':'Street cleaning','NO PLATES':'No license plates',
+ 'FAIL DISPL':'No permit displayed','PRK GRADE':'Wheels not curbed on grade','PK PHB OTD':'Prohibited parking (posted)'};
 const vname=v=>VNAMES[v]||v;
 
 function svgEl(s){const d=document.createElementNS('http://www.w3.org/2000/svg','g');d.innerHTML=s;return d;}
@@ -270,58 +271,101 @@ document.addEventListener('pointermove',e=>{if(tipOn)tipMove(e);},{passive:true}
 addEventListener('scroll',()=>{if(tipOn){tip.style.opacity='0';tipOn=false;}},{passive:true});
 
 fetch('data/stats.json').then(r=>r.json()).then(S=>{
-  const yearly=S.yearly.filter(r=>r.y>=2009&&r.y<=2026);   // 2008 is partial in the dataset
   const totalRev=S.yearly.reduce((s,r)=>s+r.rev,0), totalN=S.yearly.reduce((s,r)=>s+r.n,0);
   $('bigTotal').textContent=fmt$(totalRev);
   $('bigCount').textContent=(totalN/1e6).toFixed(1);
 
+  // stat cards + notes render once; the charts re-render per breakpoint
+  const yearly=S.yearly.filter(r=>r.y>=2009&&r.y<=2026);   // 2008 is partial in the dataset
+  const last=yearly.find(r=>r.y===2025)||yearly[yearly.length-2];
+  $('yearStats').innerHTML=`
+    <div class="stat"><div class="v red">${fmt$(last.rev)}</div><div class="l">assessed in ${last.y}</div></div>
+    <div class="stat"><div class="v">${fmtN(last.n)}</div><div class="l">tickets in ${last.y}</div></div>
+    <div class="stat"><div class="v amber">${fmt$(last.rev/365)}</div><div class="l">per day</div></div>
+    <div class="stat"><div class="v green">$${Math.round(last.rev/last.n)}</div><div class="l">average ticket</div></div>`;
+  const ys=S.yearlySweep.filter(r=>r.y>=2009&&r.y<=2026);
+  const recent=ys.find(r=>r.y===2025)||ys[ys.length-2], firstY=ys[0], lastY=ys[ys.length-1];
+  $('sweepStats').innerHTML=`
+    <div class="stat"><div class="v">${fmtN(recent.n)}</div><div class="l">sweep tickets in ${recent.y}</div></div>
+    <div class="stat"><div class="v red">${fmt$(recent.rev)}</div><div class="l">assessed in ${recent.y}</div></div>
+    <div class="stat"><div class="v amber">$${Math.round(firstY.avg)} → $${Math.round(lastY.avg)}</div><div class="l">avg fine, ${firstY.y} → ${lastY.y}</div></div>
+    <div class="stat"><div class="v green">22 min</div><div class="l">median block's full ticket span</div></div>`;
+  const ts=S.topStreets.slice(0,8);
+  $('streetsNote').innerHTML='<b>The heaviest streets (2 yrs of sweeping fines):</b> '+
+    ts.map(t=>`${t.street.charAt(0)+t.street.slice(1).toLowerCase()} (${fmt$(t.rev)})`).join(' · ');
+  if(S.hoodSurge){
+    const ranked=S.hoodSurge.rows.filter(r=>r.pct!=null);
+    const grayed=S.hoodSurge.rows.filter(r=>r.pct==null).map(r=>r.hood);
+    $('surgeNote').innerHTML=`<b>${ranked.length} neighborhoods ranked.</b> Areas with under `+
+      `${S.hoodSurge.minN.toLocaleString()} citations in either window aren't ranked`+
+      (grayed.length?` (${grayed.join(', ')})`:'')+`. DataSF citations matched to neighborhoods via the
+      city's address records — unmatched addresses are excluded, so counts are conservative.`;
+  }
+
+  renderCharts(S);
+  let rw=innerWidth,rt;
+  addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{
+    if(Math.abs(innerWidth-rw)>40){rw=innerWidth;renderCharts(S);}},150);});
+}).catch(()=>{document.querySelectorAll('.panel').forEach(p=>p.innerHTML='<p class="note">Couldn\'t load the data — refresh to retry.</p>');});
+
+// width-aware charts: under 520px they redraw in a phone-native layout (1 SVG unit = 1px)
+function renderCharts(S){
+  TIPS.length=0;
+  const pw=$('chartYears').getBoundingClientRect().width||960;
+  const MOB=pw<520, CW=Math.max(300,Math.round(pw));
+  const yearly=S.yearly.filter(r=>r.y>=2009&&r.y<=2026);
+
   // --- yearly bars ---
   {
-    const W=960,H=320,P={l:54,r:8,t:18,b:38},n=yearly.length;
+    const W=MOB?CW:960,H=MOB?240:320,P={l:MOB?40:54,r:MOB?4:8,t:18,b:MOB?30:38},n=yearly.length;
     const bw=(W-P.l-P.r)/n, max=Math.max(...yearly.map(r=>r.rev));
+    const ax=v=>MOB?(v?'$'+Math.round(v/1e6)+'M':'$0'):fmt$(v);
     let s='';
     [0,.5,1].forEach(f=>{const y=P.t+(H-P.t-P.b)*(1-f);
       s+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="${SOFT}" stroke-opacity=".25" stroke-width="1.5"/>`
-        +`<text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="11" fill="${SOFT}">${fmt$(max*f)}</text>`;});
+        +`<text x="${P.l-6}" y="${y+4}" text-anchor="end" font-size="${MOB?10:11}" fill="${SOFT}">${ax(max*f)}</text>`;});
     let hits='';
     yearly.forEach((r,i)=>{
       const h=(H-P.t-P.b)*(r.rev/max), x=P.l+i*bw, isCovid=r.y===2020||r.y===2021;
-      s+=`<rect x="${x+2}" y="${H-P.b-h}" width="${bw-5}" height="${h}" rx="3"
+      s+=`<rect x="${x+1.5}" y="${H-P.b-h}" width="${bw-(MOB?3:5)}" height="${h}" rx="${MOB?2:3}"
         fill="${isCovid?AMBER:RED}"/>`;
-      if(r.y%2===1||r.y===2026)s+=`<text x="${x+bw/2}" y="${H-P.b+16}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
+      if(MOB?r.y%4===1:(r.y%2===1||r.y===2026))s+=`<text x="${x+bw/2}" y="${H-P.b+16}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
       hits+=`<rect class="hit" x="${x}" y="${P.t}" width="${bw}" height="${H-P.t-P.b}"${tipA(
         `<span class="tt">${r.y}${r.y===2026?' · so far':''}</span>${fmt$(r.rev)} assessed<br>`+
         `${fmtN(r.n)} tickets · ~$${Math.round(r.rev/r.n)} average`)}/>`;
     });
     const covid=yearly.find(r=>r.y===2020);
     if(covid){const i=yearly.indexOf(covid),x=P.l+i*bw+bw/2;
-      s+=`<text x="${x}" y="${P.t+10}" text-anchor="middle" font-size="11" font-weight="800" fill="${AMBER}">covid ↓</text>`;}
+      s+=`<text x="${x}" y="${P.t+10}" text-anchor="middle" font-size="${MOB?10:11}" font-weight="800" fill="${AMBER}">covid ↓</text>`;}
     const peak=yearly.reduce((a,b)=>b.rev>a.rev?b:a);
     {const i=yearly.indexOf(peak),x=P.l+i*bw+bw/2,ph=(H-P.t-P.b)*(peak.rev/max);
-      s+=`<text x="${x}" y="${H-P.b-ph-7}" text-anchor="middle" font-size="11" font-weight="800" fill="${RED}">${fmt$(peak.rev)}</text>`;}
+      s+=`<text x="${Math.min(x,W-28)}" y="${H-P.b-ph-7}" text-anchor="middle" font-size="${MOB?10:11}" font-weight="800" fill="${RED}">${ax(peak.rev)}</text>`;}
+    $('chartYears').setAttribute('height',H);
     draw('chartYears',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}${hits}</svg>`);
-    const last=yearly.find(r=>r.y===2025)||yearly[yearly.length-2];
-    $('yearStats').innerHTML=`
-      <div class="stat"><div class="v red">${fmt$(last.rev)}</div><div class="l">assessed in ${last.y}</div></div>
-      <div class="stat"><div class="v">${fmtN(last.n)}</div><div class="l">tickets in ${last.y}</div></div>
-      <div class="stat"><div class="v amber">${fmt$(last.rev/365)}</div><div class="l">per day</div></div>
-      <div class="stat"><div class="v green">$${Math.round(last.rev/last.n)}</div><div class="l">average ticket</div></div>`;
   }
 
   // --- violations (merge the two street-cleaning codes) ---
   {
     const merged={}; S.byViolation.forEach(r=>{const k=vname(r.v);merged[k]=merged[k]||{n:0,rev:0};merged[k].n+=r.n;merged[k].rev+=r.rev;});
     const rows=Object.entries(merged).map(([v,o])=>({v,...o})).sort((a,b)=>b.n-a.n).slice(0,10);
-    const W=960,rh=40,P={l:8,r:8,t:6},H=P.t+rows.length*rh+6;
+    const W=MOB?CW:960,rh=MOB?46:40,P={t:6},H=P.t+rows.length*rh+(MOB?2:6);
     const max=rows[0].n; let s='';
     rows.forEach((r,i)=>{
-      const y=P.t+i*rh, w=(W-260)*(r.n/max), sweep=r.v.startsWith('Street cleaning');
-      s+=`<rect x="200" y="${y+6}" width="${Math.max(w,4)}" height="${rh-14}" rx="5" fill="${sweep?RED:INK}" fill-opacity="${sweep?1:.82}"/>
-        <text x="192" y="${y+rh/2+4}" text-anchor="end" font-size="13" fill="${INK}">${r.v}</text>
-        <text x="${204+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12.5" font-weight="800" fill="${sweep?RED:SOFT}">${fmtN(r.n)} · ${fmt$(r.rev)}</text>
-        <rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
-          `<span class="tt">${r.v}</span>${fmtN(r.n)} tickets since 2021<br>`+
-          `${fmt$(r.rev)} assessed · ~$${Math.round(r.rev/r.n)} each`)}/>`;
+      const y=P.t+i*rh, sweep=r.v.startsWith('Street cleaning');
+      if(MOB){
+        const w=Math.max((W-4)*(r.n/max),4);
+        s+=`<text x="0" y="${y+12}" font-size="12.5" font-weight="700" fill="${INK}">${r.v}</text>
+          <text x="${W}" y="${y+12}" text-anchor="end" font-size="11" font-weight="800" fill="${sweep?RED:SOFT}">${fmtN(r.n)} · ${fmt$(r.rev)}</text>
+          <rect x="0" y="${y+19}" width="${w}" height="15" rx="4" fill="${sweep?RED:INK}" fill-opacity="${sweep?1:.82}"/>`;
+      }else{
+        const w=(W-260)*(r.n/max);
+        s+=`<rect x="200" y="${y+6}" width="${Math.max(w,4)}" height="${rh-14}" rx="5" fill="${sweep?RED:INK}" fill-opacity="${sweep?1:.82}"/>
+          <text x="192" y="${y+rh/2+4}" text-anchor="end" font-size="13" fill="${INK}">${r.v}</text>
+          <text x="${204+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12.5" font-weight="800" fill="${sweep?RED:SOFT}">${fmtN(r.n)} · ${fmt$(r.rev)}</text>`;
+      }
+      s+=`<rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
+        `<span class="tt">${r.v}</span>${fmtN(r.n)} tickets since 2021<br>`+
+        `${fmt$(r.rev)} assessed · ~$${Math.round(r.rev/r.n)} each`)}/>`;
     });
     $('chartViol').setAttribute('height',H);
     draw('chartViol',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
@@ -330,41 +374,36 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
   // --- sweep per year + avg fine ---
   {
     const ys=S.yearlySweep.filter(r=>r.y>=2009&&r.y<=2026);
-    const W=960,H=300,P={l:54,r:60,t:16,b:36},n=ys.length;
+    const W=MOB?CW:960,H=MOB?230:300,P=MOB?{l:38,r:36,t:16,b:30}:{l:54,r:60,t:16,b:36},n=ys.length;
     const bw=(W-P.l-P.r)/n,maxN=Math.max(...ys.map(r=>r.n)),maxA=Math.max(...ys.map(r=>r.avg));
     let s='';
     [0,.5,1].forEach(f=>{const gy=P.t+(H-P.t-P.b)*(1-f);
       s+=`<line x1="${P.l}" y1="${gy}" x2="${W-P.r}" y2="${gy}" stroke="${SOFT}" stroke-opacity=".25" stroke-width="1.5"/>`
-        +`<text x="${P.l-8}" y="${gy-6}" text-anchor="end" font-size="11" fill="${SOFT}">${fmtN(maxN*f)}</text>`;});
+        +`<text x="${P.l-6}" y="${gy-6}" text-anchor="end" font-size="${MOB?10:11}" fill="${SOFT}">${fmtN(maxN*f)}</text>`;});
     ys.forEach((r,i)=>{
       const h=(H-P.t-P.b)*(r.n/maxN),x=P.l+i*bw;
-      s+=`<rect x="${x+2}" y="${H-P.b-h}" width="${bw-5}" height="${h}" rx="3" fill="${INK}" fill-opacity=".85"/>`;
-      if(r.y%2===1||r.y===2026)s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
+      s+=`<rect x="${x+1.5}" y="${H-P.b-h}" width="${bw-(MOB?3:5)}" height="${h}" rx="${MOB?2:3}" fill="${INK}" fill-opacity=".85"/>`;
+      if(MOB?r.y%4===1:(r.y%2===1||r.y===2026))s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
     });
     const pts=ys.map((r,i)=>`${P.l+i*bw+bw/2},${P.t+(H-P.t-P.b)*(1-r.avg/maxA)}`).join(' ');
-    s+=`<polyline points="${pts}" fill="none" stroke="${RED}" stroke-width="3.5" stroke-linejoin="round" pointer-events="none"/>`;
+    s+=`<polyline points="${pts}" fill="none" stroke="${RED}" stroke-width="${MOB?2.5:3.5}" stroke-linejoin="round" pointer-events="none"/>`;
     const lastY=ys[ys.length-1],ly=P.t+(H-P.t-P.b)*(1-lastY.avg/maxA);
-    s+=`<text x="${W-P.r+6}" y="${ly+4}" font-size="13" font-weight="800" fill="${RED}">$${Math.round(lastY.avg)}</text>`;
+    s+=`<text x="${W-P.r+5}" y="${ly+4}" font-size="${MOB?11:13}" font-weight="800" fill="${RED}">$${Math.round(lastY.avg)}</text>`;
     const firstY=ys[0],fy=P.t+(H-P.t-P.b)*(1-firstY.avg/maxA);
-    s+=`<text x="${P.l-8}" y="${fy+4}" text-anchor="end" font-size="13" font-weight="800" fill="${RED}">$${Math.round(firstY.avg)}</text>`;
+    s+=`<text x="${P.l-6}" y="${fy+4}" text-anchor="end" font-size="${MOB?11:13}" font-weight="800" fill="${RED}">$${Math.round(firstY.avg)}</text>`;
     ys.forEach((r,i)=>{
       const x=P.l+i*bw;
       s+=`<rect class="hit" x="${x}" y="${P.t}" width="${bw}" height="${H-P.t-P.b}"${tipA(
         `<span class="tt">${r.y}${r.y===2026?' · so far':''}</span>${fmtN(r.n)} sweep tickets<br>`+
         `${fmt$(r.rev)} assessed · <b>$${Math.round(r.avg)} avg fine</b>`)}/>`;
     });
+    $('chartSweep').setAttribute('height',H);
     draw('chartSweep',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
-    const recent=ys.find(r=>r.y===2025)||ys[ys.length-2];
-    $('sweepStats').innerHTML=`
-      <div class="stat"><div class="v">${fmtN(recent.n)}</div><div class="l">sweep tickets in ${recent.y}</div></div>
-      <div class="stat"><div class="v red">${fmt$(recent.rev)}</div><div class="l">assessed in ${recent.y}</div></div>
-      <div class="stat"><div class="v amber">$${Math.round(firstY.avg)} → $${Math.round(lastY.avg)}</div><div class="l">avg fine, ${firstY.y} → ${lastY.y}</div></div>
-      <div class="stat"><div class="v green">22 min</div><div class="l">median block's full ticket span</div></div>`;
   }
 
   // --- hour histogram ---
   {
-    const hs=S.sweepHour;const W=960,H=260,P={l:14,r:14,t:24,b:34};
+    const hs=S.sweepHour;const W=MOB?CW:960,H=MOB?200:260,P=MOB?{l:6,r:6,t:20,b:26}:{l:14,r:14,t:24,b:34};
     const bw=(W-P.l-P.r)/24,max=Math.max(...hs.map(r=>r.n)),tot=hs.reduce((a,r)=>a+r.n,0);
     const hf=h=>{h=h%24;return (h%12||12)+(h<12?'a':'p');};
     let s='',hits='';
@@ -372,37 +411,43 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
       const r=hs.find(x=>x.h===h)||{n:0};
       const bh=(H-P.t-P.b)*(r.n/max),x=P.l+h*bw;
       const col=h<6?AMBER:(h>=8&&h<12?RED:INK);
-      s+=`<rect x="${x+2}" y="${H-P.b-bh}" width="${bw-5}" height="${Math.max(bh,2)}" rx="3" fill="${col}" fill-opacity=".9"/>`;
-      if(h%3===0)s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p'}</text>`;
+      s+=`<rect x="${x+1.5}" y="${H-P.b-bh}" width="${bw-(MOB?3:5)}" height="${Math.max(bh,2)}" rx="${MOB?2:3}" fill="${col}" fill-opacity=".9"/>`;
+      if(h%(MOB?6:3)===0)s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p'}</text>`;
       hits+=`<rect class="hit" x="${x}" y="${P.t}" width="${bw}" height="${H-P.t-P.b}"${tipA(
         `<span class="tt">${hf(h)} – ${hf(h+1)}</span>${fmtN(r.n)} sweep tickets<br>`+
         `${(100*r.n/tot).toFixed(1)}% of the two-year total`)}/>`;
     }
     s+=hits;
-    s+=`<text x="${P.l+2*bw}" y="${P.t-6}" font-size="11.5" font-weight="800" fill="${AMBER}">overnight commercial</text>`;
-    s+=`<text x="${P.l+9.4*bw}" y="${P.t-6}" font-size="11.5" font-weight="800" fill="${RED}">morning residential</text>`;
+    s+=`<text x="${P.l+(MOB?0:2*bw)}" y="${P.t-6}" font-size="${MOB?10:11.5}" font-weight="800" fill="${AMBER}">${MOB?'overnight':'overnight commercial'}</text>`;
+    s+=`<text x="${P.l+(MOB?7.6:9.4)*bw}" y="${P.t-6}" font-size="${MOB?10:11.5}" font-weight="800" fill="${RED}">${MOB?'morning rush':'morning residential'}</text>`;
+    $('chartHour').setAttribute('height',H);
     draw('chartHour',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
   }
 
   // --- neighborhoods ---
   {
     const rows=S.hoods.slice(0,15);
-    const W=960,rh=32,P={t:4},H=P.t+rows.length*rh+6,max=rows[0].rev;
+    const W=MOB?CW:960,rh=MOB?40:32,P={t:4},H=P.t+rows.length*rh+6,max=rows[0].rev;
     let s='';
     rows.forEach((r,i)=>{
-      const y=P.t+i*rh,w=(W-300)*(r.rev/max);
-      s+=`<rect x="226" y="${y+5}" width="${Math.max(w,4)}" height="${rh-11}" rx="4" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>
-        <text x="218" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
-        <text x="${230+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>
-        <rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
-          `<span class="tt">${r.hood}</span>${fmt$(r.rev)} in sweep fines (2 yrs)<br>`+
-          `${fmtN(r.n)} tickets · ~$${Math.round(r.rev/r.n)} each`)}/>`;
+      const y=P.t+i*rh;
+      if(MOB){
+        const w=Math.max((W-4)*(r.rev/max),4);
+        s+=`<text x="0" y="${y+11}" font-size="12" font-weight="${i<3?800:700}" fill="${INK}">${r.hood}</text>
+          <text x="${W}" y="${y+11}" text-anchor="end" font-size="10.5" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>
+          <rect x="0" y="${y+16}" width="${w}" height="13" rx="3" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>`;
+      }else{
+        const w=(W-300)*(r.rev/max);
+        s+=`<rect x="226" y="${y+5}" width="${Math.max(w,4)}" height="${rh-11}" rx="4" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>
+          <text x="218" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
+          <text x="${230+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>`;
+      }
+      s+=`<rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
+        `<span class="tt">${r.hood}</span>${fmt$(r.rev)} in sweep fines (2 yrs)<br>`+
+        `${fmtN(r.n)} tickets · ~$${Math.round(r.rev/r.n)} each`)}/>`;
     });
     $('chartHoods').setAttribute('height',H);
     draw('chartHoods',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
-    const ts=S.topStreets.slice(0,8);
-    $('streetsNote').innerHTML='<b>The heaviest streets (2 yrs of sweeping fines):</b> '+
-      ts.map(t=>`${t.street.charAt(0)+t.street.slice(1).toLowerCase()} (${fmt$(t.rev)})`).join(' · ');
   }
 
   // --- surge: same six months, five years apart (diverging bars) ---
@@ -410,30 +455,33 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
     const GRN='#157A44';
     const ranked=S.hoodSurge.rows.filter(r=>r.pct!=null);
     const rows=[...ranked.slice(0,10),...ranked.slice(-3)];   // biggest risers + every decliner end
-    const W=960,rh=30,P={t:6},H=P.t+rows.length*rh+10,maxA=Math.max(...rows.map(r=>Math.abs(r.pct)));
-    const X0=330,XW=W-X0-170;
+    const W=MOB?CW:960,rh=MOB?44:30,P={t:6},H=P.t+rows.length*rh+10,maxA=Math.max(...rows.map(r=>Math.abs(r.pct)));
+    const maxNeg=Math.max(...rows.filter(r=>r.pct<0).map(r=>Math.abs(r.pct)),1);
+    const X0=MOB?Math.round((W-4)*maxNeg/(maxNeg+maxA))+4:330;
+    const XW=W-X0-(MOB?4:170);
     let s=`<line x1="${X0}" y1="0" x2="${X0}" y2="${H}" stroke="${INK}" stroke-width="1.5" stroke-dasharray="3 4" opacity=".45"/>`;
     rows.forEach((r,i)=>{
       const y=P.t+i*rh,w=Math.max(XW*(Math.abs(r.pct)/maxA),3),pos=r.pct>=0;
       if(i===10)s+=`<line x1="0" y1="${y+1}" x2="${W}" y2="${y+1}" stroke="${SOFT}" stroke-width="1" stroke-dasharray="2 5" opacity=".6"/>`;
-      s+=`<rect x="${pos?X0:X0-w}" y="${y+5}" width="${w}" height="${rh-10}" rx="4" fill="${pos?RED:GRN}" fill-opacity="${i<3||!pos?1:.8}"/>
-        <text x="${X0-w*(pos?0:1)-10}" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
-        <text x="${X0+(pos?w:0)+8}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}%</text>
-        <text x="${X0+(pos?w:0)+62}" y="${y+rh/2+4}" font-size="11" fill="${SOFT}">${fmtN(r.then)} → ${fmtN(r.now)}</text>
-        <rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
-          `<span class="tt">${r.hood}</span>${S.hoodSurge.windows.then}: <b>${r.then.toLocaleString()}</b> citations<br>`+
-          `${S.hoodSurge.windows.now}: <b>${r.now.toLocaleString()}</b> citations<br>`+
-          `<b style="color:${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}% in five years</b>`)}/>`;
+      if(MOB){
+        s+=`<text x="0" y="${y+12}" font-size="12" font-weight="700" fill="${INK}">${r.hood} <tspan font-size="10" font-weight="800" fill="${SOFT}"> ${fmtN(r.then)} → ${fmtN(r.now)}</tspan></text>
+          <text x="${W}" y="${y+12}" text-anchor="end" font-size="11.5" font-weight="800" fill="${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}%</text>
+          <rect x="${pos?X0:X0-w}" y="${y+18}" width="${w}" height="13" rx="3" fill="${pos?RED:GRN}" fill-opacity="${i<3||!pos?1:.8}"/>`;
+      }else{
+        s+=`<rect x="${pos?X0:X0-w}" y="${y+5}" width="${w}" height="${rh-10}" rx="4" fill="${pos?RED:GRN}" fill-opacity="${i<3||!pos?1:.8}"/>
+          <text x="${X0-w*(pos?0:1)-10}" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
+          <text x="${X0+(pos?w:0)+8}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}%</text>
+          <text x="${X0+(pos?w:0)+62}" y="${y+rh/2+4}" font-size="11" fill="${SOFT}">${fmtN(r.then)} → ${fmtN(r.now)}</text>`;
+      }
+      s+=`<rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
+        `<span class="tt">${r.hood}</span>${S.hoodSurge.windows.then}: <b>${r.then.toLocaleString()}</b> citations<br>`+
+        `${S.hoodSurge.windows.now}: <b>${r.now.toLocaleString()}</b> citations<br>`+
+        `<b style="color:${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}% in five years</b>`)}/>`;
     });
     $('chartSurge').setAttribute('height',H);
     draw('chartSurge',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
-    const grayed=S.hoodSurge.rows.filter(r=>r.pct==null).map(r=>r.hood);
-    $('surgeNote').innerHTML=`<b>${ranked.length} neighborhoods ranked.</b> Areas with under `+
-      `${S.hoodSurge.minN.toLocaleString()} citations in either window aren't ranked`+
-      (grayed.length?` (${grayed.join(', ')})`:'')+`. DataSF citations matched to neighborhoods via the
-      city's address records — unmatched addresses are excluded, so counts are conservative.`;
   }
-}).catch(()=>{document.querySelectorAll('.panel').forEach(p=>p.innerHTML='<p class="note">Couldn\'t load the data — refresh to retry.</p>');});
+}
 </script>
 </body>
 </html>
