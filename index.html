@@ -777,20 +777,39 @@ function distSqToLineMeters(lat,lng,latlngs){
 }
 
 /* ---------- viewport loading ---------- */
+const SEG_CAP=2500;  // rows we are willing to pull+draw per viewport (one Socrata page)
+let ovMode=true;     // true = the citywide overview is the active view (low zoom OR over-cap viewport)
+function enterOverviewMode(showHint){
+  segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();
+  segCache=[];segCacheAll=[];rppCache=[];lastRows=[];
+  ovMode=true;
+  const hint=document.getElementById('hint');
+  hint.style.opacity=showHint?'1':'0';hint.style.visibility=showHint?'visible':'hidden';
+  drawOverview();  // complete citywide picture (hides the hint when ready)
+}
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
-  if(z<MIN_ZOOM_DATA){segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();segCache=[];segCacheAll=[];rppCache=[];lastRows=[];
-    hint.style.opacity='1';hint.style.visibility='visible';
-    drawOverview();  // citywide endpoints take over below data zoom (hides the hint when ready)
-    return;}
-  if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}  // token bump: kill in-flight chunked draws
-  hint.style.opacity='0';hint.style.visibility='hidden';  // opacity alone leaves the about-link invisibly clickable
+  if(z<MIN_ZOOM_DATA){enterOverviewMode(true);return;}
   const b=map.getBounds().pad(0.15);
   const poly=`POLYGON((${b.getWest()} ${b.getSouth()}, ${b.getEast()} ${b.getSouth()}, ${b.getEast()} ${b.getNorth()}, ${b.getWest()} ${b.getNorth()}, ${b.getWest()} ${b.getSouth()}))`;
   const my=++fetchTok;
+  // Wide windows at z15-16 can hold far more blocks than one page (a 2000px-wide z15
+  // viewport ≈ 25k rows vs the 2,500 cap) — a truncated fetch draws a random subset and
+  // the map looks broken. Count first: over cap → stay on the complete citywide overview.
+  try{
+    const cr=await fetch(SWEEP+`?$select=count(*)&$where=intersects(line,'${poly}')`);
+    if(cr.ok){
+      const n=+(((await cr.json())[0]||{}).count||0);
+      if(my!==fetchTok)return;
+      if(n>SEG_CAP){enterOverviewMode(false);return;}
+    }
+  }catch(e){}  // count probe failing is not fatal — fall through to the normal fetch
+  ovMode=false;
+  if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}  // token bump: kill in-flight chunked draws
+  hint.style.opacity='0';hint.style.visibility='hidden';  // opacity alone leaves the about-link invisibly clickable
   try{
     const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,line`
-      +`&$where=intersects(line,'${poly}')&$limit=2500`;
+      +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
     const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
     if(my!==fetchTok)return;
     lastRows=data;
@@ -817,7 +836,8 @@ async function ensureOverview(){
 let ovrDrawTok=0;
 async function drawOverview(){
   try{await ensureOverview();}catch(e){return;}  // on failure the "find your spot" hint stays
-  const key=String(dayFilter)+'|'+statusOn.green+statusOn.amber+statusOn.red+'|'+Math.floor(Date.now()/6e5);
+  const ow=map.getZoom()>=MIN_ZOOM_DATA?3:2;  // primary view at z15+ fallback: slightly bolder
+  const key=String(dayFilter)+'|'+statusOn.green+statusOn.amber+statusOn.red+'|'+ow+'|'+Math.floor(Date.now()/6e5);
   if(key!==ovrKey){
     ovrKey=key;
     const my=++ovrDrawTok;
@@ -833,7 +853,7 @@ async function drawOverview(){
         rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
         const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
         if(cls!=='gray'&&!statusOn[cls])return;
-        L.polyline([b.a,b.z],{renderer:overviewRenderer,color,weight:2,opacity:.8,interactive:false}).addTo(overviewLayer);
+        L.polyline([b.a,b.z],{renderer:overviewRenderer,color,weight:ow,opacity:.8,interactive:false}).addTo(overviewLayer);
       });
       if(i+CHUNK<OVR.length)await new Promise(r=>requestAnimationFrame(r));
     }
@@ -921,7 +941,7 @@ function drawRoutes(){
 async function drawMeters(){
   try{ await ensureLoadCache(); }catch(e){ toast('Meter data unavailable right now.'); return; }
   meterLayer.clearLayers();
-  if(map.getZoom()<MIN_ZOOM_DATA||!meterPts)return;
+  if(ovMode||map.getZoom()<MIN_ZOOM_DATA||!meterPts)return;
   // scale dot size with zoom — fixed radius smears every meter into one gray smudge at z15
   const b=map.getBounds(), z=map.getZoom(), mr=z>=18?3.5:z>=17?3:z>=16?2.5:2;
   meterPts.forEach(p=>{
@@ -970,7 +990,7 @@ async function ensureLoadCache(){
 async function drawLoadZones(){
   try{ await ensureLoadCache(); }catch(e){ toast('Loading zones unavailable right now.'); return; }
   loadLayer.clearLayers();
-  if(map.getZoom()<MIN_ZOOM_DATA)return;
+  if(ovMode||map.getZoom()<MIN_ZOOM_DATA)return;
   const b=map.getBounds(), lr=map.getZoom()>=17?5:4;  // slightly smaller at low zoom
   loadCache.forEach(z=>{
     if(!b.contains([z.lat,z.lng]))return;
@@ -1458,7 +1478,7 @@ function nearestSeg(lat,lng,cnnHint){
   pool.forEach(o=>{const d=distSqToLineMeters(lat,lng,o.side.latlngs); if(d<bd){bd=d;best=o}});
   return best;
 }
-map.on('click',e=>{ if(map.getZoom()<MIN_ZOOM_DATA){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
+map.on('click',e=>{ if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
 
 /* ---------- day filter + today's date ---------- */
 let dayChips=[];
@@ -1472,13 +1492,26 @@ function setDayFilter(v){
   dc.classList.toggle('on',today); dc.setAttribute('aria-pressed',today);
   updateRouteDay();  // route follows the day filter — keep its legend label in sync
   drawSegments(lastRows);
-  if(map.getZoom()<MIN_ZOOM_DATA)drawOverview();  // recolor the citywide view too
+  if(ovMode)drawOverview();  // recolor the citywide view too
 }
+const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function refreshToday(){
+  const now=new Date();
+  document.getElementById('dateChip').textContent='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate();
+  dayChips.forEach(b=>b.classList.toggle('today',b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===now.getDay()));
+}
+let liveDay=new Date().getDay();
+function dayRollover(){  // long-lived tabs: refresh "today" + statuses when the date flips
+  if(new Date().getDay()===liveDay)return;
+  liveDay=new Date().getDay();
+  refreshToday(); updateRouteDay();
+  drawSegments(lastRows); if(ovMode)drawOverview();
+}
+setInterval(dayRollover,60e3);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)dayRollover();});
 (function initDayRow(){
   const now=new Date();
-  const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dateChip=document.getElementById('dateChip');
-  dateChip.textContent='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate();
   // the date chip IS the today filter — removes the today/chip duplication
   dateChip.onclick=()=>{
     const t=new Date().getDay();
@@ -1486,8 +1519,8 @@ function setDayFilter(v){
     setDayFilter(dayFilter===t?null:t);
   };
   dayChips=[...document.querySelectorAll('.dchip')];
+  refreshToday();
   dayChips.forEach(b=>{
-    if(b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===now.getDay())b.classList.add('today');
     b.setAttribute('aria-pressed',b.classList.contains('on'));
     b.onclick=()=>{
       const v=b.dataset.day==='all'?null:parseInt(b.dataset.day,10);
@@ -1567,7 +1600,7 @@ function refreshLayerBadges(){
     const k=b.dataset.st; statusOn[k]=!statusOn[k];
     b.classList.toggle('on',statusOn[k]); b.setAttribute('aria-pressed',statusOn[k]);
     refreshLayerBadges(); drawSegments(lastRows);
-    if(map.getZoom()<MIN_ZOOM_DATA)drawOverview();
+    if(ovMode)drawOverview();
   };});
   (async()=>{
     try{
@@ -1641,11 +1674,11 @@ document.getElementById('routeToggle').onclick=function(){
   routeOn=!routeOn; this.classList.toggle('on',routeOn); this.setAttribute('aria-pressed',routeOn);
   refreshLayerBadges(); updateRouteDay();
   if(routeOn){
-    if(map.getZoom()<MIN_ZOOM_DATA){
-      // the citywide view has no street data — zoom in and let the redraw chain take over
+    if(ovMode){
+      // the overview has no street data — zoom in and let the redraw chain take over
       closeLayersPanel();
       toast('Truck routes show at street zoom — zooming you in. Pick a day chip to change the day.');
-      map.setView(map.getCenter(),16);
+      map.setView(map.getCenter(),Math.max(MIN_ZOOM_DATA+1,map.getZoom()+1));
       return;
     }
     const dow=dayFilter!=null?dayFilter:new Date().getDay();
