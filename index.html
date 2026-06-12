@@ -803,6 +803,7 @@ function drawRoutes(){
   routeLayer.clearLayers();
   if(!routeOn||!ENF)return 0;
   const dow=dayFilter!=null?dayFilter:new Date().getDay();
+  const rz=map.getZoom();
   const groups={};
   segCacheAll.forEach(o=>{
     const r=(o.side.rows||[]).find(x=>normDay(x.weekday)===dow); if(!r)return;
@@ -843,17 +844,24 @@ function drawRoutes(){
       // paper casing under the ink dash so the route reads on top of the busy curb colors
       L.polyline(pts,{color:'#FFFDF6',weight:7,opacity:.9,lineCap:'round',interactive:false}).addTo(routeLayer);
       L.polyline(pts,{color:'#17150F',weight:3,dashArray:'7 8',opacity:.9,interactive:false}).addTo(routeLayer);
+      // direction arrows: skip segments too short ON SCREEN, so they thin out when zoomed
+      // out instead of stacking into soup (one block ≈ 21px @z15 vs 168px @z18)
       for(let i=1;i<pts.length;i++){
         const pa=map.latLngToContainerPoint(pts[i-1]), pb=map.latLngToContainerPoint(pts[i]);
+        if(Math.hypot(pb.x-pa.x,pb.y-pa.y)<24)continue;
         const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI+90;  // triangle points up by default
         L.marker([(pts[i-1][0]+pts[i][0])/2,(pts[i-1][1]+pts[i][1])/2],{interactive:false,
           icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],
             html:`<div class="rarrow" style="transform:rotate(${ang}deg);animation-delay:${Math.min(i*14,210)}ms"></div>`})}).addTo(routeLayer);
       }
-      L.marker(pts[0],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
-        html:`<div class="rstart">START ~${fmtMin(run[0].t)}</div>`})}).addTo(routeLayer);
-      L.marker(pts[pts.length-1],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
-        html:`<div class="rend">END ~${fmtMin(run[run.length-1].t)}</div>`})}).addTo(routeLayer);
+      // START/END time chips only once zoomed in enough to read them — below z17 the many
+      // parallel runs overlap their pills into an unreadable pile (the reported "weird" look)
+      if(rz>=17){
+        L.marker(pts[0],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
+          html:`<div class="rstart">START ~${fmtMin(run[0].t)}</div>`})}).addTo(routeLayer);
+        L.marker(pts[pts.length-1],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
+          html:`<div class="rend">END ~${fmtMin(run[run.length-1].t)}</div>`})}).addTo(routeLayer);
+      }
       drawn++;
     });
   });
@@ -865,10 +873,11 @@ async function drawMeters(){
   try{ await ensureLoadCache(); }catch(e){ toast('Meter data unavailable right now.'); return; }
   meterLayer.clearLayers();
   if(map.getZoom()<MIN_ZOOM_DATA||!meterPts)return;
-  const b=map.getBounds();
+  // scale dot size with zoom — fixed radius smears every meter into one gray smudge at z15
+  const b=map.getBounds(), z=map.getZoom(), mr=z>=18?3.5:z>=17?3:z>=16?2.5:2;
   meterPts.forEach(p=>{
     if(!b.contains(p))return;
-    L.circleMarker(p,{renderer:meterRenderer,radius:3,color:'#17150F',weight:1,
+    L.circleMarker(p,{renderer:meterRenderer,radius:mr,color:'#17150F',weight:1,
       fillColor:getCSS('--gray'),fillOpacity:.85,interactive:false}).addTo(meterLayer);
   });
 }
@@ -913,10 +922,10 @@ async function drawLoadZones(){
   try{ await ensureLoadCache(); }catch(e){ toast('Loading zones unavailable right now.'); return; }
   loadLayer.clearLayers();
   if(map.getZoom()<MIN_ZOOM_DATA)return;
-  const b=map.getBounds();
+  const b=map.getBounds(), lr=map.getZoom()>=17?5:4;  // slightly smaller at low zoom
   loadCache.forEach(z=>{
     if(!b.contains([z.lat,z.lng]))return;
-    const m=L.circleMarker([z.lat,z.lng],{radius:5,color:'#17150F',weight:2,
+    const m=L.circleMarker([z.lat,z.lng],{radius:lr,color:'#17150F',weight:2,
       fillColor:LOAD_COLORS[z.color]||'#888',fillOpacity:1,className:'loaddot'});
     const days=z.days&&z.days.length>14?'daily':z.days;
     const hrs=z.from?`${z.from}–${z.to}`:'';
@@ -1015,7 +1024,9 @@ function drawSegments(rows){
 }
 
 // Ribbon weight in px so the band spans roughly curb-to-curb (±6m) at each zoom.
-function rppWeight(){const z=map.getZoom();return z>=18?26:z>=17?14:z>=16?7:4;}
+// curb-to-curb ribbon width in px ≈ street width at each zoom (each level doubles m/px,
+// so the weight roughly doubles too); without the z19/z20 steps it shrinks to a thin stripe
+function rppWeight(){const z=map.getZoom();return z>=20?96:z>=19?50:z>=18?26:z>=17?14:z>=16?7:4;}
 map.on('zoomend',()=>[rppLayer,areaLayer].forEach(g=>g.eachLayer(l=>l.setStyle&&l.setStyle({weight:rppWeight()}))));
 
 async function loadRpp(poly, my){
