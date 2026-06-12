@@ -76,3 +76,48 @@ The enemy is **a recurring calendar event and a phone alarm**, plus "just read t
 - **vs "just set an alarm"**: "Your calendar doesn't know where you parked, which side of the street you're on, whether it's the 2nd or 4th Monday, or that your block gets ticketed 22 minutes after the window opens. CURB does — for free, with no account."
 
 Launch framing: lead with the data ("we reconstructed when ticketing actually happens on every SF block from 650k citations"), not "another reminder app" — that framing survived every Reddit launch-thread autopsy in this research; "reminder app" framing did not. Timing hook: SF drivers are already confused about parking apps after SFMTA's May 2026 PayByPhone-to-ParkMobile/HotSpot switch.
+## 7. Feature matrix — CURB vs everyone (verified 2026-06-12)
+
+| Feature | CURB | SpotAngels | Ticketless+ | Sweep Alarm | kaushalpartani | Xtreet | City (DataSF/PW) |
+|---|---|---|---|---|---|---|---|
+| Sweeping schedules per block | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (lookup) |
+| Map colored by next sweep | ✅ | partial | ❌ | ❌ | ❌ | ❌ | ❌ |
+| REAL ticket times (citations) | ✅ only one | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Push alerts | ✅ Web Push | ✅ (app) | ✅ | ✅ ×3 escalating | ❌ (cal only) | email (spam) | ❌ |
+| Auto park detection | ❌ (pin only) | ✅ Bluetooth | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Holiday suspensions | 🔜 ALE-162 | ✅ | ❌ | ❌ | ❌ | ❌ | PDF calendar |
+| RPP permit areas | ✅ + dropdown | partial | ✅ (Apr 2026) | ❌ | ❌ | ✅ (31 zones, 2015-era) | dataset only |
+| Meters | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | dataset only |
+| White/school loading zones | ✅ only one | ❌ | ❌ | ❌ | ❌ | partial colors | not published |
+| Time-limit / tow-away warnings | ❌ | partial | ✅ | ❌ | ❌ | ✅ | ❌ |
+| Calendar export | ✅ Google+.ics | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Android | ✅ (web) | ✅ | ❌ iOS-only | ✅ | ✅ (web) | ✅ (web) | ✅ (web) |
+| No install needed | ✅ | web map only | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Free, no paywall | ✅ | ❌ freemium | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Open source | ✅ MIT | ❌ | ❌ | ❌ | ✅ GPL-3 | ❌ | data only |
+| Freshness | live + monthly builds | app 17mo stale, web fresh | shipped Apr 2026 | shipped Jun 2026 | pushed Jun 2026 | © 2015 shell | rows 2026-05-14 |
+
+## 8. Where everyone gets their data
+
+| Player | Data source | Implication |
+|---|---|---|
+| **CURB** | DataSF (yhqp-riqs schedules, ab4h-6ztd citations, hi6h-neyh RPP, meter sets, EAS addresses) + SFMTA Digital Curb ArcGIS (white zones) | Only one combining schedules WITH enforcement reality; white-zone source nobody else found |
+| SpotAngels | City schedule data + crowdsourced community reports + manually curated holiday calendar | Crowdsourcing = their moat and their staleness risk (still quotes $73 fine) |
+| Ticketless+ | Official SFMTA/DataSF schedule data | Same upstream as CURB minus citations — can't show real ticket times without building our pipeline |
+| Sweep Alarm | DataSF schedules | Pass-through; reviews say "always double-check the sign" |
+| kaushalpartani | DataSF schedules (straight pass-through, GPL) | Honest about data-quality fragility in README |
+| Xtreet | DataSF-era data behind a 2015 shell (API serves correct June 2026 data) | Backend alive, frontend abandoned |
+| City lookup | n8xs-xfw6 routes dataset — the system of record | "Currently undergoing maintenance" banner; CURB inherits this risk too (monitor) |
+| Google/Apple/Waze | Own map stacks — zero curb-rule data | Threat only if INRIX's curb data lands inside them (1–2 yrs) |
+| ParkMobile/HotSpot | SFMTA meter-payment rails | Complementary; never covers free/RPP blocks |
+| INRIX | Built SFMTA's digital curb inventory itself (SMART/CDS) + probe data | Deepest raw data, B2B only; the upstream to watch |
+
+## 9. What CURB does NOT cover today (honest gaps)
+
+1. **Auto park detection** — Ticketless+/SpotAngels detect parking via Bluetooth/motion; impossible in a PWA. Counter: zero-friction pin = parked state (ALE-164).
+2. **Holiday suspensions** — SpotAngels has the calendar; ours lands with ALE-162.
+3. **Escalating alerts** — Sweep Alarm sends 3; we send 1 (ALE-167 queued).
+4. **Time-limit + tow-away + construction warnings** — Ticketless+ warns on all three; CURB shows RPP limits but doesn't alert on 72-hr rule, tow-away corridors, or temp construction signs (construction isn't in open data; tow-away partially is).
+5. **Native app-store presence** — every installed app beats a PWA on discoverability; counter is web reach + no-install.
+6. **Crowdsourced corrections** — SpotAngels users fix bad data; our equivalent is the GitHub wrong-data issue template (weaker loop).
+7. **Off-street fallback** — when street parking is hopeless, SpotHero owns the moment ("find a safe spot" mode is in the ALE-164 brief).
