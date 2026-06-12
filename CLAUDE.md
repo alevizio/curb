@@ -169,6 +169,12 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   filter (toggles `dayFilter` to today).
 - **Canonical domain is `curb.guide`** — all og/twitter meta URLs + the OG card footer use
   it (absolute). Add `https://curb.guide/*` to the Google Maps key referrer allowlist.
+- **Overview fallback (`ovMode`, don't regress)**: detail mode is gated by a `count(*)`
+  probe, not zoom alone — wide windows at z15-16 can hold 10x the `SEG_CAP` (2,500) rows
+  and a truncated fetch draws a misleading random subset. Over cap → `enterOverviewMode()`
+  keeps the complete citywide overview (weight 3 at z15+, 2 below). All "are we in citywide
+  view" checks (map click → flyTo, day/status recolor, route toggle auto-zoom, meter/loading
+  guards) read `ovMode`, NOT `getZoom()<MIN_ZOOM_DATA`.
 - **Performance invariants**: head carries preconnects to every data origin (fonts.gstatic,
   cdnjs, data.sfgov.org, tile.googleapis.com, carto). The citywide overview draws in
   1,500-line chunks across frames (`drawOverview`, token-guarded) — never synchronously.
