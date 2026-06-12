@@ -1531,9 +1531,24 @@ function setDayFilter(v){
 const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function refreshToday(){
   const now=new Date();
-  document.getElementById('dateChip').textContent='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate();
+  document.getElementById('dateChip').textContent='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate()
+    +(wx?' · '+wx.i+' '+wx.t+'°':'');
   dayChips.forEach(b=>b.classList.toggle('today',b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===now.getDay()));
 }
+/* SF weather on the date chip — Open-Meteo (free, keyless); degrades silently if it fails */
+let wx=null;
+const WMO=[[0,'☀️'],[1,'🌤️'],[2,'⛅'],[3,'☁️'],[48,'🌫️'],[57,'🌦️'],[67,'🌧️'],[77,'❄️'],[82,'🌧️'],[86,'❄️'],[99,'⛈️']];
+function wxIcon(c){for(const [max,ic] of WMO)if(c<=max)return ic;return '☁️';}
+async function fetchWx(){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=temperature_2m,weather_code&temperature_unit=fahrenheit');
+    if(!r.ok)return;
+    const d=await r.json();
+    wx={t:Math.round(d.current.temperature_2m),i:wxIcon(+d.current.weather_code)};
+    refreshToday();
+  }catch(e){}
+}
+fetchWx(); setInterval(fetchWx,30*60e3);
 let liveDay=new Date().getDay();
 function dayRollover(){  // long-lived tabs: refresh "today" + statuses when the date flips
   if(new Date().getDay()===liveDay)return;
