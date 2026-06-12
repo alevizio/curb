@@ -109,7 +109,7 @@
   /* mobile: the layers control docks bottom-left, sitting on top of the legend (which grows —
      a ResizeObserver tracks its height into --legH); the panel opens upward from the button */
   @media (max-width:767px){
-    .layers{right:auto;left:12px;top:auto;bottom:calc(134px + env(safe-area-inset-bottom) + var(--legH,68px))}
+    .layers{right:auto;left:12px;top:auto;bottom:calc(53px + env(safe-area-inset-bottom) + var(--legH,68px))}
     .layers .layerspanel{top:auto;bottom:calc(100% + 8px);right:auto;left:0;max-height:min(430px,calc(100dvh - 200px))}
   }
   .layersbtn{font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
@@ -185,7 +185,7 @@
     [data-tip-pos="b"]:hover::after{bottom:auto;top:calc(100% + 8px)}
   }
   /* curb-color legend, pinned to the map bottom-left; rows tap to show/hide */
-  .legend2{position:fixed;left:12px;bottom:calc(126px + env(safe-area-inset-bottom));z-index:600;
+  .legend2{position:fixed;left:12px;bottom:calc(45px + env(safe-area-inset-bottom));z-index:600;  /* bottom edge lines up with the zoom pill */
     background:rgba(242,236,223,.95);border:2px solid var(--ink);border-radius:11px;box-shadow:var(--shadow);
     padding:6px 8px;display:flex;flex-direction:column;gap:1px}
   .lst{display:flex;align-items:center;gap:7px;border:0;background:transparent;font:inherit;font-size:11px;
@@ -193,7 +193,7 @@
   .lst i{width:20px;height:6px;border-radius:4px;flex:none}
   .lst:not(.on){opacity:.45}
   .lst:not(.on) i{background:transparent!important;border:1.5px dashed var(--ink)}
-  @media (min-width:768px){.legend2{left:16px;bottom:16px}}
+  @media (min-width:768px){.legend2{left:16px;bottom:47px}}  /* bottom edge lines up with the zoom pill (30px margin + attribution strip) */
   /* overlay rows join the legend while their layer is on; tap a row to switch the layer off */
   #ovlLeg:not(:empty){margin-top:3px;padding-top:4px;border-top:1.5px solid rgba(23,21,15,.18);
     display:flex;flex-direction:column;gap:1px}
