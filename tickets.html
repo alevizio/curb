@@ -78,6 +78,16 @@
   .note{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-top:12px;line-height:1.55}
   .note b{color:var(--ink)}
 
+  /* chart hover: full-column/row hit zones + a paper tooltip */
+  svg .hit{fill:transparent}
+  svg .hit:hover{fill:rgba(23,21,15,.08)}
+  #tip{position:fixed;z-index:60;pointer-events:none;background:var(--sign);border:2.5px solid var(--ink);
+    border-radius:11px;padding:9px 12px 10px;font-size:13px;font-weight:600;line-height:1.5;
+    color:var(--ink-soft);box-shadow:4px 4px 0 var(--ink);max-width:280px;opacity:0;transition:opacity .12s}
+  #tip .tt{display:block;font-family:'Anton',sans-serif;font-size:15px;text-transform:uppercase;
+    color:var(--ink);margin-bottom:3px}
+  #tip b{color:var(--ink)}
+
   .ctxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:18px}
   .ctx{border:2.5px solid var(--ink);border-radius:14px;background:var(--sign);box-shadow:3px 3px 0 var(--ink);padding:16px}
   .ctx h3{font-family:'Anton',sans-serif;font-size:18px;text-transform:uppercase;line-height:1.05;margin-bottom:7px}
@@ -124,7 +134,8 @@
     <div class="sec-k">The history</div>
     <h2>A nine-figure habit, every single year</h2>
     <p class="lede">Assessed parking fines by year. Watch the <b>2020 pandemic crater</b> (enforcement was
-      fully suspended that spring) — and how fast the totals climbed back past every pre-COVID year.</p>
+      fully suspended that spring) — and how fast the totals climbed back past every pre-COVID year.
+      <b>Hover or tap any bar</b> on this page for the exact numbers.</p>
     <div class="panel"><svg id="chartYears" width="100%" height="320" role="img" aria-label="Bar chart of assessed parking fines per year since 2008"></svg></div>
     <div class="statrow" id="yearStats"></div>
   </section>
@@ -238,6 +249,26 @@ const vname=v=>VNAMES[v]||v;
 function svgEl(s){const d=document.createElementNS('http://www.w3.org/2000/svg','g');d.innerHTML=s;return d;}
 function draw(id,inner){const svg=$(id);svg.innerHTML=inner;}
 
+// chart tooltips — hit zones carry data-ti, an index into TIPS
+const TIPS=[];
+const tipA=h=>{TIPS.push(h);return ` data-ti="${TIPS.length-1}"`;};
+const tip=document.createElement('div');tip.id='tip';document.body.appendChild(tip);
+let tipOn=false;
+function tipMove(e){
+  const r=tip.getBoundingClientRect();
+  let x=e.clientX+14,y=e.clientY+18;
+  if(x+r.width>innerWidth-10)x=e.clientX-r.width-14;
+  if(y+r.height>innerHeight-10)y=e.clientY-r.height-14;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+}
+document.addEventListener('pointerover',e=>{
+  const el=e.target.closest('[data-ti]');
+  if(!el){if(tipOn){tip.style.opacity='0';tipOn=false;}return;}
+  tip.innerHTML=TIPS[+el.dataset.ti];tipOn=true;tip.style.opacity='1';tipMove(e);
+});
+document.addEventListener('pointermove',e=>{if(tipOn)tipMove(e);},{passive:true});
+addEventListener('scroll',()=>{if(tipOn){tip.style.opacity='0';tipOn=false;}},{passive:true});
+
 fetch('data/stats.json').then(r=>r.json()).then(S=>{
   const yearly=S.yearly.filter(r=>r.y>=2009&&r.y<=2026);   // 2008 is partial in the dataset
   const totalRev=S.yearly.reduce((s,r)=>s+r.rev,0), totalN=S.yearly.reduce((s,r)=>s+r.n,0);
@@ -252,22 +283,29 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
     [0,.5,1].forEach(f=>{const y=P.t+(H-P.t-P.b)*(1-f);
       s+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="${SOFT}" stroke-opacity=".25" stroke-width="1.5"/>`
         +`<text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="11" fill="${SOFT}">${fmt$(max*f)}</text>`;});
+    let hits='';
     yearly.forEach((r,i)=>{
       const h=(H-P.t-P.b)*(r.rev/max), x=P.l+i*bw, isCovid=r.y===2020||r.y===2021;
       s+=`<rect x="${x+2}" y="${H-P.b-h}" width="${bw-5}" height="${h}" rx="3"
         fill="${isCovid?AMBER:RED}"/>`;
       if(r.y%2===1||r.y===2026)s+=`<text x="${x+bw/2}" y="${H-P.b+16}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
+      hits+=`<rect class="hit" x="${x}" y="${P.t}" width="${bw}" height="${H-P.t-P.b}"${tipA(
+        `<span class="tt">${r.y}${r.y===2026?' · so far':''}</span>${fmt$(r.rev)} assessed<br>`+
+        `${fmtN(r.n)} tickets · ~$${Math.round(r.rev/r.n)} average`)}/>`;
     });
     const covid=yearly.find(r=>r.y===2020);
     if(covid){const i=yearly.indexOf(covid),x=P.l+i*bw+bw/2;
       s+=`<text x="${x}" y="${P.t+10}" text-anchor="middle" font-size="11" font-weight="800" fill="${AMBER}">covid ↓</text>`;}
-    draw('chartYears',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
+    const peak=yearly.reduce((a,b)=>b.rev>a.rev?b:a);
+    {const i=yearly.indexOf(peak),x=P.l+i*bw+bw/2,ph=(H-P.t-P.b)*(peak.rev/max);
+      s+=`<text x="${x}" y="${H-P.b-ph-7}" text-anchor="middle" font-size="11" font-weight="800" fill="${RED}">${fmt$(peak.rev)}</text>`;}
+    draw('chartYears',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}${hits}</svg>`);
     const last=yearly.find(r=>r.y===2025)||yearly[yearly.length-2];
     $('yearStats').innerHTML=`
       <div class="stat"><div class="v red">${fmt$(last.rev)}</div><div class="l">assessed in ${last.y}</div></div>
       <div class="stat"><div class="v">${fmtN(last.n)}</div><div class="l">tickets in ${last.y}</div></div>
       <div class="stat"><div class="v amber">${fmt$(last.rev/365)}</div><div class="l">per day</div></div>
-      <div class="stat"><div class="v green">${fmt$(last.rev/last.n)}</div><div class="l">average ticket</div></div>`;
+      <div class="stat"><div class="v green">$${Math.round(last.rev/last.n)}</div><div class="l">average ticket</div></div>`;
   }
 
   // --- violations (merge the two street-cleaning codes) ---
@@ -280,7 +318,10 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
       const y=P.t+i*rh, w=(W-260)*(r.n/max), sweep=r.v.startsWith('Street cleaning');
       s+=`<rect x="200" y="${y+6}" width="${Math.max(w,4)}" height="${rh-14}" rx="5" fill="${sweep?RED:INK}" fill-opacity="${sweep?1:.82}"/>
         <text x="192" y="${y+rh/2+4}" text-anchor="end" font-size="13" fill="${INK}">${r.v}</text>
-        <text x="${204+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12.5" font-weight="800" fill="${sweep?RED:SOFT}">${fmtN(r.n)} · ${fmt$(r.rev)}</text>`;
+        <text x="${204+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12.5" font-weight="800" fill="${sweep?RED:SOFT}">${fmtN(r.n)} · ${fmt$(r.rev)}</text>
+        <rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
+          `<span class="tt">${r.v}</span>${fmtN(r.n)} tickets since 2021<br>`+
+          `${fmt$(r.rev)} assessed · ~$${Math.round(r.rev/r.n)} each`)}/>`;
     });
     $('chartViol').setAttribute('height',H);
     draw('chartViol',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
@@ -292,17 +333,26 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
     const W=960,H=300,P={l:54,r:60,t:16,b:36},n=ys.length;
     const bw=(W-P.l-P.r)/n,maxN=Math.max(...ys.map(r=>r.n)),maxA=Math.max(...ys.map(r=>r.avg));
     let s='';
+    [0,.5,1].forEach(f=>{const gy=P.t+(H-P.t-P.b)*(1-f);
+      s+=`<line x1="${P.l}" y1="${gy}" x2="${W-P.r}" y2="${gy}" stroke="${SOFT}" stroke-opacity=".25" stroke-width="1.5"/>`
+        +`<text x="${P.l-8}" y="${gy-6}" text-anchor="end" font-size="11" fill="${SOFT}">${fmtN(maxN*f)}</text>`;});
     ys.forEach((r,i)=>{
       const h=(H-P.t-P.b)*(r.n/maxN),x=P.l+i*bw;
       s+=`<rect x="${x+2}" y="${H-P.b-h}" width="${bw-5}" height="${h}" rx="3" fill="${INK}" fill-opacity=".85"/>`;
       if(r.y%2===1||r.y===2026)s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${String(r.y).slice(2)}'</text>`;
     });
     const pts=ys.map((r,i)=>`${P.l+i*bw+bw/2},${P.t+(H-P.t-P.b)*(1-r.avg/maxA)}`).join(' ');
-    s+=`<polyline points="${pts}" fill="none" stroke="${RED}" stroke-width="3.5" stroke-linejoin="round"/>`;
+    s+=`<polyline points="${pts}" fill="none" stroke="${RED}" stroke-width="3.5" stroke-linejoin="round" pointer-events="none"/>`;
     const lastY=ys[ys.length-1],ly=P.t+(H-P.t-P.b)*(1-lastY.avg/maxA);
     s+=`<text x="${W-P.r+6}" y="${ly+4}" font-size="13" font-weight="800" fill="${RED}">$${Math.round(lastY.avg)}</text>`;
     const firstY=ys[0],fy=P.t+(H-P.t-P.b)*(1-firstY.avg/maxA);
     s+=`<text x="${P.l-8}" y="${fy+4}" text-anchor="end" font-size="13" font-weight="800" fill="${RED}">$${Math.round(firstY.avg)}</text>`;
+    ys.forEach((r,i)=>{
+      const x=P.l+i*bw;
+      s+=`<rect class="hit" x="${x}" y="${P.t}" width="${bw}" height="${H-P.t-P.b}"${tipA(
+        `<span class="tt">${r.y}${r.y===2026?' · so far':''}</span>${fmtN(r.n)} sweep tickets<br>`+
+        `${fmt$(r.rev)} assessed · <b>$${Math.round(r.avg)} avg fine</b>`)}/>`;
+    });
     draw('chartSweep',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
     const recent=ys.find(r=>r.y===2025)||ys[ys.length-2];
     $('sweepStats').innerHTML=`
@@ -315,15 +365,20 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
   // --- hour histogram ---
   {
     const hs=S.sweepHour;const W=960,H=260,P={l:14,r:14,t:24,b:34};
-    const bw=(W-P.l-P.r)/24,max=Math.max(...hs.map(r=>r.n));
-    let s='';
+    const bw=(W-P.l-P.r)/24,max=Math.max(...hs.map(r=>r.n)),tot=hs.reduce((a,r)=>a+r.n,0);
+    const hf=h=>{h=h%24;return (h%12||12)+(h<12?'a':'p');};
+    let s='',hits='';
     for(let h=0;h<24;h++){
       const r=hs.find(x=>x.h===h)||{n:0};
       const bh=(H-P.t-P.b)*(r.n/max),x=P.l+h*bw;
       const col=h<6?AMBER:(h>=8&&h<12?RED:INK);
       s+=`<rect x="${x+2}" y="${H-P.b-bh}" width="${bw-5}" height="${Math.max(bh,2)}" rx="3" fill="${col}" fill-opacity=".9"/>`;
       if(h%3===0)s+=`<text x="${x+bw/2}" y="${H-P.b+15}" text-anchor="middle" font-size="10.5" fill="${SOFT}">${h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p'}</text>`;
+      hits+=`<rect class="hit" x="${x}" y="${P.t}" width="${bw}" height="${H-P.t-P.b}"${tipA(
+        `<span class="tt">${hf(h)} – ${hf(h+1)}</span>${fmtN(r.n)} sweep tickets<br>`+
+        `${(100*r.n/tot).toFixed(1)}% of the two-year total`)}/>`;
     }
+    s+=hits;
     s+=`<text x="${P.l+2*bw}" y="${P.t-6}" font-size="11.5" font-weight="800" fill="${AMBER}">overnight commercial</text>`;
     s+=`<text x="${P.l+9.4*bw}" y="${P.t-6}" font-size="11.5" font-weight="800" fill="${RED}">morning residential</text>`;
     draw('chartHour',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
@@ -338,7 +393,10 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
       const y=P.t+i*rh,w=(W-300)*(r.rev/max);
       s+=`<rect x="226" y="${y+5}" width="${Math.max(w,4)}" height="${rh-11}" rx="4" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>
         <text x="218" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
-        <text x="${230+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>`;
+        <text x="${230+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>
+        <rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
+          `<span class="tt">${r.hood}</span>${fmt$(r.rev)} in sweep fines (2 yrs)<br>`+
+          `${fmtN(r.n)} tickets · ~$${Math.round(r.rev/r.n)} each`)}/>`;
     });
     $('chartHoods').setAttribute('height',H);
     draw('chartHoods',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
@@ -361,7 +419,11 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
       s+=`<rect x="${pos?X0:X0-w}" y="${y+5}" width="${w}" height="${rh-10}" rx="4" fill="${pos?RED:GRN}" fill-opacity="${i<3||!pos?1:.8}"/>
         <text x="${X0-w*(pos?0:1)-10}" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
         <text x="${X0+(pos?w:0)+8}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}%</text>
-        <text x="${X0+(pos?w:0)+62}" y="${y+rh/2+4}" font-size="11" fill="${SOFT}">${fmtN(r.then)} → ${fmtN(r.now)}</text>`;
+        <text x="${X0+(pos?w:0)+62}" y="${y+rh/2+4}" font-size="11" fill="${SOFT}">${fmtN(r.then)} → ${fmtN(r.now)}</text>
+        <rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
+          `<span class="tt">${r.hood}</span>${S.hoodSurge.windows.then}: <b>${r.then.toLocaleString()}</b> citations<br>`+
+          `${S.hoodSurge.windows.now}: <b>${r.now.toLocaleString()}</b> citations<br>`+
+          `<b style="color:${pos?RED:GRN}">${r.pct>0?'+':''}${r.pct}% in five years</b>`)}/>`;
     });
     $('chartSurge').setAttribute('height',H);
     draw('chartSurge',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);
