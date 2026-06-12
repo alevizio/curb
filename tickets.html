@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>The SF Parking Ticket Economy — Every Fine Since 2008 | CURB</title>
-<meta name="description" content="23.8 million parking tickets, mapped and counted: what San Francisco fines every year, what the tickets are for, which neighborhoods pay most — from public SFMTA data.">
+<meta name="description" content="23.8 million parking tickets, counted: what San Francisco fines every year, what for, and which neighborhoods pay most — from public SFMTA data.">
 <link rel="canonical" href="https://curb.guide/tickets">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CURB">
@@ -14,6 +14,8 @@
 <meta property="og:image" content="https://curb.guide/og.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="CURB — the SF parking ticket economy, charted from 23.8 million public citations">
+<meta property="article:published_time" content="2026-06-10">
+<meta property="article:modified_time" content="2026-06-12">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://curb.guide/og.png">
 <meta name="theme-color" content="#E0322E">
@@ -187,7 +189,7 @@
 
 <main class="wrap">
   <div class="hero">
-    <div class="kicker rise">The ticket economy · public SFMTA data, 2008–today</div>
+    <div class="kicker rise">The ticket economy · public SFMTA data, 2008–today<span id="dataDate"></span></div>
     <div class="big rise d1" id="bigTotal">$—</div>
     <h1 class="rise d1">in parking fines. <span id="bigCount">—</span> million tickets.</h1>
     <p class="sub rise d2">Every parking citation San Francisco writes is public record. We counted all of
@@ -356,6 +358,12 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
   const totalRev=S.yearly.reduce((s,r)=>s+r.rev,0), totalN=S.yearly.reduce((s,r)=>s+r.n,0);
   $('bigTotal').textContent=fmt$(totalRev);
   $('bigCount').textContent=(totalN/1e6).toFixed(1);
+  if(S._meta&&S._meta.generated){
+    const g=new Date(S._meta.generated);
+    const ML=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    $('dataDate').innerHTML=' · updated <time datetime="'+S._meta.generated.slice(0,10)+'">'
+      +ML[g.getMonth()]+' '+g.getDate()+', '+g.getFullYear()+'</time>';
+  }
 
   // stat cards + notes render once; the charts re-render per breakpoint
   const yearly=S.yearly.filter(r=>r.y>=2009&&r.y<=2026);   // 2008 is partial in the dataset
