@@ -105,7 +105,7 @@
 
   /* hero */
   .hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,64px);
-    align-items:center;padding:clamp(44px,8vh,86px) 0 clamp(40px,7vh,72px)}
+    align-items:center;padding-top:clamp(44px,8vh,86px);padding-bottom:clamp(40px,7vh,72px)}
   h1{font-family:'Anton',sans-serif;text-transform:uppercase;line-height:.92;letter-spacing:.005em;
     font-size:clamp(52px,8.2vw,104px)}
   h1 .dot{color:var(--red)}
@@ -170,7 +170,7 @@
   .legendline .w i{background:var(--paper)}
 
   /* how it works — numbered notice, not cards */
-  .how{padding:clamp(48px,8vh,84px) 0 clamp(28px,4vh,40px)}
+  .how{padding-top:clamp(48px,8vh,84px);padding-bottom:clamp(28px,4vh,40px)}
   .how .k,.faq .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
   .how h2,.faq h2{font-family:'Anton',sans-serif;font-size:clamp(34px,5vw,52px);text-transform:uppercase;line-height:.95;margin:6px 0 0}
   .steps{margin-top:34px}
@@ -188,7 +188,7 @@
   .ic{width:15px;height:15px;vertical-align:-2.5px}
 
   /* maker's note — one human, one grudge, kept tiny */
-  .maker{padding:clamp(44px,7vh,72px) 0 0}
+  .maker{padding-top:clamp(44px,7vh,72px)}
   .maker .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
   .maker h2{font-family:'Anton',sans-serif;font-size:clamp(28px,4.2vw,44px);text-transform:uppercase;line-height:.97;margin:8px 0 0}
   .maker p{margin-top:14px;color:var(--ink-soft);font-weight:600;line-height:1.55;max-width:40em}
@@ -197,7 +197,7 @@
     padding:8px 13px;font-size:13px;font-weight:800;transform:rotate(-.6deg);box-shadow:4px 4px 0 rgba(23,21,15,.22)}
 
   /* press — the same citations, reported */
-  .press{padding:clamp(40px,6vh,68px) 0 0}
+  .press{padding-top:clamp(40px,6vh,68px)}
   .press .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
   .press h2{font-family:'Anton',sans-serif;font-size:clamp(30px,4.4vw,48px);text-transform:uppercase;line-height:.96;margin:6px 0 0}
   .press .lede{margin-top:12px;color:var(--ink-soft);font-weight:600;max-width:44em}
@@ -211,7 +211,7 @@
   .pressrow p{font-size:13.5px;color:var(--ink-soft);font-weight:600;margin-top:4px;max-width:46em}
 
   /* bio — the human, last word before the footer */
-  .bio{padding:clamp(40px,6vh,64px) 0 0}
+  .bio{padding-top:clamp(40px,6vh,64px)}
   .biocard{display:flex;gap:18px;align-items:flex-start;border:3px solid var(--ink);border-radius:14px;
     background:var(--paper);padding:20px 22px;box-shadow:7px 7px 0 var(--ink)}
   .biocard .ava{flex:none;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--ink);
@@ -225,7 +225,7 @@
   @media (max-width:560px){.biocard{flex-direction:column;gap:12px}}
 
   /* faq */
-  .faq{padding:clamp(36px,6vh,64px) 0 0}
+  .faq{padding-top:clamp(36px,6vh,64px)}
   .qa{padding:22px 0;border-top:2.5px solid var(--ink)}
   .qa:last-of-type{border-bottom:2.5px solid var(--ink)}
   .qa h3{font-family:'Anton',sans-serif;font-size:clamp(18px,2.2vw,23px);text-transform:uppercase;line-height:1.05}
@@ -234,7 +234,7 @@
 
   /* footer */
   footer{margin-top:clamp(44px,7vh,72px);border-top:3px solid var(--ink);background:var(--ink);color:var(--paper)}
-  .foot{display:flex;flex-wrap:wrap;gap:18px 36px;align-items:center;padding:30px 0 34px;font-weight:700;font-size:14.5px}
+  .foot{display:flex;flex-wrap:wrap;gap:18px 36px;align-items:center;padding-top:30px;padding-bottom:34px;font-weight:700;font-size:14.5px}
   .foot .fine{flex-basis:100%;font-weight:600;font-size:13px;color:rgba(242,236,223,.66);line-height:1.6}
   .foot a{color:var(--paper);text-underline-offset:3px}
   .foot .mark{font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.02em}
