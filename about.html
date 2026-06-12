@@ -75,12 +75,33 @@
   .rule{border:0;border-top:2.5px solid var(--ink);margin:0}
 
   /* masthead */
-  header{padding:26px 0 0}
+  header{padding:26px 0 0;position:relative;z-index:50}  /* keeps the nav dropdown above .rise hero text */
   .mast{display:flex;align-items:center;gap:14px}
   .logo{font-size:27px;padding:9px 14px;box-shadow:3px 3px 0 var(--ink)}
   .logo span{color:var(--red)}
   .url{font-weight:800;letter-spacing:.01em;color:var(--ink-soft)}
   .mast .btn{margin-left:auto;padding:11px 16px;font-size:14px}
+
+  /* top nav: inline links on desktop, hamburger under 680px */
+  .topnav{display:flex;gap:4px;margin-left:auto}
+  .topnav a{padding:9px 13px;border-radius:10px;font-weight:800;font-size:14.5px;text-decoration:none;
+    color:var(--ink);border:2.5px solid transparent}
+  .topnav a:hover{border-color:var(--ink)}
+  .topnav a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+  .navwrap{position:relative;display:none}
+  .burger{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:var(--sign,#FFFDF6);
+    color:var(--ink);border:2.5px solid var(--ink);border-radius:11px;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+  .burger svg{width:20px;height:20px}
+  .navmenu{position:absolute;right:0;top:calc(100% + 8px);width:212px;background:var(--paper);
+    border:3px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--ink);padding:8px;z-index:40}
+  .navmenu a{display:block;padding:11px 12px;border-radius:9px;font-weight:800;font-size:15px;
+    text-decoration:none;color:var(--ink)}
+  .navmenu a:hover{background:rgba(23,21,15,.07)}
+  .navmenu a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+  @media (max-width:680px){
+    .topnav{display:none}
+    .navwrap{display:block;margin-left:auto}
+  }
 
   /* hero */
   .hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,64px);
@@ -239,7 +260,22 @@
 <header class="wrap rise">
   <div class="mast">
     <a class="chip logo" href="/" aria-label="CURB — open the map">CURB<span>.</span></a>
-    <span class="url">curb.guide</span>
+    <nav class="topnav" aria-label="Pages">
+      <a href="/">Map</a>
+      <a href="/tickets">Tickets</a>
+      <a href="/about" aria-current="page">About</a>
+    </nav>
+    <div class="navwrap">
+      <button class="burger" id="navBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="navmenu" id="navMenu" hidden>
+        <a href="/">Map</a>
+        <a href="/tickets">Tickets</a>
+        <a href="/about" aria-current="page">About</a>
+        <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
+      </div>
+    </div>
     <a class="btn" href="/">Open the map →</a>
   </div>
 </header>
@@ -454,5 +490,14 @@
   </div>
 </footer>
 
+<script>
+// hamburger nav (mobile)
+(()=>{const b=document.getElementById('navBtn'),m=document.getElementById('navMenu');if(!b)return;
+  const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');};
+  b.addEventListener('click',e=>{e.stopPropagation();const open=m.hidden;m.hidden=!open;b.setAttribute('aria-expanded',String(open));});
+  document.addEventListener('click',e=>{if(!m.hidden&&!m.contains(e.target))close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+})();
+</script>
 </body>
 </html>
