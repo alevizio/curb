@@ -189,6 +189,20 @@
   .pressrow:hover b,.pressrow:focus-visible b{color:var(--red-text)}
   .pressrow p{font-size:13.5px;color:var(--ink-soft);font-weight:600;margin-top:4px;max-width:46em}
 
+  /* bio — the human, last word before the footer */
+  .bio{padding:clamp(40px,6vh,64px) 0 0}
+  .biocard{display:flex;gap:18px;align-items:flex-start;border:3px solid var(--ink);border-radius:14px;
+    background:var(--paper);padding:20px 22px;box-shadow:7px 7px 0 var(--ink)}
+  .biocard .ava{flex:none;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--ink);
+    color:var(--paper);border-radius:12px;font-family:'Anton',sans-serif;font-size:26px;transform:rotate(-3deg)}
+  .biocard .ava span{color:var(--red)}
+  .biocard .who{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .biocard b.nm{display:block;font-family:'Anton',sans-serif;font-size:clamp(19px,2.4vw,24px);
+    text-transform:uppercase;line-height:1.05;margin-top:2px}
+  .biocard p{font-size:14px;color:var(--ink-soft);font-weight:600;line-height:1.55;margin-top:6px;max-width:42em}
+  .biocard p a{color:var(--ink);font-weight:800;text-underline-offset:3px}
+  @media (max-width:560px){.biocard{flex-direction:column;gap:12px}}
+
   /* faq */
   .faq{padding:clamp(36px,6vh,64px) 0 0}
   .qa{padding:22px 0;border-top:2.5px solid var(--ink)}
@@ -410,6 +424,20 @@
       </a>
     </div>
   </section>
+
+  <section class="wrap bio" id="bio">
+    <div class="biocard">
+      <span class="ava" aria-hidden="true">A<span>.</span></span>
+      <div>
+        <span class="who">The human behind it</span>
+        <b class="nm">Alejandro</b>
+        <p>Product designer who codes. By day he builds design systems and interfaces; by night he turns
+          whatever annoys him into small tools — this one started at a windshield on Valencia. CURB is
+          designed, built and street-parked in San Francisco.
+          Find him on <a href="https://github.com/alevizio" rel="noopener">GitHub</a>.</p>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -419,6 +447,7 @@
     <a href="https://data.sfgov.org" rel="noopener">Data: DataSF</a>
     <a href="/tickets">The ticket economy</a>
     <a href="https://github.com/alevizio/curb" rel="noopener">Source</a>
+    <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
     <span class="fine">The posted sign is always the source of truth — temporary signs and holidays override
       everything here. Ticket times are historical guidance from public citation records, never a guarantee.
       No accounts, no tracking, no ads. Made in San Francisco.</span>
