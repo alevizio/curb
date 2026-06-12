@@ -134,13 +134,32 @@
   .beta{flex:none;font-style:normal;font-family:'Anton',sans-serif;font-size:9px;letter-spacing:.07em;
     text-transform:uppercase;background:var(--amber);color:var(--ink);padding:3px 6px;border-radius:6px}
   .ltile .beta{position:absolute;top:-9px;right:-5px;box-shadow:1.5px 1.5px 0 var(--ink)}
-  /* permit-area picker: one dropdown + the chosen area's sign disc */
+  /* permit-area picker: custom dropdown so every option can carry its sign-disc color.
+     Panel version expands inline (the panel scrolls); legend version overlays upward. */
   .arearow{display:flex;align-items:center;gap:9px;margin-top:8px}
-  .adisc{flex:none;min-width:26px;height:26px;padding:0 3px;border-radius:13px;color:#fff;display:grid;
-    place-items:center;font-family:'Anton',sans-serif;font-size:13px}
-  .adisc[hidden]{display:none}
-  .legsel{flex:1;min-width:0;font:inherit;font-size:12.5px;font-weight:800;color:var(--ink);
-    background:var(--sign-white);border:2px solid var(--ink);border-radius:9px;padding:7px 8px;cursor:pointer}
+  .adrop{position:relative;flex:1;min-width:0}
+  .adbtn{display:flex;align-items:center;gap:8px;width:100%;font:inherit;font-size:12.5px;font-weight:800;
+    color:var(--ink);background:var(--sign-white);border:2px solid var(--ink);border-radius:9px;
+    padding:7px 9px;cursor:pointer;text-align:left}
+  .adbtn .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .adbtn .car{flex:none;font-size:9px;opacity:.8}
+  .adbtn[aria-expanded="true"] .car{transform:rotate(180deg)}
+  .adbtn .d,.adopt .d{flex:none;min-width:20px;height:20px;padding:0 2px;border-radius:10px;color:#fff;
+    display:grid;place-items:center;font-family:'Anton',sans-serif;font-style:normal;font-size:10.5px}
+  .adbtn .d[hidden]{display:none}
+  .adlist{margin-top:6px;max-height:212px;overflow:auto;background:var(--paper);border:2px solid var(--ink);
+    border-radius:11px;padding:5px;box-shadow:3px 3px 0 rgba(23,21,15,.25)}
+  .adlist[hidden]{display:none}
+  .adopt{display:flex;align-items:center;gap:8px;width:100%;padding:6px 7px;border:0;border-radius:8px;
+    background:transparent;font:inherit;font-size:12px;font-weight:800;color:var(--ink);cursor:pointer;text-align:left}
+  @media (hover:hover){.adopt:hover{background:rgba(23,21,15,.08)}}
+  .adopt.all .d{background:transparent;border:1.5px dashed var(--ink)}
+  .adopt[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+  .adrop.up .adlist{position:absolute;left:0;bottom:calc(100% + 6px);margin-top:0;width:176px;z-index:650;
+    box-shadow:var(--shadow)}
+  .adrop.mini{flex:none}
+  .adrop.mini .adbtn{font-size:11px;padding:3px 6px;border-width:1.5px;border-radius:7px;background:var(--paper)}
+  .adrop.mini .adbtn .d{min-width:16px;height:16px;font-size:9px;border-radius:8px}
   /* desktop control tooltips (data-tip), signage style */
   @media (hover:hover) and (pointer:fine){
     [data-tip]{position:relative}
@@ -167,8 +186,6 @@
   .lst i.dots{display:flex;gap:2px;width:auto;height:auto;background:transparent;border-radius:0}
   .lst i.dots b{width:7px;height:7px;border-radius:50%;border:1.2px solid var(--ink)}
   .lst i.mdot{width:9px;height:9px;border-radius:50%;background:var(--gray);border:1.5px solid var(--ink);margin:0 5px}
-  .legsel.mini{flex:none;font-size:11px;font-weight:800;padding:3px 4px;border-width:1.5px;border-radius:7px;
-    max-width:104px;background:var(--paper)}
   /* route-day line in the legend: routes are per-day, so name the day they're for */
   .rtday{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--ink);
     white-space:nowrap;padding:5px 4px 2px;margin-top:3px;border-top:1.5px solid rgba(23,21,15,.18)}
@@ -535,10 +552,7 @@
     </div>
     <div class="lp-sec">Permit areas</div>
     <div class="arearow">
-      <span class="adisc" id="areaDisc" hidden aria-hidden="true"></span>
-      <select class="legsel" id="areaSelPanel" aria-label="Highlight a permit area">
-        <option value="">Browse an area…</option>
-      </select>
+      <div class="adrop" id="areaDropPanel"></div>
     </div>
   </div>
 </div>
@@ -1612,22 +1626,51 @@ function refreshLayerBadges(){
 // the legend mirrors whatever is on the map: each active overlay gets a row with its true
 // map symbol. Tapping a row switches that layer off; the permit row carries the area dropdown.
 let AREAS=[];
-function areaOpts(ph){
-  return `<option value="">${ph}</option>`+AREAS.map(a=>`<option value="${a}"${a===curArea?' selected':''}>Area ${a}</option>`).join('');
+// custom area dropdown: a <select> can't color its options, so each option carries the
+// area's sign disc. One global closer handles outside-click/Esc for every instance.
+function buildAreaDrop(host,ph){
+  host.innerHTML=`<button type="button" class="adbtn" aria-haspopup="listbox" aria-expanded="false">
+      <span class="d" hidden></span><span class="t">${ph}</span><span class="car">▼</span></button>
+    <div class="adlist" role="listbox" aria-label="Permit areas" hidden></div>`;
+  const btn=host.querySelector('.adbtn'), list=host.querySelector('.adlist');
+  btn.onclick=e=>{e.stopPropagation();
+    const open=list.hidden;
+    closeAreaDrops();
+    if(open){
+      list.innerHTML=`<button class="adopt all" role="option" data-a="" aria-selected="${!curArea}"><span class="d" aria-hidden="true"></span>All areas</button>`
+        +AREAS.map(a=>`<button class="adopt" role="option" data-a="${a}" aria-selected="${a===curArea}">
+          <span class="d" style="background:${areaColor(a)}">${a}</span>Area ${a}</button>`).join('');
+      list.querySelectorAll('.adopt').forEach(o=>o.onclick=ev=>{ev.stopPropagation();closeAreaDrops();showArea(o.dataset.a);});
+      list.hidden=false; btn.setAttribute('aria-expanded','true');
+      const sel=list.querySelector('[aria-selected="true"]'); if(sel)sel.scrollIntoView({block:'center'});
+    }};
+  host._sync=()=>{const d=btn.querySelector('.d'),t=btn.querySelector('.t');
+    if(curArea){d.hidden=false;d.style.background=areaColor(curArea);d.textContent=curArea;t.textContent='Area '+curArea;}
+    else{d.hidden=true;t.textContent=ph;}};
+  host._sync();
 }
+function closeAreaDrops(){
+  document.querySelectorAll('.adrop').forEach(h=>{
+    const l=h.querySelector('.adlist'),b=h.querySelector('.adbtn');
+    if(l&&!l.hidden){l.hidden=true;b.setAttribute('aria-expanded','false');}
+  });
+}
+function syncAreaDrops(){document.querySelectorAll('.adrop').forEach(h=>h._sync&&h._sync());}
+document.addEventListener('click',e=>{if(!e.target.closest('.adrop'))closeAreaDrops();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAreaDrops();});
 function renderOvlLegend(){
   const el=document.getElementById('ovlLeg');
   let h='';
   if(rppOn){
     const col=curArea?areaColor(curArea):'var(--meter)';
     h+=`<div class="lov"><button class="lst on" data-ovl="rpp" data-tip="Tap to hide permit zones"><i style="background:${col};height:8px"></i>Permits</button>
-      <select class="legsel mini" id="areaSelLeg" aria-label="Permit area">${areaOpts('All areas')}</select></div>`;
+      <div class="adrop up mini" id="areaDropLeg"></div></div>`;
   }
   if(loadOn)h+=`<div class="lov"><button class="lst on" data-ovl="load" data-tip="Tap to hide loading zones"><i class="dots"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#E0322E"></b></i>Loading zones</button></div>`;
   if(meterOn)h+=`<div class="lov"><button class="lst on" data-ovl="meter" data-tip="Tap to hide meters"><i class="mdot"></i>Metered curbs</button></div>`;
   el.innerHTML=h;
-  const sel=document.getElementById('areaSelLeg');
-  if(sel)sel.onchange=()=>showArea(sel.value);
+  const legDrop=document.getElementById('areaDropLeg');
+  if(legDrop)buildAreaDrop(legDrop,'All areas');
   el.querySelectorAll('[data-ovl]').forEach(b=>{b.onclick=()=>
     document.getElementById({rpp:'rppToggle',load:'loadToggle',meter:'meterToggle'}[b.dataset.ovl]).click();});
 }
@@ -1637,8 +1680,7 @@ function renderOvlLegend(){
   document.addEventListener('click',e=>{ if(!panel.hidden&&!e.target.closest('.layers'))closeLayersPanel(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!panel.hidden)closeLayersPanel(); });
   document.getElementById('lpClose').onclick=closeLayersPanel;
-  const pSel=document.getElementById('areaSelPanel');
-  pSel.onchange=()=>showArea(pSel.value);
+  buildAreaDrop(document.getElementById('areaDropPanel'),'Browse an area…');
   document.querySelectorAll('.legend2 .lst[data-st]').forEach(b=>{b.onclick=()=>{
     const k=b.dataset.st; statusOn[k]=!statusOn[k];
     b.classList.toggle('on',statusOn[k]); b.setAttribute('aria-pressed',statusOn[k]);
@@ -1650,20 +1692,13 @@ function renderOvlLegend(){
       const r=await fetch(RPP+`?$select=rpparea1,count(*) as n&$where=rpparea1 IS NOT NULL&$group=rpparea1&$order=rpparea1`);
       const d=await r.json();
       AREAS=d.map(x=>x.rpparea1).filter(a=>/^[A-Z]{1,2}$/.test(a||''));
-      pSel.innerHTML=areaOpts('Browse an area…');
-      renderOvlLegend();
     }catch(e){}
   })();
 })();
 async function showArea(letter){
   const my=++areaTok;
   curArea=letter; areaLayer.clearLayers();
-  const pSel=document.getElementById('areaSelPanel'); if(pSel)pSel.value=letter;
-  const lSel=document.getElementById('areaSelLeg'); if(lSel)lSel.value=letter;
-  const disc=document.getElementById('areaDisc');
-  disc.hidden=!letter;
-  if(letter){disc.textContent=letter;disc.style.background=areaColor(letter);}
-  refreshLayerBadges(); renderOvlLegend();
+  refreshLayerBadges(); renderOvlLegend(); syncAreaDrops();
   if(letter)closeLayersPanel();
   if(!letter)return;
   try{
