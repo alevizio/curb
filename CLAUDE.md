@@ -203,8 +203,11 @@ Files now present for the push feature:
 - `api/send-notifications.js` — Vercel cron handler; loads subs, sends web-push for any
   spot whose `nextSweepISO` is within `leadMinutes`, de-dupes via `notifiedFor`, deletes
   on 410/404. Requires `CRON_SECRET` (Bearer) — refuses to run unauthenticated.
-- `vercel.json` — cron every 15 min (needs Vercel Pro; Hobby throttles to ~daily — use an
-  external scheduler hitting the endpoint with `Authorization: Bearer <CRON_SECRET>`).
+- `vercel.json` — cron every 15 min (needs Vercel Pro; Hobby throttles to ~daily). The REAL
+  trigger is `.github/workflows/sweep-alerts-cron.yml` (free Actions schedule, public repo):
+  curls the endpoint with `Bearer ${{ secrets.CRON_SECRET }}` every 15 min. Requires the
+  `CRON_SECRET` repo secret (gh secret set CRON_SECRET, value from .env / Vercel env — NEVER
+  committed). Both crons may fire; `notifiedFor` de-dupes server-side so nobody gets pushed twice.
 - `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET.
 
 ### What's DONE vs TODO
