@@ -162,7 +162,15 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   most-common rule as "typically … (2017 data)".
 - **Loading/color-curb layer** (`loadToggle` → `loadOn`, `loadLayer`): toggle loads
   `6cqg-dxku` ⋈ meter coords ONCE (`loadCache`), renders colored dots per viewport; tap →
-  popup with days/hours/limit. Metered zones only (note in the toggle toast).
+  popup with days/hours/limit. PLUS unmetered white zones (`whiteCache` ←
+  `data/white-zones.json`, built by `npm run build:whitezones`): SFMTA Digital Curb
+  ArcGIS layer `Curb_Zones_with_All_Policies` (services.arcgis.com/Zs2aNLFN00jrS4gG,
+  anonymous/no-key but UNDOCUMENTED — snapshot at build time, never query live from
+  clients) filtered to Passenger/Accessible Loading, grouped by CZ_ID, schedules merged,
+  school-tagged via schools dataset 7e7j-59qk proximity (150m) + ZONE_SPECS text from the
+  MTA.colorcurb point layer (25m). Drawn as white polylines with ink casing under the
+  dots. This is the data hi6h-neyh's title excludes; re-check quarterly whether SFMTA
+  ships the promised public CDS Curbs API (none as of June 2026) and migrate when live.
 - **Enforcement overlay** (`ENF`/`enfFor`): lazy-loads `data/enforcement.json`; sheet shows
   a 🎯 callout + per-side line, tooltip shows a compact `tip-enf`. Keyed by cnn → JS dow.
   Degrades silently if the JSON is absent (e.g. before deploy). Rebuild with
