@@ -125,8 +125,18 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
 - **Google Cal button** (`openGoogleCal`): template URL with floating wall-clock times
   pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
   reflects that; only .ics and push promise the 30-min lead.
-- **Corner layout (Google-Maps style — don't re-scatter)**: top-left = logo + search +
-  ONE day-chip row; top-right = the `.layers` control (button + `#layersPanel`). Panel rows are
+- **Info menu** (`#infoBtn` ⓘ at the right of the search field → `#infoMenu`): the single
+  hub for the other pages — How CURB works (opens the welcome explainer), Parking tickets
+  (`/tickets`), About (`/about`). The old buried `lp-link` to /tickets in the Layers panel
+  was removed; don't re-add scattered page links. Opens/closes like the Layers panel
+  (outside-click + Esc, mirrored via `closeInfoMenu`).
+- **Truck-route day**: routes are per-day (`drawRoutes` keys off `dayFilter ?? today`). The
+  bottom-left legend shows a `#rtDayLeg` "Truck route · <Day>" line ONLY while routes are on,
+  kept in sync by `updateRouteDay()` (called from the route toggle + `setDayFilter`). In "All"
+  day mode the route shows today's run, so the label appends "today" — don't let All mode
+  imply an all-days route (there is no such thing; one run per day per corridor).
+- **Corner layout (Google-Maps style — don't re-scatter)**: top-left = logo + search + info
+  ⓘ button + ONE day-chip row; top-right = the `.layers` control (button + `#layersPanel`). Panel rows are
   [map-symbol] [label] [eye] — the symbol ALWAYS shows the layer's true map appearance
   (it IS the legend; off rows dim to .42 but stay readable), the eye toggles visibility.
   Truck routes carries an amber .beta chip (font-style:normal — no italics rule). Active

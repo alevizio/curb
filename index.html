@@ -152,6 +152,34 @@
   .lst:not(.on){opacity:.45}
   .lst:not(.on) i{background:transparent!important;border:1.5px dashed var(--ink)}
   @media (min-width:768px){.legend2{left:16px;bottom:16px}}
+  /* route-day line in the legend: routes are per-day, so name the day they're for */
+  .rtday{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--ink);
+    white-space:nowrap;padding:5px 4px 2px;margin-top:3px;border-top:1.5px solid rgba(23,21,15,.18)}
+  .rtday .sw{width:20px;height:0;border-top:2.5px dashed var(--ink);flex:none}
+  .rtday b{font-weight:800}
+  .rtday .rtto{color:var(--ink-soft);font-weight:700}
+  /* info / other-pages menu (top bar, right of search) */
+  .infowrap{position:relative;flex:none;pointer-events:auto}
+  .infobtn{display:grid;place-items:center;width:44px;height:44px;color:var(--ink);
+    background:rgba(242,236,223,.95);border:2.5px solid var(--ink);border-radius:11px;box-shadow:var(--shadow);cursor:pointer}
+  .infobtn svg{width:22px;height:22px}
+  .infobtn:active{transform:translate(2px,2px);box-shadow:none}
+  .infobtn[aria-expanded="true"]{background:var(--ink);color:var(--paper)}
+  .infomenu{position:absolute;right:0;top:calc(100% + 8px);width:272px;background:var(--paper);
+    border:2.5px solid var(--ink);border-radius:14px;box-shadow:var(--shadow);padding:8px;z-index:700}
+  .im-head{font-family:'Anton',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px 9px}
+  .im-head span{color:var(--ink-soft);font-family:'Hanken Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:0;text-transform:none}
+  .im-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:0;background:transparent;
+    cursor:pointer;padding:9px 8px;border-radius:9px;color:var(--ink);text-decoration:none;font:inherit}
+  .im-item:hover,.im-item:focus-visible{background:#fff;outline:none}
+  .im-ic{flex:none;width:32px;height:32px;display:grid;place-items:center;border:2px solid var(--ink);border-radius:9px;background:var(--paper)}
+  .im-ic svg{width:18px;height:18px}
+  .im-ic .d{width:6px;height:6px;border-radius:50%}
+  .im-tx{display:flex;flex-direction:column;min-width:0}
+  .im-tx b{font-size:13.5px;font-weight:800;line-height:1.15}
+  .im-tx small{font-size:11px;font-weight:600;color:var(--ink-soft);line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .im-foot{font-size:10.5px;font-weight:600;color:var(--ink-soft);padding:9px 8px 3px;line-height:1.4;
+    border-top:1.5px solid rgba(23,21,15,.14);margin-top:5px}
   /* inferred truck-route decorations */
   .rarrow{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;
     border-bottom:13px solid var(--ink);
@@ -438,6 +466,27 @@
     </div>
     <div class="sug" id="sug" hidden role="listbox" aria-label="Search suggestions"></div>
     </div>
+    <div class="infowrap">
+      <button class="infobtn" id="infoBtn" aria-label="Info and other pages" aria-haspopup="true" aria-expanded="false" data-tip="Guide, tickets &amp; about" data-tip-pos="b">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.3" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="7.8" r="1.35" fill="currentColor"/><path d="M12 11.1v5.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
+      <div class="infomenu" id="infoMenu" hidden role="menu" aria-label="Info and pages">
+        <div class="im-head">CURB <span>· SF street parking</span></div>
+        <button class="im-item" id="imGuide" role="menuitem">
+          <span class="im-ic" aria-hidden="true" style="display:flex;gap:3px"><i class="d" style="background:var(--green)"></i><i class="d" style="background:var(--amber)"></i><i class="d" style="background:var(--red)"></i></span>
+          <span class="im-tx"><b>How CURB works</b><small>Curb colors, sweeping &amp; alerts</small></span>
+        </button>
+        <a class="im-item" href="/tickets" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V7Z"/><path d="M12 6v2M12 11v2M12 16v2"/></svg></span>
+          <span class="im-tx"><b>Parking tickets</b><small>What SF fines — by year &amp; area</small></span>
+        </a>
+        <a class="im-item" href="/about" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
+          <span class="im-tx"><b>About CURB</b><small>What it does &amp; data sources</small></span>
+        </a>
+        <div class="im-foot">Live data from DataSF. The posted sign is always the final word.</div>
+      </div>
+    </div>
   </div>
   <div class="dayrow" aria-label="Filter by sweep day">
     <button class="datechip" id="dateChip" aria-pressed="false" data-tip="Show only today's sweeping" data-tip-pos="b"></button>
@@ -472,7 +521,6 @@
     <div class="lp-sec">Permit areas</div>
     <div class="agrid" id="areaGrid"></div>
     <button class="aclear" id="areaClear" hidden>Clear area highlight</button>
-    <a class="lp-link" href="/tickets">The ticket economy → what SF fines, by year &amp; neighborhood</a>
   </div>
 </div>
 
@@ -481,6 +529,7 @@
   <button class="lst on" data-st="green" aria-pressed="true" data-tip="Tap to show / hide"><i style="background:var(--green)"></i>Clear</button>
   <button class="lst on" data-st="amber" aria-pressed="true"><i style="background:var(--amber)"></i>Soon · within 24h</button>
   <button class="lst on" data-st="red" aria-pressed="true"><i style="background:var(--red)"></i>Now · under 3h</button>
+  <div class="rtday" id="rtDayLeg" hidden role="note"><span class="sw" aria-hidden="true"></span><span id="rtDayLbl">Truck route</span></div>
 </div>
 
 
@@ -1421,6 +1470,7 @@ function setDayFilter(v){
   });
   const dc=document.getElementById('dateChip'), today=(v!==null&&v===new Date().getDay());
   dc.classList.toggle('on',today); dc.setAttribute('aria-pressed',today);
+  updateRouteDay();  // route follows the day filter — keep its legend label in sync
   drawSegments(lastRows);
   if(map.getZoom()<MIN_ZOOM_DATA)drawOverview();  // recolor the citywide view too
 }
@@ -1473,6 +1523,26 @@ function convexHull(points){
 function closeLayersPanel(){
   document.getElementById('layersPanel').hidden=true;
   document.getElementById('layersBtn').setAttribute('aria-expanded','false');
+}
+function closeInfoMenu(){
+  document.getElementById('infoMenu').hidden=true;
+  document.getElementById('infoBtn').setAttribute('aria-expanded','false');
+}
+(function initInfoMenu(){
+  const btn=document.getElementById('infoBtn'), menu=document.getElementById('infoMenu');
+  btn.onclick=()=>{const open=menu.hidden; menu.hidden=!open; btn.setAttribute('aria-expanded',open);};
+  document.getElementById('imGuide').onclick=()=>{closeInfoMenu();showWelcome();};
+  document.addEventListener('click',e=>{ if(!menu.hidden&&!e.target.closest('.infowrap'))closeInfoMenu(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!menu.hidden)closeInfoMenu(); });
+})();
+// routes are per-day; name the day they're drawn for (esp. in "All" mode, where they show today)
+function updateRouteDay(){
+  const el=document.getElementById('rtDayLeg'); if(!el)return;
+  el.hidden=!routeOn;
+  if(!routeOn)return;
+  const dow=dayFilter!=null?dayFilter:new Date().getDay();
+  const isToday=dayFilter==null||dayFilter===new Date().getDay();
+  document.getElementById('rtDayLbl').innerHTML=`Truck route · <b>${DAYLBL[dow]}</b>${isToday?' <span class="rtto">today</span>':''}`;
 }
 // active-layer badges on the Layers button: blue dot = permit, amber dot = loading, disc = area
 function refreshLayerBadges(){
@@ -1569,7 +1639,7 @@ document.getElementById('meterToggle').onclick=function(){
 };
 document.getElementById('routeToggle').onclick=function(){
   routeOn=!routeOn; this.classList.toggle('on',routeOn); this.setAttribute('aria-pressed',routeOn);
-  refreshLayerBadges();
+  refreshLayerBadges(); updateRouteDay();
   if(routeOn){
     if(map.getZoom()<MIN_ZOOM_DATA){
       // the citywide view has no street data — zoom in and let the redraw chain take over
