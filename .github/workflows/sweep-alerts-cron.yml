@@ -1,0 +1,32 @@
+# Fires the CURB push-notification check every 15 minutes.
+# Vercel Hobby throttles vercel.json crons to ~once a day, which is useless for
+# "move your car in 30 min" alerts — this free Actions schedule is the real trigger.
+# The Vercel cron stays as a harmless backup; sends are de-duped server-side
+# (notifiedFor), so double-firing can never double-notify.
+# Secret: CRON_SECRET (repo secret) must match the Vercel env var of the same name.
+name: sweep-alerts-cron
+
+on:
+  schedule:
+    - cron: "*/15 * * * *" # UTC; GitHub schedules are best-effort (may lag a few min)
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: sweep-cron
+  cancel-in-progress: false
+
+jobs:
+  fire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Hit the notification endpoint
+        run: |
+          code=$(curl -sS -o /tmp/out.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://curb.guide/api/send-notifications)
+          echo "HTTP $code"
+          cat /tmp/out.json; echo
+          test "$code" = "200"
