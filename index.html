@@ -66,6 +66,9 @@
   :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
   .field:focus-within{outline:3px solid var(--meter);outline-offset:2px}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  a{color:inherit}  /* no browser-default blue anywhere; intentional link colors set per class */
+  .leaflet-control-attribution{font-weight:600}
+  .leaflet-control-attribution a{color:var(--ink);font-weight:700;text-underline-offset:2px}
   .srh{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
   html,body{height:100%}
   body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
@@ -76,14 +79,16 @@
     padding:calc(12px + env(safe-area-inset-top)) 12px 0;  /* viewport-fit=cover: stay clear of the notch */
     pointer-events:none;display:flex;flex-direction:column;gap:8px}
   .barrow{display:flex;gap:8px;align-items:center;pointer-events:auto}
+  /* first row: logo, search field and info button all share one 48px height */
   .logo{font-family:'Anton',sans-serif;font-size:26px;letter-spacing:.01em;text-transform:uppercase;
-    background:var(--ink);color:var(--paper);padding:6px 11px;border-radius:11px;line-height:1;flex:none;
+    background:var(--ink);color:var(--paper);height:48px;display:inline-flex;align-items:center;
+    padding:0 12px;border-radius:11px;line-height:1;flex:none;
     box-shadow:var(--shadow);border:0;cursor:pointer}
   .logo:active{transform:translate(2px,2px);box-shadow:none}
   .logo .o{color:var(--red)}
   .fwrap{flex:1;position:relative;min-width:0}
   .field{display:flex;align-items:center;background:var(--paper);border:2.5px solid var(--ink);
-    border-radius:11px;box-shadow:var(--shadow);overflow:hidden}
+    border-radius:11px;box-shadow:var(--shadow);overflow:hidden;height:48px}
   /* search autocomplete dropdown */
   .sug{position:absolute;left:0;right:0;top:calc(100% + 7px);background:var(--paper);border:2.5px solid var(--ink);
     border-radius:12px;box-shadow:var(--shadow);overflow:hidden;z-index:660}
@@ -96,11 +101,17 @@
   .sugi.none{cursor:default;color:var(--ink-soft);font-weight:600;white-space:normal}
   .sugi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .field svg{margin-left:12px;width:18px;height:18px;flex:none}
-  #q{flex:1;border:0;background:transparent;outline:none;font:inherit;font-size:16px;font-weight:600;padding:11px 12px 11px 8px;min-width:0}
+  #q{flex:1;border:0;background:transparent;outline:none;font:inherit;font-size:16px;font-weight:600;padding:0 12px 0 8px;height:100%;min-width:0}
   #q::placeholder{color:#938d7c;font-weight:500}
 
   /* ---- layers control (top-right corner, Google-Maps style) ---- */
   .layers{position:fixed;right:12px;top:calc(116px + env(safe-area-inset-top));z-index:620}
+  /* mobile: the layers control docks bottom-left, sitting on top of the legend (which grows —
+     a ResizeObserver tracks its height into --legH); the panel opens upward from the button */
+  @media (max-width:767px){
+    .layers{right:auto;left:12px;top:auto;bottom:calc(134px + env(safe-area-inset-bottom) + var(--legH,68px))}
+    .layers .layerspanel{top:auto;bottom:calc(100% + 8px);right:auto;left:0;max-height:min(430px,calc(100dvh - 200px))}
+  }
   .layersbtn{font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
     color:var(--ink);background:rgba(242,236,223,.95);border:2px solid var(--ink);border-radius:11px;
     padding:10px 12px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:7px}
@@ -199,7 +210,7 @@
   .rtday .rtto{color:var(--ink-soft);font-weight:700}
   /* info / other-pages menu (top bar, right of search) */
   .infowrap{position:relative;flex:none;pointer-events:auto}
-  .infobtn{display:grid;place-items:center;width:44px;height:44px;color:var(--ink);
+  .infobtn{display:grid;place-items:center;width:48px;height:48px;flex:none;color:var(--ink);
     background:rgba(242,236,223,.95);border:2.5px solid var(--ink);border-radius:11px;box-shadow:var(--shadow);cursor:pointer}
   .infobtn svg{width:22px;height:22px}
   .infobtn:active{transform:translate(2px,2px);box-shadow:none}
@@ -233,9 +244,10 @@
   .lp-link{display:block;margin-top:12px;padding-top:11px;border-top:1.5px solid rgba(23,21,15,.15);
     font-size:11.5px;font-weight:800;color:var(--red-text);text-decoration:none;text-transform:uppercase;letter-spacing:.03em}
 
-  /* vertical padding leaves room for the chips' hit-expansion (overflow-x clips pseudos) */
+  /* vertical padding leaves room for the chips' hit-expansion (overflow-x clips pseudos).
+     On mobile the row bleeds past .top's 12px gutters so chips crop at the screen edges. */
   .dayrow{display:flex;gap:6px;align-items:center;pointer-events:auto;overflow-x:auto;
-    scrollbar-width:none;padding:6px 0 8px}
+    scrollbar-width:none;margin:0 -12px;padding:6px 12px 8px}
   .dayrow::-webkit-scrollbar{display:none}
   .datechip{flex:none;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
     background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink);
@@ -270,7 +282,7 @@
   .leaflet-control-zoom.leaflet-bar a:hover{background:#fff;color:var(--ink)}
   .leaflet-control-zoom.leaflet-bar a:active{background:var(--ink);color:var(--paper)}
   .leaflet-control-zoom.leaflet-bar a.leaflet-disabled{opacity:.4}
-  .leaflet-bottom.leaflet-left .leaflet-control-zoom{margin:0 0 calc(24px + env(safe-area-inset-bottom)) 14px}
+  .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0 12px calc(28px + env(safe-area-inset-bottom)) 0}
 
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));
     z-index:700;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 15px;border-radius:10px;
@@ -468,7 +480,8 @@
   /* ---- Desktop: dock the sheet as a floating card, constrain the search cluster ---- */
   @media (min-width:768px){
     .top{left:16px;right:auto;top:14px;width:min(648px,calc(100vw - 200px));padding:0}  /* fits all 7 day chips + the weather date chip */
-    .layers{top:14px;right:16px}  /* true top-right corner — the search cluster leaves it free */
+    .layers{top:14px;right:16px;bottom:auto;left:auto}  /* true top-right corner — the search cluster leaves it free */
+    .dayrow{margin:0;padding-left:0;padding-right:0}
     .sheet{left:16px;right:auto;bottom:16px;width:min(420px,calc(100vw - 32px));
       border:3px solid var(--ink);border-radius:18px;box-shadow:var(--shadow);
       padding:14px 18px 18px;max-height:calc(100dvh - 150px);
@@ -649,14 +662,16 @@ const MAP_STYLE=[
   {featureType:'water',elementType:'geometry.fill',stylers:[{color:'#ded1b7'}]}
 ];
 
-const mqDesktop=window.matchMedia('(min-width:768px)');
 const CAN_HOVER=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+// mobile: the layers control sits on top of the legend, which grows as overlays toggle
+new ResizeObserver(es=>{for(const e of es)
+  document.documentElement.style.setProperty('--legH',e.target.offsetHeight+'px');
+}).observe(document.querySelector('.legend2'));
 
 const map=L.map('map',{zoomControl:false,attributionControl:true}).setView([37.7749,-122.4194],15);
 // Desktop: the sheet docks bottom-left as a card, so zoom lives bottom-right; track
 // resizes/rotation so the control never ends up under the open sheet.
-const zoomCtl=L.control.zoom({position:mqDesktop.matches?'bottomright':'bottomleft'}).addTo(map);
-mqDesktop.addEventListener('change',e=>zoomCtl.setPosition(e.matches?'bottomright':'bottomleft'));
+const zoomCtl=L.control.zoom({position:'bottomright'}).addTo(map);
 
 // Basemap: official Google Map Tiles API when GMAPS_KEY is set, else keyless CARTO (Google-style) fallback.
 function addCarto(){
