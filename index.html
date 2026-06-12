@@ -237,6 +237,7 @@
     background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink);
     border:0;cursor:pointer}
   .datechip.on{background:var(--red)}
+  .datechip .wic{width:14px;height:14px;vertical-align:-3px;margin:0 1px}
   .dchip{flex:none;font:inherit;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
     background:rgba(242,236,223,.92);color:var(--ink);border:2px solid var(--ink);border-radius:10px;
     padding:7px 11px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
@@ -1531,14 +1532,23 @@ function setDayFilter(v){
 const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function refreshToday(){
   const now=new Date();
-  document.getElementById('dateChip').textContent='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate()
-    +(wx?' · '+wx.i+' '+wx.t+'°':'');
+  document.getElementById('dateChip').innerHTML='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate()
+    +(wx?' · '+WXICON[wx.i]+' '+wx.t+'°':'');
   dayChips.forEach(b=>b.classList.toggle('today',b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===now.getDay()));
 }
-/* SF weather on the date chip — Open-Meteo (free, keyless); degrades silently if it fails */
+/* SF weather on the date chip — Open-Meteo (free, keyless); degrades silently if it fails.
+   Icons drawn in the app's duotone icon language: pop-color fill + currentColor detail. */
 let wx=null;
-const WMO=[[0,'☀️'],[1,'🌤️'],[2,'⛅'],[3,'☁️'],[48,'🌫️'],[57,'🌦️'],[67,'🌧️'],[77,'❄️'],[82,'🌧️'],[86,'❄️'],[99,'⛈️']];
-function wxIcon(c){for(const [max,ic] of WMO)if(c<=max)return ic;return '☁️';}
+const WXICON={
+  sun:'<svg class="wic" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="2.6" fill="var(--pop-amber)" stroke="currentColor" stroke-width="1.2"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M7 .9v1.3M7 11.8v1.3M.9 7h1.3M11.8 7h1.3M2.8 2.8l.95.95M10.25 10.25l.95.95M11.2 2.8l-.95.95M3.75 10.25l-.95.95"/></g></svg>',
+  partly:'<svg class="wic" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="4.4" cy="4.6" r="2" fill="var(--pop-amber)" stroke="currentColor" stroke-width="1.1"/><g stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M4.4 .8v1M.7 4.6h1M1.8 2l.7.7M7 2l-.7.7"/></g><path d="M6.1 12.4h4.5a2.25 2.25 0 0 0 .39-4.46A3 3 0 0 0 6 6.6a1.95 1.95 0 0 0 .1 5.8Z" fill="var(--pop-blue)" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>',
+  cloud:'<svg class="wic" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.1 11.3h5.8a2.5 2.5 0 0 0 .43-4.96A3.4 3.4 0 0 0 3.9 7.1a2.1 2.1 0 0 0 .2 4.2Z" fill="var(--pop-blue)" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>',
+  fog:'<svg class="wic" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.1 9.3h5.8a2.5 2.5 0 0 0 .43-4.96A3.4 3.4 0 0 0 3.9 5.1a2.1 2.1 0 0 0 .2 4.2Z" fill="var(--pop-blue)" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M3 11.4h8M4.5 13.2h5"/></g></svg>',
+  rain:'<svg class="wic" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.1 9.5h5.8a2.5 2.5 0 0 0 .43-4.96A3.4 3.4 0 0 0 3.9 5.3a2.1 2.1 0 0 0 .2 4.2Z" fill="var(--pop-blue)" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="m4.9 11.3-.5 1.6m3.1-1.6-.5 1.6m3.1-1.6-.5 1.6"/></g></svg>',
+  snow:'<svg class="wic" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.1 9.5h5.8a2.5 2.5 0 0 0 .43-4.96A3.4 3.4 0 0 0 3.9 5.3a2.1 2.1 0 0 0 .2 4.2Z" fill="var(--pop-blue)" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><g fill="currentColor"><circle cx="4.6" cy="11.9" r=".8"/><circle cx="7.2" cy="12.7" r=".8"/><circle cx="9.7" cy="11.9" r=".8"/></g></svg>',
+  storm:'<svg class="wic" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.1 8.7h5.8a2.5 2.5 0 0 0 .43-4.96A3.4 3.4 0 0 0 3.9 4.5a2.1 2.1 0 0 0 .2 4.2Z" fill="var(--pop-blue)" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M7.9 8.3 5.9 11h1.7l-1 2.7 3.4-3.7H8.2l1-1.7Z" fill="var(--pop-amber)" stroke="currentColor" stroke-width=".9" stroke-linejoin="round"/></svg>'};
+const WMO=[[0,'sun'],[1,'sun'],[2,'partly'],[3,'cloud'],[48,'fog'],[67,'rain'],[77,'snow'],[82,'rain'],[86,'snow'],[99,'storm']];
+function wxIcon(c){for(const [max,k] of WMO)if(c<=max)return k;return 'cloud';}
 async function fetchWx(){
   try{
     const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=temperature_2m,weather_code&temperature_unit=fahrenheit');
