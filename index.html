@@ -420,22 +420,41 @@
   /* ---- motion (gated: transform/opacity only, exponential ease-outs) ---- */
   @media (prefers-reduced-motion:no-preference){
     .layerspanel:not([hidden]){animation:panelin .2s cubic-bezier(.16,1,.3,1);transform-origin:top right}
+    .infomenu:not([hidden]){animation:panelin .2s cubic-bezier(.16,1,.3,1);transform-origin:top right}
     .sug:not([hidden]){animation:panelin .16s cubic-bezier(.16,1,.3,1);transform-origin:top left}
     .calchoice:not([hidden]){animation:panelin .18s cubic-bezier(.16,1,.3,1);transform-origin:top left}
+    .adlist:not([hidden]){animation:panelin .18s cubic-bezier(.16,1,.3,1);transform-origin:top left}
+    .adrop.up .adlist:not([hidden]){animation-name:panelup;transform-origin:bottom left}
+    /* the mobile layers panel opens upward — rise from the button, not drop from above */
+    @media (max-width:767px){
+      .layerspanel:not([hidden]){animation-name:panelup;transform-origin:bottom left}
+    }
+    /* legend rows slide in as overlays toggle on */
+    #ovlLeg .lov,.rtday:not([hidden]){animation:rowin .2s cubic-bezier(.16,1,.3,1) both}
     #layerBadges i{animation:bpop .18s cubic-bezier(.16,1,.3,1)}
     .abigdisc{animation:discin .32s cubic-bezier(.16,1,.3,1)}
     .aboundary{animation:fadein .5s ease-out}
     .rarrow{animation:fadein .3s both}
     .rstart,.rend{animation:fadein .3s both .22s}
     .ltile{transition:background-color .15s,color .15s,border-color .15s}
+    .dchip,.datechip{transition:background-color .15s,color .15s}
+    .lst{transition:opacity .15s}
     .dchip:active{transform:translate(1px,1px)}
     .toast{transform:translate(-50%,5px);transition:opacity .25s,transform .25s}
     .toast.show{transform:translate(-50%,0)}
     /* hover weight bumps + opacity changes glide instead of snapping (SVG pane only;
        the heavy overview/meter layers are canvas and unaffected) */
     .leaflet-overlay-pane svg path{transition:stroke-width .15s ease,opacity .2s ease}
+    @media (hover:hover) and (pointer:fine){
+      .layersbtn,.infobtn,.logo,.leaflet-control-zoom.leaflet-bar a{transition:transform .12s ease}
+      .layersbtn:hover,.infobtn:hover,.logo:hover{transform:translateY(-1px)}
+      .ltile:not(.on):hover{background:rgba(23,21,15,.05)}
+      .lst:hover{background:rgba(23,21,15,.07)}
+    }
   }
   @keyframes panelin{from{opacity:0;transform:scale(.96) translateY(-5px)}}
+  @keyframes panelup{from{opacity:0;transform:scale(.96) translateY(5px)}}
+  @keyframes rowin{from{opacity:0;transform:translateX(-5px)}}
   @keyframes bpop{from{opacity:0;transform:scale(.4)}}
   @keyframes discin{from{opacity:0;transform:scale(.55)}}
   @keyframes fadein{from{opacity:0}}
