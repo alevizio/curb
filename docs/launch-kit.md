@@ -228,5 +228,14 @@ milestone post. One asset, four surfaces.
 - [ ] Search Console verified + sitemap submitted
 - [ ] Fresh data: `npm run build:enforcement && npm run build:overview && npm run build:zones && npm run build:whitezones && npm run build:stats`
 - [ ] Cron/push smoke test (the end-to-end push test is still pending)
-- [ ] Reply templates ready for "is this legal?" (public records; sign is source of truth)
-  and "do this for my city" (top request — note which cities get asked)
+- [ ] Reply templates ready — the full arsenal is in `competitive-landscape.md` §6
+  (one-liners vs SpotAngels, Ticketless+, Sweep Alarm, Xtreet, the city, "just set an
+  alarm") and `data-defense.md` ("is this legal?" — the Find My Parking Cops question).
+  The big preempt, verbatim-ready: **"So just... read the sign?"** → "The sign tells you
+  the window. CURB tells you when tickets actually start on YOUR block — median block
+  gets every ticket in a 22-minute span — and your calendar doesn't know where you
+  parked, which side you're on, or whether it's the 2nd or 4th Monday."
+- [ ] "Do this for my city" replies: note which cities get asked (demand signal)
+- Timing hook for press + posts: SFMTA just switched meter apps (PayByPhone →
+  ParkMobile/HotSpot, May 2026) — SF drivers are actively confused about parking apps
+  RIGHT NOW. And the fine is **$105** — most of the web still quotes $73–97.
