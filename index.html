@@ -700,6 +700,9 @@ const MIN_ZOOM_DATA=15;
 const OFFSET=5; // metres each side of centreline
 // Web Push: VAPID *public* key (safe to ship to the client). Matches VAPID_PRIVATE_KEY on the server.
 const VAPID_PUBLIC_KEY="BNh-13Y456HR3O_-AvNP_kEIIui1YvbEumSFLF0l-VD94H_qtGpAQPush_WycVNXYbnt6s9UVC8FXI9-crT-8Ao";
+// Cookieless custom events (Vercel Web Analytics). No-op until the dashboard toggle is on
+// and /_vercel/insights/script.js has loaded — guarded so it never throws in sandbox/dev.
+function track(name){try{if(window.va)window.va('event',{name});}catch(_){}}
 // Google Map Tiles API key (optional). When set, the basemap uses official Google tiles; otherwise it
 // falls back to keyless CARTO. This is a CLIENT key — restrict it by HTTP referrer + API in Google Cloud
 // Console. Set it here, or define window.GMAPS_KEY before this script (e.g. a gitignored config.js).
@@ -1423,6 +1426,7 @@ function openSheet(group, activeKey){
   if(canRemind){
     const doCal=k=>{try{localStorage.setItem('curbCalPref',k);}catch(_){}
       document.getElementById('calChoice').hidden=true;
+      track('calendar_added');
       k==='google'?openGoogleCal(group.corridor||'SF',group.limits||'',ns):downloadICS(group.corridor||'SF',group.limits||'',ns);};
     document.getElementById('calBtn').onclick=()=>{
       const p=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
@@ -1451,6 +1455,7 @@ function openSheet(group, activeKey){
     try{
       if(navigator.share)await navigator.share({title:'CURB',text,url});
       else{await navigator.clipboard.writeText(url);toast('Link copied — text it to whoever asked.');}
+      track('block_shared');  // native share resolved, or clipboard copy succeeded (AbortError skips this)
     }catch(err){
       if(err&&err.name==='AbortError')return;  // user closed the share sheet
       try{await navigator.clipboard.writeText(url);toast('Link copied.');}catch(_){prompt('Copy this link:',url);}
@@ -1469,6 +1474,7 @@ function openSheet(group, activeKey){
   if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
     sheetEl.classList.remove('tall');
     document.getElementById('grabBtn').setAttribute('aria-expanded','false');
+    track('sheet_open');  // fresh open only — % of visits that tap a block (side-switches don't recount)
   }
   sheetEl.classList.add('open');
   // the verdict IS the explainer's payoff — close the welcome whenever a sheet opens
@@ -1579,6 +1585,7 @@ async function onAlertTap(spot, btn){
     });
     if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.note||d.error||('save failed ('+res.status+')')); }
     try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}
+    track('alert_armed');  // the activation→retention metric
     btn.classList.remove('busy','alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on';
     toast('Sweep alert set for '+(spot.corridor||'this block')+(spot.eveningISO?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before."));
   }catch(err){
@@ -2162,6 +2169,8 @@ document.getElementById('iosHint').addEventListener('click',e=>{ if(e.target.id=
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
+  // Home-Screen install — the iOS Web Push prerequisite; one of the most valuable funnel events.
+  window.addEventListener('appinstalled', () => { try { if (window.va) window.va('event', { name: 'pwa_install' }); } catch (_) {} });
 </script>
 </body>
 </html>
