@@ -1353,9 +1353,16 @@ function openSheet(group, activeKey){
   const spot = ns ? (()=>{
     const prev=new Date(Date.UTC(ns.y,ns.mo-1,ns.da)-864e5);
     const eve=sfWallToInstant(prev.getUTCFullYear(),prev.getUTCMonth()+1,prev.getUTCDate(),20);
+    // Carry the raw sweep rule so the server can recompute the next occurrence each cron tick
+    // (the "forever-watch" — alerts keep firing without the user reopening the app). The active
+    // side's row is the rule that produced `ns`; cnn+sideKey let the watch re-identify this curb.
+    const r0=active.row||(active.rows&&active.rows[0]);
+    const rule=r0?{weekday:r0.weekday,fromhour:r0.fromhour,tohour:r0.tohour,
+      week1:r0.week1,week2:r0.week2,week3:r0.week3,week4:r0.week4,week5:r0.week5,holidays:r0.holidays||'0'}:null;
     return {
       corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
       nextSweepISO: ns.start.toISOString(), leadMinutes: 30,
+      ...(rule?{rule, cnn:String(group.cnn||''), sideKey:String(active.key||'')}:{}),
       ...(+eve>Date.now()+6e5&&+eve<+ns.start?{eveningISO:eve.toISOString()}:{})
     };
   })() : null;

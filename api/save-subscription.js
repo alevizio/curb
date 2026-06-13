@@ -1,6 +1,31 @@
 // POST { subscription, spot } — store a Web Push subscription + the saved spot.
-// spot = { corridor, limits, blockside, nextSweepISO, leadMinutes }
+// spot = { corridor, limits, blockside, nextSweepISO, leadMinutes, eveningISO?, rule?, cnn?, sideKey? }
 import { saveSub, storeReady } from './_store.js';
+// Side-effect import: attaches the SF time core (normDay/nextSweep/…) to globalThis so we can
+// validate an incoming recurrence rule with the EXACT guards the cron's nextSweep() uses.
+import '../lib/sweep-core.js';
+const normDay = globalThis.normDay;
+
+// A recurring sweep rule the cron can recompute the next occurrence from (the "forever-watch").
+// Validated with nextSweep's own guards (weekday must normalize, fromhour must parse) — anything
+// off returns null and the sub degrades to a pure one-shot. latlng is NEVER accepted (privacy:
+// precise coords stay client-only in localStorage).
+function sanitizeRule(rule) {
+  if (!rule || typeof rule !== 'object') return null;
+  if (normDay(rule.weekday) === null) return null;
+  const fromH = parseInt(rule.fromhour, 10);
+  if (Number.isNaN(fromH)) return null;
+  const bit = (v) => (String(v) === '1' ? '1' : '0');
+  return {
+    // store a canonical 3-char label (never arbitrary client text); guard above ensures a valid index
+    weekday: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][normDay(rule.weekday)],
+    fromhour: String(fromH),
+    tohour: String(parseInt(rule.tohour, 10) || fromH + 1),
+    week1: bit(rule.week1), week2: bit(rule.week2), week3: bit(rule.week3),
+    week4: bit(rule.week4), week5: bit(rule.week5),
+    holidays: bit(rule.holidays),
+  };
+}
 
 // Known browser push services. Endpoints are always https on one of these hosts.
 const PUSH_HOST = /(\.googleapis\.com|\.push\.services\.mozilla\.com|\.notify\.windows\.com|\.push\.apple\.com)$/i;
@@ -36,6 +61,12 @@ function sanitizeSpot(spot) {
     leadMinutes: lead,
   };
   if (Number.isFinite(ev) && ev < ts) out.eveningISO = new Date(ev).toISOString();
+  const rule = sanitizeRule(spot.rule);
+  if (rule) {
+    out.rule = rule;
+    out.cnn = String(spot.cnn || '').replace(/[^0-9]/g, '').slice(0, 12);
+    out.sideKey = t(spot.sideKey, 8);
+  }
   return out;
 }
 

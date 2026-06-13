@@ -1,7 +1,12 @@
 // Vercel Cron handler (see vercel.json). Fires a push for any saved spot whose
 // next sweep falls inside its lead window. Generate keys: npx web-push generate-vapid-keys
 import webpush from 'web-push';
-import { loadAllSubs, deleteSub, markNotified, storeReady } from './_store.js';
+import { loadAllSubs, deleteSub, markNotified, advanceSpot, storeReady } from './_store.js';
+import { recomputeSpot } from './_schedule.js';
+
+// A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
+// live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
+const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
 
 export default async function handler(req, res) {
   // Required: this endpoint dispatches pushes + spends store/web-push quota, so it must not run
@@ -26,10 +31,24 @@ export default async function handler(req, res) {
   try {
     const subs = await loadAllSubs();
     const now = Date.now();
-    let sent = 0, pruned = 0;
+    let sent = 0, pruned = 0, rearmed = 0;
 
-    for (const { endpoint, subscription, spot, notifiedFor, notifiedEveFor } of subs) {
+    for (const { endpoint, subscription, spot, notifiedFor, notifiedEveFor, savedAt } of subs) {
       if (!spot || !spot.nextSweepISO) continue;
+
+      // Forever-watch re-arm (ALE-168): if the spot carries a recurring rule and its next
+      // occurrence has rolled past the stored one (the window ended), advance the stored spot
+      // and reset the per-window de-dupe so the next sweep fires. This is its OWN pass — at
+      // lead-push time nextSweep() still returns the same instant, so it can't advance early.
+      // The advanced occurrence is in the future, so nothing pushes this tick → continue.
+      // STALENESS GUARD: only auto-advance while the watch is fresh. A frozen rule can't track a
+      // city schedule change, so a watch not refreshed (by reopening the app) within MAX_WATCH_AGE
+      // stops rolling forward — the currently-armed sweep still fires, then it goes dormant.
+      if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
+        const advanced = recomputeSpot(spot);
+        if (advanced) { await advanceSpot(endpoint, advanced); rearmed++; continue; }
+      }
+
       const lead = (spot.leadMinutes ?? 30) * 60000;
       const delta = new Date(spot.nextSweepISO).getTime() - now;
 
@@ -70,7 +89,7 @@ export default async function handler(req, res) {
       // mistaken for a send failure (which would let the next 15-min tick re-push the same sweep).
       if (delivered) await markNotified(endpoint, spot.nextSweepISO, field);
     }
-    res.status(200).json({ ok: true, checked: subs.length, sent, pruned });
+    res.status(200).json({ ok: true, checked: subs.length, sent, pruned, rearmed });
   } catch (e) {
     console.error('send-notifications failed:', e);
     res.status(500).json({ error: 'internal error' });

@@ -34,16 +34,42 @@ export async function saveSub(subscription, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
   let notifiedFor = null, notifiedEveFor = null;
+  const out = spot || null;
   try {
     const v = await r.hget(KEY, subscription.endpoint);
     const prev = typeof v === 'string' ? safeParse(v) : v;
     if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
       notifiedFor = prev.notifiedFor ?? null;
       notifiedEveFor = prev.notifiedEveFor ?? null;
+      // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
+      // forever-watch to one-shot). Carry the prior rule/cnn/sideKey forward when absent.
+      if (out && !out.rule && prev.spot.rule) {
+        out.rule = prev.spot.rule;
+        if (prev.spot.cnn) out.cnn = prev.spot.cnn;
+        if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
+      }
     }
   } catch { /* best effort — worst case is one duplicate push */ }
-  const record = { subscription, spot: spot || null, notifiedFor, notifiedEveFor };
+  // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
+  // re-arming once a watch goes stale past MAX_WATCH_AGE (see send-notifications) so a frozen rule
+  // can't push wrong times forever after a city schedule change. advanceSpot preserves it.
+  const record = { subscription, spot: out, notifiedFor, notifiedEveFor, savedAt: Date.now() };
   await r.hset(KEY, { [subscription.endpoint]: JSON.stringify(record) });
+}
+
+/** Advance a subscription to its next computed sweep occurrence (the cron "forever-watch"
+ *  re-arm). Replaces the spot and RESETS the per-window de-dupe so the next sweep can fire.
+ *  Preserves savedAt — the re-arm is clock-driven, not a fresh client refresh. */
+export async function advanceSpot(endpoint, newSpot) {
+  const r = redis();
+  if (!r) return;
+  const v = await r.hget(KEY, endpoint);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return;
+  rec.spot = newSpot;
+  rec.notifiedFor = null;
+  rec.notifiedEveFor = null;
+  await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
 }
 
 /** Load every stored record as { endpoint, subscription, spot, notifiedFor }. */
