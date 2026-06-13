@@ -49,7 +49,16 @@ header{padding:calc(40px + env(safe-area-inset-top)) 0 0}
 .btn:hover{transform:translateY(-1px)}.btn:active{transform:translate(2px,2px);box-shadow:none}
 .btn.ghost{background:transparent;color:var(--ink)}
 .mast .btn{margin-left:auto;padding:11px 16px;font-size:14px}
-@media (max-width:680px){.topnav{display:none}.mast .btn{margin-left:auto}}
+/* mobile hamburger — same pattern as the map / tickets / about pages */
+.navwrap{position:relative;display:none}
+.burger{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:var(--sign);color:var(--ink);border:2.5px solid var(--ink);border-radius:11px;box-shadow:3px 3px 0 var(--ink);cursor:pointer;padding:0}
+.burger svg{width:20px;height:20px}
+.navmenu{position:absolute;right:0;top:calc(100% + 8px);width:232px;background:var(--paper);border:3px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--ink);padding:8px;z-index:40}
+.navmenu a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:9px;font-weight:800;font-size:15px;text-decoration:none;color:var(--ink)}
+.navmenu a svg{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.navmenu a:hover{background:rgba(23,21,15,.07)}
+.navmenu a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+@media (max-width:680px){.topnav{display:none}.navwrap{display:block;margin-left:auto}.mast .btn{display:none}}
 main{padding-bottom:60px}
 .crumb{font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:30px}
 .crumb a{text-decoration:none;display:inline-block;padding:6px 2px}.crumb a:hover{text-decoration:underline}
@@ -86,11 +95,19 @@ ul.streets li .n{color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .faq summary{font-family:'Anton',sans-serif;font-size:19px;text-transform:uppercase;cursor:pointer;letter-spacing:.01em}
 .faq p{margin-top:10px;font-weight:500;color:var(--ink-soft)}.faq p b{color:var(--ink)}
 .cta{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap}
-.hoodgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
-.hoodgrid a{display:block;border:2.5px solid var(--ink);border-radius:13px;background:var(--sign);box-shadow:3px 3px 0 var(--ink);padding:13px 16px;text-decoration:none;transition:transform .1s}
-.hoodgrid a:hover{transform:translateY(-1px)}
-.hoodgrid .hn{font-family:'Anton',sans-serif;font-size:19px;text-transform:uppercase;line-height:1}
-.hoodgrid .hs{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-top:4px}
+.hoodgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:18px}
+.hcard{display:flex;flex-direction:column;border:2.5px solid var(--ink);border-radius:14px;background:var(--sign);box-shadow:3px 3px 0 var(--ink);text-decoration:none;overflow:hidden;transition:transform .12s}
+.hcard:hover{transform:translateY(-2px)}
+.hcard:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+.hcard-viz{display:block;height:52px;border-bottom:2.5px solid var(--ink)}
+.hcard-viz svg{display:block;width:100%;height:100%}
+.hcard-nm{font-family:'Anton',sans-serif;font-size:19px;text-transform:uppercase;line-height:1;
+  padding:12px 14px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.hcard-stats{display:flex;gap:8px;padding:10px 14px 14px}
+.hcard .pill{display:flex;flex-direction:column;flex:1;background:var(--paper);border:2px solid var(--ink);
+  border-radius:9px;padding:6px 9px;line-height:1.05}
+.hcard .pill b{font-family:'Anton',sans-serif;font-size:17px;color:var(--ink)}
+.hcard .pill i{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-style:normal;margin-top:3px}
 footer{border-top:3px solid var(--ink);margin-top:50px;padding:26px 0 calc(34px + env(safe-area-inset-bottom))}
 .foot{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:baseline}
 .foot .mark{font-family:'Anton',sans-serif;font-size:22px}.foot .mark span{color:var(--red-text)}
@@ -109,6 +126,19 @@ footer{border-top:3px solid var(--ink);margin-top:50px;padding:26px 0 calc(34px 
       <a href="/tickets">Tickets</a>
       <a href="/about">About</a>
     </nav>
+    <div class="navwrap">
+      <button class="burger" id="navBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="navmenu" id="navMenu" hidden>
+        <a href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.1 5.6a2 2 0 0 0 1.8 0l3.7-1.8A1 1 0 0 1 21 4.6v12.8a1 1 0 0 1-.6.9l-4.5 2.3a2 2 0 0 1-1.8 0l-4.2-2.1a2 2 0 0 0-1.8 0l-3.7 1.8A1 1 0 0 1 3 19.4V6.6a1 1 0 0 1 .6-.9l4.5-2.3a2 2 0 0 1 1.8 0z"/><path d="M15 5.8v15M9 3.2v15"/></svg>Map</a>
+        <a href="/n/" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>Neighborhoods</a>
+        <a href="/tickets"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V7Z"/><path d="M12 6v2M12 11v2M12 16v2"/></svg>Tickets</a>
+        <a href="/about"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>About</a>
+        <a href="https://github.com/alevizio/curb/issues" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 2 1.88 1.88M14.12 3.88 16 2M9 7.13v-1a3 3 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>Report a bug</a>
+        <a href="https://github.com/alevizio/curb" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" style="fill:currentColor;stroke:none"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.34.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 2.88-.39c.98 0 1.96.13 2.88.39 2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .31.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>Open source</a>
+      </div>
+    </div>
     <a class="btn" href="/">Open the map →</a>
   </div>
 </header>
@@ -178,12 +208,54 @@ footer{border-top:3px solid var(--ink);margin-top:50px;padding:26px 0 calc(34px 
     <div class="sec-k">Nearby</div>
     <h2>Other <b>neighborhoods</b></h2>
     <div class="hoodgrid">
-    <a href="/n/bayview-hunters-point"><span class="hn">Bayview Hunters Point</span><span class="hs">27,624 tickets · $2.8M</span></a>
-    <a href="/n/castro-upper-market"><span class="hn">Castro/Upper Market</span><span class="hs">26,605 tickets · $2.7M</span></a>
-    <a href="/n/inner-richmond"><span class="hn">Inner Richmond</span><span class="hs">27,900 tickets · $2.8M</span></a>
-    <a href="/n/inner-sunset"><span class="hn">Inner Sunset</span><span class="hs">24,070 tickets · $2.4M</span></a>
-    <a href="/n/noe-valley"><span class="hn">Noe Valley</span><span class="hs">29,005 tickets · $2.9M</span></a>
-    <a href="/n/south-of-market"><span class="hn">South of Market</span><span class="hs">24,030 tickets · $2.4M</span></a>
+    <a class="hcard" href="/n/bayview-hunters-point">
+      <span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="#cdddea"/><g stroke="rgba(23,21,15,.16)" stroke-width="3"><path d="M-20 52 L32 0"/><path d="M0 52 L52 0"/><path d="M20 52 L72 0"/><path d="M40 52 L92 0"/><path d="M60 52 L112 0"/><path d="M80 52 L132 0"/><path d="M100 52 L152 0"/></g></svg></span>
+      <span class="hcard-nm">Bayview Hunters Point</span>
+      <span class="hcard-stats">
+        <span class="pill"><b>27.6k</b><i>tickets</i></span>
+        <span class="pill"><b>$2.8M</b><i>in fines</i></span>
+      </span>
+    </a>
+    <a class="hcard" href="/n/castro-upper-market">
+      <span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="#ecd3cd"/><g stroke="rgba(23,21,15,.16)" stroke-width="3"><path d="M-20 52 L32 0"/><path d="M0 52 L52 0"/><path d="M20 52 L72 0"/><path d="M40 52 L92 0"/><path d="M60 52 L112 0"/><path d="M80 52 L132 0"/><path d="M100 52 L152 0"/></g></svg></span>
+      <span class="hcard-nm">Castro/Upper Market</span>
+      <span class="hcard-stats">
+        <span class="pill"><b>26.6k</b><i>tickets</i></span>
+        <span class="pill"><b>$2.7M</b><i>in fines</i></span>
+      </span>
+    </a>
+    <a class="hcard" href="/n/inner-richmond">
+      <span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="#cfe3d6"/><g stroke="rgba(23,21,15,.16)" stroke-width="3"><path d="M-20 52 L32 0"/><path d="M0 52 L52 0"/><path d="M20 52 L72 0"/><path d="M40 52 L92 0"/><path d="M60 52 L112 0"/><path d="M80 52 L132 0"/><path d="M100 52 L152 0"/></g></svg></span>
+      <span class="hcard-nm">Inner Richmond</span>
+      <span class="hcard-stats">
+        <span class="pill"><b>27.9k</b><i>tickets</i></span>
+        <span class="pill"><b>$2.8M</b><i>in fines</i></span>
+      </span>
+    </a>
+    <a class="hcard" href="/n/inner-sunset">
+      <span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="#e6d8df"/><g stroke="rgba(23,21,15,.16)" stroke-width="3"><path d="M-20 52 L32 0"/><path d="M0 52 L52 0"/><path d="M20 52 L72 0"/><path d="M40 52 L92 0"/><path d="M60 52 L112 0"/><path d="M80 52 L132 0"/><path d="M100 52 L152 0"/></g></svg></span>
+      <span class="hcard-nm">Inner Sunset</span>
+      <span class="hcard-stats">
+        <span class="pill"><b>24.1k</b><i>tickets</i></span>
+        <span class="pill"><b>$2.4M</b><i>in fines</i></span>
+      </span>
+    </a>
+    <a class="hcard" href="/n/noe-valley">
+      <span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="#d2e0d6"/><g stroke="rgba(23,21,15,.16)" stroke-width="3"><path d="M-20 52 L32 0"/><path d="M0 52 L52 0"/><path d="M20 52 L72 0"/><path d="M40 52 L92 0"/><path d="M60 52 L112 0"/><path d="M80 52 L132 0"/><path d="M100 52 L152 0"/></g></svg></span>
+      <span class="hcard-nm">Noe Valley</span>
+      <span class="hcard-stats">
+        <span class="pill"><b>29k</b><i>tickets</i></span>
+        <span class="pill"><b>$2.9M</b><i>in fines</i></span>
+      </span>
+    </a>
+    <a class="hcard" href="/n/south-of-market">
+      <span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="#dadbc6"/><g stroke="rgba(23,21,15,.16)" stroke-width="3"><path d="M-20 52 L32 0"/><path d="M0 52 L52 0"/><path d="M20 52 L72 0"/><path d="M40 52 L92 0"/><path d="M60 52 L112 0"/><path d="M80 52 L132 0"/><path d="M100 52 L152 0"/></g></svg></span>
+      <span class="hcard-nm">South of Market</span>
+      <span class="hcard-stats">
+        <span class="pill"><b>24k</b><i>tickets</i></span>
+        <span class="pill"><b>$2.4M</b><i>in fines</i></span>
+      </span>
+    </a>
     </div>
     <p class="lede" style="margin-top:16px"><a href="/n/" style="font-weight:800">See all 36 neighborhoods →</a></p>
   </section>
@@ -191,12 +263,21 @@ footer{border-top:3px solid var(--ink);margin-top:50px;padding:26px 0 calc(34px 
 <footer><div class="wrap foot">
   <span class="mark">CURB<span>.</span></span>
   <a href="/">Open the map</a>
-  <a href="/n/">All neighborhoods</a>
+  <a href="/n/">Neighborhoods</a>
   <a href="/tickets">The ticket economy</a>
   <a href="/about">About CURB</a>
   <a href="https://data.sfgov.org" rel="noopener">Data: DataSF</a>
+  <a href="https://github.com/alevizio/curb" rel="noopener">Open source — GitHub</a>
+  <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
   <a href="/privacy">Privacy</a>
   <span class="fine">Schedules are set block by block — the <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies — only anonymous page counts. Made in San Francisco.</span>
 </div></footer>
+<script>
+  (function(){var b=document.getElementById('navBtn'),m=document.getElementById('navMenu');if(!b||!m)return;
+   function close(){m.hidden=true;b.setAttribute('aria-expanded','false');}
+   b.addEventListener('click',function(e){e.stopPropagation();var open=m.hidden;m.hidden=!open;b.setAttribute('aria-expanded',String(open));});
+   document.addEventListener('click',function(e){if(!m.hidden&&!m.contains(e.target)&&e.target!==b)close();});
+   document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});})();
+</script>
 </body>
 </html>

@@ -185,6 +185,9 @@
       font-size:11px;font-weight:700;letter-spacing:0;text-transform:none;padding:5px 9px;border-radius:7px;
       white-space:nowrap;z-index:4000;pointer-events:none;box-shadow:2px 2px 0 rgba(23,21,15,.3)}
     [data-tip-pos="b"]:hover::after{bottom:auto;top:calc(100% + 8px)}
+    /* the logo is hard against the screen's left edge — a centered tooltip overflows off-screen.
+       Anchor it to the logo's left so it grows rightward and stays visible. */
+    .logo[data-tip]:hover::after{left:0;transform:none}
     /* lift the hovered control above its container's stacking context — Leaflet controls sit at
        z-index:1000, so a tooltip trapped in .top/.sheet/.layers would otherwise render behind them */
     [data-tip]:hover{z-index:4000}

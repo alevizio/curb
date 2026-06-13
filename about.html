@@ -228,6 +228,11 @@
   .biocard p{font-size:14px;color:var(--ink-soft);font-weight:600;line-height:1.55;margin-top:6px;max-width:42em}
   .biocard p a{color:var(--ink);font-weight:800;text-underline-offset:3px}
   @media (max-width:560px){.biocard{flex-direction:column;gap:12px}}
+  .oscard{border:3px solid var(--ink);border-radius:14px;background:var(--sign);padding:20px 22px;box-shadow:7px 7px 0 var(--ink)}
+  .oscard .who{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .oscard p{font-size:15px;color:var(--ink-soft);font-weight:600;line-height:1.55;margin-top:6px;max-width:42em}
+  .oscard p b{color:var(--ink)}
+  .os-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
 
   /* faq */
   .faq{padding-top:clamp(36px,6vh,64px)}
@@ -491,6 +496,17 @@
           whatever annoys him into small tools — this one started at a windshield on Valencia. CURB is
           designed, built and street-parked in San Francisco.
           Find him on <a href="https://github.com/alevizio" rel="noopener">GitHub</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="opensource">
+    <div class="oscard">
+      <span class="who">Open source</span>
+      <p>CURB is <b>free and MIT-licensed</b> — the whole app is on GitHub, built on public DataSF data. Spot a wrong sweep time or a bug? Open an issue and I'll fix it.</p>
+      <div class="os-cta">
+        <a class="btn" href="https://github.com/alevizio/curb" rel="noopener">View on GitHub →</a>
+        <a class="btn ghost" href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
       </div>
     </div>
   </section>
