@@ -1644,6 +1644,17 @@ map.on('click',e=>{ if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} pla
 
 /* ---------- day filter + today's date ---------- */
 let dayChips=[];
+// Approx citywide blocks swept per weekday (distinct cnn, yhqp-riqs, 2026-06-13).
+// Refresh if the sweep dataset changes materially; kept rounded so drift doesn't matter.
+const DAY_BLOCKS=[974,6074,5874,5678,5733,5669,1025];  // Sun..Sat, JS getDay order
+function dayHeadsUp(v){
+  const n=DAY_BLOCKS[v]; if(n==null)return;
+  const approx=n>=1000?Math.round(n/100)*100:n;  // ~6,100 / ~1,000
+  if(v===0||v===6)  // weekend = the high-signal "is my block a gotcha?" case
+    toast(`Only ~${approx.toLocaleString()} SF blocks sweep on ${DAYLBL[v]}s — about a sixth of a weekday. Any block still colored here gets cleaned today; the rest are clear.`);
+  else
+    toast(`~${approx.toLocaleString()} SF blocks sweep on ${DAYLBL[v]}s — the colored ones are the blocks to move off.`);
+}
 function setDayFilter(v){
   dayFilter=v;
   dayChips.forEach(x=>{
@@ -1655,6 +1666,7 @@ function setDayFilter(v){
   updateRouteDay();  // route follows the day filter — keep its legend label in sync
   drawSegments(lastRows);
   if(ovMode)drawOverview();  // recolor the citywide view too
+  if(v!=null)dayHeadsUp(v);  // contextualize the (often sparse) filtered map
 }
 const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 // frequency phrase from the 5 week flags: all -> "every week", else ordinals
