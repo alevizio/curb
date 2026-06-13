@@ -348,6 +348,14 @@
   .centerico{flex:none;width:34px;height:34px;border:2px solid var(--ink);border-radius:9px;background:var(--paper);
     color:var(--ink);cursor:pointer;display:grid;place-items:center;box-shadow:2px 2px 0 var(--ink)}
   .centerico:active{transform:translate(1px,1px);box-shadow:none}
+  .sheettools{position:absolute;top:12px;right:14px;display:flex;align-items:center;gap:7px;z-index:3}
+  .sheettools .sheet-close{position:static;width:34px;height:34px;border-radius:9px}
+  .sheettools .sheet-close::after{inset:-6px}
+  .asched{font-size:13px;font-weight:700;margin:3px 0 2px}
+  .asched.green{color:var(--green-text)} .asched.amber{color:var(--amber-text)} .asched.red{color:var(--red-text)}
+  .sideslbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:14px}
+  .shdiv{border:0;border-top:2px solid rgba(23,21,15,.12);margin:13px 0 0}
+  .metico{width:15px;height:15px;flex:none}
   .ic{width:17px;height:17px;flex:none;vertical-align:-3px}
   .ic.s{width:13px;height:13px;vertical-align:-2px}
   .chips{display:flex;flex-wrap:wrap;gap:7px}  /* margin lives on chips so an empty row adds no gap */
@@ -475,13 +483,15 @@
   .curbtip .tip-next{font-size:12px;font-weight:700;margin-top:2px}
   .curbtip .tip-next.red{color:var(--red-text)} .curbtip .tip-next.amber{color:var(--amber-text)} .curbtip .tip-next.green{color:var(--green-text)}
   .curbtip .tip-rpp{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;background:var(--meter);border-radius:6px;padding:2px 7px;margin-top:5px}
-  .curbtip .tip-enf{font-size:11.5px;font-weight:800;color:var(--ink);background:rgba(224,50,46,.12);
-    border:1.5px solid rgba(224,50,46,.45);border-radius:7px;padding:3px 8px;margin-top:5px;display:inline-block}
+  .curbtip .tip-enf{font-size:11.5px;font-weight:800;color:var(--ink);background:rgba(193,18,31,.12);
+    border:1.5px solid rgba(193,18,31,.45);border-radius:7px;padding:3px 8px;margin-top:5px;display:inline-block}
   .curbtip .tip-cta{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-top:6px}
 
   /* "Real-world" enforcement callout in the sheet (from citation history) */
   .enf{display:flex;gap:9px;align-items:flex-start;margin-top:10px;border:2px solid var(--ink);border-radius:12px;
-    padding:9px 11px;background:rgba(224,50,46,.07)}
+    padding:9px 11px;background:rgba(193,18,31,.07);cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit}
+  .enf:active{transform:translate(1px,1px)}
+  .enf .enfsrc{display:inline-block;margin-left:5px;font-size:11px;font-weight:700;color:var(--meter);white-space:nowrap;text-decoration:underline;text-underline-offset:2px}
   .enf .tgt{flex:none;color:var(--red-text)} .enf .tgt .ic{width:19px;height:19px}
   .enf .etxt{font-size:12.5px;font-weight:700;line-height:1.35}
   .enf .etxt b{color:var(--red-text)}
@@ -635,7 +645,11 @@
 
 <div class="sheet" id="sheet" role="dialog" aria-label="Parking details for this block">
   <button class="grab" id="grabBtn" aria-label="Expand details" aria-expanded="false"><i></i></button>
-  <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
+  <div class="sheettools">
+    <button class="centerico" id="shareBtn" aria-label="Share this block" data-tip="Share this block"></button>
+    <button class="centerico" id="centerBtn" aria-label="Center map on this block" data-tip="Center on this block"></button>
+    <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
+  </div>
   <div id="sheetBody"></div>
 </div>
 
@@ -842,16 +856,16 @@ function statusFor(ns){
   return {rank:2,color:getCSS('--green')};
 }
 function relPhrase(ns){
-  if(!ns)return {txt:'see posted sign',short:'see posted sign',cls:'green'};
+  if(!ns)return {txt:'see posted sign',short:'see posted sign',rel:'',cls:'green'};
   const now=new Date();
-  if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.toH);return {txt:t,short:t,cls:'red'};}
+  if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.toH);return {txt:t,short:t,rel:'now',cls:'red'};}
   const hrs=(ns.start-now)/36e5, days=Math.floor(hrs/24);
   const when=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+', '+fmtHour(ns.fromH)+'–'+fmtHour(ns.toH);
   const rel = hrs<1?'in <1 hr':hrs<24?('in '+Math.round(hrs)+' hr'):days===1?'tomorrow':('in '+days+' days');
   const cls = hrs<3?'red':hrs<24?'amber':'green';
   // short = date + countdown only (the sign badge beside it already shows day + window)
   const short=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+' · '+rel;
-  return {txt:when+' · '+rel,short,cls,when:ns.start};
+  return {txt:when+' · '+rel,short,rel,cls,when:ns.start};
 }
 
 /* perpendicular offset of a polyline by N metres (sign = side) */
@@ -1311,8 +1325,9 @@ function openSheet(group, activeKey){
   else if(now>=ns.start&&now<ns.end){kicker='Restricted';head='Sweeping now';}
   else{head=DAYLBL[ns.dow]+' '+fmtHour(ns.fromH);}
 
-  const ordered=[active, ...group.sides.filter(s=>s!==active)];
-  const sidesHtml=ordered.map(s=>{
+  // the active side IS the verdict at the top — list only the OTHER side(s), no repeat
+  const others=group.sides.filter(s=>s!==active);
+  const sidesHtml=others.map(s=>{
     const r=s.row||s.rows[0]; const rp=relPhrase(s.ns);
     const weeks=[r.week1,r.week2,r.week3,r.week4,r.week5].map(x=>String(x)==="1");
     const allW=weeks.every(Boolean);
@@ -1320,16 +1335,16 @@ function openSheet(group, activeKey){
     const act=s.ns&&now>=s.ns.start&&now<s.ns.end;
     const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
     const e=enfFor(group.cnn, normDay(r.weekday));
-    // The active side's enforcement is shown in the callout above — only repeat it on the other sides.
-    return `<div class="srow ${s===active?'active':'tap'}" data-side="${s.key}"${s===active?'':` role="button" tabindex="0" aria-label="Switch to the ${s.blockside||'other'} side"`}>
+    return `<div class="srow tap" data-side="${s.key}" role="button" tabindex="0" aria-label="Switch to the ${s.blockside||'other'} side">
       <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div><div class="sc">STREET CLEANING</div></div>
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.short||rp.txt}</div>
-        ${e&&s!==active?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· ${e.n} tickets</span></div>`:''}
+        ${e?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· ${e.n} tickets</span></div>`:''}
         ${allW?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
+  const sidesBlock=others.length?`<div class="sideslbl">Other side${others.length>1?'s':''}</div><div class="sides">${sidesHtml}</div>`:'';
 
   const rp=nearestRpp(active.mid);
   const rppHtml = rp ? `<span class="chip rpp" title="SFMTA permit data (2017)">Permit <span class="adisc" style="background:${areaColor(rp.area)}">${rp.area}</span> ${rp.hrlimit?rp.hrlimit+'hr limit':''} ${rp.days||''} ${rp.from?rp.from+(rp.to?'–'+rp.to:''):''} · holders exempt</span>` : '';
@@ -1355,19 +1370,25 @@ function openSheet(group, activeKey){
     const fromMin=active.row?parseInt(active.row.fromhour,10)*60:ae.avg;
     const into=Math.max(0,ae.avg-fromMin);
     const intoTxt=into<60?into+' min':Math.floor(into/60)+'h'+(into%60?' '+(into%60)+'m':'');
-    enfHtml=`<div class="enf"><span class="tgt" aria-hidden="true">${ICONS.target}</span><div>
-      <div class="etxt">Tickets here usually land <b>~${fmtMin(ae.avg)}</b> — ${intoTxt} into the window.</div>
-      <div class="esub">Earliest seen ${fmtMin(ae.lo)} · from ${ae.n} tickets over ~2 yrs.</div>
-    </div></div>`;
+    enfHtml=`<button class="enf" id="enfBtn" type="button" aria-label="Where this estimate comes from">
+      <span class="tgt" aria-hidden="true">${ICONS.target}</span>
+      <span class="etxt">Tickets here usually land <b>~${fmtMin(ae.avg)}</b> — ${intoTxt} into the window.<span class="enfsrc">where from?</span></span>
+    </button>`;
   }
+  // active side's full schedule as a single line (replaces its redundant row below)
+  const _ar=active.row||active.rows[0];
+  const _aw=_ar?[_ar.week1,_ar.week2,_ar.week3,_ar.week4,_ar.week5].map(x=>String(x)==='1'):[true,true,true,true,true];
+  const _arp=relPhrase(ns);
+  const aSched=ns?`<div class="asched ${_arp.cls}">${fmtHour(ns.fromH)}–${fmtHour(ns.toH)} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   document.getElementById('sheetBody').innerHTML=`
     <div class="verdict ${vClass}"><span class="kicker">${kicker}</span><span class="head">${head}</span></div>
-    <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span>
-      <button class="centerico" id="shareBtn" aria-label="Share this block" data-tip="Share this block">${ICONS.share}</button>
-      <button class="centerico" id="centerBtn" aria-label="Center map on this block" data-tip="Center on this block">${ICONS.center}</button></div>
+    <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span></div>
+    ${aSched}
     ${enfHtml}
+    <div class="chips"><span class="chip meter" id="meterChip" style="display:none"></span>${rppHtml}</div>
+    ${canRemind?'<hr class="shdiv">':''}
     <div class="actions">
       ${canRemind?`<button class="btn ${alertOn?'on':''}" id="alertBtn">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}
       ${canRemind?`<button class="btn alt" id="calBtn">${ICONS.cal} Calendar${calPref?'<span class="vsep" id="calMore" title="Change calendar type">▾</span>':''}</button>`:''}
@@ -1376,8 +1397,7 @@ function openSheet(group, activeKey){
         <button class="btn alt" id="calICS">Apple / .ics</button>
       </div>`:''}
     </div>
-    <div class="chips"><span class="chip meter" id="meterChip" style="display:none"><span class="d"></span></span>${rppHtml}</div>
-    <div class="sides">${sidesHtml}</div>
+    ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
       <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping the <b>night before</b> (~8pm) and <b>~30 min before</b> sweeping; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
@@ -1398,6 +1418,8 @@ function openSheet(group, activeKey){
     document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
   }
   document.getElementById('centerBtn').onclick=()=>map.fitBounds(L.polyline(active.latlngs).getBounds(),{maxZoom:18,padding:[60,60]});
+  const _enf=document.getElementById('enfBtn');
+  if(_enf&&ae)_enf.onclick=()=>toast(`Estimated from ~${ae.n} street-cleaning tickets on this block over ~2 years (SFMTA citations via DataSF). Earliest seen ${fmtMin(ae.lo)}. The posted sign is the source of truth.`);
   // Share: the block gets a real URL (/b/<cnn>, server-rendered card for unfurls).
   document.getElementById('shareBtn').onclick=async()=>{
     const url=location.origin+'/b/'+group.cnn;
@@ -1419,7 +1441,7 @@ function openSheet(group, activeKey){
     el.onclick=go;
     el.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();}};
   });
-  loadMeterChip(group.corridor||'');
+  loadMeterBlock(active.latlngs, group.cnn);
   fillRange(group.cnn);
   const sheetEl=document.getElementById('sheet');
   if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
@@ -1437,24 +1459,13 @@ function openSheet(group, activeKey){
   }catch(_){}
 }
 document.getElementById('sheetClose').onclick=()=>document.getElementById('sheet').classList.remove('open');
+document.getElementById('shareBtn').innerHTML=ICONS.share;
+document.getElementById('centerBtn').innerHTML=ICONS.center;
 document.getElementById('grabBtn').onclick=function(){
   const tall=document.getElementById('sheet').classList.toggle('tall');
   this.setAttribute('aria-expanded',tall);
 };
 
-async function loadMeterChip(street){
-  const slot=document.getElementById('meterChip'); if(!slot||!street)return;
-  const base=street.toUpperCase().replace(/ (ST|AVE|BLVD|WAY|DR|RD)$/,'').replace(/'/g,"''");
-  try{
-    // $where must be percent-encoded: the raw % wildcards otherwise make an invalid URL (request dies before CORS).
-    const url=METER+`?$select=count(objectid) as c&$where=`
-      +encodeURIComponent(`upper(street_name) like '%${base}%' AND on_offstreet_type='ON'`);
-    const r=await fetch(url); if(!r.ok)return; const d=await r.json();
-    const c=parseInt(d[0]?.c||0,10);
-    if(c>0){slot.style.display='inline-flex';slot.innerHTML=`<span class="d"></span>Metered street`;
-      slot.title=`~${c.toLocaleString()} meters on ${street} — check the meter for hours & rates`;}
-  }catch(e){}
-}
 
 function downloadICS(street,block,ns){
   const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
@@ -1646,6 +1657,28 @@ function setDayFilter(v){
   if(ovMode)drawOverview();  // recolor the citywide view too
 }
 const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// frequency phrase from the 5 week flags: all -> "every week", else ordinals
+function freqLabel(weeks){if(weeks.every(Boolean))return 'every week';const o=['1st','2nd','3rd','4th','5th'];
+  const on=weeks.map((w,i)=>w?o[i]:null).filter(Boolean);return on.length?on.join(' & '):'';}
+// block-specific meter sign — query meters inside THIS block's bbox (street-level was misleading)
+const meterBlockCache={};
+const METER_ICON='<svg class="metico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="9" rx="3"/><path d="M9.5 6h5"/><path d="M12 11.5V20"/><path d="M8.5 20.5h7"/></svg>';
+async function loadMeterBlock(latlngs,cnn){
+  const slot=document.getElementById('meterChip'); if(!slot)return;
+  const show=c=>{ if(c>0){slot.style.display='inline-flex';slot.innerHTML=METER_ICON+'Metered';
+    slot.title='Metered curb — pay at the meter; it shows the hours & rates';} else slot.style.display='none'; };
+  if(cnn in meterBlockCache){show(meterBlockCache[cnn]);return;}
+  if(!latlngs||!latlngs.length)return;
+  let a1=90,a2=-90,o1=180,o2=-180;
+  latlngs.forEach(([la,lo])=>{a1=Math.min(a1,la);a2=Math.max(a2,la);o1=Math.min(o1,lo);o2=Math.max(o2,lo);});
+  const P=0.00022; a1-=P;a2+=P;o1-=P;o2+=P;  // ~25m buffer: meters sit at the curb, off the centerline
+  try{
+    const url=METER+`?$select=count(objectid) as c&$where=`+encodeURIComponent(
+      `on_offstreet_type='ON' AND latitude between ${a1} and ${a2} AND longitude between ${o1} and ${o2}`);
+    const r=await fetch(url); if(!r.ok)return; const d=await r.json();
+    const c=parseInt(d[0]?.c||0,10); meterBlockCache[cnn]=c; show(c);
+  }catch(e){}
+}
 function refreshToday(){
   const p=sfTodayParts(), d=todaySF();  // the chip shows SF's today, wherever the device is
   document.getElementById('dateChip').innerHTML='Today · '+DAYLBL[d]+' '+MONLBL[p.mo-1]+' '+p.da
