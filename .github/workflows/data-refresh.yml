@@ -1,0 +1,70 @@
+# Monthly refresh of the precomputed data assets (data/*.json).
+#
+# Rebuilds enforcement times, the citywide overview, meter/loading zones, white
+# (passenger/loading) curb zones, and the /tickets stats from their live sources,
+# validates the shapes (scripts/validate-data.mjs — fails loudly if a Socrata/ArcGIS
+# source changed), and commits only if something actually changed. The commit pushes
+# to main, which Vercel auto-deploys.
+#
+# Manual run: Actions tab → "data-refresh" → Run workflow.
+name: data-refresh
+
+on:
+  schedule:
+    - cron: "17 9 1 * *" # 09:17 UTC on the 1st of each month (off the top of the hour)
+  workflow_dispatch: {}
+
+# Need write access to commit the refreshed assets back to the repo.
+permissions:
+  contents: write
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install deps
+        run: npm ci
+
+      # Each build hits live DataSF/ArcGIS. They're independent; run sequentially so a
+      # failure points at one source. `set -e` (default) aborts the job on any non-zero.
+      - name: Rebuild data assets
+        run: |
+          npm run build:enforcement
+          npm run build:overview
+          npm run build:zones
+          npm run build:whitezones
+          npm run build:stats
+
+      - name: Validate shapes (fail loudly on source drift)
+        run: npm run validate:data
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # _meta.generated carries a fresh timestamp every run, and the daily citation/
+          # zone sources almost always move, so in practice this commits each month. The
+          # guard is here only for the rare no-op (e.g. a re-run minutes apart).
+          git add data/*.json
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit."
+            exit 0
+          fi
+          stamp=$(date -u +%Y-%m-%d)
+          git commit -m "chore(data): monthly refresh ${stamp}
+
+          Automated rebuild of enforcement/overview/zones/white-zones/stats from live
+          sources, shape-validated by scripts/validate-data.mjs."
+          git push
+          echo "Pushed refreshed data — Vercel will redeploy."
