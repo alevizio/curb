@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SF Street Cleaning Map — When Tickets Actually Land | CURB</title>
 <meta name="description" content="Free SF street sweeping map: every block's cleaning schedule, permit areas, and the times tickets actually land — with move-your-car alerts. Tap your curb.">
 <link rel="canonical" href="https://curb.guide/">
@@ -34,6 +34,8 @@
 <meta name="twitter:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts.">
 <meta name="twitter:image" content="https://curb.guide/og.png">
 <meta name="twitter:image:alt" content="CURB — SF street parking map with colored curb lines">
+<link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
+<link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossorigin>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#C1121F">
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
@@ -530,7 +532,7 @@
 </head>
 <body>
 <h1 class="srh">San Francisco street cleaning map — sweeping schedules, permit areas, and real ticket times by block</h1>
-<div id="map"></div>
+<main id="map" aria-label="San Francisco parking map"></main>
 
 <div class="top">
   <div class="barrow">
