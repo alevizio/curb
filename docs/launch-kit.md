@@ -176,21 +176,45 @@ all city open data. Curious if it matches what you've seen on your street.
 
 ---
 
-## 6 · X/Twitter thread skeleton
-1. SF posts 2-hour street-cleaning windows. I analyzed 650,000 tickets: the median
-   block gets ALL of them in a 22-minute span. 🧵
-2. [chart/screenshot: Steiner timeline] Posted 9–11am. Median ticket 9:14. None after 9:40.
-3. So I built curb.guide — every SF curb, colored by its next sweep, with the real
-   ticket times per block. Free, no account.
-4. The data nobody publishes: the city HAS live sweeper GPS (it's in their systems
-   inventory). NYC publishes theirs by law. SF doesn't. So this is prediction, not
-   tracking — built from the tickets themselves.
-5. Bonus layer: SFMTA's open data excludes painted white zones. Found the inventory
-   on the city's GIS — all 1,975 passenger-loading zones are on the map now, school
-   drop-off zones included. [white-zone popup screenshot]
-6. [sign-stack image] Open data → fewer $105 surprises. curb.guide
+## 6 · X/Twitter thread (polished — copy/paste; media notes in [brackets])
 
----
+**1/** San Francisco posts a 2-hour street-cleaning window.
+I matched 650,000 tickets to the exact blocks they were written on.
+On the median block, every ticket lands inside the same 22 minutes. 🧵
+[media: the trailer (curb-trailer-16x9.mp4) OR card-stat22.png]
+
+**2/** Street cleaning is SF's #1 ticket — about half a million a year, more than LA writes. It's $105 now.
+And the sign misleads you: it says "9–11am," but the tickets start ~9:14 and stop by 9:40. The window is theater; the enforcement is a sniper.
+
+**3/** So I built the map I wanted → curb.guide
+Every curb in SF, colored by its next sweep. Green = clear, amber = soon, red = move now.
+Tap your block: the posted schedule AND when tickets actually land there.
+[media: card-tap.png]
+
+**4/** One tap arms a move-your-car alert — a heads-up the night before, and ~30 min before the truck.
+No more "is it the 2nd or 4th Tuesday?" It knows your block, your side of the street, the week pattern.
+[media: card-alerts.png]
+
+**5/** It even maps the white passenger-loading zones at schools — the ones SFMTA doesn't publish on its open-data portal. I found the inventory on the city's own GIS and put all 1,975 on the map.
+[media: card-whitezones.png]
+
+**6/** And there's the whole data story: 23.8M tickets since 2008 — what SF fines, by year, type and neighborhood → curb.guide/tickets
+[media: card-tickets.png]
+
+**7/** It's free. No account, no ads, no cookies, nothing to install — works in any browser.
+And it's open source (MIT): github.com/alevizio/curb
+Built entirely on SF's public data (DataSF). The posted sign is always the final word.
+
+**8/** If you park on the street in SF, try it on your block: curb.guide
+Tell me if your block's real ticket times match what you've lived through. 👀
+
+_Reply-ready if someone calls it creepy:_ "It's the city's own published data, aggregated — no officer tracking, nothing live. The goal is the opposite of dodging enforcement: move your car before the sweeper, which is exactly what the program wants."
+
+## Social assets (generated, in ~/Downloads/curb-social/)
+- **curb-trailer-16x9.mp4** — ~25s trailer for Twitter/X (also LinkedIn).
+- **curb-trailer-9x16.mp4** — same for Instagram Reels/Stories & TikTok.
+- **card-*.png** — 8 feature cards (2560×1440): stat22, map, tap, alerts, whitezones, tickets, logo, cta. Drop them into the thread above or post standalone.
+- Regenerate: `/tmp/social/` has reel.html + render.js (`node render.js full land|port` → ffmpeg) and cards.js.
 
 ## 7 · Demo video — 60 seconds, one take (record before PH day)
 Cmd+Shift+5 full-screen capture at 2x, clean profile, cursor large; captions burned in

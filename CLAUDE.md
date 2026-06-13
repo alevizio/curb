@@ -81,15 +81,24 @@ calendar reminder before the next sweep.
 - og/template.html + og.png — static 1200x630 social card (regenerate with `npm run og`
   after design-token changes; meta tags live in index.html `<head>`, URLs absolute).
 - Brand mark = the isometric "curb cube" (gray top #ADB5BD / red side #C1121F / cream C
-  #FDF0D5). Logo is the BARE cube SVG only — no plate, no wordmark — inline `<svg
-  class="clogo">` in all three headers, the welcome modal (.wmark), and the info-menu
-  header (.imlogo). --red is unified to the LOGO RED #C1121F everywhere (was three reds
-  #E0322E/#C22A26/#C42127 — all collapsed; #C1121F is darker so it also passes AA as text).
-  Favicon is the bare cube on TRANSPARENT (icons/favicon.svg + /favicon.ico); install icons
-  (icons/icon-{192,512,512-maskable}.png, apple-touch-icon.png) keep the paper fill because
-  iOS turns transparency into a black box and Android maskable requires a fill. og.png is
-  the bare cube too. Regenerate from /Users/alevizio/Downloads/crub-logo.svg via the
-  square-canvas wrappers; tickets/about share .wrap max-width 1080px.
+  #FDF0D5) with a thick rounded BLACK outline (the 2026-06-13 logo refresh). The single
+  source is `icons/logo.svg` — a self-contained vector referenced via `<img class="clogo|
+  imlogo|cube|oglogo" src="/icons/logo.svg">` in every header, the welcome modal (.wmark),
+  the info-menu (.imlogo), 404 and the story pages (NOT inline SVG anymore — keeps the HTML
+  light and the mark consistent). CRITICAL: the outline is BAKED as a fat round-joined black
+  stroke (stroke-width 34, linejoin/linecap round) on the two face paths (gray + red, whose
+  union is the full silhouette) drawn behind the colored fills — it is deliberately NOT a
+  runtime feMorphology filter, because Safari clips SVG filters inside `<img>` and shaved the
+  outline (Chrome was fine). Don't reintroduce a filter in logo.svg. viewBox is
+  `-19 -16 282 306` (the 17px outline needs the margin). --red is unified to the LOGO RED
+  #C1121F everywhere. Favicon is the same outlined cube on TRANSPARENT (icons/favicon.svg =
+  copy of logo.svg + /favicon.ico); install icons (icons/icon-{192,512,512-maskable}.png,
+  apple-touch-icon.png) keep the paper fill (iOS blackens transparency, Android maskable needs
+  a fill). og.png/og-tickets.png inline the outlined svg. Regenerate the whole icon set from
+  logo.svg via rsvg-convert + PIL (the gen script lives in /tmp during a refresh; outline math
+  is in the script, not a Downloads source). The maker headshot is `icons/alejandro.jpg`
+  (GitHub avatar, self-hosted) framed in the about-page bio. tickets/about share .wrap
+  max-width 1080px.
 - scripts/build-enforcement.mjs + data/enforcement.json — precomputed citation enforcement
   times (`npm run build:enforcement`).
 - docs/ — sweeper-data research + ready-to-send public-records requests.
