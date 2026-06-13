@@ -688,14 +688,17 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- SF time/sweep core (DAYLBL, normDay, fmtHour, sfWallToInstant, nextSweep, holidays) —
+     loaded before the main script so its exports are on globalThis. Unit-tested separately. -->
+<script src="/lib/sweep-core.js"></script>
 <script>
 const SWEEP="https://data.sfgov.org/resource/yhqp-riqs.json";
 const METER="https://data.sfgov.org/resource/8vzz-qzz9.json";
 const RPP="https://data.sfgov.org/resource/hi6h-neyh.json";
 const ADDR="https://data.sfgov.org/resource/3mea-di5p.json";
 const LOADRULES="https://data.sfgov.org/resource/6cqg-dxku.json"; // metered color-curb operating schedules
-const DAYIDX={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
-const DAYLBL=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+// DAYIDX, DAYLBL, normDay, fmtHour and the SF time core (sfWallToInstant/nextSweep/holidays)
+// are defined in lib/sweep-core.js (loaded just before this script) and live on globalThis.
 const MIN_ZOOM_DATA=15;
 const OFFSET=5; // metres each side of centreline
 // Web Push: VAPID *public* key (safe to ship to the client). Matches VAPID_PRIVATE_KEY on the server.
@@ -813,59 +816,12 @@ function enfFor(cnn,dow){
 function fmtMin(m){let h=Math.floor(m/60),mm=m%60;const ap=h>=12?'pm':'am';h=h%12;if(h===0)h=12;return h+':'+String(mm).padStart(2,'0')+ap;}
 
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
-function normDay(s){if(!s)return null;const k=s.trim().toLowerCase().slice(0,3);return (k in DAYIDX)?DAYIDX[k]:null}
-function fmtHour(h){h=parseInt(h,10);if(isNaN(h))return '';const ap=h>=12?'PM':'AM';let hh=h%12;if(hh===0)hh=12;return hh+ap}
 
-/* ---------- SF-pinned time core ----------
-   All sweep math runs on San Francisco wall-clock regardless of device timezone:
-   instants come from sfWallToInstant (two-pass offset correction — handles both 2026
-   DST edges from any device TZ), calendar iteration uses UTC date arithmetic
-   (timezone-free), and display strings come from the wall fields carried on the ns
-   object — NEVER Date.getHours()/getDay() on a sweep instant. */
-const SF_TZ='America/Los_Angeles';
-const sfDTF=new Intl.DateTimeFormat('en-US',{timeZone:SF_TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
-function sfParts(d){const o={};for(const p of sfDTF.formatToParts(d))o[p.type]=p.value;return {y:+o.year,mo:+o.month,da:+o.day,h:(+o.hour)%24,mi:+o.minute};}
-function sfWallToInstant(y,mo,da,h,mi=0){
-  let t=Date.UTC(y,mo-1,da,h,mi);
-  for(let i=0;i<2;i++){const p=sfParts(new Date(t));
-    t+=Date.UTC(y,mo-1,da,h,mi)-Date.UTC(p.y,p.mo-1,p.da,p.h,p.mi);}
-  // spring-forward: a nonexistent wall hour (2am on the change night) resolves FORWARD
-  const fp=sfParts(new Date(t)); if(fp.h!==h%24)t+=36e5;
-  return new Date(t);
-}
-function sfTodayParts(){return sfParts(new Date());}
-function todaySF(){const p=sfTodayParts();return new Date(Date.UTC(p.y,p.mo-1,p.da)).getUTCDay();}
-/* Sweeping suspensions (SFMTA holiday enforcement schedule, verified 2026-06-13).
-   Daytime rows suspend on every observed holiday; rows flagged holidays=1 (nightly /
-   7-day commercial corridors) sweep straight through except the big three.
-   TABLE COVERS THROUGH 2027-01-01 — refresh when SFMTA posts the next calendar. */
-const HOL_DAY=new Set(['2026-01-01','2026-01-19','2026-02-16','2026-05-25','2026-07-03','2026-07-04',
-  '2026-09-07','2026-10-12','2026-11-11','2026-11-26','2026-11-27','2026-12-25','2027-01-01']);
-const HOL_NIGHT=new Set(['2026-01-01','2026-11-26','2026-12-25','2027-01-01']);
-function sweepSuspended(rec,iso){return (String(rec.holidays)==='1'?HOL_NIGHT:HOL_DAY).has(iso);}
-function nextSweep(rec){
-  const dow=normDay(rec.weekday); if(dow===null)return null;
-  const weeks=[rec.week1,rec.week2,rec.week3,rec.week4,rec.week5].map(v=>String(v)==="1");
-  const fromH=parseInt(rec.fromhour,10); if(isNaN(fromH))return null;
-  let toH=parseInt(rec.tohour,10); if(isNaN(toH))toH=fromH+1;
-  const now=new Date(), t0=sfTodayParts();
-  const base=Date.UTC(t0.y,t0.mo-1,t0.da);          // today as an SF calendar day
-  for(let i=0;i<150;i++){  // 150d covers the 119-day max week5 gap
-    const d=new Date(base+i*864e5);
-    if(d.getUTCDay()!==dow)continue;
-    const occ=Math.ceil(d.getUTCDate()/7);
-    if(occ<1||occ>5||!weeks[occ-1])continue;
-    const y=d.getUTCFullYear(),mo=d.getUTCMonth()+1,da=d.getUTCDate();
-    const iso=y+'-'+String(mo).padStart(2,'0')+'-'+String(da).padStart(2,'0');
-    if(sweepSuspended(rec,iso))continue;            // SFMTA holiday suspension
-    const start=sfWallToInstant(y,mo,da,fromH);
-    let end=sfWallToInstant(y,mo,da,toH);
-    if(+end<=+start)end=new Date(+start+36e5);      // DST spring-forward can collapse 2-3am windows
-    if(i===0&&now>=end)continue;
-    return {start,end,fromH,toH,dow,y,mo,da};
-  }
-  return null;
-}
+/* The SF-pinned time core — normDay, fmtHour, sfParts, sfWallToInstant, sfTodayParts,
+   todaySF, the holiday tables, sweepSuspended and nextSweep — lives in lib/sweep-core.js
+   (loaded just before this script, attached to globalThis) so it can be unit-tested under
+   frozen clocks and arbitrary device timezones. statusFor/relPhrase below stay here because
+   they touch the DOM (getCSS) / display strings. */
 function statusFor(ns){
   if(!ns)return {rank:1,color:getCSS('--gray')};
   const now=new Date();
@@ -981,29 +937,43 @@ async function ensureOverview(){
     week1:m&1?'1':'0',week2:m&2?'1':'0',week3:m&4?'1':'0',week4:m&8?'1':'0',week5:m&16?'1':'0'}))}));
   return OVR;
 }
-let ovrDrawTok=0;
+let ovrDrawTok=0, ovrLines=null;
+// Build the ~12k citywide polylines ONCE and keep them. Filter/status/zoom changes then
+// recolor via setStyle instead of clearLayers()+recreate — leaflet 1.9.4 leaks DOM/canvas
+// state on repeated layer teardown (#8538), which compounds in a long-lived PWA tab. Hidden
+// blocks get opacity 0 (no add/remove churn), so the object set is allocated exactly once.
+function buildOverviewLines(){
+  if(ovrLines)return;
+  ovrLines=OVR.map(b=>({b, ln:L.polyline([b.a,b.z],{renderer:overviewRenderer,weight:2,opacity:0,interactive:false})}));
+  ovrLines.forEach(e=>e.ln.addTo(overviewLayer));
+}
+// Resolve a block's current style (color/weight) or null when it should be hidden this view.
+function overviewStyle(b,ow){
+  let rules=b.rules;
+  if(dayFilter!=null){rules=rules.filter(r=>normDay(r.weekday)===dayFilter);if(!rules.length)return null;}
+  let rank=0,color=getCSS('--gray');
+  rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
+  const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
+  if(cls!=='gray'&&!statusOn[cls])return null;  // gray always shows; colored statuses respect the legend
+  return {color,weight:ow,opacity:.8};
+}
 async function drawOverview(){
   try{await ensureOverview();}catch(e){return;}  // on failure the "find your spot" hint stays
+  buildOverviewLines();
   const ow=map.getZoom()>=MIN_ZOOM_DATA?3:2;  // primary view at z15+ fallback: slightly bolder
   const key=String(dayFilter)+'|'+statusOn.green+statusOn.amber+statusOn.red+'|'+ow+'|'+Math.floor(Date.now()/6e5);
   if(key!==ovrKey){
     ovrKey=key;
     const my=++ovrDrawTok;
-    overviewLayer.clearLayers();
-    // chunked across frames: 12k synchronous polylines is a visible main-thread stall on phones
-    const CHUNK=1500;
-    for(let i=0;i<OVR.length;i+=CHUNK){
+    // chunked across frames: restyling 12k canvas paths at once is a visible main-thread stall on phones
+    const CHUNK=2000;
+    for(let i=0;i<ovrLines.length;i+=CHUNK){
       if(my!==ovrDrawTok)return;  // superseded by a newer filter change mid-draw
-      OVR.slice(i,i+CHUNK).forEach(b=>{
-        let rules=b.rules;
-        if(dayFilter!=null){rules=rules.filter(r=>normDay(r.weekday)===dayFilter);if(!rules.length)return;}
-        let rank=0,color=getCSS('--gray');
-        rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
-        const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
-        if(cls!=='gray'&&!statusOn[cls])return;
-        L.polyline([b.a,b.z],{renderer:overviewRenderer,color,weight:ow,opacity:.8,interactive:false}).addTo(overviewLayer);
+      ovrLines.slice(i,i+CHUNK).forEach(e=>{
+        const s=overviewStyle(e.b,ow);
+        e.ln.setStyle(s||{opacity:0});  // hide via opacity, keep the object
       });
-      if(i+CHUNK<OVR.length)await new Promise(r=>requestAnimationFrame(r));
+      if(i+CHUNK<ovrLines.length)await new Promise(r=>requestAnimationFrame(r));
     }
   }
   if(!map.hasLayer(overviewLayer))overviewLayer.addTo(map);
