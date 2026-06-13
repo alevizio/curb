@@ -16,11 +16,5 @@
       "source": "/b/:cnn",
       "destination": "/api/block?cnn=:cnn"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/send-notifications",
-      "schedule": "*/15 * * * *"
-    }
   ]
 }

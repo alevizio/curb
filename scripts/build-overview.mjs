@@ -16,7 +16,7 @@ async function fetchAll() {
   const PAGE = 20000, rows = [];
   for (let offset = 0; ; offset += PAGE) {
     const u = new URL(SWEEP);
-    u.searchParams.set('$select', 'cnn,weekday,fromhour,tohour,week1,week2,week3,week4,week5,line');
+    u.searchParams.set('$select', 'cnn,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line');
     u.searchParams.set('$order', 'cnn');
     u.searchParams.set('$limit', PAGE);
     u.searchParams.set('$offset', offset);
@@ -47,7 +47,8 @@ function main(rows) {
       e = { ends: [f[0], f[1], l[0], l[1]].map(v => +v.toFixed(5)), rules: new Map() };
       byCnn.set(r.cnn, e);
     }
-    e.rules.set(`${dow}|${fromH}|${toH}|${mask}`, [dow, fromH, toH, mask]);
+    const hol = String(r.holidays) === '1' ? 1 : 0;
+    e.rules.set(`${dow}|${fromH}|${toH}|${mask}|${hol}`, [dow, fromH, toH, mask, hol]);
   });
   const blocks = [];
   for (const e of byCnn.values()) blocks.push([...e.ends, [...e.rules.values()]]);

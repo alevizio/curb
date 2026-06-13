@@ -27,11 +27,22 @@ export function storeReady() {
   return Boolean(URL_ && TOKEN);
 }
 
-/** Upsert a subscription + its saved spot, keyed by endpoint. Resets notify state. */
+/** Upsert a subscription + its saved spot, keyed by endpoint.
+ *  Notify state resets for a NEW sweep time but is preserved when the user re-arms
+ *  the same sweep (re-tapping the button must not let the cron push twice). */
 export async function saveSub(subscription, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  const record = { subscription, spot: spot || null, notifiedFor: null };
+  let notifiedFor = null, notifiedEveFor = null;
+  try {
+    const v = await r.hget(KEY, subscription.endpoint);
+    const prev = typeof v === 'string' ? safeParse(v) : v;
+    if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
+      notifiedFor = prev.notifiedFor ?? null;
+      notifiedEveFor = prev.notifiedEveFor ?? null;
+    }
+  } catch { /* best effort — worst case is one duplicate push */ }
+  const record = { subscription, spot: spot || null, notifiedFor, notifiedEveFor };
   await r.hset(KEY, { [subscription.endpoint]: JSON.stringify(record) });
 }
 
