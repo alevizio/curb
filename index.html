@@ -363,7 +363,10 @@
   .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:8px;padding:5px 10px}
   .chip.meter{color:var(--meter);background:rgba(47,91,208,.1);border:1.5px solid rgba(47,91,208,.4)}
   /* permit chip = a mini version of the green time-limit sign, with the area disc */
-  .chip.rpp{color:var(--sign-green);background:var(--sign-white);border:2px solid var(--sign-green);font-weight:800}
+  .chip.rpp{color:var(--sign-green);background:var(--sign-white);border:2px solid var(--sign-green);font-weight:800;cursor:pointer}
+  .chip.rpp:active{transform:translate(1px,1px)}
+  .chip.rpp .adisc{min-width:17px;height:17px;font-size:10.5px;padding:0 2px;flex:none}
+  .chip.rpp .rppgo{margin-left:4px;color:var(--meter);font-weight:800;white-space:nowrap}
   .adisc{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 3px;border-radius:9px;
     background:var(--disc-blue);color:#fff;font-family:'Anton',sans-serif;font-size:10.5px;font-style:normal}
   .chip .d{width:8px;height:8px;border-radius:50%;background:currentColor}
@@ -1346,8 +1349,7 @@ function openSheet(group, activeKey){
   }).join('');
   const sidesBlock=others.length?`<div class="sideslbl">Other side${others.length>1?'s':''}</div><div class="sides">${sidesHtml}</div>`:'';
 
-  const rp=nearestRpp(active.mid);
-  const rppHtml = rp ? `<span class="chip rpp" title="SFMTA permit data (2017)">Permit <span class="adisc" style="background:${areaColor(rp.area)}">${rp.area}</span> ${rp.hrlimit?rp.hrlimit+'hr limit':''} ${rp.days||''} ${rp.from?rp.from+(rp.to?'–'+rp.to:''):''} · holders exempt</span>` : '';
+  // permit-area chip is filled async per block (loadRppBlock), clickable to outline the area
   const canRemind = ns && relPhrase(ns).when;
   // Spot for push alerts: the tapped side's block + its next sweep (see api/save-subscription.js).
   // eveningISO = 8pm SF the evening before (true instant) — the calm night-before push;
@@ -1387,7 +1389,7 @@ function openSheet(group, activeKey){
     <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span></div>
     ${aSched}
     ${enfHtml}
-    <div class="chips"><span class="chip meter" id="meterChip" style="display:none"></span>${rppHtml}</div>
+    <div class="chips"><span class="chip meter" id="meterChip" style="display:none"></span><span class="chip rpp" id="rppSlot" style="display:none"></span></div>
     ${canRemind?'<hr class="shdiv">':''}
     <div class="actions">
       ${canRemind?`<button class="btn ${alertOn?'on':''}" id="alertBtn">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}
@@ -1446,6 +1448,7 @@ function openSheet(group, activeKey){
     el.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();}};
   });
   loadMeterBlock(active.latlngs, group.cnn);
+  loadRppBlock(active.latlngs, active.mid, group.cnn);
   fillRange(group.cnn);
   const sheetEl=document.getElementById('sheet');
   if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
@@ -1680,6 +1683,40 @@ function freqLabel(weeks){if(weeks.every(Boolean))return 'every week';const o=['
 // block-specific meter sign — query meters inside THIS block's bbox (street-level was misleading)
 const meterBlockCache={};
 const METER_ICON='<svg class="metico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="9" rx="3"/><path d="M9.5 6h5"/><path d="M12 11.5V20"/><path d="M8.5 20.5h7"/></svg>';
+// permit-area chip: which RPP area this block needs a permit for; tap to outline the area.
+let rppBlockCache={};
+function renderRpp(rp){
+  const slot=document.getElementById('rppSlot'); if(!slot)return;
+  if(!rp){slot.style.display='none';return;}
+  const meta=[rp.hrlimit?rp.hrlimit+'hr limit':'',rp.days||'',rp.from?rp.from+(rp.to?'–'+rp.to:''):''].filter(Boolean).join(' ');
+  slot.style.display='inline-flex';
+  slot.innerHTML=`Permit Area <span class="adisc" style="background:${areaColor(rp.area)}">${rp.area}</span>${meta?' · '+meta:''} · holders exempt<span class="rppgo">outline ▸</span>`;
+  slot.title=`Tap to outline Permit Area ${rp.area} on the map`;
+  slot.setAttribute('role','button'); slot.setAttribute('tabindex','0');
+  slot.onclick=()=>{document.getElementById('sheet').classList.remove('tall');showArea(rp.area);};
+  slot.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();slot.onclick();}};
+}
+async function loadRppBlock(latlngs,mid,cnn){
+  if(cnn in rppBlockCache){renderRpp(rppBlockCache[cnn]);return;}
+  const cached=nearestRpp(mid);                       // from the loaded permit layer, if on
+  if(cached){rppBlockCache[cnn]=cached;renderRpp(cached);return;}
+  if(!latlngs||!latlngs.length){renderRpp(null);return;}
+  let a1=90,a2=-90,o1=180,o2=-180;
+  latlngs.forEach(([la,lo])=>{a1=Math.min(a1,la);a2=Math.max(a2,la);o1=Math.min(o1,lo);o2=Math.max(o2,lo);});
+  const P=0.0003; a1-=P;a2+=P;o1-=P;o2+=P;            // ~33m around the block
+  const poly=`POLYGON((${o1} ${a1}, ${o2} ${a1}, ${o2} ${a2}, ${o1} ${a2}, ${o1} ${a1}))`;
+  try{
+    const r=await fetch(RPP+`?$select=rpparea1,hrlimit,days,from_time,to_time,shape&$where=`
+      +encodeURIComponent(`rpparea1 IS NOT NULL AND intersects(shape,'${poly}')`)+`&$limit=40`);
+    if(!r.ok){renderRpp(null);return;} const d=await r.json();
+    let best=null,bd=Infinity;
+    d.forEach(rec=>{const g=rec.shape; if(!g||!g.coordinates)return;
+      const lines=g.type==='MultiLineString'?g.coordinates:[g.coordinates];
+      lines.forEach(c=>{const ll=c.map(p=>[p[1],p[0]]);const dd=distSqToLineMeters(mid[0],mid[1],ll);
+        if(dd<bd){bd=dd;best={area:rec.rpparea1,hrlimit:rec.hrlimit,days:rec.days,from:rec.from_time,to:rec.to_time};}});});
+    const rp=bd<35*35?best:null; rppBlockCache[cnn]=rp; renderRpp(rp);
+  }catch(e){renderRpp(null);}
+}
 async function loadMeterBlock(latlngs,cnn){
   const slot=document.getElementById('meterChip'); if(!slot)return;
   const show=c=>{ if(c>0){slot.style.display='inline-flex';slot.innerHTML=METER_ICON+'Metered';
