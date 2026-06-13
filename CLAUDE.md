@@ -80,6 +80,13 @@ calendar reminder before the next sweep.
 - index.html — the entire app (HTML + CSS + JS in one file).
 - og/template.html + og.png — static 1200x630 social card (regenerate with `npm run og`
   after design-token changes; meta tags live in index.html `<head>`, URLs absolute).
+- Brand mark = the isometric "curb cube" (gray top #ADB5BD / red side #C1121F / cream C
+  #FDF0D5). Header logos are inline `<svg class="clogo">` + "CURB" + red dot on the black
+  plate, identical across index/tickets/about. Icon assets (icons/icon{,-192,-512,
+  -512-maskable}.{svg,png}, apple-touch-icon.png, favicon.svg, /favicon.ico, og.png) all
+  derive from the same paths — regenerate from /Users/alevizio/Downloads/crub-logo.svg via
+  the square-canvas wrappers if the mark changes. Logo red (#C1121F) is intentionally its
+  own; --red (#E0322E) stays the app/theme red.
 - scripts/build-enforcement.mjs + data/enforcement.json — precomputed citation enforcement
   times (`npm run build:enforcement`).
 - docs/ — sweeper-data research + ready-to-send public-records requests.
