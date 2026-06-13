@@ -82,11 +82,14 @@ const hoodOf = new Map();
 }
 
 log('streaming 2yr street-cleaning rows for hoods/streets…');
-const hoods = new Map(), streets = new Map();
+// hoods: citywide rollup (n, rev). hoodDetail: per-hood histograms for the neighborhood SEO
+// pages (sweep hour/dow distribution, mean minute-of-day, heaviest streets IN that hood).
+const hoods = new Map(), streets = new Map(), hoodDetail = new Map();
+const newDetail = () => ({ n: 0, rev: 0, minSum: 0, minN: 0, hours: Array(24).fill(0), dows: Array(7).fill(0), streets: new Map() });
 let cursor = '', seen = 0;
 for (;;) {
   const rows = await soda(CITES, {
-    '$select': ':id,citation_location,fine_amount',
+    '$select': ':id,citation_location,fine_amount,citation_issued_datetime',
     '$where': `${SWEEP_WHERE} AND citation_issued_datetime > '${SINCE}'` + (cursor ? ` AND :id > '${cursor}'` : ''),
     '$order': ':id', '$limit': 50000,
   });
@@ -96,7 +99,17 @@ for (;;) {
     const p = parseLoc(r.citation_location); if (!p) continue;
     const fine = +r.fine_amount || 0;
     const hood = hoodOf.get(`${p.num}|${p.name}`);
-    if (hood) { const h = hoods.get(hood) || { n: 0, rev: 0 }; h.n++; h.rev += fine; hoods.set(hood, h); }
+    // citation_issued_datetime is SF local wall time (no offset) — parse the fields directly.
+    const m = String(r.citation_issued_datetime || '').match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/);
+    const hh = m ? +m[4] : null, mi = m ? +m[5] : null;
+    const dow = m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay() : null;
+    if (hood) {
+      const h = hoods.get(hood) || { n: 0, rev: 0 }; h.n++; h.rev += fine; hoods.set(hood, h);
+      const d = hoodDetail.get(hood) || newDetail(); d.n++; d.rev += fine;
+      if (hh !== null) { d.hours[hh]++; d.dows[dow]++; d.minSum += hh * 60 + mi; d.minN++; }
+      d.streets.set(p.name, (d.streets.get(p.name) || 0) + 1);
+      hoodDetail.set(hood, d);
+    }
     const s = streets.get(p.name) || { n: 0, rev: 0 }; s.n++; s.rev += fine; streets.set(p.name, s);
   }
   cursor = rows[rows.length - 1][':id'];
@@ -147,6 +160,14 @@ const out = {
     .sort((a, b) => b.n - a.n),
   topStreets: [...streets.entries()].map(([k, v]) => ({ street: k, n: v.n, rev: Math.round(v.rev) }))
     .sort((a, b) => b.n - a.n).slice(0, 25),
+  // Per-hood detail for the neighborhood SEO pages (scripts/build-hood-pages.mjs).
+  hoodDetail: Object.fromEntries([...hoodDetail.entries()].map(([k, v]) => [k, {
+    n: v.n, rev: Math.round(v.rev),
+    avgMin: v.minN ? Math.round(v.minSum / v.minN) : null,
+    hours: v.hours, dows: v.dows,
+    topStreets: [...v.streets.entries()].map(([street, n]) => ({ street, n }))
+      .sort((a, b) => b.n - a.n).slice(0, 6),
+  }])),
 };
 const fs = await import('node:fs');
 const url = new URL('../data/stats.json', import.meta.url);

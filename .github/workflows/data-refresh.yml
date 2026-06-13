@@ -49,6 +49,10 @@ jobs:
       - name: Validate shapes (fail loudly on source drift)
         run: npm run validate:data
 
+      # Regenerate the neighborhood SEO pages + sitemap from the fresh stats.json.
+      - name: Rebuild neighborhood pages
+        run: npm run build:hoodpages
+
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
@@ -56,7 +60,7 @@ jobs:
           # _meta.generated carries a fresh timestamp every run, and the daily citation/
           # zone sources almost always move, so in practice this commits each month. The
           # guard is here only for the rare no-op (e.g. a re-run minutes apart).
-          git add data/*.json
+          git add data/*.json n/ sitemap.xml
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit."
             exit 0

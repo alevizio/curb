@@ -17,6 +17,10 @@
       "destination": "/api/block?cnn=:cnn"
     },
     {
+      "source": "/n/:slug",
+      "destination": "/n/:slug.html"
+    },
+    {
       "source": "/privacy",
       "destination": "/privacy.html"
     }

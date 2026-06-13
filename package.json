@@ -13,6 +13,7 @@
     "build:zones": "node scripts/build-zones.mjs",
     "build:stats": "node scripts/build-stats.mjs",
     "build:whitezones": "node scripts/build-white-zones.mjs",
+    "build:hoodpages": "node scripts/build-hood-pages.mjs",
     "validate:data": "node scripts/validate-data.mjs",
     "test": "vitest run"
   },
