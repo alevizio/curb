@@ -256,6 +256,24 @@
   .dayrow{display:flex;gap:6px;align-items:center;pointer-events:auto;overflow-x:auto;
     scrollbar-width:none;margin:0 -12px;padding:6px 12px 8px}
   .dayrow::-webkit-scrollbar{display:none}
+  /* Your-car status strip — docks under the day chips; shows only when a spot is pinned. */
+  .carstrip{display:none;align-items:center;gap:9px;pointer-events:auto;width:100%;max-width:340px;margin-top:2px;
+    background:var(--sign);border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);
+    padding:8px 11px;font:inherit;cursor:pointer;text-align:left;transition:transform .12s}
+  .carstrip.show{display:flex}
+  .carstrip:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+  .carstrip .cs-dot{width:11px;height:11px;border-radius:50%;flex:none;background:var(--green);
+    box-shadow:0 0 0 3px rgba(31,158,90,.18)}
+  .carstrip.soon .cs-dot{background:var(--amber);box-shadow:0 0 0 3px rgba(224,138,30,.18)}
+  .carstrip.now .cs-dot{background:var(--red);box-shadow:0 0 0 3px rgba(193,18,31,.2)}
+  .carstrip .cs-tx{display:flex;flex-direction:column;line-height:1.15;min-width:0;flex:1}
+  .carstrip .cs-where{font-size:12.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  .carstrip .cs-sub{font-size:11.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .carstrip.soon .cs-sub{color:var(--amber-text)} .carstrip.now .cs-sub{color:var(--red-text)}
+  .carstrip .cs-clear{flex:none;width:22px;height:22px;display:grid;place-items:center;border-radius:7px;
+    color:var(--ink-soft);font-size:16px;line-height:1;font-weight:700}
+  .carstrip .cs-clear:hover{background:rgba(23,21,15,.08);color:var(--ink)}
+  .carstrip .cs-go{flex:none;font-size:17px;font-weight:800;color:var(--ink-soft)}
   .datechip{flex:none;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
     background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink);
     border:0;cursor:pointer}
@@ -608,6 +626,13 @@
     <button class="dchip" data-day="6">Sat</button>
     <button class="dchip" data-day="0">Sun</button>
   </div>
+  <!-- Your-car status strip (ALE-164): persists where you parked + its live sweep verdict. -->
+  <button class="carstrip" id="carStrip" hidden aria-label="Your parked car — show its block">
+    <span class="cs-dot" aria-hidden="true"></span>
+    <span class="cs-tx"><b class="cs-where">Your car</b><span class="cs-sub"></span></span>
+    <span class="cs-clear" id="carClear" role="button" tabindex="0" aria-label="Clear your parked car" title="Not parked here anymore">×</span>
+    <span class="cs-go" aria-hidden="true">›</span>
+  </button>
 </div>
 
 <!-- layers control: everything map-related lives in one corner, Google-Maps style -->
@@ -1369,6 +1394,9 @@ function openSheet(group, activeKey){
       ...(+eve>Date.now()+6e5&&+eve<+ns.start?{eveningISO:eve.toISOString()}:{})
     };
   })() : null;
+  // remember the open block for pin-on-arm; if this open came from "I'm here" (placeYou), pin it now
+  _curSpot=spot; _curMid=active.mid;
+  if(_pinOnOpen){_pinOnOpen=false; writePin(spot,active.mid);}
   const alertOn = alertSpotMatches(spot);
 
   // Real-world enforcement callout for the active side (from citation history).
@@ -1575,6 +1603,7 @@ async function onAlertTap(spot, btn){
     if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.note||d.error||('save failed ('+res.status+')')); }
     try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}
     track('alert_armed');  // the activation→retention metric
+    writePin(spot,_curMid);  // arming an alert pins your car → the status strip tracks it
     btn.classList.remove('busy','alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on';
     toast('Sweep alert set for '+(spot.corridor||'this block')+(spot.eveningISO?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before."));
   }catch(err){
@@ -1610,8 +1639,47 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
   if(youMarker)map.removeLayer(youMarker);
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
-  if(!quiet)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);
+  if(!quiet){_pinOnOpen=true;setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);}
 }
+
+/* ---------- Your-car pin + persistent status strip (ALE-164) ----------
+   "I'm here" (locate / tap-to-place) or arming an alert pins the block; the strip then shows
+   its live sweep verdict from the stored rule and taps back to it. All client-side localStorage. */
+let curbPin=(()=>{try{return JSON.parse(localStorage.getItem('curbPin')||'null');}catch(_){return null;}})();
+let _pinOnOpen=false;            // placeYou sets this so the NEXT sheet-open pins (not every tap)
+let _curSpot=null, _curMid=null; // the open sheet's spot + midpoint, for pin-on-arm
+function savePin(p){curbPin=p;try{p?localStorage.setItem('curbPin',JSON.stringify(p)):localStorage.removeItem('curbPin');}catch(_){}renderStrip();}
+function writePin(spot,latlng){
+  if(!spot||!spot.rule)return;   // only a block with a real sweep rule is worth tracking
+  savePin({corridor:spot.corridor||'',blockside:spot.blockside||'',rule:spot.rule,
+    cnn:spot.cnn||'',sideKey:spot.sideKey||'',latlng:latlng||null,pinnedAt:Date.now()});
+}
+function renderStrip(){
+  const el=document.getElementById('carStrip'); if(!el)return;
+  if(!curbPin||!curbPin.rule){el.classList.remove('show');el.hidden=true;return;}
+  const ns=nextSweep(curbPin.rule), rp=relPhrase(ns);
+  const cls=rp.cls==='red'?'now':rp.cls==='amber'?'soon':'';
+  el.classList.remove('now','soon'); if(cls)el.classList.add(cls);
+  el.querySelector('.cs-where').textContent='📍 '+(curbPin.corridor||'Your block');
+  el.querySelector('.cs-sub').textContent=ns?rp.short:'tap to view block';
+  el.hidden=false; el.classList.add('show');
+}
+function flyToPin(){
+  if(!curbPin)return;
+  const go=(la,lo)=>{map.flyTo([la,lo],17,{duration:.6});setTimeout(()=>openNearestWhenReady(la,lo,curbPin.cnn,0),700);};
+  if(curbPin.latlng){go(curbPin.latlng[0],curbPin.latlng[1]);return;}
+  fetch(SWEEP+`?$select=line&$where=cnn='${curbPin.cnn}'&$limit=1`).then(r=>r.json()).then(d=>{
+    const c=d[0]&&d[0].line&&d[0].line.coordinates; if(c&&c.length){const m=c[(c.length/2)|0];go(m[1],m[0]);}
+  }).catch(()=>{});
+}
+(function(){
+  const el=document.getElementById('carStrip'), clr=document.getElementById('carClear');
+  if(el)el.onclick=e=>{if(e.target===clr)return;flyToPin();};
+  if(clr){const go=e=>{e.stopPropagation();savePin(null);toast('Cleared your parked car.');};
+    clr.onclick=go; clr.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' ')go(ev);};}
+})();
+renderStrip();
+setInterval(renderStrip,60e3);  // keep the countdown fresh as the day rolls over
 
 /* Auto-position on launch — ONLY when permission is already granted, so no permission
    prompt ever fires by itself. Permissions API where available; older Safari falls back
