@@ -780,22 +780,51 @@ function getCSS(v){return getComputedStyle(document.documentElement).getProperty
 function normDay(s){if(!s)return null;const k=s.trim().toLowerCase().slice(0,3);return (k in DAYIDX)?DAYIDX[k]:null}
 function fmtHour(h){h=parseInt(h,10);if(isNaN(h))return '';const ap=h>=12?'PM':'AM';let hh=h%12;if(hh===0)hh=12;return hh+ap}
 
+/* ---------- SF-pinned time core ----------
+   All sweep math runs on San Francisco wall-clock regardless of device timezone:
+   instants come from sfWallToInstant (two-pass offset correction — handles both 2026
+   DST edges from any device TZ), calendar iteration uses UTC date arithmetic
+   (timezone-free), and display strings come from the wall fields carried on the ns
+   object — NEVER Date.getHours()/getDay() on a sweep instant. */
+const SF_TZ='America/Los_Angeles';
+const sfDTF=new Intl.DateTimeFormat('en-US',{timeZone:SF_TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+function sfParts(d){const o={};for(const p of sfDTF.formatToParts(d))o[p.type]=p.value;return {y:+o.year,mo:+o.month,da:+o.day,h:(+o.hour)%24,mi:+o.minute};}
+function sfWallToInstant(y,mo,da,h,mi=0){
+  let t=Date.UTC(y,mo-1,da,h,mi);
+  for(let i=0;i<2;i++){const p=sfParts(new Date(t));
+    t+=Date.UTC(y,mo-1,da,h,mi)-Date.UTC(p.y,p.mo-1,p.da,p.h,p.mi);}
+  return new Date(t);
+}
+function sfTodayParts(){return sfParts(new Date());}
+function todaySF(){const p=sfTodayParts();return new Date(Date.UTC(p.y,p.mo-1,p.da)).getUTCDay();}
+/* Sweeping suspensions (SFMTA holiday enforcement schedule, verified 2026-06-13).
+   Daytime rows suspend on every observed holiday; rows flagged holidays=1 (nightly /
+   7-day commercial corridors) sweep straight through except the big three.
+   TABLE COVERS THROUGH 2027-01-01 — refresh when SFMTA posts the next calendar. */
+const HOL_DAY=new Set(['2026-01-01','2026-01-19','2026-02-16','2026-05-25','2026-07-03','2026-07-04',
+  '2026-09-07','2026-10-12','2026-11-11','2026-11-26','2026-11-27','2026-12-25','2027-01-01']);
+const HOL_NIGHT=new Set(['2026-01-01','2026-11-26','2026-12-25','2027-01-01']);
+function sweepSuspended(rec,iso){return (String(rec.holidays)==='1'?HOL_NIGHT:HOL_DAY).has(iso);}
 function nextSweep(rec){
   const dow=normDay(rec.weekday); if(dow===null)return null;
   const weeks=[rec.week1,rec.week2,rec.week3,rec.week4,rec.week5].map(v=>String(v)==="1");
   const fromH=parseInt(rec.fromhour,10); if(isNaN(fromH))return null;
   let toH=parseInt(rec.tohour,10); if(isNaN(toH))toH=fromH+1;
-  const now=new Date();
+  const now=new Date(), t0=sfTodayParts();
+  const base=Date.UTC(t0.y,t0.mo-1,t0.da);          // today as an SF calendar day
   for(let i=0;i<150;i++){  // 150d covers the 119-day max week5 gap
-    const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);
-    if(d.getDay()!==dow)continue;
-    const occ=Math.ceil(d.getDate()/7);
+    const d=new Date(base+i*864e5);
+    if(d.getUTCDay()!==dow)continue;
+    const occ=Math.ceil(d.getUTCDate()/7);
     if(occ<1||occ>5||!weeks[occ-1])continue;
-    const start=new Date(d.getFullYear(),d.getMonth(),d.getDate(),fromH,0,0);
-    let end=new Date(d.getFullYear(),d.getMonth(),d.getDate(),toH,0,0);
-    if(+end<=+start)end=new Date(+start+36e5);  // DST spring-forward can collapse 2-3am windows
+    const y=d.getUTCFullYear(),mo=d.getUTCMonth()+1,da=d.getUTCDate();
+    const iso=y+'-'+String(mo).padStart(2,'0')+'-'+String(da).padStart(2,'0');
+    if(sweepSuspended(rec,iso))continue;            // SFMTA holiday suspension
+    const start=sfWallToInstant(y,mo,da,fromH);
+    let end=sfWallToInstant(y,mo,da,toH);
+    if(+end<=+start)end=new Date(+start+36e5);      // DST spring-forward can collapse 2-3am windows
     if(i===0&&now>=end)continue;
-    return {start,end};
+    return {start,end,fromH,toH,dow,y,mo,da};
   }
   return null;
 }
@@ -811,13 +840,13 @@ function statusFor(ns){
 function relPhrase(ns){
   if(!ns)return {txt:'see posted sign',short:'see posted sign',cls:'green'};
   const now=new Date();
-  if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.end.getHours());return {txt:t,short:t,cls:'red'};}
+  if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.toH);return {txt:t,short:t,cls:'red'};}
   const hrs=(ns.start-now)/36e5, days=Math.floor(hrs/24);
-  const when=DAYLBL[ns.start.getDay()]+' '+(ns.start.getMonth()+1)+'/'+ns.start.getDate()+', '+fmtHour(ns.start.getHours())+'–'+fmtHour(ns.end.getHours());
+  const when=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+', '+fmtHour(ns.fromH)+'–'+fmtHour(ns.toH);
   const rel = hrs<1?'in <1 hr':hrs<24?('in '+Math.round(hrs)+' hr'):days===1?'tomorrow':('in '+days+' days');
   const cls = hrs<3?'red':hrs<24?'amber':'green';
   // short = date + countdown only (the sign badge beside it already shows day + window)
-  const short=DAYLBL[ns.start.getDay()]+' '+(ns.start.getMonth()+1)+'/'+ns.start.getDate()+' · '+rel;
+  const short=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+' · '+rel;
   return {txt:when+' · '+rel,short,cls,when:ns.start};
 }
 
@@ -889,7 +918,7 @@ async function loadViewport(){
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}  // token bump: kill in-flight chunked draws
   hint.style.opacity='0';hint.style.visibility='hidden';  // opacity alone leaves the about-link invisibly clickable
   try{
-    const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,line`
+    const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line`
       +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
     const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
     if(my!==fetchTok)return;
@@ -952,7 +981,7 @@ function distM(p,q){const kx=Math.cos(p[0]*Math.PI/180)*111320;const dx=(p[1]-q[
 function drawRoutes(){
   routeLayer.clearLayers();
   if(!routeOn||!ENF)return 0;
-  const dow=dayFilter!=null?dayFilter:new Date().getDay();
+  const dow=dayFilter!=null?dayFilter:todaySF();
   const rz=map.getZoom();
   const groups={};
   segCacheAll.forEach(o=>{
@@ -1246,7 +1275,7 @@ function verdictClass(ns){
 }
 function previewHtml(group, side){
   const ns=side.ns, now=new Date();
-  const head=!ns?'Posted sign':(now>=ns.start&&now<ns.end)?'Sweeping now':DAYLBL[ns.start.getDay()]+' '+fmtHour(ns.start.getHours());
+  const head=!ns?'Posted sign':(now>=ns.start&&now<ns.end)?'Sweeping now':DAYLBL[ns.dow]+' '+fmtHour(ns.fromH);
   const rp=relPhrase(ns);
   const r=side.row||side.rows[0];  // the rule that produced ns — rows[0] can be a different weekday
   const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
@@ -1276,7 +1305,7 @@ function openSheet(group, activeKey){
   let vClass=verdictClass(ns),kicker='Park until',head='—';
   if(!ns){kicker='Schedule';head='Posted sign';}
   else if(now>=ns.start&&now<ns.end){kicker='Restricted';head='Sweeping now';}
-  else{head=DAYLBL[ns.start.getDay()]+' '+fmtHour(ns.start.getHours());}
+  else{head=DAYLBL[ns.dow]+' '+fmtHour(ns.fromH);}
 
   const ordered=[active, ...group.sides.filter(s=>s!==active)];
   const sidesHtml=ordered.map(s=>{
@@ -1434,8 +1463,9 @@ function downloadICS(street,block,ns){
 function openGoogleCal(street,block,ns){
   // Floating wall-clock times pinned to SF via ctz — sweep times are inherently local to SF,
   // and without ctz Google interprets them in the viewer's calendar timezone (hours off for visitors).
-  const dt=d=>d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')
-    +'T'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'00';
+  // wall times derived in SF regardless of device TZ (instants are now true instants)
+  const dt=d=>{const p=sfParts(d),z=n=>String(n).padStart(2,'0');
+    return p.y+z(p.mo)+z(p.da)+'T'+z(p.h)+z(p.mi)+'00';};
   const u='https://calendar.google.com/calendar/render?action=TEMPLATE'
     +'&text='+encodeURIComponent('🧹 Move car — street sweeping ('+street+')')
     +'&dates='+dt(ns.start)+'/'+dt(ns.end)+'&ctz=America/Los_Angeles'
@@ -1598,7 +1628,7 @@ function setDayFilter(v){
     const on=v==null?x.dataset.day==='all':parseInt(x.dataset.day,10)===v;
     x.classList.toggle('on',on); x.setAttribute('aria-pressed',on);
   });
-  const dc=document.getElementById('dateChip'), today=(v!==null&&v===new Date().getDay());
+  const dc=document.getElementById('dateChip'), today=(v!==null&&v===todaySF());
   dc.classList.toggle('on',today); dc.setAttribute('aria-pressed',today);
   updateRouteDay();  // route follows the day filter — keep its legend label in sync
   drawSegments(lastRows);
@@ -1606,10 +1636,10 @@ function setDayFilter(v){
 }
 const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function refreshToday(){
-  const now=new Date();
-  document.getElementById('dateChip').innerHTML='Today · '+DAYLBL[now.getDay()]+' '+MONLBL[now.getMonth()]+' '+now.getDate()
+  const p=sfTodayParts(), d=todaySF();  // the chip shows SF's today, wherever the device is
+  document.getElementById('dateChip').innerHTML='Today · '+DAYLBL[d]+' '+MONLBL[p.mo-1]+' '+p.da
     +(wx?' · '+WXICON[wx.i]+' '+wx.t+'°':'');
-  dayChips.forEach(b=>b.classList.toggle('today',b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===now.getDay()));
+  dayChips.forEach(b=>b.classList.toggle('today',b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===d));
 }
 /* SF weather on the date chip — Open-Meteo (free, keyless); degrades silently if it fails.
    Icons drawn in the app's duotone icon language: pop-color fill + currentColor detail. */
@@ -1634,10 +1664,10 @@ async function fetchWx(){
   }catch(e){}
 }
 fetchWx(); setInterval(fetchWx,30*60e3);
-let liveDay=new Date().getDay();
+let liveDay=todaySF();
 function dayRollover(){  // long-lived tabs: refresh "today" + statuses when the date flips
-  if(new Date().getDay()===liveDay)return;
-  liveDay=new Date().getDay();
+  if(todaySF()===liveDay)return;
+  liveDay=todaySF();
   refreshToday(); updateRouteDay();
   drawSegments(lastRows); if(ovMode)drawOverview();
 }
@@ -1648,7 +1678,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)dayRollove
   const dateChip=document.getElementById('dateChip');
   // the date chip IS the today filter — removes the today/chip duplication
   dateChip.onclick=()=>{
-    const t=new Date().getDay();
+    const t=todaySF();
     document.getElementById('sheet').classList.remove('open');
     setDayFilter(dayFilter===t?null:t);
   };
@@ -1707,8 +1737,8 @@ function updateRouteDay(){
   const el=document.getElementById('rtDayLeg'); if(!el)return;
   el.hidden=!routeOn;
   if(!routeOn)return;
-  const dow=dayFilter!=null?dayFilter:new Date().getDay();
-  const isToday=dayFilter==null||dayFilter===new Date().getDay();
+  const dow=dayFilter!=null?dayFilter:todaySF();
+  const isToday=dayFilter==null||dayFilter===todaySF();
   document.getElementById('rtDayLbl').innerHTML=`Truck route · <b>${DAYLBL[dow]}</b>${isToday?' <span class="rtto">today</span>':''}`;
 }
 // active-layer badges on the Layers button: blue dot = permit, amber dot = loading, disc = area
@@ -1858,7 +1888,7 @@ document.getElementById('routeToggle').onclick=function(){
       map.setView(map.getCenter(),Math.max(MIN_ZOOM_DATA+1,map.getZoom()+1));
       return;
     }
-    const dow=dayFilter!=null?dayFilter:new Date().getDay();
+    const dow=dayFilter!=null?dayFilter:todaySF();
     const n=drawRoutes();
     toast(n?`Inferred ${DAYLBL[dow]} sweep runs from 2 yrs of ticket times — dashed path, arrows show direction. Pick a day chip to change day. An estimate, never live.`
            :`No ${DAYLBL[dow]} runs to infer here — try another day chip or pan to a residential area.`);
