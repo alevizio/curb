@@ -1331,10 +1331,17 @@ function openSheet(group, activeKey){
   const rppHtml = rp ? `<span class="chip rpp" title="SFMTA permit data (2017)">Permit <span class="adisc" style="background:${areaColor(rp.area)}">${rp.area}</span> ${rp.hrlimit?rp.hrlimit+'hr limit':''} ${rp.days||''} ${rp.from?rp.from+(rp.to?'–'+rp.to:''):''} · holders exempt</span>` : '';
   const canRemind = ns && relPhrase(ns).when;
   // Spot for push alerts: the tapped side's block + its next sweep (see api/save-subscription.js).
-  const spot = ns ? {
-    corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
-    nextSweepISO: ns.start.toISOString(), leadMinutes: 30
-  } : null;
+  // eveningISO = 8pm SF the evening before (true instant) — the calm night-before push;
+  // skipped when arming after that point, so day-of arming gets only the 30-min alert.
+  const spot = ns ? (()=>{
+    const prev=new Date(Date.UTC(ns.y,ns.mo-1,ns.da)-864e5);
+    const eve=sfWallToInstant(prev.getUTCFullYear(),prev.getUTCMonth()+1,prev.getUTCDate(),20);
+    return {
+      corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
+      nextSweepISO: ns.start.toISOString(), leadMinutes: 30,
+      ...(+eve>Date.now()+6e5&&+eve<+ns.start?{eveningISO:eve.toISOString()}:{})
+    };
+  })() : null;
   const alertOn = alertSpotMatches(spot);
 
   // Real-world enforcement callout for the active side (from citation history).
@@ -1369,7 +1376,7 @@ function openSheet(group, activeKey){
     <div class="sides">${sidesHtml}</div>
     <details class="noted">
       <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts and .ics reminders fire <b>~30 min before</b> sweeping; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
+      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping the <b>night before</b> (~8pm) and <b>~30 min before</b> sweeping; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
     </details>`;
 
   if(canRemind){
@@ -1536,7 +1543,7 @@ async function onAlertTap(spot, btn){
     if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.note||d.error||('save failed ('+res.status+')')); }
     try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}
     btn.classList.remove('busy','alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on';
-    toast('Sweep alert set for '+(spot.corridor||'this block')+" — we'll ping you ~30 min before.");
+    toast('Sweep alert set for '+(spot.corridor||'this block')+(spot.eveningISO?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before."));
   }catch(err){
     const on=alertSpotMatches(spot);
     btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.remove('alt');

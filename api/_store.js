@@ -55,14 +55,15 @@ export async function deleteSub(endpoint) {
   if (r) await r.hdel(KEY, endpoint);
 }
 
-/** Record that we already pushed for a given sweep time, so the cron won't repeat. */
-export async function markNotified(endpoint, nextSweepISO) {
+/** Record that we already pushed for a given sweep time, so the cron won't repeat.
+ *  field: 'notifiedFor' (the ~30-min lead push) or 'notifiedEveFor' (night-before). */
+export async function markNotified(endpoint, nextSweepISO, field = 'notifiedFor') {
   const r = redis();
   if (!r) return;
   const v = await r.hget(KEY, endpoint);
   const rec = typeof v === 'string' ? safeParse(v) : v;
   if (!rec) return;
-  rec.notifiedFor = nextSweepISO;
+  rec[field] = nextSweepISO;
   await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
 }
 

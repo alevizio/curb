@@ -26,13 +26,17 @@ function sanitizeSpot(spot) {
   let lead = Number(spot.leadMinutes);
   if (!Number.isFinite(lead)) lead = 30;
   lead = Math.min(180, Math.max(1, Math.round(lead)));
-  return {
+  // optional night-before push: must parse and precede the sweep itself
+  const ev = Date.parse(spot.eveningISO);
+  const out = {
     corridor: t(spot.corridor, 120),
     limits: t(spot.limits, 120),
     blockside: t(spot.blockside, 60),
     nextSweepISO: new Date(ts).toISOString(),
     leadMinutes: lead,
   };
+  if (Number.isFinite(ev) && ev < ts) out.eveningISO = new Date(ev).toISOString();
+  return out;
 }
 
 export default async function handler(req, res) {
