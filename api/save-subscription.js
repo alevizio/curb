@@ -1,6 +1,6 @@
 // POST { subscription, spot } — store a Web Push subscription + the saved spot.
 // spot = { corridor, limits, blockside, nextSweepISO, leadMinutes, eveningISO?, rule?, cnn?, sideKey? }
-import { saveSub, storeReady } from './_store.js';
+import { saveSub, ensureOwnerProof, storeReady } from './_store.js';
 // Side-effect import: attaches the SF time core (normDay/nextSweep/…) to globalThis so we can
 // validate an incoming recurrence rule with the EXACT guards the cron's nextSweep() uses.
 import '../lib/sweep-core.js';
@@ -34,11 +34,10 @@ function validSubscription(s) {
   if (!s || typeof s.endpoint !== 'string' || s.endpoint.length > 1024) return false;
   let u; try { u = new URL(s.endpoint); } catch { return false; }
   if (u.protocol !== 'https:' || !PUSH_HOST.test(u.hostname)) return false;
-  if (s.keys != null) {
-    const { p256dh, auth } = s.keys;
-    if (typeof p256dh !== 'string' || typeof auth !== 'string') return false;
-    if (p256dh.length > 256 || auth.length > 256) return false;
-  }
+  // keys are REQUIRED (web-push needs them, and a keyless record can't be ownership-proved later)
+  const k = s.keys;
+  if (!k || typeof k.p256dh !== 'string' || typeof k.auth !== 'string') return false;
+  if (k.p256dh.length > 256 || k.auth.length > 256) return false;
   return true;
 }
 
@@ -82,7 +81,11 @@ export default async function handler(req, res) {
       return;
     }
     await saveSub(subscription, cleanSpot);
-    res.status(200).json({ ok: true, stored: true });
+    // Mint the auto-park ownership proof on first save; return the plaintext exactly once so the
+    // client can stash it for /api/enable-auto-park. Decoupled from keys.auth (which the cron must
+    // keep in plaintext to send pushes), so a store read-leak can't forge it.
+    const ownerProof = await ensureOwnerProof(subscription.endpoint);
+    res.status(200).json({ ok: true, stored: true, ...(ownerProof ? { ownerProof } : {}) });
   } catch (e) {
     console.error('save-subscription failed:', e);
     res.status(500).json({ error: 'internal error' });

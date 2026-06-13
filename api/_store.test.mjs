@@ -7,18 +7,22 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 process.env.KV_REST_API_URL = 'https://fake.upstash.io';
 process.env.KV_REST_API_TOKEN = 'fake-token';
 
-// In-memory hash keyed by field (endpoint) — the only hash this store uses is 'curb:subs'.
+// In-memory Redis mock: hash-aware (curb:subs / curb:tokens) + a kv space for SET NX (rate slots).
 const mem = {};
+const kv = {};
 vi.mock('@upstash/redis', () => ({
   Redis: class {
-    async hget(_k, f) { return mem[f]; }
-    async hset(_k, obj) { Object.assign(mem, obj); }
-    async hdel(_k, f) { delete mem[f]; }
-    async hgetall() { return { ...mem }; }
+    async hget(k, f) { return mem[k] && mem[k][f]; }
+    async hset(k, obj) { (mem[k] || (mem[k] = {})); Object.assign(mem[k], obj); }
+    async hdel(k, f) { if (mem[k]) delete mem[k][f]; }
+    async hgetall(k) { return mem[k] ? { ...mem[k] } : null; }
+    async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
   },
 }));
 
-const { saveSub, advanceSpot, markNotified, loadAllSubs } = await import('./_store.js');
+const { saveSub, advanceSpot, markNotified, loadAllSubs, getSub,
+  saveToken, resolveToken, deleteTokensForEndpoint,
+  ensureOwnerProof, verifyOwnerProof, claimSlot } = await import('./_store.js');
 
 const SUB = { endpoint: 'https://web.push.apple.com/abc123', keys: { p256dh: 'p', auth: 'a' } };
 const EP = SUB.endpoint;
@@ -26,7 +30,70 @@ const RULE = { weekday: 'Wed', fromhour: '8', tohour: '10', week1: '1', week2: '
 const spotA = { corridor: 'Haight St', nextSweepISO: '2026-06-17T15:00:00.000Z', leadMinutes: 30, rule: RULE, cnn: '123', sideKey: 'L' };
 const spotB = { corridor: 'Haight St', nextSweepISO: '2026-06-24T15:00:00.000Z', leadMinutes: 30, rule: RULE, cnn: '123', sideKey: 'L' };
 
-beforeEach(() => { for (const k of Object.keys(mem)) delete mem[k]; });
+beforeEach(() => {
+  for (const k of Object.keys(mem)) delete mem[k];
+  for (const k of Object.keys(kv)) delete kv[k];
+});
+
+describe('owner proof (auto-park auth)', () => {
+  it('mints once, reveals the plaintext only the first time, and verifies', async () => {
+    await saveSub(SUB, spotA);
+    const proof = await ensureOwnerProof(EP);
+    expect(typeof proof).toBe('string');
+    expect(await ensureOwnerProof(EP)).toBe(null);          // never re-revealed
+    expect(JSON.stringify(mem)).not.toContain(proof);       // only the hash is stored
+    expect(await verifyOwnerProof(EP, proof)).toBe(true);
+    expect(await verifyOwnerProof(EP, 'wrong')).toBe(false);
+    expect(await verifyOwnerProof(EP, undefined)).toBe(false);
+    expect(await verifyOwnerProof('https://nope', proof)).toBe(false);
+  });
+  it('cannot be minted for a nonexistent subscription', async () => {
+    expect(await ensureOwnerProof('https://web.push.apple.com/ghost')).toBe(null);
+  });
+});
+
+describe('claimSlot (atomic rate limit)', () => {
+  it('first claim succeeds, a second within the window is rejected', async () => {
+    expect(await claimSlot('park:tokenX', 60000)).toBe(true);
+    expect(await claimSlot('park:tokenX', 60000)).toBe(false);
+    expect(await claimSlot('park:tokenY', 60000)).toBe(true); // different key independent
+  });
+});
+
+describe('auto-park tokens', () => {
+  it('mints, resolves, and never stores the plaintext token', async () => {
+    await saveSub(SUB, spotA);
+    await saveToken('tok-secret-123', EP);
+    const r = await resolveToken('tok-secret-123');
+    expect(r.endpoint).toBe(EP);
+    // the raw token must NOT appear as a stored field (only its hash keys the tokens hash)
+    expect(JSON.stringify(mem)).not.toContain('tok-secret-123');
+  });
+
+  it('returns null for an unknown or empty token', async () => {
+    expect(await resolveToken('nope')).toBe(null);
+    expect(await resolveToken('')).toBe(null);
+    expect(await resolveToken(undefined)).toBe(null);
+  });
+
+  it('revoke deletes every token for an endpoint but leaves others', async () => {
+    await saveToken('mine-1', EP);
+    await saveToken('mine-2', EP);
+    await saveToken('someone-else', 'https://web.push.apple.com/other');
+    await deleteTokensForEndpoint(EP);
+    expect(await resolveToken('mine-1')).toBe(null);
+    expect(await resolveToken('mine-2')).toBe(null);
+    expect((await resolveToken('someone-else')).endpoint).toBe('https://web.push.apple.com/other');
+  });
+
+  it('getSub returns the stored record', async () => {
+    await saveSub(SUB, spotA);
+    const s = await getSub(EP);
+    expect(s.subscription.endpoint).toBe(EP);
+    expect(s.spot.nextSweepISO).toBe(spotA.nextSweepISO);
+    expect(await getSub('https://nope')).toBe(null);
+  });
+});
 
 const rec = async () => (await loadAllSubs()).find((x) => x.endpoint === EP);
 
