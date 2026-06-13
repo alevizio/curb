@@ -81,12 +81,15 @@ calendar reminder before the next sweep.
 - og/template.html + og.png — static 1200x630 social card (regenerate with `npm run og`
   after design-token changes; meta tags live in index.html `<head>`, URLs absolute).
 - Brand mark = the isometric "curb cube" (gray top #ADB5BD / red side #C1121F / cream C
-  #FDF0D5). Header logos are inline `<svg class="clogo">` + "CURB" + red dot on the black
-  plate, identical across index/tickets/about. Icon assets (icons/icon{,-192,-512,
-  -512-maskable}.{svg,png}, apple-touch-icon.png, favicon.svg, /favicon.ico, og.png) all
-  derive from the same paths — regenerate from /Users/alevizio/Downloads/crub-logo.svg via
-  the square-canvas wrappers if the mark changes. Logo red (#C1121F) is intentionally its
-  own; --red (#E0322E) stays the app/theme red.
+  #FDF0D5). Logo is the BARE cube SVG only — no plate, no wordmark — inline `<svg
+  class="clogo">` in all three headers, the welcome modal (.wmark), and the info-menu
+  header (.imlogo). --red is unified to the LOGO RED #C1121F everywhere (was three reds
+  #E0322E/#C22A26/#C42127 — all collapsed; #C1121F is darker so it also passes AA as text).
+  Favicon is the bare cube on TRANSPARENT (icons/favicon.svg + /favicon.ico); install icons
+  (icons/icon-{192,512,512-maskable}.png, apple-touch-icon.png) keep the paper fill because
+  iOS turns transparency into a black box and Android maskable requires a fill. og.png is
+  the bare cube too. Regenerate from /Users/alevizio/Downloads/crub-logo.svg via the
+  square-canvas wrappers; tickets/about share .wrap max-width 1080px.
 - scripts/build-enforcement.mjs + data/enforcement.json — precomputed citation enforcement
   times (`npm run build:enforcement`).
 - docs/ — sweeper-data research + ready-to-send public-records requests.
