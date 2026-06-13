@@ -1687,7 +1687,7 @@ function freqLabel(weeks){if(weeks.every(Boolean))return 'every week';const o=['
   const on=weeks.map((w,i)=>w?o[i]:null).filter(Boolean);return on.length?on.join(' & '):'';}
 // block-specific meter sign — query meters inside THIS block's bbox (street-level was misleading)
 const meterBlockCache={};
-const METER_ICON='<svg class="metico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="9" rx="3"/><path d="M9.5 6h5"/><path d="M12 11.5V20"/><path d="M8.5 20.5h7"/></svg>';
+const METER_ICON='<svg class="metico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 15h2"/><path d="M12 12v3"/><path d="M12 19v3"/><path d="M15.282 19a1 1 0 0 0 .948-.68l2.37-6.988a7 7 0 1 0-13.2 0l2.37 6.988a1 1 0 0 0 .948.68z"/><path d="M9 9a3 3 0 1 1 6 0"/></svg>';
 // permit-area chip: which RPP area this block needs a permit for; tap to outline the area.
 let rppBlockCache={};
 function renderRpp(rp){
