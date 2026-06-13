@@ -475,7 +475,10 @@
     .leaflet-overlay-pane svg path{transition:stroke-width .15s ease,opacity .2s ease}
     @media (hover:hover) and (pointer:fine){
       .layersbtn,.infobtn,.logo,.leaflet-control-zoom.leaflet-bar a{transition:transform .12s ease}
-      .layersbtn:hover,.infobtn:hover,.logo:hover{transform:translateY(-1px)}
+      .layersbtn:hover,.infobtn:hover{transform:translateY(-1px)}
+      /* the logo is a borderless, shadowless mark — a lift makes it float oddly. A subtle scale
+         reads as one coherent gesture with its press-in :active{scale(.92)}. */
+      .logo:hover{transform:scale(1.05)}
       .ltile:not(.on):hover{background:rgba(23,21,15,.05)}
       .lst:hover{background:rgba(23,21,15,.07)}
     }
