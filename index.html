@@ -723,10 +723,15 @@ const MAP_STYLE=[
   {elementType:'labels.text.stroke',stylers:[{color:'#fbf7ef'}]},
   {featureType:'administrative',elementType:'geometry.stroke',stylers:[{color:'#d7c4a5'}]},
   {featureType:'poi',stylers:[{visibility:'off'}]},
-  // Roads stay neutral near-paper (NOT the theme's orange-tan): the curb lines are drawn
-  // on top of them and the amber "soon" tier must keep ~3:1 contrast — don't warm these.
-  {featureType:'road',elementType:'geometry',stylers:[{color:'#f6f1e6'}]},
-  {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#d8d2c4'}]},
+  // Parks read GREEN — the parchment theme otherwise flattens them into the paper land.
+  // Re-enable poi.park geometry only (labels stay off): soft sage fill + a slightly deeper edge.
+  {featureType:'poi.park',elementType:'geometry.fill',stylers:[{visibility:'on'},{color:'#c6ddbe'}]},
+  {featureType:'poi.park',elementType:'geometry.stroke',stylers:[{visibility:'on'},{color:'#a9c8a0'}]},
+  // Roads: a COOL light-grey fill (distinct from the WARM paper land → streets read clearly via hue,
+  // not luminance) + a logo-grey (#ADB5BD) casing for crisp edges. The fill stays light on purpose —
+  // the curb lines sit on top and the amber "soon" tier must keep its contrast, so don't darken it.
+  {featureType:'road',elementType:'geometry.fill',stylers:[{color:'#eceff1'}]},
+  {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#aeb6bd'}]},
   {featureType:'water',elementType:'geometry.fill',stylers:[{color:'#ded1b7'}]}
 ];
 
