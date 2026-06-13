@@ -349,7 +349,7 @@
     color:var(--ink);cursor:pointer;display:grid;place-items:center;box-shadow:2px 2px 0 var(--ink)}
   .centerico:active{transform:translate(1px,1px);box-shadow:none}
   .sheettools{position:absolute;top:12px;right:14px;display:flex;align-items:center;gap:7px;z-index:3}
-  .sheettools .sheet-close{position:static;width:34px;height:34px;border-radius:9px}
+  .sheettools .sheet-close{position:relative;width:34px;height:34px;border-radius:9px}
   .sheettools .sheet-close::after{inset:-6px}
   .asched{font-size:13px;font-weight:700;margin:3px 0 2px}
   .asched.green{color:var(--green-text)} .asched.amber{color:var(--amber-text)} .asched.red{color:var(--red-text)}
@@ -1417,7 +1417,11 @@ function openSheet(group, activeKey){
     document.getElementById('calICS').onclick=()=>doCal('ics');
     document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
   }
-  document.getElementById('centerBtn').onclick=()=>map.fitBounds(L.polyline(active.latlngs).getBounds(),{maxZoom:18,padding:[60,60]});
+  document.getElementById('centerBtn').onclick=()=>{
+    document.getElementById('sheet').classList.remove('tall');  // collapse so the block isn't hidden behind a tall sheet
+    map.fitBounds(L.polyline(active.latlngs).getBounds(),
+      {maxZoom:18,paddingTopLeft:[50,90],paddingBottomRight:[50,Math.round(innerHeight*0.44)]});  // reserve the peek sheet
+  };
   const _enf=document.getElementById('enfBtn');
   if(_enf&&ae)_enf.onclick=()=>toast(`Estimated from ~${ae.n} street-cleaning tickets on this block over ~2 years (SFMTA citations via DataSF). Earliest seen ${fmtMin(ae.lo)}. The posted sign is the source of truth.`);
   // Share: the block gets a real URL (/b/<cnn>, server-rendered card for unfurls).
