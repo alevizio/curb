@@ -71,11 +71,11 @@ export default async function handler(req, res) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${pageUrl}">
-<meta property="og:image" content="https://curb.guide/og.png">
+<meta property="og:image" content="https://curb.guide/api/og?cnn=${cnn}">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#E0322E">
-<meta name="twitter:image" content="https://curb.guide/og.png">
+<meta name="twitter:image" content="https://curb.guide/api/og?cnn=${cnn}">
 <link rel="icon" href="/icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

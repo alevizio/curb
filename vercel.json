@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/og.js": {
+      "includeFiles": "{og/fonts/**,node_modules/@resvg/resvg-wasm/index_bg.wasm}"
+    }
+  },
   "rewrites": [
     {
       "source": "/config.js",
