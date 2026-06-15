@@ -83,6 +83,8 @@
     padding:calc(20px + env(safe-area-inset-top)) 12px 0;  /* viewport-fit=cover: stay clear of the notch */
     pointer-events:none;display:flex;flex-direction:column;gap:8px}
   .barrow{display:flex;gap:8px;align-items:center;pointer-events:auto}
+  /* embed mode (/?embed=1 in the /n/ neighborhood map iframes): drop the page-nav chrome */
+  html.embed .infobtn,html.embed #iosHint{display:none!important}
   /* first row: logo, search field and info button all share one 48px height */
   .logo{height:48px;display:inline-flex;align-items:center;padding:0;background:none;
     border:0;cursor:pointer;flex:none}
@@ -747,7 +749,21 @@ new ResizeObserver(es=>{for(const e of es)
   document.documentElement.style.setProperty('--legH',e.target.offsetHeight+'px');
 }).observe(document.querySelector('.legend2'));
 
-const map=L.map('map',{zoomControl:false,attributionControl:true}).setView([37.7749,-122.4194],15);
+const map=L.map('map',{zoomControl:false,attributionControl:true,doubleClickZoom:false}).setView([37.7749,-122.4194],15);
+if(map.doubleClickZoom)map.doubleClickZoom.disable();
+map.getContainer().addEventListener('dblclick',e=>{
+  L.DomEvent.stop(e);
+},true);
+let lastMapClick=0;
+map.getContainer().addEventListener('click',e=>{
+  const now=Date.now();
+  if(now-lastMapClick<=340)L.DomEvent.stop(e);
+  lastMapClick=now;
+},true);
+/* Embed mode (/?embed=1, used by the /n/ neighborhood pages): declutter chrome + suppress onboarding. */
+const QS=new URLSearchParams(location.search);
+const EMBED=QS.get('embed')==='1';
+if(EMBED)document.documentElement.classList.add('embed');
 // Desktop: the sheet docks bottom-left as a card, so zoom lives bottom-right; track
 // resizes/rotation so the control never ends up under the open sheet.
 const zoomCtl=L.control.zoom({position:'bottomright'}).addTo(map);
@@ -1631,6 +1647,14 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
 /* Auto-position on launch — ONLY when permission is already granted, so no permission
    prompt ever fires by itself. Permissions API where available; older Safari falls back
    to a flag set after the first successful manual locate. */
+/* Deep link: /?bbox=w,s,e,n — frame a neighborhood (the /n/ page embeds). */
+(function bboxLink(){
+  const bb=QS.get('bbox'); if(!bb)return;
+  const p=bb.split(',').map(Number); if(p.length!==4||p.some(isNaN))return;
+  const [w,s,e,n]=p;
+  map.fitBounds([[s,w],[n,e]],{padding:[18,18]});
+})();
+
 /* Deep link: /?b=<cnn> (from share pages) — fly to the block and open its sheet. */
 (async function deepLink(){
   const m=location.search.match(/[?&]b=(\d+)/); if(!m)return;
@@ -1645,6 +1669,7 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
 })();
 
 (async function autoLocate(){
+  if(EMBED||QS.get('bbox'))return;  // a framed embed / neighborhood view wins over auto-centering
   if(/[?&]b=\d/.test(location.search))return;  // a shared block link wins over auto-centering
   if(!navigator.geolocation)return;
   let granted=false;
@@ -2154,7 +2179,7 @@ function showWelcome(){
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'&&document.getElementById('welcome').classList.contains('open'))markOnboarded();
   });
-  if(!onboarded())showWelcome();
+  if(!EMBED&&!onboarded())showWelcome();
 })();
 
 /* iOS install hint: close on × or backdrop tap; auto-show once for un-installed iOS Safari. */
