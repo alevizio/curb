@@ -49,9 +49,12 @@ jobs:
       - name: Validate shapes (fail loudly on source drift)
         run: npm run validate:data
 
-      # Regenerate the neighborhood SEO pages + sitemap from the fresh stats.json.
-      - name: Rebuild neighborhood pages
-        run: npm run build:hoodpages
+      # Regenerate the neighborhood map snapshots (from the fresh overview.json),
+      # then the SEO pages + sitemap from the fresh stats.json.
+      - name: Rebuild neighborhood maps + pages
+        run: |
+          npm run build:hoodmaps
+          npm run build:hoodpages
 
       - name: Commit if changed
         run: |
