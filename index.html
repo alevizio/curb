@@ -80,7 +80,7 @@
   .leaflet-container{font-family:'Hanken Grotesk',sans-serif}
 
   .top{position:fixed;top:0;left:0;right:0;z-index:600;
-    padding:calc(12px + env(safe-area-inset-top)) 12px 0;  /* viewport-fit=cover: stay clear of the notch */
+    padding:calc(20px + env(safe-area-inset-top)) 12px 0;  /* viewport-fit=cover: stay clear of the notch */
     pointer-events:none;display:flex;flex-direction:column;gap:8px}
   .barrow{display:flex;gap:8px;align-items:center;pointer-events:auto}
   /* first row: logo, search field and info button all share one 48px height */
@@ -534,7 +534,7 @@
 
   /* ---- Desktop: dock the sheet as a floating card, constrain the search cluster ---- */
   @media (min-width:768px){
-    .top{left:16px;right:auto;top:14px;width:min(648px,calc(100vw - 200px));padding:0}  /* fits all 7 day chips + the weather date chip */
+    .top{left:16px;right:auto;top:22px;width:min(648px,calc(100vw - 200px));padding:0}  /* fits all 7 day chips + the weather date chip */
     .layers{top:14px;right:16px;bottom:auto;left:auto}  /* true top-right corner — the search cluster leaves it free */
     .dayrow{margin:0;padding-left:0;padding-right:0}
     .sheet{left:16px;right:auto;bottom:16px;width:min(420px,calc(100vw - 32px));
