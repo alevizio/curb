@@ -14,11 +14,9 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
   body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
   .wrap{max-width:760px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
   header{padding:calc(40px + env(safe-area-inset-top)) 0 0;display:flex;align-items:center;gap:12px}
-  .backbtn{display:grid;place-items:center;width:44px;height:44px;flex:none;background:var(--sign,#FFFDF6);
-    color:var(--ink);border:2.5px solid var(--ink);border-radius:11px;box-shadow:3px 3px 0 var(--ink);
-    text-decoration:none;padding:0;line-height:1}
-  .backbtn svg{display:block;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.8;
-    stroke-linecap:round;stroke-linejoin:round}
+  .backbtn{display:inline-grid;place-items:center;width:34px;height:34px;flex:none;background:none;color:var(--ink-soft);border:0;box-shadow:none;text-decoration:none;padding:0;line-height:1;margin-left:-6px}
+.backbtn:hover{color:var(--ink)}
+.backbtn svg{display:block;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .logo{display:inline-flex;height:51px}.logo img{height:51px;width:auto;display:block}
   .nav{margin-left:auto;display:flex;gap:6px}
   .nav a{padding:8px 12px;border-radius:9px;font-weight:800;font-size:14px;text-decoration:none;color:var(--ink);border:2.5px solid transparent}

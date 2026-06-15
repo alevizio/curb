@@ -40,8 +40,9 @@ body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-
 a{color:inherit}
 header{padding:calc(40px + env(safe-area-inset-top)) 0 0}
 .mast{display:flex;align-items:center;gap:14px}
-.backbtn{display:grid;place-items:center;width:44px;height:44px;flex:none;background:var(--sign);color:var(--ink);border:2.5px solid var(--ink);border-radius:11px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;padding:0;line-height:1}
-.backbtn svg{display:block;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.backbtn{display:inline-grid;place-items:center;width:34px;height:34px;flex:none;background:none;color:var(--ink-soft);border:0;box-shadow:none;text-decoration:none;padding:0;line-height:1;margin-left:-6px}
+.backbtn:hover{color:var(--ink)}
+.backbtn svg{display:block;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .logo{display:inline-flex;align-items:center;text-decoration:none}
 .logo .clogo{height:54px;width:auto;flex:none;display:block}
 .topnav{display:flex;gap:4px;margin-left:auto}
