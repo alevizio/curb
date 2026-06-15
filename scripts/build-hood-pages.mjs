@@ -124,7 +124,7 @@ h2 b{color:var(--red-text)}
 .bars{display:grid;gap:8px;margin-top:6px}
 .bar{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;font-weight:700;font-size:14px}
 .bar .track{height:16px;background:rgba(23,21,15,.1);border-radius:8px;overflow:hidden}
-.bar .fill{height:100%;background:var(--amber);border-radius:8px}
+.bar .fill{display:block;height:100%;background:var(--amber);border-radius:8px}
 .bar .fill.peak{background:var(--red)}
 .bar .n{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-size:13px}
 .bar .pk{margin-left:6px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--red-text)}
