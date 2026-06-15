@@ -69,7 +69,9 @@ private struct CurbWebView: UIViewRepresentable {
         configuration.allowsInlineMediaPlayback = true
         configuration.userContentController.addUserScript(Self.nativeLocationScript)
         configuration.userContentController.addUserScript(Self.appChromeScript)
+        configuration.userContentController.addUserScript(Self.shareScript)
         configuration.userContentController.add(context.coordinator.locationBridge, name: "curbLocation")
+        configuration.userContentController.add(context.coordinator.shareBridge, name: "curbShare")
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
@@ -90,6 +92,7 @@ private struct CurbWebView: UIViewRepresentable {
 
         context.coordinator.webView = webView
         context.coordinator.locationBridge.webView = webView
+        context.coordinator.shareBridge.webView = webView
         context.coordinator.lastReloadToken = reloadToken
 
         webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
@@ -291,6 +294,33 @@ private struct CurbWebView: UIViewRepresentable {
         forMainFrameOnly: true
     )
 
+    // Bridge navigator.share → native share sheet (WKWebView doesn't implement Web Share).
+    private static let shareScript = WKUserScript(
+        source: """
+        (function () {
+          if (!window.webkit || !window.webkit.messageHandlers || !window.webkit.messageHandlers.curbShare) return;
+          var resolveFn = null, rejectFn = null;
+          window.__curbShareDone = function (ok) {
+            if (ok) { if (resolveFn) resolveFn(); }
+            else if (rejectFn) { rejectFn(new DOMException('Share canceled', 'AbortError')); }
+            resolveFn = null; rejectFn = null;
+          };
+          navigator.share = function (data) {
+            return new Promise(function (resolve, reject) {
+              resolveFn = resolve; rejectFn = reject;
+              window.webkit.messageHandlers.curbShare.postMessage({
+                title: (data && data.title) || '',
+                text: (data && data.text) || '',
+                url: (data && data.url) || ''
+              });
+            });
+          };
+        })();
+        """,
+        injectionTime: .atDocumentStart,
+        forMainFrameOnly: true
+    )
+
     func updateUIView(_ webView: WKWebView, context: Context) {
         if context.coordinator.lastReloadToken != reloadToken {
             context.coordinator.lastReloadToken = reloadToken
@@ -298,11 +328,14 @@ private struct CurbWebView: UIViewRepresentable {
         }
     }
 
-    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate, UIDocumentInteractionControllerDelegate {
         var parent: CurbWebView
         weak var webView: WKWebView?
         let locationBridge = LocationBridge()
+        let shareBridge = ShareBridge()
         var lastReloadToken: UUID?
+        private var downloadDestination: URL?
+        private var documentController: UIDocumentInteractionController?
 
         init(parent: CurbWebView) {
             self.parent = parent
@@ -331,6 +364,11 @@ private struct CurbWebView: UIViewRepresentable {
             decidePolicyFor navigationAction: WKNavigationAction,
             decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void
         ) {
+            if navigationAction.shouldPerformDownload {
+                decisionHandler(.download)
+                return
+            }
+
             guard let nextURL = navigationAction.request.url else {
                 decisionHandler(.allow)
                 return
@@ -359,6 +397,41 @@ private struct CurbWebView: UIViewRepresentable {
                 }
             }
             return nil
+        }
+
+        // MARK: downloads (the web's "Apple / .ics" reminder triggers a blob download)
+        func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+            download.delegate = self
+        }
+
+        func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+            download.delegate = self
+        }
+
+        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping @MainActor @Sendable (URL?) -> Void) {
+            let name = suggestedFilename.isEmpty ? "curb-reminder.ics" : suggestedFilename
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent(name)
+            try? FileManager.default.removeItem(at: url)
+            downloadDestination = url
+            completionHandler(url)
+        }
+
+        func downloadDidFinish(_ download: WKDownload) {
+            guard let url = downloadDestination else { return }
+            let controller = UIDocumentInteractionController(url: url)
+            controller.delegate = self
+            documentController = controller
+            if !controller.presentPreview(animated: true), let view = webView {
+                controller.presentOptionsMenu(from: view.bounds, in: view, animated: true)
+            }
+        }
+
+        func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+            downloadDestination = nil
+        }
+
+        func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
+            curbTopViewController() ?? UIViewController()
         }
 
         private func finishWith(error: Error) {
@@ -534,6 +607,50 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
 
         let escapedId = id.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "'", with: "\\'")
         webView.evaluateJavaScript("window.__curbNativeLocationResult && window.__curbNativeLocationResult('\(escapedId)', \(json));")
+    }
+}
+
+@MainActor private func curbTopViewController() -> UIViewController? {
+    let windows = UIApplication.shared.connectedScenes
+        .compactMap { $0 as? UIWindowScene }
+        .flatMap { $0.windows }
+    var root = windows.first { $0.isKeyWindow }?.rootViewController ?? windows.first?.rootViewController
+    while let presented = root?.presentedViewController { root = presented }
+    return root
+}
+
+// Bridge the web's navigator.share() to a native UIActivityViewController.
+private final class ShareBridge: NSObject, WKScriptMessageHandler {
+    weak var webView: WKWebView?
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "curbShare", let body = message.body as? [String: Any] else { return }
+        let text = (body["text"] as? String) ?? ""
+        let urlString = (body["url"] as? String) ?? ""
+
+        var items: [Any] = []
+        if let url = URL(string: urlString), url.scheme != nil { items.append(url) }
+        if !text.isEmpty { items.append(text) }
+
+        guard !items.isEmpty, let top = curbTopViewController() else {
+            finish(false)
+            return
+        }
+
+        let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        if let popover = activity.popoverPresentationController, let view = webView {
+            popover.sourceView = view
+            popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+        activity.completionWithItemsHandler = { [weak self] _, completed, _, _ in
+            self?.finish(completed)
+        }
+        top.present(activity, animated: true)
+    }
+
+    private func finish(_ ok: Bool) {
+        webView?.evaluateJavaScript("window.__curbShareDone && window.__curbShareDone(\(ok ? "true" : "false"));")
     }
 }
 
