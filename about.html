@@ -61,6 +61,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
+html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
   body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;
     font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
   ::selection{background:var(--ink);color:var(--paper)}
@@ -81,6 +82,11 @@
   /* masthead */
   header{padding:calc(40px + env(safe-area-inset-top)) 0 0;position:relative;z-index:50}  /* keeps the nav dropdown above .rise hero text */
   .mast{display:flex;align-items:center;gap:14px}
+  .backbtn{display:grid;place-items:center;width:44px;height:44px;flex:none;background:var(--sign,#FFFDF6);
+    color:var(--ink);border:2.5px solid var(--ink);border-radius:11px;box-shadow:3px 3px 0 var(--ink);
+    text-decoration:none;padding:0;line-height:1}
+  .backbtn svg{display:block;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.8;
+    stroke-linecap:round;stroke-linejoin:round}
   .logo{display:inline-flex;align-items:center;text-decoration:none;background:none;padding:0;box-shadow:none}
   .logo .clogo{height:54px;width:auto;flex:none;display:block}
   .url{font-weight:800;letter-spacing:.01em;color:var(--ink-soft)}
@@ -272,6 +278,7 @@
 
 <header class="wrap rise">
   <div class="mast">
+    <a class="backbtn" href="/" aria-label="Back to map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg></a>
     <a class="logo" href="/" aria-label="CURB — open the map"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></a>
     <nav class="topnav" aria-label="Pages">
       <a href="/">Map</a>

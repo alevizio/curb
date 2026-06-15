@@ -32,6 +32,7 @@
 :root{--paper:#F2ECDF;--ink:#17150F;--ink-soft:#4A4536;--green:#1F9E5A;--amber:#E08A1E;--red:#C1121F;--meter:#2F5BD0;
   --green-text:#157A44;--amber-text:#8F5A06;--red-text:#C1121F;--sign:#FFFDF6;--shadow:5px 5px 0 var(--ink)}
 html{scroll-behavior:smooth}
+html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--ink);color:var(--paper)}
 :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
@@ -39,6 +40,8 @@ body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-
 a{color:inherit}
 header{padding:calc(40px + env(safe-area-inset-top)) 0 0}
 .mast{display:flex;align-items:center;gap:14px}
+.backbtn{display:grid;place-items:center;width:44px;height:44px;flex:none;background:var(--sign);color:var(--ink);border:2.5px solid var(--ink);border-radius:11px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;padding:0;line-height:1}
+.backbtn svg{display:block;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
 .logo{display:inline-flex;align-items:center;text-decoration:none}
 .logo .clogo{height:54px;width:auto;flex:none;display:block}
 .topnav{display:flex;gap:4px;margin-left:auto}
@@ -119,6 +122,7 @@ footer{border-top:3px solid var(--ink);margin-top:50px;padding:26px 0 calc(34px 
 <body>
 <header class="wrap">
   <div class="mast">
+    <a class="backbtn" href="/" aria-label="Back to map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg></a>
     <a class="logo" href="/" aria-label="CURB — open the map"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></a>
     <nav class="topnav" aria-label="Pages">
       <a href="/">Map</a>

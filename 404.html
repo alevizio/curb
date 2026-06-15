@@ -8,6 +8,7 @@
 <style>
   :root{--paper:#F2ECDF;--ink:#17150F;--soft:#4A4536;--red:#C1121F}
   *{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
   body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;
     min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:32px;text-align:center}
   .cube{height:107px;width:auto;display:block}
@@ -17,10 +18,11 @@
   .btn{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:16px;text-decoration:none;
     border:2.5px solid var(--ink);border-radius:13px;padding:14px 22px;background:var(--ink);color:var(--paper);
     box-shadow:5px 5px 0 var(--ink);margin-top:6px}
+  .btn svg{display:block;width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
   .btn:active{transform:translate(2px,2px);box-shadow:none}
 </style></head><body>
   <img class="cube" src="/icons/logo.svg" alt="" aria-hidden="true">
   <h1>No curb here<span class="d">.</span></h1>
   <p>That page got swept away. The map's still where you left it — every SF curb, colored by its next sweep.</p>
-  <a class="btn" href="/">← Open the map</a>
+  <a class="btn" href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg>Open the map</a>
 </body></html>
