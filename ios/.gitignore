@@ -1,0 +1,7 @@
+# Xcode per-user state — not shared
+xcuserdata/
+*.xcuserstate
+
+# Build output
+build/
+DerivedData/
