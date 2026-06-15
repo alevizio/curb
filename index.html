@@ -1663,11 +1663,23 @@ async function onAlertTap(spot, btn){
 document.getElementById('locate').onclick=()=>{
   const btn=document.getElementById('locate');
   if(!navigator.geolocation)return locateFail();
+  if(btn.classList.contains('loading'))return;
   btn.classList.add('loading');
+  btn.setAttribute('aria-busy','true');
+  let done=false;
+  const finish=()=>{
+    if(done)return false;
+    done=true;
+    clearTimeout(failsafe);
+    btn.classList.remove('loading');
+    btn.removeAttribute('aria-busy');
+    return true;
+  };
+  const failsafe=setTimeout(()=>{ if(finish())locateFail(); },11000);
   navigator.geolocation.getCurrentPosition(
-    p=>{btn.classList.remove('loading');try{localStorage.setItem('curbLocOK','1');}catch(_){}
+    p=>{if(!finish())return;try{localStorage.setItem('curbLocOK','1');}catch(_){}
       placeYou(p.coords.latitude,p.coords.longitude,true);},
-    e=>{btn.classList.remove('loading');locateFail();},
+    e=>{if(!finish())return;locateFail();},
     {enableHighAccuracy:true,timeout:9000,maximumAge:30000});
 };
 function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
