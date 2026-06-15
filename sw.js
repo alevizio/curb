@@ -1,5 +1,5 @@
 // CURB service worker — app-shell cache + Web Push.
-const CACHE = 'curb-v1';
+const CACHE = 'curb-v2';
 const SHELL = ['/', 'index.html', 'manifest.json',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
@@ -16,15 +16,23 @@ self.addEventListener('activate', e => {
   })());
 });
 
-// Network-first for same-origin GETs, fall back to cached shell when offline.
+// Stale-while-revalidate for same-origin GETs: serve cache instantly (fast app feel),
+// refresh in the background so the next load reflects web deploys, fall back to the shell
+// offline. API routes + cross-origin (map tiles / DataSF) always hit the network.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const u = new URL(e.request.url);
-  if (u.origin !== location.origin) return; // let map tiles / DataSF hit network
-  e.respondWith(
-    fetch(e.request).catch(() =>
-      caches.match(e.request).then(r => r || caches.match('/')))
-  );
+  if (u.origin !== location.origin) return;   // map tiles / DataSF
+  if (u.pathname.startsWith('/api/')) return;  // never cache API (config key, push, share)
+  e.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(e.request);
+    const fresh = fetch(e.request).then(resp => {
+      if (resp && resp.ok && resp.type === 'basic') cache.put(e.request, resp.clone());
+      return resp;
+    }).catch(() => null);
+    return cached || (await fresh) || cache.match('/');
+  })());
 });
 
 // Push payload shape: { title, body, url, tag }
