@@ -56,7 +56,7 @@ enum CurbStatus: Equatable {
 extension View {
     func signageButtonStyle(background: Color = CurbTheme.ink, foreground: Color = CurbTheme.paper) -> some View {
         self
-            .font(.system(size: 15, weight: .800, design: .rounded))
+            .font(.system(size: 15, weight: .heavy, design: .rounded))
             .foregroundStyle(foreground)
             .padding(.horizontal, 14)
             .padding(.vertical, 11)

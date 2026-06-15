@@ -27,21 +27,28 @@ final class CurbViewModel: ObservableObject {
     private var loadTask: Task<Void, Never>?
     private var suggestionTask: Task<Void, Never>?
     private var toastTask: Task<Void, Never>?
+    private var viewportLoadGeneration = 0
 
     init() {
         locationProvider.onResult = { [weak self] result in
             Task { @MainActor in
                 switch result {
-                case .success(let coordinate):
+                case .success(let location):
+                    let coordinate = location.coordinate
                     self?.moveTo(coordinate, span: .street)
                     self?.parkedCoordinate = coordinate
                     self?.loadTask?.cancel()
                     self?.loadTask = Task { @MainActor in
-                        try? await Task.sleep(for: .milliseconds(500))
-                        await self?.selectNearest(to: coordinate)
+                        do {
+                            try await Task.sleep(for: .milliseconds(500))
+                        } catch {
+                            return
+                        }
+                        guard !Task.isCancelled else { return }
+                        self?.selectNearest(to: coordinate)
                     }
-                case .failure:
-                    self?.showToast("Location is blocked. Search a street or tap where you parked.")
+                case .failure(let error):
+                    self?.showToast(error.localizedDescription)
                 }
             }
         }
@@ -57,13 +64,22 @@ final class CurbViewModel: ObservableObject {
     func regionDidChange(_ region: MKCoordinateRegion) {
         loadTask?.cancel()
         loadTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(325))
+            do {
+                try await Task.sleep(for: .milliseconds(325))
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
             await loadViewport(region)
         }
     }
 
     func loadViewport(_ region: MKCoordinateRegion) async {
+        viewportLoadGeneration += 1
+        let generation = viewportLoadGeneration
+
         guard region.span.longitudeDelta <= Self.minLongitudeDeltaForCurbData else {
+            isLoading = false
             overlays = []
             groups = []
             showToast("Zoom in for block-by-block curb rules.")
@@ -71,23 +87,33 @@ final class CurbViewModel: ObservableObject {
         }
 
         isLoading = true
-        defer { isLoading = false }
+        defer { finishViewportLoad(generation) }
 
         do {
             let count = try await client.sweepCount(in: region)
+            try Task.checkCancellation()
+            guard isActiveViewportLoad(generation) else { return }
+
             guard count <= Self.segmentCap else {
                 overlays = []
                 groups = []
                 showToast("This view has too many blocks. Zoom in a little.")
                 return
             }
+
             let rows = try await client.sweepRows(in: region, limit: Self.segmentCap)
+            try Task.checkCancellation()
+            guard isActiveViewportLoad(generation) else { return }
+
             lastRows = rows
             rebuildGroups()
             if rows.isEmpty {
                 showToast("No SF street-sweeping data in this view.")
             }
+        } catch is CancellationError {
+            return
         } catch {
+            guard isActiveViewportLoad(generation) else { return }
             showToast("Could not load that area. Pan and try again.")
         }
     }
@@ -133,7 +159,12 @@ final class CurbViewModel: ObservableObject {
         }
 
         suggestionTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(220))
+            do {
+                try await Task.sleep(for: .milliseconds(220))
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
             await loadSuggestions(for: query)
         }
     }
@@ -151,8 +182,13 @@ final class CurbViewModel: ObservableObject {
                     moveTo(coordinate, span: .street)
                     loadTask?.cancel()
                     loadTask = Task { @MainActor in
-                        try? await Task.sleep(for: .milliseconds(650))
-                        await self.selectNearest(to: coordinate, cnnHint: row.cnn)
+                        do {
+                            try await Task.sleep(for: .milliseconds(650))
+                        } catch {
+                            return
+                        }
+                        guard !Task.isCancelled else { return }
+                        self.selectNearest(to: coordinate, cnnHint: row.cnn)
                     }
                     return
                 }
@@ -184,8 +220,13 @@ final class CurbViewModel: ObservableObject {
             moveTo(coordinate, span: .street)
             loadTask?.cancel()
             loadTask = Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(650))
-                await self.selectNearest(to: coordinate, cnnHint: row.cnn)
+                do {
+                    try await Task.sleep(for: .milliseconds(650))
+                } catch {
+                    return
+                }
+                guard !Task.isCancelled else { return }
+                self.selectNearest(to: coordinate, cnnHint: row.cnn)
             }
         case .street(let row):
             guard let coordinate = row.line?.locations.first else { return }
@@ -214,9 +255,18 @@ final class CurbViewModel: ObservableObject {
                 return SearchSuggestion(title: title, kind: .street(row))
             })
         }
-        if query == searchText.trimmingCharacters(in: .whitespacesAndNewlines) {
+        if !Task.isCancelled, query == searchText.trimmingCharacters(in: .whitespacesAndNewlines) {
             suggestions = next
         }
+    }
+
+    private func finishViewportLoad(_ generation: Int) {
+        guard viewportLoadGeneration == generation else { return }
+        isLoading = false
+    }
+
+    private func isActiveViewportLoad(_ generation: Int) -> Bool {
+        viewportLoadGeneration == generation && !Task.isCancelled
     }
 
     private func rebuildGroups() {

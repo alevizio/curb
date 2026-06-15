@@ -30,6 +30,11 @@
 	<string>CURB can add a street-sweeping reminder to your calendar.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>CURB uses your location to find the nearest San Francisco curb rules.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>PreciseCurbLocation</key>
+		<string>CURB needs precise location to choose the right curb and side of the block.</string>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchScreen</key>
