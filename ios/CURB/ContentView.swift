@@ -1,551 +1,569 @@
-import MapKit
 import SwiftUI
+import WebKit
+import CoreLocation
 
 struct ContentView: View {
-    @EnvironmentObject private var model: CurbViewModel
-    @FocusState private var searchFocused: Bool
-    @State private var didLoadInitialViewport = false
+    private let curbURL = URL(string: "https://curb.guide")!
+
+    @State private var isLoading = true
+    @State private var loadError: String?
+    @State private var reloadToken = UUID()
 
     var body: some View {
-        ZStack(alignment: .top) {
-            CurbMapView(
-                overlays: model.overlays,
-                parkedCoordinate: model.parkedCoordinate,
-                cameraRequest: model.cameraRequest,
-                initialRegion: model.initialRegion(),
-                onRegionChanged: model.regionDidChange,
-                onTap: model.tapMap
+        ZStack {
+            CurbWebView(
+                url: curbURL,
+                reloadToken: reloadToken,
+                isLoading: $isLoading,
+                loadError: $loadError
             )
             .ignoresSafeArea()
 
-            topChrome
-
-            if model.isLoading {
-                ProgressView()
-                    .tint(CurbTheme.ink)
-                    .padding(12)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-                    .padding(.top, 118)
+            if isLoading {
+                LoadingOverlay()
             }
 
-            VStack {
-                Spacer()
-                if let selection = model.selected {
-                    CurbDetailSheet(selection: selection)
-                        .environmentObject(model)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
-            .ignoresSafeArea(edges: .bottom)
-
-            if let toast = model.toast {
-                VStack {
-                    Spacer()
-                    Text(toast)
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundStyle(CurbTheme.paper)
+            if let loadError {
+                VStack(spacing: 14) {
+                    Text("CURB could not load")
+                        .font(.system(size: 21, weight: .black, design: .rounded))
+                    Text(loadError)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(CurbTheme.ink)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .padding(.horizontal, 18)
-                        .padding(.bottom, model.selected == nil ? 34 : 250)
+                        .foregroundStyle(CurbTheme.ink.opacity(0.72))
+                    Button("Try again") {
+                        self.loadError = nil
+                        isLoading = true
+                        reloadToken = UUID()
+                    }
+                    .signageButtonStyle()
                 }
-                .transition(.opacity)
+                .foregroundStyle(CurbTheme.ink)
+                .padding(20)
+                .background(CurbTheme.paper)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(CurbTheme.ink, lineWidth: 2)
+                )
+                .padding(24)
             }
         }
         .background(CurbTheme.paper)
-        .animation(.snappy(duration: 0.22), value: model.selected?.id)
-        .animation(.snappy(duration: 0.18), value: model.toast)
-        .task {
-            guard !didLoadInitialViewport else { return }
-            didLoadInitialViewport = true
-            await model.loadViewport(model.initialRegion())
-        }
+    }
+}
+
+private struct CurbWebView: UIViewRepresentable {
+    let url: URL
+    let reloadToken: UUID
+    @Binding var isLoading: Bool
+    @Binding var loadError: String?
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
     }
 
-    private var topChrome: some View {
-        VStack(spacing: 9) {
-            HStack(spacing: 9) {
-                Button {
-                    model.notify("CURB shows rules, not live spaces. The posted sign always wins.")
-                } label: {
-                    Text("CURB")
-                        .font(.system(size: 25, weight: .black, design: .default))
-                        .foregroundStyle(CurbTheme.paper)
-                        .frame(width: 72, height: 47)
-                        .background(CurbTheme.red)
-                        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                .stroke(CurbTheme.ink, lineWidth: 2)
-                        )
-                }
-                .buttonStyle(.plain)
+    func makeUIView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = true
+        configuration.allowsInlineMediaPlayback = true
+        configuration.userContentController.addUserScript(Self.nativeLocationScript)
+        configuration.userContentController.addUserScript(Self.appChromeScript)
+        configuration.userContentController.add(context.coordinator.locationBridge, name: "curbLocation")
 
-                HStack(spacing: 7) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 16, weight: .black))
-                    TextField("Street or address", text: $model.searchText)
-                        .focused($searchFocused)
-                        .textInputAutocapitalization(.words)
-                        .disableAutocorrection(true)
-                        .submitLabel(.search)
-                        .onSubmit {
-                            searchFocused = false
-                            Task { await model.performSearch() }
-                        }
-                        .onChange(of: model.searchText) { _, _ in
-                            model.updateSuggestions()
-                        }
-                }
-                .foregroundStyle(CurbTheme.ink)
-                .padding(.horizontal, 12)
-                .frame(height: 47)
-                .background(CurbTheme.paper)
-                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .stroke(CurbTheme.ink, lineWidth: 2)
-                )
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.navigationDelegate = context.coordinator
+        webView.uiDelegate = context.coordinator
+        webView.allowsBackForwardNavigationGestures = true
+        webView.scrollView.isScrollEnabled = true
+        webView.scrollView.bounces = true
+        webView.scrollView.alwaysBounceVertical = true
+        webView.scrollView.delaysContentTouches = false
+        webView.scrollView.canCancelContentTouches = true
+        webView.scrollView.keyboardDismissMode = .interactive
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.backgroundColor = CurbTheme.uiPaper
+        webView.backgroundColor = CurbTheme.uiPaper
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+        }
 
-                Button {
-                    searchFocused = false
-                    model.locate()
-                } label: {
-                    Image(systemName: "location.fill")
-                        .font(.system(size: 18, weight: .black))
-                        .foregroundStyle(CurbTheme.paper)
-                        .frame(width: 47, height: 47)
-                        .background(CurbTheme.ink)
-                        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                }
-                .buttonStyle(.plain)
+        context.coordinator.webView = webView
+        context.coordinator.locationBridge.webView = webView
+        context.coordinator.lastReloadToken = reloadToken
+
+        webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
+        return webView
+    }
+
+    private static let nativeLocationScript = WKUserScript(
+        source: """
+        (function () {
+          if (window.__curbNativeGeoInstalled) return;
+          if (!window.webkit || !window.webkit.messageHandlers || !window.webkit.messageHandlers.curbLocation) return;
+          window.__curbNativeGeoInstalled = true;
+
+          var callbacks = {};
+          var nextId = 1;
+          var permissionState = 'prompt';
+          try {
+            if (localStorage.getItem('curbLocOK') === '1') permissionState = 'granted';
+          } catch (_) {}
+
+          function geoError(code, message) {
+            return {
+              code: code,
+              message: message || 'Location unavailable',
+              PERMISSION_DENIED: 1,
+              POSITION_UNAVAILABLE: 2,
+              TIMEOUT: 3
+            };
+          }
+
+          function geoPosition(result) {
+            return {
+              coords: {
+                latitude: result.latitude,
+                longitude: result.longitude,
+                accuracy: result.accuracy,
+                altitude: result.altitude == null ? null : result.altitude,
+                altitudeAccuracy: result.altitudeAccuracy == null ? null : result.altitudeAccuracy,
+                heading: result.heading == null ? null : result.heading,
+                speed: result.speed == null ? null : result.speed
+              },
+              timestamp: result.timestamp || Date.now()
+            };
+          }
+
+          window.__curbNativeLocationResult = function (id, result) {
+            var callback = callbacks[String(id)];
+            if (!callback) return;
+            delete callbacks[String(id)];
+            if (result && result.ok) {
+              permissionState = 'granted';
+              try { localStorage.setItem('curbLocOK', '1'); } catch (_) {}
+              callback.success(geoPosition(result));
+            } else {
+              if (result && result.code === 1) permissionState = 'denied';
+              callback.error(geoError((result && result.code) || 2, (result && result.message) || 'Location unavailable'));
             }
-            .padding(.horizontal, 12)
+          };
 
-            if !model.suggestions.isEmpty, searchFocused {
-                VStack(spacing: 0) {
-                    ForEach(model.suggestions.prefix(6)) { suggestion in
-                        Button {
-                            searchFocused = false
-                            model.pickSuggestion(suggestion)
-                        } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: suggestionIcon(suggestion))
-                                    .font(.system(size: 13, weight: .black))
-                                    .frame(width: 22, height: 22)
-                                    .background(CurbTheme.ink)
-                                    .foregroundStyle(CurbTheme.paper)
-                                    .clipShape(Circle())
-                                Text(suggestion.title)
-                                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                                    .foregroundStyle(CurbTheme.ink)
-                                    .lineLimit(1)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 10)
-                        }
-                        .buttonStyle(.plain)
+          function request(success, error, options) {
+            if (typeof success !== 'function') {
+              throw new TypeError('Position success callback must be a function');
+            }
+            var id = String(nextId++);
+            callbacks[id] = {
+              success: success,
+              error: typeof error === 'function' ? error : function () {}
+            };
+            window.webkit.messageHandlers.curbLocation.postMessage({
+              id: id,
+              options: options || {}
+            });
+            return Number(id);
+          }
 
-                        if suggestion.id != model.suggestions.prefix(6).last?.id {
-                            Divider().background(CurbTheme.ink.opacity(0.25))
-                        }
-                    }
-                }
-                .background(CurbTheme.paper)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(CurbTheme.ink, lineWidth: 2)
-                )
-                .padding(.horizontal, 91)
-                .padding(.trailing, 58)
+          var nativeGeo = {
+            getCurrentPosition: function (success, error, options) {
+              request(success, error, options);
+            },
+            watchPosition: function (success, error, options) {
+              return request(success, error, options);
+            },
+            clearWatch: function (id) {
+              delete callbacks[String(id)];
+            }
+          };
+
+          try {
+            Object.defineProperty(navigator, 'geolocation', {
+              configurable: true,
+              enumerable: true,
+              value: nativeGeo
+            });
+          } catch (_) {
+            navigator.geolocation = nativeGeo;
+          }
+
+          if (navigator.permissions && navigator.permissions.query) {
+            var originalQuery = navigator.permissions.query.bind(navigator.permissions);
+            navigator.permissions.query = function (descriptor) {
+              if (descriptor && descriptor.name === 'geolocation') {
+                return Promise.resolve({ name: 'geolocation', state: permissionState, onchange: null });
+              }
+              return originalQuery(descriptor);
+            };
+          }
+        })();
+        """,
+        injectionTime: .atDocumentStart,
+        forMainFrameOnly: true
+    )
+
+    private static let appChromeScript = WKUserScript(
+        source: """
+        (function () {
+          try {
+            localStorage.setItem('curbIosHintShown', '1');
+          } catch (_) {}
+          function installCurbAppChrome() {
+            if (document.getElementById('curb-ios-app-style')) return;
+            document.documentElement.classList.add('curb-ios-app');
+            var style = document.createElement('style');
+            style.id = 'curb-ios-app-style';
+            style.textContent = [
+              '.curb-ios-app.curb-ios-page{height:auto!important;min-height:100%!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}',
+              '.curb-ios-app.curb-ios-page body{height:auto!important;min-height:100dvh!important;overflow-x:hidden!important;overflow-y:visible!important;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-bottom:max(34px,calc(18px + env(safe-area-inset-bottom)))!important}',
+              '.curb-ios-app.curb-ios-page body>header{padding-top:max(78px,calc(24px + env(safe-area-inset-top)))!important}',
+              '.curb-ios-app.curb-ios-page .mast,.curb-ios-app.curb-ios-page body>header{position:relative;z-index:70}',
+              '.curb-ios-app #iosHint{display:none!important}',
+              '.curb-ios-back{display:none;align-items:center;justify-content:center;width:44px;height:44px;min-width:44px;padding:0;border:2.5px solid var(--ink);border-radius:11px;background:var(--sign,#FFFDF6);color:var(--ink);box-shadow:3px 3px 0 var(--ink);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}',
+              '.curb-ios-page .curb-ios-back{display:inline-flex}',
+              '.curb-ios-back svg{width:21px;height:21px;display:block;stroke:currentColor;fill:none;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}',
+              '.curb-ios-back:active{transform:translate(2px,2px);box-shadow:none}',
+              '.curb-ios-app,.curb-ios-app body{-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}',
+              '.curb-ios-app *:not(input):not(textarea):not([contenteditable]){-webkit-user-select:none;user-select:none}'
+            ].join('\\n');
+            (document.head || document.documentElement).appendChild(style);
+          }
+          function syncCurbAppRoute() {
+            var path = location.pathname || '/';
+            var isPage = path !== '/';
+            document.documentElement.classList.toggle('curb-ios-page', isPage);
+            var button = document.getElementById('curbIosBack');
+            if (button) button.hidden = !isPage;
+          }
+          function installCurbBackButton() {
+            if (document.getElementById('curbIosBack')) {
+              syncCurbAppRoute();
+              return;
+            }
+            var host = document.querySelector('.mast') || document.querySelector('body > header') || document.querySelector('header');
+            if (!host) return;
+            var button = document.createElement('button');
+            button.id = 'curbIosBack';
+            button.className = 'curb-ios-back';
+            button.type = 'button';
+            button.title = 'Back';
+            button.setAttribute('aria-label', 'Back');
+            button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/><path d="M21 12H9"/></svg>';
+            button.addEventListener('click', function () {
+              var sameOriginReferrer = false;
+              try {
+                sameOriginReferrer = !!document.referrer && new URL(document.referrer).origin === location.origin;
+              } catch (_) {}
+              if (history.length > 1 && sameOriginReferrer) {
+                history.back();
+              } else {
+                location.assign('/');
+              }
+            });
+            host.insertBefore(button, host.firstChild);
+            syncCurbAppRoute();
+          }
+          function installCurbAppCopy() {
+            if (typeof window.locateFail !== 'function' || window.locateFail.__curbIosAppCopy) return;
+            var replacement = function () {
+              if (typeof window.toast === 'function') {
+                window.toast('Location is unavailable — allow CURB in Settings, or search/tap the map.');
+              }
+            };
+            replacement.__curbIosAppCopy = true;
+            window.locateFail = replacement;
+          }
+          installCurbAppChrome();
+          syncCurbAppRoute();
+          installCurbAppCopy();
+          document.addEventListener('DOMContentLoaded', function () {
+            installCurbAppChrome();
+            installCurbBackButton();
+            syncCurbAppRoute();
+          }, { once: true });
+          document.addEventListener('DOMContentLoaded', function () {
+            installCurbAppCopy();
+            setTimeout(installCurbAppCopy, 500);
+          }, { once: true });
+        })();
+        """,
+        injectionTime: .atDocumentStart,
+        forMainFrameOnly: true
+    )
+
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        if context.coordinator.lastReloadToken != reloadToken {
+            context.coordinator.lastReloadToken = reloadToken
+            webView.reload()
+        }
+    }
+
+    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+        var parent: CurbWebView
+        weak var webView: WKWebView?
+        let locationBridge = LocationBridge()
+        var lastReloadToken: UUID?
+
+        init(parent: CurbWebView) {
+            self.parent = parent
+        }
+
+        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            parent.isLoading = true
+            parent.loadError = nil
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            parent.isLoading = false
+            parent.loadError = nil
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            finishWith(error: error)
+        }
+
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            finishWith(error: error)
+        }
+
+        func webView(
+            _ webView: WKWebView,
+            decidePolicyFor navigationAction: WKNavigationAction,
+            decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void
+        ) {
+            guard let nextURL = navigationAction.request.url else {
+                decisionHandler(.allow)
+                return
             }
 
-            dayStrip
-        }
-        .padding(.top, 9)
-    }
+            if shouldOpenExternally(nextURL) {
+                UIApplication.shared.open(nextURL)
+                decisionHandler(.cancel)
+                return
+            }
 
-    private var dayStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 7) {
-                dayChip(title: "All", day: nil)
-                dayChip(title: "Today \(SweepSchedule.dayLabels[SweepSchedule.sfTodayIndex()])", day: SweepSchedule.sfTodayIndex())
-                ForEach(0..<7, id: \.self) { day in
-                    dayChip(title: SweepSchedule.dayLabels[day], day: day)
+            decisionHandler(.allow)
+        }
+
+        func webView(
+            _ webView: WKWebView,
+            createWebViewWith configuration: WKWebViewConfiguration,
+            for navigationAction: WKNavigationAction,
+            windowFeatures: WKWindowFeatures
+        ) -> WKWebView? {
+            if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
+                if shouldOpenExternally(url) {
+                    UIApplication.shared.open(url)
+                } else {
+                    webView.load(URLRequest(url: url))
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 2)
+            return nil
         }
-    }
 
-    private func dayChip(title: String, day: Int?) -> some View {
-        let isOn = model.dayFilter == day || (day == nil && model.dayFilter == nil)
-        return Button {
-            model.selectDay(day)
-        } label: {
-            Text(title)
-                .font(.system(size: 13, weight: .black, design: .rounded))
-                .foregroundStyle(isOn ? CurbTheme.paper : CurbTheme.ink)
-                .padding(.horizontal, 12)
-                .frame(height: 34)
-                .background(isOn ? CurbTheme.ink : CurbTheme.paper)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(CurbTheme.ink, lineWidth: 1.5)
-                )
+        private func finishWith(error: Error) {
+            parent.isLoading = false
+            let nsError = error as NSError
+            if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
+                return
+            }
+            parent.loadError = error.localizedDescription
         }
-        .buttonStyle(.plain)
-    }
 
-    private func suggestionIcon(_ suggestion: SearchSuggestion) -> String {
-        switch suggestion.kind {
-        case .address: "house.fill"
-        case .street: "road.lanes"
+        private func shouldOpenExternally(_ url: URL) -> Bool {
+            guard let host = url.host?.lowercased() else {
+                return false
+            }
+            if host == "curb.guide" || host.hasSuffix(".curb.guide") {
+                return false
+            }
+            return host == "github.com"
+                || host.hasSuffix(".github.com")
+                || host.contains("calendar.google.com")
+                || host.contains("accounts.google.com")
+                || host.contains("google.com")
+                || host.contains("apple.com")
         }
     }
 }
 
-struct CurbDetailSheet: View {
-    @EnvironmentObject private var model: CurbViewModel
-    let selection: CurbSelection
-    @State private var alertBusy = false
-    @State private var calendarBusy = false
-
-    private var window: SweepWindow? { selection.side.nextSweep }
-    private var displayRule: SweepRow? { selection.side.displayRow }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Capsule()
-                .fill(CurbTheme.ink.opacity(0.35))
-                .frame(width: 46, height: 5)
-                .padding(.top, 9)
-                .padding(.bottom, 10)
-
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 13) {
-                    header
-                    scheduleLine
-                    detailChips
-                    actionRow
-                    otherSides
-                    dataNote
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 28)
-            }
-            .frame(maxHeight: 390)
-        }
-        .background(CurbTheme.paper)
-        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18, style: .continuous))
-        .overlay(alignment: .top) {
-            UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18, style: .continuous)
-                .stroke(CurbTheme.ink, lineWidth: 2)
-        }
-        .shadow(color: .black.opacity(0.18), radius: 14, y: -4)
+private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcurrency CLLocationManagerDelegate {
+    private struct PendingRequest {
+        let id: String
+        let workItem: DispatchWorkItem
     }
 
-    private var header: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 7) {
-                Text(kicker)
-                    .font(.system(size: 12, weight: .black, design: .rounded))
-                    .textCase(.uppercase)
-                    .foregroundStyle(CurbTheme.ink.opacity(0.66))
+    weak var webView: WKWebView?
 
-                HStack(spacing: 9) {
-                    Text(headline)
-                        .font(.system(size: 34, weight: .black, design: .rounded))
-                        .foregroundStyle(selection.side.status.color)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.74)
+    private let locationManager = CLLocationManager()
+    private var pendingRequests: [String: PendingRequest] = [:]
+    private var lastLocation: CLLocation?
 
-                    if (selection.meterCount ?? 0) > 0 {
-                        Label("Metered", systemImage: "parkingsign.circle.fill")
-                            .font(.system(size: 12, weight: .black, design: .rounded))
-                            .foregroundStyle(CurbTheme.paper)
-                            .padding(.horizontal, 8)
-                            .frame(height: 25)
-                            .background(CurbTheme.ink)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                    }
-                }
+    override init() {
+        super.init()
+        locationManager.delegate = self
+    }
 
-                Text(whereLine)
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .foregroundStyle(CurbTheme.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard
+            message.name == "curbLocation",
+            let body = message.body as? [String: Any],
+            let id = body["id"] as? String
+        else {
+            return
+        }
 
-            Spacer()
+        let options = body["options"] as? [String: Any] ?? [:]
+        let maximumAge = milliseconds(from: options["maximumAge"], fallback: 0)
+        let timeout = min(max(milliseconds(from: options["timeout"], fallback: 10_000), 1_000), 30_000)
+        let highAccuracy = options["enableHighAccuracy"] as? Bool ?? true
 
-            VStack(spacing: 8) {
-                Button {
-                    model.selected = nil
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .black))
-                        .foregroundStyle(CurbTheme.ink)
-                        .frame(width: 32, height: 32)
-                        .background(CurbTheme.paper)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(CurbTheme.ink, lineWidth: 1.5))
-                }
-                .buttonStyle(.plain)
+        if let lastLocation,
+           maximumAge > 0,
+           Date().timeIntervalSince(lastLocation.timestamp) * 1_000 <= Double(maximumAge) {
+            finish(id: id, with: lastLocation)
+            return
+        }
 
-                if let url = URL(string: "https://curb.guide/b/\(selection.group.cnn)") {
-                    ShareLink(item: url) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 14, weight: .black))
-                            .foregroundStyle(CurbTheme.ink)
-                            .frame(width: 32, height: 32)
-                            .background(CurbTheme.paper)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(CurbTheme.ink, lineWidth: 1.5))
-                    }
-                }
-            }
+        locationManager.desiredAccuracy = highAccuracy ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
+
+        let timeoutWork = DispatchWorkItem { [weak self] in
+            self?.finish(id: id, code: 3, message: "Location timed out.")
+        }
+        pendingRequests[id] = PendingRequest(id: id, workItem: timeoutWork)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeout), execute: timeoutWork)
+
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            locationManager.requestLocation()
+        case .denied, .restricted:
+            finish(id: id, code: 1, message: "Location permission is off for CURB.")
+        @unknown default:
+            finish(id: id, code: 2, message: "Location is unavailable.")
         }
     }
 
-    private var scheduleLine: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if let window {
-                Text("\(SweepSchedule.formattedHour(window.fromHour))-\(SweepSchedule.formattedHour(window.toHour)) · \(SweepSchedule.frequencyLabel(for: displayRule)) · \(SweepSchedule.relativePhrase(for: window))")
-                    .font(.system(size: 16, weight: .black, design: .rounded))
-                    .foregroundStyle(selection.side.status.color)
-            }
-            if let rule = displayRule {
-                let day = SweepSchedule.dayLabels[SweepSchedule.normalizedDay(rule.weekday) ?? 0].uppercased()
-                Text("\(selection.side.blockside) · sweeps \(day) \(SweepSchedule.formattedHour(rule.fromhour))-\(SweepSchedule.formattedHour(rule.tohour))")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundStyle(CurbTheme.ink.opacity(0.74))
-            }
-        }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(selection.side.status.color.opacity(0.10))
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(selection.side.status.color, lineWidth: 1.5)
-        )
-    }
-
-    @ViewBuilder
-    private var detailChips: some View {
-        HStack(spacing: 8) {
-            if let rpp = selection.rpp {
-                Label {
-                    Text(rppText(rpp))
-                } icon: {
-                    Text(rpp.area)
-                        .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(CurbTheme.paper)
-                        .frame(width: 23, height: 23)
-                        .background(CurbTheme.meter)
-                        .clipShape(Circle())
-                }
-                .font(.system(size: 13, weight: .heavy, design: .rounded))
-                .foregroundStyle(CurbTheme.ink)
-                .padding(.horizontal, 9)
-                .padding(.vertical, 7)
-                .background(CurbTheme.meter.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(CurbTheme.meter, lineWidth: 1.2)
-                )
-            }
-
-            if selection.meterCount == 0 {
-                Text("No meters found on this block")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundStyle(CurbTheme.ink.opacity(0.62))
-            }
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.requestLocation()
+        case .denied, .restricted:
+            finishAll(code: 1, message: "Location permission is off for CURB.")
+        case .notDetermined:
+            break
+        @unknown default:
+            finishAll(code: 2, message: "Location is unavailable.")
         }
     }
 
-    private var actionRow: some View {
-        HStack(spacing: 9) {
-            Button {
-                Task { await scheduleAlert() }
-            } label: {
-                Label(alertTitle, systemImage: alertIsOn ? "checkmark.circle.fill" : "bell.badge.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .disabled(window == nil || alertBusy)
-            .signageButtonStyle(background: alertIsOn ? CurbTheme.green : CurbTheme.ink)
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else {
+            finishAll(code: 2, message: "Location is unavailable.")
+            return
+        }
+        lastLocation = location
+        let requestIds = Array(pendingRequests.keys)
+        requestIds.forEach { finish(id: $0, with: location) }
+    }
 
-            Button {
-                Task { await addCalendarEvent() }
-            } label: {
-                Label(calendarBusy ? "Adding" : "Calendar", systemImage: "calendar.badge.plus")
-                    .frame(maxWidth: .infinity)
-            }
-            .disabled(window == nil || calendarBusy)
-            .signageButtonStyle(background: CurbTheme.paper, foreground: CurbTheme.ink)
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        let nsError = error as NSError
+        if nsError.domain == kCLErrorDomain as String, nsError.code == CLError.denied.rawValue {
+            finishAll(code: 1, message: "Location permission is off for CURB.")
+        } else {
+            finishAll(code: 2, message: "Location is unavailable.")
         }
     }
 
-    @ViewBuilder
-    private var otherSides: some View {
-        let others = selection.group.sides.filter { $0.id != selection.side.id }
-        if !others.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Other side")
-                    .font(.system(size: 12, weight: .black, design: .rounded))
-                    .textCase(.uppercase)
-                    .foregroundStyle(CurbTheme.ink.opacity(0.62))
-                ForEach(others) { side in
-                    Button {
-                        model.select(group: selection.group, side: side)
-                    } label: {
-                        HStack(spacing: 11) {
-                            StreetCleaningBadge(side: side)
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(side.blockside)
-                                    .font(.system(size: 15, weight: .black, design: .rounded))
-                                Text(otherSideSummary(side))
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .foregroundStyle(side.status.color)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 12, weight: .black))
-                        }
-                        .foregroundStyle(CurbTheme.ink)
-                        .padding(10)
-                        .background(CurbTheme.paper)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .stroke(CurbTheme.ink.opacity(0.32), lineWidth: 1.2)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+    private func milliseconds(from value: Any?, fallback: Int) -> Int {
+        if let number = value as? NSNumber {
+            return number.intValue
         }
-    }
-
-    private var dataNote: some View {
-        Text("Posted signs, temporary signs, and holidays override this data. CURB shows rules, not live parking availability. Permit data is a city 2017 hint and may be incomplete.")
-            .font(.system(size: 12, weight: .semibold, design: .rounded))
-            .foregroundStyle(CurbTheme.ink.opacity(0.64))
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 2)
-    }
-
-    private var kicker: String {
-        guard let window else { return "Schedule" }
-        let now = Date()
-        if now >= window.start, now < window.end {
-            return "Restricted"
+        if let double = value as? Double {
+            return Int(double)
         }
-        return "Park until"
-    }
-
-    private var headline: String {
-        guard let window else { return "Posted sign" }
-        let now = Date()
-        if now >= window.start, now < window.end {
-            return "Sweeping now"
+        if let int = value as? Int {
+            return int
         }
-        return "\(SweepSchedule.dayLabels[window.weekday]) \(SweepSchedule.formattedHour(window.fromHour))"
+        return fallback
     }
 
-    private var whereLine: String {
-        [selection.group.corridor, selection.group.limits].filter { !$0.isEmpty }.joined(separator: " · ")
+    private func finishAll(code: Int, message: String) {
+        let requestIds = Array(pendingRequests.keys)
+        requestIds.forEach { finish(id: $0, code: code, message: message) }
     }
 
-    private var alertTitle: String {
-        if alertBusy { return "Enabling" }
-        return alertIsOn ? "Alerts on" : "Sweep alert"
-    }
-
-    private var alertIsOn: Bool {
-        guard let key = NativeReminderScheduler.alertKey(for: selection) else { return false }
-        return model.savedAlertKey == key
-    }
-
-    private func scheduleAlert() async {
-        alertBusy = true
-        defer { alertBusy = false }
-        do {
-            let key = try await NativeReminderScheduler.scheduleAlerts(for: selection)
-            model.setAlertKey(key)
-            model.notify("Sweep alert set: night-before when useful, plus about 30 min before.")
-        } catch {
-            model.notify(error.localizedDescription)
+    private func finish(id: String, with location: CLLocation) {
+        guard let pending = pendingRequests.removeValue(forKey: id) else {
+            return
         }
+        pending.workItem.cancel()
+
+        let payload: [String: Any] = [
+            "ok": true,
+            "latitude": location.coordinate.latitude,
+            "longitude": location.coordinate.longitude,
+            "accuracy": max(location.horizontalAccuracy, 0),
+            "altitude": location.verticalAccuracy >= 0 ? location.altitude : NSNull(),
+            "altitudeAccuracy": location.verticalAccuracy >= 0 ? location.verticalAccuracy : NSNull(),
+            "heading": location.course >= 0 ? location.course : NSNull(),
+            "speed": location.speed >= 0 ? location.speed : NSNull(),
+            "timestamp": location.timestamp.timeIntervalSince1970 * 1_000
+        ]
+        send(payload, to: id)
     }
 
-    private func addCalendarEvent() async {
-        calendarBusy = true
-        defer { calendarBusy = false }
-        do {
-            try await CalendarReminderWriter.addEvent(for: selection)
-            model.notify("Calendar reminder added.")
-        } catch {
-            model.notify(error.localizedDescription)
+    private func finish(id: String, code: Int, message: String) {
+        guard let pending = pendingRequests.removeValue(forKey: id) else {
+            return
         }
+        pending.workItem.cancel()
+        send(["ok": false, "code": code, "message": message], to: id)
     }
 
-    private func rppText(_ rpp: RPPHint) -> String {
-        let detail = [rpp.hourLimit.map { "\($0)hr limit" }, rpp.days, rpp.fromTime].compactMap { $0 }.joined(separator: " · ")
-        if detail.isEmpty {
-            return "Permit Area \(rpp.area)"
+    private func send(_ payload: [String: Any], to id: String) {
+        guard
+            let webView,
+            let data = try? JSONSerialization.data(withJSONObject: payload),
+            let json = String(data: data, encoding: .utf8)
+        else {
+            return
         }
-        return "Permit Area \(rpp.area) · \(detail)"
-    }
 
-    private func otherSideSummary(_ side: CurbSide) -> String {
-        guard let window = side.nextSweep else { return "Check posted sign" }
-        return "\(SweepSchedule.shortDate(window.start)) · \(SweepSchedule.relativePhrase(for: window))"
+        let escapedId = id.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "'", with: "\\'")
+        webView.evaluateJavaScript("window.__curbNativeLocationResult && window.__curbNativeLocationResult('\(escapedId)', \(json));")
     }
 }
 
-private struct StreetCleaningBadge: View {
-    let side: CurbSide
-
+private struct LoadingOverlay: View {
     var body: some View {
-        VStack(spacing: 1) {
-            Text(day)
-                .font(.system(size: 11, weight: .black, design: .rounded))
-            Text(time)
-                .font(.system(size: 10, weight: .black, design: .rounded))
-            Text("CLEAN")
-                .font(.system(size: 7, weight: .black, design: .rounded))
+        ZStack {
+            CurbTheme.paper
+                .ignoresSafeArea()
+
+            TimelineView(.animation) { timeline in
+                Image("CurbLoaderLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 118, height: 118)
+                    .scaleEffect(heartbeatScale(at: timeline.date))
+                    .accessibilityLabel("Loading CURB")
+            }
         }
-        .foregroundStyle(CurbTheme.paper)
-        .frame(width: 58, height: 44)
-        .background(side.status.color)
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .stroke(CurbTheme.ink, lineWidth: 1)
-        )
+        .transition(.opacity)
     }
 
-    private var day: String {
-        guard let row = side.displayRow, let index = SweepSchedule.normalizedDay(row.weekday) else {
-            return "SIGN"
-        }
-        return SweepSchedule.dayLabels[index].uppercased()
+    private func heartbeatScale(at date: Date) -> CGFloat {
+        let phase = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.18)
+        let firstBeat = pulse(phase, center: 0.12, width: 0.055, lift: 0.13)
+        let secondBeat = pulse(phase, center: 0.32, width: 0.07, lift: 0.09)
+        return 0.94 + firstBeat + secondBeat
     }
 
-    private var time: String {
-        guard let row = side.displayRow else { return "" }
-        return "\(SweepSchedule.formattedHour(row.fromhour))-\(SweepSchedule.formattedHour(row.tohour))"
+    private func pulse(_ value: TimeInterval, center: TimeInterval, width: TimeInterval, lift: CGFloat) -> CGFloat {
+        let distance = (value - center) / width
+        return lift * CGFloat(exp(-(distance * distance)))
     }
 }

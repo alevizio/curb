@@ -3,45 +3,29 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A10000000000000000000001 /* CURBApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* CURBApp.swift */; };
-		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
-		A10000000000000000000003 /* CurbMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* CurbMapView.swift */; };
-		A10000000000000000000004 /* CurbViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* CurbViewModel.swift */; };
-		A10000000000000000000005 /* DataSFClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* DataSFClient.swift */; };
-		A10000000000000000000006 /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Geometry.swift */; };
-		A10000000000000000000007 /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* LocationProvider.swift */; };
-		A10000000000000000000008 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* Models.swift */; };
-		A10000000000000000000009 /* ReminderServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* ReminderServices.swift */; };
-		A1000000000000000000000A /* SweepSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* SweepSchedule.swift */; };
-		A1000000000000000000000B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* Theme.swift */; };
-		A1000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* Assets.xcassets */; };
-		A1000000000000000000000D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000E /* PrivacyInfo.xcprivacy */; };
+		C0DE00000000000000000020 /* CURBApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000010 /* CURBApp.swift */; };
+		C0DE00000000000000000021 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000011 /* ContentView.swift */; };
+		C0DE0000000000000000002A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001A /* Theme.swift */; };
+		C0DE0000000000000000002B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001C /* Assets.xcassets */; };
+		C0DE0000000000000000002C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001D /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A20000000000000000000001 /* CURBApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CURBApp.swift; sourceTree = "<group>"; };
-		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A20000000000000000000003 /* CurbMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurbMapView.swift; sourceTree = "<group>"; };
-		A20000000000000000000004 /* CurbViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurbViewModel.swift; sourceTree = "<group>"; };
-		A20000000000000000000005 /* DataSFClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSFClient.swift; sourceTree = "<group>"; };
-		A20000000000000000000006 /* Geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geometry.swift; sourceTree = "<group>"; };
-		A20000000000000000000007 /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
-		A20000000000000000000008 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		A20000000000000000000009 /* ReminderServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderServices.swift; sourceTree = "<group>"; };
-		A2000000000000000000000A /* SweepSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SweepSchedule.swift; sourceTree = "<group>"; };
-		A2000000000000000000000B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		A2000000000000000000000C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A2000000000000000000000D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A2000000000000000000000E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		A2000000000000000000000F /* CURB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CURB.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DE00000000000000000006 /* CURB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CURB.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DE00000000000000000010 /* CURBApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CURBApp.swift; sourceTree = "<group>"; };
+		C0DE00000000000000000011 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		C0DE0000000000000000001A /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		C0DE0000000000000000001B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C0DE0000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C0DE0000000000000000001D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A30000000000000000000001 /* Frameworks */ = {
+		C0DE00000000000000000008 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -51,131 +35,118 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A40000000000000000000001 = {
+		C0DE00000000000000000003 = {
 			isa = PBXGroup;
 			children = (
-				A40000000000000000000002 /* CURB */,
-				A40000000000000000000003 /* Products */,
+				C0DE00000000000000000005 /* CURB */,
+				C0DE00000000000000000004 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A40000000000000000000002 /* CURB */ = {
+		C0DE00000000000000000004 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A20000000000000000000001 /* CURBApp.swift */,
-				A20000000000000000000002 /* ContentView.swift */,
-				A20000000000000000000003 /* CurbMapView.swift */,
-				A20000000000000000000004 /* CurbViewModel.swift */,
-				A20000000000000000000005 /* DataSFClient.swift */,
-				A20000000000000000000006 /* Geometry.swift */,
-				A20000000000000000000007 /* LocationProvider.swift */,
-				A20000000000000000000008 /* Models.swift */,
-				A20000000000000000000009 /* ReminderServices.swift */,
-				A2000000000000000000000A /* SweepSchedule.swift */,
-				A2000000000000000000000B /* Theme.swift */,
-				A2000000000000000000000C /* Info.plist */,
-				A2000000000000000000000D /* Assets.xcassets */,
-				A2000000000000000000000E /* PrivacyInfo.xcprivacy */,
-			);
-			path = CURB;
-			sourceTree = "<group>";
-		};
-		A40000000000000000000003 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A2000000000000000000000F /* CURB.app */,
+				C0DE00000000000000000006 /* CURB.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C0DE00000000000000000005 /* CURB */ = {
+			isa = PBXGroup;
+			children = (
+				C0DE00000000000000000010 /* CURBApp.swift */,
+				C0DE00000000000000000011 /* ContentView.swift */,
+				C0DE0000000000000000001A /* Theme.swift */,
+				C0DE0000000000000000001B /* Info.plist */,
+				C0DE0000000000000000001D /* PrivacyInfo.xcprivacy */,
+				C0DE0000000000000000001C /* Assets.xcassets */,
+			);
+			path = CURB;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A50000000000000000000001 /* CURB */ = {
+		C0DE00000000000000000002 /* CURB */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A80000000000000000000002 /* Build configuration list for PBXNativeTarget "CURB" */;
+			buildConfigurationList = C0DE0000000000000000000D /* Build configuration list for PBXNativeTarget "CURB" */;
 			buildPhases = (
-				A60000000000000000000001 /* Sources */,
-				A60000000000000000000002 /* Resources */,
-				A30000000000000000000001 /* Frameworks */,
+				C0DE00000000000000000007 /* Sources */,
+				C0DE00000000000000000008 /* Frameworks */,
+				C0DE00000000000000000009 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = CURB;
+			packageProductDependencies = (
+			);
 			productName = CURB;
-			productReference = A2000000000000000000000F /* CURB.app */;
+			productReference = C0DE00000000000000000006 /* CURB.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A70000000000000000000001 /* Project object */ = {
+		C0DE00000000000000000001 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
-					A50000000000000000000001 = {
-						CreatedOnToolsVersion = 16.0;
+					C0DE00000000000000000002 = {
+						CreatedOnToolsVersion = 26.5;
 					};
 				};
 			};
-			buildConfigurationList = A80000000000000000000001 /* Build configuration list for PBXProject "CURB" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = C0DE0000000000000000000A /* Build configuration list for PBXProject "CURB" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = A40000000000000000000001;
-			productRefGroup = A40000000000000000000003 /* Products */;
+			mainGroup = C0DE00000000000000000003;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C0DE00000000000000000004 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A50000000000000000000001 /* CURB */,
+				C0DE00000000000000000002 /* CURB */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A60000000000000000000002 /* Resources */ = {
+		C0DE00000000000000000009 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1000000000000000000000C /* Assets.xcassets in Resources */,
-				A1000000000000000000000D /* PrivacyInfo.xcprivacy in Resources */,
+				C0DE0000000000000000002B /* Assets.xcassets in Resources */,
+				C0DE0000000000000000002C /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A60000000000000000000001 /* Sources */ = {
+		C0DE00000000000000000007 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000000000000000000001 /* CURBApp.swift in Sources */,
-				A10000000000000000000002 /* ContentView.swift in Sources */,
-				A10000000000000000000003 /* CurbMapView.swift in Sources */,
-				A10000000000000000000004 /* CurbViewModel.swift in Sources */,
-				A10000000000000000000005 /* DataSFClient.swift in Sources */,
-				A10000000000000000000006 /* Geometry.swift in Sources */,
-				A10000000000000000000007 /* LocationProvider.swift in Sources */,
-				A10000000000000000000008 /* Models.swift in Sources */,
-				A10000000000000000000009 /* ReminderServices.swift in Sources */,
-				A1000000000000000000000A /* SweepSchedule.swift in Sources */,
-				A1000000000000000000000B /* Theme.swift in Sources */,
+				C0DE00000000000000000020 /* CURBApp.swift in Sources */,
+				C0DE00000000000000000021 /* ContentView.swift in Sources */,
+				C0DE0000000000000000002A /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		A90000000000000000000001 /* Debug */ = {
+		C0DE0000000000000000000B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -232,10 +203,11 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		A90000000000000000000002 /* Release */ = {
+		C0DE0000000000000000000C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -289,7 +261,7 @@
 			};
 			name = Release;
 		};
-		A90000000000000000000003 /* Debug */ = {
+		C0DE0000000000000000000E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -297,8 +269,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_LANGUAGE = en;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CURB/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -306,17 +281,22 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_SWIFT_FLAGS = "-enable-bare-slash-regex";
 				PRODUCT_BUNDLE_IDENTIFIER = guide.curb.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTED_PLATFORMS = (
+					iphoneos,
+					iphonesimulator,
+				);
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = minimal;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
-		A90000000000000000000004 /* Release */ = {
+		C0DE0000000000000000000F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -324,8 +304,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_LANGUAGE = en;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CURB/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -333,39 +316,43 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_SWIFT_FLAGS = "-enable-bare-slash-regex";
 				PRODUCT_BUNDLE_IDENTIFIER = guide.curb.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTED_PLATFORMS = (
+					iphoneos,
+					iphonesimulator,
+				);
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = minimal;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A80000000000000000000001 /* Build configuration list for PBXProject "CURB" */ = {
+		C0DE0000000000000000000A /* Build configuration list for PBXProject "CURB" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A90000000000000000000001 /* Debug */,
-				A90000000000000000000002 /* Release */,
+				C0DE0000000000000000000B /* Debug */,
+				C0DE0000000000000000000C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A80000000000000000000002 /* Build configuration list for PBXNativeTarget "CURB" */ = {
+		C0DE0000000000000000000D /* Build configuration list for PBXNativeTarget "CURB" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A90000000000000000000003 /* Debug */,
-				A90000000000000000000004 /* Release */,
+				C0DE0000000000000000000E /* Debug */,
+				C0DE0000000000000000000F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = A70000000000000000000001 /* Project object */;
+	rootObject = C0DE00000000000000000001 /* Project object */;
 }
