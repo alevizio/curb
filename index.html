@@ -259,49 +259,6 @@
   .dayrow{display:flex;gap:6px;align-items:center;pointer-events:auto;overflow-x:auto;
     scrollbar-width:none;margin:0 -12px;padding:6px 12px 8px}
   .dayrow::-webkit-scrollbar{display:none}
-  /* Your-car status strip — docks under the day chips; shows only when a spot is pinned. */
-  .carstrip{display:none;align-items:center;gap:9px;pointer-events:auto;width:100%;max-width:340px;margin-top:2px;
-    background:var(--sign);border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);
-    padding:8px 11px;font:inherit;cursor:pointer;text-align:left;transition:transform .12s}
-  .carstrip.show{display:flex}
-  .carstrip:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
-  .carstrip .cs-dot{width:11px;height:11px;border-radius:50%;flex:none;background:var(--green);
-    box-shadow:0 0 0 3px rgba(31,158,90,.18)}
-  .carstrip.soon .cs-dot{background:var(--amber);box-shadow:0 0 0 3px rgba(224,138,30,.18)}
-  .carstrip.now .cs-dot{background:var(--red);box-shadow:0 0 0 3px rgba(193,18,31,.2)}
-  .carstrip .cs-tx{display:flex;flex-direction:column;line-height:1.15;min-width:0;flex:1}
-  .carstrip .cs-where{font-size:12.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
-  .carstrip .cs-sub{font-size:11.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .carstrip.soon .cs-sub{color:var(--amber-text)} .carstrip.now .cs-sub{color:var(--red-text)}
-  .carstrip .cs-clear{flex:none;width:22px;height:22px;display:grid;place-items:center;border-radius:7px;
-    color:var(--ink-soft);font-size:16px;line-height:1;font-weight:700}
-  .carstrip .cs-clear:hover{background:rgba(23,21,15,.08);color:var(--ink)}
-  .carstrip .cs-go{flex:none;font-size:17px;font-weight:800;color:var(--ink-soft)}
-  /* "find a safe spot" entry (shown when your car is swept soon) */
-  .findsafe{display:none;align-items:center;gap:6px;pointer-events:auto;margin-top:6px;font:inherit;font-size:12.5px;
-    font-weight:800;background:var(--amber);color:var(--ink);border:2.5px solid var(--ink);border-radius:11px;
-    padding:8px 13px;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
-  .findsafe.show{display:inline-flex}
-  .findsafe:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
-  /* smart-pin "just parked here?" prompt */
-  .parkprompt{display:none;align-items:center;gap:10px;pointer-events:auto;width:100%;max-width:340px;margin-top:6px;
-    background:var(--sign);border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);
-    padding:8px 11px;font:inherit;cursor:pointer;text-align:left}
-  .parkprompt.show{display:flex}
-  .parkprompt .pp-tx{display:flex;flex-direction:column;line-height:1.15;flex:1;min-width:0}
-  .parkprompt .pp-tx b{font-size:13px;font-weight:800;color:var(--ink)}
-  .parkprompt .pp-tx small{font-size:11px;font-weight:700;color:var(--ink-soft)}
-  .parkprompt .pp-pin{flex:none;font-size:12.5px;font-weight:800;background:var(--ink);color:var(--paper);border-radius:9px;padding:7px 12px}
-  .parkprompt .pp-x{flex:none;width:22px;height:22px;display:grid;place-items:center;border-radius:7px;color:var(--ink-soft);font-size:16px;font-weight:700}
-  .parkprompt .pp-x:hover{background:rgba(23,21,15,.08);color:var(--ink)}
-  /* move-mode banner (bottom-center) */
-  .movebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));z-index:1200;
-    display:none;align-items:center;gap:12px;background:var(--ink);color:var(--paper);border-radius:13px;
-    padding:10px 14px;box-shadow:4px 4px 0 rgba(23,21,15,.35);max-width:calc(100vw - 32px);pointer-events:auto}
-  .movebar.show{display:flex}
-  .movebar .mb-tx{font-size:12.5px;font-weight:700;line-height:1.25}
-  .movebar .mb-x{font:inherit;font-size:12.5px;font-weight:800;background:var(--paper);color:var(--ink);border:0;
-    border-radius:9px;padding:7px 12px;cursor:pointer;flex:none}
   .datechip{flex:none;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
     background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 11px;box-shadow:3px 3px 0 var(--ink);
     border:0;cursor:pointer}
@@ -654,27 +611,6 @@
     <button class="dchip" data-day="6">Sat</button>
     <button class="dchip" data-day="0">Sun</button>
   </div>
-  <!-- Your-car status strip (ALE-164): persists where you parked + its live sweep verdict. -->
-  <button class="carstrip" id="carStrip" hidden aria-label="Your parked car — show its block">
-    <span class="cs-dot" aria-hidden="true"></span>
-    <span class="cs-tx"><b class="cs-where">Your car</b><span class="cs-sub"></span></span>
-    <span class="cs-clear" id="carClear" role="button" tabindex="0" aria-label="Clear your parked car" title="Not parked here anymore">×</span>
-    <span class="cs-go" aria-hidden="true">›</span>
-  </button>
-  <!-- shows when your car's block is being swept soon (ALE-164 move-mode) -->
-  <button class="findsafe" id="findSafe" hidden>🅿️ Find a safe spot</button>
-  <!-- smart-pin prompt (ALE-168 T1): offered after auto-locate to a fresh spot -->
-  <button class="parkprompt" id="parkPrompt" hidden aria-label="Pin this as where you parked">
-    <span class="pp-tx"><b>Just parked here?</b><small>Pin it to watch the sweep</small></span>
-    <span class="pp-pin">Pin it</span>
-    <span class="pp-x" id="parkPromptX" role="button" tabindex="0" aria-label="Dismiss">×</span>
-  </button>
-</div>
-
-<!-- "find a safe spot" move-mode banner -->
-<div class="movebar" id="moveBar" hidden role="status">
-  <span class="mb-tx" id="moveBarTx">Safe spots highlighted</span>
-  <button class="mb-x" id="moveExit">Exit</button>
 </div>
 
 <!-- layers control: everything map-related lives in one corner, Google-Maps style -->
@@ -1290,10 +1226,7 @@ function drawSegments(rows){
       const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
       if(cls!=='gray'&&!statusOn[cls])return;
       const click=()=>openSheet(group, s.key);
-      // "Find a safe spot" lens: dim sides that get swept before moveUntil; keep safe ones bright.
-      let mw=5, mo=.95;
-      if(moveMode){const safe=!side.ns||+side.ns.start>moveUntil; mw=safe?6:4; mo=safe?.98:.12;}
-      const vis=L.polyline(ll,{color,weight:mw,opacity:mo,lineCap:'round'}).on('click',click).addTo(segLayer);
+      const vis=L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round'}).on('click',click).addTo(segLayer);
       const hit=L.polyline(ll,{color:'#000',opacity:0,weight:16}).on('click',click).addTo(segLayer);
       if(CAN_HOVER){
         hit.bindTooltip(()=>previewHtml(group,side),
@@ -1303,7 +1236,7 @@ function drawSegments(rows){
         hit.on('tooltipopen',e=>{const el=e.tooltip.getElement();
           if(el){el.classList.remove('now','soon','ok');el.classList.add(verdictClass(side.ns));}});
         hit.on('mouseover',()=>vis.setStyle({weight:9,opacity:1}));
-        hit.on('mouseout',()=>vis.setStyle({weight:mw,opacity:mo}));
+        hit.on('mouseout',()=>vis.setStyle({weight:5,opacity:.95}));
       }
       segCache.push({group, side});
     });
@@ -1439,9 +1372,6 @@ function openSheet(group, activeKey){
       ...(+eve>Date.now()+6e5&&+eve<+ns.start?{eveningISO:eve.toISOString()}:{})
     };
   })() : null;
-  // remember the open block for pin-on-arm; if this open came from "I'm here" (placeYou), pin it now
-  _curSpot=spot; _curMid=active.mid;
-  if(_pinOnOpen){_pinOnOpen=false; writePin(spot,active.mid);}
   const alertOn = alertSpotMatches(spot);
 
   // Real-world enforcement callout for the active side (from citation history).
@@ -1648,7 +1578,6 @@ async function onAlertTap(spot, btn){
     if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.note||d.error||('save failed ('+res.status+')')); }
     try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}
     track('alert_armed');  // the activation→retention metric
-    writePin(spot,_curMid);  // arming an alert pins your car → the status strip tracks it
     btn.classList.remove('busy','alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on';
     toast('Sweep alert set for '+(spot.corridor||'this block')+(spot.eveningISO?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before."));
   }catch(err){
@@ -1696,87 +1625,8 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
   if(youMarker)map.removeLayer(youMarker);
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
-  if(!quiet){_pinOnOpen=true;setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);}
+  if(!quiet)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);
 }
-
-/* ---------- Your-car pin + persistent status strip (ALE-164) ----------
-   "I'm here" (locate / tap-to-place) or arming an alert pins the block; the strip then shows
-   its live sweep verdict from the stored rule and taps back to it. All client-side localStorage. */
-let curbPin=(()=>{try{return JSON.parse(localStorage.getItem('curbPin')||'null');}catch(_){return null;}})();
-let moveMode=false, moveUntil=0;   // "find a safe spot" lens (ALE-164): dim curbs swept before moveUntil
-let _pinOnOpen=false;            // placeYou sets this so the NEXT sheet-open pins (not every tap)
-let _curSpot=null, _curMid=null; // the open sheet's spot + midpoint, for pin-on-arm
-function savePin(p){curbPin=p;try{p?localStorage.setItem('curbPin',JSON.stringify(p)):localStorage.removeItem('curbPin');}catch(_){}renderStrip();}
-function writePin(spot,latlng){
-  if(!spot||!spot.rule)return;   // only a block with a real sweep rule is worth tracking
-  savePin({corridor:spot.corridor||'',blockside:spot.blockside||'',rule:spot.rule,
-    cnn:spot.cnn||'',sideKey:spot.sideKey||'',latlng:latlng||null,pinnedAt:Date.now()});
-}
-function renderStrip(){
-  const el=document.getElementById('carStrip'), fs=document.getElementById('findSafe'); if(!el)return;
-  if(!curbPin||!curbPin.rule){el.classList.remove('show');el.hidden=true;if(fs){fs.classList.remove('show');fs.hidden=true;}return;}
-  const ns=nextSweep(curbPin.rule), rp=relPhrase(ns);
-  const cls=rp.cls==='red'?'now':rp.cls==='amber'?'soon':'';
-  el.classList.remove('now','soon'); if(cls)el.classList.add(cls);
-  el.querySelector('.cs-where').textContent='📍 '+(curbPin.corridor||'Your block');
-  el.querySelector('.cs-sub').textContent=ns?rp.short:'tap to view block';
-  el.hidden=false; el.classList.add('show');
-  // offer "find a safe spot" only when the car's block is swept soon/now and we're not already in it
-  if(fs){const danger=(cls==='now'||cls==='soon')&&!moveMode;fs.classList.toggle('show',danger);fs.hidden=!danger;}
-}
-function flyToPin(){
-  if(!curbPin)return;
-  const go=(la,lo)=>{map.flyTo([la,lo],17,{duration:.6});setTimeout(()=>openNearestWhenReady(la,lo,curbPin.cnn,0),700);};
-  if(curbPin.latlng){go(curbPin.latlng[0],curbPin.latlng[1]);return;}
-  fetch(SWEEP+`?$select=line&$where=cnn='${curbPin.cnn}'&$limit=1`).then(r=>r.json()).then(d=>{
-    const c=d[0]&&d[0].line&&d[0].line.coordinates; if(c&&c.length){const m=c[(c.length/2)|0];go(m[1],m[0]);}
-  }).catch(()=>{});
-}
-(function(){
-  const el=document.getElementById('carStrip'), clr=document.getElementById('carClear');
-  if(el)el.onclick=e=>{if(e.target===clr)return;flyToPin();};
-  if(clr){const go=e=>{e.stopPropagation();savePin(null);toast('Cleared your parked car.');};
-    clr.onclick=go; clr.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' ')go(ev);};}
-})();
-renderStrip();
-setInterval(renderStrip,60e3);  // keep the countdown fresh as the day rolls over
-
-/* ---------- "find a safe spot" move-mode (ALE-164) ---------- */
-function enterMove(){
-  // target: a block that stays clear at least as long as the current pin would, and ≥24h out
-  const pinNs=curbPin&&curbPin.rule?nextSweep(curbPin.rule):null;
-  moveUntil=Math.max(Date.now()+24*3600e3, pinNs?+pinNs.start:0);
-  moveMode=true;
-  const bar=document.getElementById('moveBar');
-  if(bar){document.getElementById('moveBarTx').textContent='Bright blocks stay clear a while — dimmed ones get swept soon. Pick a bright one.';bar.hidden=false;bar.classList.add('show');}
-  renderStrip();
-  if(ovMode){toast('Zoom in to spot a safe block.');} else drawSegments(lastRows);
-}
-function exitMove(){
-  moveMode=false;
-  const bar=document.getElementById('moveBar'); if(bar){bar.classList.remove('show');bar.hidden=true;}
-  renderStrip();
-  if(!ovMode)drawSegments(lastRows);
-}
-(function(){
-  const f=document.getElementById('findSafe'); if(f)f.onclick=enterMove;
-  const x=document.getElementById('moveExit'); if(x)x.onclick=exitMove;
-})();
-
-/* ---------- smart-pin "just parked here?" prompt (ALE-168 Tier 1) ---------- */
-let _smartLL=null;
-function maybeSmartPin(lat,lng){
-  // only when we're at a FRESH spot — no pin, or >75m from the pinned car
-  if(curbPin&&curbPin.latlng&&distM([lat,lng],curbPin.latlng)<75)return;
-  _smartLL=[lat,lng];
-  const el=document.getElementById('parkPrompt'); if(el){el.hidden=false;el.classList.add('show');}
-}
-function hidePark(){const el=document.getElementById('parkPrompt');if(el){el.classList.remove('show');el.hidden=true;}}
-(function(){
-  const el=document.getElementById('parkPrompt'), x=document.getElementById('parkPromptX'); if(!el)return;
-  el.onclick=e=>{if(e.target===x)return; hidePark(); if(_smartLL)placeYou(_smartLL[0],_smartLL[1],true);};  // pins + opens the block
-  if(x){const go=e=>{e.stopPropagation();hidePark();}; x.onclick=go; x.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' ')go(ev);};}
-})();
 
 /* Auto-position on launch — ONLY when permission is already granted, so no permission
    prompt ever fires by itself. Permissions API where available; older Safari falls back
@@ -1802,16 +1652,10 @@ function hidePark(){const el=document.getElementById('parkPrompt');if(el){el.cla
   catch(_){ try{granted=localStorage.getItem('curbLocOK')==='1';}catch(_){} }
   if(!granted)return;
   navigator.geolocation.getCurrentPosition(
-    p=>{placeYou(p.coords.latitude,p.coords.longitude,true,null,true); maybeSmartPin(p.coords.latitude,p.coords.longitude);},
+    p=>placeYou(p.coords.latitude,p.coords.longitude,true,null,true),
     ()=>{},  // silent: launch convenience, never an error
     {enableHighAccuracy:true,timeout:8000,maximumAge:60000});
 })();
-// /?move=1 — the "find a safe spot" deep link (from the night-before push). Center on the
-// pinned car if we have one, then enter move-mode once the first data load settles.
-if(/[?&]move=1/.test(location.search)){
-  if(curbPin&&curbPin.latlng)map.setView(curbPin.latlng,16);
-  setTimeout(()=>enterMove(),1400);
-}
 function openNearestWhenReady(lat,lng,cnnHint,tries){
   const n=nearestSeg(lat,lng,cnnHint);
   if(n){openSheet(n.group,n.side.key);return;}
