@@ -1,14 +1,19 @@
 # CURB iOS
 
-Native iPhone app for CURB's San Francisco curb-rules experience.
+Native iPhone wrapper for CURB's San Francisco curb-rules experience.
+
+The iOS target intentionally loads the production CURB web app at `https://curb.guide`
+inside `WKWebView`. That keeps the App Store app visually identical to the web/PWA
+experience: same Leaflet map, same search, same bottom sheet, same layers, same copy.
 
 ## What is included
 
-- SwiftUI shell with a MapKit map.
-- Live DataSF street-sweeping fetches for the visible viewport.
-- CURB's curb-side offset logic, next-sweep calculation, SF timezone handling, and holiday suspension table.
-- Tap/search/location flows to select the nearest curb.
-- Native bottom sheet with the active curb, other side, metered/RPP hints, share link, local notification alerts, and EventKit calendar reminders.
+- SwiftUI app shell.
+- `WKWebView` loading `https://curb.guide`.
+- Native Core Location bridge for the web UI's locate button.
+- Native loading/error states.
+- External handoff for Google/Apple links that should leave the app.
+- Existing iOS privacy strings for location/calendar prompts used by the web UI.
 
 ## Open locally
 
@@ -22,7 +27,7 @@ Then set your Apple Developer Team and a final bundle identifier under the CURB 
 
 - Replace `guide.curb.ios` with the bundle ID registered in Apple Developer.
 - Set the signing team.
-- Review App Privacy answers in App Store Connect. This app uses location only on device to find nearby curb rules, stores one local alert key in `UserDefaults`, and does not sell or track users.
+- Review App Privacy answers in App Store Connect. The app displays `curb.guide`; location is used only when the user asks the map to locate them. CURB does not sell or track users.
 - Archive from Xcode and upload through Organizer.
 
 The app intentionally does not claim live parking availability; SF's live space sensors are gone, so the posted sign remains the source of truth.
