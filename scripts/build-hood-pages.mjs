@@ -44,7 +44,32 @@ const kfmt = (n) => n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' 
 // name) + one-line title + two standout stat pills. Shared by the index grid and the related grid.
 const CARD_TINTS = ['#cfe3d6', '#e7dcc2', '#cdddea', '#ecd3cd', '#dadbc6', '#d6dde6', '#e6d8df', '#d2e0d6'];
 const tintFor = (h) => CARD_TINTS[[...h].reduce((a, c) => a + c.charCodeAt(0), 0) % CARD_TINTS.length];
-const cardViz = (h) => `<span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="${tintFor(h)}"/><g stroke="rgba(23,21,15,.16)" stroke-width="3">${[-20, 0, 20, 40, 60, 80, 100].map((x) => `<path d="M${x} 52 L${x + 52} 0"/>`).join('')}</g></svg></span>`;
+const HOOD_MAPS = JSON.parse(readFileSync(new URL('data/hood-maps.json', ROOT), 'utf8'));
+// Card visual: the neighborhood's street-cleaning network as an amber-on-paper map snapshot
+// (data/hood-maps.json, built by build-hood-maps.mjs). Falls back to tinted stripes if missing.
+const cardViz = (name) => {
+  const m = HOOD_MAPS[slug(name)];
+  if (m) return `<span class="hcard-viz"><svg viewBox="${m.vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><rect width="300" height="130" fill="var(--paper)"/><path d="${m.d}" fill="none" stroke="var(--amber)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  return `<span class="hcard-viz"><svg viewBox="0 0 120 52" preserveAspectRatio="none" aria-hidden="true"><rect width="120" height="52" fill="${tintFor(name)}"/><g stroke="rgba(23,21,15,.16)" stroke-width="3">${[-20, 0, 20, 40, 60, 80, 100].map((x) => `<path d="M${x} 52 L${x + 52} 0"/>`).join('')}</g></svg></span>`;
+};
+// Live-map embed: the amber snapshot as a click-to-load poster that swaps to a neighborhood-
+// framed CURB map iframe (/?embed=1&bbox=...). Keeps the SEO page static+fast; the heavy
+// Leaflet map only loads when the visitor opts in.
+const mapEmbed = (name) => {
+  const m = HOOD_MAPS[slug(name)];
+  if (!m || !m.bbox) return '';
+  return `<section class="hmap-sec" aria-label="${esc(name)} parking map">
+    <div class="sec-k">The live map</div>
+    <h2>${esc(name)} <b>parking</b>, live</h2>
+    <p class="lede">Every curb in ${esc(name)}, colored by its next street sweep. Tap a block for its posted schedule, meters, permit zone — and a free move-your-car reminder.</p>
+    <button type="button" class="hmap" data-bbox="${m.bbox.join(',')}" aria-label="Load the live CURB map for ${esc(name)}">
+      <svg class="hmap-shot" viewBox="${m.vb}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="300" height="130" fill="var(--paper)"/><path d="${m.d}" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="hmap-cta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Explore the live map</span>
+    </button>
+    <script>(function(s){var b=s.parentElement.querySelector('.hmap');b.addEventListener('click',function(){var f=document.createElement('iframe');f.className='hmap-frame';f.loading='eager';f.title=b.getAttribute('aria-label');f.setAttribute('allow','geolocation');f.src='/?embed=1&bbox='+encodeURIComponent(b.dataset.bbox);b.replaceWith(f);},{once:true});})(document.currentScript);<\/script>
+  </section>`;
+};
+
 const hoodCard = (h) => `<a class="hcard" href="/n/${slug(h.hood)}">
       ${cardViz(h.hood)}
       <span class="hcard-nm">${esc(h.hood)}</span>
@@ -144,7 +169,13 @@ ul.streets li .n{color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .hcard{display:flex;flex-direction:column;border:2.5px solid var(--ink);border-radius:14px;background:var(--sign);box-shadow:3px 3px 0 var(--ink);text-decoration:none;overflow:hidden;transition:transform .12s}
 .hcard:hover{transform:translateY(-2px)}
 .hcard:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
-.hcard-viz{display:block;height:52px;border-bottom:2.5px solid var(--ink)}
+.hcard-viz{display:block;height:116px;background:var(--paper);border-bottom:2.5px solid var(--ink)}
+.hmap-sec .hmap{position:relative;display:block;width:100%;padding:0;margin-top:6px;border:2.5px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);background:var(--paper);overflow:hidden;cursor:pointer;line-height:0}
+.hmap-shot{display:block;width:100%;height:clamp(220px,42vh,360px)}
+.hmap-cta{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:9px;font-family:'Anton',sans-serif;font-size:16px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink);background:var(--sign);border:2.5px solid var(--ink);border-radius:11px;box-shadow:3px 3px 0 var(--ink);padding:11px 16px;line-height:1}
+.hmap-cta svg{width:18px;height:18px;fill:var(--red)}
+.hmap:hover .hmap-cta{transform:translate(-50%,-50%) translateY(-1px)}
+.hmap-frame{display:block;width:100%;height:clamp(380px,64vh,620px);border:2.5px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);margin-top:6px;background:var(--paper)}
 .hcard-viz svg{display:block;width:100%;height:100%}
 .hcard-nm{font-family:'Anton',sans-serif;font-size:19px;text-transform:uppercase;line-height:1;
   padding:12px 14px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
@@ -392,6 +423,8 @@ function renderHood(h, idx) {
     <p class="lede" style="margin-top:16px">The street-cleaning fine is <b>$${FINE}</b> (2026). ${isHoodTiming ? `In ${esc(name)}, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b>.` : `Citywide, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b> — ${esc(name)} follows the same pattern.`}</p>
   </section>
 
+  ${mapEmbed(name)}
+
   <section>
     <div class="sec-k">When tickets happen${isHoodTiming ? ` in ${esc(name)}` : ' (citywide)'}</div>
     <h2>By <b>day</b> &amp; <b>hour</b></h2>
@@ -451,6 +484,11 @@ function renderIndex() {
       },
     ],
   });
+  // Aggregate data points across every analyzed neighborhood — the proof strip atop the directory.
+  const totTickets = hoods.reduce((a, h) => a + (+h.n || 0), 0);
+  const totFines = hoods.reduce((a, h) => a + (+h.rev || 0), 0);
+  const cPeakDow = peakFromList(cityDows, 'd');
+  const cPeakHour = peakFromList(cityHours, 'h');
   const cards = hoods.map(hoodCard).join('\n    ');
   const body = `
 <main class="wrap">
@@ -459,6 +497,13 @@ function renderIndex() {
     <div class="kicker">San Francisco · street cleaning</div>
     <h1>Street cleaning by <b>neighborhood</b></h1>
     <p class="sub">Schedules are set block by block, but the <b>ticket record</b> tells a story per neighborhood. Pick yours for real numbers — or just open the map and tap your block.</p>
+    <div class="statrow">
+      <div class="stat"><div class="v red">${num(totTickets)}</div><div class="l">Street-cleaning tickets analyzed</div></div>
+      <div class="stat"><div class="v">${money(totFines)}</div><div class="l">In fines · last ~2 years</div></div>
+      <div class="stat"><div class="v">${hoods.length}</div><div class="l">Neighborhoods mapped</div></div>
+      <div class="stat"><div class="v amber">${DOW[cPeakDow.i]}s</div><div class="l">Busiest day citywide</div></div>
+      <div class="stat"><div class="v amber">~${fmtHour(cPeakHour.i)}</div><div class="l">Most common ticket time</div></div>
+    </div>
     <div class="cta"><a class="btn" href="/">Open the map →</a></div>
   </div>
   <section>
