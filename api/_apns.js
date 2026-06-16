@@ -24,6 +24,19 @@ export function apnsConfigured() {
 
 const b64url = (buf) => Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
+// Load the APNs private key robustly, however APNS_KEY_P8 ended up stored. PEM is whitespace-
+// sensitive, and pasting a multi-line .p8 into an env-var UI often collapses the newlines (to
+// spaces, escaped "\n", or one line) — which makes a direct PEM parse fail with a DECODER error.
+// So: try the value as-is (newlines intact / escaped), and if that fails, strip the BEGIN/END
+// markers + ALL whitespace to recover the base64 body and load it as PKCS#8 DER.
+function loadApnsKey() {
+  const raw = String(process.env.APNS_KEY_P8 || '').replace(/\\n/g, '\n').trim();
+  try { return crypto.createPrivateKey(raw); } catch { /* fall back to DER reconstruction */ }
+  const b64 = raw.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+  const der = Buffer.from(b64, 'base64');
+  return crypto.createPrivateKey({ key: der, format: 'der', type: 'pkcs8' });
+}
+
 // Cache the ES256 provider token at module scope and re-mint only every ~50 min. APNs 429s a
 // re-mint sooner than ~20 min (TooManyProviderTokenUpdates) and 403s a token older than 1h
 // (ExpiredProviderToken). A cold start re-mints — harmless at a 15-min cron cadence.
@@ -31,9 +44,7 @@ let _jwt = null; // { token, iat }
 export function getProviderToken() {
   const nowSec = Math.floor(Date.now() / 1000);
   if (_jwt && nowSec - _jwt.iat < 3000) return _jwt.token;
-  // .p8 newlines must survive: if stored with escaped "\n", restore real newlines before signing.
-  const pem = String(process.env.APNS_KEY_P8 || '').replace(/\\n/g, '\n');
-  const key = crypto.createPrivateKey(pem);
+  const key = loadApnsKey();
   const header = b64url(JSON.stringify({ alg: 'ES256', kid: process.env.APNS_KEY_ID }));
   const claims = b64url(JSON.stringify({ iss: process.env.APNS_TEAM_ID, iat: nowSec }));
   const signingInput = `${header}.${claims}`;
