@@ -19,7 +19,7 @@ export const altHost = () => (HOST() === SANDBOX_HOST ? PROD_HOST : SANDBOX_HOST
 /** True once all four APNs env vars are present. The cron skips the iOS pass when false, so the
  *  live web-push path is never affected before the key is configured. */
 export function apnsConfigured() {
-  return Boolean(process.env.APNS_KEY_P8 && process.env.APNS_KEY_ID && process.env.APNS_TEAM_ID);
+  return Boolean((process.env.APNS_KEY_P8_B64 || process.env.APNS_KEY_P8) && process.env.APNS_KEY_ID && process.env.APNS_TEAM_ID);
 }
 
 const b64url = (buf) => Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -30,11 +30,19 @@ const b64url = (buf) => Buffer.from(buf).toString('base64').replace(/\+/g, '-').
 // So: try the value as-is (newlines intact / escaped), and if that fails, strip the BEGIN/END
 // markers + ALL whitespace to recover the base64 body and load it as PKCS#8 DER.
 function loadApnsKey() {
+  // PREFERRED: APNS_KEY_P8_B64 = base64 of the whole .p8 PEM. Single-line, charset-safe — survives
+  // any env-var field with no newline/charset mangling. Decode straight back to the original PEM.
+  const b64Pem = process.env.APNS_KEY_P8_B64;
+  if (b64Pem) {
+    const pem = Buffer.from(String(b64Pem).replace(/\s+/g, ''), 'base64').toString('utf8');
+    return crypto.createPrivateKey(pem);
+  }
+  // FALLBACK: APNS_KEY_P8 = raw PEM. Tolerate escaped/collapsed newlines; if a direct parse fails,
+  // strip the BEGIN/END markers + all whitespace and load the base64 body as PKCS#8 DER.
   const raw = String(process.env.APNS_KEY_P8 || '').replace(/\\n/g, '\n').trim();
   try { return crypto.createPrivateKey(raw); } catch { /* fall back to DER reconstruction */ }
-  const b64 = raw.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
-  const der = Buffer.from(b64, 'base64');
-  return crypto.createPrivateKey({ key: der, format: 'der', type: 'pkcs8' });
+  const body = raw.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+  return crypto.createPrivateKey({ key: Buffer.from(body, 'base64'), format: 'der', type: 'pkcs8' });
 }
 
 // Cache the ES256 provider token at module scope and re-mint only every ~50 min. APNs 429s a
