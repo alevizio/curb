@@ -2,7 +2,8 @@
 // deps, mirroring the repo's hand-rolled web-push-minimal style. Token-based auth (a .p8 APNs key →
 // ES256 provider JWT). Helper file ("_" prefix) — import-only.
 //
-// Env: APNS_KEY_P8 (the full .p8 PEM), APNS_KEY_ID, APNS_TEAM_ID, APNS_BUNDLE_ID, optional APNS_HOST.
+// Env: APNS_KEY_P8_B64 (preferred, base64 of the whole .p8 PEM) or APNS_KEY_P8 (raw .p8 PEM),
+//      APNS_KEY_ID, APNS_TEAM_ID, APNS_BUNDLE_ID, optional APNS_HOST.
 import http2 from 'node:http2';
 import crypto from 'node:crypto';
 
@@ -16,15 +17,17 @@ const HOST = () => process.env.APNS_HOST || PROD_HOST;
 export const primaryHost = () => HOST();
 export const altHost = () => (HOST() === SANDBOX_HOST ? PROD_HOST : SANDBOX_HOST);
 
-/** True once all four APNs env vars are present. The cron skips the iOS pass when false, so the
- *  live web-push path is never affected before the key is configured. */
+/** True once the APNs key (APNS_KEY_P8_B64 or APNS_KEY_P8), APNS_KEY_ID and APNS_TEAM_ID are all
+ *  present (APNS_BUNDLE_ID defaults to guide.curb.ios). The cron skips the iOS pass when false, so
+ *  the live web-push path is never affected before the key is configured. */
 export function apnsConfigured() {
   return Boolean((process.env.APNS_KEY_P8_B64 || process.env.APNS_KEY_P8) && process.env.APNS_KEY_ID && process.env.APNS_TEAM_ID);
 }
 
 const b64url = (buf) => Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
-// Load the APNs private key robustly, however APNS_KEY_P8 ended up stored. PEM is whitespace-
+// Load the APNs private key robustly. Reads APNS_KEY_P8_B64 first (preferred — base64 of the whole
+// .p8 PEM), then falls back to APNS_KEY_P8 however it ended up stored. PEM is whitespace-
 // sensitive, and pasting a multi-line .p8 into an env-var UI often collapses the newlines (to
 // spaces, escaped "\n", or one line) — which makes a direct PEM parse fail with a DECODER error.
 // So: try the value as-is (newlines intact / escaped), and if that fails, strip the BEGIN/END
@@ -63,14 +66,25 @@ export function getProviderToken() {
   return token;
 }
 
+/** Drop the cached provider JWT so the next getProviderToken() re-mints. Called on a 403
+ *  ExpiredProviderToken/InvalidProviderToken (clock skew / key change on a warm instance) — without
+ *  it, every iOS push stays wedged behind the stale token until the instance cold-starts. */
+export function resetProviderToken() { _jwt = null; }
+
 /** Open ONE http2 session for the whole cron run. Caller MUST session.close() in a finally so the
  *  function event loop can exit (a lingering session hangs the invocation to timeout). */
 export function openSession(host) {
-  return http2.connect(`https://${host || HOST()}`);
+  const session = http2.connect(`https://${host || HOST()}`);
+  // A session-level 'error' (DNS/TLS/connect failure) fires asynchronously, so without a listener it
+  // escapes the caller's try/catch and becomes an uncaughtException that 500s the whole cron — taking
+  // down the already-completed web-push reporting too. Swallow it; sendOne's per-request handler still
+  // resolves each in-flight push with { status: 0 }, so the run ends cleanly and retries next tick.
+  session.on('error', () => {});
+  return session;
 }
 
 /** POST one alert to /3/device/<token>. Resolves { status, reason } (never rejects). */
-export function sendOne(session, jwt, token, payload, collapseId) {
+export function sendOne(session, jwt, token, payload, collapseId, expiration) {
   return new Promise((resolve) => {
     const body = Buffer.from(JSON.stringify(payload));
     const headers = {
@@ -84,6 +98,9 @@ export function sendOne(session, jwt, token, payload, collapseId) {
       'content-length': body.length,
     };
     if (collapseId) headers['apns-collapse-id'] = String(collapseId).slice(0, 64);
+    // apns-expiration (epoch seconds): the last moment the alert is worth delivering. APNs drops it if
+    // the device only reconnects after this — so a "move your car" alert can't arrive hours stale.
+    if (expiration != null) headers['apns-expiration'] = String(Math.floor(expiration));
     let req;
     try { req = session.request(headers); } catch (e) { resolve({ status: 0, reason: e.message }); return; }
     let status = 0, data = '';

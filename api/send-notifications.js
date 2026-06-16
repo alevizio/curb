@@ -3,10 +3,10 @@
 import webpush from 'web-push';
 import {
   loadAllSubs, deleteSub, markNotified, advanceSpot, storeReady,
-  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot,
+  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot,
 } from './_store.js';
 import { recomputeSpot } from './_schedule.js';
-import { apnsConfigured, getProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
+import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
 // live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
@@ -59,11 +59,12 @@ export default async function handler(req, res) {
         const jwt = getProviderToken();
         session = openSession();
         const aps = { aps: { alert: { title: 'CURB test ✅', body: 'Native push is working — you can move your car with confidence.' }, sound: 'default' }, url: '/', tag: 'curb-test' };
+        const testExp = Math.floor(Date.now() / 1000) + 300; // a test alert has no real deadline — let APNs drop it after 5 min if undeliverable
         for (const { token } of tokens) {
-          let { status, reason } = await sendOne(session, jwt, token, aps, 'curb-test');
+          let { status, reason } = await sendOne(session, jwt, token, aps, 'curb-test', testExp);
           if (status === 410 || (status === 400 && /BadDeviceToken|Unregistered/i.test(reason))) {
             if (!alt) alt = openSession(altHost());
-            ({ status, reason } = await sendOne(alt, jwt, token, aps, 'curb-test'));
+            ({ status, reason } = await sendOne(alt, jwt, token, aps, 'curb-test', testExp));
           }
           results.push({ status, reason });
         }
@@ -86,6 +87,15 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)' }); return;
   }
   webpush.setVapidDetails(VAPID_SUBJECT || 'mailto:you@example.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+
+  // Run-level lock: two schedulers drive this endpoint (the GitHub Action AND the vercel.json cron),
+  // so two invocations can overlap. The per-sweep markNotified dedupe is a non-atomic read-modify-
+  // write, so overlapping runs could both pass it and double-fire. A short atomic claim lets at most
+  // one run process a given ~2-min window; a skipped run is a harmless no-op (the holder does the work,
+  // and the 30-min lead window spans several 15-min ticks so nothing is missed). No-op in dev (no store).
+  if (!(await claimSlot('cron-run', 120000))) {
+    res.status(200).json({ ok: true, skipped: 'another run holds the lock' }); return;
+  }
 
   try {
     const now = Date.now();
@@ -127,7 +137,8 @@ export default async function handler(req, res) {
     const iosSubs = await loadAllIosSubs();
     let iosError = null; // isolate APNs failures so they can't 500 the cron or block web push
     if (iosConfigured && iosSubs.length) try {
-      const jwt = getProviderToken(); // throws on a malformed .p8 — caught below, not fatal
+      let jwt = getProviderToken(); // throws on a malformed .p8 — caught below, not fatal
+      let jwtReset = false; // re-mint the provider JWT at most once per run on a 403 ExpiredProviderToken
       const session = openSession(); // ONE http2 session on the primary host; closed in finally
       let altSession = null; // opened lazily only if a token mismatches the primary environment
       const isBadToken = (s, r) => s === 410 || (s === 400 && /BadDeviceToken|Unregistered/i.test(r));
@@ -141,15 +152,27 @@ export default async function handler(req, res) {
           const due = dueAlert(spot, notifiedFor, notifiedEveFor, now);
           if (!due) continue;
           const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': due.tag }, url: deepLink(spot), tag: due.tag };
-          let { status, reason } = await sendOne(session, jwt, token, aps, due.tag);
+          // apns-expiration = the sweep instant: if the device is offline now and reconnects AFTER the
+          // truck has come, APNs drops the stale "move your car" alert instead of delivering it late.
+          const exp = Math.floor(new Date(spot.nextSweepISO).getTime() / 1000);
+          let { status, reason } = await sendOne(session, jwt, token, aps, due.tag, exp);
           // Cross-host retry: a device's token environment (sandbox vs production) follows the build,
           // so the primary host can reject a valid token as BadDeviceToken. Try the OTHER host once
           // before pruning — only then is the token genuinely dead.
           if (isBadToken(status, reason)) {
             try {
               if (!altSession) altSession = openSession(altHost());
-              ({ status, reason } = await sendOne(altSession, jwt, token, aps, due.tag));
+              ({ status, reason } = await sendOne(altSession, jwt, token, aps, due.tag, exp));
             } catch { /* alt host unreachable — fall through to prune below */ }
+          }
+          // 403 ExpiredProviderToken => the cached ES256 JWT went stale on this warm instance (clock
+          // skew / key change). Re-mint ONCE per run and resend — never per-token, or APNs 429s the
+          // mint. The guard makes the rest of the batch reuse the fresh token.
+          if (status === 403 && /ExpiredProviderToken|InvalidProviderToken/i.test(reason) && !jwtReset) {
+            jwtReset = true;
+            resetProviderToken();
+            jwt = getProviderToken();
+            ({ status, reason } = await sendOne(session, jwt, token, aps, due.tag, exp));
           }
           let delivered = false;
           if (status === 200) { delivered = true; iosSent++; }

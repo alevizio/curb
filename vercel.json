@@ -2,6 +2,9 @@
   "functions": {
     "api/og.js": {
       "includeFiles": "{og/fonts/**,node_modules/@resvg/resvg-wasm/index_bg.wasm}"
+    },
+    "api/send-notifications.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
