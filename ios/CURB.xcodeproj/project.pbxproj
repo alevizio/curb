@@ -10,10 +10,10 @@
 		C0DE00000000000000000020 /* CURBApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000010 /* CURBApp.swift */; };
 		C0DE00000000000000000021 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000011 /* ContentView.swift */; };
 		C0DE0000000000000000002A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001A /* Theme.swift */; };
-		C0DE0000000000000000002D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001E /* AppDelegate.swift */; };
-		C0DE0000000000000000002E /* PushRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001F /* PushRouter.swift */; };
 		C0DE0000000000000000002B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001C /* Assets.xcassets */; };
 		C0DE0000000000000000002C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001D /* PrivacyInfo.xcprivacy */; };
+		C0DE0000000000000000002D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001E /* AppDelegate.swift */; };
+		C0DE0000000000000000002E /* PushRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE0000000000000000001F /* PushRouter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,12 +21,11 @@
 		C0DE00000000000000000010 /* CURBApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CURBApp.swift; sourceTree = "<group>"; };
 		C0DE00000000000000000011 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		C0DE0000000000000000001A /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		C0DE0000000000000000001E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		C0DE0000000000000000001F /* PushRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRouter.swift; sourceTree = "<group>"; };
-		C0DE0000000000000000001B /* CURB.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CURB.entitlements; sourceTree = "<group>"; };
 		C0DE0000000000000000001B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C0DE0000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C0DE0000000000000000001D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		C0DE0000000000000000001E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		C0DE0000000000000000001F /* PushRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRouter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,7 +63,6 @@
 				C0DE0000000000000000001A /* Theme.swift */,
 				C0DE0000000000000000001E /* AppDelegate.swift */,
 				C0DE0000000000000000001F /* PushRouter.swift */,
-				C0DE0000000000000000001B /* CURB.entitlements */,
 				C0DE0000000000000000001B /* Info.plist */,
 				C0DE0000000000000000001D /* PrivacyInfo.xcprivacy */,
 				C0DE0000000000000000001C /* Assets.xcassets */,
