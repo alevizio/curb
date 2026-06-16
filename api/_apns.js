@@ -7,7 +7,14 @@ import http2 from 'node:http2';
 import crypto from 'node:crypto';
 
 const BUNDLE = () => process.env.APNS_BUNDLE_ID || 'guide.curb.ios';
-const HOST = () => process.env.APNS_HOST || 'api.push.apple.com'; // sandbox: api.development.push.apple.com
+export const PROD_HOST = 'api.push.apple.com';
+export const SANDBOX_HOST = 'api.development.push.apple.com';
+// Primary host: production by default (TestFlight + App Store). Override with APNS_HOST for a
+// sandbox-only setup. The cron also falls back to the OTHER host on a BadDeviceToken (a device's
+// token environment depends on the build, so a single primary can mismatch during testing).
+const HOST = () => process.env.APNS_HOST || PROD_HOST;
+export const primaryHost = () => HOST();
+export const altHost = () => (HOST() === SANDBOX_HOST ? PROD_HOST : SANDBOX_HOST);
 
 /** True once all four APNs env vars are present. The cron skips the iOS pass when false, so the
  *  live web-push path is never affected before the key is configured. */
@@ -39,8 +46,8 @@ export function getProviderToken() {
 
 /** Open ONE http2 session for the whole cron run. Caller MUST session.close() in a finally so the
  *  function event loop can exit (a lingering session hangs the invocation to timeout). */
-export function openSession() {
-  return http2.connect(`https://${HOST()}`);
+export function openSession(host) {
+  return http2.connect(`https://${host || HOST()}`);
 }
 
 /** POST one alert to /3/device/<token>. Resolves { status, reason } (never rejects). */

@@ -6,7 +6,7 @@ import {
   loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot,
 } from './_store.js';
 import { recomputeSpot } from './_schedule.js';
-import { apnsConfigured, getProviderToken, openSession, sendOne } from './_apns.js';
+import { apnsConfigured, getProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
 // live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
@@ -91,7 +91,9 @@ export default async function handler(req, res) {
     const iosSubs = apnsConfigured() ? await loadAllIosSubs() : [];
     if (iosSubs.length) {
       const jwt = getProviderToken();
-      const session = openSession(); // ONE http2 session for the whole run; closed in finally
+      const session = openSession(); // ONE http2 session on the primary host; closed in finally
+      let altSession = null; // opened lazily only if a token mismatches the primary environment
+      const isBadToken = (s, r) => s === 410 || (s === 400 && /BadDeviceToken|Unregistered/i.test(r));
       try {
         for (const { token, spot, notifiedFor, notifiedEveFor, savedAt } of iosSubs) {
           if (!spot || !spot.nextSweepISO) continue;
@@ -102,14 +104,24 @@ export default async function handler(req, res) {
           const due = dueAlert(spot, notifiedFor, notifiedEveFor, now);
           if (!due) continue;
           const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': due.tag }, url: deepLink(spot), tag: due.tag };
-          const { status, reason } = await sendOne(session, jwt, token, aps, due.tag);
+          let { status, reason } = await sendOne(session, jwt, token, aps, due.tag);
+          // Cross-host retry: a device's token environment (sandbox vs production) follows the build,
+          // so the primary host can reject a valid token as BadDeviceToken. Try the OTHER host once
+          // before pruning — only then is the token genuinely dead.
+          if (isBadToken(status, reason)) {
+            try {
+              if (!altSession) altSession = openSession(altHost());
+              ({ status, reason } = await sendOne(altSession, jwt, token, aps, due.tag));
+            } catch { /* alt host unreachable — fall through to prune below */ }
+          }
           let delivered = false;
           if (status === 200) { delivered = true; iosSent++; }
-          else if (status === 410 || (status === 400 && /BadDeviceToken|Unregistered/i.test(reason))) { await deleteIosSub(token); iosPruned++; }
+          else if (isBadToken(status, reason)) { await deleteIosSub(token); iosPruned++; }
           if (delivered) await markIosNotified(token, spot.nextSweepISO, due.field);
         }
       } finally {
         try { session.close(); } catch { /* already closed */ }
+        try { if (altSession) altSession.close(); } catch { /* already closed */ }
       }
     }
 
