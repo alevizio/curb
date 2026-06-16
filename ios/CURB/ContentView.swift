@@ -99,10 +99,17 @@ private struct CurbWebView: UIViewRepresentable {
         context.coordinator.pushBridge.webView = webView
         // Notification-tap deep links: navigate the live web view; consume any cold-start link.
         PushRouter.shared.navigate = { [weak webView] url in webView?.load(URLRequest(url: url)) }
-        if let pending = PushRouter.shared.pendingURL { webView.load(URLRequest(url: pending)); PushRouter.shared.pendingURL = nil }
         context.coordinator.lastReloadToken = reloadToken
 
-        webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
+        // A cold-start notification tap parks its deep link in pendingURL BEFORE the web view exists;
+        // load it INSTEAD of the root, or the unconditional root load would immediately cancel and
+        // replace it (two back-to-back WKWebView.load calls — the second wins, dropping the deep link).
+        if let pending = PushRouter.shared.pendingURL {
+            PushRouter.shared.pendingURL = nil
+            webView.load(URLRequest(url: pending))
+        } else {
+            webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
+        }
         return webView
     }
 
@@ -699,6 +706,12 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
         guard message.name == "curbPush", let body = message.body as? [String: Any] else { return }
         pendingSpot = body["spot"] as? [String: Any]
         Task { @MainActor in
+            // If the user already denied notifications, iOS shows no prompt — requestAuthorization just
+            // returns false. Surface that distinctly so JS can point them straight at Settings.
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            if settings.authorizationStatus == .denied {
+                self.resolve(false, "denied-settings"); return
+            }
             let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
             if granted {
                 PushRouter.shared.tokenReceiver = self
