@@ -45,6 +45,39 @@ export default async function handler(req, res) {
     res.status(401).json({ error: 'unauthorized' }); return;
   }
 
+  // Authed delivery test: ?test=ios sends a one-off push to every registered iOS token, bypassing
+  // the due-window logic (and never touching spot/dedupe state) — to confirm end-to-end APNs
+  // delivery on demand. Uses the same cross-host retry as the real loop.
+  if ((req.query?.test || '') === 'ios') {
+    if (!storeReady()) { res.status(500).json({ error: 'store not configured' }); return; }
+    if (!apnsConfigured()) { res.status(400).json({ error: 'APNs not configured' }); return; }
+    const tokens = await loadAllIosSubs();
+    const results = [];
+    if (tokens.length) {
+      let session, alt = null;
+      try {
+        const jwt = getProviderToken();
+        session = openSession();
+        const aps = { aps: { alert: { title: 'CURB test ✅', body: 'Native push is working — you can move your car with confidence.' }, sound: 'default' }, url: '/', tag: 'curb-test' };
+        for (const { token } of tokens) {
+          let { status, reason } = await sendOne(session, jwt, token, aps, 'curb-test');
+          if (status === 410 || (status === 400 && /BadDeviceToken|Unregistered/i.test(reason))) {
+            if (!alt) alt = openSession(altHost());
+            ({ status, reason } = await sendOne(alt, jwt, token, aps, 'curb-test'));
+          }
+          results.push({ status, reason });
+        }
+      } catch (e) {
+        res.status(200).json({ ok: false, test: 'ios', tokens: tokens.length, error: e.message || String(e) }); return;
+      } finally {
+        try { session && session.close(); } catch {}
+        try { alt && alt.close(); } catch {}
+      }
+    }
+    res.status(200).json({ ok: true, test: 'ios', tokens: tokens.length, results });
+    return;
+  }
+
   const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT } = process.env;
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     res.status(500).json({ error: 'VAPID keys not set (see .env.example)' }); return;

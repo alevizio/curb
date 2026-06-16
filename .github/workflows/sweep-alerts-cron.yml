@@ -9,7 +9,12 @@ name: sweep-alerts-cron
 on:
   schedule:
     - cron: "*/15 * * * *" # UTC; GitHub schedules are best-effort (may lag a few min)
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Optional delivery test, e.g. 'ios' (sends a one-off test push to registered iOS tokens)"
+        required: false
+        default: ""
 
 permissions: {}
 
@@ -23,10 +28,14 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Hit the notification endpoint
+        env:
+          TEST: ${{ github.event.inputs.test }}
         run: |
+          url="https://curb.guide/api/send-notifications"
+          [ -n "$TEST" ] && url="$url?test=$TEST"
           code=$(curl -sS -o /tmp/out.json -w '%{http_code}' \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://curb.guide/api/send-notifications)
+            "$url")
           echo "HTTP $code"
           cat /tmp/out.json; echo
           test "$code" = "200"
