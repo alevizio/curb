@@ -230,7 +230,9 @@ private struct CurbWebView: UIViewRepresentable {
               '.curb-ios-app.curb-ios-page .mast,.curb-ios-app.curb-ios-page body>header{position:relative;z-index:70}',
               '.curb-ios-app #iosHint{display:none!important}',
               '.curb-ios-back{display:none;align-items:center;justify-content:center;width:44px;height:44px;min-width:44px;padding:0;border:2.5px solid var(--ink);border-radius:11px;background:var(--sign,#FFFDF6);color:var(--ink);box-shadow:3px 3px 0 var(--ink);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}',
-              '.curb-ios-page .curb-ios-back{display:inline-flex}',
+              // The web sub-pages now ship their own subtle back button, so keep the injected
+              // native one hidden — avoids two back buttons on internal pages.
+              '.curb-ios-page .curb-ios-back{display:none}',
               '.curb-ios-back svg{width:21px;height:21px;display:block;stroke:currentColor;fill:none;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}',
               '.curb-ios-back:active{transform:translate(2px,2px);box-shadow:none}',
               '.curb-ios-app,.curb-ios-app body{-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}',
