@@ -6,7 +6,7 @@
 [![Live](https://img.shields.io/badge/live-curb.guide-1F9E5A)](https://curb.guide)
 [![Data: DataSF](https://img.shields.io/badge/data-DataSF-E0322E)](https://data.sfgov.org)
 
-![CURB — every SF curb colored by its next street sweep](og.png)
+![CURB — every SF curb colored by its next street sweep, with the times tickets actually land on each block](docs/curb-screenshot.png)
 
 San Francisco posts a 2-hour street-cleaning window. We matched **650,000+ real
 citations** to their exact blocks: on the median block, every ticket lands inside a
