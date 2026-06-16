@@ -92,8 +92,9 @@ export default async function handler(req, res) {
     // the APNs key is present) — this disambiguates "no device registered" from "key not loaded".
     const iosConfigured = apnsConfigured();
     const iosSubs = await loadAllIosSubs();
-    if (iosConfigured && iosSubs.length) {
-      const jwt = getProviderToken();
+    let iosError = null; // isolate APNs failures so they can't 500 the cron or block web push
+    if (iosConfigured && iosSubs.length) try {
+      const jwt = getProviderToken(); // throws on a malformed .p8 — caught below, not fatal
       const session = openSession(); // ONE http2 session on the primary host; closed in finally
       let altSession = null; // opened lazily only if a token mismatches the primary environment
       const isBadToken = (s, r) => s === 410 || (s === 400 && /BadDeviceToken|Unregistered/i.test(r));
@@ -126,9 +127,12 @@ export default async function handler(req, res) {
         try { session.close(); } catch { /* already closed */ }
         try { if (altSession) altSession.close(); } catch { /* already closed */ }
       }
+    } catch (e) {
+      iosError = e.message || String(e); // e.g. a PEM parse error — non-secret, helps diagnose
+      console.error('APNs pass failed:', e);
     }
 
-    res.status(200).json({ ok: true, web: { checked: subs.length, sent, pruned, rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, sent: iosSent, pruned: iosPruned, rearmed: iosRearmed } });
+    res.status(200).json({ ok: true, web: { checked: subs.length, sent, pruned, rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, sent: iosSent, pruned: iosPruned, rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } });
   } catch (e) {
     console.error('send-notifications failed:', e);
     res.status(500).json({ error: 'internal error' });
