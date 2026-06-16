@@ -88,8 +88,11 @@ export default async function handler(req, res) {
 
     // ---- Native APNs (iOS) ---- identical windows / dedupe / re-arm, different transport. Skipped
     // entirely until the APNS_* env vars are set, so the web-push path is unaffected before then.
-    const iosSubs = apnsConfigured() ? await loadAllIosSubs() : [];
-    if (iosSubs.length) {
+    // Always load so `checked` reflects how many iOS watches actually exist (independent of whether
+    // the APNs key is present) — this disambiguates "no device registered" from "key not loaded".
+    const iosConfigured = apnsConfigured();
+    const iosSubs = await loadAllIosSubs();
+    if (iosConfigured && iosSubs.length) {
       const jwt = getProviderToken();
       const session = openSession(); // ONE http2 session on the primary host; closed in finally
       let altSession = null; // opened lazily only if a token mismatches the primary environment
@@ -125,7 +128,7 @@ export default async function handler(req, res) {
       }
     }
 
-    res.status(200).json({ ok: true, web: { checked: subs.length, sent, pruned, rearmed }, ios: { checked: iosSubs.length, sent: iosSent, pruned: iosPruned, rearmed: iosRearmed } });
+    res.status(200).json({ ok: true, web: { checked: subs.length, sent, pruned, rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, sent: iosSent, pruned: iosPruned, rearmed: iosRearmed } });
   } catch (e) {
     console.error('send-notifications failed:', e);
     res.status(500).json({ error: 'internal error' });
