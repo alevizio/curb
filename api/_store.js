@@ -20,7 +20,7 @@ function redis() {
   return _redis;
 }
 
-// One hash, field = subscription.endpoint, value = { subscription, spot, notifiedFor }.
+// One hash, field = subscription.endpoint, value = { subscription, spot, notifiedFor, notifiedEveFor, savedAt, proofHash? }.
 const KEY = 'curb:subs';
 
 /** True once the store env vars are present (used to fail loudly instead of silently). */
@@ -60,7 +60,9 @@ export async function saveSub(subscription, spot) {
 
 /** Advance a subscription to its next computed sweep occurrence (the cron "forever-watch"
  *  re-arm). Replaces the spot and RESETS the per-window de-dupe so the next sweep can fire.
- *  Preserves savedAt — the re-arm is clock-driven, not a fresh client refresh. */
+ *  Preserves savedAt — the re-arm is clock-driven, not a fresh client refresh.
+ *  Benign race: a concurrent same-sweep client saveSub is a last-writer-wins read-modify-write;
+ *  worst case is one duplicate or missed re-arm that self-corrects on the next 15-min tick. */
 export async function advanceSpot(endpoint, newSpot) {
   const r = redis();
   if (!r) return;

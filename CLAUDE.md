@@ -258,6 +258,18 @@ Files now present for the push feature:
   committed). Both crons may fire; `notifiedFor` de-dupes server-side so nobody gets pushed twice.
 - `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET.
 
+**Native iOS (APNs) — added 2026-06-16.** The iOS app is a WKWebView wrapper, so it gets native
+push alongside Web Push:
+- `api/_apns.js` — minimal APNs sender (ES256 .p8 JWT over `node:http2`, no deps; key via
+  `APNS_KEY_P8_B64` preferred / `APNS_KEY_P8`). `api/save-ios-subscription.js` stores a hex APNs
+  device token + spot in the `curb:apns` Upstash hash (sibling of `curb:subs`, identical shape).
+- `api/send-notifications.js` runs a SECOND loop over `loadAllIosSubs()` with the IDENTICAL
+  lead-window / night-before / dedupe / forever-watch logic, delivering over APNs instead of
+  web-push; `?test=ios` (authed) sends a one-off delivery test. Env: `APNS_KEY_P8_B64`/`APNS_KEY_P8`,
+  `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_BUNDLE_ID` (see `docs/native-push-plan.md`).
+- On the native wrapper the "🔔 Sweep alerts" button is diverted to `window.__curbNativePush`
+  (the `curbPush` bridge → APNs registration), NOT the PWA "Add to Home Screen" hint.
+
 ### What's DONE vs TODO
 DONE (all of it, end-to-end):
 1. Client subscribe flow — "🔔 Sweep alerts" button beside ＋Reminder (`onAlertTap` in
@@ -270,11 +282,13 @@ DONE (all of it, end-to-end):
    diverts to it. Auto-shown once for un-installed iOS Safari.
 4. Re-subscription + 410/404 prune; cron de-dupe via `notifiedFor`; VAPID-key self-heal.
 
-Known limitation (by design — `spot` carries only a single `nextSweepISO`, no recurrence
-rule): an alert is **one-shot**. After that sweep passes, the button reverts from
-"✓ Alerts on" to "🔔 Sweep alerts" (the saved-alert key includes `nextSweepISO`), cueing a
-re-tap to arm the next occurrence. True recurrence would need to persist the sweep rule
-(weekday + week flags + hours) and recompute server-side — intentionally out of scope.
+Forever-watch (implemented): when the saved `spot` carries a recurrence `rule` (weekday +
+week1..week5 flags + hours, via `sanitizeRule`), the cron re-arms it server-side after each sweep
+window ends — `recomputeSpot` advances `nextSweepISO` (and `eveningISO`) to the next occurrence and
+RESETS the per-window de-dupe (`advanceSpot` / `advanceIosSpot`). A watch stops auto-advancing once
+it goes stale past `MAX_WATCH_AGE` (~120 days) so a frozen rule can't track a city schedule change.
+Spots WITHOUT a `rule` still degrade to a single one-shot push (the button reverts from "✓ Alerts on"
+once that one sweep passes, since the saved-alert key includes `nextSweepISO`).
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
 VAPID_SUBJECT, CRON_SECRET, KV_REST_API_URL/TOKEN (Upstash). Embedded VAPID *public* key

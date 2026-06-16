@@ -54,8 +54,13 @@ Setup (one time):
    fallback, point any external scheduler (e.g. cron-job.org) at the endpoint with header
    `Authorization: Bearer <CRON_SECRET>`.
 
-iOS: Web Push only works once CURB is installed to the Home Screen (the app shows an
-"Add to Home Screen" hint for un-installed iPhones).
+iOS — two paths:
+- **Native app** (the iOS build is a WKWebView wrapper with native **APNs**): the "🔔 Sweep
+  alerts" button is diverted to the native bridge, so no Home-Screen install is needed. Set
+  `APNS_KEY_P8_B64` (or `APNS_KEY_P8`), `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_BUNDLE_ID` on Vercel
+  (see `.env.example` / `docs/native-push-plan.md`).
+- **Mobile Safari (PWA)**: Web Push only works once CURB is installed to the Home Screen (the app
+  shows an "Add to Home Screen" hint for un-installed iPhones).
 
 ## Map basemap (Google Maps, optional)
 With a Google **Map Tiles API** key the basemap uses official Google tiles; without one it
