@@ -1561,6 +1561,17 @@ function hideIosHint(){document.getElementById('iosHint').classList.remove('open
 
 async function onAlertTap(spot, btn){
   if(!spot){toast('No upcoming sweep on this side to alert on.');return;}
+  // Native iOS app (WKWebView wrapper): route to native APNs registration instead of Web Push.
+  // Must precede the standalone hint, or the wrapper would wrongly show the "Add to Home Screen" tip.
+  if(window.__curbNativePush){
+    const original=btn.innerHTML;
+    btn.classList.add('busy'); btn.textContent='Enabling…';
+    return window.__curbRequestPush(spot).then(ok=>{
+      btn.classList.remove('busy');
+      if(ok){ try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){} track('alert_armed'); btn.classList.remove('alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on'; }
+      else { btn.innerHTML=original; toast('Allow notifications for CURB in Settings to get sweep alerts.'); }
+    });
+  }
   // iOS only delivers Web Push when the site is installed to the Home Screen (standalone).
   if(isIOS() && !isStandalone()){ showIosHint(); return; }
   if(!pushSupported()){ toast('This browser does not support push alerts — use ＋ Reminder instead.'); return; }

@@ -1,6 +1,7 @@
 import SwiftUI
 import WebKit
 import CoreLocation
+import UserNotifications
 
 struct ContentView: View {
     private let curbURL = URL(string: "https://curb.guide")!
@@ -70,8 +71,10 @@ private struct CurbWebView: UIViewRepresentable {
         configuration.userContentController.addUserScript(Self.nativeLocationScript)
         configuration.userContentController.addUserScript(Self.appChromeScript)
         configuration.userContentController.addUserScript(Self.shareScript)
+        configuration.userContentController.addUserScript(Self.pushScript)
         configuration.userContentController.add(context.coordinator.locationBridge, name: "curbLocation")
         configuration.userContentController.add(context.coordinator.shareBridge, name: "curbShare")
+        configuration.userContentController.add(context.coordinator.pushBridge, name: "curbPush")
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
@@ -93,6 +96,10 @@ private struct CurbWebView: UIViewRepresentable {
         context.coordinator.webView = webView
         context.coordinator.locationBridge.webView = webView
         context.coordinator.shareBridge.webView = webView
+        context.coordinator.pushBridge.webView = webView
+        // Notification-tap deep links: navigate the live web view; consume any cold-start link.
+        PushRouter.shared.navigate = { [weak webView] url in webView?.load(URLRequest(url: url)) }
+        if let pending = PushRouter.shared.pendingURL { webView.load(URLRequest(url: pending)); PushRouter.shared.pendingURL = nil }
         context.coordinator.lastReloadToken = reloadToken
 
         webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
@@ -321,6 +328,30 @@ private struct CurbWebView: UIViewRepresentable {
         forMainFrameOnly: true
     )
 
+    // Bridge the web "Sweep alerts" button to native APNs registration. Defines a flag the web
+    // checks (__curbNativePush) and a promise-returning __curbRequestPush(spot) resolved natively.
+    private static let pushScript = WKUserScript(
+        source: """
+        (function () {
+          if (!window.webkit || !window.webkit.messageHandlers || !window.webkit.messageHandlers.curbPush) return;
+          window.__curbNativePush = true;
+          var resolveFn = null;
+          window.__curbNativePushResult = function (ok, msg) {
+            if (resolveFn) resolveFn({ ok: ok, message: msg });
+            resolveFn = null;
+          };
+          window.__curbRequestPush = function (spot) {
+            return new Promise(function (resolve) {
+              resolveFn = resolve;
+              window.webkit.messageHandlers.curbPush.postMessage({ spot: spot || null });
+            }).then(function (r) { return !!(r && r.ok); });
+          };
+        })();
+        """,
+        injectionTime: .atDocumentStart,
+        forMainFrameOnly: true
+    )
+
     func updateUIView(_ webView: WKWebView, context: Context) {
         if context.coordinator.lastReloadToken != reloadToken {
             context.coordinator.lastReloadToken = reloadToken
@@ -333,6 +364,7 @@ private struct CurbWebView: UIViewRepresentable {
         weak var webView: WKWebView?
         let locationBridge = LocationBridge()
         let shareBridge = ShareBridge()
+        let pushBridge = PushBridge()
         var lastReloadToken: UUID?
         private var downloadDestination: URL?
         private var documentController: UIDocumentInteractionController?
@@ -651,6 +683,56 @@ private final class ShareBridge: NSObject, WKScriptMessageHandler {
 
     private func finish(_ ok: Bool) {
         webView?.evaluateJavaScript("window.__curbShareDone && window.__curbShareDone(\(ok ? "true" : "false"));")
+    }
+}
+
+// Native APNs registration bridge: the web's "Sweep alerts" button → permission prompt → device
+// token → POST {token, spot} to /api/save-ios-subscription → resolve the JS promise.
+@MainActor
+private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenReceiver {
+    weak var webView: WKWebView?
+    private var pendingSpot: [String: Any]?
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "curbPush", let body = message.body as? [String: Any] else { return }
+        pendingSpot = body["spot"] as? [String: Any]
+        Task { @MainActor in
+            let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+            if granted {
+                PushRouter.shared.tokenReceiver = self
+                UIApplication.shared.registerForRemoteNotifications()
+                // didReceiveDeviceToken (or didFailRegistration) resolves the JS promise.
+            } else {
+                self.resolve(false, "denied")
+            }
+        }
+    }
+
+    func didReceiveDeviceToken(_ hexToken: String) {
+        guard let spot = pendingSpot else { resolve(false, "no-spot"); return }
+        let payload: [String: Any] = ["token": hexToken, "platform": "ios", "bundleId": "guide.curb.ios", "spot": spot]
+        guard let url = URL(string: "https://curb.guide/api/save-ios-subscription"),
+              let data = try? JSONSerialization.data(withJSONObject: payload) else { resolve(false, "encode"); return }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = data
+        Task { @MainActor in
+            do {
+                let (_, resp) = try await URLSession.shared.data(for: req)
+                let ok = (resp as? HTTPURLResponse).map { (200...299).contains($0.statusCode) } ?? false
+                self.resolve(ok, ok ? "saved" : "save-failed")
+            } catch {
+                self.resolve(false, "save-failed")
+            }
+        }
+    }
+
+    func didFailRegistration(_ message: String) { resolve(false, message) }
+
+    private func resolve(_ ok: Bool, _ msg: String) {
+        let safe = msg.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "'", with: "\\'")
+        webView?.evaluateJavaScript("window.__curbNativePushResult && window.__curbNativePushResult(\(ok ? "true" : "false"), '\(safe)');")
     }
 }
 
