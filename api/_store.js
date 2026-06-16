@@ -113,6 +113,82 @@ export async function getSub(endpoint) {
   return (typeof v === 'string' ? safeParse(v) : v) || null;
 }
 
+// ---- native iOS (APNs) subscriptions ----
+// A sibling hash with the IDENTICAL record shape, keyed by the hex APNs device token instead of a
+// web-push endpoint. The spot/rule sub-shape is byte-identical to curb:subs, so recomputeSpot() and
+// the entire forever-watch + lead-window + dedupe logic apply unchanged — only the key, the load/
+// advance/mark/delete helpers, and the delivery transport (APNs vs web-push) differ. No web-push
+// field (endpoint/p256dh/auth) ever appears here, so validSubscription() never sees a hex token.
+const KEY_IOS = 'curb:apns';
+
+/** Upsert an APNs device token + its saved spot. Mirrors saveSub: preserves the per-window de-dupe
+ *  on a same-time re-arm and carries the recurrence rule/cnn/sideKey forward when omitted. */
+export async function saveIosSub(token, spot) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  let notifiedFor = null, notifiedEveFor = null;
+  const out = spot || null;
+  try {
+    const v = await r.hget(KEY_IOS, token);
+    const prev = typeof v === 'string' ? safeParse(v) : v;
+    if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
+      notifiedFor = prev.notifiedFor ?? null;
+      notifiedEveFor = prev.notifiedEveFor ?? null;
+      if (out && !out.rule && prev.spot.rule) {
+        out.rule = prev.spot.rule;
+        if (prev.spot.cnn) out.cnn = prev.spot.cnn;
+        if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
+      }
+    }
+  } catch { /* best effort — worst case is one duplicate push */ }
+  const record = { token, spot: out, notifiedFor, notifiedEveFor, savedAt: Date.now(), platform: 'ios' };
+  await r.hset(KEY_IOS, { [token]: JSON.stringify(record) });
+}
+
+/** Advance an iOS watch to its next computed occurrence (forever-watch re-arm). */
+export async function advanceIosSpot(token, newSpot) {
+  const r = redis();
+  if (!r) return;
+  const v = await r.hget(KEY_IOS, token);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return;
+  rec.spot = newSpot;
+  rec.notifiedFor = null;
+  rec.notifiedEveFor = null;
+  await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
+}
+
+/** Load every iOS record as { token, spot, notifiedFor, notifiedEveFor, savedAt }. */
+export async function loadAllIosSubs() {
+  const r = redis();
+  if (!r) return [];
+  const all = await r.hgetall(KEY_IOS);
+  if (!all) return [];
+  return Object.entries(all)
+    .map(([token, v]) => {
+      const rec = typeof v === 'string' ? safeParse(v) : v;
+      return rec ? { token, ...rec } : null;
+    })
+    .filter(Boolean);
+}
+
+/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken). */
+export async function deleteIosSub(token) {
+  const r = redis();
+  if (r) await r.hdel(KEY_IOS, token);
+}
+
+/** Record that we already pushed an iOS token for a given sweep time (per-window de-dupe). */
+export async function markIosNotified(token, nextSweepISO, field = 'notifiedFor') {
+  const r = redis();
+  if (!r) return;
+  const v = await r.hget(KEY_IOS, token);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return;
+  rec[field] = nextSweepISO;
+  await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
+}
+
 const sha = (s) => createHash('sha256').update(String(s)).digest('hex');
 
 // ---- subscription ownership proof (ALE-168 Tier 2 auth) ----

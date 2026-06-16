@@ -6,3 +6,6 @@ node_modules/
 /config.js
 *.xcuserstate
 xcuserdata/
+
+# Never commit the APNs auth key
+AuthKey_*.p8
