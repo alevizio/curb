@@ -214,7 +214,7 @@ _Reply-ready if someone calls it creepy:_ "It's the city's own published data, a
 - **curb-trailer-16x9.mp4** — ~25s trailer for Twitter/X (also LinkedIn).
 - **curb-trailer-9x16.mp4** — same for Instagram Reels/Stories & TikTok.
 - **card-*.png** — 8 feature cards (2560×1440): stat22, map, tap, alerts, whitezones, tickets, logo, cta. Drop them into the thread above or post standalone.
-- Regenerate: `/tmp/social/` has reel.html + render.js (`node render.js full land|port` → ffmpeg) and cards.js.
+- Regenerate the trailer: `node scripts/social/build-trailer.mjs all` — the "22 Minutes" trailer, source now IN THE REPO (`scripts/social/build-trailer.mjs`, satori→resvg→ffmpeg), renders 16:9 + 9:16 (~20s, 1080p) to `~/Downloads/curb-social/`. (The old `/tmp/social` reel.html generator is gone; the prior Jun-12 renders are backed up as `*-jun12.mp4`.)
 
 ## 7 · Demo video — 60 seconds, one take (record before PH day)
 Cmd+Shift+5 full-screen capture at 2x, clean profile, cursor large; captions burned in
