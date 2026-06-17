@@ -1,0 +1,14 @@
+{
+  "productName": "CURB",
+  "cta": "curb.guide",
+  "width": 1920, "height": 1080, "fps": 30,
+  "brand": { "colors": ["#C1121F", "#F2ECDF", "#17150F"], "logo": "/Users/alevizio/curb/scripts/social/assets/logo.png" },
+  "scenes": [
+    { "id": "01-hook", "title": "SF street cleaning", "caption": "The 2-hour window is a lie", "durationSeconds": 2.6 },
+    { "id": "02-truth", "title": "650,000 tickets", "caption": "Every ticket. The same 22 minutes.", "durationSeconds": 3.0 },
+    { "id": "03-map", "title": "Every curb", "caption": "Colored by its next sweep", "screenshot": "/Users/alevizio/curb/docs/curb-screenshot.png", "durationSeconds": 3.3 },
+    { "id": "04-aha", "title": "Tap your block", "caption": "See when tickets actually land", "screenshot": "./sheet.png", "durationSeconds": 3.3 },
+    { "id": "05-alerts", "title": "One tap", "caption": "Move your car first", "durationSeconds": 2.4 },
+    { "id": "06-cta", "title": "Free. Open source.", "durationSeconds": 2.6 }
+  ]
+}
