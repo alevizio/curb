@@ -85,6 +85,7 @@ The key is kept out of this public repo:
   `data/enforcement.json` by `npm run build:enforcement` (see `scripts/build-enforcement.mjs`)
 - /tickets aggregates: `npm run build:stats` → `data/stats.json` (yearly fines,
   violations, hour histograms, neighborhood totals + five-year surge)
+- Neighborhood boundaries: DataSF `j2bu-swwd` (Analysis Neighborhoods) — /tickets + the per-hood pages
 
 All DataSF datasets are published under the Open Data Commons PDDL; the code here is
 MIT (see [LICENSE](LICENSE)).
@@ -95,6 +96,34 @@ for SF (SFpark sensors retired in 2014).
 
 See `CLAUDE.md` for architecture and data schemas, `docs/` for the sweeper-data research
 and ready-to-send public-records requests.
+
+## How the ticket times are reconstructed
+
+The headline finding — *"the median block is ticketed within ~22 minutes"* — is built offline by
+`scripts/build-enforcement.mjs` + `scripts/build-stats.mjs`:
+
+1. **Pull the citations.** SFMTA's citation dataset (`ab4h-6ztd`, ~23.8M rows since 2008) carries a
+   minute-resolution timestamp and the officer-typed address — but **no coordinates since ~2021**, so you
+   get raw strings like `0121 STEINER ST`. Paged with a keyset cursor on `:id` (deep `$offset` times out
+   on a table that size).
+2. **Geocode by joining, not coordinates.** Each address is normalized to
+   `stripZeros(number)|UPPERCASE(street)` and matched to a block segment (CNN) via the Enterprise
+   Addressing System (`3mea-di5p`), then validated against that block's posted sweep schedule
+   (`yhqp-riqs`) to drop bad matches. ~659k street-cleaning citations match over the last ~2 years.
+3. **Reduce to a per-block-side distribution.** `data/enforcement.json` stores, per block side,
+   `[count, mean-minutes-into-window, earliest, latest]`. The **"22 minutes" is the median, across
+   ~18,000 block-sides, of `latest − earliest`** (the window its whole 2-year ticket history falls in);
+   ~87% of block-sides land all their tickets within 45 minutes.
+
+**Known limits (also stated on the About page):** it's an address-string→block join, not GPS, so any
+single block can be off; the distribution is conditional on enforcement happening — it shows *when*
+tickets land, not *whether* a block is swept (survivorship); data is refreshed monthly; and it's
+predictive from history, never live (SF publishes no real-time sweeper GPS). The posted sign is always
+the source of truth.
+
+The inferred truck-route layer is a **Beta estimate**: blocks sharing a corridor + sweep window are
+ordered by their mean ticket time; runs whose time-vs-position correlation is weak (`|r| < 0.35`) are
+not drawn.
 
 ## Regenerating derived assets
 ```bash

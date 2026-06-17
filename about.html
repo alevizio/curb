@@ -246,6 +246,38 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
   .qa p{margin-top:7px;color:var(--ink-soft);font-weight:600;max-width:52em}
   .qa p b{color:var(--ink)}
 
+  /* the receipts — data sources & methodology */
+  .data{padding-top:clamp(40px,6vh,68px)}
+  .data .k{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .data h2{font-family:'Anton',sans-serif;font-size:clamp(34px,5vw,52px);text-transform:uppercase;line-height:.95;margin:6px 0 0}
+  .dlede{margin-top:13px;color:var(--ink-soft);font-weight:600;max-width:46em}
+  .dlede b{color:var(--ink)}
+  .srcs{margin-top:28px}
+  .src{display:grid;grid-template-columns:minmax(0,11em) 1fr;gap:clamp(12px,2.4vw,28px);align-items:baseline;
+    padding:16px 0;border-top:2px solid rgba(23,21,15,.28)}
+  .src:last-child{border-bottom:2px solid rgba(23,21,15,.28)}
+  .src .sh{font-family:'Anton',sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.02em;line-height:1.08}
+  .src p{color:var(--ink-soft);font-weight:600;font-size:14.5px}
+  .src p a{font-weight:800;color:var(--ink);text-underline-offset:3px;white-space:nowrap}
+  .src code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+  @media (max-width:560px){.src{grid-template-columns:1fr;gap:3px}.src p a{white-space:normal}}
+  .method{margin-top:32px;border:3px solid var(--ink);border-radius:16px;background:var(--sign);
+    box-shadow:var(--shadow);padding:clamp(22px,3.4vw,32px)}
+  .method .mk{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .method h3{font-family:'Anton',sans-serif;font-size:clamp(22px,3vw,30px);text-transform:uppercase;line-height:1;margin:5px 0 12px}
+  .method p{color:var(--ink-soft);font-weight:600;margin-top:10px;max-width:56em}
+  .method p b{color:var(--ink)} .method code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+  .method ol{margin:14px 0 0;padding:0;list-style:none;counter-reset:m}
+  .method ol li{position:relative;padding:11px 0 11px 40px;color:var(--ink-soft);font-weight:600;
+    border-top:2px solid rgba(23,21,15,.16)}
+  .method ol li:first-child{border-top:0;padding-top:4px}
+  .method ol li::before{counter-increment:m;content:counter(m);position:absolute;left:2px;top:9px;
+    font-family:'Anton',sans-serif;color:var(--red-text);font-size:21px;line-height:1}
+  .method ol li:first-child::before{top:2px}
+  .method ol li b{color:var(--ink)}
+  .method .lim{margin-top:16px;font-size:13.5px;border-top:2px solid rgba(23,21,15,.16);padding-top:13px}
+  .method .lim a{color:var(--ink);font-weight:800;text-underline-offset:3px}
+
   /* footer */
   footer{margin-top:clamp(44px,7vh,72px);border-top:3px solid var(--ink);background:var(--ink);color:var(--paper)}
   .foot{display:flex;flex-wrap:wrap;gap:18px 36px;align-items:center;padding-top:30px;padding-bottom:34px;font-weight:700;font-size:14.5px}
@@ -454,6 +486,46 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
         <p>Yes. One tap arms two pushes: a heads-up <b>the evening before</b> (~8pm) and an urgent alert <b>~30 minutes before</b> your block is swept — or add the
           sweep to your calendar. On iPhone, install CURB to your Home Screen to receive push alerts.</p>
       </div>
+    </div>
+  </section>
+
+  <section class="wrap data" id="data">
+    <div class="k">The receipts</div>
+    <h2>No black box<span class="dot">.</span></h2>
+    <p class="dlede">CURB invents nothing. Every line, time and color is computed from San Francisco's own
+      <b>public open data</b> — mostly precomputed into static files the map reads instantly, none of it
+      live tracking. Here's exactly what it runs on, and how the ticket times are rebuilt.</p>
+
+    <div class="srcs">
+      <div class="src"><div class="sh">Sweep schedule</div><p>The posted day &amp; window for every block. <a href="https://data.sfgov.org/d/yhqp-riqs" rel="noopener">DataSF · <code>yhqp-riqs</code></a></p></div>
+      <div class="src"><div class="sh">Parking citations</div><p>23.8M tickets since 2008, stamped to the minute — the real ticket time on each block. <a href="https://data.sfgov.org/d/ab4h-6ztd" rel="noopener">DataSF · <code>ab4h-6ztd</code></a></p></div>
+      <div class="src"><div class="sh">Address index</div><p>The city's addressing system (EAS) — the key that pins each citation to a block. <a href="https://data.sfgov.org/d/3mea-di5p" rel="noopener">DataSF · <code>3mea-di5p</code></a></p></div>
+      <div class="src"><div class="sh">Permit areas</div><p>The ~30 lettered residential permit (RPP) zones. <a href="https://data.sfgov.org/d/hi6h-neyh" rel="noopener">DataSF · <code>hi6h-neyh</code></a> <em>(2017 set)</em></p></div>
+      <div class="src"><div class="sh">Meters &amp; color curb</div><p>Metered streets and their commercial / passenger / red loading rules. <a href="https://data.sfgov.org/d/6cqg-dxku" rel="noopener">DataSF · <code>6cqg-dxku</code></a></p></div>
+      <div class="src"><div class="sh">White school zones</div><p>The ~1,975 unmetered passenger-loading zones (627 by schools) DataSF leaves out — pulled from the city's own ArcGIS curb layer. <a href="https://sfgov.maps.arcgis.com/" rel="noopener">SFMTA Digital Curb</a></p></div>
+      <div class="src"><div class="sh">Neighborhoods</div><p>Boundaries for the per-neighborhood ticket stats. <a href="https://data.sfgov.org/d/j2bu-swwd" rel="noopener">DataSF · <code>j2bu-swwd</code></a></p></div>
+    </div>
+
+    <div class="method">
+      <div class="mk">How the "9:14" is built</div>
+      <h3>From 650k tickets to one minute</h3>
+      <p>Here's the hard part: SFMTA logs every citation with a timestamp and an address, but
+        <b>stopped attaching coordinates around 2021</b> — so all that's left is an officer-typed string like
+        <code>0121 STEINER ST</code>. Reconstructing "when does this block get ticketed" means putting those
+        strings back on the map:</p>
+      <ol>
+        <li>Match each citation's address to a specific block using the city's address index (EAS), then
+          <b>check it against that block's posted schedule</b> to throw out bad matches.</li>
+        <li>For every block side, take ~2 years of its matched street-cleaning tickets and measure the
+          <b>window they actually fall in</b> — earliest to latest.</li>
+        <li>Across ~18,000 block-sides, the median of that window is <b>about 22 minutes</b>; ~87% land all
+          their tickets within 45. On the example block above, the median ticket lands at <b>9:14</b>.</li>
+      </ol>
+      <p class="lim"><b>Where it's fuzzy, said plainly:</b> it's a text-to-block match, not GPS, so any single
+        block can be off — the posted sign is always the real answer. The pattern shows <i>when</i> tickets
+        land, not <i>whether</i> your block gets swept (you only see blocks that were ticketed). It's refreshed
+        monthly, and it's predictive from history — there's no live sweeper feed in SF, so nothing here is
+        real-time. The full pipeline and the math are <a href="https://github.com/alevizio/curb" rel="noopener">open source on GitHub</a>.</p>
     </div>
   </section>
 
