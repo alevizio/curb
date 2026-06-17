@@ -718,6 +718,8 @@ const VAPID_PUBLIC_KEY="BNh-13Y456HR3O_-AvNP_kEIIui1YvbEumSFLF0l-VD94H_qtGpAQPus
 // Cookieless custom events (Vercel Web Analytics). No-op until the dashboard toggle is on
 // and /_vercel/insights/script.js has loaded — guarded so it never throws in sandbox/dev.
 function track(name){try{if(window.va)window.va('event',{name});}catch(_){}}
+// push_clicked: the service worker appends ?p=1 when a delivered notification is opened.
+addEventListener('load',()=>{try{if(new URLSearchParams(location.search).get('p')==='1'){track('push_clicked');history.replaceState(null,'',location.pathname+location.hash);}}catch(_){}});
 // Google Map Tiles API key (optional). When set, the basemap uses official Google tiles; otherwise it
 // falls back to keyless CARTO. This is a CLIENT key — restrict it by HTTP referrer + API in Google Cloud
 // Console. Set it here, or define window.GMAPS_KEY before this script (e.g. a gitignored config.js).
@@ -1561,6 +1563,7 @@ function hideIosHint(){document.getElementById('iosHint').classList.remove('open
 
 async function onAlertTap(spot, btn){
   if(!spot){toast('No upcoming sweep on this side to alert on.');return;}
+  track('alert_intent');  // tapped Sweep alerts on a valid spot — funnel denominator for activation
   // Native iOS app (WKWebView wrapper): route to native APNs registration instead of Web Push.
   // Must precede the standalone hint, or the wrapper would wrongly show the "Add to Home Screen" tip.
   if(window.__curbNativePush){
@@ -1569,19 +1572,19 @@ async function onAlertTap(spot, btn){
     return window.__curbRequestPush(spot).then(ok=>{
       btn.classList.remove('busy');
       if(ok){ try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){} track('alert_armed'); btn.classList.remove('alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on'; }
-      else { btn.innerHTML=original; toast('Allow notifications for CURB in Settings to get sweep alerts.'); }
+      else { track('alert_blocked'); btn.innerHTML=original; toast('Allow notifications for CURB in Settings to get sweep alerts.'); }
     });
   }
   // iOS only delivers Web Push when the site is installed to the Home Screen (standalone).
-  if(isIOS() && !isStandalone()){ showIosHint(); return; }
+  if(isIOS() && !isStandalone()){ track('ios_install_gate'); showIosHint(); return; }
   if(!pushSupported()){ toast('This browser does not support push alerts — use ＋ Reminder instead.'); return; }
-  if(Notification.permission==='denied'){ toast('Notifications are blocked. Re-enable them in your browser settings, then retry.'); return; }
+  if(Notification.permission==='denied'){ track('permission_denied'); toast('Notifications are blocked. Re-enable them in your browser settings, then retry.'); return; }
 
   const original=btn.innerHTML;  // innerHTML: the label carries an inline SVG glyph
   btn.classList.add('busy'); btn.textContent='Enabling…';
   try{
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){ toast('Allow notifications to get move-your-car alerts.'); throw new Error('permission-'+perm); }
+    if(perm!=='granted'){ track('permission_denied'); toast('Allow notifications to get move-your-car alerts.'); throw new Error('permission-'+perm); }
     const reg=await navigator.serviceWorker.ready;
     const appKey=urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
     let sub=await reg.pushManager.getSubscription();
@@ -1617,6 +1620,7 @@ async function onAlertTap(spot, btn){
 
 /* ---------- locate / tap ---------- */
 document.getElementById('locate').onclick=()=>{
+  track('locate_used');
   const btn=document.getElementById('locate');
   if(!navigator.geolocation)return locateFail();
   if(btn.classList.contains('loading'))return;
@@ -2139,6 +2143,7 @@ function normalizedAddressQuery(v){
 }
 async function doSearch(){
   const v=document.getElementById('q').value.trim(); if(v.length<2)return;
+  track('search_used');
   const addr=normalizedAddressQuery(v);
   if(addr){
     try{

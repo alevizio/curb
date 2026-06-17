@@ -54,7 +54,8 @@ self.addEventListener('push', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) || '/';
+  const base = (e.notification.data && e.notification.data.url) || '/';
+  const url = base + (base.indexOf('?') === -1 ? '?' : '&') + 'p=1';  // marker → page fires push_clicked
   e.waitUntil((async () => {
     const all = await clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const c of all) {
