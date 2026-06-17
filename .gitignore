@@ -9,3 +9,7 @@ xcuserdata/
 
 # Never commit the APNs auth key
 AuthKey_*.p8
+
+# Local-only: social/marketing asset stash + temp capture scripts (never publish to the repo)
+assets/
+_capture.mjs
