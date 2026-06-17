@@ -1,0 +1,12 @@
+{
+  "productName": "CURB",
+  "brand": { "colors": ["#C1121F", "#F2ECDF", "#17150F"] },
+  "size": [1290, 2796],
+  "screens": [
+    { "image": "screens/01-map.png",      "caption": "Every SF curb, colored by its next sweep" },
+    { "image": "screens/02-sheet.png",    "caption": "See when tickets actually land" },
+    { "image": "screens/03-alerts.png",   "caption": "One tap. Move your car first.", "dark": true },
+    { "image": "screens/04-layers.png",   "caption": "Permits, meters, even hidden school zones" },
+    { "image": "screens/05-overview.png", "caption": "Free. No account. Open source.", "dark": true }
+  ]
+}
