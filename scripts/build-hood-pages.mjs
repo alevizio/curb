@@ -70,6 +70,19 @@ const mapEmbed = (name) => {
   </section>`;
 };
 
+// Evergreen "how enforcement works" explainer — the SpotAngels-style rules section that adds dwell
+// time + real value, with one hood-specific line (the modal time/day) so it isn't a boilerplate clone.
+const enforcementSection = (name, typical, dowIdx) => `
+  <section>
+    <div class="sec-k">How enforcement works</div>
+    <h2>The 2-hour sign, the <b>22-minute</b> reality</h2>
+    <p class="lede">San Francisco posts a street-cleaning window — often two hours — but the ticket doesn't wait. Across ~650,000 citations, the typical SF block gets <b>all of its tickets inside the same ~22 minutes</b>, usually right after the window opens. In ${esc(name)}, that cluster lands around <b>${typical}</b> on <b>${DOW[dowIdx]}s</b>.</p>
+    <div class="panel">
+      <p class="lede"><b>Once the sweeper has physically passed your side of the street</b>, SFMTA's own rules let you re-park there — even before the posted hours end. But don't park early assuming it's done, and being even a minute off is still ticketable.</p>
+      <p class="lede" style="margin-top:10px">Good to know: a residential parking permit (RPP) runs <b>$215/yr</b>; meters are free on <b>Sundays</b> and three holidays; and a car can't sit in one spot more than <b>72 hours</b>, even with a permit. The posted sign is always the final word.</p>
+    </div>
+  </section>`;
+
 const hoodCard = (h) => `<a class="hcard" href="/n/${slug(h.hood)}">
       ${cardViz(h.hood)}
       <span class="hcard-nm">${esc(h.hood)}</span>
@@ -346,6 +359,22 @@ function renderHood(h, idx) {
       q: `How do I avoid a street-cleaning ticket in ${name}?`,
       a: `Move your car before the posted window — most tickets here are written around ${typical} on ${DOW[peakDow.i]}s. CURB lets you tap your block, see the next sweep, and *set a free reminder (calendar or push)* ~30 minutes before, plus the night before. The posted sign always wins if it differs.`,
     },
+    {
+      q: `Can I park after the street sweeper passes in ${name}?`,
+      a: `Yes — under SFMTA's rules, once the sweeper has physically swept your side of the street you can re-park there, *even if the posted hours haven't ended*. But you can't park during the posted window just because it looks done early, and being even a minute off is ticketable. On most ${name} blocks the sweep clusters around *${typical}* on *${DOW[peakDow.i]}s* — check your exact block on the map.`,
+    },
+    {
+      q: `Is street cleaning enforced on holidays?`,
+      a: `Residential street sweeping is suspended on roughly a dozen observed city holidays (for example New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving and Christmas); many overnight commercial routes still run. Temporary signs and the posted schedule always override — when in doubt, *read the sign on your block.*`,
+    },
+    {
+      q: `What if my car was towed for street cleaning in ${name}?`,
+      a: `SF street-cleaning tows go to *AutoReturn* at 450 7th Street (open 24/7) — call *(415) 865-8200* or check autoreturn.com to find your car. Expect a tow fee plus daily storage on top of the $${FINE} ticket; a discounted low-income rate is available. Note: SF's "Text Before Tow" alerts do *not* cover street-cleaning tows.`,
+    },
+    {
+      q: `How do I contest a street-cleaning ticket?`,
+      a: `File a protest within *21 days* of the citation through the SFMTA citation portal — ideally with a photo from where you parked showing a missing, faded, or blocked sign, or that you were ticketed outside the posted window. A meaningful share of first-level protests are dismissed, so it's often worth contesting if your sign was unclear.`,
+    },
   ];
   const faqHtml = faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${mdBold(f.a)}</p></details>`).join('\n      ');
 
@@ -372,6 +401,8 @@ function renderHood(h, idx) {
         creator: { '@type': 'Organization', name: 'CURB', url: 'https://curb.guide/' },
         spatialCoverage: { '@type': 'Place', name: `${name}, San Francisco, California` },
         temporalCoverage: (stats._meta?.hood_window_since || '2024-06-01').slice(0, 10) + '/..',
+        datePublished: '2026-06-13',
+        dateModified: (stats._meta?.generated || new Date().toISOString()).slice(0, 10),
       },
       {
         '@type': 'BreadcrumbList',
@@ -439,6 +470,7 @@ function renderHood(h, idx) {
     </div>
   </section>
 ${streetsSection}
+  ${enforcementSection(name, typical, peakDow.i)}
   <section>
     <div class="sec-k">FAQ</div>
     <h2>Street cleaning in ${esc(name)}, <b>answered</b></h2>
