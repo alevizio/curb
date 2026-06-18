@@ -369,6 +369,8 @@
   .sheettools .sheet-close::after{inset:-6px}
   .asched{font-size:13px;font-weight:700;margin:3px 0 2px}
   .asched.green{color:var(--green-text)} .asched.amber{color:var(--amber-text)} .asched.red{color:var(--red-text)}
+  .afterpass{font-size:11.5px;color:var(--ink-soft);margin:1px 0 5px;line-height:1.45}
+  .afterpass a{color:var(--meter);font-weight:700;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
   .sideslbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:14px}
   .shdiv{border:0;border-top:2px solid rgba(23,21,15,.12);margin:13px 0 0}
   .metico{width:15px;height:15px;flex:none}
@@ -1409,6 +1411,8 @@ function openSheet(group, activeKey){
   const _aw=_ar?[_ar.week1,_ar.week2,_ar.week3,_ar.week4,_ar.week5].map(x=>String(x)==='1'):[true,true,true,true,true];
   const _arp=relPhrase(ns);
   const aSched=ns?`<div class="asched ${_arp.cls}">${fmtHour(ns.fromH)}–${fmtHour(ns.toH)} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
+  // The "park after the sweeper passes" rule — most useful when a sweep is active now or imminent (within 24h).
+  const _soon=ns&&((now>=ns.start&&now<ns.end)||(ns.start-now)<864e5);
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   document.getElementById('sheetBody').innerHTML=`
@@ -1417,6 +1421,7 @@ function openSheet(group, activeKey){
     <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span></div>
     ${aSched}
     ${enfHtml}
+    ${_soon?`<div class="afterpass">Once the sweeper has passed, you can re-park here — even before the posted window ends. <a href="https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets" target="_blank" rel="noopener">SFMTA rule ↗</a></div>`:''}
     <div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>
     ${canRemind?'<hr class="shdiv">':''}
     <div class="actions">

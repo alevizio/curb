@@ -19,6 +19,8 @@
   "acceptedAnswer":{"@type":"Answer","text":"Most residential blocks are swept weekly or twice a month in a fixed weekday window (for example, Tuesday 9–11am); many commercial corridors are swept overnight. Every block has its own schedule — CURB shows the exact rule for any curb when you tap it on the map."}},
  {"@type":"Question","name":"When do street-cleaning parking tickets actually get written?",
   "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from two years of SFMTA citations — on a typical 9–11am block, the median ticket lands around 9:14am. The posted sign is always the source of truth."}},
+ {"@type":"Question","name":"Can I park after the street sweeper passes?",
+  "acceptedAnswer":{"@type":"Answer","text":"Yes — it's SFMTA's own rule: once the street sweeper has physically swept the curbside, you may park there, even if the posted sweeping hours haven't expired. The flip side: during the posted hours you may not park until the street has actually been swept — so if you're parked before the sweeper arrives, you can still be ticketed. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"What are the dashed truck routes on the map?",
   "acceptedAnswer":{"@type":"Answer","text":"An experimental Beta layer. San Francisco doesn't publish where sweepers start or which way they drive, so CURB infers it: two years of street-cleaning tickets (DataSF) give each block a typical ticket time, and blocks sharing a corridor and sweep window are connected in the order the tickets land. It's an estimate from public citation records, never live tracking — the posted sign always wins."}},
  {"@type":"Question","name":"Is CURB free?",
@@ -450,6 +452,14 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
         <p>Usually in the <b>first 30–40 minutes</b> of the posted window, not spread across it. CURB
           reconstructs each block's real ticket times from two years of SFMTA citations — on a typical
           9–11am block, the median ticket lands around 9:14am. The posted sign is always the source of truth.</p>
+      </div>
+      <div class="qa">
+        <h3>Can I park after the street sweeper passes?</h3>
+        <p>Yes — it's SFMTA's own rule: <b>once the street sweeper has physically swept the curbside, you
+          may park there, even if the posted sweeping hours haven't expired.</b> The flip side: during the
+          posted hours you may <b>not</b> park until the street has actually been swept — so if you're parked
+          before the sweeper arrives, you can still be ticketed. The posted sign is always the source of
+          truth. (<a href="https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets" rel="noopener">SFMTA: Parking is allowed after sweeping</a>.)</p>
       </div>
       <div class="qa">
         <h3>What are the dashed truck routes on the map?</h3>
