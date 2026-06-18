@@ -371,7 +371,13 @@
   .asched.green{color:var(--green-text)} .asched.amber{color:var(--amber-text)} .asched.red{color:var(--red-text)}
   .afterpass{font-size:11.5px;color:var(--ink-soft);margin:1px 0 5px;line-height:1.45}
   .afterpass a{color:var(--meter);font-weight:700;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
-  .holskip{font-size:12.5px;font-weight:800;color:var(--green-text);margin:3px 0 4px;line-height:1.4}
+  .holcard{display:flex;gap:11px;align-items:center;margin:9px 0 2px;border:2px solid var(--green);border-radius:12px;padding:10px 12px;background:rgba(31,158,90,.10)}
+  .holcard .hic{flex:none;width:28px;height:28px;display:grid;place-items:center;color:var(--green-text)}
+  .holcard .hic svg{width:26px;height:26px}
+  .holcard .hk{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green-text)}
+  .holcard .hh{font-family:'Anton',sans-serif;font-size:18px;line-height:1;text-transform:uppercase;color:var(--green-text);margin:1px 0 2px}
+  .holcard .hs{font-size:12px;font-weight:700;color:var(--ink);line-height:1.3}
+  .holcard .hs b{color:var(--green-text)}
   .sideslbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:14px}
   .shdiv{border:0;border-top:2px solid rgba(23,21,15,.12);margin:13px 0 0}
   .metico{width:15px;height:15px;flex:none}
@@ -1418,7 +1424,8 @@ function openSheet(group, activeKey){
   const _hrec=active.row||(active.rows&&active.rows[0]);
   const _hol=(_hrec&&typeof holidaySkip==='function')?holidaySkip(_hrec):null;
   const _WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const _holNote=_hol?`<div class="holskip">No sweeping <b>${_hol.name}</b> · ${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da} — city holiday, no need to move.</div>`:'';
+  const _holDate=_hol?`${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da}`:'';
+  const _holNote=_hol?`<div class="holcard"><span class="hic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.2h18M8 2.5v4M16 2.5v4"/><path d="M8.4 14.6l2.6 2.6 4.6-5.2"/></svg></span><div><div class="hk">City holiday</div><div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate} — leave your car where it is.</div></div></div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   document.getElementById('sheetBody').innerHTML=`
