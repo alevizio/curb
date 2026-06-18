@@ -371,6 +371,7 @@
   .asched.green{color:var(--green-text)} .asched.amber{color:var(--amber-text)} .asched.red{color:var(--red-text)}
   .afterpass{font-size:11.5px;color:var(--ink-soft);margin:1px 0 5px;line-height:1.45}
   .afterpass a{color:var(--meter);font-weight:700;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+  .holskip{font-size:12.5px;font-weight:800;color:var(--green-text);margin:3px 0 4px;line-height:1.4}
   .sideslbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:14px}
   .shdiv{border:0;border-top:2px solid rgba(23,21,15,.12);margin:13px 0 0}
   .metico{width:15px;height:15px;flex:none}
@@ -1413,6 +1414,11 @@ function openSheet(group, activeKey){
   const aSched=ns?`<div class="asched ${_arp.cls}">${fmtHour(ns.fromH)}–${fmtHour(ns.toH)} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
   // The "park after the sweeper passes" rule — most useful when a sweep is active now or imminent (within 24h).
   const _soon=ns&&((now>=ns.start&&now<ns.end)||(ns.start-now)<864e5);
+  // Holiday heads-up: if this side's next scheduled sweep is cancelled for a city holiday, say so.
+  const _hrec=active.row||(active.rows&&active.rows[0]);
+  const _hol=(_hrec&&typeof holidaySkip==='function')?holidaySkip(_hrec):null;
+  const _WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const _holNote=_hol?`<div class="holskip">No sweeping <b>${_hol.name}</b> · ${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da} — city holiday, no need to move.</div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   document.getElementById('sheetBody').innerHTML=`
@@ -1420,6 +1426,7 @@ function openSheet(group, activeKey){
       <div class="headrow"><span class="head">${head}</span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb — pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div></div>
     <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span></div>
     ${aSched}
+    ${_holNote}
     ${enfHtml}
     ${_soon?`<div class="afterpass">Once the sweeper has passed, you can re-park here — even before the posted window ends. <a href="https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets" target="_blank" rel="noopener">SFMTA rule ↗</a></div>`:''}
     <div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>
