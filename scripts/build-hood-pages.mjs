@@ -45,6 +45,27 @@ const kfmt = (n) => n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' 
 const CARD_TINTS = ['#cfe3d6', '#e7dcc2', '#cdddea', '#ecd3cd', '#dadbc6', '#d6dde6', '#e6d8df', '#d2e0d6'];
 const tintFor = (h) => CARD_TINTS[[...h].reduce((a, c) => a + c.charCodeAt(0), 0) % CARD_TINTS.length];
 const HOOD_MAPS = JSON.parse(readFileSync(new URL('data/hood-maps.json', ROOT), 'utf8'));
+// Per-hood enrichment (curb-mix + garages) from build-hood-enrich.mjs. Optional — degrade if absent.
+let ENRICH = {};
+try { ENRICH = JSON.parse(readFileSync(new URL('data/hood-enrich.json', ROOT), 'utf8')).hoods || {}; } catch { /* no enrich file yet */ }
+const cleanAddr = (s) => String(s || '').replace(/[^\x20-\x7E]+/g, ' ').replace(/\s+/g, ' ').trim();
+// "What parking is like" — curb-mix (share of mapped curb) + the nearest off-street garages/lots.
+const parkingSection = (name, en) => {
+  if (!en) return '';
+  const m = en.mix;
+  const mixLine = m ? `Of ${esc(name)}'s mapped curb, about <b>${m.general}%</b> is general street parking${m.rpp >= 3 ? `, <b>${m.rpp}%</b> residential-permit (RPP)` : ''}${m.loading >= 4 ? `, and <b>${m.loading}%</b> loading zones` : ''}. (Share of curb in SFMTA's Digital Curb data — the posted sign on your block always wins.)` : '';
+  const gar = (en.garages || []).length
+    ? `<div class="panel"><div class="sec-k">Off-street parking nearby</div><ul class="streets">${en.garages.map((g) => `<li><span>${esc(cleanAddr(g.addr))} <i style="font-style:normal;color:var(--ink-soft);font-weight:600">· ${g.type}</i></span><span class="n">${num(g.cap)} spaces${g.hr ? ` · $${g.hr}/hr` : ''}</span></li>`).join('')}</ul></div><p class="lede" style="margin-top:10px;font-size:13.5px">No street spot? Rates are operator-supplied — confirm on arrival.</p>`
+    : '';
+  if (!mixLine && !gar) return '';
+  return `
+  <section>
+    <div class="sec-k">What parking is like</div>
+    <h2>Parking in <b>${esc(name)}</b></h2>
+    ${mixLine ? `<p class="lede">${mixLine}</p>` : ''}
+    ${gar}
+  </section>`;
+};
 // Card visual: the neighborhood's street-cleaning network as an amber-on-paper map snapshot
 // (data/hood-maps.json, built by build-hood-maps.mjs). Falls back to tinted stripes if missing.
 const cardViz = (name) => {
@@ -454,6 +475,7 @@ function renderHood(h, idx) {
     <p class="lede" style="margin-top:16px">The street-cleaning fine is <b>$${FINE}</b> (2026). ${isHoodTiming ? `In ${esc(name)}, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b>.` : `Citywide, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b> — ${esc(name)} follows the same pattern.`}</p>
   </section>
 
+  ${parkingSection(name, ENRICH[sl])}
   ${mapEmbed(name)}
 
   <section>
