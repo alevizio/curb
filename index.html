@@ -797,11 +797,20 @@ function addCarto(){
     const {session}=await sres.json();
     if(!session) throw new Error('no session');
     // 2) Tile layer (Leaflet fills {z}/{x}/{y}; session+key are baked in).
-    L.tileLayer(`https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${session}&key=${encodeURIComponent(GMAPS_KEY)}`,
+    const gtiles=L.tileLayer(`https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${session}&key=${encodeURIComponent(GMAPS_KEY)}`,
       {maxZoom:20}).addTo(map);
     // 3) Google requires showing the per-viewport attribution; refresh it on pan/zoom.
     let cur='© Google';
     map.attributionControl.addAttribution(cur);
+    // createSession can succeed while the tile IMAGES still fail (referrer/key/quota/network — notably
+    // inside WKWebViews, where <img> tile requests may not carry the Referer the key is locked to).
+    // That left a blank basemap with no fallback. If the first tiles error before any load, swap to CARTO.
+    let _gOk=0,_gErr=0,_gSwap=false;
+    gtiles.on('tileload',()=>{ _gOk++; });
+    gtiles.on('tileerror',()=>{ if(_gSwap)return; _gErr++;
+      if(_gErr>=4 && _gOk===0){ _gSwap=true; map.removeLayer(gtiles);
+        try{ map.attributionControl.removeAttribution(cur); }catch(_){}
+        addCarto(); console.warn('Google tiles failing — fell back to CARTO basemap.'); } });
     const refresh=async()=>{
       try{
         const b=map.getBounds();
