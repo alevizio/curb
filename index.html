@@ -812,11 +812,12 @@ function addCarto(){
         try{ map.attributionControl.removeAttribution(cur); }catch(_){}
         addCarto(); console.warn('Google tiles failing — fell back to CARTO basemap.'); } });
     const refresh=async()=>{
+      if(_gSwap)return; // fell back to CARTO — stop re-adding Google's attribution
       try{
         const b=map.getBounds();
         const r=await fetch('https://tile.googleapis.com/tile/v1/viewport?session='+session+'&key='+encodeURIComponent(GMAPS_KEY)
           +'&zoom='+map.getZoom()+'&north='+b.getNorth()+'&south='+b.getSouth()+'&east='+b.getEast()+'&west='+b.getWest());
-        if(!r.ok) return; const d=await r.json(); const next=d.copyright||cur;
+        if(!r.ok||_gSwap) return; const d=await r.json(); if(_gSwap)return; const next=d.copyright||cur;
         if(next!==cur){ map.attributionControl.removeAttribution(cur); map.attributionControl.addAttribution(next); cur=next; }
       }catch(_){}
     };
