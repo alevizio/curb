@@ -378,6 +378,10 @@
   .holcard .hh{font-family:'Anton',sans-serif;font-size:18px;line-height:1;text-transform:uppercase;color:var(--green-text);margin:1px 0 2px}
   .holcard .hs{font-size:12px;font-weight:700;color:var(--ink);line-height:1.3}
   .holcard .hs b{color:var(--green-text)}
+  .signfix{font-size:11.5px;margin-top:11px;text-align:center}
+  .signfix a{color:var(--ink-soft);font-weight:600;text-decoration:none}
+  .signfix a b{color:var(--meter);font-weight:700}
+  .signfix a:hover b,.signfix a:active b{text-decoration:underline}
   .sideslbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:14px}
   .shdiv{border:0;border-top:2px solid rgba(23,21,15,.12);margin:13px 0 0}
   .metico{width:15px;height:15px;flex:none}
@@ -1444,6 +1448,19 @@ function openSheet(group, activeKey){
   const _holNote=_hol?`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div><div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate} — leave your car where it is.</div></div></div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
+  // Crowdsourced "Correct a Sign": a pre-filled GitHub issue carrying this block's exact context so a
+  // report is actionable, and a photo of the real sign can be dropped straight in (open-source repo).
+  const _repSched = ns ? `${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)}–${fmtHour(ns.toH)}` : 'no posted street-sweeping';
+  const _repBody = [
+    `**Block:** ${group.corridor||'—'}${group.limits?' · '+group.limits:''}`,
+    `**Side:** ${(active&&active.blockside)||'—'}`,
+    `**CNN:** ${group.cnn||'—'}`,
+    `**CURB currently shows:** ${_repSched}`,
+    ``, `**What the posted sign actually says** (days/hours, or "no sweeping here"):`, ``, ``,
+    `**A photo of the sign helps a lot — drag it in:**`, ``,
+    `---`, `_Reported from ${location.origin}/b/${group.cnn||''}_`
+  ].join('\n');
+  const _report = `https://github.com/alevizio/curb/issues/new?title=${encodeURIComponent('Sign correction: '+(group.corridor||'block')+(group.limits?' ('+group.limits+')':''))}&body=${encodeURIComponent(_repBody)}`;
   document.getElementById('sheetBody').innerHTML=`
     <div class="verdict ${vClass}"><span class="kicker">${kicker}</span>
       <div class="headrow"><span class="head">${head}</span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb — pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div></div>
@@ -1466,7 +1483,8 @@ function openSheet(group, activeKey){
     <details class="noted">
       <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
       <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping the <b>night before</b> (~8pm) and <b>~30 min before</b> sweeping; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
-    </details>`;
+    </details>
+    <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
 
   if(canRemind){
     const doCal=k=>{try{localStorage.setItem('curbCalPref',k);}catch(_){}
@@ -1488,6 +1506,7 @@ function openSheet(group, activeKey){
     map.fitBounds(L.polyline(active.latlngs).getBounds(),
       {maxZoom:18,paddingTopLeft:[50,90],paddingBottomRight:[50,Math.round(innerHeight*0.44)]});  // reserve the peek sheet
   };
+  const _sf=document.getElementById('signfixLink'); if(_sf)_sf.onclick=()=>{try{track('sign_report');}catch(_){}};
   const _enf=document.getElementById('enfBtn');
   if(_enf&&ae)_enf.onclick=()=>toast(`Estimated from ~${ae.n} street-cleaning tickets on this block over ~2 years (SFMTA citations via DataSF). Earliest seen ${fmtMin(ae.lo)}. The posted sign is the source of truth.`);
   // Share: the block gets a real URL (/b/<cnn>, server-rendered card for unfurls).
