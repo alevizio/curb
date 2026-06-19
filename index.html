@@ -784,8 +784,14 @@ function addCarto(){
   return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     {subdomains:'abcd',maxZoom:20,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
 }
+// Remember a Google quota outage for the rest of the SF day so repeat visitors skip the doomed Google
+// attempt (no blank flash) and go straight to CARTO. Keyed by the SF calendar date, so it self-clears
+// when Google's daily tile quota resets at midnight Pacific, and we retry Google the next day.
+function gmapsDayKey(){ try{ const t=sfTodayParts(); return t.y+'-'+String(t.mo).padStart(2,'0')+'-'+String(t.da).padStart(2,'0'); }catch(_){ return ''; } }
+function gmapsDownToday(){ const k=gmapsDayKey(); try{ return !!k && localStorage.getItem('curbGmapsDown')===k; }catch(_){ return false; } }
+function markGmapsDown(){ try{ const k=gmapsDayKey(); if(k) localStorage.setItem('curbGmapsDown',k); }catch(_){} }
 (async function initBasemap(){
-  if(!GMAPS_KEY){ addCarto(); return; }
+  if(!GMAPS_KEY || gmapsDownToday()){ addCarto(); return; } // skip the doomed Google call if it was quota-tapped earlier today
   try{
     // 1) Create a session token for 2D roadmap tiles (free; tiles are billed).
     const ctrl=new AbortController(), to=setTimeout(()=>ctrl.abort(),3000);
@@ -806,11 +812,11 @@ function addCarto(){
     // inside WKWebViews, where <img> tile requests may not carry the Referer the key is locked to).
     // That left a blank basemap with no fallback. If the first tiles error before any load, swap to CARTO.
     let _gOk=0,_gErr=0,_gSwap=false;
-    gtiles.on('tileload',()=>{ _gOk++; });
+    gtiles.on('tileload',()=>{ if(_gOk===0){ try{ localStorage.removeItem('curbGmapsDown'); }catch(_){} } _gOk++; }); // Google works — clear any stale outage flag
     gtiles.on('tileerror',()=>{ if(_gSwap)return; _gErr++;
       if(_gErr>=4 && _gOk===0){ _gSwap=true; map.removeLayer(gtiles);
         try{ map.attributionControl.removeAttribution(cur); }catch(_){}
-        addCarto(); console.warn('Google tiles failing — fell back to CARTO basemap.'); } });
+        markGmapsDown(); addCarto(); console.warn('Google tiles tapped out — using CARTO for the rest of the day.'); } });
     const refresh=async()=>{
       if(_gSwap)return; // fell back to CARTO — stop re-adding Google's attribution
       try{
