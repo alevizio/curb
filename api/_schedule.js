@@ -25,5 +25,9 @@ export function recomputeSpot(spot) {
   const out = { ...spot, nextSweepISO: iso };
   if (+eve < +ns.start) out.eveningISO = eve.toISOString();
   else delete out.eveningISO;
+  // morning-of (~2h before the sweep) — the Intense level's extra ping. A fixed offset, so DST-safe.
+  const morn = new Date(+ns.start - 2 * 3600 * 1000);
+  if (+morn < +ns.start && +morn > +eve) out.morningISO = morn.toISOString();
+  else delete out.morningISO;
   return out;
 }

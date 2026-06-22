@@ -424,6 +424,17 @@
   .wk{font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--ink)}
   .wk.off{opacity:.22;border-style:dashed} .wk.on{background:var(--green-text);color:#fff;border-color:var(--green-text)}
   .actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .alertcfg{margin-top:11px;border-top:2px solid rgba(23,21,15,.10);padding-top:9px}
+  .alertcfg>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--ink-soft)}
+  .alertcfg>summary::-webkit-details-marker{display:none}
+  .alertcfg>summary .acfg-st{font-weight:800;color:var(--ink);text-transform:capitalize}
+  .acfg-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+  .acfg-lbl{font-size:12px;font-weight:700;color:var(--ink-soft)}
+  .seg{display:inline-flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
+  .seg button{appearance:none;-webkit-appearance:none;border:0;background:transparent;font:inherit;font-size:11.5px;font-weight:700;color:var(--ink);padding:6px 11px;cursor:pointer;border-left:2px solid var(--ink)}
+  .seg button:first-child{border-left:0}
+  .seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+  .acfg-test{width:100%;margin-top:11px;justify-content:center}
   .calchoice{display:flex;gap:9px;margin-top:9px;flex-basis:100%}
   .calchoice[hidden]{display:none}
   .calchoice .btn{font-size:13px;padding:11px}
@@ -1426,11 +1437,17 @@ function openSheet(group, activeKey){
     const r0=active.row||(active.rows&&active.rows[0]);
     const rule=r0?{weekday:r0.weekday,fromhour:r0.fromhour,tohour:r0.tohour,
       week1:r0.week1,week2:r0.week2,week3:r0.week3,week4:r0.week4,week5:r0.week5,holidays:r0.holidays||'0'}:null;
+    // morning-of (~2h before) feeds the Intense level; the block's avg ticket time flavors the copy.
+    const morn=new Date(+ns.start-72e5);
+    const _et=enfFor(group.cnn, active.row&&normDay(active.row.weekday));
     return {
       corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
       nextSweepISO: ns.start.toISOString(), leadMinutes: 30,
+      level: getAlertLevel(), voice: getAlertVoice(),
+      ...(_et?{tip:fmtMin(_et.avg)}:{}),
       ...(rule?{rule, cnn:String(group.cnn||''), sideKey:String(active.key||'')}:{}),
-      ...(+eve>Date.now()+6e5&&+eve<+ns.start?{eveningISO:eve.toISOString()}:{})
+      ...(+eve>Date.now()+6e5&&+eve<+ns.start?{eveningISO:eve.toISOString()}:{}),
+      ...(+morn>Date.now()+6e5&&+morn<+ns.start&&+morn>+eve?{morningISO:morn.toISOString()}:{})
     };
   })() : null;
   const alertOn = alertSpotMatches(spot);
@@ -1486,10 +1503,26 @@ function openSheet(group, activeKey){
         <button class="btn alt" id="calICS">Apple / .ics</button>
       </div>`:''}
     </div>
+    ${canRemind?`<details class="alertcfg" id="alertCfg">
+      <summary><span>Alert style</span><b class="acfg-st">${alertOn?'On · '+getAlertLevel():'Customize ▸'}</b></summary>
+      <div class="acfg-row" data-k="curbAlertLevel" data-def="normal">
+        <span class="acfg-lbl">Intensity</span>
+        <div class="seg" role="group" aria-label="Alert intensity">
+          <button type="button" data-v="light">Light</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="intense">Intense</button>
+        </div>
+      </div>
+      <div class="acfg-row" data-k="curbAlertVoice" data-def="cheeky">
+        <span class="acfg-lbl">Voice</span>
+        <div class="seg" role="group" aria-label="Alert voice">
+          <button type="button" data-v="cheeky">Cheeky</button><button type="button" data-v="drill">Drill</button><button type="button" data-v="deadpan">Deadpan</button>
+        </div>
+      </div>
+      <button class="btn alt acfg-test" id="testPushBtn" type="button">${ICONS.bell} Send me a test</button>
+    </details>`:''}
     ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping the <b>night before</b> (~8pm) and <b>~30 min before</b> sweeping; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
+      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping you before sweeping at the intensity you pick under <b>Alert style</b> — Light (~30 min before), Normal (+ the night before), or Intense (+ the morning of); .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
 
@@ -1507,6 +1540,7 @@ function openSheet(group, activeKey){
     document.getElementById('calGoogle').onclick=()=>doCal('google');
     document.getElementById('calICS').onclick=()=>doCal('ics');
     document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
+    applyAlertCfg(spot);
   }
   document.getElementById('centerBtn').onclick=()=>{
     document.getElementById('sheet').classList.remove('tall');  // collapse so the block isn't hidden behind a tall sheet
@@ -1618,6 +1652,8 @@ function pushSupported(){
 // reverts to "🔔 Sweep alerts" — a real cue to re-tap and re-arm (the server has no recurrence rule).
 function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}
 function savedAlertKey(){try{return localStorage.getItem('curbAlertKey')||'';}catch(_){return '';}}
+function getAlertLevel(){try{return localStorage.getItem('curbAlertLevel')||'normal';}catch(_){return 'normal';}}
+function getAlertVoice(){try{return localStorage.getItem('curbAlertVoice')||'cheeky';}catch(_){return 'cheeky';}}
 function alertSpotMatches(spot){const k=spotKey(spot);return !!spot && k!=='' && savedAlertKey()===k;}
 function showIosHint(){document.getElementById('iosHint').classList.add('open');}
 function hideIosHint(){document.getElementById('iosHint').classList.remove('open');}
@@ -1670,13 +1706,69 @@ async function onAlertTap(spot, btn){
     try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}
     track('alert_armed');  // the activation→retention metric
     btn.classList.remove('busy','alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on';
-    toast('Sweep alert set for '+(spot.corridor||'this block')+(spot.eveningISO?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before."));
+    const _nb=spot.eveningISO&&getAlertLevel()!=='light';
+    toast('Sweep alert set for '+(spot.corridor||'this block')+(_nb?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before."));
   }catch(err){
     const on=alertSpotMatches(spot);
     btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.remove('alt');
     if(on)btn.textContent='✓ Alerts on'; else btn.innerHTML=original;
     if(!/^permission-/.test(String(err&&err.message))) toast('Could not enable alerts — '+((err&&err.message)||'try again')+'.');
   }
+}
+
+// Alert style (intensity + voice) live picker + the "send me a test" path. Both dials are global
+// localStorage prefs that ride the spot to the server; changing one while armed silently re-arms it.
+function applyAlertCfg(spot){
+  const cfg=document.getElementById('alertCfg'); if(!cfg)return;
+  cfg.querySelectorAll('.acfg-row').forEach(row=>{
+    const k=row.dataset.k, def=row.dataset.def;
+    const cur=(()=>{try{return localStorage.getItem(k)||def;}catch(_){return def;}})();
+    row.querySelectorAll('.seg button').forEach(b=>{
+      b.setAttribute('aria-pressed', String(b.dataset.v===cur));
+      b.onclick=()=>{
+        try{localStorage.setItem(k,b.dataset.v);}catch(_){}
+        row.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+        const st=cfg.querySelector('.acfg-st');
+        if(st&&alertSpotMatches(spot))st.textContent='On · '+getAlertLevel();
+        if(alertSpotMatches(spot))reArm({...spot, level:getAlertLevel(), voice:getAlertVoice()});
+      };
+    });
+  });
+  const tb=document.getElementById('testPushBtn');
+  if(tb)tb.onclick=()=>sendTestPush({...spot, level:getAlertLevel(), voice:getAlertVoice()});
+}
+// Silently push the updated cadence/voice to the server for an already-armed spot (no re-prompt).
+function reArm(spot){
+  if(window.__curbNativePush){ try{window.__curbRequestPush(spot);}catch(_){ } return; }
+  if(!pushSupported())return;
+  navigator.serviceWorker.ready
+    .then(reg=>reg.pushManager.getSubscription())
+    .then(sub=>sub&&fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),spot})}))
+    .catch(()=>{});
+}
+// Send a real test push to THIS device so you can feel the chosen cadence + voice on your lock screen.
+async function sendTestPush(spot){
+  if(window.__curbNativePush){
+    if(typeof window.__curbTestPush==='function'){ try{window.__curbTestPush({level:spot.level,voice:spot.voice,which:'all',spot});}catch(_){ } toast('Sending a test — check your lock screen. 🔔'); }
+    else toast('Update the app from TestFlight to test on iPhone — your alerts still work.');
+    return;
+  }
+  if(isIOS()&&!isStandalone()){ showIosHint(); return; }
+  if(!pushSupported()){ toast('This browser can\'t do push — use the Calendar button instead.'); return; }
+  if(Notification.permission==='denied'){ toast('Notifications are blocked — re-enable them to test.'); return; }
+  const tb=document.getElementById('testPushBtn'); const orig=tb?tb.innerHTML:'';
+  if(tb){tb.disabled=true;tb.textContent='Sending…';}
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){ toast('Allow notifications to feel a test.'); throw new Error('perm'); }
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
+    const res=await fetch('/api/test-notification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),level:spot.level,voice:spot.voice,which:'all',spot})});
+    if(res.ok){ try{track('alert_test');}catch(_){ } toast('Test sent — check your notifications. 🔔'); }
+    else toast('Could not send a test — try again.');
+  }catch(err){ if(!/perm/.test(String(err&&err.message)))toast('Could not send a test.'); }
+  finally{ if(tb){tb.disabled=false;tb.innerHTML=orig;} }
 }
 
 /* ---------- locate / tap ---------- */

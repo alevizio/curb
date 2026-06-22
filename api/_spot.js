@@ -7,6 +7,7 @@
 // Side-effect import: attaches the SF time core (normDay/nextSweep/…) to globalThis so we can
 // validate an incoming recurrence rule with the EXACT guards the cron's nextSweep() uses.
 import '../lib/sweep-core.js';
+import { normLevel, normVoice } from '../lib/notify-core.js';
 const normDay = globalThis.normDay;
 
 // A recurring sweep rule the cron can recompute the next occurrence from (the "forever-watch").
@@ -38,7 +39,9 @@ export function sanitizeSpot(spot) {
   if (!Number.isFinite(ts)) return null; // no valid sweep time => nothing for the cron to fire on
   let lead = Number(spot.leadMinutes);
   if (!Number.isFinite(lead)) lead = 30;
-  lead = Math.min(180, Math.max(1, Math.round(lead)));
+  // Floor at 15 (the cron interval) so the lead window can never be narrower than a tick gap and get
+  // skipped; cap at 60 so it stays well under the morning-of anchor (120 min) and that window survives.
+  lead = Math.min(60, Math.max(15, Math.round(lead)));
   // optional night-before push: must parse and precede the sweep itself
   const ev = Date.parse(spot.eveningISO);
   const out = {
@@ -49,6 +52,16 @@ export function sanitizeSpot(spot) {
     leadMinutes: lead,
   };
   if (Number.isFinite(ev) && ev < ts) out.eveningISO = new Date(ev).toISOString();
+  // morning-of anchor for the Intense level (set client-side / by recomputeSpot); must precede sweep.
+  const mn = Date.parse(spot.morningISO);
+  if (Number.isFinite(mn) && mn < ts) out.morningISO = new Date(mn).toISOString();
+  // notification dials: intensity (cadence) + voice (tone), both coerced to a known value.
+  out.level = normLevel(spot.level);
+  out.voice = normVoice(spot.voice);
+  // optional ticket-time flex woven into copy (e.g. "9:14am") — accept ONLY a clean time string,
+  // never arbitrary client text, so nothing odd can ever land in a push body.
+  const tipRaw = String(spot.tip || '').trim().slice(0, 14);
+  if (/^~?\d{1,2}:\d{2}\s?[ap]\.?m\.?$/i.test(tipRaw)) out.tip = tipRaw;
   const rule = sanitizeRule(spot.rule);
   if (rule) {
     out.rule = rule;

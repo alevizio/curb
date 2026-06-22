@@ -98,23 +98,23 @@ describe('auto-park tokens', () => {
 const rec = async () => (await loadAllSubs()).find((x) => x.endpoint === EP);
 
 describe('saveSub de-dupe preservation', () => {
-  it('re-arming the SAME sweep preserves notifiedFor / notifiedEveFor', async () => {
+  it('re-arming the SAME sweep preserves the de-dupe map (no double push)', async () => {
     await saveSub(SUB, spotA);
-    await markNotified(EP, spotA.nextSweepISO, 'notifiedFor');
-    await markNotified(EP, spotA.nextSweepISO, 'notifiedEveFor');
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    await markNotified(EP, spotA.nextSweepISO, 'eve');
     await saveSub(SUB, { ...spotA }); // identical nextSweepISO
     const r = await rec();
-    expect(r.notifiedFor).toBe(spotA.nextSweepISO);
-    expect(r.notifiedEveFor).toBe(spotA.nextSweepISO);
+    expect(r.notified.lead).toBe(spotA.nextSweepISO);
+    expect(r.notified.eve).toBe(spotA.nextSweepISO);
   });
 
-  it('a DIFFERENT sweep resets both de-dupe fields', async () => {
+  it('a DIFFERENT sweep resets the de-dupe map', async () => {
     await saveSub(SUB, spotA);
-    await markNotified(EP, spotA.nextSweepISO, 'notifiedFor');
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
     await saveSub(SUB, spotB);
     const r = await rec();
-    expect(r.notifiedFor).toBe(null);
-    expect(r.notifiedEveFor).toBe(null);
+    expect(r.notified.lead).toBe(undefined);
+    expect(r.notified.eve).toBe(undefined);
     expect(r.spot.nextSweepISO).toBe(spotB.nextSweepISO);
   });
 
@@ -128,15 +128,14 @@ describe('saveSub de-dupe preservation', () => {
 });
 
 describe('advanceSpot', () => {
-  it('replaces the spot and resets all de-dupe fields', async () => {
+  it('replaces the spot and resets the de-dupe map', async () => {
     await saveSub(SUB, spotA);
-    await markNotified(EP, spotA.nextSweepISO, 'notifiedFor');
-    await markNotified(EP, spotA.nextSweepISO, 'notifiedEveFor');
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    await markNotified(EP, spotA.nextSweepISO, 'eve');
     await advanceSpot(EP, spotB);
     const r = await rec();
     expect(r.spot.nextSweepISO).toBe(spotB.nextSweepISO);
-    expect(r.notifiedFor).toBe(null);
-    expect(r.notifiedEveFor).toBe(null);
+    expect(r.notified).toEqual({});
   });
 
   it('preserves savedAt (the staleness clock is client-refresh, not cron-advance)', async () => {
@@ -145,5 +144,15 @@ describe('advanceSpot', () => {
     expect(typeof before).toBe('number');
     await advanceSpot(EP, spotB);
     expect((await rec()).savedAt).toBe(before); // cron advance must NOT reset the staleness clock
+  });
+});
+
+describe('legacy de-dupe migration (back-compat for live subscribers)', () => {
+  it('reads an old notifiedFor/notifiedEveFor record as a { lead, eve } map', async () => {
+    // a record written by the PRE-upgrade code, straight into the mock hash — must NOT re-push
+    mem['curb:subs'] = { [EP]: JSON.stringify({ subscription: SUB, spot: spotA, notifiedFor: spotA.nextSweepISO, notifiedEveFor: spotA.nextSweepISO, savedAt: 1 }) };
+    const r = await rec();
+    expect(r.notified.lead).toBe(spotA.nextSweepISO);
+    expect(r.notified.eve).toBe(spotA.nextSweepISO);
   });
 });

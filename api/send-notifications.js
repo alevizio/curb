@@ -7,29 +7,16 @@ import {
 } from './_store.js';
 import { recomputeSpot } from './_schedule.js';
 import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
+import { dueAlert } from '../lib/notify-core.js';
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
 // live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
 const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
 
-// Which alert (if any) is due for a spot right now — shared by both transports so web push and
-// native APNs fire on the exact same windows with the exact same copy. Returns { field, title,
-// body, tag } or null. Two escalating pushes per sweep, never more: night-before (~8pm SF) = calm
-// planning; ~30-min lead = urgent. Each window de-dupes independently per sweep time.
-function dueAlert(spot, notifiedFor, notifiedEveFor, now) {
-  const lead = (spot.leadMinutes ?? 30) * 60000;
-  const delta = new Date(spot.nextSweepISO).getTime() - now;
-  const side = spot.blockside ? ` (${spot.blockside})` : '';
-  const eve = spot.eveningISO ? new Date(spot.eveningISO).getTime() : null;
-  if (eve && now >= eve && now < eve + 45 * 60000 && delta > lead && notifiedEveFor !== spot.nextSweepISO) {
-    return { field: 'notifiedEveFor', title: 'Street cleaning tomorrow 🧹', body: `${spot.corridor || 'Your block'}${side} gets swept tomorrow — plan where to move.`, tag: 'curb-sweep-eve' };
-  }
-  if (delta > 0 && delta <= lead && notifiedFor !== spot.nextSweepISO) {
-    const mins = Math.max(1, Math.round(delta / 60000));
-    return { field: 'notifiedFor', title: 'Move your car 🧹', body: `Sweeping ${spot.corridor || 'your block'}${side} in ~${mins} min.`, tag: 'curb-sweep' };
-  }
-  return null;
-}
+// The cadence brain — which push is due for a spot right now, with what copy, at the user's chosen
+// intensity + voice — lives in lib/notify-core.js. It's a pure, unit-tested module shared by BOTH
+// transports here AND the /api/test-notification preview endpoint, so they can never diverge.
+// dueAlert(spot, notifiedMap, now) -> { key, tag, title, body } | null.
 
 // A notification tap opens the specific block when we know its cnn, else the map.
 const deepLink = (spot) => (spot && spot.cnn ? '/b/' + spot.cnn : '/');
@@ -104,7 +91,7 @@ export default async function handler(req, res) {
 
     // ---- Web Push ----
     const subs = await loadAllSubs();
-    for (const { endpoint, subscription, spot, notifiedFor, notifiedEveFor, savedAt } of subs) {
+    for (const { endpoint, subscription, spot, notified, savedAt } of subs) {
       if (!spot || !spot.nextSweepISO) continue;
       // Forever-watch re-arm: advance to the next occurrence once the window ends (its OWN pass —
       // never coupled to the lead push, which still returns the same instant at lead time). Stops
@@ -114,7 +101,7 @@ export default async function handler(req, res) {
         const advanced = recomputeSpot(spot);
         if (advanced) { await advanceSpot(endpoint, advanced); rearmed++; continue; }
       }
-      const due = dueAlert(spot, notifiedFor, notifiedEveFor, now);
+      const due = dueAlert(spot, notified, now);
       if (!due) continue;
       const payload = JSON.stringify({ title: due.title, body: due.body, url: deepLink(spot), tag: due.tag });
       let delivered = false;
@@ -126,7 +113,7 @@ export default async function handler(req, res) {
       }
       // De-dupe write lives OUTSIDE the send try/catch: a transient store error here must not be
       // mistaken for a send failure (which would let the next 15-min tick re-push the same sweep).
-      if (delivered) await markNotified(endpoint, spot.nextSweepISO, due.field);
+      if (delivered) await markNotified(endpoint, spot.nextSweepISO, due.key);
     }
 
     // ---- Native APNs (iOS) ---- identical windows / dedupe / re-arm, different transport. Skipped
@@ -143,13 +130,13 @@ export default async function handler(req, res) {
       let altSession = null; // opened lazily only if a token mismatches the primary environment
       const isBadToken = (s, r) => s === 410 || (s === 400 && /BadDeviceToken|Unregistered/i.test(r));
       try {
-        for (const { token, spot, notifiedFor, notifiedEveFor, savedAt } of iosSubs) {
+        for (const { token, spot, notified, savedAt } of iosSubs) {
           if (!spot || !spot.nextSweepISO) continue;
           if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
             const advanced = recomputeSpot(spot);
             if (advanced) { await advanceIosSpot(token, advanced); iosRearmed++; continue; }
           }
-          const due = dueAlert(spot, notifiedFor, notifiedEveFor, now);
+          const due = dueAlert(spot, notified, now);
           if (!due) continue;
           const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': due.tag }, url: deepLink(spot), tag: due.tag };
           // apns-expiration = the sweep instant: if the device is offline now and reconnects AFTER the
@@ -177,7 +164,7 @@ export default async function handler(req, res) {
           let delivered = false;
           if (status === 200) { delivered = true; iosSent++; }
           else if (isBadToken(status, reason)) { await deleteIosSub(token); iosPruned++; }
-          if (delivered) await markIosNotified(token, spot.nextSweepISO, due.field);
+          if (delivered) await markIosNotified(token, spot.nextSweepISO, due.key);
         }
       } finally {
         try { session.close(); } catch { /* already closed */ }

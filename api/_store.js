@@ -20,8 +20,20 @@ function redis() {
   return _redis;
 }
 
-// One hash, field = subscription.endpoint, value = { subscription, spot, notifiedFor, notifiedEveFor, savedAt, proofHash? }.
+// One hash, field = subscription.endpoint, value = { subscription, spot, notified, savedAt, proofHash? }.
 const KEY = 'curb:subs';
+
+// Back-compat: older records carried two named de-dupe fields (notifiedFor / notifiedEveFor); the
+// cadence engine (lib/notify-core.js) now uses a { eve, morn, lead } map keyed by touchpoint. Derive
+// the map from whatever a record has, so live subscribers keep their de-dupe across the upgrade
+// (worst case is one duplicate push during the one sweep cycle it takes every record to migrate).
+function notifiedMap(rec) {
+  if (rec && rec.notified && typeof rec.notified === 'object') return { ...rec.notified };
+  const m = {};
+  if (rec && rec.notifiedFor) m.lead = rec.notifiedFor;
+  if (rec && rec.notifiedEveFor) m.eve = rec.notifiedEveFor;
+  return m;
+}
 
 /** True once the store env vars are present (used to fail loudly instead of silently). */
 export function storeReady() {
@@ -34,14 +46,13 @@ export function storeReady() {
 export async function saveSub(subscription, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  let notifiedFor = null, notifiedEveFor = null;
+  let notified = {};
   const out = spot || null;
   try {
     const v = await r.hget(KEY, subscription.endpoint);
     const prev = typeof v === 'string' ? safeParse(v) : v;
     if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      notifiedFor = prev.notifiedFor ?? null;
-      notifiedEveFor = prev.notifiedEveFor ?? null;
+      notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
       // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
       // forever-watch to one-shot). Carry the prior rule/cnn/sideKey forward when absent.
       if (out && !out.rule && prev.spot.rule) {
@@ -54,7 +65,7 @@ export async function saveSub(subscription, spot) {
   // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
   // re-arming once a watch goes stale past MAX_WATCH_AGE (see send-notifications) so a frozen rule
   // can't push wrong times forever after a city schedule change. advanceSpot preserves it.
-  const record = { subscription, spot: out, notifiedFor, notifiedEveFor, savedAt: Date.now() };
+  const record = { subscription, spot: out, notified, savedAt: Date.now() };
   await r.hset(KEY, { [subscription.endpoint]: JSON.stringify(record) });
 }
 
@@ -70,8 +81,8 @@ export async function advanceSpot(endpoint, newSpot) {
   const rec = typeof v === 'string' ? safeParse(v) : v;
   if (!rec) return;
   rec.spot = newSpot;
-  rec.notifiedFor = null;
-  rec.notifiedEveFor = null;
+  rec.notified = {};
+  delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
 }
 
@@ -84,7 +95,7 @@ export async function loadAllSubs() {
   return Object.entries(all)
     .map(([endpoint, v]) => {
       const rec = typeof v === 'string' ? safeParse(v) : v; // Upstash may auto-deserialize
-      return rec ? { endpoint, ...rec } : null;
+      return rec ? { endpoint, ...rec, notified: notifiedMap(rec) } : null;
     })
     .filter(Boolean);
 }
@@ -97,13 +108,15 @@ export async function deleteSub(endpoint) {
 
 /** Record that we already pushed for a given sweep time, so the cron won't repeat.
  *  field: 'notifiedFor' (the ~30-min lead push) or 'notifiedEveFor' (night-before). */
-export async function markNotified(endpoint, nextSweepISO, field = 'notifiedFor') {
+export async function markNotified(endpoint, nextSweepISO, key = 'lead') {
   const r = redis();
   if (!r) return;
   const v = await r.hget(KEY, endpoint);
   const rec = typeof v === 'string' ? safeParse(v) : v;
   if (!rec) return;
-  rec[field] = nextSweepISO;
+  rec.notified = notifiedMap(rec);
+  rec.notified[key] = nextSweepISO;
+  delete rec.notifiedFor; delete rec.notifiedEveFor; // migrate off the legacy fields once touched
   await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
 }
 
@@ -128,14 +141,13 @@ const KEY_IOS = 'curb:apns';
 export async function saveIosSub(token, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  let notifiedFor = null, notifiedEveFor = null;
+  let notified = {};
   const out = spot || null;
   try {
     const v = await r.hget(KEY_IOS, token);
     const prev = typeof v === 'string' ? safeParse(v) : v;
     if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      notifiedFor = prev.notifiedFor ?? null;
-      notifiedEveFor = prev.notifiedEveFor ?? null;
+      notified = notifiedMap(prev);
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
@@ -143,7 +155,7 @@ export async function saveIosSub(token, spot) {
       }
     }
   } catch { /* best effort — worst case is one duplicate push */ }
-  const record = { token, spot: out, notifiedFor, notifiedEveFor, savedAt: Date.now(), platform: 'ios' };
+  const record = { token, spot: out, notified, savedAt: Date.now(), platform: 'ios' };
   await r.hset(KEY_IOS, { [token]: JSON.stringify(record) });
 }
 
@@ -155,8 +167,8 @@ export async function advanceIosSpot(token, newSpot) {
   const rec = typeof v === 'string' ? safeParse(v) : v;
   if (!rec) return;
   rec.spot = newSpot;
-  rec.notifiedFor = null;
-  rec.notifiedEveFor = null;
+  rec.notified = {};
+  delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
 }
 
@@ -169,7 +181,7 @@ export async function loadAllIosSubs() {
   return Object.entries(all)
     .map(([token, v]) => {
       const rec = typeof v === 'string' ? safeParse(v) : v;
-      return rec ? { token, ...rec } : null;
+      return rec ? { token, ...rec, notified: notifiedMap(rec) } : null;
     })
     .filter(Boolean);
 }
@@ -181,13 +193,15 @@ export async function deleteIosSub(token) {
 }
 
 /** Record that we already pushed an iOS token for a given sweep time (per-window de-dupe). */
-export async function markIosNotified(token, nextSweepISO, field = 'notifiedFor') {
+export async function markIosNotified(token, nextSweepISO, key = 'lead') {
   const r = redis();
   if (!r) return;
   const v = await r.hget(KEY_IOS, token);
   const rec = typeof v === 'string' ? safeParse(v) : v;
   if (!rec) return;
-  rec[field] = nextSweepISO;
+  rec.notified = notifiedMap(rec);
+  rec.notified[key] = nextSweepISO;
+  delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
 }
 
