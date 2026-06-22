@@ -1,5 +1,5 @@
 // CURB service worker — app-shell cache + Web Push.
-const CACHE = 'curb-v2';
+const CACHE = 'curb-v3';
 const SHELL = ['/', 'index.html', 'manifest.json',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
