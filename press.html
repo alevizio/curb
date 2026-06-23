@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CURB — Press kit</title>
+<meta name="description" content="Press kit for CURB (curb.guide): the free San Francisco street-parking map that reconstructs when tickets actually land from 659,000 real SFMTA citations. Facts, quotes, screenshots, and assets for reporters.">
+<!-- Quietly shareable: discoverable by direct link, kept out of search. -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://curb.guide/press">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CURB">
+<meta property="og:title" content="CURB — Press kit">
+<meta property="og:description" content="The free SF parking map that shows when tickets actually land — facts, quotes, screenshots & assets for reporters.">
+<meta property="og:url" content="https://curb.guide/press">
+<meta property="og:image" content="https://curb.guide/og.png?v=2">
+<link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
+<link rel="icon" sizes="any" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
+    --green:#1F9E5A; --amber:#E08A1E; --red:#C1121F; --meter:#2F5BD0;
+    --sign:#FFFDF6; --rail:#3B372E; --shadow:6px 6px 0 var(--ink);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--ink);color:var(--paper)}
+  :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
+  a{color:inherit}
+  .wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 22px}
+  .anton{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.005em;line-height:.98}
+  .eyebrow{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.16em;color:var(--red);font-size:14px}
+  /* header */
+  header{position:sticky;top:0;z-index:20;background:rgba(242,236,223,.92);backdrop-filter:blur(8px);border-bottom:2px solid rgba(23,21,15,.12)}
+  .mast{display:flex;align-items:center;gap:14px;padding:11px 0;max-width:1080px;margin:0 auto;padding-left:22px;padding-right:22px}
+  .mast .clogo{height:42px;width:auto;display:block}
+  .mast .pk{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.05em;font-size:15px}
+  .mast .sp{flex:1}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.03em;font-size:15px;border:2.5px solid var(--ink);border-radius:13px;padding:11px 18px;background:var(--ink);color:var(--paper);text-decoration:none;transition:transform .08s}
+  .btn:hover{transform:translate(-1px,-1px)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.sm{padding:8px 13px;font-size:13px;border-radius:11px}
+  /* hero */
+  .hero{padding:54px 0 30px}
+  .hero h1{font-size:clamp(40px,7.4vw,84px);margin:12px 0 0}
+  .hero h1 .r{color:var(--red)}
+  .lede{font-size:clamp(18px,2.4vw,23px);max-width:42ch;margin-top:18px;color:var(--ink-soft);font-weight:600}
+  .lede b{color:var(--ink)}
+  .herocta{display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}
+  /* sections */
+  section{padding:30px 0}
+  h2{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(24px,3.4vw,34px);line-height:1.02;margin-bottom:18px}
+  h2 .r{color:var(--red)}
+  p.body{max-width:62ch;margin-bottom:14px}
+  p.body b{font-weight:800}
+  /* stat grid */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .stat{border:3px solid var(--ink);border-radius:16px;background:var(--sign);padding:18px 16px}
+  .stat .n{font-family:'Anton',sans-serif;font-size:clamp(30px,4.5vw,44px);line-height:.95;color:var(--red)}
+  .stat .n.ink{color:var(--ink)}
+  .stat .l{font-weight:700;font-size:13.5px;margin-top:7px;line-height:1.3}
+  /* finding cards */
+  .finds{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .find{border:3px solid var(--ink);border-radius:18px;padding:22px;background:var(--paper);box-shadow:var(--shadow)}
+  .find h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:21px;line-height:1.04;margin-bottom:10px}
+  .find p{font-size:15.5px}
+  /* hoods */
+  .hoods{list-style:none;counter-reset:h;display:grid;gap:9px;max-width:560px}
+  .hoods li{counter-increment:h;display:flex;align-items:center;gap:13px;border:2.5px solid var(--ink);border-radius:13px;padding:11px 15px;background:var(--sign);font-weight:700}
+  .hoods li::before{content:counter(h);font-family:'Anton',sans-serif;background:var(--ink);color:var(--paper);width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:16px}
+  .hoods .v{margin-left:auto;color:var(--ink-soft);font-weight:600;font-size:14.5px}
+  /* gallery */
+  .shots{display:flex;gap:16px;overflow-x:auto;padding:6px 2px 16px;scroll-snap-type:x mandatory}
+  .shots figure{flex:none;width:208px;scroll-snap-align:start}
+  .shots img{width:100%;border:3px solid var(--ink);border-radius:20px;display:block;background:var(--sign)}
+  .shots figcaption{font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-top:8px;text-align:center}
+  /* quotes */
+  .quotes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  blockquote{border-left:5px solid var(--red);padding:4px 0 4px 18px;font-size:19px;font-weight:700;line-height:1.35}
+  blockquote cite{display:block;margin-top:9px;font-size:14px;font-weight:600;font-style:normal;color:var(--ink-soft)}
+  /* facts + maker + assets */
+  .card{border:3px solid var(--ink);border-radius:18px;background:var(--sign);padding:24px}
+  .facts{columns:2;column-gap:30px}
+  .facts li{break-inside:avoid;margin-bottom:9px;list-style:none;padding-left:22px;position:relative;font-weight:600;font-size:15.5px}
+  .facts li::before{content:"";position:absolute;left:0;top:8px;width:11px;height:11px;border-radius:3px;background:var(--red)}
+  .maker{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+  .maker img{width:96px;height:96px;border-radius:16px;border:3px solid var(--ink);object-fit:cover;flex:none}
+  .maker p{max-width:60ch;font-size:15.5px}
+  .dl{display:flex;flex-wrap:wrap;gap:11px;margin-top:6px}
+  .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .links a{border:2.5px solid var(--ink);border-radius:11px;padding:9px 14px;text-decoration:none;font-weight:700;font-size:14.5px;background:var(--paper)}
+  /* footer */
+  footer{border-top:2px solid rgba(23,21,15,.14);margin-top:40px;padding:30px 0 50px}
+  .foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:14px}
+  .foot .mark{font-family:'Anton',sans-serif;font-size:20px}
+  .foot .mark span{color:var(--red)}
+  .foot a{color:var(--ink-soft);text-decoration:none;font-weight:700}
+  .foot a:hover{color:var(--ink)}
+  .foot .fine{flex-basis:100%;color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin-top:8px;font-weight:500}
+  @media (max-width:680px){
+    .finds,.quotes{grid-template-columns:1fr}
+    .facts{columns:1}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="mast">
+    <a href="/" aria-label="CURB — open the map"><img class="clogo" src="/icons/logo.svg" alt="CURB" aria-hidden="true"></a>
+    <span class="pk">Press kit</span>
+    <span class="sp"></span>
+    <a class="btn ghost sm" href="/">Open the map →</a>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <span class="eyebrow">CURB · Press kit</span>
+    <h1 class="anton">SF's posted 2-hour street-cleaning window is really <span class="r">~22 minutes</span>.</h1>
+    <p class="lede">CURB is a free map of San Francisco street-parking rules — and the only one that shows <b>when tickets actually get written</b>, rebuilt from ~659,000 real SFMTA citations. Tap your curb, know the rule, move your car in time.</p>
+    <div class="herocta">
+      <a class="btn" href="https://curb.guide" rel="noopener">curb.guide</a>
+      <a class="btn ghost" href="https://github.com/alevizio/curb" rel="noopener">Open source on GitHub</a>
+      <a class="btn ghost" href="#assets">Screenshots &amp; assets ↓</a>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>The <span class="r">story</span></h2>
+    <p class="body">San Francisco posts a two-hour street-cleaning window on every block — but the ticket doesn't wait two hours. Alejandro Vizio, a product designer in the Haight, matched roughly <b>659,000 SFMTA street-cleaning citations</b> to the exact blocks they were written on. The finding: on a typical block, nearly every ticket lands in the same <b>~22-minute span</b> right after the window opens — <b>87% of blocks</b> see all their tickets within the first 45 minutes. The posted "two hours" is mostly decorative.</p>
+    <p class="body">He built CURB in about a month, solo — after he and his girlfriend ran up roughly $2,000 in tickets — using the city's public open data and AI (Claude) for the data analysis and backend. It's free, has no account, no ads, and no tracking, and it's open source. A native iOS app is in App Store review now. <b>The posted physical sign is always the final authority — CURB never overrides it.</b></p>
+  </section>
+
+  <section class="wrap">
+    <h2>By the <span class="r">numbers</span></h2>
+    <div class="stats">
+      <div class="stat"><div class="n">659k</div><div class="l">street-cleaning tickets matched to their blocks (~2 yrs)</div></div>
+      <div class="stat"><div class="n">~22 min</div><div class="l">the real window — vs. the posted 2 hours</div></div>
+      <div class="stat"><div class="n">87%</div><div class="l">of blocks: every ticket within 45 minutes</div></div>
+      <div class="stat"><div class="n">$105</div><div class="l">the street-cleaning fine in 2026</div></div>
+      <div class="stat"><div class="n ink">23.8M</div><div class="l">total SF parking citations since 2008 ($2.01B in fines)</div></div>
+      <div class="stat"><div class="n ink">$0</div><div class="l">free — no account, no ads, no tracking, open source</div></div>
+    </div>
+    <p class="body" style="margin-top:14px;font-size:14.5px;color:var(--ink-soft)">Every figure is reconstructed from San Francisco's <b>public</b> open data (DataSF, dataset <code>ab4h-6ztd</code>) — reproducible and citable. The unit for the 22-minute / 87% figures is the block-side.</p>
+  </section>
+
+  <section class="wrap">
+    <h2>Two findings reporters <span class="r">love</span></h2>
+    <div class="finds">
+      <div class="find">
+        <h3>The 22-minute reality</h3>
+        <p>Take <b>214–255 Steiner St</b> (posted 9–11am). Over two years: 203 tickets, earliest at 9:00am sharp, the <b>median ticket at 9:14am</b>, and 90% already written by 9:39am. "I'll move it before 11" is exactly how you get a $105 ticket.</p>
+      </div>
+      <div class="find">
+        <h3>You can re-park after the sweeper passes</h3>
+        <p>Most drivers don't know this SFMTA rule: <b>once the sweeper has physically passed your side of the street, you can re-park — even before the posted window ends.</b> No need to circle the block for an hour. (You still can't park before the truck arrives.)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>Most-ticketed <span class="r">neighborhoods</span></h2>
+    <p class="body" style="font-size:15px">Street cleaning is the city's single most common parking citation. By volume over the last ~2 years:</p>
+    <ol class="hoods">
+      <li>Mission <span class="v">71,129 tickets · $7.2M</span></li>
+      <li>Sunset / Parkside <span class="v">48,329 · $4.9M</span></li>
+      <li>Tenderloin <span class="v">42,150 · $4.2M</span></li>
+      <li>Outer Richmond <span class="v">38,786 · $3.9M</span></li>
+      <li>Marina <span class="v">35,909 · $3.6M</span></li>
+    </ol>
+  </section>
+
+  <section class="wrap" id="assets">
+    <h2>Screenshots <span class="r">&amp; assets</span></h2>
+    <div class="shots">
+      <figure><a href="/press/curb-map.png" download><img src="/press/curb-map.png" alt="CURB map of San Francisco, every block colored by its next street sweep"></a><figcaption>The whole city, by next sweep</figcaption></figure>
+      <figure><a href="/press/curb-ticket-times.png" download><img src="/press/curb-ticket-times.png" alt="A CURB block card showing when tickets actually land"></a><figcaption>When tickets actually land</figcaption></figure>
+      <figure><a href="/press/curb-alerts.png" download><img src="/press/curb-alerts.png" alt="CURB move-your-car alert settings"></a><figcaption>Move-your-car alerts</figcaption></figure>
+      <figure><a href="/press/curb-layers.png" download><img src="/press/curb-layers.png" alt="CURB permit zones, meters and loading zones"></a><figcaption>Permits · meters · zones</figcaption></figure>
+      <figure><a href="/press/curb-data.png" download><img src="/press/curb-data.png" alt="CURB by-the-numbers data panel"></a><figcaption>The receipts</figcaption></figure>
+    </div>
+    <div class="links">
+      <a href="/press/curb-app-map.png" download>↓ Clean app shot — map</a>
+      <a href="/press/curb-app-block.png" download>↓ Clean app shot — block</a>
+      <a href="/icons/logo.svg" download>↓ Logo (SVG)</a>
+      <a href="/og.png" download>↓ Social card (1200×630)</a>
+    </div>
+    <p class="body" style="margin-top:14px;font-size:14px;color:var(--ink-soft)">All screenshots are real product captures, free to use with a credit to CURB / curb.guide. Need a specific size, state, or neighborhood? Just ask.</p>
+  </section>
+
+  <section class="wrap">
+    <h2>About the <span class="r">maker</span></h2>
+    <div class="card maker">
+      <img src="/icons/alejandro.jpg" alt="Alejandro Vizio" onerror="this.style.display='none'">
+      <p><b>Alejandro Vizio</b> is a product designer and developer in San Francisco's Haight-Ashbury. Originally from Argentina, he's lived in SF for ten years. He built CURB by himself over about a month, after racking up roughly $2,000 in parking tickets — designing the app and using AI (Claude) for the data analysis and backend. He previously built mapping tools at Pachama, a carbon-credit startup. CURB is free and open source; his goal is simply to help San Franciscans read the city's own parking rules.</p>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>Usable <span class="r">quotes</span></h2>
+    <div class="quotes">
+      <blockquote>"The sign says two hours, but the truck comes in the first twenty minutes. The second hour is decorative."<cite>— Alejandro Vizio, maker of CURB</cite></blockquote>
+      <blockquote>"I matched 659,000 tickets to the blocks they were written on. The data was public the whole time — nobody had bothered to read it."<cite>— Alejandro Vizio</cite></blockquote>
+      <blockquote>"Once the sweeper passes, you can park again — even before the window ends. Most people don't know that, so they circle the block for an hour."<cite>— Alejandro Vizio</cite></blockquote>
+      <blockquote>"It's free, it's open source, and it collects nothing. The posted sign is always the final word — I'm just showing what the city's own data already says."<cite>— Alejandro Vizio</cite></blockquote>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>Fast <span class="r">facts</span></h2>
+    <div class="card">
+      <ul class="facts">
+        <li>Free — no account, no ads, no tracking, no data collection.</li>
+        <li>Open source (MIT) — github.com/alevizio/curb.</li>
+        <li>Built solo, in ~a month, with AI (Claude) for the backend + data.</li>
+        <li>Runs entirely on San Francisco public open data (DataSF).</li>
+        <li>Live web app at curb.guide; native iOS app in App Store review.</li>
+        <li>Shows street sweeping, permit (RPP) zones, meters, color curb, and ~1,975 loading zones the city's data omits.</li>
+        <li>Move-your-car alerts: choose Light, Normal, or Intense — calendar or push.</li>
+        <li>The posted physical sign is always the final authority.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2><span class="r">Contact</span></h2>
+    <p class="body">For interviews, the full dataset, per-neighborhood breakdowns, or hi-res assets — <b>Alejandro Vizio</b>, San Francisco.</p>
+    <div class="dl">
+      <!-- TODO: set your preferred press email below before sharing widely -->
+      <a class="btn sm" href="mailto:hello@curb.guide">Email</a>
+      <a class="btn ghost sm" href="https://github.com/alevizio/curb" rel="noopener">GitHub</a>
+      <a class="btn ghost sm" href="https://curb.guide">curb.guide</a>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap foot">
+  <span class="mark">CURB<span>.</span></span>
+  <a href="/">Open the map</a>
+  <a href="/about">About</a>
+  <a href="/tickets">The ticket economy</a>
+  <a href="https://data.sfgov.org" rel="noopener">Data: DataSF</a>
+  <a href="https://github.com/alevizio/curb" rel="noopener">Open source</a>
+  <span class="fine">Figures are reconstructed from public SFMTA citation records (DataSF, last ~2 years) and are historical guidance, never a guarantee. The <b>posted sign is always the source of truth</b>. Free and open source (MIT). Made in San Francisco.</span>
+</div></footer>
+</body>
+</html>
