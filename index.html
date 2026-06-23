@@ -599,6 +599,10 @@
       </button>
       <div class="infomenu" id="infoMenu" hidden role="menu" aria-label="Info and pages">
         <div class="im-head"><img class="imlogo" src="/icons/logo.svg" alt="" aria-hidden="true"><span>SF street parking</span></div>
+        <a class="im-item" id="imGet" style="display:none" target="_blank" rel="noopener" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.54c-.03-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.15-2.76.83-3.48.83-.72 0-1.83-.81-3.01-.79-1.55.02-2.98.9-3.78 2.29-1.61 2.79-.41 6.92 1.15 9.19.76 1.11 1.67 2.35 2.86 2.31 1.15-.05 1.58-.74 2.97-.74 1.39 0 1.78.74 3 .72 1.24-.02 2.02-1.12 2.78-2.24.88-1.29 1.24-2.54 1.26-2.6-.03-.01-2.41-.93-2.43-3.7ZM14.77 5.6c.64-.78 1.07-1.85.95-2.93-.92.04-2.04.61-2.7 1.38-.59.69-1.11 1.79-.97 2.85 1.03.08 2.08-.52 2.72-1.3Z"/></svg></span>
+          <span class="im-tx"><b>Get the iOS app</b><small>CURB on the App Store</small></span>
+        </a>
         <button class="im-item" id="imGuide" role="menuitem">
           <span class="im-ic" aria-hidden="true" style="display:flex;gap:3px"><i class="d" style="background:var(--green)"></i><i class="d" style="background:var(--amber)"></i><i class="d" style="background:var(--red)"></i></span>
           <span class="im-tx"><b>How CURB works</b><small>Curb colors, sweeping &amp; alerts</small></span>
@@ -2054,9 +2058,17 @@ function closeInfoMenu(){
   // "Rate CURB" self-activates once we're live: ask Apple's iTunes lookup for our numeric App ID by
   // bundle id, via JSONP (the lookup has no CORS header but supports a callback). Cached, so we probe at
   // most ~once/day until it resolves — then it's the App Store review composer, no hardcoded ID needed.
-  (function rateLink(){
-    const a=document.getElementById('imRate'); if(!a)return;
-    const light=id=>{ a.href='https://apps.apple.com/app/id'+id+'?action=write-review'; a.style.display=''; };
+  // Two App Store links self-activate once we're live: "Rate CURB" + "Get the iOS app". Ask Apple's
+  // iTunes lookup for our numeric App ID by bundle id via JSONP (no CORS, but supports a callback),
+  // cached so we probe at most ~once/day until it resolves. "Get the iOS app" stays hidden inside the
+  // native wrapper (you already have the app there).
+  (function appLinks(){
+    const rate=document.getElementById('imRate'), get=document.getElementById('imGet');
+    if(!rate&&!get) return;
+    const light=id=>{
+      if(rate){ rate.href='https://apps.apple.com/app/id'+id+'?action=write-review'; rate.style.display=''; }
+      if(get && !window.__curbNativePush){ get.href='https://apps.apple.com/app/id'+id; get.style.display=''; }
+    };
     let rec=null; try{ rec=JSON.parse(localStorage.getItem('curbAppId')||'null'); }catch(_){}
     if(rec&&rec.id){ light(rec.id); return; }
     if(rec&&Date.now()-(rec.ts||0)<864e5) return; // probed within a day, still not on the store
