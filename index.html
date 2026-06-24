@@ -73,6 +73,13 @@
   a{color:inherit}  /* no browser-default blue anywhere; intentional link colors set per class */
   .leaflet-control-attribution{font-weight:600}
   .leaflet-control-attribution a{color:var(--ink);font-weight:700;text-underline-offset:2px}
+  /* Google Map Tiles policy: the Google logo must be visible alongside the ©Google attribution (they
+     are separate, mandatory, non-interchangeable). Bottom-left, clear of the legend (which anchors at
+     bottom:47px and grows upward) and the bottom-right attribution, with a soft paper backing so it
+     stays legible on any tile. Only shown while the Google basemap is live (see initBasemap). */
+  #gmapsLogo{position:absolute;left:9px;bottom:7px;z-index:620;pointer-events:none;
+    background:rgba(255,253,246,.85);border-radius:6px;padding:3px 6px;line-height:0;box-shadow:0 1px 4px rgba(23,21,15,.2)}
+  #gmapsLogo img{display:block;height:18px;width:auto}
   .srh{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
   html,body{height:100%}
   body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
@@ -823,6 +830,16 @@ function addCarto(){
 function gmapsDayKey(){ try{ const t=sfTodayParts(); return t.y+'-'+String(t.mo).padStart(2,'0')+'-'+String(t.da).padStart(2,'0'); }catch(_){ return ''; } }
 function gmapsDownToday(){ const k=gmapsDayKey(); try{ return !!k && localStorage.getItem('curbGmapsDown')===k; }catch(_){ return false; } }
 function markGmapsDown(){ try{ const k=gmapsDayKey(); if(k) localStorage.setItem('curbGmapsDown',k); }catch(_){} }
+// Map Tiles policy requires the Google logo shown alongside the per-viewport ©Google attribution.
+// Reveal it only once real Google tiles render (so the CARTO fallback never shows it); remove on fallback.
+function showGoogleLogo(){
+  if(document.getElementById('gmapsLogo'))return;
+  const w=document.createElement('div'); w.id='gmapsLogo';
+  const img=new Image(); img.alt='Google';
+  img.src='https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png';
+  w.appendChild(img); const m=document.getElementById('map'); if(m)m.appendChild(w);
+}
+function hideGoogleLogo(){ const el=document.getElementById('gmapsLogo'); if(el)el.remove(); }
 (async function initBasemap(){
   if(!GMAPS_KEY || gmapsDownToday()){ addCarto(); return; } // skip the doomed Google call if it was quota-tapped earlier today
   try{
@@ -845,11 +862,11 @@ function markGmapsDown(){ try{ const k=gmapsDayKey(); if(k) localStorage.setItem
     // inside WKWebViews, where <img> tile requests may not carry the Referer the key is locked to).
     // That left a blank basemap with no fallback. If the first tiles error before any load, swap to CARTO.
     let _gOk=0,_gErr=0,_gSwap=false;
-    gtiles.on('tileload',()=>{ if(_gOk===0){ try{ localStorage.removeItem('curbGmapsDown'); }catch(_){} } _gOk++; }); // Google works — clear any stale outage flag
+    gtiles.on('tileload',()=>{ if(_gOk===0){ try{ localStorage.removeItem('curbGmapsDown'); }catch(_){} showGoogleLogo(); } _gOk++; }); // Google works — clear any stale outage flag + show the required Google logo
     gtiles.on('tileerror',()=>{ if(_gSwap)return; _gErr++;
       if(_gErr>=4 && _gOk===0){ _gSwap=true; map.removeLayer(gtiles);
         try{ map.attributionControl.removeAttribution(cur); }catch(_){}
-        markGmapsDown(); addCarto(); console.warn('Google tiles tapped out — using CARTO for the rest of the day.'); } });
+        hideGoogleLogo(); markGmapsDown(); addCarto(); console.warn('Google tiles tapped out — using CARTO for the rest of the day.'); } });
     const refresh=async()=>{
       if(_gSwap)return; // fell back to CARTO — stop re-adding Google's attribution
       try{
