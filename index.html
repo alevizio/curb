@@ -71,15 +71,11 @@
   .field:focus-within{outline:3px solid var(--meter);outline-offset:2px}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   a{color:inherit}  /* no browser-default blue anywhere; intentional link colors set per class */
-  .leaflet-control-attribution{font-weight:600}
+  .leaflet-control-attribution{font-weight:600;background:transparent;text-shadow:0 0 3px #FFFDF6,0 0 2px #FFFDF6,0 0 2px #FFFDF6}
   .leaflet-control-attribution a{color:var(--ink);font-weight:700;text-underline-offset:2px}
-  /* Google Map Tiles policy: the Google logo must be visible alongside the ©Google attribution (they
-     are separate, mandatory, non-interchangeable). Bottom-left, clear of the legend (which anchors at
-     bottom:47px and grows upward) and the bottom-right attribution, with a soft paper backing so it
-     stays legible on any tile. Only shown while the Google basemap is live (see initBasemap). */
-  #gmapsLogo{position:absolute;left:9px;bottom:7px;z-index:620;pointer-events:none;
-    background:rgba(255,253,246,.85);border-radius:6px;padding:3px 6px;line-height:0;box-shadow:0 1px 4px rgba(23,21,15,.2)}
-  #gmapsLogo img{display:block;height:18px;width:auto}
+  /* The Google logo sits inline just before the per-viewport ©Google attribution (Map Tiles policy:
+     both must be visible together). Sized to the text so it reads as one tidy credit, not a boxed badge. */
+  .leaflet-control-attribution img.gmlogo{height:14px;width:auto;vertical-align:-3px;margin-right:4px;filter:drop-shadow(0 0 1.5px #FFFDF6) drop-shadow(0 0 1px #FFFDF6)}
   .srh{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
   html,body{height:100%}
   body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
@@ -830,16 +826,10 @@ function addCarto(){
 function gmapsDayKey(){ try{ const t=sfTodayParts(); return t.y+'-'+String(t.mo).padStart(2,'0')+'-'+String(t.da).padStart(2,'0'); }catch(_){ return ''; } }
 function gmapsDownToday(){ const k=gmapsDayKey(); try{ return !!k && localStorage.getItem('curbGmapsDown')===k; }catch(_){ return false; } }
 function markGmapsDown(){ try{ const k=gmapsDayKey(); if(k) localStorage.setItem('curbGmapsDown',k); }catch(_){} }
-// Map Tiles policy requires the Google logo shown alongside the per-viewport ©Google attribution.
-// Reveal it only once real Google tiles render (so the CARTO fallback never shows it); remove on fallback.
-function showGoogleLogo(){
-  if(document.getElementById('gmapsLogo'))return;
-  const w=document.createElement('div'); w.id='gmapsLogo';
-  const img=new Image(); img.alt='Google';
-  img.src='https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png';
-  w.appendChild(img); const m=document.getElementById('map'); if(m)m.appendChild(w);
-}
-function hideGoogleLogo(){ const el=document.getElementById('gmapsLogo'); if(el)el.remove(); }
+// The Google logo, shown inline before the per-viewport ©Google attribution (Map Tiles policy requires
+// both visible together). Lives in the attribution string, so it's present only while Google is the
+// basemap and disappears with it on the CARTO fallback.
+const GLOGO='<img class="gmlogo" alt="Google" src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png">';
 (async function initBasemap(){
   if(!GMAPS_KEY || gmapsDownToday()){ addCarto(); return; } // skip the doomed Google call if it was quota-tapped earlier today
   try{
@@ -856,24 +846,24 @@ function hideGoogleLogo(){ const el=document.getElementById('gmapsLogo'); if(el)
     const gtiles=L.tileLayer(`https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${session}&key=${encodeURIComponent(GMAPS_KEY)}`,
       {maxZoom:20}).addTo(map);
     // 3) Google requires showing the per-viewport attribution; refresh it on pan/zoom.
-    let cur='© Google';
+    let cur=GLOGO+'© Google';
     map.attributionControl.addAttribution(cur);
     // createSession can succeed while the tile IMAGES still fail (referrer/key/quota/network — notably
     // inside WKWebViews, where <img> tile requests may not carry the Referer the key is locked to).
     // That left a blank basemap with no fallback. If the first tiles error before any load, swap to CARTO.
     let _gOk=0,_gErr=0,_gSwap=false;
-    gtiles.on('tileload',()=>{ if(_gOk===0){ try{ localStorage.removeItem('curbGmapsDown'); }catch(_){} showGoogleLogo(); } _gOk++; }); // Google works — clear any stale outage flag + show the required Google logo
+    gtiles.on('tileload',()=>{ if(_gOk===0){ try{ localStorage.removeItem('curbGmapsDown'); }catch(_){} } _gOk++; }); // Google works — clear any stale outage flag
     gtiles.on('tileerror',()=>{ if(_gSwap)return; _gErr++;
       if(_gErr>=4 && _gOk===0){ _gSwap=true; map.removeLayer(gtiles);
         try{ map.attributionControl.removeAttribution(cur); }catch(_){}
-        hideGoogleLogo(); markGmapsDown(); addCarto(); console.warn('Google tiles tapped out — using CARTO for the rest of the day.'); } });
+        markGmapsDown(); addCarto(); console.warn('Google tiles tapped out — using CARTO for the rest of the day.'); } });
     const refresh=async()=>{
       if(_gSwap)return; // fell back to CARTO — stop re-adding Google's attribution
       try{
         const b=map.getBounds();
         const r=await fetch('https://tile.googleapis.com/tile/v1/viewport?session='+session+'&key='+encodeURIComponent(GMAPS_KEY)
           +'&zoom='+map.getZoom()+'&north='+b.getNorth()+'&south='+b.getSouth()+'&east='+b.getEast()+'&west='+b.getWest());
-        if(!r.ok||_gSwap) return; const d=await r.json(); if(_gSwap)return; const next=d.copyright||cur;
+        if(!r.ok||_gSwap) return; const d=await r.json(); if(_gSwap)return; const next=GLOGO+(d.copyright||'© Google');
         if(next!==cur){ map.attributionControl.removeAttribution(cur); map.attributionControl.addAttribution(next); cur=next; }
       }catch(_){}
     };
