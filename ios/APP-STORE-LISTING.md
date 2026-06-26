@@ -6,7 +6,7 @@
 **Support URL:** https://curb.guide
 
 **Promotional text** (≤170, editable anytime without review):
-> 650k SF tickets mapped: your posted 2-hour street-cleaning window is really ~22 minutes. See your block's real ticket time. Free.
+> 1M+ SF tickets mapped: the posted 2-hour street-cleaning window is really ~20 minutes. See your block's real ticket time. Free.
 
 **Keywords** (≤100 chars):
 ```
@@ -15,13 +15,13 @@ street cleaning,sweeping,parking,SF,tickets,RPP,meters,reminder,alert,curb,SFMTA
 
 ## Description
 ```
-Your street-cleaning sign says 9–11am. The tickets say 9:14am.
+Your street-cleaning sign says 9–11am. The tickets say 9:11am.
 
 CURB is a free map of San Francisco street-parking rules — and the only one that shows you WHEN tickets actually get written, not just when the sign says you're at risk.
 
-I matched roughly 659,000 SFMTA street-cleaning citations to the blocks where they were issued. The finding: that posted 2-hour window is mostly a 22-minute reality. On a typical block, nearly all tickets land in the same ~22-minute span right after sweeping starts — 87.4% within the first 45 minutes.
+I matched the city's complete record — about a million GPS-located SFMTA street-cleaning citations — to the blocks where they were issued. The finding: that posted 2-hour window is mostly a 20-minute reality. On a typical block, the tickets land in a tight ~15-minute burst right after sweeping starts — about 90% within the first hour.
 
-Take 214–255 Steiner St. Posted window: 9–11am. Over two years: 203 tickets, earliest at 9:00am sharp, the median ticket at 9:14am, and 90% already written by 9:39am. The "2 hours" was never real.
+Take 214–255 Steiner St. Posted window: 9–11am. In 2024–2026: 221 tickets, earliest at 9:00am sharp, the median ticket at 9:11am, and 90% already written by 9:21am. The "2 hours" was never real.
 
 WHAT CURB SHOWS YOU
 - Every block colored by its next street sweep — see at a glance where it's safe to park
@@ -39,7 +39,7 @@ MOVE-YOUR-CAR ALERTS
 THE SCALE OF IT
 - $105 street-cleaning fine in 2026
 - 23.8M total parking citations in SF since 2008
-- ~1.2M street-cleaning tickets in the last two years alone
+- Over a million street-cleaning tickets in 2024–2026 alone
 - Enforcement is surging where the city is building: Mission Bay +107%, Financial District / South Beach +68% vs. five years ago
 
 A NOTE ON HONESTY
@@ -54,7 +54,7 @@ Free. No ads. No signup. No account. No data collection.
 ```
 First release.
 
-CURB maps every San Francisco block by its next street sweep — and shows you when tickets actually get written, reconstructed from ~659,000 real SFMTA citations. The posted 2-hour window is mostly a 22-minute reality.
+CURB maps every San Francisco block by its next street sweep — and shows you when tickets actually get written, reconstructed from over a million real SFMTA citations. The posted 2-hour window is mostly a 20-minute reality.
 
 In v1.0:
 - Live street-sweeping map, colored by next sweep
@@ -98,7 +98,7 @@ CURB surfaces patterns in public data as guidance only. The app clearly states t
 
 ## Screenshots — 6.7" iPhone shotlist
 1. **Full-screen SF map** zoomed to a neighborhood, blocks color-coded by next sweep, locate button visible. → *"Every SF block, colored by its next street sweep."*
-2. **Steiner St block card** over the map: posted 9–11am window + the real ticket-timing spike right after 9:00am. → *"Posted 9–11am. Median ticket: 9:14am. The 2-hour window is really ~22 minutes."*
-3. **Stat view** / zoomed-out map with a data panel: ~659k citations, 87.4% in first 45 min, $105 fine. → *"~659,000 real tickets, mapped. 87.4% land in the first 45 minutes."*
+2. **Steiner St block card** over the map: posted 9–11am window + the real ticket-timing spike right after 9:00am. → *"Posted 9–11am. Median ticket: 9:11am. The 2-hour window is really ~20 minutes."*
+3. **Stat view** / zoomed-out map with a data panel: ~1M citations, ~90% in first hour, $105 fine. → *"Over a million real tickets, mapped. ~90% land in the first hour."*
 4. **Move-your-car alert flow**: sweep schedule with Add-to-Calendar + an iOS push banner preview. → *"Get a calendar event or a push alert before your block is swept."*
 5. **Layers view**: RPP shading, meter pins, color curb, white loading zones near a school. → *"Permit zones, meters, color curb, and ~1,975 loading zones the city's data leaves out."*

@@ -231,7 +231,7 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
     <div class="sec-k">The flagship fine</div>
     <h2>Street cleaning: <b>the city's #1 ticket</b></h2>
     <p class="lede">The fine has more than doubled since 2008 while the rules stayed the same. The posted
-      window says two hours — <b>the median block gets every ticket inside a 22-minute span.</b></p>
+      window says two hours — <b>the median block's tickets cluster in a ~15-minute burst.</b></p>
     <div class="panel"><svg id="chartSweep" width="100%" height="300" role="img" aria-label="Street cleaning tickets per year with average fine line"></svg></div>
     <div class="statrow" id="sweepStats"></div>
   </section>
@@ -317,7 +317,8 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
   <a href="https://github.com/alevizio/curb" rel="noopener">Open source — GitHub</a>
   <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
   <a href="/privacy">Privacy</a>
-  <span class="fine">Schedules are set block by block — the <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies — only anonymous page counts. Made in San Francisco.</span>
+  <a href="https://github.com/sponsors/alevizio" rel="noopener">Buy me a coffee ☕</a>
+  <span class="fine">Schedules are set block by block — the <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies — only anonymous page counts. Running CURB — the map tiles, servers, and domain — comes out of my own pocket; if it saved you a ticket, you can <a href="https://github.com/sponsors/alevizio" rel="noopener">buy me a coffee</a> to help keep it online and ad-free. Made in San Francisco.</span>
 </div>
 </footer>
 
@@ -392,7 +393,7 @@ fetch('data/stats.json').then(r=>r.json()).then(S=>{
     <div class="stat"><div class="v">${fmtN(recent.n)}</div><div class="l">sweep tickets in ${recent.y}</div></div>
     <div class="stat"><div class="v red">${fmt$(recent.rev)}</div><div class="l">assessed in ${recent.y}</div></div>
     <div class="stat"><div class="v amber">$${Math.round(firstY.avg)} → $${Math.round(lastY.avg)}</div><div class="l">avg fine, ${firstY.y} → ${lastY.y}</div></div>
-    <div class="stat"><div class="v green">22 min</div><div class="l">median block's full ticket span</div></div>`;
+    <div class="stat"><div class="v green">15 min</div><div class="l">median block's ticket burst</div></div>`;
   const ts=S.topStreets.slice(0,8);
   $('streetsNote').innerHTML='<b>The heaviest streets (2 yrs of sweeping fines):</b> '+
     ts.map(t=>`${t.street.charAt(0)+t.street.slice(1).toLowerCase()} (${fmt$(t.rev)})`).join(' · ');

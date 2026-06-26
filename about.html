@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>About CURB — SF Street Sweeping & Real Ticket Times</title>
-<meta name="description" content="How CURB works: SF street sweeping schedules block by block, permit areas, and ticket times rebuilt from 1.2M real citations. Free — open the live map.">
+<meta name="description" content="How CURB works: SF street sweeping schedules block by block, permit areas, and ticket times rebuilt from 1M+ real citations. Free — open the live map.">
 <link rel="canonical" href="https://curb.guide/about">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"CURB",
@@ -18,7 +18,7 @@
  {"@type":"Question","name":"When does street sweeping happen in San Francisco?",
   "acceptedAnswer":{"@type":"Answer","text":"Most residential blocks are swept weekly or twice a month in a fixed weekday window (for example, Tuesday 9–11am); many commercial corridors are swept overnight. Every block has its own schedule — CURB shows the exact rule for any curb when you tap it on the map."}},
  {"@type":"Question","name":"When do street-cleaning parking tickets actually get written?",
-  "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from two years of SFMTA citations — on a typical 9–11am block, the median ticket lands around 9:14am. The posted sign is always the source of truth."}},
+  "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from the city's complete street-cleaning citation record — on a typical 9–11am block, the median ticket lands around 9:11am. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"Can I park after the street sweeper passes?",
   "acceptedAnswer":{"@type":"Answer","text":"Yes — it's SFMTA's own rule: once the street sweeper has physically swept the curbside, you may park there, even if the posted sweeping hours haven't expired. The flip side: during the posted hours you may not park until the street has actually been swept — so if you're parked before the sweeper arrives, you can still be ticketed. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"What are the dashed truck routes on the map?",
@@ -170,10 +170,10 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
   .proof .src{font-size:13.5px;font-weight:600;color:var(--ink-soft)}
   .bar{position:relative;margin:34px 0 6px;height:64px}
   .bar .track{position:absolute;left:0;right:0;top:26px;height:14px;border:2.5px solid var(--ink);border-radius:8px;background:var(--paper)}
-  .bar .zone{position:absolute;left:0;top:26px;height:14px;width:32.5%;border:2.5px solid var(--ink);border-radius:8px 4px 4px 8px;
+  .bar .zone{position:absolute;left:0;top:26px;height:14px;width:17.5%;border:2.5px solid var(--ink);border-radius:8px 4px 4px 8px;
     background:repeating-linear-gradient(-55deg,var(--red),var(--red) 7px,#EE6B5E 7px,#EE6B5E 14px)}
-  .bar .med{position:absolute;left:11.7%;top:14px;width:4px;height:38px;background:var(--ink);border-radius:2px}
-  .bar .med::after{content:'median ticket · 9:14am';position:absolute;left:10px;top:-4px;white-space:nowrap;
+  .bar .med{position:absolute;left:9.2%;top:14px;width:4px;height:38px;background:var(--ink);border-radius:2px}
+  .bar .med::after{content:'median ticket · 9:11am';position:absolute;left:10px;top:-4px;white-space:nowrap;
     font-size:12.5px;font-weight:800}
   .bar .tick{position:absolute;top:48px;font-size:12px;font-weight:700;color:var(--ink-soft);transform:translateX(-50%)}
   .legendline{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;font-weight:700;margin-top:14px}
@@ -347,7 +347,7 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
       </div>
     </div>
 
-    <div class="post rise d2" role="img" aria-label="A real SF sign pole: a red street-cleaning sign reading No Parking, 9 to 11 AM, Tuesday, Street Cleaning; below it a green sign reading 2 Hour Parking, 8 AM to 6 PM, Monday through Friday, except vehicles with Area K and M permits; and a CURB plate reading: tickets land around 9:14 AM">
+    <div class="post rise d2" role="img" aria-label="A real SF sign pole: a red street-cleaning sign reading No Parking, 9 to 11 AM, Tuesday, Street Cleaning; below it a green sign reading 2 Hour Parking, 8 AM to 6 PM, Monday through Friday, except vehicles with Area K and M permits; and a CURB plate reading: tickets land around 9:11 AM">
       <div class="rail r1"></div><div class="rail r2"></div>
       <div class="sign red">
         <div class="s-no">NO PARKING</div>
@@ -365,8 +365,8 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
         <div class="g-area">AREA <i class="disc b">K</i> <i class="disc g">M</i> PERMITS</div>
       </div>
       <div class="plate">
-        <div class="t">Tickets land <em>~9:14 am</em></div>
-        <div class="s">curb.guide · from 1.2M citations</div>
+        <div class="t">Tickets land <em>~9:11 am</em></div>
+        <div class="s">curb.guide · from 1M+ citations</div>
       </div>
     </div>
   </section>
@@ -374,10 +374,10 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
   <section class="wrap">
     <div class="proof rise d4">
       <div class="k">A real block — 214–255 Steiner St</div>
-      <h2>The sign says 9–11. <b>The tickets say 9:14.</b></h2>
-      <p class="src">203 street-cleaning citations on this block over two years: the earliest at 9:00am sharp,
-        90% written by 9:39am. The posted two-hour window is real — the risk is not evenly spread inside it.</p>
-      <div class="bar" role="img" aria-label="Timeline of the 9 to 11 AM window. Tickets cluster between 9:00 and 9:39, with the median at 9:14 AM.">
+      <h2>The sign says 9–11. <b>The tickets say 9:11.</b></h2>
+      <p class="src">221 street-cleaning citations on this block, 2024–2026: the earliest at 9:00am sharp,
+        90% written by 9:21am. The posted two-hour window is real — the risk is not evenly spread inside it.</p>
+      <div class="bar" role="img" aria-label="Timeline of the 9 to 11 AM window. Tickets cluster between 9:00 and 9:21, with the median at 9:11 AM.">
         <div class="track"></div>
         <div class="zone"></div>
         <div class="med"></div>
@@ -450,8 +450,8 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
       <div class="qa">
         <h3>When do street-cleaning parking tickets actually get written?</h3>
         <p>Usually in the <b>first 30–40 minutes</b> of the posted window, not spread across it. CURB
-          reconstructs each block's real ticket times from two years of SFMTA citations — on a typical
-          9–11am block, the median ticket lands around 9:14am. The posted sign is always the source of truth.</p>
+          reconstructs each block's real ticket times from the city's complete street-cleaning citation
+          record — on a typical 9–11am block, the median ticket lands around 9:11am. The posted sign is always the source of truth.</p>
       </div>
       <div class="qa">
         <h3>Can I park after the street sweeper passes?</h3>
@@ -508,8 +508,8 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
 
     <div class="srcs">
       <div class="src"><div class="sh">Sweep schedule</div><p>The posted day &amp; window for every block. <a href="https://data.sfgov.org/d/yhqp-riqs" rel="noopener">DataSF · <code>yhqp-riqs</code></a></p></div>
-      <div class="src"><div class="sh">Parking citations</div><p>23.8M tickets since 2008, stamped to the minute — the real ticket time on each block. <a href="https://data.sfgov.org/d/ab4h-6ztd" rel="noopener">DataSF · <code>ab4h-6ztd</code></a></p></div>
-      <div class="src"><div class="sh">Address index</div><p>The city's addressing system (EAS) — the key that pins each citation to a block. <a href="https://data.sfgov.org/d/3mea-di5p" rel="noopener">DataSF · <code>3mea-di5p</code></a></p></div>
+      <div class="src"><div class="sh">Parking citations</div><p>1M+ street-cleaning tickets (2024–mid-2026), stamped to the minute and <b>GPS-located</b> — the complete record via SF public-records request #26-5453. The open feed drops coordinates. <a href="https://data.sfgov.org/d/ab4h-6ztd" rel="noopener">DataSF · <code>ab4h-6ztd</code></a></p></div>
+      <div class="src"><div class="sh">Address index</div><p>The city's addressing system (EAS) — pins older, address-only citations to a block (the 2024+ pull is GPS-located). <a href="https://data.sfgov.org/d/3mea-di5p" rel="noopener">DataSF · <code>3mea-di5p</code></a></p></div>
       <div class="src"><div class="sh">Permit areas</div><p>The ~30 lettered residential permit (RPP) zones. <a href="https://data.sfgov.org/d/hi6h-neyh" rel="noopener">DataSF · <code>hi6h-neyh</code></a> <em>(2017 set)</em></p></div>
       <div class="src"><div class="sh">Meters &amp; color curb</div><p>Metered streets and their commercial / passenger / red loading rules. <a href="https://data.sfgov.org/d/6cqg-dxku" rel="noopener">DataSF · <code>6cqg-dxku</code></a></p></div>
       <div class="src"><div class="sh">White school zones</div><p>The ~1,975 unmetered passenger-loading zones (627 by schools) DataSF leaves out — pulled from the city's own ArcGIS curb layer. <a href="https://sfgov.maps.arcgis.com/" rel="noopener">SFMTA Digital Curb</a></p></div>
@@ -517,25 +517,27 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
     </div>
 
     <div class="method">
-      <div class="mk">How the "9:14" is built</div>
-      <h3>From 650k tickets to one minute</h3>
-      <p>Here's the hard part: SFMTA logs every citation with a timestamp and an address, but
-        <b>stopped attaching coordinates around 2021</b> — so all that's left is an officer-typed string like
-        <code>0121 STEINER ST</code>. Reconstructing "when does this block get ticketed" means putting those
-        strings back on the map:</p>
+      <div class="mk">How the "9:11" is built</div>
+      <h3>From a million tickets to one minute</h3>
+      <p>SFMTA logs every citation with a timestamp, but <b>stopped attaching coordinates to the public feed
+        around 2021</b> — leaving an officer-typed string like <code>0121 STEINER ST</code>. So I filed a
+        public-records request (#26-5453) and got the <b>complete record back with GPS</b>: about a million
+        street-cleaning tickets, 2024 to mid-2026, each one located. From there it's direct:</p>
       <ol>
-        <li>Match each citation's address to a specific block using the city's address index (EAS), then
-          <b>check it against that block's posted schedule</b> to throw out bad matches.</li>
-        <li>For every block side, take ~2 years of its matched street-cleaning tickets and measure the
-          <b>window they actually fall in</b> — earliest to latest.</li>
-        <li>Across ~18,000 block-sides, the median of that window is <b>about 22 minutes</b>; ~87% land all
-          their tickets within 45. On the example block above, the median ticket lands at <b>9:14</b>.</li>
+        <li>Snap each ticket's GPS to the <b>nearest street segment</b> (within ~40m), then
+          <b>check it against that block's posted schedule</b> to drop bad matches.</li>
+        <li>For every block side, take all of its street-cleaning tickets and measure
+          <b>when they actually fall</b> inside the posted window.</li>
+        <li>Across ~22,000 block-sides, the typical block's tickets land in a <b>~15-minute burst</b> — a
+          median of about <b>25 minutes</b> into the two-hour window. Citywide, ~77% are written in the first
+          45 minutes and ~90% within the first hour; on the example block above, the median ticket lands at
+          <b>9:11</b>.</li>
       </ol>
-      <p class="lim"><b>Where it's fuzzy, said plainly:</b> it's a text-to-block match, not GPS, so any single
-        block can be off — the posted sign is always the real answer. The pattern shows <i>when</i> tickets
-        land, not <i>whether</i> your block gets swept (you only see blocks that were ticketed). It's refreshed
-        monthly, and it's predictive from history — there's no live sweeper feed in SF, so nothing here is
-        real-time. The full pipeline and the math are <a href="https://github.com/alevizio/curb" rel="noopener">open source on GitHub</a>.</p>
+      <p class="lim"><b>Said plainly:</b> the 2024-onward tickets are GPS-located, so each is matched to its
+        block directly, not guessed from a text string — and the posted sign is still the real answer. The
+        pattern shows when tickets land, not whether your block gets swept (you only see blocks that were
+        ticketed). It's rebuilt from the city's own record and predictive from history — there's no live
+        sweeper feed in SF, so nothing here is real-time. The full pipeline and the math are <a href="https://github.com/alevizio/curb" rel="noopener">open source on GitHub</a>.</p>
     </div>
   </section>
 
@@ -610,7 +612,8 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
   <a href="https://github.com/alevizio/curb" rel="noopener">Open source — GitHub</a>
   <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
   <a href="/privacy">Privacy</a>
-  <span class="fine">Schedules are set block by block — the <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies — only anonymous page counts. Made in San Francisco.</span>
+  <a href="https://github.com/sponsors/alevizio" rel="noopener">Buy me a coffee ☕</a>
+  <span class="fine">Schedules are set block by block — the <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies — only anonymous page counts. Running CURB — the map tiles, servers, and domain — comes out of my own pocket; if it saved you a ticket, you can <a href="https://github.com/sponsors/alevizio" rel="noopener">buy me a coffee</a> to help keep it online and ad-free. Made in San Francisco.</span>
 </div></footer>
 
 <script>
