@@ -1,0 +1,58 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "owner",
+    "name": "Alejandro Vizio",
+    "email": "viziomas@gmail.com",
+    "description": "Product designer and developer in San Francisco, sole author and maintainer of CURB (curb.guide), a free and open-source map of SF street-parking and street-sweeping rules built entirely on public DataSF open data. CURB takes no ads, no signups, collects no user data, and has no paywall.",
+    "webpageUrl": { "url": "https://curb.guide" }
+  },
+  "projects": [
+    {
+      "guid": "curb-guide",
+      "name": "CURB",
+      "description": "A free, open-source, no-ads, no-signup map of San Francisco street-parking and street-sweeping rules at curb.guide, built on public DataSF open data. Featured by SFGate in June 2026, which noted SFMTA has not objected to the app's use of public data and that CURB has drawn 2,500+ visitors. By matching the city's complete record — about a million GPS-located street-cleaning citations — to their blocks, CURB surfaced that SF's posted 2-hour sweep window is really about 20 minutes of real risk. Funding covers running costs (Google Map Tiles API, Vercel, Redis, domain) and ongoing maintenance while keeping the project free and ad-free forever.",
+      "webpageUrl": { "url": "https://curb.guide" },
+      "repositoryUrl": {
+        "url": "https://github.com/alevizio/curb",
+        "wellKnown": "https://curb.guide/.well-known/funding-manifest-urls"
+      },
+      "licenses": ["spdx:MIT"],
+      "tags": ["civic-tech", "open-data", "maps", "san-francisco", "parking", "government", "public-service"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "github-sponsors",
+        "type": "payment-provider",
+        "address": "https://github.com/sponsors/alevizio",
+        "description": "GitHub Sponsors for Alejandro Vizio. For grant disbursement (bank transfer), contact viziomas@gmail.com."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "infra-runway",
+        "status": "active",
+        "name": "Infrastructure and maintenance runway",
+        "description": "Covers ~$2,400/year of running costs (Google Map Tiles API ~$200/mo, Vercel Pro ~$20/mo, Redis, domain) plus a maintenance stipend, keeping CURB free and ad-free.",
+        "amount": 10000,
+        "currency": "USD",
+        "frequency": "yearly",
+        "channels": ["github-sponsors"]
+      },
+      {
+        "guid": "any-support",
+        "status": "active",
+        "name": "Any amount",
+        "description": "Any contribution helps cover monthly infrastructure costs.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["github-sponsors"]
+      }
+    ]
+  }
+}
