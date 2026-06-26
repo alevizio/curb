@@ -551,6 +551,9 @@
   .enf .esub{font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:1px}
   .smeta .enfline{font-size:11.5px;font-weight:700;color:var(--red-text);margin-top:3px}
   .smeta .enfline span{color:var(--ink-soft);font-weight:600}
+  .smeta .swpline{font-size:11.5px;font-weight:700;color:var(--disc-blue,#1D69A5);margin-top:2px;display:flex;align-items:center;gap:4px}
+  .smeta .swpline .ic{flex:none}
+  .smeta .swpline span{color:var(--ink-soft);font-weight:600}
 
   /* Loading / color-curb zone markers + popup */
   .loaddot{border-radius:50%;border:2px solid var(--ink);box-shadow:1px 1px 0 var(--ink)}
@@ -909,6 +912,20 @@ async function loadEnforcement(){
 function enfFor(cnn,dow){
   if(!ENF||dow==null)return null;
   const b=ENF[cnn]; const a=b&&b[dow];
+  return a?{n:a[0],avg:a[1],lo:a[2],hi:a[3]}:null;
+}
+/* ---------- sweeper passes (precomputed; data/sweeps.json) ---------- */
+// SWP[cnn][dow] = [n, avgMin, loMin, hiMin] — when the broom sweeper ACTUALLY passes, from SF
+// Public Works fleet AVL GPS (records request #26-5451). Sparse (only where the city's truck GPS
+// lands on a swept block) and growing as more data is released. Lazy-loaded; absent until fetched.
+let SWP=null, swpTried=false;
+async function loadSweeps(){
+  if(SWP||swpTried)return; swpTried=true;
+  try{const r=await fetch('data/sweeps.json',{cache:'force-cache'}); if(r.ok)SWP=await r.json();}catch(_){}
+}
+function swpFor(cnn,dow){
+  if(!SWP||dow==null)return null;
+  const b=SWP[cnn]; const a=b&&b[dow];
   return a?{n:a[0],avg:a[1],lo:a[2],hi:a[3]}:null;
 }
 function fmtMin(m){let h=Math.floor(m/60),mm=m%60;const ap=h>=12?'pm':'am';h=h%12;if(h===0)h=12;return h+':'+String(mm).padStart(2,'0')+ap;}
@@ -1423,12 +1440,14 @@ function openSheet(group, activeKey){
     const act=s.ns&&now>=s.ns.start&&now<s.ns.end;
     const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
     const e=enfFor(group.cnn, normDay(r.weekday));
+    const sw=swpFor(group.cnn, normDay(r.weekday));
     return `<div class="srow tap" data-side="${s.key}" role="button" tabindex="0" aria-label="Switch to the ${s.blockside||'other'} side">
       <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div><div class="sc">STREET CLEANING</div></div>
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.short||rp.txt}</div>
         ${e?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· ${e.n} tickets</span></div>`:''}
+        ${sw?`<div class="swpline"><svg class="ic" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 5-7 7"/><path d="M13 11 6 18a2 2 0 0 1-3-3l7-7"/><path d="m9 9 4 4"/></svg>Sweeper ~${fmtMin(sw.avg)} <span>· ${sw.n} passes</span></div>`:''}
         ${allW?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
@@ -1465,14 +1484,19 @@ function openSheet(group, activeKey){
 
   // Real-world enforcement callout for the active side (from citation history).
   const ae=enfFor(group.cnn, active.row&&normDay(active.row.weekday));
+  const as=swpFor(group.cnn, active.row&&normDay(active.row.weekday));
   let enfHtml='';
   if(ae){
     const fromMin=active.row?parseInt(active.row.fromhour,10)*60:ae.avg;
     const into=Math.max(0,ae.avg-fromMin);
     const intoTxt=into<60?into+' min':Math.floor(into/60)+'h'+(into%60?' '+(into%60)+'m':'');
+    const lead=as?ae.avg-as.avg:null;
+    const etxt=(lead!=null&&lead>0)
+      ? `The sweeper passes <b>~${fmtMin(as.avg)}</b>, and tickets land <b>~${fmtMin(ae.avg)}</b> — ${lead} min later.`
+      : `Tickets here usually land <b>~${fmtMin(ae.avg)}</b> — ${intoTxt} into the window.`;
     enfHtml=`<button class="enf" id="enfBtn" type="button" aria-label="Where this estimate comes from">
       <span class="tgt" aria-hidden="true">${ICONS.target}</span>
-      <span class="etxt">Tickets here usually land <b>~${fmtMin(ae.avg)}</b> — ${intoTxt} into the window.<span class="enfsrc">where from?</span></span>
+      <span class="etxt">${etxt}<span class="enfsrc">where from?</span></span>
     </button>`;
   }
   // active side's full schedule as a single line (replaces its redundant row below)
@@ -2368,6 +2392,7 @@ let mvt=null;
 map.on('moveend',()=>{clearTimeout(mvt);mvt=setTimeout(loadViewport,250);});
 map.whenReady(()=>setTimeout(loadViewport,400));
 loadEnforcement();  // background; populates the "real-world ticket time" lines once ready
+loadSweeps();       // background; populates the "sweeper passes" lines where we have the city's truck GPS (#26-5451)
 window.addEventListener('offline',()=>toast("You're offline — showing cached data; sweep times may be stale."));
 window.addEventListener('online',()=>{toast('Back online — refreshing.');loadViewport();});
 

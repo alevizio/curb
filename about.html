@@ -538,6 +538,12 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
         pattern shows when tickets land, not whether your block gets swept (you only see blocks that were
         ticketed). It's rebuilt from the city's own record and predictive from history — there's no live
         sweeper feed in SF, so nothing here is real-time. The full pipeline and the math are <a href="https://github.com/alevizio/curb" rel="noopener">open source on GitHub</a>.</p>
+      <p class="lim"><b>New — the sweeper's own GPS:</b> I also obtained San Francisco's actual street-sweeper
+        telematics (public-records request #26-5451). Where the truck's GPS lands on a block I track, it
+        confirms the story directly: the sweeper passes first, and the ticket follows a median of
+        <b>~19 minutes later</b> — the truck is ahead of the citation on about 78% of those blocks. Coverage is
+        partial and growing as the city releases more; blocks that have it show a <b>"Sweeper ~9:04a"</b> line
+        beneath the ticket time.</p>
     </div>
   </section>
 
