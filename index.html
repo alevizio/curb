@@ -338,6 +338,15 @@
     @keyframes wpop{from{opacity:0;transform:translate(-50%,calc(-50% + 12px))}}
   }
 
+  /* ── Pride weekend: a festive touch, gated on body.pride (set only during the window; auto-retires) ── */
+  .pride-flag{background:linear-gradient(90deg,#E40303 0 17%,#FF8C00 17% 33%,#FFED00 33% 50%,#008026 50% 67%,#004DFF 67% 83%,#750787 83% 100%)}
+  .pride-rule{display:none}
+  body.pride .pride-rule{display:block;height:5px;border-radius:4px;margin:11px auto 1px;max-width:188px;
+    background:linear-gradient(90deg,#E40303 0 17%,#FF8C00 17% 33%,#FFED00 33% 50%,#008026 50% 67%,#004DFF 67% 83%,#750787 83% 100%)}
+  body.pride .logo{position:relative}
+  body.pride .logo::after{content:"";position:absolute;left:2px;right:2px;bottom:-3px;height:3px;border-radius:3px;
+    background:linear-gradient(90deg,#E40303 0 17%,#FF8C00 17% 33%,#FFED00 33% 50%,#008026 50% 67%,#004DFF 67% 83%,#750787 83% 100%)}
+
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
     border-radius:22px 22px 0 0;box-shadow:0 -6px 0 var(--ink);padding:8px 16px calc(20px + env(safe-area-inset-bottom));
     transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1),max-height .28s cubic-bezier(.2,.8,.2,1);
@@ -707,6 +716,7 @@
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
+  <div class="pride-rule" aria-hidden="true"></div>
   <p>Every curb in SF, colored by its <b>next street sweep</b>:</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear — you're fine</span>
@@ -2393,6 +2403,17 @@ map.on('moveend',()=>{clearTimeout(mvt);mvt=setTimeout(loadViewport,250);});
 map.whenReady(()=>setTimeout(loadViewport,400));
 loadEnforcement();  // background; populates the "real-world ticket time" lines once ready
 loadSweeps();       // background; populates the "sweeper passes" lines where we have the city's truck GPS (#26-5451)
+
+/* ── Pride weekend: festive touch only, date-gated so it auto-retires after Sun 6/28 (no parking logic touched) ── */
+(function pride(){
+  const now=Date.now();
+  if(now < Date.parse('2026-06-26T00:00:00-07:00') || now >= Date.parse('2026-06-29T00:00:00-07:00')) return;
+  document.body.classList.add('pride');
+  const greet=()=>toast('🏳️‍🌈 Happy Pride, SF — park proud this weekend.');
+  try{
+    if(localStorage.getItem('curbPride26')!=='1'){ localStorage.setItem('curbPride26','1'); setTimeout(greet,1100); }
+  }catch(_){ setTimeout(greet,1100); }
+})();
 window.addEventListener('offline',()=>toast("You're offline — showing cached data; sweep times may be stale."));
 window.addEventListener('online',()=>{toast('Back online — refreshing.');loadViewport();});
 
