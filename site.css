@@ -1,12 +1,15 @@
 /* CURB — shared site chrome (top nav + footer), injected by /site.js. Prefixed .sn- so it never
    collides with any page's own styles. Uses each page's existing tokens, with fallbacks. */
+/* Smooth (squircle) corners wherever supported — progressive enhancement; falls back to normal round. */
+*{corner-shape:superellipse(2)}
 .sn-nav,.sn-foot{--_paper:var(--paper,#F2ECDF);--_ink:var(--ink,#17150F);--_soft:var(--ink-soft,#4A4536);
   --_red:var(--red,#C1121F);--_sign:var(--sign,#FFFDF6);font-family:'Hanken Grotesk',system-ui,sans-serif}
 
 /* ---- top nav ---- */
-.sn-nav{position:sticky;top:0;z-index:600;background:var(--_paper);margin:0;padding:0;border:0;transition:transform .28s ease}
-.sn-nav.sn-hide{transform:translateY(-100%)}
-.sn-mast{max-width:1080px;margin:0 auto;padding:0 clamp(16px,4.5vw,48px);height:62px;display:flex;align-items:center;gap:12px}
+.sn-nav{position:sticky;top:12px;z-index:600;width:fit-content;max-width:calc(100% - 24px);margin:12px auto 0;
+  background:var(--_sign);border:2px solid var(--_ink);border-radius:999px;padding:0;transition:transform .28s ease}
+.sn-nav.sn-hide{transform:translateY(calc(-100% - 22px))}
+.sn-mast{margin:0;padding:0 7px 0 17px;height:52px;display:flex;align-items:center;gap:10px}
 .sn-logo{display:inline-flex;align-items:center;flex:none;text-decoration:none}
 .sn-logo img{height:42px;width:auto;display:block}
 .sn-links{display:flex;align-items:center;gap:2px;margin-left:auto}
@@ -36,7 +39,7 @@
 .sn-burger{display:none;margin-left:auto;width:44px;height:44px;align-items:center;justify-content:center;
   background:var(--_sign);color:var(--_ink);border:2.5px solid var(--_ink);border-radius:11px;box-shadow:3px 3px 0 var(--_ink);cursor:pointer}
 .sn-burger svg{width:21px;height:21px}
-.sn-menu{position:absolute;right:clamp(16px,4.5vw,48px);top:58px;width:236px;background:var(--_paper);
+.sn-menu{position:absolute;right:6px;top:calc(100% + 8px);width:236px;background:var(--_paper);
   border:3px solid var(--_ink);border-radius:14px;box-shadow:7px 7px 0 var(--_ink);padding:8px;z-index:60}
 .sn-menu a{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-radius:9px;
   font-weight:800;font-size:15px;text-decoration:none;color:var(--_ink)}
@@ -45,7 +48,7 @@
 .sn-menu hr{border:0;border-top:2px solid rgba(23,21,15,.14);margin:6px 5px}
 .sn-menu .sn-ext{opacity:.5;font-size:12px}
 [hidden]{display:none!important}
-@media (max-width:720px){ .sn-links,.sn-cta{display:none} .sn-burger{display:flex} }
+@media (max-width:720px){ .sn-links,.sn-cta{display:none} .sn-burger{display:flex} .sn-nav{width:auto;margin:12px;max-width:none} }
 
 /* ---- footer (grouped columns — Mobbin best-practice) ---- */
 .sn-foot{margin-top:clamp(48px,8vh,72px);background:var(--_ink);color:var(--_paper);border:0;padding:0}
