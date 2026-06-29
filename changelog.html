@@ -1,11 +1,11 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Changelog — CURB</title>
-<meta name="description" content="What's changed in CURB — the free San Francisco street-parking map. Built in the open; full history on GitHub.">
+<meta name="description" content="What's changed in CURB — the free San Francisco street-parking map. Three weeks, 213 commits; built in the open with a design timelapse.">
 <link rel="canonical" href="https://curb.guide/changelog">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Changelog — CURB">
-<meta property="og:description" content="What's changed in CURB — the free San Francisco street-parking map. Built in the open, newest first.">
+<meta property="og:description" content="Watch CURB take shape — three weeks of building, commit by commit, with a design timelapse.">
 <meta property="og:url" content="https://curb.guide/changelog">
 <meta property="og:image" content="https://curb.guide/og.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
@@ -17,24 +17,31 @@
 <link rel="stylesheet" href="/site.css">
 <script src="/site.js" defer></script>
 <style>
-  :root{--paper:#F2ECDF;--ink:#17150F;--ink-soft:#4A4536;--soft:#4A4536;--red:#C1121F;--meter:#2F5BD0;--green:#1F9E5A}
+  :root{--paper:#F2ECDF;--ink:#17150F;--ink-soft:#4A4536;--soft:#4A4536;--red:#C1121F;--meter:#2F5BD0;--green:#1F9E5A;--sign:#FFFDF6}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
   .wrap{max-width:760px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
-  header{padding:calc(40px + env(safe-area-inset-top)) 0 0;display:flex;align-items:center;gap:12px}
-  .backbtn{display:inline-grid;place-items:center;width:34px;height:34px;flex:none;background:none;color:var(--ink-soft);border:0;text-decoration:none;padding:0;line-height:1;margin-left:-6px}
-  .backbtn:hover{color:var(--ink)}
-  .backbtn svg{display:block;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .logo{display:inline-flex;height:51px}.logo img{height:51px;width:auto;display:block}
-  .nav{margin-left:auto;display:flex;gap:6px}
-  .nav a{padding:8px 12px;border-radius:9px;font-weight:800;font-size:14px;text-decoration:none;color:var(--ink);border:2.5px solid transparent}
-  .nav a:hover{border-color:var(--ink)}
   h1{font-family:'Anton',sans-serif;font-size:clamp(40px,8vw,68px);text-transform:uppercase;line-height:.96;margin:clamp(34px,7vh,64px) 0 6px}
   h1 .d{color:var(--red)}
-  .lede{font-weight:600;color:var(--soft);max-width:44em;margin-bottom:30px}
+  .lede{font-weight:600;color:var(--soft);max-width:44em;margin-bottom:6px}
   .lede a{color:var(--meter);text-underline-offset:3px}
   a{color:var(--meter)}
+  /* design timelapse */
+  .tl{margin:clamp(26px,5vh,42px) 0 10px;display:flex;gap:clamp(18px,4vw,38px);align-items:center;flex-wrap:wrap}
+  .tl-phone{flex:none;width:min(238px,60vw);aspect-ratio:420/760;position:relative;border:3px solid var(--ink);border-radius:26px;overflow:hidden;background:var(--ink);box-shadow:6px 6px 0 var(--ink)}
+  .tl-phone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;opacity:0;transition:opacity .7s ease}
+  .tl-phone img.on{opacity:1}
+  .tl-side{flex:1;min-width:230px}
+  .tl-side .k{font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+  .tl-side h2{font-family:'Anton',sans-serif;font-size:clamp(30px,5.5vw,48px);text-transform:uppercase;line-height:.97;margin:6px 0 10px;border:0;padding:0}
+  .tl-side h2 .d{color:var(--red)}
+  .tl-cap{font-family:'Anton',sans-serif;color:var(--red)}
+  .tl-side p{font-weight:600;color:var(--soft);max-width:30em}
+  .tl-dots{display:flex;gap:8px;margin-top:16px}
+  .tl-dots button{width:13px;height:13px;border-radius:50%;border:2.5px solid var(--ink);background:transparent;cursor:pointer;padding:0}
+  .tl-dots button.on{background:var(--ink)}
+  h1 + .lede + .tl{margin-top:24px}
   .entry{border-top:3px solid var(--ink);padding:22px 0 4px}
   .entry .date{font-family:'Anton',sans-serif;font-size:21px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:12px}
   .cl{display:flex;gap:11px;align-items:flex-start;margin:11px 0}
@@ -46,72 +53,287 @@
   .cl .tag.fix{background:var(--paper);color:var(--ink)}
   .cl .tag.note{background:var(--red);border-color:var(--red)}
   .cl p{margin:0} .cl b{font-weight:800}
-  .foot-note{margin:26px 0 4px;font-weight:600;color:var(--soft)}
-  footer{margin-top:48px;border-top:3px solid var(--ink);background:var(--ink);color:var(--paper)}
-  .foot{padding:26px 0;font-weight:700;font-size:14px;display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center}
-  .foot a{color:var(--paper)} .foot .mark{font-family:'Anton',sans-serif;font-size:19px}.foot .mark span{color:var(--red)}
-  .foot .fine{flex-basis:100%;font-weight:600;font-size:12.5px;color:rgba(242,236,223,.66)}
+  .clfoot{margin:30px 0 4px;font-weight:600;color:var(--soft)}
 </style></head><body>
 <!-- nav injected by /site.js -->
 <main class="wrap">
   <h1>Changelog<span class="d">.</span></h1>
-  <p class="lede">CURB is built in the open. Here are the changes that mattered — newest first.
-    The complete commit-by-commit history lives on <a href="https://github.com/alevizio/curb/commits" rel="noopener">GitHub</a>.</p>
+  <p class="lede">CURB is built in the open — here's the whole thing, commit by commit, newest first.
+    The complete history also lives on <a href="https://github.com/alevizio/curb/commits" rel="noopener">GitHub</a>.</p>
 
-  <div class="entry">
-    <h2 class="date">June 29, 2026</h2>
-    <div class="cl"><span class="tag data">Data</span><p>Sweeper-pass times are now labeled as the city's <b>real GPS</b>, not an estimate — and coverage grew to <b>190 blocks</b> (deduped, ≥3 real passes) as the city released more.</p></div>
-    <div class="cl"><span class="tag new">Open</span><p>Published the raw <b>SF sweeper-GPS dataset</b> in the repo (10,525 trips), with provenance and thanks to the city.</p></div>
+  <div class="tl" id="tl">
+    <div class="tl-phone">
+      <img src="/icons/timelapse/01-2026-06-08.png" alt="CURB on June 8, 2026" data-cap="June 8" class="on">
+      <img src="/icons/timelapse/02-2026-06-10.png" alt="" data-cap="June 10">
+      <img src="/icons/timelapse/03-2026-06-12.png" alt="" data-cap="June 12">
+      <img src="/icons/timelapse/04-2026-06-13.png" alt="" data-cap="June 13">
+      <img src="/icons/timelapse/05-2026-06-16.png" alt="" data-cap="June 16">
+      <img src="/icons/timelapse/06-2026-06-22.png" alt="" data-cap="June 22">
+      <img src="/icons/timelapse/07-2026-06-29.png" alt="" data-cap="June 29">
+    </div>
+    <div class="tl-side">
+      <div class="k">From a windshield to this</div>
+      <h2>Watch CURB<br>take shape<span class="d">.</span></h2>
+      <p>Three weeks, 213 commits — the same screen from <span class="tl-cap" id="tlCap">June 8</span> to June 29, 2026.</p>
+      <div class="tl-dots" id="tlDots"></div>
+    </div>
   </div>
 
-  <div class="entry">
-    <h2 class="date">June 28, 2026</h2>
-    <div class="cl"><span class="tag new">New</span><p>A small <b>Pride-weekend</b> touch on the map — a rainbow-outlined logo, date-gated so it retires itself after June. 🌈</p></div>
-  </div>
+  <!-- changelog:start -->
+    <div class="entry">
+      <h2 class="date">June 29, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Richer 'In the news' rows — publisher logos, specific dates, author</p></div>
+      <div class="cl"><span class="tag new">New</span><p>/support page + Support links in nav + footer</p></div>
+      <div class="cl"><span class="tag data">Data</span><p>Add the evening June 29 #26-5451 batch — 184 -&gt; 190 blocks</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Real section separation + bigger gallery, scrollbar, download previews</p></div>
+      <div class="cl"><span class="tag new">New</span><p>More pronounced rounded corners + corner-shape on pseudo-elements</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Changelog/privacy nav layout + press-kit section spacing</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Force free CARTO basemap — stop all Google Maps Tiles calls (billing)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>How-it-works as a secondary (ghost) button; drop footer bottom divider</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Submenu icons, content-width pill, press tags, leaner ⓘ menu + onboarding</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Full-width pill nav + button shadow, white dropdowns, light footer w/ logo</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Floating pill nav + smooth (squircle) corners site-wide</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Tighten the ⓘ info menu — prioritized hierarchy, ~half the length</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Identical nav+footer on every page + reveal-on-scroll-up, borderless</p></div>
+      <div class="cl"><span class="tag new">New</span><p>One consistent nav + footer across every back-of-map page</p></div>
+      <div class="cl"><span class="tag data">Data</span><p>Add the June 29 #26-5451 batch — coverage 118 -&gt; 184 blocks</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Add SFGate + The Dissent SF coverage to the In-the-news list</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Make the surge caveat a clear asterisk callout</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Commit the GPS hoods builder + warn that build:stats reverts per-hood totals</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Docs+fix: correct README pipeline/numbers, footnote the surge baseline, validate sweeps.json</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Regenerate neighborhood stats from GPS + correct stale numbers site-wide</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Expand sweeper coverage, publish the SF GPS dataset, add a changelog</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Label the sweeper-pass times as the city's REAL GPS (keep routes Beta)</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 28, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Rainbow-outlined logo (30° gradient), drop modal rule, run through June</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Festive Pride-weekend touch on the map (date-gated, auto-retires)</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 26, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Real "when the sweeper passes" from SF Public Works AVL GPS (#26-5451)</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 25, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Funding rails -- funding.json (FLOSS/fund manifest), FUNDING.yml, Code of Conduct</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Correct ticket-timing stats from the complete GPS dataset</p></div>
+      <div class="cl"><span class="tag data">Data</span><p>Rebuild enforcement.json from the complete GPS citation record (#26-5453)</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 23, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Inline the Google logo with the attribution, drop the white box</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Show the Google logo alongside the per-viewport attribution (Map Tiles policy)</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 22, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Press kit page at /press (noindex), linked subtly in footers</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Self-activating 'Get the iOS app' App Store link in the info menu</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Configurable push-notification cadence, voice, and on-device self-test</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 19, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Divider between pages and the rest, add Privacy, drop redundant Report-a-bug</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Self-activating 'Rate CURB' — lights up via iTunes lookup once we're on the App Store</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Wire Correct-a-Sign to the existing wrong-data form + add Share/Send-feedback menu items</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Correct a Sign — report a wrong block straight to a pre-filled GitHub issue</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 18, 2026</h2>
+      <div class="cl"><span class="tag fix">Fix</span><p>Remember Google's daily quota outage per SF-day, skip straight to CARTO</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Stop the attribution refresher from re-adding Google credit after CARTO fallback</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Fall back to CARTO when Google tiles fail to load (not just on createSession failure)</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Scope .src grid rules to .srcs so they stop clobbering the proof paragraph</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Size up holiday-card icon to 30px for vertical balance</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Use the gallery ICONS.cal glyph on the holiday card</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Make the holiday note a card (green, Anton headline, calendar icon)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Add Juneteenth holiday + surface 'no sweeping — city holiday' note</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Surface the 'park after the sweeper passes' rule</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 17, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Phase 2 — per-neighborhood curb-mix + off-street garages</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Enrich neighborhood pages — enforcement explainer + high-intent FAQs</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Instrument the activation funnel</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Add breathing room above the open-source card</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Add 'The receipts' data-sources + methodology section</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Refresh social-preview cards</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 16, 2026</h2>
+      <div class="cl"><span class="tag ios">iOS</span><p>App Store screenshot framer (iPhone captures → 1290x2796 marketing PNGs)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>"22 Minutes" launch trailer generator</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Match install icons to the padded native app icon</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Un-cropped app icon — padded cube, flattened opaque</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Preserve cold-start notification deep link + flag denied permission</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Harden APNs delivery against transient + abuse failure modes</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Authed ?test=ios delivery test + workflow_dispatch input</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Accept APNS_KEY_P8_B64 (base64 PEM) — mangle-proof key input</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Robust APNs key loader (recover from whitespace-collapsed .p8)</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Isolate APNs failures from the cron + surface the error</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>One back button on internal pages + uncropped app icon</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Report ios.configured + always count iOS watches</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Cross-host APNs retry before pruning a token</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Native push client — APNs registration bridge + deep links</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Native iOS APNs transport alongside Web Push (ALE backend)</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 15, 2026</h2>
+      <div class="cl"><span class="tag ios">iOS</span><p>Native bridges for Share and the .ics calendar reminder</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Service worker stale-while-revalidate (instant + fresh)</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Switch to the WKWebView wrapper (matches the live site) + native-feel polish</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Revive the native SwiftUI/MapKit app + fix it to compile</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Continue WKWebView conversion on the native target</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Unify the site footer across all internal pages</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Neighborhood map snapshots, live-map embed, landing data points</p></div>
+      <div class="cl"><span class="tag new">New</span><p>?bbox + ?embed deep-link for neighborhood map embeds</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Give the top bar breathing room from the screen edge</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Make the "Back to map" button subtle</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Drop the logo hover tooltip</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Remove move-mode, "your car" strip, and smart-pin prompt</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>WKWebView wrapper on the native target (parallel pivot)</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Guard the locate button with a loading failsafe</p></div>
+      <div class="cl"><span class="tag new">New</span><p>"Back to map" button + scroll fix on sub-pages</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Make ticket bar charts render — fill was an inline span</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 13, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Per-block dynamic Open Graph cards</p></div>
+      <div class="cl"><span class="tag new">New</span><p>"find a safe spot" move-mode + smart-pin prompt (ALE-164/168)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>"your car" persistent status strip + pin=parked</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Redesigned hood cards, unified nav/footer, about open-source CTA, logo tooltip</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Logo hover scales instead of lifting</p></div>
+      <div class="cl"><span class="tag new">New</span><p>/api/parked auto-park endpoint + token auth, appsec-hardened</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Server-side forever-watch — recurring sweep alerts (ALE-168/164)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Cooler grey streets + green parks in the basemap theme</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Neighborhood street-cleaning pages</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Perf(map)+test: overview recolor-not-rebuild + extract &amp; test SF time core</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Monthly data-refresh Action + shape validator</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Wire 5 cookieless custom events</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Outlined logo refresh + sheet/UX polish</p></div>
+      <div class="cl"><span class="tag new">New</span><p>New parking-meter icon for the Metered chip</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Align the toolbar — clear the close button's stray top/right offsets</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Toolbar tooltips drop down (not cropped) + cleaner permit chip</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Preconnect to tile.googleapis.com (now the live basemap host)</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 12, 2026</h2>
+      <div class="cl"><span class="tag fix">Fix</span><p>Clear the launch-check punch list</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Permit chip names the area + taps to outline it</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Share &amp; location buttons were dead — close button's hit-area blanketed the toolbar</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Full day names in heads-up (Saturdays, not Sats)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Day-filter heads-up — contextualize the sparse weekend view</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Redesign block card — no redundancy, block-accurate meters, cleaner</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Bare-cube logo everywhere + unify red to logo #C1121F</p></div>
+      <div class="cl"><span class="tag new">New</span><p>New curb-cube logo across app, favicons, PWA icons &amp; OG</p></div>
+      <div class="cl"><span class="tag data">Data</span><p>Launch refresh — all five assets rebuilt, overview carries holidays</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>QA punch list — every finding from the 7-agent pre-launch sweep</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Escalating two-push model — night-before + 30-min</p></div>
+      <div class="cl"><span class="tag new">New</span><p>SF-pinned time + SFMTA holiday suspensions (ALE-162 items 1-2)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Data-defense memo, legality FAQ, competitive reply arsenal</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Llms.txt — agent-readable map of pages and data endpoints</p></div>
+      <div class="cl"><span class="tag new">New</span><p>De-dup the block card — every number appears once</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Open-source presence everywhere — repo one tap away on every surface</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Close the animation gaps — newer surfaces join the gated system</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Vercel Web Analytics script on all pages (cookieless, free tier)</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Legend bottom edge aligns with the zoom pill on both breakpoints</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Mobile corner relayout + unified 48px top row + no default-blue links</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Drop redundant tooltip from the sheet close button</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Freshness date on /tickets, article timestamps, org sameAs</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Dataset schema on /tickets + growth plan</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Unmetered white zones — passenger loading incl. school zones</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Weather icons in the app's duotone icon language, not emoji</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Widen desktop top bar so the day row fits the weather chip</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Live SF weather on the date chip</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Permit-area dropdowns show each area's sign-disc color</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Google-style layer tiles, dynamic legend, permit-area dropdowns</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Shared footer across internal pages + icons in the hamburger menu</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Restore side gutters — padding shorthand was zeroing .wrap</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Top nav on /tickets and /about — inline links, hamburger under 680px</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Phone-native chart layouts under 520px</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Hover tooltips on every chart + clearer labels</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Report-a-bug links (GitHub Issues) + bio card on /about</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Neighborhood ticket-surge chart on /tickets, press links + maker note on /about</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Truck-routes Beta explainer on /about + free 15-min alerts scheduler</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Complete overview when a viewport exceeds the row cap + day rollover</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 11, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Info menu hub for all pages + truck-route day label</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Zoom-aware rendering so every layer holds up in/out</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Truck routes independent of curb-color toggles</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Basemap fallback DNS dead; locate back in the search field; desktop tooltips</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Bottom-left legend, joined zoom pill, floating locate; routes flow fix</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Legend-first rows — map symbols + eye toggles + Beta tag</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 10, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>/tickets — the SF parking ticket economy, visualized</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Launch-hardening quick wins from verified deep research</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Share-a-block — /b/&lt;cnn&gt; pages, Share button, deep link</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Unhappy paths on search, filters, coverage, connectivity</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Preconnects, chunked citywide draw, static zones asset</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Purposeful micro-animations, reduced-motion gated</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Trim /about title to 54 chars (was 61, over the ~60 truncation line)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Canonicals, robots, sitemap, structured data, FAQ content</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Citywide overview — curb lines visible at every zoom</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Uniform show/hide toggle UI; routes actually visible</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Area boundary territory, status show/hide, truck routes v2</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Google-style autocomplete</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Mobile QA fixes, metered-parking layer, inferred truck routes (beta)</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Google-Maps-style corner organization</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Logo reopens the welcome explainer</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Disc picker — colored circles exactly like the parking signs</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Adopt the alevizio pop icon set; sign design inside the app; kill italics</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Authentic SF sign stack on landing + permit-area browser in the app</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>Distill pass from design critique — peek, two actions, drawn glyphs</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 9, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>First-run welcome + first-verdict alerts toast</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Curb.guide landing page — "an official notice you actually want to read"</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>AA status-text tokens, focus/ARIA/keyboard/targets; auto-locate on launch</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Street-wide zoom-scaled ribbon instead of per-side offset bands</p></div>
+      <div class="cl"><span class="tag new">New</span><p>De-dupe enforcement, switchable sides, hover/press states</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Desktop UX, hover previews, day filter, loading zones, enforcement &amp; ticket-time overlay</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Precompute real-world street-cleaning enforcement times</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Branded 1200x630 social card + canonical curb.guide URLs</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Fix curb side matching for address search</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">June 8, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Deliver Google Maps key via gitignored config.js (local) + env-injected /config.js (Vercel)</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Official Google Map Tiles basemap with CARTO fallback; open at street zoom</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Initial commit: CURB — SF parking PWA with Web Push alerts</p></div>
+    </div>
+    <!-- changelog:end -->
 
-  <div class="entry">
-    <h2 class="date">June 26, 2026</h2>
-    <div class="cl"><span class="tag new">New</span><p><b>Real "when the sweeper passes."</b> Using San Francisco's actual street-sweeper GPS (public-records request #26-5451), blocks now show the truck's real pass time — and the data confirms a ticket lands a median of <b>~19 minutes after</b> the sweeper. 🧹</p></div>
-  </div>
-
-  <div class="entry">
-    <h2 class="date">June 25, 2026</h2>
-    <div class="cl"><span class="tag data">Data</span><p>Rebuilt ticket timing from the <b>complete citation record</b> — about a million GPS-located tickets. The posted 2-hour window is really about <b>20 minutes</b>.</p></div>
-    <div class="cl"><span class="tag ios">iOS</span><p>The <b>CURB iOS app went live</b> on the App Store — free, a native wrapper of the same map.</p></div>
-    <div class="cl"><span class="tag new">New</span><p>Added open-source sponsorship links for anyone who wants to help keep CURB free and ad-free.</p></div>
-  </div>
-
-  <div class="entry">
-    <h2 class="date">June 22, 2026</h2>
-    <div class="cl"><span class="tag new">New</span><p><b>Configurable sweep alerts</b> — choose the cadence (Light / Normal / Intense) and the voice (Cheeky / Drill / Deadpan), with a "send me a test."</p></div>
-    <div class="cl"><span class="tag new">New</span><p>A reporter-ready <b>press kit</b> at /press, and a self-activating "Get the iOS app" link.</p></div>
-  </div>
-
-  <div class="entry">
-    <h2 class="date">June 19, 2026</h2>
-    <div class="cl"><span class="tag new">New</span><p><b>Correct a Sign</b> — spot a wrong block? Report it in two taps. Plus Share, Send-feedback, and Rate-CURB in the menu, and a Privacy page.</p></div>
-  </div>
-
-  <div class="entry">
-    <h2 class="date">June 18, 2026</h2>
-    <div class="cl"><span class="tag new">New</span><p>Surfaced the <b>"park after the sweeper passes"</b> rule, and a holiday heads-up when sweeping is suspended (e.g. Juneteenth).</p></div>
-    <div class="cl"><span class="tag fix">Fix</span><p>Map stays reliable — it falls back gracefully to free tiles if the basemap hits its daily limit.</p></div>
-  </div>
-
-  <div class="entry">
-    <h2 class="date">June 17, 2026</h2>
-    <div class="cl"><span class="tag new">New</span><p>Richer <b>neighborhood pages</b> — per-neighborhood curb mix, off-street garages, and high-intent FAQs.</p></div>
-    <div class="cl"><span class="tag data">Data</span><p>Added <b>"The receipts"</b> to the About page — every data source and the methodology, in the open.</p></div>
-  </div>
-
-  <div class="entry">
-    <h2 class="date">June 16, 2026</h2>
-    <div class="cl"><span class="tag ios">iOS</span><p>Native <b>iOS push notifications</b> and the iOS app groundwork, plus a launch trailer and App Store screenshot tooling.</p></div>
-  </div>
-
-  <p class="foot-note">Earlier in June 2026, CURB launched as a free, open-source map of San Francisco's
-    street-parking rules — colored by the next street sweep, with real ticket timing per block.
-    See it all on <a href="https://github.com/alevizio/curb/commits" rel="noopener">GitHub →</a></p>
+  <p class="clfoot">Built solo, in the open, on San Francisco's public data — see every commit on
+    <a href="https://github.com/alevizio/curb/commits" rel="noopener">GitHub →</a></p>
 </main>
 <!-- footer injected by /site.js -->
+<script>
+  (function () {
+    var ph = document.querySelector('.tl-phone'); if (!ph) return;
+    var imgs = [].slice.call(ph.querySelectorAll('img')), cap = document.getElementById('tlCap'), dots = document.getElementById('tlDots');
+    var n = 0, timer;
+    imgs.forEach(function (_, i) {
+      var d = document.createElement('button'); d.type = 'button'; if (i === 0) d.className = 'on';
+      d.setAttribute('aria-label', imgs[i].getAttribute('data-cap'));
+      d.addEventListener('click', function () { show(i); restart(); });
+      dots.appendChild(d);
+    });
+    var dotEls = [].slice.call(dots.children);
+    function show(i) {
+      n = i; imgs.forEach(function (im, k) { im.classList.toggle('on', k === i); });
+      dotEls.forEach(function (d, k) { d.classList.toggle('on', k === i); });
+      cap.textContent = imgs[i].getAttribute('data-cap');
+    }
+    function next() { show((n + 1) % imgs.length); }
+    function restart() { clearInterval(timer); timer = setInterval(next, 1500); }
+    restart();
+    ph.addEventListener('mouseenter', function () { clearInterval(timer); });
+    ph.addEventListener('mouseleave', restart);
+  })();
+</script>
 </body></html>

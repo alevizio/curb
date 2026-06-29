@@ -19,6 +19,7 @@
     "build:hoodmaps": "node scripts/build-hood-maps.mjs",
     "build:hoodenrich": "node scripts/build-hood-enrich.mjs",
     "build:hoodpages": "node scripts/build-hood-pages.mjs",
+    "build:changelog": "node scripts/build-changelog.mjs",
     "validate:data": "node scripts/validate-data.mjs",
     "test": "vitest run"
   },
