@@ -1450,7 +1450,7 @@ function openSheet(group, activeKey){
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.short||rp.txt}</div>
         ${e?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· ${e.n} tickets</span></div>`:''}
-        ${sw?`<div class="swpline"><svg class="ic" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 5-7 7"/><path d="M13 11 6 18a2 2 0 0 1-3-3l7-7"/><path d="m9 9 4 4"/></svg>Sweeper ~${fmtMin(sw.avg)} <span>· ${sw.n} passes</span></div>`:''}
+        ${sw?`<div class="swpline"><svg class="ic" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 5-7 7"/><path d="M13 11 6 18a2 2 0 0 1-3-3l7-7"/><path d="m9 9 4 4"/></svg>Sweeper ~${fmtMin(sw.avg)} <span>· real, from city GPS</span></div>`:''}
         ${allW?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
@@ -1495,7 +1495,7 @@ function openSheet(group, activeKey){
     const intoTxt=into<60?into+' min':Math.floor(into/60)+'h'+(into%60?' '+(into%60)+'m':'');
     const lead=as?ae.avg-as.avg:null;
     const etxt=(lead!=null&&lead>0)
-      ? `The sweeper passes <b>~${fmtMin(as.avg)}</b>, and tickets land <b>~${fmtMin(ae.avg)}</b> — ${lead} min later.`
+      ? `The city's GPS shows the sweeper passing <b>~${fmtMin(as.avg)}</b>, then tickets land <b>~${fmtMin(ae.avg)}</b> — ${lead} min later.`
       : `Tickets here usually land <b>~${fmtMin(ae.avg)}</b> — ${intoTxt} into the window.`;
     enfHtml=`<button class="enf" id="enfBtn" type="button" aria-label="Where this estimate comes from">
       <span class="tgt" aria-hidden="true">${ICONS.target}</span>
