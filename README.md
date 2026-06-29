@@ -82,7 +82,7 @@ The key is kept out of this public repo:
 - Unmetered white zones (passenger loading, school zones): SFMTA Digital Curb on the
   city ArcGIS hub — snapshot via `npm run build:whitezones` (data DataSF excludes)
 - Enforcement history: DataSF `ab4h-6ztd` (parking citations) — precomputed into
-  `data/enforcement.json` by `npm run build:enforcement` (see `scripts/build-enforcement.mjs`)
+  `data/enforcement.json` by `npm run build:enforcement` (see `scripts/build-enforcement-records.py`)
 - /tickets aggregates: `npm run build:stats` → `data/stats.json` (yearly fines,
   violations, hour histograms, neighborhood totals + five-year surge)
 - Neighborhood boundaries: DataSF `j2bu-swwd` (Analysis Neighborhoods) — /tickets + the per-hood pages

@@ -51,10 +51,13 @@ calendar reminder before the next sweep.
    only; paint-only curbs aren't published. Loaded once on toggle, rendered per-viewport.
 5. Parking citations — `ab4h-6ztd` (23.8M rows, daily, ~2-5 day lag)
    STR CLEAN (TRC7.2.22) + ST CLEANIN (T37C) = street-cleaning tickets, minute-resolution.
-   NOT geocoded since ~2021 (address strings only, zero-padded + typos). CURB joins
-   citation address → CNN via EAS (3mea-di5p), keyed by stripZeros(number)|street_name.
-   Precomputed offline into `data/enforcement.json` — see `scripts/build-enforcement.mjs`
-   and `docs/sweeper-data-research.md`. Powers the "🎯 Ticketed ~9:14a" lines.
+   A 2024 records request (#26-5453) restored GPS lat/long on the citations: ~815k of
+   ~1M street-cleaning tickets now match to a CNN by NEAREST CNN SEGMENT (<=40m), the
+   primary pipeline. The old address→CNN join via EAS (3mea-di5p, keyed by
+   stripZeros(number)|street_name) is demoted to a pre-2024 fallback for rows without GPS.
+   Precomputed offline into `data/enforcement.json` — see
+   `scripts/build-enforcement-records.py` and `docs/sweeper-data-research.md`. Powers the
+   "🎯 Ticketed ~9:11a" lines.
 
 ### Spatial queries (verified working)
 - Segments in viewport: `?$where=intersects(line,'POLYGON((lng lat, ...))')&$limit=2500`
@@ -99,8 +102,12 @@ calendar reminder before the next sweep.
   is in the script, not a Downloads source). The maker headshot is `icons/alejandro.jpg`
   (GitHub avatar, self-hosted) framed in the about-page bio. tickets/about share .wrap
   max-width 1080px.
-- scripts/build-enforcement.mjs + data/enforcement.json — precomputed citation enforcement
-  times (`npm run build:enforcement`).
+- scripts/build-enforcement-records.py + data/enforcement.json — precomputed citation
+  enforcement times (`npm run build:enforcement`); GPS nearest-CNN-segment from records
+  request #26-5453, with the data/enforcement-gps dataset as input.
+- scripts/build-sweeps.py + data/sweeps.json — precomputed sweeper-pass times (records
+  request #26-5451 + the data/sweeper-gps dataset); a ticket lands a median ~19 min AFTER
+  the sweeper passes.
 - docs/ — sweeper-data research + ready-to-send public-records requests.
 - README.md — human-facing run/deploy notes.
 
@@ -138,9 +145,6 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   `placeYou()` resets the filter — "where I parked" must see every curb side.
 - **Locate** lives inside the search field (`.field .loc`, navigation glyph); there is
   no floating FAB anymore.
-- **Google Cal button** (`openGoogleCal`): template URL with floating wall-clock times
-  pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
-  reflects that; only .ics and push promise the 30-min lead.
 - **Google Cal button** (`openGoogleCal`): template URL with floating wall-clock times
   pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
   reflects that; only .ics and push promise the 30-min lead.

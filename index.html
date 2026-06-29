@@ -338,7 +338,7 @@
     @keyframes wpop{from{opacity:0;transform:translate(-50%,calc(-50% + 12px))}}
   }
 
-  /* ── Pride: festive touch is JS-driven — body.pride swaps the header/welcome logo to logo-pride.svg
+  /* ── Pride: festive touch is JS-driven — the img.clogo src swap to logo-pride.svg
      (a rainbow gradient on the cube's outline stroke) + fires a welcome toast; see the pride() IIFE. ── */
 
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
@@ -2401,7 +2401,6 @@ loadSweeps();       // background; populates the "sweeper passes" lines where we
 (function pride(){
   const now=Date.now();
   if(now < Date.parse('2026-06-26T00:00:00-07:00') || now >= Date.parse('2026-07-01T00:00:00-07:00')) return;
-  document.body.classList.add('pride');
   document.querySelectorAll('img.clogo').forEach(img=>{ img.src='/icons/logo-pride.svg'; });   // rainbow-outlined cube
   const greet=()=>toast('🏳️‍🌈 Happy Pride, SF — park proud this weekend.');
   try{

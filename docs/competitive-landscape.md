@@ -32,8 +32,8 @@
 
 | Differentiator | Defensibility | Fastest copier |
 |---|---|---|
-| **REAL ticket times per block (650k citations)** | Strongest moat. Nobody upstream has it — INRIX/SFMTA publish scheduled rules, not enforcement reality. Requires the citation-reconstruction pipeline, not just DataSF. Directly answers the universal review complaint "always double-check the sign" and the Reddit outrage "ticketed at 2:14AM, sign says 2–6am" | SpotAngels (data team, could replicate in months if they noticed); Ticketless+ (solo dev, slower) |
-| **The 22-minute finding** (headline stat from that data) | A story, not a feature — own it at launch before anyone can. Citable, press-ready, AI-engine-quotable | Anyone can cite it once published; only CURB can generate the next one |
+| **REAL ticket times per block (~815k of ~1M citations)** | Strongest moat. Nobody upstream has it — INRIX/SFMTA publish scheduled rules, not enforcement reality. Requires the citation-reconstruction pipeline, not just DataSF. Directly answers the universal review complaint "always double-check the sign" and the Reddit outrage "ticketed at 2:14AM, sign says 2–6am" | SpotAngels (data team, could replicate in months if they noticed); Ticketless+ (solo dev, slower) |
+| **The ~20-minute finding** (headline stat from that data) | A story, not a feature — own it at launch before anyone can. Citable, press-ready, AI-engine-quotable | Anyone can cite it once published; only CURB can generate the next one |
 | **Free / no-account / open-source** | Matches r/sanfrancisco values exactly (community is hostile to paywalls); SpotAngels structurally can't follow (freemium business), Ticketless+ already matches free/no-account but is closed-source | Ticketless+ (already 2 of 3) |
 | **White school zones + unmetered loading zones** | Nobody covers these — verified gap across all lenses | Ticketless+ or SpotAngels via the SFMTA CDS curb inventory (public data, weeks of work once motivated) |
 | **Web/PWA + Web Push (no install, Android reach)** | Ticketless+ is iOS-only; SpotAngels' web map has no alerts; answers the verified Android demand ("I'd pay $20 today if there was an android version") | SpotAngels (has web infra); kaushalpartani (open-source web, but no push today) |
@@ -65,17 +65,17 @@ The enemy is **a recurring calendar event and a phone alarm**, plus "just read t
 
 ## 6. Positioning One-Liners ("how is this different from X?")
 
-- **vs SpotAngels**: "SpotAngels shows the posted schedule and charges for the good parts. CURB is free, no account, open-source — and shows when ticketing *actually* happens on your block, reconstructed from 650k real SFMTA citations."
+- **vs SpotAngels**: "SpotAngels shows the posted schedule and charges for the good parts. CURB is free, no account, open-source — and shows when ticketing *actually* happens on your block, reconstructed from ~815k of ~1M real SFMTA citations."
 - **vs Ticketless+**: "Love it — it's iOS-only and uses the official schedule. CURB works on any phone in the browser, no install required, and adds real citation times, RPP areas, meters, and white school zones on one map."
 - **vs Sweep Alarm**: "Sweep Alarm is a great alarm you set yourself. CURB is the whole curb: every block colored by next sweep, permits, meters, white zones — and the alert knows your block's real first-ticket time, not just the sign."
 - **vs Xtreet**: "Xtreet hasn't meaningfully changed since 2015 and emails you (check spam). CURB is maintained, open-source, push-notifies you, and is built from this year's data."
 - **vs kaushalpartani's map**: "Genuinely good free tool — CURB does that plus push alerts, every curb colored at once, permits, meters, white zones, and real ticket times instead of a pass-through of the schedule feed."
-- **vs the city (DataSF/Public Works)**: "Same official data underneath — but the city map can't tell you your next sweep is in 14 hours or wake you up before it. And the schedule isn't the whole truth: citations show enforcement starts ~22 minutes in on average."
+- **vs the city (DataSF/Public Works)**: "Same official data underneath — but the city map can't tell you your next sweep is in 14 hours or wake you up before it. And the schedule isn't the whole truth: citations show enforcement starts ~20 minutes in on average."
 - **vs ParkMobile/HotSpot**: "Those pay your meter. CURB protects you on the free and permit blocks where sweeping tickets actually happen — the part no payment app touches."
 - **vs Text Before Tow**: "The city texts you 5 minutes before the tow truck, and never for street cleaning. CURB warns you the night before, for the violation SF writes most."
-- **vs "just set an alarm"**: "Your calendar doesn't know where you parked, which side of the street you're on, whether it's the 2nd or 4th Monday, or that your block gets ticketed 22 minutes after the window opens. CURB does — for free, with no account."
+- **vs "just set an alarm"**: "Your calendar doesn't know where you parked, which side of the street you're on, whether it's the 2nd or 4th Monday, or that your block gets ticketed ~20 minutes after the window opens. CURB does — for free, with no account."
 
-Launch framing: lead with the data ("we reconstructed when ticketing actually happens on every SF block from 650k citations"), not "another reminder app" — that framing survived every Reddit launch-thread autopsy in this research; "reminder app" framing did not. Timing hook: SF drivers are already confused about parking apps after SFMTA's May 2026 PayByPhone-to-ParkMobile/HotSpot switch.
+Launch framing: lead with the data ("we reconstructed when ticketing actually happens on every SF block from ~815k of ~1M citations"), not "another reminder app" — that framing survived every Reddit launch-thread autopsy in this research; "reminder app" framing did not. Timing hook: SF drivers are already confused about parking apps after SFMTA's May 2026 PayByPhone-to-ParkMobile/HotSpot switch.
 ## 7. Feature matrix — CURB vs everyone (verified 2026-06-12)
 
 | Feature | CURB | SpotAngels | Ticketless+ | Sweep Alarm | kaushalpartani | Xtreet | City (DataSF/PW) |

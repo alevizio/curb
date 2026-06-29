@@ -22,7 +22,7 @@ Companion file: `launch-kit.md` (finished post drafts; this file is the strategy
    "no accounts, no tracking, no ads" promise (it counts pageviews, not people).
    Add one disclosure line to the /about fine print. Without this, nothing below is measurable.
 3. **Execute the launch-kit sequence** (assets are done, just post):
-   - Tue: r/sanfrancisco (the 22-minute-window finding — data first, app second)
+   - Tue: r/sanfrancisco (the ~20-minute-window finding — data first, app second)
    - Thu 8–10am ET: Show HN (link to /about, technical first comment ready)
    - Next Tue 12:01am PT: Product Hunt
    - Same week: press emails
@@ -30,7 +30,7 @@ Companion file: `launch-kit.md` (finished post drafts; this file is the strategy
    Respond to every comment fast — that is most of the work.
 4. **Press pitch, warm angle**: The SF Standard ran the ticket-surge story June 10–11 —
    the same reporters are already linked from /about. Email them + Mission Local with
-   what they DON'T have: (a) the 22-minute enforcement-window finding, (b) our
+   what they DON'T have: (a) the ~20-minute enforcement-window finding, (b) our
    neighborhood surge cut of their own story, (c) the school white-zone layer built
    from SFMTA's unpublished-on-DataSF inventory. One short email each, three angles.
 5. **DataSF showcase**: datasf.org features apps built on their data. Free submission,
@@ -67,8 +67,8 @@ Companion file: `launch-kit.md` (finished post drafts; this file is the strategy
     SF Civic Tech (sfcivictech.org) demo night, parking/urbanism newsletters,
     @DataSF on X (they amplify showcase apps; tag them on the launch thread).
 12. **X thread template** (pin after launch):
-    1/ SF posts a 2-hour street-cleaning window. I matched 650k tickets to blocks:
-       on the median block every ticket lands in a 22-MINUTE span. [chart]
+    1/ SF posts a 2-hour street-cleaning window. I matched ~815k tickets to blocks
+       (of ~1M): on the median block every ticket lands in a ~20-MINUTE span. [chart]
     2/ Built curb.guide — every curb colored by its next sweep. Tap your block,
        see when tickets actually land there. [video]
     3/ It knows the permit areas, meters, loading zones — even the white school

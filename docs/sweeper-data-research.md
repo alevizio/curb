@@ -24,21 +24,24 @@ Socrata APIs; program-status claims are cited to sources._
   **`ST CLEANIN`** (T37C, 2.40M rows). Minute-resolution `citation_issued_datetime`.
 - **Real fine in 2026: $105** (verified: 208,673 of 208,712 YTD STR CLEAN tickets).
 - **Publish lag ~2–5 days**; drop typo'd future dates (max seen `2027-04-23`).
-- **Not geocoded** for recent years (0 of 851k 2025–26 rows have lat/long) — only an
-  address string. So CURB **joins the address → block (CNN)** via the EAS dataset
-  (`3mea-di5p`), which it already uses for search. Watch out: citation addresses are
-  zero-padded and dirty (`001 STEINER ST`, `0121 …`, occasional `VALENICA` typos).
+- The bulk DataSF rows ship without lat/long for recent years — only an address string.
+  A 2024 records request (#26-5453) **restored GPS coordinates** on the citations, so the
+  earlier "0 of 851k rows have lat/long / address join only" claim is superseded: CURB now
+  matches each ticket to the **nearest CNN segment (<=40m)** off GPS (~815k of ~1M
+  street-cleaning tickets matched). The address → block (CNN) join via the EAS dataset
+  (`3mea-di5p`) is kept only as a pre-2024 fallback for GPS-less rows. Watch out either way:
+  citation addresses are zero-padded and dirty (`001 STEINER ST`, `0121 …`, `VALENICA` typos).
 
 ### What the data proves (live demos)
-- **214–255 Steiner St** (posted Wed/Fri 9–11 AM): 203 tickets since 2023 →
-  **median 9:14 AM, 90% by 9:39, earliest 9:00.** Real risk window ≈ 40 min, not 2 hrs.
+- **214–255 Steiner St** (posted Wed/Fri 9–11 AM): 221 tickets since 2023 →
+  **median 9:11 AM, 90% by 9:21, earliest 9:00.** Real risk window ≈ 40 min, not 2 hrs.
 - **Valencia St** (posted 6–8 AM): **97.6%** of 1,356 tickets in the **6 AM hour**.
 - A single afternoon ticket trail traces the truck across the Outer Sunset
   (12:31 Tompkins → 13:30 Moraga) → **route order, direction, and pace are recoverable**.
 
-→ This is what CURB now ships: `scripts/build-enforcement.mjs` precomputes per-block-side
+→ This is what CURB now ships: `scripts/build-enforcement-records.py` precomputes per-block-side
   ticket-time distributions into `data/enforcement.json`; the sheet/tooltip show
-  "🎯 Ticketed ~9:14a · earliest 9:00a."
+  "🎯 Ticketed ~9:11a · earliest 9:00a."
 
 ## The enforcement vehicles (PCO "ticket cars")
 - PCOs ride the sweeper's route; the citation record is their only public exhaust.

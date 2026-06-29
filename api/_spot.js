@@ -58,7 +58,7 @@ export function sanitizeSpot(spot) {
   // notification dials: intensity (cadence) + voice (tone), both coerced to a known value.
   out.level = normLevel(spot.level);
   out.voice = normVoice(spot.voice);
-  // optional ticket-time flex woven into copy (e.g. "9:14am") — accept ONLY a clean time string,
+  // optional ticket-time flex woven into copy (e.g. "9:11am") — accept ONLY a clean time string,
   // never arbitrary client text, so nothing odd can ever land in a push body.
   const tipRaw = String(spot.tip || '').trim().slice(0, 14);
   if (/^~?\d{1,2}:\d{2}\s?[ap]\.?m\.?$/i.test(tipRaw)) out.tip = tipRaw;

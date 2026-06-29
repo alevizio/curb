@@ -40,7 +40,7 @@ truth"). No celebration animations; the reward is quiet: a green strip.
 |---|---|
 | No pin (first run) | Strip teaches: "📍 Tap the curb where you parked — CURB watches it for you." Dismissible, returns after 7 days. |
 | Pinned, clear | Green strip: "Your car · 214 Steiner · clear until Wed 9am". |
-| Pinned, sweep <24h | Amber/red strip: "⚠ Sweeps tomorrow 9–11am · 🎯 usually 9:14" + "Find a safe spot →". |
+| Pinned, sweep <24h | Amber/red strip: "⚠ Sweeps tomorrow 9–11am · 🎯 usually 9:11" + "Find a safe spot →". |
 | Sweeping NOW | Red strip, pulses once on open (reduced-motion safe): "Sweeping now until 11am". |
 | Stale pin (>7 days) | Strip asks: "Still parked on Steiner? [Yes] [Re-pin]" — keeps data honest. |
 | Push permission denied / unsupported | Strip fully functional; small "alerts off" affix links to browser settings / iOS install hint (existing). |
@@ -53,7 +53,7 @@ truth"). No celebration animations; the reward is quiet: a green strip.
   localStorage → subscribes push (one permission ask ever; iOS keeps the install-hint
   divert) → toast: "Watching 214 Steiner — Wed & Fri. We'll warn you the night before."
 - **Evening push** (~8:30pm SF time, only if the pinned block sweeps in the next ~14h):
-  "🧹 Car on Steiner — sweeps tomorrow 9–11am (🎯 usually 9:14). Move it tonight?"
+  "🧹 Car on Steiner — sweeps tomorrow 9–11am (🎯 usually 9:11). Move it tonight?"
   → tap opens `/?move=1` → safe-spot mode.
 - **30-min push**: unchanged, last line of defense.
 - **Re-pin in move mode**: tap a highlighted curb → pin transfers, alerts re-arm, mode

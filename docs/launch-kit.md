@@ -1,16 +1,16 @@
 # CURB Launch Kit
 
 _Ready-to-post assets. Stats computed 2026-06-11 from data/enforcement.json
-(656,599 street-cleaning tickets matched to 9,107 blocks / 18,077 block-days)._
+(~815k of ~1M street-cleaning tickets matched to 9,107 blocks / 18,077 block-days)._
 
 ## The numbers that carry everything
 - The city posts a **2-hour** sweeping window. On the **median block, every ticket
-  falls inside a 22-minute span.**
-- On **87.5% of blocks**, all tickets land within 45 minutes. (94.5% within an hour.)
+  falls inside a ~20-minute span.**
+- On **~77% of blocks**, all tickets land within 45 minutes. (~90% within the first hour.)
 - Typical gap between a block's earliest ticket and its average: **9 minutes** —
   the ticketing pass is fast and consistent.
-- Exemplar: 214–255 Steiner St, posted Wed/Fri 9–11am → median ticket **9:14am**,
-  90% written by 9:39.
+- Exemplar: 214–255 Steiner St, posted Wed/Fri 9–11am → median ticket **9:11am**,
+  90% written by 9:21.
 - Fine: **$105** (verified against 208k tickets YTD 2026).
 
 ## Sequence — pinned calendar (set 2026-06-12)
@@ -30,17 +30,17 @@ _Ready-to-post assets. Stats computed 2026-06-11 from data/enforcement.json
 ---
 
 ## 1 · Reddit — r/sanfrancisco
-**Title:** I analyzed 650k SF street-cleaning tickets. The "2-hour" window is a myth — on most blocks, every ticket lands in a ~22-minute span. So I built a free map of when they actually come.
+**Title:** I analyzed ~815k SF street-cleaning tickets. The "2-hour" window is a myth — on most blocks, every ticket lands in a ~20-minute span. So I built a free map of when they actually come.
 
 **Body:**
 Like everyone here I've eaten my share of $105 street-cleaning tickets, so I pulled
 SFMTA's public citation data (every parking ticket since 2008 is on DataSF) and matched
-~650,000 street-cleaning tickets to their exact blocks.
+~815,000 street-cleaning tickets to their exact blocks.
 
 What I found: the posted window is two hours, but enforcement isn't. On the median
-block, **all tickets fall within a 22-minute span**, usually right after the window
-opens. On 87% of blocks, everything's written inside 45 minutes. Example: the
-9–11am block I checked first gets its median ticket at **9:14am** — nobody's been
+block, **all tickets fall within a ~20-minute span**, usually right after the window
+opens. On ~77% of blocks, everything's written inside 45 minutes. Example: the
+9–11am block I checked first gets its median ticket at **9:11am** — nobody's been
 ticketed there after 9:40 in two years.
 
 So I made the map I wanted: **curb.guide** — every curb in SF colored by its next
@@ -55,7 +55,7 @@ your experience.
 ---
 
 ## 2 · Show HN
-**Title:** Show HN: I matched 650k SF parking tickets to city blocks to find when sweepers actually come
+**Title:** Show HN: I matched ~815k SF parking tickets to city blocks to find when sweepers actually come
 
 **URL:** https://curb.guide/about
 
@@ -90,7 +90,7 @@ Source: https://github.com/alevizio/curb
 **Tagline (49):** Know when SF street sweeping tickets actually land
 
 **Description (≤260):** CURB maps every SF curb by its next street sweep — and shows
-when tickets are actually written on your block, reconstructed from 650k real
+when tickets are actually written on your block, reconstructed from ~815k real
 citations. Permit areas, loading zones, push alerts ~30 min before. Free, no account,
 no tracking.
 
@@ -104,9 +104,9 @@ Hi PH! I kept getting $105 street-cleaning tickets even though I "knew" my block
 schedule — because the posted 2-hour window tells you nothing about when the truck
 actually comes.
 
-SF publishes every parking ticket as open data, so I matched ~650k street-cleaning
+SF publishes every parking ticket as open data, so I matched ~815k street-cleaning
 citations to their exact blocks. It turns out enforcement is incredibly consistent:
-on the median block all tickets land in a 22-minute span. CURB shows that, per curb,
+on the median block all tickets land in a ~20-minute span. CURB shows that, per curb,
 on a live map — plus permit areas, loading zones, and a push alert before your block
 is swept. It's free and anonymous, built on SF open data.
 
@@ -116,18 +116,18 @@ cities you'd want this for. I'm here all day!
 ---
 
 ## 4 · Press pitch (SF Standard / Mission Local / SFGate)
-**Subject:** Data: SF's "2-hour" street-cleaning windows are really ~22 minutes of ticketing
+**Subject:** Data: SF's "2-hour" street-cleaning windows are really ~20 minutes of ticketing
 
 Hi [name],
 
-I analyzed all ~650,000 street-cleaning citations SFMTA has issued over the last two
+I analyzed all ~815,000 street-cleaning citations SFMTA has issued over the last two
 years (public DataSF records) and matched them to their exact blocks. Two findings your
 readers will feel personally:
 
 - The posted window is two hours, but on the median SF block, every ticket is written
-  within a 22-minute span — typically starting minutes after the window opens.
-- Enforcement is remarkably consistent block-to-block: 87% of blocks see all tickets
-  inside 45 minutes. (Sample block: posted 9–11am, median ticket 9:14am, none after 9:40.)
+  within a ~20-minute span — typically starting minutes after the window opens.
+- Enforcement is remarkably consistent block-to-block: ~77% of blocks see all tickets
+  inside 45 minutes. (Sample block: posted 9–11am, median ticket 9:11am, none after 9:40.)
 
 I built a free public map of it — curb.guide — every block's schedule plus its actual
 ticket times. No account, no ads; it runs entirely on city open data.
@@ -149,9 +149,9 @@ Loved the surge piece — I'd been building on the same DataSF citations and you
 matched my numbers almost exactly (I get Ingleside -14% vs your -13%). Three things
 I have that might make follow-ups:
 
-1. **The "2-hour window" is really ~22 minutes.** I matched ~650k street-cleaning
+1. **The "2-hour window" is really ~20 minutes.** I matched ~815k street-cleaning
    citations to their exact blocks: on the median block every ticket lands in a
-   22-minute span. Per-block, on a free public map (curb.guide).
+   ~20-minute span. Per-block, on a free public map (curb.guide).
 2. **My own neighborhood cut of your surge analysis** — same windows, all violation
    types, address-matched: Mission Bay +112%, FiDi +69%, only three neighborhoods
    declining. Chart + methodology: curb.guide/tickets
@@ -179,12 +179,12 @@ all city open data. Curious if it matches what you've seen on your street.
 ## 6 · X/Twitter thread (polished — copy/paste; media notes in [brackets])
 
 **1/** San Francisco posts a 2-hour street-cleaning window.
-I matched 650,000 tickets to the exact blocks they were written on.
-On the median block, every ticket lands inside the same 22 minutes. 🧵
+I matched ~815,000 tickets to the exact blocks they were written on.
+On the median block, every ticket lands inside the same ~20 minutes. 🧵
 [media: the trailer (curb-trailer-16x9.mp4) OR card-stat22.png]
 
 **2/** Street cleaning is SF's #1 ticket — about half a million a year, more than LA writes. It's $105 now.
-And the sign misleads you: it says "9–11am," but the tickets start ~9:14 and stop by 9:40. The window is theater; the enforcement is a sniper.
+And the sign misleads you: it says "9–11am," but the tickets start ~9:11 and stop by 9:40. The window is theater; the enforcement is a sniper.
 
 **3/** So I built the map I wanted → curb.guide
 Every curb in SF, colored by its next sweep. Green = clear, amber = soon, red = move now.
@@ -224,7 +224,7 @@ Cmd+Shift+5 full-screen capture at 2x, clean profile, cursor large; captions bur
 |---|---|---|
 | 0–5s | Zoomed Mission view, curbs colored; idle 1 beat | "Every SF curb, colored by its next street sweep" |
 | 5–15s | Tap a red block → sheet opens on the verdict | "Tap where you parked. Red = sweeping soon." |
-| 15–30s | Scroll sheet to the 🎯 ticket-time line | "The sign says 9–11am. The tickets say 9:14." |
+| 15–30s | Scroll sheet to the 🎯 ticket-time line | "The sign says 9–11am. The tickets say 9:11." |
 | 30–40s | Tap the alert bell → "✓ Alerts on" toast | "One tap = a push alert ~30 min before the sweeper" |
 | 40–50s | Layers panel → permit zones + a white school zone popup | "Permit areas, meters — even the school zones the city doesn't publish" |
 | 50–60s | Zoom out citywide, hold on the full map | "Free. No account. curb.guide" |
@@ -257,7 +257,7 @@ milestone post. One asset, four surfaces.
   alarm") and `data-defense.md` ("is this legal?" — the Find My Parking Cops question).
   The big preempt, verbatim-ready: **"So just... read the sign?"** → "The sign tells you
   the window. CURB tells you when tickets actually start on YOUR block — median block
-  gets every ticket in a 22-minute span — and your calendar doesn't know where you
+  gets every ticket in a ~20-minute span — and your calendar doesn't know where you
   parked, which side you're on, or whether it's the 2nd or 4th Monday."
 - [ ] "Do this for my city" replies: note which cities get asked (demand signal)
 - Timing hook for press + posts: SFMTA just switched meter apps (PayByPhone →

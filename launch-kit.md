@@ -96,7 +96,7 @@ SFGate ran a positive feature on CURB this week — https://www.sfgate.com/local
 >
 > Quick one, and it's local data, not a pitch for a company.
 >
-> I pulled ~650,000 SFMTA street-cleaning citations and matched each one to the block it was written on. The posted "2-hour" sweep window is mostly a 20-minute reality: on a typical block, nearly all tickets are written in one short burst right after the window opens — 77% within the first 45 minutes.
+> I pulled ~815,000 of ~1M SFMTA street-cleaning citations and matched each one to the block it was written on. The posted "2-hour" sweep window is mostly a 20-minute reality: on a typical block, nearly all tickets are written in one short burst right after the window opens — 77% within the first 45 minutes.
 >
 > Concrete example: the 200 block of Steiner. 221 tickets over two years on a posted 9-11am window. Earliest was 9:00am sharp; the median ticket was 9:11am; 90% were written by 9:21am. The back half of that "window" is effectively decorative.
 >
@@ -273,7 +273,7 @@ These build account standing before/around the Juneteenth PSA so your account is
 > Note: PH lets you **self-hunt** now — you don't need a hunter, and self-launching gives you full control of timing + the maker comment. A well-followed hunter only helps with extra reach. If you want one, here's a humble DM:
 
 **To a maker/hunter you genuinely admire (X or PH DM):**
-> Hey [name] — I really like [a specific thing they made/hunted]. I'm launching CURB on Product Hunt [date]: a free map of SF street parking that reverse-engineers ~659k tickets to show when each block *actually* gets ticketed (turns out the posted "2-hour" street-cleaning window is really ~20 minutes). Solo project, no ads, no signup. Would you be up for hunting it — or honestly just taking a look on launch day? Totally fine if not. Either way, thanks for the stuff you put out. — Alejandro (curb.guide)
+> Hey [name] — I really like [a specific thing they made/hunted]. I'm launching CURB on Product Hunt [date]: a free map of SF street parking that reverse-engineers ~815k matched tickets to show when each block *actually* gets ticketed (turns out the posted "2-hour" street-cleaning window is really ~20 minutes). Solo project, no ads, no signup. Would you be up for hunting it — or honestly just taking a look on launch day? Totally fine if not. Either way, thanks for the stuff you put out. — Alejandro (curb.guide)
 
 Keep it short, name something specific of theirs, and give them an easy "no." Don't mass-send.
 

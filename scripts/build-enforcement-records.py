@@ -122,10 +122,10 @@ print("\n=== RESULTS ===")
 print(f"matched tickets: {tot:,}  ({100*tot/len(xs):.1f}% of SF citations)")
 print(f"blocks: {len(blocks):,} | side-days: {kept:,}")
 print(f"median ticket: {median_off} min into the window")
-print(f"within window-start +22min: {within(22):.1f}%  | +45min: {within(45):.1f}%  | +60min: {within(60):.1f}%")
+print(f"within window-start ~20: {within(22):.1f}%  | +45min: {within(45):.1f}%  | +60min: {within(60):.1f}%")
 print(f"median block-day avg: {int(np.median(bd))} min into window  (mean {bd.mean():.1f})")
 
-# launch-kit-style per-block-side metrics (the "22-minute window" + "87% within 45min" claims)
+# launch-kit-style per-block-side metrics (the "~20-minute window" + "~77% within 45min" claims)
 p50s, spans, p90le45, maxle45, span_le22 = [], [], 0, 0, 0
 nb = 0
 for (cnn, dow), offs in bdoff.items():

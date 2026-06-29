@@ -13,7 +13,7 @@
 //
 // Method notes:
 // - Citations aggregated SERVER-SIDE by (citation_location, dow) so we move ~350k
-//   rows, not ~1.2M. Paged with a cursor on citation_location (no deep offsets).
+//   rows, not ~1M. Paged with a cursor on citation_location (no deep offsets).
 // - dow from Socrata date_extract_dow is Postgres DOW (0=Sun..6=Sat) == JS getDay();
 //   we map a stray 7 -> 0 defensively.
 // - A group is only credited to a block if its avg time lands near that block's

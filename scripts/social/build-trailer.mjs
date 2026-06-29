@@ -69,7 +69,7 @@ const beats = [
     rise(p, 0.4, 0.6, 26, { marginTop: 56, fontFamily: 'Hanken', fontWeight: 700, fontSize: 54, color: C.inkSoft }, "So you've got two hours. Right?"),
   ] },
 
-  // 2 · THE TRUTH — 2 hours is really 22 minutes
+  // 2 · THE TRUTH — 2 hours is really ~20 minutes
   { dur: 4.0, bg: C.paper, render: (p, W, H) => {
     const shrink = rev(p, 0.18, 0.42, easeBack);        // 1→0 collapse of the window bar
     const trackW = Math.min(1180, W - 120), fillW = lerp(trackW, Math.min(210, trackW * 0.18), shrink);
@@ -82,7 +82,7 @@ const beats = [
             el('div', { display: 'flex', fontFamily: 'Hanken', fontWeight: 700, fontSize: 30, color: shrink > 0.5 ? C.sign : C.ink, opacity: clamp(Math.abs(shrink - 0.5) * 2) }, shrink > 0.5 ? '22 MIN' : '2 HOURS')),
         ]),
         rise(p, 0.42, 0.6, 30, { marginTop: 44, fontFamily: 'Anton', fontSize: W < 1400 ? 150 : 200, color: C.ink, lineHeight: 0.95 }, '22 MINUTES'),
-        rise(p, 0.58, 0.74, 22, { marginTop: 10, fontFamily: 'Hanken', fontWeight: 700, fontSize: 46, color: C.inkSoft, maxWidth: Math.min(1180, W - 100), textAlign: 'center' }, 'On the median SF block, every ticket lands in the same 22 minutes.'),
+        rise(p, 0.58, 0.74, 22, { marginTop: 10, fontFamily: 'Hanken', fontWeight: 700, fontSize: 46, color: C.inkSoft, maxWidth: Math.min(1180, W - 100), textAlign: 'center' }, 'On the median SF block, every ticket lands in the same ~20 minutes.'),
       ]),
     ];
   } },

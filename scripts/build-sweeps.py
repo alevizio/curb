@@ -5,12 +5,15 @@
 # Notes from the data: 10 broom-sweeper vehicles, ~7.8k trip points Mar–Jun 2026, ~9% exact dup rows
 # (deduped here), ~36% sit at the Cesar Chavez yard (filtered out by the in-window match). One GPS
 # point per trip, so this is good for "when did the sweeper pass" but NOT dense enough to redraw routes.
-import openpyxl, json, math, sys, glob, os, datetime
+import openpyxl, json, math, sys, glob, os, csv, datetime
 import urllib.request, urllib.parse
 import numpy as np
 from shapely import STRtree, points, LineString
 
-TRIPDIR = "/Users/alevizio/Downloads/26-5451_2026-06-26 14_35_30 -0700"
+# By DEFAULT read the committed, reproducible CSV (data/sweeper-gps/sweeper-trips.csv). Only fall back
+# to the raw multi-XLSX export when CURB_SWEEPER_XLSX points at the (non-redistributable) records dir.
+CSV_IN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "sweeper-gps", "sweeper-trips.csv")
+TRIPDIR = os.environ.get("CURB_SWEEPER_XLSX")
 OUT = "/Users/alevizio/curb/data/sweeps.json"
 ENF = "/Users/alevizio/curb/data/enforcement.json"
 TOL_M = 40.0
@@ -52,24 +55,41 @@ tree = STRtree([seg_line[c] for c in cnns])
 print(f"  {len(cnns)} segments", file=sys.stderr)
 
 # 2) parse sweeper trips — DEDUPE exact (device, time, lat, lon) rows (~9% of the export)
-print("reading sweeper trips…", file=sys.stderr)
 xs, ys, mins, dows = [], [], [], []
 seen = set(); dups = 0
-for p in sorted(glob.glob(os.path.join(TRIPDIR, "*.xlsx"))):
-    ws = openpyxl.load_workbook(p, read_only=True)["Data"]
-    it = ws.iter_rows(values_only=True); hdr = False
-    for r in it:
-        if not r: continue
-        if r[0] == 'DeviceName': hdr = True; continue
-        if not hdr or r[0] is None: continue
-        dev, st, lat, lon = r[0], r[13], r[18], r[19]
-        if not isinstance(lat,(int,float)) or not isinstance(lon,(int,float)) or not hasattr(st,'hour'): continue
-        if not (SFLAT[0] <= lat <= SFLAT[1] and SFLON[0] <= lon <= SFLON[1]): continue
-        key = (str(dev), st.isoformat(), round(lat,6), round(lon,6))
-        if key in seen: dups += 1; continue
-        seen.add(key)
-        x, y = proj(lon, lat)
-        xs.append(x); ys.append(y); mins.append(st.hour*60 + st.minute); dows.append((st.weekday()+1)%7)
+def add_point(dev, st, lat, lon):
+    global dups
+    if not isinstance(lat,(int,float)) or not isinstance(lon,(int,float)) or not hasattr(st,'hour'): return
+    if not (SFLAT[0] <= lat <= SFLAT[1] and SFLON[0] <= lon <= SFLON[1]): return
+    key = (str(dev), st.isoformat(), round(lat,6), round(lon,6))
+    if key in seen: dups += 1; return
+    seen.add(key)
+    x, y = proj(lon, lat)
+    xs.append(x); ys.append(y); mins.append(st.hour*60 + st.minute); dows.append((st.weekday()+1)%7)
+
+if TRIPDIR:
+    print("reading sweeper trips (raw XLSX export)…", file=sys.stderr)
+    for p in sorted(glob.glob(os.path.join(TRIPDIR, "*.xlsx"))):
+        ws = openpyxl.load_workbook(p, read_only=True)["Data"]
+        it = ws.iter_rows(values_only=True); hdr = False
+        for r in it:
+            if not r: continue
+            if r[0] == 'DeviceName': hdr = True; continue
+            if not hdr or r[0] is None: continue
+            add_point(r[0], r[13], r[18], r[19])
+else:
+    print("reading sweeper trips (committed CSV)…", file=sys.stderr)
+    with open(CSV_IN, newline="") as f:
+        for r in csv.DictReader(f):
+            ts = (r.get("trip_start") or "").strip()
+            st = None
+            for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f"):
+                try: st = datetime.datetime.strptime(ts, fmt); break
+                except ValueError: pass
+            if st is None: continue
+            try: lat, lon = float(r["latitude"]), float(r["longitude"])
+            except (TypeError, ValueError, KeyError): continue
+            add_point(r.get("vehicle_id"), st, lat, lon)
 xs = np.asarray(xs); ys = np.asarray(ys); mins = np.asarray(mins, np.int32); dows = np.asarray(dows, np.int8)
 print(f"  {len(xs)} unique SF sweeper points ({dups} exact dups dropped)", file=sys.stderr)
 

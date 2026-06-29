@@ -40,6 +40,10 @@ calendar reminder before the next sweep.
    to_time, exceptions, shape (GeoJSON MultiLineString). STALE: this is SFMTA's
    2017 set, flagged by the city as not comprehensively updated. Treat as a hint.
 
+NOTE: enforcement + sweeper-pass data are now GPS-based — records request #26-5453 restored
+GPS lat/long on citations (nearest-CNN-segment match, build-enforcement-records.py), and
+records request #26-5451 supplies sweeper-pass times (data/sweeps.json, build-sweeps.py).
+
 ### Spatial queries (verified working)
 - Segments in viewport: `?$where=intersects(line,'POLYGON((lng lat, ...))')&$limit=2500`
 - RPP in viewport:      `?$where=intersects(shape,'POLYGON((...))') AND rpparea1 IS NOT NULL`
@@ -119,11 +123,14 @@ DONE (all of it, end-to-end):
    diverts to it. Auto-shown once for un-installed iOS Safari.
 4. Re-subscription + 410/404 prune; cron de-dupe via `notifiedFor`; VAPID-key self-heal.
 
-Known limitation (by design — `spot` carries only a single `nextSweepISO`, no recurrence
-rule): an alert is **one-shot**. After that sweep passes, the button reverts from
-"✓ Alerts on" to "🔔 Sweep alerts" (the saved-alert key includes `nextSweepISO`), cueing a
-re-tap to arm the next occurrence. True recurrence would need to persist the sweep rule
-(weekday + week flags + hours) and recompute server-side — intentionally out of scope.
+Forever-watch (SHIPPED): when the saved `spot` carries a recurrence `rule` (weekday +
+week1..week5 flags + hours, via `sanitizeRule`), the cron re-arms it server-side after each
+sweep window ends — `recomputeSpot` advances `nextSweepISO` and RESETS the per-window
+de-dupe, so the watch keeps firing every occurrence (it stops auto-advancing past
+`MAX_WATCH_AGE` ~120 days so a frozen rule can't track a city schedule change). Spots
+WITHOUT a `rule` still degrade to a single **one-shot** push: after that sweep passes the
+button reverts from "✓ Alerts on" to "🔔 Sweep alerts" (the saved-alert key includes
+`nextSweepISO`), cueing a re-tap to arm the next occurrence.
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
 VAPID_SUBJECT, CRON_SECRET, KV_REST_API_URL/TOKEN (Upstash). Embedded VAPID *public* key
