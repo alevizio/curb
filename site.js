@@ -15,15 +15,25 @@
   var mapLink = [['/', 'Map']];
   var primary = [['/n/', 'Neighborhoods'], ['/tickets', 'Tickets'], ['/about', 'About']];
   var secondary = [['/press', 'Press kit'], ['/changelog', 'Changelog'], ['/privacy', 'Privacy']];
-  function links(list) {
+  function svg(d, extra) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (extra || '') + '<path d="' + d + '"/></svg>'; }
+  var IC = {
+    '/': svg('M3 11.5 12 4l9 7.5M5 10v10h14V10'),
+    '/n/': svg('M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z', '<circle cx="12" cy="10" r="2.5"/>'),
+    '/tickets': svg('M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V7Z'),
+    '/about': svg('M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM14 3v5h5'),
+    '/press': svg('M3 11v2a1 1 0 0 0 1 1h2l9 4V6L6 10H4a1 1 0 0 0-1 1Z'),
+    '/changelog': svg('M12 7.5V12l3 2', '<circle cx="12" cy="12" r="9"/>'),
+    '/privacy': svg('M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10ZM9 12l2 2 4-4')
+  };
+  function links(list, ic) {
     return list.map(function (x) {
       var a = on(x[0]);
-      return '<a href="' + x[0] + '"' + (a ? ' class="sn-on" aria-current="page"' : '') + '>' + x[1] + '</a>';
+      return '<a href="' + x[0] + '"' + (a ? ' class="sn-on" aria-current="page"' : '') + '>' + (ic && IC[x[0]] ? IC[x[0]] : '') + '<span>' + x[1] + '</span></a>';
     }).join('');
   }
   var chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
   var burgerIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
-  var extLinks = '<hr><a href="' + GH + '" rel="noopener">Open source' + ext + '</a><a href="' + APP + '" rel="noopener">Get the app' + ext + '</a>';
+  var extLinks = '<hr><a href="' + GH + '" rel="noopener">' + svg('m9 18-6-6 6-6M15 6l6 6-6 6') + '<span>Open source</span>' + ext + '</a><a href="' + APP + '" rel="noopener">' + svg('M11 18.5h2', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/>') + '<span>Get the app</span>' + ext + '</a>';
 
   var nav =
     '<header class="sn-nav">' +
@@ -32,13 +42,13 @@
         '<nav class="sn-links" aria-label="Pages">' + links(primary) +
           '<div class="sn-more">' +
             '<button class="sn-morebtn" type="button" aria-haspopup="true" aria-expanded="false">More ' + chev + '</button>' +
-            '<div class="sn-pop" hidden>' + links(secondary) + extLinks + '</div>' +
+            '<div class="sn-pop" hidden>' + links(secondary, 1) + extLinks + '</div>' +
           '</div>' +
         '</nav>' +
         '<a class="sn-cta sn-ghost" href="' + APP + '" rel="noopener">Download iOS app</a>' +
         '<a class="sn-cta" href="/">Open the map</a>' +
         '<button class="sn-burger" type="button" aria-label="Menu" aria-haspopup="true" aria-expanded="false">' + burgerIcon + '</button>' +
-        '<div class="sn-menu" hidden>' + links(mapLink) + links(primary) + '<hr>' + links(secondary) + extLinks + '</div>' +
+        '<div class="sn-menu" hidden>' + links(mapLink, 1) + links(primary, 1) + '<hr>' + links(secondary, 1) + extLinks + '</div>' +
       '</div>' +
     '</header>';
 
