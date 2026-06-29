@@ -14,10 +14,12 @@
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
 <style>
   :root{--paper:#F2ECDF;--ink:#17150F;--ink-soft:#4A4536;--soft:#4A4536;--red:#C1121F;--meter:#2F5BD0;--green:#1F9E5A}
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
   .wrap{max-width:760px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
   header{padding:calc(40px + env(safe-area-inset-top)) 0 0;display:flex;align-items:center;gap:12px}
@@ -50,11 +52,7 @@
   .foot a{color:var(--paper)} .foot .mark{font-family:'Anton',sans-serif;font-size:19px}.foot .mark span{color:var(--red)}
   .foot .fine{flex-basis:100%;font-weight:600;font-size:12.5px;color:rgba(242,236,223,.66)}
 </style></head><body>
-<header class="wrap">
-  <a class="backbtn" href="/about" aria-label="Back to About"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg></a>
-  <a class="logo" href="/" aria-label="CURB — open the map"><img src="/icons/logo.svg" alt="" aria-hidden="true"></a>
-  <nav class="nav"><a href="/">Map</a><a href="/tickets">Tickets</a><a href="/about">About</a></nav>
-</header>
+<!-- nav injected by /site.js -->
 <main class="wrap">
   <h1>Changelog<span class="d">.</span></h1>
   <p class="lede">CURB is built in the open. Here are the changes that mattered — newest first.
@@ -115,16 +113,5 @@
     street-parking rules — colored by the next street sweep, with real ticket timing per block.
     See it all on <a href="https://github.com/alevizio/curb/commits" rel="noopener">GitHub →</a></p>
 </main>
-<footer><div class="wrap foot">
-  <span class="mark">CURB<span>.</span></span>
-  <a href="/">Open the map</a>
-  <a href="/about">About CURB</a>
-  <a href="/tickets">The ticket economy</a>
-  <a href="/press">Press</a>
-  <a href="https://github.com/alevizio/curb" rel="noopener">Open source — GitHub</a>
-  <a href="/privacy">Privacy</a>
-  <a href="https://github.com/sponsors/alevizio" rel="noopener">Buy me a coffee ☕</a>
-  <span class="fine">CURB is free and open source (MIT). The posted street sign is always the source of truth.
-    Made in San Francisco, on public data — with thanks to SF Public Works &amp; SFMTA for fulfilling the records requests behind it.</span>
-</div></footer>
+<!-- footer injected by /site.js -->
 </body></html>

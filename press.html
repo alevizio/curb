@@ -22,6 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
 <style>
   :root{
     --paper:#F2ECDF; --ink:#17150F; --ink-soft:#4A4536;
@@ -30,7 +32,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:clip}
   ::selection{background:var(--ink);color:var(--paper)}
   :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
   a{color:inherit}
@@ -111,14 +113,7 @@
 </style>
 </head>
 <body>
-<header>
-  <div class="mast">
-    <a href="/" aria-label="CURB — open the map"><img class="clogo" src="/icons/logo.svg" alt="CURB" aria-hidden="true"></a>
-    <span class="pk">Press kit</span>
-    <span class="sp"></span>
-    <a class="btn ghost sm" href="/">Open the map →</a>
-  </div>
-</header>
+<!-- nav injected by /site.js -->
 
 <main>
   <section class="wrap hero">
@@ -241,16 +236,6 @@
   </section>
 </main>
 
-<footer><div class="wrap foot">
-  <span class="mark">CURB<span>.</span></span>
-  <a href="/">Open the map</a>
-  <a href="/about">About</a>
-  <a href="/changelog">Changelog</a>
-  <a href="/tickets">The ticket economy</a>
-  <a href="https://data.sfgov.org" rel="noopener">Data: DataSF</a>
-  <a href="https://github.com/alevizio/curb" rel="noopener">Open source</a>
-  <a href="https://github.com/sponsors/alevizio" rel="noopener">Buy me a coffee ☕</a>
-  <span class="fine">Figures are reconstructed from public SFMTA citation records (DataSF, last ~2 years) and are historical guidance, never a guarantee. The <b>posted sign is always the source of truth</b>. Free and open source (MIT). Running CURB — the map tiles, servers, and domain — comes out of my own pocket; if it saved you a ticket, you can <a href="https://github.com/sponsors/alevizio" rel="noopener">buy me a coffee</a> to help keep it online and ad-free. Made in San Francisco.</span>
-</div></footer>
+<!-- footer injected by /site.js -->
 </body>
 </html>

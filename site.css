@@ -1,0 +1,69 @@
+/* CURB — shared site chrome (top nav + footer), injected by /site.js. Prefixed .sn- so it never
+   collides with any page's own styles. Uses each page's existing tokens, with fallbacks. */
+.sn-nav,.sn-foot{--_paper:var(--paper,#F2ECDF);--_ink:var(--ink,#17150F);--_soft:var(--ink-soft,#4A4536);
+  --_red:var(--red,#C1121F);--_sign:var(--sign,#FFFDF6);font-family:'Hanken Grotesk',system-ui,sans-serif}
+
+/* ---- top nav ---- */
+.sn-nav{position:sticky;top:0;z-index:600;background:var(--_paper);box-shadow:0 3px 16px rgba(23,21,15,.08)}
+.sn-mast{max-width:1080px;margin:0 auto;padding:0 clamp(16px,4.5vw,48px);height:62px;display:flex;align-items:center;gap:12px}
+.sn-logo{display:inline-flex;align-items:center;flex:none;text-decoration:none}
+.sn-logo img{height:42px;width:auto;display:block}
+.sn-links{display:flex;align-items:center;gap:2px;margin-left:auto}
+.sn-links>a,.sn-morebtn{padding:8px 12px;border-radius:10px;font-weight:800;font-size:14.5px;line-height:1;
+  text-decoration:none;color:var(--_ink);border:2.5px solid transparent;background:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;font-family:inherit}
+.sn-links>a:hover,.sn-morebtn:hover,.sn-morebtn[aria-expanded="true"]{border-color:var(--_ink)}
+.sn-links>a.sn-on{color:var(--_ink);text-decoration:underline;text-decoration-color:var(--_red);text-decoration-thickness:3px;text-underline-offset:6px}
+.sn-more{position:relative}
+.sn-morebtn svg{width:11px;height:11px;transition:transform .15s}
+.sn-morebtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.sn-pop{position:absolute;right:0;top:calc(100% + 9px);width:210px;background:var(--_paper);
+  border:3px solid var(--_ink);border-radius:13px;box-shadow:6px 6px 0 var(--_ink);padding:7px}
+.sn-pop a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:9px;
+  font-weight:800;font-size:14.5px;text-decoration:none;color:var(--_ink)}
+.sn-pop a:hover{background:rgba(23,21,15,.07)}
+.sn-pop a.sn-on{background:var(--_ink);color:var(--_paper)}
+.sn-pop hr{border:0;border-top:2px solid rgba(23,21,15,.14);margin:6px 5px}
+.sn-pop .sn-ext{opacity:.5;font-size:12px}
+.sn-cta{margin-left:9px;display:inline-flex;align-items:center;padding:10px 15px;font-weight:800;font-size:14px;
+  text-decoration:none;border:2.5px solid var(--_ink);border-radius:12px;background:var(--_ink);color:var(--_paper);
+  box-shadow:3px 3px 0 rgba(23,21,15,.22)}
+.sn-cta:active{transform:translate(2px,2px);box-shadow:none}
+.sn-cta.sn-ghost{background:transparent;color:var(--_ink);box-shadow:none;margin-left:0}
+.sn-cta.sn-ghost:hover{background:rgba(23,21,15,.06)}
+@media (max-width:1000px){.sn-cta.sn-ghost{display:none}}
+.sn-burger{display:none;margin-left:auto;width:44px;height:44px;align-items:center;justify-content:center;
+  background:var(--_sign);color:var(--_ink);border:2.5px solid var(--_ink);border-radius:11px;box-shadow:3px 3px 0 var(--_ink);cursor:pointer}
+.sn-burger svg{width:21px;height:21px}
+.sn-menu{position:absolute;right:clamp(16px,4.5vw,48px);top:58px;width:236px;background:var(--_paper);
+  border:3px solid var(--_ink);border-radius:14px;box-shadow:7px 7px 0 var(--_ink);padding:8px;z-index:60}
+.sn-menu a{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-radius:9px;
+  font-weight:800;font-size:15px;text-decoration:none;color:var(--_ink)}
+.sn-menu a:hover{background:rgba(23,21,15,.07)}
+.sn-menu a.sn-on{background:var(--_ink);color:var(--_paper)}
+.sn-menu hr{border:0;border-top:2px solid rgba(23,21,15,.14);margin:6px 5px}
+.sn-menu .sn-ext{opacity:.5;font-size:12px}
+[hidden]{display:none!important}
+@media (max-width:720px){ .sn-links,.sn-cta{display:none} .sn-burger{display:flex} }
+
+/* ---- footer (grouped columns — Mobbin best-practice) ---- */
+.sn-foot{margin-top:clamp(48px,8vh,72px);background:var(--_ink);color:var(--_paper)}
+.sn-foot .sn-finner{max-width:1080px;margin:0 auto;padding:46px clamp(16px,4.5vw,48px) 30px;
+  display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:34px 24px}
+.sn-foot .sn-fbrand{max-width:25em}
+.sn-foot .sn-mark{font-family:'Anton',sans-serif;font-size:26px;letter-spacing:.02em;display:block}
+.sn-foot .sn-mark span{color:var(--_red)}
+.sn-foot .sn-ftag{margin:9px 0 17px;font-weight:600;font-size:13.5px;line-height:1.5;color:rgba(242,236,223,.6)}
+.sn-foot .sn-fapp{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border:2px solid rgba(242,236,223,.32);
+  border-radius:11px;font-weight:800;font-size:13.5px;color:var(--_paper);text-decoration:none}
+.sn-foot .sn-fapp:hover{border-color:var(--_paper);background:rgba(242,236,223,.06)}
+.sn-foot .sn-fapp .sn-ext{opacity:.55}
+.sn-foot .sn-fcol h4{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,236,223,.5);margin:0 0 11px}
+.sn-foot .sn-fcol a{display:block;padding:5px 0;font-weight:700;font-size:14px;color:var(--_paper);text-decoration:none}
+.sn-foot .sn-fcol a:hover{text-decoration:underline;text-underline-offset:3px}
+.sn-foot .sn-fbar{border-top:1px solid rgba(242,236,223,.14)}
+.sn-foot .sn-fine{display:block;max-width:1080px;margin:0 auto;padding:18px clamp(16px,4.5vw,48px) 32px;
+  font-weight:600;font-size:12.5px;line-height:1.55;color:rgba(242,236,223,.55)}
+.sn-foot .sn-fine b{color:rgba(242,236,223,.78);font-weight:700}
+@media (max-width:720px){.sn-foot .sn-finner{grid-template-columns:1fr 1fr;gap:28px 20px}.sn-foot .sn-fbrand{grid-column:1/-1}}
+@media (max-width:430px){.sn-foot .sn-finner{grid-template-columns:1fr}}

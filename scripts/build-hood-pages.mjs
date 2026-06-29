@@ -132,7 +132,7 @@ const CSS = `
 :root{--paper:#F2ECDF;--ink:#17150F;--ink-soft:#4A4536;--green:#1F9E5A;--amber:#E08A1E;--red:#C1121F;--meter:#2F5BD0;
   --green-text:#157A44;--amber-text:#8F5A06;--red-text:#C1121F;--sign:#FFFDF6;--shadow:5px 5px 0 var(--ink)}
 html{scroll-behavior:smooth}
-html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
 body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--ink);color:var(--paper)}
 :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
@@ -255,6 +255,8 @@ ${jsonld}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
 <style>${CSS}</style>
 </head>
 <body>`;
@@ -263,6 +265,8 @@ ${jsonld}
 // has the same navigation and footer (topnav on desktop, hamburger on mobile).
 const cur = (current, k) => (current === k ? ' aria-current="page"' : '');
 const NAV = (current) => `
+<!-- nav injected by /site.js -->`;
+const NAV_UNUSED = (current) => `
 <header class="wrap">
   <div class="mast">
     <a class="backbtn" href="/" aria-label="Back to map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg></a>
@@ -291,6 +295,8 @@ const NAV = (current) => `
 </header>`;
 
 const FOOTER = `
+<!-- footer injected by /site.js -->`;
+const FOOTER_UNUSED = `
 <footer><div class="wrap foot">
   <span class="mark">CURB<span>.</span></span>
   <a href="/">Open the map</a>
