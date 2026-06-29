@@ -52,6 +52,11 @@ try {
   check('stats.json', 'topStreets[] length', Array.isArray(stats.topStreets) ? stats.topStreets.length : NaN, 15, 50);
   check('stats.json', 'sweepDow[] length', Array.isArray(stats.sweepDow) ? stats.sweepDow.length : NaN, 7, 7);
   check('stats.json', 'sweepHour[] length', Array.isArray(stats.sweepHour) ? stats.sweepHour.length : NaN, 18, 26);
+
+  // sweeps.json — sweeper-GPS pass times keyed by cnn (#26-5451), counts live in _meta
+  const sw = load('sweeps.json');
+  check('sweeps.json', 'meta.blocks', sw._meta?.blocks, 50, 400);
+  check('sweeps.json', 'keyed entries', Object.keys(sw).filter((k) => k !== '_meta').length, 50, 400);
 } catch (e) {
   errors.push(`failed to read/parse a data file: ${e.message}`);
 }

@@ -8,9 +8,9 @@
 
 ![CURB — every SF curb colored by its next street sweep, with the times tickets actually land on each block](docs/curb-screenshot.png)
 
-San Francisco posts a 2-hour street-cleaning window. We matched **650,000+ real
-citations** to their exact blocks: on the median block, every ticket lands inside a
-**22-minute span**. CURB puts that on a map — every curb in SF colored by its next
+San Francisco posts a 2-hour street-cleaning window. We matched **about a million real
+citations** (~815,000 to their exact blocks): on the median block, the tickets land inside a
+**~20-minute span**. CURB puts that on a map — every curb in SF colored by its next
 sweep, with the posted schedule AND the times tickets are actually written there,
 plus permit (RPP) areas, meters, loading zones (including the unmetered white school
 zones the city doesn't publish on DataSF), and one-tap Web Push move-your-car alerts.
@@ -99,21 +99,22 @@ and ready-to-send public-records requests.
 
 ## How the ticket times are reconstructed
 
-The headline finding — *"the median block is ticketed within ~22 minutes"* — is built offline by
-`scripts/build-enforcement.mjs` + `scripts/build-stats.mjs`:
+The headline finding — *"the median block is ticketed within ~20 minutes"* — is built offline by
+`scripts/build-enforcement-records.py` + `scripts/build-stats.mjs`:
 
-1. **Pull the citations.** SFMTA's citation dataset (`ab4h-6ztd`, ~23.8M rows since 2008) carries a
-   minute-resolution timestamp and the officer-typed address — but **no coordinates since ~2021**, so you
-   get raw strings like `0121 STEINER ST`. Paged with a keyset cursor on `:id` (deep `$offset` times out
-   on a table that size).
-2. **Geocode by joining, not coordinates.** Each address is normalized to
-   `stripZeros(number)|UPPERCASE(street)` and matched to a block segment (CNN) via the Enterprise
-   Addressing System (`3mea-di5p`), then validated against that block's posted sweep schedule
-   (`yhqp-riqs`) to drop bad matches. ~659k street-cleaning citations match over the last ~2 years.
+1. **Pull the citations.** The 2024–2026 street-cleaning citations came via SFMTA public-records request
+   **#26-5453** — about a million rows, **with GPS coordinates** restored (the public DataSF feed
+   `ab4h-6ztd` has dropped coordinates since ~2021). The older address-only path — normalize to
+   `stripZeros(number)|UPPERCASE(street)` and join to a block (CNN) via the Enterprise Addressing System
+   `3mea-di5p`, in `scripts/build-enforcement.mjs` — survives only as a pre-2024 fallback.
+2. **Match by GPS, not address strings.** Each citation's GPS point is matched to the nearest street
+   segment (CNN) within ≤40 m (`yhqp-riqs` geometry), recovering **~815,000 of ~1,000,000** tickets — far
+   more, and more accurately, than the lossy address join.
 3. **Reduce to a per-block-side distribution.** `data/enforcement.json` stores, per block side,
-   `[count, mean-minutes-into-window, earliest, latest]`. The **"22 minutes" is the median, across
-   ~18,000 block-sides, of `latest − earliest`** (the window its whole 2-year ticket history falls in);
-   ~87% of block-sides land all their tickets within 45 minutes.
+   `[count, mean-minutes-into-window, earliest, latest]`. The window is really **~20 minutes** — the median
+   ticket lands ~25 min in, and **~77% of tickets fall within the first 45 minutes (~90% within the first
+   hour)**. A companion dataset — the city's actual **sweeper GPS** (request **#26-5451** → `data/sweeps.json`
+   via `scripts/build-sweeps.py`) — shows tickets land a median of **~19 minutes after** the sweeper passes.
 
 **Known limits (also stated on the About page):** it's an address-string→block join, not GPS, so any
 single block can be off; the distribution is conditional on enforcement happening — it shows *when*
