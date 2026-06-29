@@ -14,10 +14,11 @@
   var ext = ' <span class="sn-ext">↗</span>';
   var mapLink = [['/', 'Map']];
   var primary = [['/n/', 'Neighborhoods'], ['/tickets', 'Tickets'], ['/about', 'About']];
-  var secondary = [['/press', 'Press kit'], ['/changelog', 'Changelog'], ['/privacy', 'Privacy']];
+  var secondary = [['/support', 'Support'], ['/press', 'Press kit'], ['/changelog', 'Changelog'], ['/privacy', 'Privacy']];
   function svg(d, extra) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (extra || '') + '<path d="' + d + '"/></svg>'; }
   var IC = {
     '/': svg('M3 11.5 12 4l9 7.5M5 10v10h14V10'),
+    '/support': svg('M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54Z'),
     '/n/': svg('M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z', '<circle cx="12" cy="10" r="2.5"/>'),
     '/tickets': svg('M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V7Z'),
     '/about': svg('M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM14 3v5h5'),
@@ -64,7 +65,7 @@
           '<a href="/">Map</a><a href="/n/">Neighborhoods</a><a href="/tickets">The ticket economy</a><a href="/about">About</a>' +
         '</nav>' +
         '<nav class="sn-fcol" aria-label="More"><h4>More</h4>' +
-          '<a href="/press">Press kit</a><a href="/changelog">Changelog</a><a href="/privacy">Privacy</a>' +
+          '<a href="/support">Support CURB</a><a href="/press">Press kit</a><a href="/changelog">Changelog</a><a href="/privacy">Privacy</a>' +
           '<a href="' + GH + '/issues" rel="noopener">Report a bug</a>' +
         '</nav>' +
         '<nav class="sn-fcol" aria-label="Open"><h4>Open</h4>' +

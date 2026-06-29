@@ -39,6 +39,10 @@
     {
       "source": "/changelog",
       "destination": "/changelog.html"
+    },
+    {
+      "source": "/support",
+      "destination": "/support.html"
     }
   ],
   "headers": [

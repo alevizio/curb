@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Support CURB — keep it free &amp; ad-free</title>
+<meta name="description" content="CURB is free, open-source, no ads, no tracking — built solo on public San Francisco data. If it saved you a ticket, chip in to keep it online and free for the whole city.">
+<link rel="canonical" href="https://curb.guide/support">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Support CURB">
+<meta property="og:description" content="Keep CURB free and ad-free for all of San Francisco.">
+<meta property="og:url" content="https://curb.guide/support">
+<meta property="og:image" content="https://curb.guide/og.png?v=2">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://curb.guide/og.png?v=2">
+<link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
+<link rel="icon" sizes="any" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
+<style>
+  :root{--paper:#F2ECDF;--ink:#17150F;--ink-soft:#4A4536;--soft:#4A4536;--red:#C1121F;--meter:#2F5BD0;--green:#1F9E5A;--sign:#FFFDF6}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
+  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+  h1{font-family:'Anton',sans-serif;font-size:clamp(44px,9vw,78px);text-transform:uppercase;line-height:.95;margin:clamp(34px,7vh,64px) 0 8px}
+  h1 .d{color:var(--red)}
+  .lede{font-weight:600;color:var(--soft);max-width:42em;font-size:clamp(17px,2vw,19px)}
+  .lede b{color:var(--ink)}
+  .cta-row{margin:30px 0 10px}
+  .donate{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:17px;text-decoration:none;
+    border:2.5px solid var(--ink);border-radius:14px;padding:14px 26px;background:var(--ink);color:var(--paper);box-shadow:4px 4px 0 var(--ink)}
+  .donate:active{transform:translate(2px,2px);box-shadow:none}
+  .soon{font-weight:700;color:var(--ink);background:var(--sign);border:2.5px solid var(--ink);border-radius:14px;padding:15px 18px;max-width:40em}
+  .note{font-size:13.5px;color:var(--soft);font-weight:600;margin-top:10px;max-width:42em}
+  .ways{margin:clamp(38px,7vh,64px) 0 0;border-top:3px solid var(--ink);padding-top:26px}
+  .ways h2{font-family:'Anton',sans-serif;font-size:clamp(24px,4vw,32px);text-transform:uppercase;margin-bottom:16px}
+  .ways h2 .d{color:var(--red)}
+  .wlist{display:grid;gap:12px}
+  .wlist a{display:flex;gap:13px;align-items:flex-start;text-decoration:none;color:var(--ink);border:2.5px solid var(--ink);border-radius:14px;padding:15px 17px;background:var(--sign)}
+  .wlist a:hover{background:#fff}
+  .wlist .ic{flex:none;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+  .wlist .ic.fill{fill:currentColor;stroke:none}
+  .wlist b{display:block;font-weight:800;font-size:16px}
+  .wlist span{color:var(--soft);font-weight:600;font-size:14px;display:block}
+  .fine{margin:30px 0 12px;font-size:12.5px;color:var(--soft);font-weight:600;max-width:42em}
+</style></head><body>
+<!-- nav injected by /site.js -->
+<main class="wrap">
+  <h1>Keep CURB<br>free<span class="d">.</span></h1>
+  <p class="lede">CURB is <b>free, open-source, and ad-free</b> — no accounts, no tracking, built solo on San Francisco's public data. The map tiles, domain, and servers come out of my own pocket. If CURB saved you a ticket, a few dollars helps keep it online and free for the whole city.</p>
+
+  <div class="cta-row">
+    <a class="donate" id="donateBtn" href="">♥ Support CURB</a>
+  </div>
+  <p class="soon" id="soon" hidden>💛 One-tap support is launching in a day or two. In the meantime, the best free ways to help are right below — thank you!</p>
+  <p class="note" id="dnote">One-time or monthly, any amount, secured by Stripe. It's a personal thank-you — not a tax-deductible donation (CURB isn't a nonprofit).</p>
+
+  <section class="ways">
+    <h2>Other ways to help<span class="d">.</span></h2>
+    <div class="wlist">
+      <a href="https://github.com/alevizio/curb" target="_blank" rel="noopener"><svg class="ic fill" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z"/></svg><span><b>Star it on GitHub</b><span>It's MIT-licensed and fully open — a star helps more people find it.</span></span></a>
+      <a id="shareLink" href="https://curb.guide" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg><span><b>Share it</b><span>Send the map to a friend who parks on the street in SF.</span></span></a>
+      <a href="https://github.com/alevizio/curb/issues/new/choose" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg><span><b>Report a wrong block</b><span>Spot a bad sweep time or a bug? Tell me and I'll fix it.</span></span></a>
+    </div>
+  </section>
+
+  <p class="fine">CURB takes no ads and collects no personal data. Running costs — map tiles, domain, serverless API, and the push-notification backend — are covered out of pocket; your support keeps it free and ad-free for everyone.</p>
+</main>
+<!-- footer injected by /site.js -->
+<script>
+  (function () {
+    // Donate button activates only once a real Stripe link is in its href; until then, show "other ways".
+    var b = document.getElementById('donateBtn'), url = b.getAttribute('href');
+    if (!url || url.indexOf('stripe.com') === -1) {
+      b.hidden = true; document.getElementById('dnote').hidden = true; document.getElementById('soon').hidden = false;
+    } else { b.target = '_blank'; b.rel = 'noopener'; }
+    // Share: native share sheet where supported, else copy the link.
+    var sh = document.getElementById('shareLink');
+    sh.addEventListener('click', function (e) {
+      e.preventDefault();
+      var data = { title: 'CURB — SF street parking', text: 'Free SF street-parking map — know when tickets actually land.', url: 'https://curb.guide' };
+      if (navigator.share) { navigator.share(data).catch(function () {}); }
+      else if (navigator.clipboard) { navigator.clipboard.writeText('https://curb.guide'); sh.querySelector('b').textContent = 'Link copied ✓'; }
+      else { window.open('https://curb.guide', '_blank'); }
+    });
+  })();
+</script>
+</body></html>
