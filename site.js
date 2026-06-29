@@ -70,7 +70,6 @@
         '<nav class="sn-fcol" aria-label="Open"><h4>Open</h4>' +
           '<a href="' + GH + '" rel="noopener">Source on GitHub</a>' +
           '<a href="https://datasf.org" rel="noopener">Data: DataSF</a>' +
-          '<a href="https://github.com/sponsors/alevizio" rel="noopener">♡ Sponsor</a>' +
         '</nav>' +
       '</div>' +
       '<div class="sn-fbar"><span class="sn-fine">The posted street sign is always the source of truth — temporary signs &amp; holidays override everything here. ' +
