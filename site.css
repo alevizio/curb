@@ -1,7 +1,7 @@
 /* CURB — shared site chrome (top nav + footer), injected by /site.js. Prefixed .sn- so it never
    collides with any page's own styles. Uses each page's existing tokens, with fallbacks. */
 /* Smooth (squircle) corners wherever supported — progressive enhancement; falls back to normal round. */
-*{corner-shape:superellipse(2)}
+*,*::before,*::after{corner-shape:superellipse(2)}
 .sn-nav,.sn-foot{--_paper:var(--paper,#F2ECDF);--_ink:var(--ink,#17150F);--_soft:var(--ink-soft,#4A4536);
   --_red:var(--red,#C1121F);--_sign:var(--sign,#FFFDF6);font-family:'Hanken Grotesk',system-ui,sans-serif}
 
