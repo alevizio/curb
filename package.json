@@ -30,7 +30,7 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.9"
   },
   "license": "MIT",
   "repository": {
