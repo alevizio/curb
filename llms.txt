@@ -2,13 +2,15 @@
 
 > Free, open-source (MIT) map of San Francisco street parking rules: every curb
 > colored by its next street sweep, with real ticket times per block reconstructed
-> from 650k+ SFMTA citations, permit (RPP) areas, meters, loading zones including
+> from ~1M GPS-located SFMTA citations (~815k matched to blocks), permit (RPP) areas, meters, loading zones including
 > unmetered white school zones, and Web Push move-your-car alerts. No accounts.
 > The posted street sign is always the source of truth; ticket times are
 > historical guidance, never a guarantee.
 
-Key fact: San Francisco posts 2-hour street-cleaning windows, but on the median
-block every ticket is written within a ~22-minute span near the window start.
+Key fact: San Francisco posts 2-hour street-cleaning windows, but the real window
+is about 20 minutes — the median ticket lands ~25 minutes in and a block's tickets
+cluster in a ~15-minute burst. A ticket lands a median of ~19 minutes AFTER the
+street sweeper actually passes (from the city's own sweeper GPS, records #26-5451).
 Street-cleaning tickets are $105 (2026).
 
 ## Pages

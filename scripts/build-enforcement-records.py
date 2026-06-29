@@ -2,13 +2,13 @@
 # Build enforcement.json from the SFMTA records-request citations (GPS-geocoded, request #26-5453).
 # Matches each ticket to the nearest CNN street segment (<=40m) instead of the lossy address join,
 # then aggregates by (cnn, jsDow) -> [n, avgMin, loMin, hiMin], same schema the app already reads.
-import openpyxl, json, math, sys, itertools, datetime
+import openpyxl, json, math, os, sys, itertools, datetime
 import urllib.request, urllib.parse
 import numpy as np
 from shapely import STRtree, points, LineString
 
-XLSX = "/Users/alevizio/Downloads/TRC7.2.22_1.1.2024_06.24.2026.xlsx"
-OUT  = "/private/tmp/claude-501/-Users-alevizio/70280dca-066e-48ef-a199-c71bc5209b0d/scratchpad/enforcement.json"
+XLSX = os.environ.get("CURB_CITATIONS_XLSX", "/Users/alevizio/Downloads/TRC7.2.22_1.1.2024_06.24.2026.xlsx")  # SFMTA records #26-5453 (not redistributable); set CURB_CITATIONS_XLSX to override
+OUT  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "enforcement.json")
 TOL_M = 40.0          # max citation->segment distance (meters)
 MIN_N = 5
 SFLAT, SFLON = (37.69, 37.84), (-122.53, -122.34)

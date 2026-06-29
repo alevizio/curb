@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "npx serve . -l 3000",
     "og": "sh og/render.sh",
-    "build:enforcement": "node scripts/build-enforcement.mjs",
+    "build:enforcement": "python3 scripts/build-enforcement-records.py",
+    "build:enforcement:legacy": "node scripts/build-enforcement.mjs",
+    "build:sweeps": "python3 scripts/build-sweeps.py",
     "deploy": "vercel",
     "build:overview": "node scripts/build-overview.mjs",
     "build:zones": "node scripts/build-zones.mjs",
