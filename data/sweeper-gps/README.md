@@ -22,7 +22,7 @@ vehicles, **March 1 – June 25, 2026**). The request is fulfilled on a rolling 
 
 ## What's in `sweeper-trips.csv`
 
-9,556 unique trips (exact duplicate rows removed). One row = one logged trip for one truck.
+10,525 unique trips (exact duplicate rows removed). One row = one logged trip for one truck.
 
 | column | meaning |
 |---|---|
@@ -45,6 +45,6 @@ vehicles, **March 1 – June 25, 2026**). The request is fulfilled on a rolling 
 `../sweeps.json` — each block's typical sweeper-pass time, built from this file by
 [`scripts/build-sweeps.py`](../../scripts/build-sweeps.py): dedupe → match each GPS point to the nearest
 street-segment (CNN, ≤40 m) → keep passes inside the posted window → aggregate by block × weekday
-(≥3 passes). 184 blocks / 229 side-days so far, growing as the city releases more.
+(≥3 passes). 190 blocks / 239 side-days so far, growing as the city releases more.
 
 All public record. CURB is open source under the MIT license.
