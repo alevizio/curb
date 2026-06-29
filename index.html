@@ -772,7 +772,7 @@ addEventListener('load',()=>{try{if(new URLSearchParams(location.search).get('p'
 // Google Map Tiles API key (optional). When set, the basemap uses official Google tiles; otherwise it
 // falls back to keyless CARTO. This is a CLIENT key — restrict it by HTTP referrer + API in Google Cloud
 // Console. Set it here, or define window.GMAPS_KEY before this script (e.g. a gitignored config.js).
-const GMAPS_KEY=((typeof window!=='undefined'&&window.GMAPS_KEY)||"").trim();
+const GMAPS_KEY="";  // FORCED OFF (2026-06-29) — free CARTO basemap, no Google Maps billing. To re-enable Google tiles: restore ((typeof window!=='undefined'&&window.GMAPS_KEY)||"").trim()
 // Basemap style: "Parchment Draft" (styledmap.com) — warm paper tones that match the app's
 // paper/ink palette. Applied via the Map Tiles createSession `styles` field (roadmap only);
 // the keyless CARTO fallback is NOT styled.
