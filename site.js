@@ -79,4 +79,17 @@
   burger.addEventListener('click', function (e) { e.stopPropagation(); var o = menu.hidden; closeAll(); set(burger, menu, o); });
   document.addEventListener('click', function (e) { if (!e.target.closest('.sn-more,.sn-burger,.sn-menu')) closeAll(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+
+  // reveal on scroll-up, hide on scroll-down (always shown near the top / when a menu is open)
+  var navEl = document.querySelector('.sn-nav');
+  var lastY = window.pageYOffset, tick = false;
+  window.addEventListener('scroll', function () {
+    if (tick) return; tick = true;
+    requestAnimationFrame(function () {
+      var y = window.pageYOffset;
+      if (pop.hidden && menu.hidden && y > 90 && y > lastY + 4) navEl.classList.add('sn-hide');
+      else if (y < lastY - 4 || y < 90) navEl.classList.remove('sn-hide');
+      lastY = y; tick = false;
+    });
+  }, { passive: true });
 })();
