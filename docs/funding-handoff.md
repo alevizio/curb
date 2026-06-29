@@ -34,12 +34,14 @@ Also: **The Dissent SF** (June 2026), "After $2,000 in sweeping tickets, a Haigh
 - Repo hardening: **Dependabot** (`.github/dependabot.yml`) and **CodeQL** (`.github/workflows/codeql.yml`) are enabled via files.
 - **Traction one-pager** at `docs/traction.md`.
 - **The ~$200/mo Google Maps bill is already stopped** — the app was flipped to free CARTO basemap tiles (commit on `main`). So the *cost emergency is over*; Google-credit tickets are now optional, not urgent.
+- **The Support page is built** — `curb.guide/support` (file `support.html`): why-support copy + an "other ways to help" set; "Support CURB" is in the nav More menu + footer. The donate button is **hidden behind a "launching soon" note and auto-activates** the instant a real Stripe link is dropped into `support.html`'s `#donateBtn` href.
+- **Donations use a FRESH Stripe account — not the old gmail one.** Stripe confirmed `viziomas@gmail.com` is a Sticker-Mule custom-connected account with no dashboard, so it's unusable for donations. Alejandro is creating a fresh standalone Stripe account under @curb.guide (his identity/bank — his to do). A Sticker Mule support email is already sent to unlock that old account's payouts (a side issue, unrelated to CURB).
 
 ## Global rules
 - **Deploy order:** always `git push origin HEAD:main` FIRST (prod branch = main; Vercel git-integration). Verify on curb.guide before submitting any URL to a funder.
 - **No PII:** CURB stores no user data; the serverless API handles public DataSF data only — say this in security/grant narratives.
 - **The `@curb.guide` email (Task 0) unblocks everything** — Google for Startups auto-rejects gmail addresses; do it first.
-- **Donation rails are paused** — Alejandro is sorting Stripe and asked to hold the on-site donation link (it's been removed from the footer). **Confirm with him before setting up GitHub Sponsors / Ko-fi / re-adding any donate link.**
+- **Donations go through Stripe → the Support page** (already built). The only remaining step is Alejandro's Stripe **Payment Link** dropped into `support.html`'s `#donateBtn` href — a coworker may do that *once given the link*. Don't set up GitHub Sponsors / Ko-fi or touch any payment settings without his explicit OK; Stripe is the chosen path.
 
 ---
 
@@ -57,8 +59,8 @@ Set up **`alejandro@curb.guide`** (or `hello@curb.guide`) — cheapest is Cloudf
 Hardening is mostly done (Dependabot + CodeQL via files, SECURITY.md exists). **Remaining:** enable **secret scanning** (repo Settings → Security), optionally pin the Actions cron to a commit SHA, then **submit the form** (link in ticket). Frame it as *security hardening of real civic infrastructure* (SFGate + 2,500 visitors), not "fund my hosting."
 → https://linear.app/alevizio/issue/ALE-196
 
-### 3 · Donation rails — CONFIRM FIRST · ALE-195 (Backlog)
-GitHub Sponsors (recurring) + Ko-fi (one-off), both 0% platform fee; produces the channel URL `funding.json` references. **Hold until Alejandro confirms** (Stripe decision in progress). If approved: enable 2FA on GitHub, set up Sponsors + Ko-fi, add `.github/FUNDING.yml`, and a tasteful footer link.
+### 3 · Donations via Stripe — mostly built · ALE-195 (Backlog)
+The Support page (`curb.guide/support`) is **already built** and linked in the nav + footer. Path: Alejandro creates a **fresh standalone Stripe account under @curb.guide** (the old gmail one is Sticker-Mule-locked, no dashboard, unusable) → makes a **"Support CURB" Payment Link** (customers choose amount; optionally a monthly one) → the **only remaining edit** is dropping that `buy.stripe.com/…` link into `support.html`'s `#donateBtn` href (a coworker can do this once given the link; the button then auto-activates). GitHub Sponsors / Ko-fi are optional alternates — don't add without his OK.
 → https://linear.app/alevizio/issue/ALE-195
 
 ### 4 · Cloudflare Project Alexandria (open now) + Vercel OSS · ALE-197 (Backlog)
