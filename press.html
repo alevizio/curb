@@ -57,7 +57,8 @@
   .lede b{color:var(--ink)}
   .herocta{display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}
   /* sections */
-  section{padding:clamp(42px,6.5vh,68px) 0}
+  section{padding:0}
+  .wrap+.wrap{margin-top:clamp(46px,7vh,74px)}
   h2{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(24px,3.4vw,34px);line-height:1.02;margin-bottom:18px}
   h2 .r{color:var(--red)}
   p.body{max-width:62ch;margin-bottom:14px}
@@ -79,8 +80,11 @@
   .hoods li::before{content:counter(h);font-family:'Anton',sans-serif;background:var(--ink);color:var(--paper);width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:16px}
   .hoods .v{margin-left:auto;color:var(--ink-soft);font-weight:600;font-size:14.5px}
   /* gallery */
-  .shots{display:flex;gap:16px;overflow-x:auto;padding:6px 2px 16px;scroll-snap-type:x mandatory}
-  .shots figure{flex:none;width:208px;scroll-snap-align:start}
+  .shots{display:flex;gap:16px;overflow-x:auto;padding:6px 2px 16px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:rgba(23,21,15,.45) rgba(23,21,15,.1)}
+  .shots::-webkit-scrollbar{height:10px}
+  .shots::-webkit-scrollbar-track{background:rgba(23,21,15,.08);border-radius:99px}
+  .shots::-webkit-scrollbar-thumb{background:rgba(23,21,15,.42);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+  .shots figure{flex:none;width:300px;scroll-snap-align:start}
   .shots img{width:100%;border:3px solid var(--ink);border-radius:20px;display:block;background:var(--sign)}
   .shots figcaption{font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-top:8px;text-align:center}
   /* quotes */
@@ -97,7 +101,9 @@
   .maker p{max-width:60ch;font-size:15.5px}
   .dl{display:flex;flex-wrap:wrap;gap:11px;margin-top:6px}
   .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-  .links a{border:2.5px solid var(--ink);border-radius:11px;padding:9px 14px;text-decoration:none;font-weight:700;font-size:14.5px;background:var(--paper)}
+  .links a{display:inline-flex;align-items:center;gap:10px;border:2.5px solid var(--ink);border-radius:14px;padding:7px 15px 7px 7px;text-decoration:none;font-weight:700;font-size:14px;background:var(--paper)}
+  .links a img{width:44px;height:44px;object-fit:cover;border:2px solid var(--ink);border-radius:10px;background:var(--sign);flex:none}
+  .links a:hover{background:var(--sign)}
   /* footer */
   footer{border-top:2px solid rgba(23,21,15,.14);margin-top:40px;padding:30px 0 50px}
   .foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:14px}
@@ -182,10 +188,10 @@
       <figure><a href="/press/curb-data.png" download><img src="/press/curb-data.png" alt="CURB by-the-numbers data panel"></a><figcaption>The receipts</figcaption></figure>
     </div>
     <div class="links">
-      <a href="/press/curb-app-map.png" download>↓ Clean app shot — map</a>
-      <a href="/press/curb-app-block.png" download>↓ Clean app shot — block</a>
-      <a href="/icons/logo.svg" download>↓ Logo (SVG)</a>
-      <a href="/og.png" download>↓ Social card (1200×630)</a>
+      <a href="/press/curb-app-map.png" download><img src="/press/curb-app-map.png" alt=""><span>Clean app shot — map</span></a>
+      <a href="/press/curb-app-block.png" download><img src="/press/curb-app-block.png" alt=""><span>Clean app shot — block</span></a>
+      <a href="/icons/logo.svg" download><img src="/icons/logo.svg" alt=""><span>Logo (SVG)</span></a>
+      <a href="/og.png" download><img src="/og.png" alt=""><span>Social card (1200×630)</span></a>
     </div>
     <p class="body" style="margin-top:14px;font-size:14px;color:var(--ink-soft)">All screenshots are real product captures, free to use with a credit to CURB / curb.guide. Need a specific size, state, or neighborhood? Just ask.</p>
   </section>
