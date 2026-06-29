@@ -1,0 +1,122 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Changelog — CURB</title>
+<meta name="description" content="What's changed in CURB — the free San Francisco street-parking map. Built in the open; full history on GitHub.">
+<link rel="canonical" href="https://curb.guide/changelog">
+<link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
+<link rel="icon" sizes="any" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#F2ECDF;--ink:#17150F;--ink-soft:#4A4536;--soft:#4A4536;--red:#C1121F;--meter:#2F5BD0;--green:#1F9E5A}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  body{background:var(--paper);color:var(--ink);font-family:'Hanken Grotesk',sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+  header{padding:calc(40px + env(safe-area-inset-top)) 0 0;display:flex;align-items:center;gap:12px}
+  .backbtn{display:inline-grid;place-items:center;width:34px;height:34px;flex:none;background:none;color:var(--ink-soft);border:0;text-decoration:none;padding:0;line-height:1;margin-left:-6px}
+  .backbtn:hover{color:var(--ink)}
+  .backbtn svg{display:block;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .logo{display:inline-flex;height:51px}.logo img{height:51px;width:auto;display:block}
+  .nav{margin-left:auto;display:flex;gap:6px}
+  .nav a{padding:8px 12px;border-radius:9px;font-weight:800;font-size:14px;text-decoration:none;color:var(--ink);border:2.5px solid transparent}
+  .nav a:hover{border-color:var(--ink)}
+  h1{font-family:'Anton',sans-serif;font-size:clamp(40px,8vw,68px);text-transform:uppercase;line-height:.96;margin:clamp(34px,7vh,64px) 0 6px}
+  h1 .d{color:var(--red)}
+  .lede{font-weight:600;color:var(--soft);max-width:44em;margin-bottom:30px}
+  .lede a{color:var(--meter);text-underline-offset:3px}
+  a{color:var(--meter)}
+  .entry{border-top:3px solid var(--ink);padding:22px 0 4px}
+  .entry .date{font-family:'Anton',sans-serif;font-size:21px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:12px}
+  .cl{display:flex;gap:11px;align-items:flex-start;margin:11px 0}
+  .cl .tag{flex:none;margin-top:2px;font-family:'Anton',sans-serif;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 7px;border-radius:7px;border:2px solid var(--ink);color:var(--paper);background:var(--ink);min-width:62px;text-align:center;line-height:1.15}
+  .cl .tag.data{background:var(--meter);border-color:var(--meter)}
+  .cl .tag.new{background:var(--green);border-color:var(--green)}
+  .cl .tag.ios{background:var(--ink);border-color:var(--ink)}
+  .cl .tag.fix{background:var(--paper);color:var(--ink)}
+  .cl .tag.note{background:var(--red);border-color:var(--red)}
+  .cl p{margin:0} .cl b{font-weight:800}
+  .foot-note{margin:26px 0 4px;font-weight:600;color:var(--soft)}
+  footer{margin-top:48px;border-top:3px solid var(--ink);background:var(--ink);color:var(--paper)}
+  .foot{padding:26px 0;font-weight:700;font-size:14px;display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center}
+  .foot a{color:var(--paper)} .foot .mark{font-family:'Anton',sans-serif;font-size:19px}.foot .mark span{color:var(--red)}
+  .foot .fine{flex-basis:100%;font-weight:600;font-size:12.5px;color:rgba(242,236,223,.66)}
+</style></head><body>
+<header class="wrap">
+  <a class="backbtn" href="/about" aria-label="Back to About"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg></a>
+  <a class="logo" href="/" aria-label="CURB — open the map"><img src="/icons/logo.svg" alt="" aria-hidden="true"></a>
+  <nav class="nav"><a href="/">Map</a><a href="/tickets">Tickets</a><a href="/about">About</a></nav>
+</header>
+<main class="wrap">
+  <h1>Changelog<span class="d">.</span></h1>
+  <p class="lede">CURB is built in the open. Here are the changes that mattered — newest first.
+    The complete commit-by-commit history lives on <a href="https://github.com/alevizio/curb/commits" rel="noopener">GitHub</a>.</p>
+
+  <div class="entry">
+    <div class="date">June 29, 2026</div>
+    <div class="cl"><span class="tag data">Data</span><p>Sweeper-pass times are now labeled as the city's <b>real GPS</b>, not an estimate — and coverage grew to <b>118 blocks</b> (deduped, ≥3 real passes).</p></div>
+    <div class="cl"><span class="tag new">Open</span><p>Published the raw <b>SF sweeper-GPS dataset</b> in the repo (7,099 trips), with provenance and thanks to the city.</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 28, 2026</div>
+    <div class="cl"><span class="tag new">New</span><p>A small <b>Pride-weekend</b> touch on the map — a rainbow-outlined logo, date-gated so it retires itself after June. 🌈</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 26, 2026</div>
+    <div class="cl"><span class="tag new">New</span><p><b>Real "when the sweeper passes."</b> Using San Francisco's actual street-sweeper GPS (public-records request #26-5451), blocks now show the truck's real pass time — and the data confirms a ticket lands a median of <b>~19 minutes after</b> the sweeper. 🧹</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 25, 2026</div>
+    <div class="cl"><span class="tag data">Data</span><p>Rebuilt ticket timing from the <b>complete citation record</b> — about a million GPS-located tickets. The posted 2-hour window is really about <b>20 minutes</b>.</p></div>
+    <div class="cl"><span class="tag ios">iOS</span><p>The <b>CURB iOS app went live</b> on the App Store — free, a native wrapper of the same map.</p></div>
+    <div class="cl"><span class="tag new">New</span><p>Added open-source sponsorship links for anyone who wants to help keep CURB free and ad-free.</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 22, 2026</div>
+    <div class="cl"><span class="tag new">New</span><p><b>Configurable sweep alerts</b> — choose the cadence (Light / Normal / Intense) and the voice (Cheeky / Drill / Deadpan), with a "send me a test."</p></div>
+    <div class="cl"><span class="tag new">New</span><p>A reporter-ready <b>press kit</b> at /press, and a self-activating "Get the iOS app" link.</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 19, 2026</div>
+    <div class="cl"><span class="tag new">New</span><p><b>Correct a Sign</b> — spot a wrong block? Report it in two taps. Plus Share, Send-feedback, and Rate-CURB in the menu, and a Privacy page.</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 18, 2026</div>
+    <div class="cl"><span class="tag new">New</span><p>Surfaced the <b>"park after the sweeper passes"</b> rule, and a holiday heads-up when sweeping is suspended (e.g. Juneteenth).</p></div>
+    <div class="cl"><span class="tag fix">Fix</span><p>Map stays reliable — it falls back gracefully to free tiles if the basemap hits its daily limit.</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 17, 2026</div>
+    <div class="cl"><span class="tag new">New</span><p>Richer <b>neighborhood pages</b> — per-neighborhood curb mix, off-street garages, and high-intent FAQs.</p></div>
+    <div class="cl"><span class="tag data">Data</span><p>Added <b>"The receipts"</b> to the About page — every data source and the methodology, in the open.</p></div>
+  </div>
+
+  <div class="entry">
+    <div class="date">June 16, 2026</div>
+    <div class="cl"><span class="tag ios">iOS</span><p>Native <b>iOS push notifications</b> and the iOS app groundwork, plus a launch trailer and App Store screenshot tooling.</p></div>
+  </div>
+
+  <p class="foot-note">Earlier in June 2026, CURB launched as a free, open-source map of San Francisco's
+    street-parking rules — colored by the next street sweep, with real ticket timing per block.
+    See it all on <a href="https://github.com/alevizio/curb/commits" rel="noopener">GitHub →</a></p>
+</main>
+<footer><div class="wrap foot">
+  <span class="mark">CURB<span>.</span></span>
+  <a href="/">Open the map</a>
+  <a href="/about">About CURB</a>
+  <a href="/tickets">The ticket economy</a>
+  <a href="/press">Press</a>
+  <a href="https://github.com/alevizio/curb" rel="noopener">Open source — GitHub</a>
+  <a href="/privacy">Privacy</a>
+  <span class="fine">CURB is free and open source (MIT). The posted street sign is always the source of truth.
+    Made in San Francisco, on public data — with thanks to SF Public Works &amp; SFMTA for fulfilling the records requests behind it.</span>
+</div></footer>
+</body></html>

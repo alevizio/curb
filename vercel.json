@@ -35,6 +35,10 @@
     {
       "source": "/press",
       "destination": "/press.html"
+    },
+    {
+      "source": "/changelog",
+      "destination": "/changelog.html"
     }
   ],
   "headers": [

@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 # Build data/sweeps.json — when the street sweeper ACTUALLY passes each block — from the SF Public
-# Works AVL "Advanced Trips Detail" GPS data (records request #26-5451). Same shape as enforcement.json:
+# Works AVL "Advanced Trips Detail" GPS (records request #26-5451). Same shape as enforcement.json:
 #   { "<cnn>": { "<jsDow>": [n, avgMin, loMin, hiMin] }, "_meta": {...} }
+# Notes from the data: 10 broom-sweeper vehicles, ~7.8k trip points Mar–Jun 2026, ~9% exact dup rows
+# (deduped here), ~36% sit at the Cesar Chavez yard (filtered out by the in-window match). One GPS
+# point per trip, so this is good for "when did the sweeper pass" but NOT dense enough to redraw routes.
 import openpyxl, json, math, sys, glob, os, datetime
 import urllib.request, urllib.parse
 import numpy as np
 from shapely import STRtree, points, LineString
 
 TRIPDIR = "/Users/alevizio/Downloads/26-5451_2026-06-26 14_35_30 -0700"
-OUT = "/private/tmp/claude-501/-Users-alevizio/70280dca-066e-48ef-a199-c71bc5209b0d/scratchpad/sweeps.json"
+OUT = "/Users/alevizio/curb/data/sweeps.json"
 ENF = "/Users/alevizio/curb/data/enforcement.json"
 TOL_M = 40.0
-MIN_N = 4
+MIN_N = 3                       # >=3 REAL GPS passes near a block in-window (deduped) — ~118 blocks
 SFLAT, SFLON = (37.69, 37.84), (-122.53, -122.34)
 LAT0, LON0 = 37.7749, -122.4194
 KX = math.cos(math.radians(LAT0)) * 111320.0; KY = 110540.0
@@ -48,9 +51,10 @@ cnns = list(seg_line.keys())
 tree = STRtree([seg_line[c] for c in cnns])
 print(f"  {len(cnns)} segments", file=sys.stderr)
 
-# 2) parse sweeper trips from all xlsx Data sheets
+# 2) parse sweeper trips — DEDUPE exact (device, time, lat, lon) rows (~9% of the export)
 print("reading sweeper trips…", file=sys.stderr)
 xs, ys, mins, dows = [], [], [], []
+seen = set(); dups = 0
 for p in sorted(glob.glob(os.path.join(TRIPDIR, "*.xlsx"))):
     ws = openpyxl.load_workbook(p, read_only=True)["Data"]
     it = ws.iter_rows(values_only=True); hdr = False
@@ -58,13 +62,16 @@ for p in sorted(glob.glob(os.path.join(TRIPDIR, "*.xlsx"))):
         if not r: continue
         if r[0] == 'DeviceName': hdr = True; continue
         if not hdr or r[0] is None: continue
-        lat, lon, st = r[18], r[19], r[13]
+        dev, st, lat, lon = r[0], r[13], r[18], r[19]
         if not isinstance(lat,(int,float)) or not isinstance(lon,(int,float)) or not hasattr(st,'hour'): continue
         if not (SFLAT[0] <= lat <= SFLAT[1] and SFLON[0] <= lon <= SFLON[1]): continue
+        key = (str(dev), st.isoformat(), round(lat,6), round(lon,6))
+        if key in seen: dups += 1; continue
+        seen.add(key)
         x, y = proj(lon, lat)
         xs.append(x); ys.append(y); mins.append(st.hour*60 + st.minute); dows.append((st.weekday()+1)%7)
 xs = np.asarray(xs); ys = np.asarray(ys); mins = np.asarray(mins, np.int32); dows = np.asarray(dows, np.int8)
-print(f"  {len(xs)} sweeper GPS points in SF", file=sys.stderr)
+print(f"  {len(xs)} unique SF sweeper points ({dups} exact dups dropped)", file=sys.stderr)
 
 # 3) match to nearest segment + aggregate (only on a swept day, near the posted window)
 acc = {}
@@ -102,19 +109,17 @@ try:
                 leads.append(ed[dow][1] - v[1])   # ticket avg − sweeper avg (min)
 except Exception as e:
     print("enf compare skipped:", e, file=sys.stderr)
-print("\n=== VALIDATION: sweeper vs ticket ===")
 if leads:
     L = np.array(leads)
-    print(f"blocks with both sweeper + ticket data: {len(L)}")
-    print(f"ticket lands a median of {int(np.median(L))} min AFTER the sweeper passes (mean {L.mean():.0f})")
-    print(f"  sweeper-before-ticket on {100*(L>0).mean():.0f}% of those block-days")
+    print(f"\nsweeper vs ticket — {len(L)} blocks w/ both: ticket lands a median of {int(np.median(L))} min "
+          f"AFTER the sweeper ({100*(L>0).mean():.0f}% sweeper-first)", file=sys.stderr)
 
 out["_meta"] = {
     "generated": datetime.datetime.now().isoformat(timespec="seconds"),
     "window": "2026-03-01 to 2026-06-25", "min_passes": MIN_N, "blocks": len(blocks), "side_days": kept,
     "source": "SF Public Works fleet AVL 'Advanced Trips Detail' (broom sweepers), records request #26-5451",
-    "method": "sweeper GPS matched to nearest CNN segment (<=40m), passes during the posted window, by cnn x jsDow",
-    "note": "avgMin/loMin/hiMin = local minutes-of-day of the sweeper pass; dow is JS getDay (0=Sun).",
+    "method": "sweeper GPS deduped, matched to nearest CNN segment (<=40m), passes during the posted window, by cnn x jsDow",
+    "note": "avgMin/loMin/hiMin = local minutes-of-day of the sweeper pass; dow is JS getDay (0=Sun). One point per trip — real pass times, not route paths.",
 }
 json.dump(out, open(OUT, "w"))
 print(f"\nwrote {OUT} ({os.path.getsize(OUT)//1024} KB) — {len(blocks)} blocks", file=sys.stderr)
