@@ -6,7 +6,7 @@
   --_red:var(--red,#C1121F);--_sign:var(--sign,#FFFDF6);font-family:'Hanken Grotesk',system-ui,sans-serif}
 
 /* ---- top nav ---- */
-.sn-nav{position:sticky;top:12px;z-index:600;width:min(1080px, calc(100% - 40px));margin:12px auto 0;
+.sn-nav{position:sticky;top:12px;z-index:600;display:block;width:min(1080px, calc(100% - 40px));margin:12px auto 0;
   background:var(--_sign);border:2px solid var(--_ink);border-radius:999px;padding:0;box-shadow:4px 4px 0 var(--_ink);transition:transform .28s ease}
 .sn-nav.sn-hide{transform:translateY(calc(-100% - 22px))}
 .sn-mast{margin:0;padding:0 16px 0 28px;height:64px;display:flex;align-items:center;gap:11px}
