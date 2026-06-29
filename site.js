@@ -46,7 +46,7 @@
     '<footer class="sn-foot">' +
       '<div class="sn-finner">' +
         '<div class="sn-fbrand">' +
-          '<span class="sn-mark">CURB<span>.</span></span>' +
+          '<img class="sn-flogo" src="/icons/logo.svg" alt="CURB" width="48" height="48">' +
           '<p class="sn-ftag">Know where to park in San Francisco — block by block, including the part no sign tells you.</p>' +
           '<a class="sn-fapp" href="' + APP + '" rel="noopener">Download the iOS app' + ext + '</a>' +
         '</div>' +
