@@ -14,6 +14,7 @@
     "build:overview": "node scripts/build-overview.mjs",
     "build:zones": "node scripts/build-zones.mjs",
     "build:stats": "node scripts/build-stats.mjs",
+    "build:hoodstats": "python3 scripts/build-hood-stats.py",
     "build:whitezones": "node scripts/build-white-zones.mjs",
     "build:hoodmaps": "node scripts/build-hood-maps.mjs",
     "build:hoodenrich": "node scripts/build-hood-enrich.mjs",

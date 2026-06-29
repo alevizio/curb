@@ -2,6 +2,9 @@
 // Aggregate SF parking-citation history for the /tickets data story.
 //   data/stats.json = { yearly, yearlySweep, byViolation, sweepHour, sweepDow,
 //                       hoods, topStreets, _meta }
+// NOTE: the `hoods` this produces is the LOSSY address->EAS join (understated, e.g. Mission ~71k).
+// The canonical per-hood totals are GPS-derived — re-run `npm run build:hoodstats`
+// (scripts/build-hood-stats.py, records #26-5453) AFTER this, or the /n/ pages revert to old numbers.
 // Server-side SoQL group-bys where possible; the neighborhood breakdown streams
 // ~2yr of street-cleaning rows and joins addresses → EAS analysis_neighborhood.
 // Run: npm run build:stats   (Node 18+, no deps; ~6-8 min, mostly the stream)
