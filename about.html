@@ -22,7 +22,7 @@
  {"@type":"Question","name":"Can I park after the street sweeper passes?",
   "acceptedAnswer":{"@type":"Answer","text":"Yes — it's SFMTA's own rule: once the street sweeper has physically swept the curbside, you may park there, even if the posted sweeping hours haven't expired. The flip side: during the posted hours you may not park until the street has actually been swept — so if you're parked before the sweeper arrives, you can still be ticketed. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"What are the dashed truck routes on the map?",
-  "acceptedAnswer":{"@type":"Answer","text":"An experimental Beta layer. San Francisco doesn't publish where sweepers start or which way they drive, so CURB infers it: two years of street-cleaning tickets (DataSF) give each block a typical ticket time, and blocks sharing a corridor and sweep window are connected in the order the tickets land. It's an estimate from public citation records, never live tracking — the posted sign always wins."}},
+  "acceptedAnswer":{"@type":"Answer","text":"An experimental Beta layer. San Francisco doesn't publish the sweeper routes openly, so CURB obtained the trucks' actual GPS via a public-records request: where it covers a block, the sweeper-pass time is the city's real data, not an estimate. The dashed path order is still inferred from two years of street-cleaning citations (DataSF) where GPS coverage is thin. Never live tracking — the posted sign always wins."}},
  {"@type":"Question","name":"Is CURB free?",
   "acceptedAnswer":{"@type":"Answer","text":"Yes. CURB is free, with no account, no ads, and no tracking — and open source under the MIT license (github.com/alevizio/curb). It runs entirely on public San Francisco open data (DataSF)."}},
  {"@type":"Question","name":"What are San Francisco's residential permit parking areas?",
@@ -463,13 +463,12 @@ html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scr
       </div>
       <div class="qa">
         <h3>What are the dashed truck routes on the map?</h3>
-        <p>An experiment — that's why the layer is marked <b>Beta</b>. San Francisco doesn't publish where
-          sweepers start or which way they drive, so CURB is trying to figure it out from the paper trail:
-          <b>two years of street-cleaning tickets</b> (DataSF) give each block a typical ticket time, and
-          blocks sharing a corridor and sweep window are connected in the order the tickets land. The dashed
-          line with arrows is that reconstruction — START marks the end of the run ticketed earliest. It's
-          an estimate from public citation records, never live tracking, and it sharpens as the method is
-          refined. The posted sign on your block always wins.</p>
+        <p>An experiment — that's why the layer is marked <b>Beta</b>. San Francisco doesn't publish the
+          sweeper routes openly, so I obtained the trucks' <b>actual GPS</b> through a public-records request.
+          Where that data covers a block, the <b>"when the sweeper passes" time is the city's real telematics</b>
+          — not a guess. The dashed path order is still reconstructed from <b>two years of street-cleaning
+          citation timing</b> (DataSF) where GPS coverage is thin — START marks the end of the run ticketed
+          earliest. Never live tracking, and the posted sign on your block always wins.</p>
       </div>
       <div class="qa">
         <h3>Is CURB free?</h3>
