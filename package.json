@@ -26,6 +26,7 @@
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
     "@upstash/redis": "^1.34.3",
+    "@vercel/speed-insights": "^2.0.0",
     "satori": "^0.26.0",
     "web-push": "^3.6.7"
   },
