@@ -14,7 +14,7 @@ Thank you to **San Francisco Public Works** for fulfilling the request and shari
 
 | Dataset | Agency | Records request | Released |
 |---|---|---|---|
-| `sweeper-trips.csv` (this file) | SF Public Works | **#26-5451** | **June 26, 2026** (two rolling batches) |
+| `sweeper-trips.csv` (this file) | SF Public Works | **#26-5451** | **June 26–30, 2026** (rolling batches) |
 | Street-cleaning citations (not bundled — ~1M rows) | SFMTA | **#26-5453** | **June 25, 2026** |
 
 The source was the Public Works fleet AVL **"Advanced Trips Detail Report"** (10 broom-sweeper
@@ -22,7 +22,7 @@ vehicles, **March 1 – June 25, 2026**). The request is fulfilled on a rolling 
 
 ## What's in `sweeper-trips.csv`
 
-10,525 unique trips (exact duplicate rows removed). One row = one logged trip for one truck.
+13,465 unique trips (exact duplicate rows removed). One row = one logged trip for one truck.
 
 | column | meaning |
 |---|---|
@@ -45,6 +45,6 @@ vehicles, **March 1 – June 25, 2026**). The request is fulfilled on a rolling 
 `../sweeps.json` — each block's typical sweeper-pass time, built from this file by
 [`scripts/build-sweeps.py`](../../scripts/build-sweeps.py): dedupe → match each GPS point to the nearest
 street-segment (CNN, ≤40 m) → keep passes inside the posted window → aggregate by block × weekday
-(≥3 passes). 190 blocks / 239 side-days so far, growing as the city releases more.
+(≥3 passes). 227 blocks / 285 side-days so far, growing as the city releases more.
 
 All public record. CURB is open source under the MIT license.
