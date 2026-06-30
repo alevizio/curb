@@ -2,6 +2,14 @@
    every back-of-map page, and wires the dropdown / mobile menu / active-state. One source of truth. */
 (function () {
   if (window.__curbChrome) return; window.__curbChrome = 1;
+  // Vercel Speed Insights — anonymous real-user web vitals (no cookies); served by Vercel at the edge.
+  // Injected here so every back-of-map page (incl. generated /n/ pages) gets it from one source.
+  if (!window.si) {
+    window.si = function () { (window.siq = window.siq || []).push(arguments); };
+    var siEl = document.createElement('script');
+    siEl.defer = true; siEl.src = '/_vercel/speed-insights/script.js';
+    document.head.appendChild(siEl);
+  }
   var path = location.pathname.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/+$/, '') || '/';
   var GH = 'https://github.com/alevizio/curb';
   var APP = 'https://apps.apple.com/us/app/curb-sf-street-parking/id6780998238';
