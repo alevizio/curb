@@ -529,7 +529,16 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
         locationManager.delegate = self
     }
 
+    /// Debug-only guard that makes the main-thread-only invariant above load-bearing: a future change
+    /// delivering any entry point off-main traps here instead of silently corrupting the lock-free state.
+    @inline(__always) private func assertMain() {
+        #if DEBUG
+        precondition(Thread.isMainThread, "LocationBridge accessed off the main thread")
+        #endif
+    }
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        assertMain()
         guard
             message.name == "curbLocation",
             let body = message.body as? [String: Any],
@@ -600,6 +609,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        assertMain()
         switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             // Only act if something is actually waiting — iOS fires this once when the delegate is set,
@@ -620,6 +630,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        assertMain()
         fixInFlight = false
         guard let location = locations.last else {
             finishAll(code: 2, message: "Location is unavailable.")
@@ -631,6 +642,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        assertMain()
         fixInFlight = false
         let nsError = error as NSError
         if nsError.domain == kCLErrorDomain as String, nsError.code == CLError.denied.rawValue {
@@ -754,6 +766,7 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
     private var pendingSpot: [String: Any]?
     private var pendingTest: [String: Any]?   // set when the message is a "send me a test" request
     private var registrationTimeout: DispatchWorkItem?
+    private var registrationGen = 0   // bumped per tap; a superseded registration's timeout must not cancel a newer one
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "curbPush", let body = message.body as? [String: Any] else { return }
@@ -764,6 +777,8 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
             pendingTest = nil
             pendingSpot = body["spot"] as? [String: Any]
         }
+        registrationGen &+= 1
+        let gen = registrationGen
         Task { @MainActor in
             // If the user already denied notifications, iOS shows no prompt — requestAuthorization just
             // returns false. Surface that distinctly so JS can point them straight at Settings.
@@ -779,7 +794,12 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
                 // can silently call back neither (e.g. no network), which would leave the web
                 // "Sweep alerts" button stuck on "Enabling…". Time out after 15s like LocationBridge
                 // does. A late token still saves server-side (tokenReceiver stays set).
-                let timeout = DispatchWorkItem { [weak self] in self?.resolve(false, "timeout") }
+                // A rapid re-tap supersedes this registration; gate the timeout on the generation so a
+                // stale one can't fire resolve() and cancel the NEWER registration's timer.
+                let timeout = DispatchWorkItem { [weak self] in
+                    guard let self, self.registrationGen == gen else { return }
+                    self.resolve(false, "timeout")
+                }
                 self.registrationTimeout = timeout
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15), execute: timeout)
             } else {
