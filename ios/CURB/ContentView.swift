@@ -355,6 +355,10 @@ private struct CurbWebView: UIViewRepresentable {
               window.webkit.messageHandlers.curbPush.postMessage({ spot: spot || null });
             }).then(function (r) { return !!(r && r.ok); });
           };
+          // Fire a one-off TEST push to this device (fire-and-forget) so the user can feel the cadence.
+          window.__curbTestPush = function (opts) {
+            window.webkit.messageHandlers.curbPush.postMessage({ test: true, opts: opts || {} });
+          };
         })();
         """,
         injectionTime: .atDocumentStart,
@@ -504,7 +508,8 @@ private struct CurbWebView: UIViewRepresentable {
 private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcurrency CLLocationManagerDelegate {
     private struct PendingRequest {
         let id: String
-        let workItem: DispatchWorkItem
+        let timeoutMs: Int
+        var workItem: DispatchWorkItem?
     }
 
     weak var webView: WKWebView?
@@ -512,6 +517,12 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     private let locationManager = CLLocationManager()
     private var pendingRequests: [String: PendingRequest] = [:]
     private var lastLocation: CLLocation?
+    private var fixInFlight = false               // one shared requestLocation() outstanding (see requestFixIfNeeded)
+    private static let promptGraceMs = 50_000     // extra grace so the permission prompt never trips the backstop
+
+    // THREADING: every LocationBridge access is main-thread only — WKScriptMessage delivery, the
+    // CLLocationManager delegate callbacks (the manager is created on main), and the main-queue timeout
+    // work items all serialize there, so the plain dictionaries need no extra locking.
 
     override init() {
         super.init()
@@ -535,23 +546,29 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
         if let lastLocation,
            maximumAge > 0,
            Date().timeIntervalSince(lastLocation.timestamp) * 1_000 <= Double(maximumAge) {
+            // Register first: finish() resolves by REMOVING the entry, so a cache hit that skipped
+            // registration would never reach send() and the JS promise would never resolve.
+            pendingRequests[id] = PendingRequest(id: id, timeoutMs: timeout, workItem: nil)
             finish(id: id, with: lastLocation)
             return
         }
 
         locationManager.desiredAccuracy = highAccuracy ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
 
-        let timeoutWork = DispatchWorkItem { [weak self] in
-            self?.finish(id: id, code: 3, message: "Location timed out.")
-        }
-        pendingRequests[id] = PendingRequest(id: id, workItem: timeoutWork)
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeout), execute: timeoutWork)
+        pendingRequests[id] = PendingRequest(id: id, timeoutMs: timeout, workItem: nil)
 
         switch locationManager.authorizationStatus {
         case .notDetermined:
+            // First run: the acquisition timeout must NOT fire while the "Allow Location?" prompt is up
+            // (that was the original bug — the very first locate timed out mid-prompt). But a request with
+            // no timer can leak/hang forever if the prompt is abandoned or interrupted, so arm a generous
+            // BACKSTOP (prompt grace + the fix deadline) that won't trip during a normal answer yet still
+            // reaps a stranded request. It's tightened to the real deadline once auth resolves.
+            armTimeout(id: id, ms: timeout + Self.promptGraceMs)
             locationManager.requestWhenInUseAuthorization()
         case .authorizedAlways, .authorizedWhenInUse:
-            locationManager.requestLocation()
+            armTimeout(id: id, ms: timeout)
+            requestFixIfNeeded()
         case .denied, .restricted:
             finish(id: id, code: 1, message: "Location permission is off for CURB.")
         @unknown default:
@@ -559,10 +576,40 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
         }
     }
 
+    /// (Re)arm a request's timeout for `ms` from now, cancelling any prior one. The .notDetermined path
+    /// arms a generous backstop (so the permission prompt never trips it); resolving auth re-arms the
+    /// tight acquisition deadline. Every registered request always has exactly one live timer.
+    private func armTimeout(id: String, ms: Int) {
+        guard var pending = pendingRequests[id] else { return }
+        pending.workItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.finish(id: id, code: 3, message: "Location timed out.")
+        }
+        pending.workItem = work
+        pendingRequests[id] = pending
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(ms), execute: work)
+    }
+
+    /// One shared one-shot fix serves every pending request (didUpdateLocations / didFailWithError fan
+    /// out to all). Guarding avoids re-issuing requestLocation() mid-flight, which iOS treats as a
+    /// cancel-and-restart and would surface as a spurious failure for overlapping locates.
+    private func requestFixIfNeeded() {
+        guard !fixInFlight else { return }
+        fixInFlight = true
+        locationManager.requestLocation()
+    }
+
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
-            manager.requestLocation()
+            // Only act if something is actually waiting — iOS fires this once when the delegate is set,
+            // so an unconditional requestLocation() here would pull a stray fix on every launch.
+            let ids = Array(pendingRequests.keys)
+            guard !ids.isEmpty else { break }
+            ids.forEach { id in
+                if let ms = pendingRequests[id]?.timeoutMs { armTimeout(id: id, ms: ms) }   // tighten the backstop now that we're acquiring
+            }
+            requestFixIfNeeded()
         case .denied, .restricted:
             finishAll(code: 1, message: "Location permission is off for CURB.")
         case .notDetermined:
@@ -573,6 +620,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        fixInFlight = false
         guard let location = locations.last else {
             finishAll(code: 2, message: "Location is unavailable.")
             return
@@ -583,6 +631,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        fixInFlight = false
         let nsError = error as NSError
         if nsError.domain == kCLErrorDomain as String, nsError.code == CLError.denied.rawValue {
             finishAll(code: 1, message: "Location permission is off for CURB.")
@@ -613,7 +662,8 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
         guard let pending = pendingRequests.removeValue(forKey: id) else {
             return
         }
-        pending.workItem.cancel()
+        pending.workItem?.cancel()
+        if pendingRequests.isEmpty { fixInFlight = false }   // no request still needs the shared fix
 
         let payload: [String: Any] = [
             "ok": true,
@@ -633,7 +683,8 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
         guard let pending = pendingRequests.removeValue(forKey: id) else {
             return
         }
-        pending.workItem.cancel()
+        pending.workItem?.cancel()
+        if pendingRequests.isEmpty { fixInFlight = false }   // last request reaped (e.g. by timeout) — don't strand the flag
         send(["ok": false, "code": code, "message": message], to: id)
     }
 
@@ -701,10 +752,18 @@ private final class ShareBridge: NSObject, WKScriptMessageHandler {
 private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenReceiver {
     weak var webView: WKWebView?
     private var pendingSpot: [String: Any]?
+    private var pendingTest: [String: Any]?   // set when the message is a "send me a test" request
+    private var registrationTimeout: DispatchWorkItem?
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "curbPush", let body = message.body as? [String: Any] else { return }
-        pendingSpot = body["spot"] as? [String: Any]
+        if (body["test"] as? Bool) == true {
+            pendingTest = (body["opts"] as? [String: Any]) ?? [:]
+            pendingSpot = nil
+        } else {
+            pendingTest = nil
+            pendingSpot = body["spot"] as? [String: Any]
+        }
         Task { @MainActor in
             // If the user already denied notifications, iOS shows no prompt — requestAuthorization just
             // returns false. Surface that distinctly so JS can point them straight at Settings.
@@ -716,7 +775,13 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
             if granted {
                 PushRouter.shared.tokenReceiver = self
                 UIApplication.shared.registerForRemoteNotifications()
-                // didReceiveDeviceToken (or didFailRegistration) resolves the JS promise.
+                // didReceiveDeviceToken (or didFailRegistration) resolves the JS promise — but APNs
+                // can silently call back neither (e.g. no network), which would leave the web
+                // "Sweep alerts" button stuck on "Enabling…". Time out after 15s like LocationBridge
+                // does. A late token still saves server-side (tokenReceiver stays set).
+                let timeout = DispatchWorkItem { [weak self] in self?.resolve(false, "timeout") }
+                self.registrationTimeout = timeout
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15), execute: timeout)
             } else {
                 self.resolve(false, "denied")
             }
@@ -724,6 +789,23 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
     }
 
     func didReceiveDeviceToken(_ hexToken: String) {
+        // A "send me a test" request routes the token to the test endpoint instead of saving a watch.
+        if let opts = pendingTest {
+            pendingTest = nil
+            var payload: [String: Any] = opts
+            payload["token"] = hexToken
+            guard let url = URL(string: "https://curb.guide/api/test-notification"),
+                  let data = try? JSONSerialization.data(withJSONObject: payload) else { resolve(false, "encode"); return }
+            var req = URLRequest(url: url)
+            req.httpMethod = "POST"
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.httpBody = data
+            Task { @MainActor in
+                _ = try? await URLSession.shared.data(for: req)
+                self.resolve(true, "test-sent")
+            }
+            return
+        }
         guard let spot = pendingSpot else { resolve(false, "no-spot"); return }
         let payload: [String: Any] = ["token": hexToken, "platform": "ios", "bundleId": "guide.curb.ios", "spot": spot]
         guard let url = URL(string: "https://curb.guide/api/save-ios-subscription"),
@@ -746,6 +828,8 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
     func didFailRegistration(_ message: String) { resolve(false, message) }
 
     private func resolve(_ ok: Bool, _ msg: String) {
+        registrationTimeout?.cancel()
+        registrationTimeout = nil
         let safe = msg.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "'", with: "\\'")
         webView?.evaluateJavaScript("window.__curbNativePushResult && window.__curbNativePushResult(\(ok ? "true" : "false"), '\(safe)');")
     }

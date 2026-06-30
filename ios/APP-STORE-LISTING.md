@@ -50,6 +50,16 @@ Built by one person in San Francisco who got tired of the parking math.
 Free. No ads. No signup. No account. No data collection.
 ```
 
+## What's New (v1.0.1)
+```
+Reliability fixes:
+
+- Fixed "locate me" not working on the first try. Tapping the location button now finds you right away — even the very first time you allow location access.
+- More reliable sweep-alert setup.
+
+Thanks for the early feedback. The posted sign is always the final authority.
+```
+
 ## What's New (v1.0)
 ```
 First release.
