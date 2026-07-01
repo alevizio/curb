@@ -1,7 +1,7 @@
 # Monthly refresh of the precomputed data assets (data/*.json).
 #
-# Rebuilds enforcement times, the citywide overview, meter/loading zones, white
-# (passenger/loading) curb zones, and the /tickets stats from their live sources,
+# Rebuilds the citywide overview, meter/loading zones, white (passenger/loading) curb
+# zones, and the /tickets stats from their live sources,
 # validates the shapes (scripts/validate-data.mjs — fails loudly if a Socrata/ArcGIS
 # source changed), and commits only if something actually changed. The commit pushes
 # to main, which Vercel auto-deploys.
@@ -38,9 +38,11 @@ jobs:
 
       # Each build hits live DataSF/ArcGIS. They're independent; run sequentially so a
       # failure points at one source. `set -e` (default) aborts the job on any non-zero.
+      # NOTE: build:enforcement is intentionally excluded — it reads the non-redistributable
+      # SFMTA citations xlsx (records #26-5453) from a local path, so it only runs on
+      # Alejandro's machine; data/enforcement.json is rebuilt + committed by hand.
       - name: Rebuild data assets
         run: |
-          npm run build:enforcement
           npm run build:overview
           npm run build:zones
           npm run build:whitezones
@@ -71,7 +73,7 @@ jobs:
           stamp=$(date -u +%Y-%m-%d)
           git commit -m "chore(data): monthly refresh ${stamp}
 
-          Automated rebuild of enforcement/overview/zones/white-zones/stats from live
+          Automated rebuild of overview/zones/white-zones/stats from live
           sources, shape-validated by scripts/validate-data.mjs."
           git push
           echo "Pushed refreshed data — Vercel will redeploy."
