@@ -108,6 +108,12 @@ calendar reminder before the next sweep.
 - scripts/build-sweeps.py + data/sweeps.json — precomputed sweeper-pass times (records
   request #26-5451 + the data/sweeper-gps dataset); a ticket lands a median ~19 min AFTER
   the sweeper passes.
+- scripts/build-routes.py + data/routes.json — the REAL DPW sweeper route per block (CNN ->
+  route# + name), from DPW's "All Sweeps on All Blocks" schedule (records #26-5451; ~2010
+  vintage, so route IDENTITY only — days/hours stay live from DataSF). Colors the Truck Routes
+  map layer + adds the block sheet's "<route> sweeper route" line (loadRoutes/routeFor, keyed by
+  cnn like ENF/SWP). Local build (needs `pip install xlrd` + the .xls set via CURB_SWEEP_SCHEDULE_XLS;
+  NOT in the data-refresh CI, like build:enforcement). The layer's run DIRECTION stays inferred.
 - docs/ — sweeper-data research + ready-to-send public-records requests.
 - README.md — human-facing run/deploy notes.
 

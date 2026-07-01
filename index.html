@@ -268,6 +268,7 @@
     padding:3px 8px;border-radius:7px;white-space:nowrap;width:max-content;box-shadow:2px 2px 0 rgba(23,21,15,.3)}
   .rstart{background:var(--green-text)}
   .rend{background:var(--red-text)}
+  .rname{transform:translate(-50%,-50%);color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.01em;padding:1px 7px;border-radius:9px;white-space:nowrap;background:var(--rc,#17150F);box-shadow:1.5px 1.5px 0 rgba(0,0,0,.32)}
   .abigdisc{width:46px;height:46px;border-radius:50%;color:#fff;font-family:'Anton',sans-serif;font-style:normal;
     font-size:21px;display:grid;place-items:center;border:3px solid var(--ink);box-shadow:3px 3px 0 rgba(23,21,15,.35)}
   .lp-link{display:block;margin-top:12px;padding-top:11px;border-top:1.5px solid rgba(23,21,15,.15);
@@ -570,6 +571,11 @@
   .smeta .swpline{font-size:11.5px;font-weight:700;color:var(--disc-blue,#1D69A5);margin-top:2px;display:flex;align-items:center;gap:4px}
   .smeta .swpline .ic{flex:none}
   .smeta .swpline span{color:var(--ink-soft);font-weight:600}
+  .rtline{font-size:12px;font-weight:700;color:var(--ink);margin:9px 0 2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .rtline .ic{flex:none;color:var(--ink-soft)}
+  .rtline .rsw{flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink)}
+  .rtline b{font-weight:800}
+  .rtline .rmut{color:var(--ink-soft);font-weight:600}
 
   /* Loading / color-curb zone markers + popup */
   .loaddot{border-radius:50%;border:2px solid var(--ink);box-shadow:1px 1px 0 var(--ink)}
@@ -930,6 +936,22 @@ function swpFor(cnn,dow){
   const b=SWP[cnn]; const a=b&&b[dow];
   return a?{n:a[0],avg:a[1],lo:a[2],hi:a[3]}:null;
 }
+/* ---------- sweeper routes (precomputed; data/routes.json) ---------- */
+// ROUTES.blocks[cnn] = DPW route number; ROUTES.routeNames[num] = its name. The real per-block sweeper
+// route from SF DPW's "All Sweeps on All Blocks" schedule (records #26-5451) — route IDENTITY only; days
+// & hours stay live from DataSF. Lazy-loaded; absent until fetched / if missing.
+let ROUTES=null, rtTried=false;
+async function loadRoutes(){
+  if(ROUTES||rtTried)return; rtTried=true;
+  try{const r=await fetch('data/routes.json',{cache:'force-cache'}); if(r.ok){ROUTES=await r.json(); if(routeOn)drawRoutes();}}catch(_){}
+}
+function routeFor(cnn){
+  if(!ROUTES)return null;
+  const n=ROUTES.blocks[cnn]; if(n==null)return null;
+  return {num:n, name:(ROUTES.routeNames&&ROUTES.routeNames[n])||('Route '+n)};
+}
+// stable, distinct color per route number (golden-angle hue) — the same route reads the same everywhere
+function routeColor(n){return `hsl(${(n*137.508)%360|0} 68% 42%)`;}
 function fmtMin(m){let h=Math.floor(m/60),mm=m%60;const ap=h>=12?'pm':'am';h=h%12;if(h===0)h=12;return h+':'+String(mm).padStart(2,'0')+ap;}
 
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
@@ -1114,7 +1136,7 @@ function drawRoutes(){
     const e=enfFor(o.group.cnn,dow); if(!e)return;
     // per-SIDE runs: mixing both curb sides of a corridor made the path zig-zag between them
     const k=(o.group.corridor||'?')+'|'+r.fromhour+'|'+(o.side.blockside||o.side.key);
-    (groups[k]=groups[k]||[]).push({mid:o.side.mid,t:e.avg});
+    (groups[k]=groups[k]||[]).push({mid:o.side.mid,t:e.avg,cnn:o.group.cnn});
   });
   let drawn=0;
   Object.values(groups).forEach(arr=>{
@@ -1145,9 +1167,17 @@ function drawRoutes(){
     runs.forEach(run=>{
       if(run.length<3)return;
       const pts=run.map(x=>x.mid);
-      // paper casing under the ink dash so the route reads on top of the busy curb colors
+      // colour + label the run by its REAL DPW route (dominant among the run's blocks; data/routes.json)
+      let rc='#17150F', rname=null;
+      if(ROUTES){
+        const cc={},nm={};
+        run.forEach(x=>{const rf=routeFor(x.cnn); if(rf){cc[rf.num]=(cc[rf.num]||0)+1;nm[rf.num]=rf.name;}});
+        const best=Object.keys(cc).sort((a,b)=>cc[b]-cc[a])[0];
+        if(best!=null){rc=routeColor(+best);rname=nm[best];}
+      }
+      // paper casing under the route-coloured dash so the run reads on top of the busy curb colors
       L.polyline(pts,{color:'#FFFDF6',weight:7,opacity:.9,lineCap:'round',interactive:false}).addTo(routeLayer);
-      L.polyline(pts,{color:'#17150F',weight:3,dashArray:'7 8',opacity:.9,interactive:false}).addTo(routeLayer);
+      L.polyline(pts,{color:rc,weight:3,dashArray:'7 8',opacity:.95,interactive:false}).addTo(routeLayer);
       // direction arrows: skip segments too short ON SCREEN, so they thin out when zoomed
       // out instead of stacking into soup (one block ≈ 21px @z15 vs 168px @z18)
       for(let i=1;i<pts.length;i++){
@@ -1165,6 +1195,12 @@ function drawRoutes(){
           html:`<div class="rstart">START ~${fmtMin(run[0].t)}</div>`})}).addTo(routeLayer);
         L.marker(pts[pts.length-1],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
           html:`<div class="rend">END ~${fmtMin(run[run.length-1].t)}</div>`})}).addTo(routeLayer);
+      }
+      // real route name at the run's midpoint (reads a zoom level earlier than the time chips)
+      if(rname&&rz>=16){
+        const mp=pts[Math.floor(pts.length/2)];
+        L.marker(mp,{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
+          html:`<div class="rname" style="--rc:${rc}">${rname}</div>`})}).addTo(routeLayer);
       }
       drawn++;
     });
@@ -1487,6 +1523,9 @@ function openSheet(group, activeKey){
   // Real-world enforcement callout for the active side (from citation history).
   const ae=enfFor(group.cnn, active.row&&normDay(active.row.weekday));
   const as=swpFor(group.cnn, active.row&&normDay(active.row.weekday));
+  // Real DPW sweeper route for this block (records #26-5451). Block-level, like the enforcement/sweeper lines.
+  const rt=routeFor(group.cnn);
+  const rtHtml=rt?`<div class="rtline"><svg class="ic" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg><span class="rsw" style="background:${routeColor(rt.num)}"></span><b>${rt.name}</b> sweeper route <span class="rmut">· DPW route map</span></div>`:'';
   let enfHtml='';
   if(ae){
     const fromMin=active.row?parseInt(active.row.fromhour,10)*60:ae.avg;
@@ -1529,6 +1568,7 @@ function openSheet(group, activeKey){
     ${aSched}
     ${_holNote}
     ${enfHtml}
+    ${rtHtml}
     ${_soon?`<div class="afterpass">Once the sweeper has passed, you can re-park here — even before the posted window ends. <a href="https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets" target="_blank" rel="noopener">SFMTA rule ↗</a></div>`:''}
     <div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>
     ${canRemind?'<hr class="shdiv">':''}
@@ -2274,8 +2314,8 @@ document.getElementById('routeToggle').onclick=function(){
     }
     const dow=dayFilter!=null?dayFilter:todaySF();
     const n=drawRoutes();
-    toast(n?`Inferred ${DAYLBL[dow]} sweep runs from 2 yrs of ticket times — dashed path, arrows show direction. Pick a day chip to change day. An estimate, never live.`
-           :`No ${DAYLBL[dow]} runs to infer here — try another day chip or pan to a residential area.`);
+    toast(n?`${DAYLBL[dow]} sweep runs, colored by DPW route (Mission, Marina…). Arrows infer direction from 2 yrs of ticket times. Pick a day chip to change day — routes real, direction estimated.`
+           :`No ${DAYLBL[dow]} runs to show here — try another day chip or pan to a residential area.`);
   } else routeLayer.clearLayers();
 };
 
@@ -2395,6 +2435,7 @@ map.on('moveend',()=>{clearTimeout(mvt);mvt=setTimeout(loadViewport,250);});
 map.whenReady(()=>setTimeout(loadViewport,400));
 loadEnforcement();  // background; populates the "real-world ticket time" lines once ready
 loadSweeps();       // background; populates the "sweeper passes" lines where we have the city's truck GPS (#26-5451)
+loadRoutes();       // background; the block's DPW sweeper-route line + colors the Truck Routes layer
 
 window.addEventListener('offline',()=>toast("You're offline — showing cached data; sweep times may be stale."));
 window.addEventListener('online',()=>{toast('Back online — refreshing.');loadViewport();});

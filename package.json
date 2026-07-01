@@ -10,6 +10,7 @@
     "build:enforcement": "python3 scripts/build-enforcement-records.py",
     "build:enforcement:legacy": "node scripts/build-enforcement.mjs",
     "build:sweeps": "python3 scripts/build-sweeps.py",
+    "build:routes": "python3 scripts/build-routes.py",
     "deploy": "vercel",
     "build:overview": "node scripts/build-overview.mjs",
     "build:zones": "node scripts/build-zones.mjs",
