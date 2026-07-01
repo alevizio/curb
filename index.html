@@ -354,9 +354,6 @@
     @keyframes wpop{from{opacity:0;transform:translate(-50%,calc(-50% + 12px))}}
   }
 
-  /* ── Pride: festive touch is JS-driven — the img.clogo src swap to logo-pride.svg
-     (a rainbow gradient on the cube's outline stroke) + fires a welcome toast; see the pride() IIFE. ── */
-
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
     border-radius:25px 22px 0 0;box-shadow:0 -6px 0 var(--ink);padding:8px 16px calc(20px + env(safe-area-inset-bottom));
     transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1),max-height .28s cubic-bezier(.2,.8,.2,1);
@@ -2399,16 +2396,6 @@ map.whenReady(()=>setTimeout(loadViewport,400));
 loadEnforcement();  // background; populates the "real-world ticket time" lines once ready
 loadSweeps();       // background; populates the "sweeper passes" lines where we have the city's truck GPS (#26-5451)
 
-/* ── Pride: festive touch only, date-gated to June (Pride Month) so it auto-retires July 1 (no parking logic touched) ── */
-(function pride(){
-  const now=Date.now();
-  if(now < Date.parse('2026-06-26T00:00:00-07:00') || now >= Date.parse('2026-07-01T00:00:00-07:00')) return;
-  document.querySelectorAll('img.clogo').forEach(img=>{ img.src='/icons/logo-pride.svg'; });   // rainbow-outlined cube
-  const greet=()=>toast('🏳️‍🌈 Happy Pride, SF — park proud this weekend.');
-  try{
-    if(localStorage.getItem('curbPride26')!=='1'){ localStorage.setItem('curbPride26','1'); setTimeout(greet,1100); }
-  }catch(_){ setTimeout(greet,1100); }
-})();
 window.addEventListener('offline',()=>toast("You're offline — showing cached data; sweep times may be stale."));
 window.addEventListener('online',()=>{toast('Back online — refreshing.');loadViewport();});
 
