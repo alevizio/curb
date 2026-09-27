@@ -1805,9 +1805,12 @@ function alertSpotMatches(spot){
   if(!spot.cnn)return savedAlertKey()===spotKey(spot);  // rule-less spot: the exact-sweep key
   let a=savedAlert();
   // Migrate a legacy corridor|limits|blockside|ISO key — its first three fields name the curb. v:1 makes
-  // refreshWatch re-arm right away, which also sends this side's full rules.
+  // refreshWatch re-arm right away, which also sends this side's full rules. Only while that server watch
+  // can still be alive (its sweep is < MAX_WATCH_AGE old): an older key would silently revive a watch the
+  // user let lapse months ago.
   if(!a){const k=savedAlertKey().split('|');
-    if(k.length===4&&k.slice(0,3).join('|')===[spot.corridor,spot.limits,spot.blockside].join('|'))a=rememberAlert({...spot,level:getAlertLevel(),voice:getAlertVoice()},1);}
+    if(k.length===4&&k.slice(0,3).join('|')===[spot.corridor,spot.limits,spot.blockside].join('|')&&Date.now()-Date.parse(k[3])<WATCH_MAX_AGE)
+      a=rememberAlert({...spot,level:getAlertLevel(),voice:getAlertVoice()},1);}
   return sameCurb(a,spot)&&alertLive(a);
 }
 // Button, style summary and the "alerts are on for <other block>" note, from the saved state — so

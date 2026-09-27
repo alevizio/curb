@@ -145,8 +145,15 @@ try {
   check('turn-off sends DELETE with the subscription (endpoint + keys)', del.method === 'DELETE' && del.body.subscription?.keys?.auth === 'auth-secret');
   check('…and the sheet reads off', (await text(page, '#alertBtn')).includes('Sweep alerts') && !(await ls(page, 'curbAlert')) && (await toast(page)).includes('Alerts off for Fulton St'));
 
+  // A legacy key whose sweep is past the server's 120-day watch age names a dead watch: no revival.
+  await page.evaluate(() => { localStorage.removeItem('curbAlert'); localStorage.setItem('curbAlertKey', 'Kansas St|16th St - 17th St|West|' + new Date(Date.now() - 200 * 864e5).toISOString()); });
+  const n2 = page.__posts.length;
+  await open(page, '7735000');
+  await sleep(400);
+  check('a months-old legacy key reads off and is not silently re-armed', (await text(page, '#alertBtn')).includes('Sweep alerts') && page.__posts.length === n2 && !(await ls(page, 'curbAlert')));
+
   // Legacy corridor|limits|blockside|ISO key: still "on", and silently re-armed with the full rules.
-  await page.evaluate(() => { localStorage.removeItem('curbAlert'); localStorage.setItem('curbAlertKey', 'Kansas St|16th St - 17th St|West|2026-01-01T00:00:00.000Z'); });
+  await page.evaluate(() => { localStorage.removeItem('curbAlert'); localStorage.setItem('curbAlertKey', 'Kansas St|16th St - 17th St|West|' + new Date(Date.now() - 3 * 864e5).toISOString()); });
   const n1 = page.__posts.length;
   await open(page, '7735000');
   await sleep(400);
