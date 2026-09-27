@@ -5,6 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Readable } from 'node:stream';
 import { createHash } from 'node:crypto';
+import { readFileSync, readdirSync } from 'node:fs';
 import { SignJWT } from 'jose';
 
 const CUR = 'sig_current_test_key', NEXT = 'sig_next_test_key';
@@ -112,6 +113,15 @@ describe('auth', () => {
   it('a QStash signature can never unlock ?test=ios or ?status (CRON_SECRET-only powers)', async () => {
     expect((await run(await qstash({}, { query: { test: 'ios' } }))).code).toBe(403);
     expect((await run(await qstash({}, { query: { status: '1' } }))).code).toBe(403);
+  });
+
+  it('no workflow can be dispatched into ?test=ios (a push to every iOS device) with CRON_SECRET', () => {
+    const dir = new URL('../.github/workflows/', import.meta.url);
+    for (const f of readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))) {
+      const y = readFileSync(new URL(f, dir), 'utf8').split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
+      if (!y.includes('send-notifications')) continue;
+      expect(y, f).not.toMatch(/[?&]test=|inputs\.test/);
+    }
   });
 });
 
