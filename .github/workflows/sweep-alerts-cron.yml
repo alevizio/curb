@@ -6,17 +6,20 @@
 # There is no Vercel cron (Hobby runs crons ~once a day). The owner is alerted by healthchecks.io,
 # pinged by the endpoint itself on QStash runs, and by the monitor workflow's sender-status check.
 # Secret: CRON_SECRET (repo secret) must match the Vercel env var of the same name.
+# A manual run (workflow_dispatch) is a normal, de-duped run. There is deliberately NO delivery-test
+# input: ?test=ios pushes EVERY iOS device, and anyone holding a token that can dispatch workflows (e.g.
+# the monitor's PAT stored at QStash) must not be able to broadcast it. Run that test from your own
+# machine instead:
+#   curl -H "Authorization: Bearer $CRON_SECRET" 'https://curb.guide/api/send-notifications?test=ios'
+# Caveat: a dispatch may name ANY branch, and repo secrets reach every branch, so a branch that still
+# has the old copy of this file (with the input) can still be dispatched with it. Delete or update such
+# branches, or move CRON_SECRET into an Environment limited to main.
 name: sweep-alerts-cron
 
 on:
   schedule:
     - cron: "*/15 * * * *" # UTC; GitHub schedules are best-effort (may lag a few min)
   workflow_dispatch:
-    inputs:
-      test:
-        description: "Optional delivery test, e.g. 'ios' (sends a one-off test push to registered iOS tokens)"
-        required: false
-        default: ""
 
 permissions: {}
 
@@ -30,11 +33,8 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Hit the notification endpoint
-        env:
-          TEST: ${{ github.event.inputs.test }}
         run: |
           url="https://curb.guide/api/send-notifications"
-          [ -n "$TEST" ] && url="$url?test=$TEST"
           code=$(curl -sS -o /tmp/out.json -w '%{http_code}' \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             "$url") || code=000

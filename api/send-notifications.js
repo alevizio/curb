@@ -3,18 +3,21 @@
 //
 // Triggers (vercel.json has no cron — Vercel Hobby runs crons ~once a day):
 //  - PRIMARY: an Upstash QStash schedule POSTs here every 15 min, signed with an Upstash-Signature JWT
-//    that is verified below against the raw body and SELF_URL. QStash never holds CRON_SECRET.
+//    that is verified below against the raw body and SELF_URL. QStash never holds CRON_SECRET. The
+//    schedule MUST have an EMPTY body (see rawBody below).
 //  - BACKUP: .github/workflows/sweep-alerts-cron.yml GETs with `Authorization: Bearer CRON_SECRET`.
 //    GitHub schedules are best-effort (Sep 2026: ~7 runs/day, not 96), so it only fills gaps.
 // Overlapping runs are safe: the run lock + per-sweep de-dupe below.
-//  - GET ?status=1 (Bearer only) returns the last run's time/outcome/trigger for the monitor; no sends.
+//  - GET ?status=1 (Bearer only) returns the last run's time/outcome/trigger for the monitor, plus the
+//    last QStash-triggered run (lastQstash {at, ok, error?}) and last successful one (lastQstashOk {at});
+//    no sends.
 //  - HC_PING_URL (optional healthchecks.io check): pinged on successful QStash runs, /fail on errors,
 //    so a dead primary scheduler emails the owner even while the GitHub backup limps along.
 import webpush from 'web-push';
 import { Receiver } from '@upstash/qstash';
 import {
   loadAllSubs, deleteSub, markNotified, advanceSpot, storeReady,
-  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot,
+  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot,
   saveRunStatus, loadRunStatus,
 } from './_store.js';
 import { recomputeSpot } from './_schedule.js';
@@ -24,6 +27,8 @@ import { dueAlert } from '../lib/notify-core.js';
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
 // live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
 const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
+// The run lock's lifetime: longer than the 60 s maxDuration (vercel.json), so it outlives any run.
+const RUN_LOCK_MS = 120000;
 
 // The cadence brain — which push is due for a spot right now, with what copy, at the user's chosen
 // intensity + voice — lives in lib/notify-core.js. It's a pure, unit-tested module shared by BOTH
@@ -37,8 +42,12 @@ const deepLink = (spot) => (spot && spot.cnn ? '/b/' + spot.cnn : '/');
 // (no query string), so a signed request can never reach ?test / ?status.
 const SELF_URL = 'https://curb.guide/api/send-notifications';
 
-// The QStash signature covers a hash of the exact request bytes, so Vercel must not parse the body
-// (documented for plain Node functions). Nothing here reads a parsed body.
+// The QStash signature covers a hash of the exact request bytes. DEPLOY REQUIREMENT: the QStash schedule
+// must send an EMPTY body. On Vercel the Node runtime's request helpers read the whole stream before this
+// handler runs whenever a Content-Type is sent (the config below does not switch them off), and replay it
+// only to 'data'/'end' listeners, so rawBody() gets '' for e.g. a `{}` JSON body; a body sent without a
+// Content-Type is dropped the same way. The hash then never matches and every primary run is refused
+// (401), leaving alerts to the sparse GitHub backup. An empty body verifies on every path.
 export const config = { api: { bodyParser: false } };
 
 async function rawBody(req) {
@@ -95,13 +104,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Authed delivery test: ?test=ios sends a one-off push to every registered iOS token, bypassing
+  // Authed delivery test: ?test=ios sends a one-off push to every iOS token with alerts ON, bypassing
   // the due-window logic (and never touching spot/dedupe state) — to confirm end-to-end APNs
-  // delivery on demand. Uses the same cross-host retry as the real loop.
+  // delivery on demand. Uses the same cross-host retry as the real loop. A turned-off watch (spot =
+  // null, kept only for its de-dupe) is skipped: someone who opted out must not get a test push.
   if (test === 'ios') {
     if (!storeReady()) { res.status(500).json({ error: 'store not configured' }); return; }
     if (!apnsConfigured()) { res.status(400).json({ error: 'APNs not configured' }); return; }
-    const tokens = await loadAllIosSubs();
+    const tokens = (await loadAllIosSubs()).filter((t) => t.spot);
     const results = [];
     if (tokens.length) {
       let session, alt = null;
@@ -154,9 +164,11 @@ export default async function handler(req, res) {
   // invocations can overlap. The per-sweep markNotified dedupe is a non-atomic read-modify-write, so
   // overlapping runs could both pass it and double-fire. A short atomic claim (longer than the 60s
   // maxDuration) lets at most one run process a given ~2-min window; a skipped run is a harmless no-op.
+  // Released as soon as a run has fully succeeded (every markNotified landed), so a GitHub run a minute
+  // before a QStash tick no longer swallows that tick and delays its pushes by 15 min.
   // Deliberately NOT released on error: a retry would then re-send any push whose markNotified failed.
   // No-op in dev (no store).
-  if (!(await claimSlot('cron-run', 120000))) {
+  if (!(await claimSlot('cron-run', RUN_LOCK_MS))) {
     await finish(200, { ok: true, skipped: 'another run holds the lock' }); return;
   }
 
@@ -172,10 +184,11 @@ export default async function handler(req, res) {
       // Forever-watch re-arm: advance to the next occurrence once the window ends (its OWN pass —
       // never coupled to the lead push, which still returns the same instant at lead time). Stops
       // while stale (MAX_WATCH_AGE) so a frozen rule can't track a city schedule change. The
-      // advanced occurrence is in the future, so nothing pushes this tick → continue.
+      // advanced occurrence is in the future, so nothing pushes this tick → continue. Skipped when the
+      // user turned the watch off or re-saved it since the snapshot (advanceSpot re-reads it).
       if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
         const advanced = recomputeSpot(spot);
-        if (advanced) { await advanceSpot(endpoint, advanced); rearmed++; continue; }
+        if (advanced) { if (await advanceSpot(endpoint, advanced, spot)) rearmed++; continue; }
       }
       const due = dueAlert(spot, notified, now);
       if (!due) continue;
@@ -215,7 +228,7 @@ export default async function handler(req, res) {
           if (!spot || !spot.nextSweepISO) continue;
           if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
             const advanced = recomputeSpot(spot);
-            if (advanced) { await advanceIosSpot(token, advanced); iosRearmed++; continue; }
+            if (advanced) { if (await advanceIosSpot(token, advanced, spot)) iosRearmed++; continue; }
           }
           const due = dueAlert(spot, notified, now);
           if (!due) continue;
@@ -257,6 +270,13 @@ export default async function handler(req, res) {
       console.error('APNs pass failed:', e);
     }
 
+    // Fully successful = the web loop finished (any store error throws past here) and the APNs pass
+    // did too (its errors, markIosNotified's included, land in iosError). Only then free the lock —
+    // and only while it is surely still ours (maxDuration 60 s < RUN_LOCK_MS). If the release fails,
+    // the lock simply expires.
+    if (!iosError && Date.now() - started < RUN_LOCK_MS) {
+      try { await releaseSlot('cron-run'); } catch { /* expires on its own */ }
+    }
     await finish(200, { ok: true, web: { checked: subs.length, sent, pruned, rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, sent: iosSent, pruned: iosPruned, rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } });
   } catch (e) {
     console.error('send-notifications failed:', e);
