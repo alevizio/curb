@@ -53,6 +53,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const since = args.includes('--since') ? args[args.indexOf('--since') + 1] : 'HEAD~1';
   const root = fileURLToPath(new URL('../', import.meta.url));
+  // a bad ref (typo, shallow clone, missing value) would read as "no old sitemaps" = every URL changed
+  try { execFileSync('git', ['rev-parse', '--verify', '--quiet', `${since}^{commit}`], { cwd: root, stdio: 'ignore' }); } catch {
+    console.error(`[indexnow] --since ${since} is not a commit in this checkout — nothing sent`);
+    process.exit(1);
+  }
   const old = (file) => {
     try { return execFileSync('git', ['show', `${since}:${file}`], { cwd: root, encoding: 'utf8', maxBuffer: 64 << 20, stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return ''; }
   };

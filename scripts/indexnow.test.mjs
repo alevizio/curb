@@ -1,6 +1,8 @@
 // Tests for the IndexNow submitter (scripts/indexnow.mjs) — fetch is mocked; nothing is sent.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { KEY, parseSitemap, changedUrls, submit } from './indexnow.mjs';
 
 const sm = (...urls) => parseSitemap(`<urlset>${urls.map(([loc, mod]) => `<url><loc>${loc}</loc>${mod ? `<lastmod>${mod}</lastmod>` : ''}</url>`).join('')}</urlset>`);
@@ -36,6 +38,15 @@ describe('submit', () => {
   it('accepts 202 (key still being verified) and throws on a rejected batch', async () => {
     expect(await submit([`${B}/`], async () => ({ status: 202 }))).toEqual([202]);
     await expect(submit([`${B}/`], async () => ({ status: 403 }))).rejects.toThrow('IndexNow answered 403');
+  });
+});
+
+describe('cli', () => {
+  it('refuses an unknown --since ref instead of submitting every URL as changed', () => {
+    const r = spawnSync(process.execPath, [fileURLToPath(new URL('./indexnow.mjs', import.meta.url)), '--since', 'no-such-ref-xyz', '--dry-run'], { encoding: 'utf8' });
+    expect(r.status).toBe(1);
+    expect(r.stdout).toBe('');
+    expect(r.stderr).toContain('not a commit');
   });
 });
 
