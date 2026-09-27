@@ -66,6 +66,7 @@ jobs:
           npm run build:blocksitemap
 
       - name: Commit if changed
+        id: commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -83,4 +84,23 @@ jobs:
           Automated rebuild of overview/zones/white-zones/stats from live
           sources, shape-validated by scripts/validate-data.mjs."
           git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
           echo "Pushed refreshed data — Vercel will redeploy."
+
+      # Optional: tell IndexNow (Bing & co., free) which URLs got a new sitemap <lastmod>. Waits
+      # until Vercel serves the new sitemaps so crawlers don't fetch the old pages; never fails the job.
+      - name: Notify IndexNow
+        if: steps.commit.outputs.pushed == 'true'
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS https://curb.guide/sitemap.xml | cmp -s - sitemap.xml &&
+               curl -fsS https://curb.guide/sitemap-blocks.xml | cmp -s - sitemap-blocks.xml; then
+              npm run indexnow -- --since HEAD~1
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "New sitemaps not live after 10 min — skipping IndexNow."
+          exit 1
