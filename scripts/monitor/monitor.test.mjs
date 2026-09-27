@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { decide, signature, lastSig, withSig } from './alert.mjs';
-import { parsePage, checkDataSF, checkBasemap, checkPages, checkAlertsSender, judgeAlertsStatus, ALERTS_MAX_AGE_MIN, lit, digest, checkErrorSpike, REPORT_KINDS, isBreakage } from './smoke.mjs';
+import { parsePage, checkDataSF, checkBasemap, checkPages, checkAlertsSender, judgeAlertsStatus, ALERTS_MAX_AGE_MIN, ALERTS_BACKUP_MAX_AGE_MIN, lit, digest, checkErrorSpike, REPORT_KINDS, isBreakage } from './smoke.mjs';
 import { normalize, group } from '../../api/client-error.js';
 
 const OPTS = { title: 'curb.guide is broken', mention: 'alevizio', runUrl: 'https://github.com/x/y/actions/runs/1' };
@@ -103,18 +103,71 @@ describe('smoke checks', () => {
     expect(block.detail).toContain('redirects home');
   });
 
-  it('alerts sender: a recent successful run passes; stale, never-succeeded or erroring runs fail', () => {
+  it('alerts sender (status without lastQstash*): a recent successful run passes; stale, never-succeeded or erroring runs fail', () => {
     const now = Date.parse('2026-09-27T12:00:00Z');
     const run = (minAgo, outcome, trigger = 'qstash', extra = {}) => ({ at: new Date(now - minAgo * 60000).toISOString(), outcome, trigger, ...extra });
     expect(judgeAlertsStatus({ last: run(10, 'ok'), lastOk: run(10, 'ok') }, now).status).toBe('ok');
-    const stale = judgeAlertsStatus({ last: run(ALERTS_MAX_AGE_MIN + 5, 'ok', 'bearer'), lastOk: run(ALERTS_MAX_AGE_MIN + 5, 'ok', 'bearer') }, now);
+    expect(judgeAlertsStatus({ last: run(ALERTS_MAX_AGE_MIN + 5, 'ok'), lastOk: run(ALERTS_MAX_AGE_MIN + 5, 'ok') }, now).status).toBe('fail');
+    // backup only: 45 min is normal for GitHub's schedule, only the lenient limit fails
+    expect(judgeAlertsStatus({ last: run(ALERTS_MAX_AGE_MIN + 5, 'ok', 'bearer'), lastOk: run(ALERTS_MAX_AGE_MIN + 5, 'ok', 'bearer') }, now).status).toBe('ok');
+    const stale = judgeAlertsStatus({ last: run(ALERTS_BACKUP_MAX_AGE_MIN + 5, 'ok', 'bearer'), lastOk: run(ALERTS_BACKUP_MAX_AGE_MIN + 5, 'ok', 'bearer') }, now);
     expect(stale.status).toBe('fail');
     expect(stale.detail).toContain('via bearer');
     const erroring = judgeAlertsStatus({ last: run(5, 'error', 'qstash', { error: 'upstash down' }), lastOk: run(90, 'ok') }, now);
     expect(erroring.status).toBe('fail');
     expect(erroring.detail).toContain('upstash down');
+    const erroringBackup = judgeAlertsStatus({ last: run(5, 'error', 'bearer', { error: 'VAPID keys not set' }), lastOk: run(90, 'ok', 'bearer') }, now);
+    expect(erroringBackup.status).toBe('fail'); // a broken sender doesn't wait out the lenient limit
     expect(judgeAlertsStatus({ last: run(5, 'skipped'), lastOk: run(12, 'ok') }, now).status).toBe('ok'); // a lock-skipped tick is fine
-    expect(judgeAlertsStatus({ last: null, lastOk: null }, now).status).toBe('fail');
+    expect(judgeAlertsStatus({ last: run(5, 'skipped', 'bearer'), lastOk: null }, now).status).toBe('fail');
+  });
+
+  it('alerts sender (status with lastQstash / lastQstashOk): QStash is judged on its own runs once it has run', () => {
+    const now = Date.parse('2026-09-27T12:00:00Z');
+    const at = (minAgo) => new Date(now - minAgo * 60000).toISOString();
+    const run = (minAgo, outcome, trigger, extra = {}) => ({ at: at(minAgo), outcome, trigger, ...extra });
+    const judge = (s) => judgeAlertsStatus({ last: null, lastOk: null, lastQstash: null, lastQstashOk: null, ...s }, now);
+    // healthy primary + backup
+    expect(judge({ last: run(2, 'ok', 'bearer'), lastOk: run(2, 'ok', 'bearer'), lastQstash: { at: at(10), ok: true }, lastQstashOk: { at: at(10) } }).status).toBe('ok');
+    // QStash died, the backup still succeeds: caught, although lastOk is 5 min old
+    const dead = judge({ last: run(5, 'ok', 'bearer'), lastOk: run(5, 'ok', 'bearer'), lastQstash: { at: at(60), ok: true }, lastQstashOk: { at: at(60) } });
+    expect(dead.status).toBe('fail');
+    expect(dead.detail).toContain('60 min ago');
+    // QStash ticks erroring while the backup succeeds
+    expect(judge({ last: run(2, 'ok', 'bearer'), lastOk: run(2, 'ok', 'bearer'), lastQstash: { at: at(5), ok: false, error: 'boom' }, lastQstashOk: { at: at(50) } }).status).toBe('fail');
+    expect(judge({ last: run(5, 'error', 'qstash'), lastQstash: { at: at(5), ok: false } }).detail).toContain('failed');
+    expect(judge({ last: run(2, 'ok', 'bearer'), lastOk: run(2, 'ok', 'bearer'), lastQstash: { at: at(5), ok: false } }).detail).toContain('no QStash run has succeeded');
+    // a lock-skipped QStash tick counts as QStash alive (another run did the work)
+    expect(judge({ last: run(5, 'skipped', 'qstash'), lastOk: run(6, 'ok', 'bearer'), lastQstash: { at: at(5), ok: true, skipped: true }, lastQstashOk: null }).status).toBe('ok');
+    // QStash never ran: lenient backup-only limit
+    expect(judge({ last: run(300, 'ok', 'bearer'), lastOk: run(300, 'ok', 'bearer') }).status).toBe('ok');
+    expect(judge({ last: run(ALERTS_BACKUP_MAX_AGE_MIN + 1, 'ok', 'bearer'), lastOk: run(ALERTS_BACKUP_MAX_AGE_MIN + 1, 'ok', 'bearer') }).status).toBe('fail');
+  });
+
+  it('alerts sender: no run record at all (fresh deploy) is a skip with a note, in either status shape', () => {
+    const now = Date.parse('2026-09-27T12:00:00Z');
+    for (const s of [{ last: null, lastOk: null }, { last: null, lastOk: null, lastQstash: null, lastQstashOk: null }, {}, null]) {
+      const r = judgeAlertsStatus(s, now);
+      expect(r.status).toBe('skip');
+      expect(r.detail).toContain('no sender run recorded yet');
+    }
+  });
+
+  it('REPLAY PD-1: backup-only runs with real gaps (median ~193, worst 414 min) never open an issue', () => {
+    // Gaps between sweep-alerts-cron runs, in minutes, shaped like Sep 2026 (gh run list): smoke every 30 min.
+    const gaps = [193, 120, 295, 414, 61, 250, 193, 30, 350, 180, 240, 413, 90, 193];
+    const t0 = Date.parse('2026-09-20T00:00:00Z');
+    const runs = gaps.reduce((a, g) => [...a, a.at(-1) + g * 60000], [t0]);
+    let open = null, opened = 0, fails = 0;
+    for (let t = t0 + 60000; t < runs.at(-1); t += 30 * 60000) {
+      const lastRun = runs.filter((r) => r <= t).at(-1);
+      const rec = { at: new Date(lastRun).toISOString(), outcome: 'ok', trigger: 'bearer' };
+      const r = judgeAlertsStatus({ last: rec, lastOk: rec, lastQstash: null, lastQstashOk: null }, t);
+      if (r.status === 'fail') fails++;
+      const a = decide([pass('home page'), r], open, OPTS);
+      if (a.type === 'open') { opened++; open = { body: a.body }; } else if (a.type === 'close') open = null;
+    }
+    expect({ fails, opened }).toEqual({ fails: 0, opened: 0 });
   });
 
   it('alerts sender: reads /api/send-notifications?status=1 with CRON_SECRET; skipped without it', async () => {

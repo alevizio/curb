@@ -19,6 +19,7 @@ const BLOCK_CNN = '8753101';
 const POLY = "POLYGON((-122.42 37.76,-122.41 37.76,-122.41 37.77,-122.42 37.77,-122.42 37.76))";
 const TILE = { z: 16, x: 10483, y: 25333 }; // Mission, inside the baked SF set
 export const ALERTS_MAX_AGE_MIN = 40;       // the sender runs every 15 min (QStash); 40 = two missed ticks + slack
+export const ALERTS_BACKUP_MAX_AGE_MIN = 480; // before QStash ever runs: the GitHub backup alone (worst gap seen 414 min)
 export const ERROR_SPIKE = 25;               // errors per 30 min that mean "something broke for many"
 export const DIGEST_MIN = 3;                 // nightly: only groups seen at least this often
 
@@ -142,7 +143,11 @@ export async function checkPages(f) {
 
 /** Push alerts only go out when the sender actually runs: each run records itself, and
  *  /api/send-notifications?status=1 (CRON_SECRET, read-only, no sends) reads that record back — so
- *  this watches the real sender whichever scheduler (QStash or the GitHub backup) is driving it. */
+ *  this watches the real sender whichever scheduler (QStash or the GitHub backup) is driving it.
+ *  Once QStash has run at all it is the primary, and ITS last good run must be under 40 min old: that
+ *  catches a dead schedule even while backup runs keep `lastOk` fresh. Until then only the sparse
+ *  backup drives the sender, so a 40 min limit would open and close the issue around every backup run
+ *  (~7 a day); the limit is 480 min instead. No record at all (a fresh deploy) is a skip, not a fail. */
 const ALERTS = 'sweep alerts sender';
 export async function checkAlertsSender(f, now = Date.now()) {
   if (!process.env.CRON_SECRET) return skip(ALERTS, 'CRON_SECRET not set');
@@ -152,12 +157,27 @@ export async function checkAlertsSender(f, now = Date.now()) {
 }
 
 export function judgeAlertsStatus(s, now) {
-  const at = Date.parse(s?.lastOk?.at);
-  const last = s?.last && s.last.outcome !== 'ok' ? ` Last run: ${s.last.outcome}${s.last.error ? ` (${s.last.error})` : ''} via ${s.last.trigger}.` : '';
-  if (!Number.isFinite(at)) return fail(ALERTS, `no successful run recorded — alerts are not going out.${last}`);
-  const ageMin = Math.round((now - at) / 60000);
-  if (ageMin > ALERTS_MAX_AGE_MIN) return fail(ALERTS, `last successful run ${ageMin} min ago via ${s.lastOk.trigger} (expected every 15 min) — alerts are not going out.${last}`);
-  return ok(ALERTS, `last successful run ${ageMin} min ago via ${s.lastOk.trigger}`);
+  s = s || {};
+  if (!s.last && !s.lastOk && !s.lastQstash && !s.lastQstashOk) return skip(ALERTS, 'no sender run recorded yet (fresh deploy?) — the first QStash or GitHub backup run creates it');
+  const last = s.last && s.last.outcome !== 'ok' ? ` Last run: ${s.last.outcome}${s.last.error ? ` (${s.last.error})` : ''} via ${s.last.trigger}.` : '';
+  // A broken sender (VAPID / store missing, Upstash down) alerts on the next check, whatever the limit.
+  if (s.last?.outcome === 'error') return fail(ALERTS, `the latest sender run failed — alerts are not going out.${last}`);
+  const age = (r) => { const t = Date.parse(r?.at); return Number.isFinite(t) ? Math.round((now - t) / 60000) : null; };
+  // QStash is live once it has run. Its freshest good sign: the latest tick if it went fine (a lock-skipped
+  // tick is fine: another run did the work), else its last success. Status from before lastQstash* existed
+  // only knows QStash ran if the latest success says so.
+  const newShape = 'lastQstash' in s || 'lastQstashOk' in s;
+  const qRan = newShape ? Boolean(s.lastQstash || s.lastQstashOk) : s.lastOk?.trigger === 'qstash';
+  if (qRan) {
+    const q = age(newShape ? (s.lastQstash?.ok ? s.lastQstash : s.lastQstashOk) : s.lastOk);
+    if (q === null) return fail(ALERTS, `QStash runs the sender but no QStash run has succeeded — alerts are not going out on time.${last}`);
+    if (q > ALERTS_MAX_AGE_MIN) return fail(ALERTS, `last good QStash run ${q} min ago (expected every 15 min) — the primary scheduler stopped; only the GitHub backup is sending, hours apart.${last}`);
+    return ok(ALERTS, `last good QStash run ${q} min ago`);
+  }
+  const a = age(s.lastOk);
+  if (a === null) return fail(ALERTS, `no successful run recorded — alerts are not going out.${last}`);
+  if (a > ALERTS_BACKUP_MAX_AGE_MIN) return fail(ALERTS, `last successful run ${a} min ago via ${s.lastOk.trigger}, and QStash has never run (backup-only limit ${ALERTS_BACKUP_MAX_AGE_MIN} min) — alerts are not going out.${last}`);
+  return ok(ALERTS, `last successful run ${a} min ago via ${s.lastOk.trigger}; QStash has not run yet, so only the GitHub backup drives alerts`);
 }
 
 async function fetchErrors(f, since) {
