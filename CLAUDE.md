@@ -293,8 +293,10 @@ Files now present for the push feature:
   schedule, every 15 min, POST, empty body, destination exactly the URL above; env
   `QSTASH_CURRENT_SIGNING_KEY` / `QSTASH_NEXT_SIGNING_KEY`. QStash never holds CRON_SECRET (it also
   unlocks `?test=ios`, a push to every iOS device). BACKUP: `.github/workflows/sweep-alerts-cron.yml`
-  curls with `Bearer ${{ secrets.CRON_SECRET }}` (repo secret, NEVER committed); GitHub schedules are
-  best-effort (Sep 2026: ~7 runs/day, not 96). Overlap is safe: a 120 s run lock — released once a run
+  curls with `Bearer ${{ secrets.CRON_SECRET }}` (repo secret, NEVER committed); a manual dispatch is a
+  normal run and it deliberately has NO test input (a token able to dispatch workflows, like the
+  monitor's QStash PAT, must not be able to broadcast `?test=ios`; run that test by hand with curl and
+  the bearer). GitHub schedules are best-effort (Sep 2026: ~7 runs/day, not 96). Overlap is safe: a 120 s run lock — released once a run
   fully succeeds (web loop done, no APNs error), so a GitHub run just before a QStash tick no longer
   swallows that tick; deliberately NOT released on error (a retry would re-send a push whose
   markNotified failed) — plus the per-sweep `notified` de-dupe. Every run records itself in Upstash
