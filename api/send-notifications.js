@@ -104,13 +104,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Authed delivery test: ?test=ios sends a one-off push to every registered iOS token, bypassing
+  // Authed delivery test: ?test=ios sends a one-off push to every iOS token with alerts ON, bypassing
   // the due-window logic (and never touching spot/dedupe state) — to confirm end-to-end APNs
-  // delivery on demand. Uses the same cross-host retry as the real loop.
+  // delivery on demand. Uses the same cross-host retry as the real loop. A turned-off watch (spot =
+  // null, kept only for its de-dupe) is skipped: someone who opted out must not get a test push.
   if (test === 'ios') {
     if (!storeReady()) { res.status(500).json({ error: 'store not configured' }); return; }
     if (!apnsConfigured()) { res.status(400).json({ error: 'APNs not configured' }); return; }
-    const tokens = await loadAllIosSubs();
+    const tokens = (await loadAllIosSubs()).filter((t) => t.spot);
     const results = [];
     if (tokens.length) {
       let session, alt = null;

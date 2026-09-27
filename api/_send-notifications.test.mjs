@@ -123,6 +123,23 @@ describe('auth', () => {
       expect(y, f).not.toMatch(/[?&]test=|inputs\.test/);
     }
   });
+
+  it('?test=ios skips iOS watches the user turned off (kept only for their de-dupe)', async () => {
+    const on = 'ab'.repeat(32), off = 'cd'.repeat(32);
+    mem['curb:apns'] = {
+      [on]: JSON.stringify({ token: on, spot: SPOT, notified: {}, savedAt: NOW }),
+      [off]: JSON.stringify({ token: off, spot: null, notified: { lead: SPOT.nextSweepISO }, savedAt: NOW }),
+    };
+    // A malformed key stops the pass before any APNs connection; `tokens` is how many it would push.
+    Object.assign(process.env, { APNS_KEY_P8: 'not a key', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    try {
+      expect((await run(bearer({ query: { test: 'ios' } }))).body).toMatchObject({ ok: false, tokens: 1 });
+      delete mem['curb:apns'][on];
+      expect((await run(bearer({ query: { test: 'ios' } }))).body).toMatchObject({ ok: true, tokens: 0, results: [] });
+    } finally {
+      for (const k of ['APNS_KEY_P8', 'APNS_KEY_ID', 'APNS_TEAM_ID']) delete process.env[k];
+    }
+  });
 });
 
 describe('?status=1 (monitor)', () => {
