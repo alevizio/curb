@@ -63,7 +63,9 @@ Setup (one time):
    - **Watching it**: `HC_PING_URL` = a healthchecks.io check (period 15 min, grace ~30 min); the
      endpoint pings it after every successful QStash run and `/fail` on errors.
      `GET /api/send-notifications?status=1` with the CRON_SECRET bearer shows the last run, and the
-     monitor workflow alerts when no run succeeded for 40 min.
+     monitor workflow alerts when the latest run failed or, once QStash has run, when no QStash run
+     succeeded for 40 min. Until QStash first runs, only the GitHub backup sends, hours apart, so the
+     monitor then alerts only after 8 h without a successful run.
    - **Monitor via QStash** (optional): two more QStash schedules dispatch
      `.github/workflows/monitor.yml` through the GitHub API — smoke every 30 min, nightly once a day
      (exact request in that file's header). About 145 QStash messages a day in total.

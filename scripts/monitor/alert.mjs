@@ -7,13 +7,25 @@
 //      GITHUB_SERVER_URL + GITHUB_RUN_ID (link to the run), MONITOR_DRY_RUN=1 (print, don't call API).
 import { readFileSync, existsSync } from 'node:fs';
 
-const SIG = /<!-- monitor-sig:(.*?) -->/;
+const SIG = /<!-- monitor-sig:([^<>]*?) -->/g;
 
-/** Failing check names, sorted — the identity of "what is broken right now". */
-export const signature = (results) => results.filter((r) => r.status === 'fail').map((r) => r.name).sort().join('|');
+/** The monitor writes its marker LAST in the body, so only the last one counts: an earlier one can only
+ *  have come from quoted text (the error log is public input) and must never be read or rewritten. */
+export const lastSig = (body) => [...String(body || '').matchAll(SIG)].at(-1) || null;
+/** Swap in a new signature by position — no String.replace, which would expand $& / $` in the text. */
+export function withSig(body, sig) {
+  const b = String(body || ''), m = lastSig(b);
+  const marker = `<!-- monitor-sig:${sig} -->`;
+  return m ? b.slice(0, m.index) + marker + b.slice(m.index + m[0].length) : `${b}\n\n${marker}`;
+}
 
+/** Failing check names, sorted — the identity of "what is broken right now" (no < >: it lives inside
+ *  an HTML comment). */
+export const signature = (results) => results.filter((r) => r.status === 'fail').map((r) => String(r.name).replace(/[<>]/g, '')).sort().join('|');
+
+const noComment = (s) => String(s).replace(/<!--|-->/g, '');
 export function renderFailures(results) {
-  return results.filter((r) => r.status === 'fail').map((r) => `- ❌ **${r.name}** — ${r.detail}`).join('\n');
+  return results.filter((r) => r.status === 'fail').map((r) => `- ❌ **${noComment(r.name)}** — ${noComment(r.detail)}`).join('\n');
 }
 
 /**
@@ -39,7 +51,7 @@ export function decide(results, openIssue, { title, mention, runUrl }) {
       body: `${who}the curb.guide monitor found a problem.\n\n${list}${note}${run}\n\nThis issue closes by itself when the checks pass again.\n\n<!-- monitor-sig:${sig} -->`,
     };
   }
-  const prev = (openIssue.body || '').match(SIG)?.[1] ?? '';
+  const prev = lastSig(openIssue.body)?.[1] ?? '';
   if (prev === sig) return { type: 'none' };
   return { type: 'comment', sig, body: `Still broken, and what's failing changed:\n\n${list}${note}${run}` };
 }
@@ -75,7 +87,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(issue.html_url);
   } else if (action.type === 'comment') {
     await gh('POST', `/issues/${open.number}/comments`, { body: action.body });
-    await gh('PATCH', `/issues/${open.number}`, { body: open.body.replace(SIG, `<!-- monitor-sig:${action.sig} -->`) });
+    await gh('PATCH', `/issues/${open.number}`, { body: withSig(open.body, action.sig) });
   } else if (action.type === 'close') {
     await gh('POST', `/issues/${open.number}/comments`, { body: action.body });
     await gh('PATCH', `/issues/${open.number}`, { state: 'closed', state_reason: 'completed' });

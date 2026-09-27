@@ -81,6 +81,21 @@ export function group(entries, since) {
   return { since, total: groups.reduce((n, g) => n + g.count, 0), groups: groups.slice(0, 50) };
 }
 
+// One sender must not be able to fill the global per-minute cap (which would lock out every real report)
+// or spend the Upstash commands this log shares with the sweep-alert store. So each client IP gets one
+// report per IP_GAP_MS, checked BEFORE the global counter: first in this instance's memory (a flood that
+// hits a warm instance costs no Redis command at all), then in one shared slot across instances. The
+// page sends at most 5 reports per load; when several land within 5 s, the first (usually the cause) wins.
+const IP_GAP_MS = 5000;
+const recentIps = new Map(); // ip → when this instance last let it through; in memory only, never stored
+function localSlot(ip, now = Date.now()) {
+  const t = recentIps.get(ip);
+  if (t !== undefined && now - t < IP_GAP_MS) return false;
+  if (recentIps.size >= 5000) recentIps.clear(); // bounded: worst case one extra shared-slot check per ip
+  recentIps.set(ip, now);
+  return true;
+}
+
 function parseBody(req) {
   const b = req.body;
   if (b && typeof b === 'object' && !Buffer.isBuffer(b)) return JSON.stringify(b).length > MAX_BODY ? null : b;
@@ -103,10 +118,10 @@ export default async function handler(req, res) {
   // Always answer 204: a beacon never reads the response, and errors here must not cascade.
   try {
     const entry = normalize(parseBody(req), req.headers['user-agent']);
-    if (entry && await underErrorRate()) {
-      // One copy of the same error per client per minute (the IP is only hashed into a short-lived
-      // rate-limit key inside claimSlot, never stored with the entry).
-      const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    // The IP is only hashed into short-lived rate-limit keys inside claimSlot, never stored with the entry.
+    const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    if (entry && localSlot(ip) && await claimSlot(`errip|${ip}`, IP_GAP_MS) && await underErrorRate()) {
+      // One copy of the same error per client per minute.
       if (await claimSlot(`err|${ip}|${entry.k}|${entry.msg}`, 60000)) await pushClientError(entry);
     }
   } catch { /* best effort */ }

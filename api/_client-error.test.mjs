@@ -7,18 +7,31 @@ process.env.CRON_SECRET = 'test-secret';
 
 const lists = {};
 const kv = {};
+const ttl = {};
+const cmds = { n: 0 }; // Redis commands issued (the error log shares its Upstash quota with the alerts store)
 vi.mock('@upstash/redis', () => ({
   Redis: class {
-    async lpush(k, v) { (lists[k] || (lists[k] = [])).unshift(v); return lists[k].length; }
-    async ltrim(k, a, b) { if (lists[k]) lists[k] = lists[k].slice(a, b + 1); }
-    async lrange(k, a, b) { return (lists[k] || []).slice(a, b + 1); }
-    async incr(k) { kv[k] = (kv[k] || 0) + 1; return kv[k]; }
-    async expire() { return 1; }
-    async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
+    async lpush(k, v) { cmds.n++; (lists[k] || (lists[k] = [])).unshift(v); return lists[k].length; }
+    async ltrim(k, a, b) { cmds.n++; if (lists[k]) lists[k] = lists[k].slice(a, b + 1); }
+    async lrange(k, a, b) { cmds.n++; return (lists[k] || []).slice(a, b + 1); }
+    async incr(k) { cmds.n++; kv[k] = (kv[k] || 0) + 1; return kv[k]; }
+    async expire() { cmds.n++; return 1; }
+    async set(k, v, opts) {
+      cmds.n++;
+      if (opts && opts.nx && (k in kv) && !(ttl[k] <= Date.now())) return null;
+      kv[k] = v; if (opts && opts.px) ttl[k] = Date.now() + opts.px;
+      return 'OK';
+    }
   },
 }));
 
 const { default: handler, normalize, cleanSrc, coarseClient, group } = await import('./client-error.js');
+
+// A controllable clock: the per-client limit lives in module memory, so every test starts a minute later.
+vi.useFakeTimers({ toFake: ['Date'] });
+let clock = Date.parse('2026-09-27T12:00:00Z');
+const later = (ms) => vi.setSystemTime(clock += ms);
+const storedMsgs = () => (lists['curb:errors'] || []).map((e) => (typeof e === 'string' ? JSON.parse(e) : e).msg);
 
 const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 
@@ -35,6 +48,9 @@ const REPORT = { k: 'error', msg: "TypeError: Cannot read properties of undefine
 beforeEach(() => {
   for (const k of Object.keys(lists)) delete lists[k];
   for (const k of Object.keys(kv)) delete kv[k];
+  for (const k of Object.keys(ttl)) delete ttl[k];
+  cmds.n = 0;
+  later(60000);
 });
 
 describe('normalize', () => {
@@ -90,9 +106,29 @@ describe('handler', () => {
   });
   it('POST de-dupes the same error from the same client within a minute, but not across clients', async () => {
     await handler(post(REPORT, '1.1.1.1'), mockRes());
+    later(6000); // past the per-client gap: only the per-error de-dupe can drop this one
     await handler(post(REPORT, '1.1.1.1'), mockRes());
     await handler(post(REPORT, '2.2.2.2'), mockRes());
     expect(lists['curb:errors']).toHaveLength(2);
+  });
+  it('POST: one client flooding distinct reports gets one stored, spends no Redis on the rest, and cannot lock out others', async () => {
+    await handler(post({ ...REPORT, msg: 'junk 0' }, '6.6.6.6'), mockRes());
+    const afterFirst = cmds.n;
+    for (let i = 1; i < 400; i++) await handler(post({ ...REPORT, msg: 'junk ' + i }, '6.6.6.6'), mockRes());
+    expect(cmds.n).toBe(afterFirst); // the flood never reached Upstash on this instance
+    await handler(post({ ...REPORT, msg: 'TypeError: real bug' }, '7.7.7.7'), mockRes());
+    expect(storedMsgs()).toEqual(['TypeError: real bug', 'junk 0']);
+    expect(kv[`curb:errs:rate:${Math.floor(Date.now() / 60000)}`]).toBe(2); // the global cap only counted 2
+  });
+  it('POST: the per-client gap is shared across instances and reopens after 5 s', async () => {
+    await handler(post({ ...REPORT, msg: 'first' }, '8.8.8.8'), mockRes());
+    vi.resetModules(); // a second serverless instance: fresh memory, same Upstash
+    const { default: other } = await import('./client-error.js');
+    await other(post({ ...REPORT, msg: 'second' }, '8.8.8.8'), mockRes());
+    expect(lists['curb:errors']).toHaveLength(1);
+    later(5000);
+    await other(post({ ...REPORT, msg: 'third' }, '8.8.8.8'), mockRes());
+    expect(storedMsgs()).toEqual(['third', 'first']);
   });
   it('POST ignores oversized or malformed bodies without failing', async () => {
     const r1 = mockRes(); await handler(post('x'.repeat(5000)), r1);
