@@ -347,8 +347,9 @@ schedule change. In the sheet, ties between a side's rows go to the earliest nex
 
 Cadence (`lib/notify-core.js`, don't regress): Light = lead, Normal = eve + lead, Intense = eve +
 morn + lead; sweeps starting before 07:00 SF get ONE "move it tonight" push from 21:00 SF the evening
-before instead, at every level, derived at send time. eve is eligible 20:00 → min(23:00, sweep −
-lead); morn only when start−2h lands 06:00-21:59 SF on the sweep's own day; lead is skipped with
+before instead, at every level, derived at send time (sent after SF midnight — a late arm or tick — it
+keeps key `tonight` but uses the `early` copy: no "tonight / before bed"). eve is eligible 20:00 →
+min(23:00, sweep − lead); morn only when start−2h lands 06:00-21:59 SF on the sweep's own day; lead is skipped with
 < 5 min left. The anchor rule is `alertAnchors()` in `lib/sweep-core.js`, shared by the page, the cron
 re-arm and the send-time guard. `dueAlert` returns `expiresAt` (lead/tonight: the sweep; morn: sweep
 − lead; eve: SF midnight) used for web-push TTL (min 60 s) and apns-expiration, and `urgent`
