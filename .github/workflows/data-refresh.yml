@@ -28,7 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # full history: the sitemaps date each page by its last commit (scripts/lastmod.mjs)
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -54,11 +57,13 @@ jobs:
         run: npm run validate:data
 
       # Regenerate the neighborhood map snapshots (from the fresh overview.json),
-      # then the SEO pages + sitemap from the fresh stats.json.
+      # then the SEO pages + sitemap from the fresh stats.json, then the block sitemap
+      # (lastmods from the fresh schedules.json).
       - name: Rebuild neighborhood maps + pages
         run: |
           npm run build:hoodmaps
           npm run build:hoodpages
+          npm run build:blocksitemap
 
       - name: Commit if changed
         run: |
@@ -67,7 +72,7 @@ jobs:
           # _meta.generated carries a fresh timestamp every run, and the daily citation/
           # zone sources almost always move, so in practice this commits each month. The
           # guard is here only for the rare no-op (e.g. a re-run minutes apart).
-          git add data/*.json n/ sitemap.xml
+          git add data/*.json n/ sitemap.xml sitemap-blocks.xml
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit."
             exit 0

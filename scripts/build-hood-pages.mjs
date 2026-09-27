@@ -15,6 +15,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
 import { slug, pagedHoods } from '../lib/hoods.js';   // MIN_TICKETS floor lives there (shared with /b/ links)
 import { schedShort } from '../api/block.js';         // same schedule wording as the /b/ pages
+import { gitDate, today } from './lastmod.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const stats = JSON.parse(readFileSync(new URL('data/stats.json', ROOT), 'utf8'));
@@ -642,12 +643,19 @@ function renderIndex() {
 // ---- write pages ----
 mkdirSync(new URL('n/', ROOT), { recursive: true });
 let written = 0;
+const changed = new Set(); // pages whose HTML differs from what's on disk → lastmod today
+const put = (rel, html) => {
+  let old = null;
+  try { old = readFileSync(new URL(rel, ROOT), 'utf8'); } catch { /* new page */ }
+  if (old !== html) changed.add(rel);
+  writeFileSync(new URL(rel, ROOT), html);
+};
 for (let i = 0; i < hoods.length; i++) {
   const h = hoods[i];
-  writeFileSync(new URL(`n/${slug(h.hood)}.html`, ROOT), renderHood(h, i));
+  put(`n/${slug(h.hood)}.html`, renderHood(h, i));
   written++;
 }
-writeFileSync(new URL('n/index.html', ROOT), renderIndex());
+put('n/index.html', renderIndex());
 // a page this build no longer writes (its hood fell under the floor) is deleted, not left live with
 // stale numbers; vercel.json 301s retired slugs to /n/
 const keep = new Set(['index.html', ...hoods.map((h) => `${slug(h.hood)}.html`)]);
@@ -655,24 +663,29 @@ const removed = readdirSync(new URL('n/', ROOT)).filter((f) => f.endsWith('.html
 for (const f of removed) unlinkSync(new URL(`n/${f}`, ROOT));
 
 // ---- refresh sitemap.xml ----
-const today = (stats._meta?.generated || new Date().toISOString()).slice(0, 10);
+// <lastmod> = the day each page really changed (scripts/lastmod.mjs): today for pages this run
+// rewrote with different HTML, else the file's last commit.
 const staticUrls = [
-  ['https://curb.guide/', 'weekly', '1.0'],
-  ['https://curb.guide/about', 'monthly', '0.8'],
-  ['https://curb.guide/tickets', 'monthly', '0.8'],
-  ['https://curb.guide/changelog', 'weekly', '0.5'],
-  ['https://curb.guide/n/', 'weekly', '0.7'],
-  ['https://curb.guide/privacy', 'yearly', '0.3'],
+  ['https://curb.guide/', 'weekly', '1.0', 'index.html'],
+  ['https://curb.guide/about', 'monthly', '0.8', 'about.html'],
+  ['https://curb.guide/tickets', 'monthly', '0.8', 'tickets.html'],
+  ['https://curb.guide/changelog', 'weekly', '0.5', 'changelog.html'],
+  ['https://curb.guide/n/', 'weekly', '0.7', 'n/index.html'],
+  ['https://curb.guide/support', 'monthly', '0.5', 'support.html'],
+  ['https://curb.guide/privacy', 'yearly', '0.3', 'privacy.html'],
 ];
-const hoodUrls = hoods.map((h) => [`https://curb.guide/n/${slug(h.hood)}`, 'monthly', '0.6']);
+const hoodUrls = hoods.map((h) => [`https://curb.guide/n/${slug(h.hood)}`, 'monthly', '0.6', `n/${slug(h.hood)}.html`]);
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticUrls, ...hoodUrls].map(([loc, freq, pri]) => `  <url>
-    <loc>${loc}</loc>
-    <lastmod>${today}</lastmod>
+${[...staticUrls, ...hoodUrls].map(([loc, freq, pri, file]) => {
+  const mod = changed.has(file) ? today() : gitDate(file);
+  return `  <url>
+    <loc>${loc}</loc>${mod ? `
+    <lastmod>${mod}</lastmod>` : ''}
     <changefreq>${freq}</changefreq>
     <priority>${pri}</priority>
-  </url>`).join('\n')}
+  </url>`;
+}).join('\n')}
 </urlset>
 `;
 writeFileSync(new URL('sitemap.xml', ROOT), sitemap);
