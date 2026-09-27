@@ -28,8 +28,8 @@ calendar reminder before the next sweep.
   --meter permit-blue / paper+ink). Keep this language if extending the UI.
 
 ## Data sources (all DataSF Socrata, CORS-open: `access-control-allow-origin: *`)
-DataSF moved hosts: `data.sfgov.org` now 301s to `data.sf.gov` with no CORS header (and 403s some
-queries), which silently broke every browser fetch. Always use `https://data.sf.gov` (2026-09-27).
+DataSF moved hosts: `data.sfgov.org` now 301s to `data.sf.gov` with no CORS header (and 403s any
+query using `$select`), which silently broke every browser fetch. Always use `https://data.sf.gov` (2026-09-27).
 1. Street sweeping — `yhqp-riqs`
    https://data.sf.gov/resource/yhqp-riqs.json
    Fields: cnn (segment id), corridor, limits (cross streets), blockside,
@@ -121,9 +121,23 @@ queries), which silently broke every browser fetch. Always use `https://data.sf.
   cnn like ENF/SWP). Local build (needs `pip install xlrd` + the .xls set via CURB_SWEEP_SCHEDULE_XLS;
   NOT in the data-refresh CI, like build:enforcement). The layer's run DIRECTION stays inferred.
 - api/block.js + sitemap-blocks.xml (scripts/build-block-sitemap.mjs, `npm run build:blocksitemap`) —
-  /b/<cnn> server-rendered block share/landing pages (unique <title> + meta + citation ticket-time),
-  ~10.5k long-tail SEO pages. api/block 302-redirects unknown cnns to /, so the sitemap lists ONLY
-  enforcement ∩ currently-swept cnns (all render 200). Separate 2nd sitemap; both are in robots.txt.
+  /b/<cnn> server-rendered block share/landing pages, ~10.5k long-tail SEO pages. NO DataSF call at
+  request time: they read `data/schedules.json` (scripts/build-schedules.mjs, `npm run build:schedules`,
+  in the monthly data-refresh + validate-data): every swept cnn's rows, cleaned street text, its
+  neighborhood (hoodAt), the adjacent block at each end, a title tag for split pairs and a per-block
+  modified date. Unknown cnn → noindex 404; any internal failure → 503 + Retry-After + no-store (NEVER a
+  302 home: that told Google the pages were gone during the Sep 2026 host move). Titles stay < 60 chars
+  and unique (api/_block.test.mjs renders all of them); the "next sweeps" line makes the 200 cacheable
+  only until SF midnight. The sitemap lists enforcement ∩ baked cnns with real <lastmod>s
+  (scripts/lastmod.mjs); both sitemaps are in robots.txt (which Allows /api/og for share cards).
+- /n/ pages (scripts/build-hood-pages.mjs): list every block street by street (the only inbound links
+  to /b/), "Nearby" = hoods sharing a border, and the build DELETES pages it no longer generates
+  (vercel.json 301s retired slugs). Which hoods get a page is one rule in lib/hoods.js, shared with the
+  /b/ links. The same build rewrites the home page's neighborhood list between the
+  `<!-- hoods:start/end -->` markers in index.html (welcome card) — don't hand-edit inside them.
+- IndexNow: key file `71aabb1f18854413823b971dfe671c61.txt` at the root; `npm run indexnow -- --since
+  <ref> [--dry-run]` submits URLs whose sitemap entry changed. data-refresh runs it (optional step)
+  once the new sitemaps are live.
 - docs/ — sweeper-data research + ready-to-send public-records requests.
 - README.md — human-facing run/deploy notes.
 
