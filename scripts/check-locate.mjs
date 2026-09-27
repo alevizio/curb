@@ -278,6 +278,20 @@ try {
     const stayed = await centerNear(page, SUNSET);
     return { ok: stayed, detail: `map stayed on the search result: ${stayed}` };
   });
+  await scenario('late fix after the user panned is dropped', { remap: { 12000: 800 } }, async (page) => {
+    await viewAt(page, MISSION, 16);
+    await tapLocate(page);
+    await waitFor(page, () => /Couldn't get a fix/.test(document.getElementById('toast').textContent), 4000);
+    const c = await page.evaluate(() => { const r = document.getElementById('map').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    await page.mouse.move(c.x, c.y); await page.mouse.down(); await page.mouse.move(c.x + 80, c.y + 60, { steps: 8 }); await page.mouse.up();
+    await sleep(400);
+    const before = await page.evaluate(() => map.getCenter());
+    await answer(page, 0, { lat: MARINA[0], lng: MARINA[1] });
+    await sleep(2000);
+    const stayed = await centerNear(page, [before.lat, before.lng], 0.001);
+    const sheet = (await sheetBlock(page)).open;
+    return { ok: stayed && !sheet, detail: `stayed=${stayed} sheet=${sheet}` };
+  });
   // Also while still spinning (the longer deadlines make this likelier): the fix must not override a map tap.
   await scenario('fix arriving after a map tap during the wait is dropped', {}, async (page) => {
     await viewAt(page, MISSION, 17);

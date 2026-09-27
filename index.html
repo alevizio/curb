@@ -1911,21 +1911,23 @@ document.getElementById('locate').onclick=()=>{
   // fix there takes ~10 s: at 9 s the first tap failed and only the second (served from cache) worked.
   const app=!!window.__curbNativeGeoInstalled;
   const timeout=app?15000:geoPerm!=='granted'?30000:9000;
-  let done=false, retried=false, placed=false, failsafe=0;
+  let done=false, retried=false, placed=false, failsafe=0, panned=false;
   // Hang guard only (a dismissed prompt can mean no callback ever), so always ABOVE the real deadline —
   // the app adds up to 50 s of native prompt grace. Re-armed once the permission query has answered.
   const guard=t=>t+(app?55000:geoPerm!=='granted'?20000:3000);
   const arm=ms=>{clearTimeout(failsafe);failsafe=setTimeout(()=>{
     if(done)return; done=true;
-    if(whereGen===gen){locBusy(false);locateFailed(3,'failsafe');}
+    // After "try again, or tap where you parked" a pan means they're finding it by hand: a late fix
+    // must not fly the map back out from under them.
+    if(whereGen===gen){locBusy(false);locateFailed(3,'failsafe');map.once('dragstart',()=>{panned=true;});}
   },ms);};
   arm(guard(timeout));
   geoPermReady.then(()=>{if(!done&&!retried)arm(guard(timeout));});
   const settle=()=>{done=true;clearTimeout(failsafe);if(whereGen===gen)locBusy(false);};
   const ok=p=>{
     const late=done; if(!late)settle();
-    // A fix after the guard gave up still counts — unless the user picked another spot meanwhile.
-    if(placed||whereGen!==gen)return;
+    // A fix after the guard gave up still counts — unless the user picked another spot or panned meanwhile.
+    if(placed||whereGen!==gen||(late&&panned))return;
     placed=true;
     try{localStorage.setItem('curbLocOK','1');}catch(_){}
     if(late)toast('Found you.');  // replaces the failure toast it contradicts
