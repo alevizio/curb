@@ -59,7 +59,8 @@ export function knownNames(rows) {
 
 // One cross street: '' for placeholders, first street of a "A \ B \ C" corner, zero padding off,
 // ALL CAPS re-cased, and clipped leading letters restored from a known name — preferring names
-// already used on this street (context), then the smallest repair.
+// already used on this street (context), then names sharing a first word with one ("erry St" on
+// Berry Extension St is Berry St, not Perry St), then the smallest repair.
 export function cleanEnd(raw, known, context = new Set()) {
   let p = squash(raw);
   if (!p || /^(start|end):/i.test(p) || /^e?nd$/i.test(p)) return '';
@@ -69,12 +70,13 @@ export function cleanEnd(raw, known, context = new Set()) {
   if (known.has(p)) return p;
   if (!/^[a-z]/.test(p) && !caps) return p;
   const lp = p.toLowerCase();
+  const kin = new Set([...context].map((n) => n.split(' ')[0]));
   let best = null;
   for (const k of known) {
     for (let d = 1; d <= 3 && d < k.length; d++) {
       const tail = k.slice(d).toLowerCase();
       if (lp !== tail && !lp.startsWith(tail + ' ')) continue;
-      const score = (context.has(k) ? 0 : 10) + d;
+      const score = (context.has(k) ? 0 : kin.has(k.split(' ')[0]) ? 5 : 10) + d;
       if (!best || score < best.score) best = { score, fixed: k + p.slice(tail.length) };
     }
   }

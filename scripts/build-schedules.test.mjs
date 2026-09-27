@@ -30,6 +30,12 @@ describe('street text cleanup', () => {
     expect(cleanEnd('AYLOR ST', known, new Set(['Naylor St']))).toBe('Naylor St');
     expect(cleanEnd('ara St', known, new Set(['Vara St']))).toBe('Vara St');
   });
+  it('breaks a tie toward the name the street itself is built on', () => {
+    // DataSF: Berry Extension St, "erry St - Mission Bay Blvd" — Berry St, not Perry St across town
+    const k = new Set(['Perry St', 'Berry St', 'Cherry St', 'Mission Bay Blvd']);
+    expect(cleanEnd('erry St', k, new Set(['Berry Extension St', 'Mission Bay Blvd']))).toBe('Berry St');
+    expect(cleanEnd('erry St', new Set(['Berry St', 'Perry St']), new Set(['Perry Aly']))).toBe('Perry St');
+  });
   it('keeps the first street of a multi-street corner', () => {
     expect(cleanEnd('Bay Shore Blvd \\ Bayview Park Rd', new Set(['Bay Shore Blvd']))).toBe('Bay Shore Blvd');
   });
