@@ -30,6 +30,11 @@ describe('test push', () => {
     expect(plan.map((p) => [p.key, p.title])).toEqual([['tonight', 'Test · Night before (Mon 9 PM)']]);
   });
 
+  it('Intense on a 7 AM sweep previews no 5 AM morning-of (the real sender never sends it)', async () => {
+    const { plan } = await call({ which: 'all', level: 'intense', spot: { corridor: 'Kansas St', nextSweepISO: '2026-10-06T14:00:00.000Z' } });
+    expect(plan.map((p) => p.title)).toEqual(['Test · Night before (Mon 8 PM)', 'Test · 30 min before (Tue 6:30 AM)']);
+  });
+
   it('with no future sweep, previews a demo sweep tomorrow at 9 AM (round, real-looking times)', async () => {
     const { plan } = await call({ which: 'lead', spot: { nextSweepISO: '2020-01-01T00:00:00Z' } });
     expect(plan[0].title).toBe('Test · 30 min before (Sun 8:30 AM)');
