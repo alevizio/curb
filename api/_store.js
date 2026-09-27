@@ -327,6 +327,10 @@ export async function deleteTokensForEndpoint(endpoint) {
 // ---- sender run record (read by the monitor via /api/send-notifications?status=1) ----
 // `last` = the most recent run whatever its outcome; `ok` = the most recent successful one. Holds only
 // counts/outcome/trigger — no subscription, token or spot.
+// `qstash` / `qstashOk` = the same two, for QStash-triggered runs only, so the monitor can tell a dead
+// primary scheduler apart even while GitHub backup runs keep `last`/`ok` fresh. `qstash` is
+// { at, ok, error? } (ok is false only for an erroring run; a lock-skipped tick is a harmless no-op,
+// flagged skipped:true) and `qstashOk` is { at }.
 const CKEY = 'curb:cron';
 
 /** Record one sender run: { at, trigger, outcome: 'ok'|'error'|'skipped', ... }. */
@@ -334,16 +338,22 @@ export async function saveRunStatus(status) {
   const r = redis();
   if (!r) return;
   const v = JSON.stringify(status);
-  await r.hset(CKEY, status.outcome === 'ok' ? { last: v, ok: v } : { last: v });
+  const fields = status.outcome === 'ok' ? { last: v, ok: v } : { last: v };
+  if (status.trigger === 'qstash') {
+    fields.qstash = JSON.stringify({ at: status.at, ok: status.outcome !== 'error',
+      ...(status.outcome === 'skipped' ? { skipped: true } : {}), ...(status.error ? { error: status.error } : {}) });
+    if (status.outcome === 'ok') fields.qstashOk = JSON.stringify({ at: status.at });
+  }
+  await r.hset(CKEY, fields);
 }
 
-/** { last, lastOk } — either may be null before the first run. */
+/** { last, lastOk, lastQstash, lastQstashOk } — any may be null before the first such run. */
 export async function loadRunStatus() {
   const r = redis();
-  if (!r) return { last: null, lastOk: null };
+  if (!r) return { last: null, lastOk: null, lastQstash: null, lastQstashOk: null };
   const all = (await r.hgetall(CKEY)) || {};
   const parse = (v) => (typeof v === 'string' ? safeParse(v) : v) || null;
-  return { last: parse(all.last), lastOk: parse(all.ok) };
+  return { last: parse(all.last), lastOk: parse(all.ok), lastQstash: parse(all.qstash), lastQstashOk: parse(all.qstashOk) };
 }
 
 // ---- client error log (anonymous; see /privacy) ----

@@ -7,7 +7,9 @@
 //  - BACKUP: .github/workflows/sweep-alerts-cron.yml GETs with `Authorization: Bearer CRON_SECRET`.
 //    GitHub schedules are best-effort (Sep 2026: ~7 runs/day, not 96), so it only fills gaps.
 // Overlapping runs are safe: the run lock + per-sweep de-dupe below.
-//  - GET ?status=1 (Bearer only) returns the last run's time/outcome/trigger for the monitor; no sends.
+//  - GET ?status=1 (Bearer only) returns the last run's time/outcome/trigger for the monitor, plus the
+//    last QStash-triggered run (lastQstash {at, ok, error?}) and last successful one (lastQstashOk {at});
+//    no sends.
 //  - HC_PING_URL (optional healthchecks.io check): pinged on successful QStash runs, /fail on errors,
 //    so a dead primary scheduler emails the owner even while the GitHub backup limps along.
 import webpush from 'web-push';

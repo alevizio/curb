@@ -117,6 +117,36 @@ describe('?status=1 (monitor)', () => {
     expect(send).not.toHaveBeenCalled();
     expect((await run(bearer({ method: 'POST', query: { status: '1' } }))).code).toBe(405);
   });
+
+  it('also reports the last QStash run (any outcome) and the last successful one, apart from backup runs', async () => {
+    const iso = (t) => new Date(t).toISOString();
+    const statusNow = async () => (await run(bearer({ query: { status: '1' } }))).body;
+    expect(await statusNow()).toMatchObject({ last: null, lastOk: null, lastQstash: null, lastQstashOk: null });
+    await run(await qstash());                                         // QStash, ok
+    vi.setSystemTime(NOW + 60000);
+    await run(bearer());                                               // a GitHub backup run after it
+    let s = await statusNow();
+    expect(s.lastQstash).toEqual({ at: iso(NOW), ok: true });
+    expect(s.lastQstashOk).toEqual({ at: iso(NOW) });
+    expect(s.last).toMatchObject({ at: iso(NOW + 60000), trigger: 'bearer', outcome: 'ok' }); // unchanged fields
+    expect(s.lastOk).toMatchObject({ trigger: 'bearer', outcome: 'ok' });
+    // an erroring QStash run: lastQstash says so, lastQstashOk keeps the last good one
+    vi.setSystemTime(NOW + 15 * 60000);
+    failSubsLoad = true;
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await run(await qstash());
+    err.mockRestore();
+    failSubsLoad = false;
+    s = await statusNow();
+    expect(s.lastQstash).toEqual({ at: iso(NOW + 15 * 60000), ok: false, error: 'upstash down' });
+    expect(s.lastQstashOk).toEqual({ at: iso(NOW) });
+    // a tick skipped by the lock (the failed run still holds it) is not a failure
+    vi.setSystemTime(NOW + 16 * 60000);
+    expect((await run(await qstash())).body.skipped).toBeTruthy();
+    s = await statusNow();
+    expect(s.lastQstash).toEqual({ at: iso(NOW + 16 * 60000), ok: true, skipped: true });
+    expect(s.lastQstashOk).toEqual({ at: iso(NOW) });
+  });
 });
 
 describe('failures + the run lock', () => {

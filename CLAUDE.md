@@ -297,7 +297,9 @@ Files now present for the push feature:
   best-effort (Sep 2026: ~7 runs/day, not 96). Overlap is safe: a 120 s run lock — released once a run
   fully succeeds (web loop done, no APNs error), so a GitHub run just before a QStash tick no longer
   swallows that tick; deliberately NOT released on error (a retry would re-send a push whose
-  markNotified failed) — plus the per-sweep `notified` de-dupe. Every run records itself in Upstash (`curb:cron`: last + last success) for the
+  markNotified failed) — plus the per-sweep `notified` de-dupe. Every run records itself in Upstash
+  (`curb:cron`: last + last success, plus the last QStash-triggered run `lastQstash` {at, ok, error?}
+  and last successful one `lastQstashOk` {at}, so backup runs can't hide a dead primary) for the
   monitor's `?status=1` check; optional `HC_PING_URL` (healthchecks.io) is pinged by successful QStash
   runs and `/fail` on errors. The monitor workflow can also be dispatched by QStash (`mode` input).
 - `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET,
