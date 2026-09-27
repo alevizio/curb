@@ -12,6 +12,7 @@
 #   POST https://api.github.com/repos/alevizio/curb/actions/workflows/monitor.yml/dispatches
 #   headers: Upstash-Forward-Authorization: Bearer <fine-grained PAT, this repo only, Actions: read+write>
 #            Upstash-Forward-Accept: application/vnd.github+json
+#            Content-Type: application/json   (GitHub answers 204 on success)
 #   body:    {"ref":"main","inputs":{"mode":"smoke"}}   (or "nightly")
 # The schedules below stay as the fallback; a manual run defaults to mode "all".
 #
