@@ -305,7 +305,7 @@ const FOOTER_UNUSED = `
   <a href="/about">About CURB</a>
   <a href="/press">Press</a>
   <a href="/changelog">Changelog</a>
-  <a href="https://data.sfgov.org" rel="noopener">Data: DataSF</a>
+  <a href="https://data.sf.gov" rel="noopener">Data: DataSF</a>
   <a href="https://github.com/alevizio/curb" rel="noopener">Open source — GitHub</a>
   <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
   <a href="/privacy">Privacy</a>
@@ -425,7 +425,7 @@ function renderHood(h, idx) {
         name: `Street-cleaning citations in ${name}, San Francisco`,
         description: `Aggregated SFMTA street-cleaning citations for the ${name} neighborhood over the last ~2 years: total tickets and fines, distribution by day of week and hour, and the heaviest-ticketed streets. Derived from the public DataSF citations dataset, address-matched to neighborhoods.`,
         url: canonical,
-        isBasedOn: 'https://data.sfgov.org/Transportation/SFMTA-Parking-Citations-Fines/ab4h-6ztd',
+        isBasedOn: 'https://data.sf.gov/Transportation/SFMTA-Parking-Citations-Fines/ab4h-6ztd',
         license: 'https://opendatacommons.org/licenses/pddl/1-0/',
         creator: { '@type': 'Organization', name: 'CURB', url: 'https://curb.guide/' },
         spatialCoverage: { '@type': 'Place', name: `${name}, San Francisco, California` },

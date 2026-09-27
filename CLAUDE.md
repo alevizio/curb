@@ -24,18 +24,20 @@ calendar reminder before the next sweep.
   --meter permit-blue / paper+ink). Keep this language if extending the UI.
 
 ## Data sources (all DataSF Socrata, CORS-open: `access-control-allow-origin: *`)
+DataSF moved hosts: `data.sfgov.org` now 301s to `data.sf.gov` with no CORS header (and 403s some
+queries), which silently broke every browser fetch. Always use `https://data.sf.gov` (2026-09-27).
 1. Street sweeping — `yhqp-riqs`
-   https://data.sfgov.org/resource/yhqp-riqs.json
+   https://data.sf.gov/resource/yhqp-riqs.json
    Fields: cnn (segment id), corridor, limits (cross streets), blockside,
    cnnrightleft (L/R vs digitized direction), weekday, fromhour, tohour,
    week1..week5 ("1"/"0" = Nth occurrence of that weekday in the month),
    line (GeoJSON LineString). CURRENT data.
 2. Parking meters — `8vzz-qzz9`
-   https://data.sfgov.org/resource/8vzz-qzz9.json
+   https://data.sf.gov/resource/8vzz-qzz9.json
    Fields: street_name (UPPERCASE), cap_color, on_offstreet_type, lat/long, etc.
    CURRENT data. Used only for a street-level count (no spatial join — see limits).
 3. Parking regulations / RPP — `hi6h-neyh`
-   https://data.sfgov.org/resource/hi6h-neyh.json
+   https://data.sf.gov/resource/hi6h-neyh.json
    Fields: regulation, rpparea1 (permit-area letter), hrlimit, days, from_time,
    to_time, exceptions, shape (GeoJSON MultiLineString). STALE: this is SFMTA's
    2017 set, flagged by the city as not comprehensively updated. Treat as a hint.
@@ -232,7 +234,7 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   view" checks (map click → flyTo, day/status recolor, route toggle auto-zoom, meter/loading
   guards) read `ovMode`, NOT `getZoom()<MIN_ZOOM_DATA`.
 - **Performance invariants**: head carries preconnects to every data origin (fonts.gstatic,
-  cdnjs, data.sfgov.org, tile.googleapis.com, carto). The citywide overview draws in
+  cdnjs, data.sf.gov, tile.googleapis.com, carto). The citywide overview draws in
   1,500-line chunks across frames (`drawOverview`, token-guarded) — never synchronously.
   Meters/loading zones load from the static `data/zones.json` (regen: `npm run build:zones`);
   the live Socrata join survives only as a fallback. Static data assets: enforcement.json,

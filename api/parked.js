@@ -11,7 +11,7 @@ import { inSfBbox, polygonAround, pickParkedSpot } from './_geo.js';
 import '../lib/sweep-core.js';
 const { sfWallToInstant, fmtHour, DAYLBL } = globalThis;
 
-const SWEEP = 'https://data.sfgov.org/resource/yhqp-riqs.json';
+const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
 const RATE_MS = 60000; // ≤1 park per minute per token
 
 export default async function handler(req, res) {

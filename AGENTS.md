@@ -25,17 +25,17 @@ calendar reminder before the next sweep.
 
 ## Data sources (all DataSF Socrata, CORS-open: `access-control-allow-origin: *`)
 1. Street sweeping — `yhqp-riqs`
-   https://data.sfgov.org/resource/yhqp-riqs.json
+   https://data.sf.gov/resource/yhqp-riqs.json
    Fields: cnn (segment id), corridor, limits (cross streets), blockside,
    cnnrightleft (L/R vs digitized direction), weekday, fromhour, tohour,
    week1..week5 ("1"/"0" = Nth occurrence of that weekday in the month),
    line (GeoJSON LineString). CURRENT data.
 2. Parking meters — `8vzz-qzz9`
-   https://data.sfgov.org/resource/8vzz-qzz9.json
+   https://data.sf.gov/resource/8vzz-qzz9.json
    Fields: street_name (UPPERCASE), cap_color, on_offstreet_type, lat/long, etc.
    CURRENT data. Used only for a street-level count (no spatial join — see limits).
 3. Parking regulations / RPP — `hi6h-neyh`
-   https://data.sfgov.org/resource/hi6h-neyh.json
+   https://data.sf.gov/resource/hi6h-neyh.json
    Fields: regulation, rpparea1 (permit-area letter), hrlimit, days, from_time,
    to_time, exceptions, shape (GeoJSON MultiLineString). STALE: this is SFMTA's
    2017 set, flagged by the city as not comprehensively updated. Treat as a hint.

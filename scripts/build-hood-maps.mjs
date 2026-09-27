@@ -19,7 +19,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 const ROOT = new URL('../', import.meta.url);
 const GEO = new URL('data/neighborhoods.geojson', ROOT);
 const SOURCES = [
-  'https://data.sfgov.org/resource/j2bu-swwd.geojson?$limit=100',
+  'https://data.sf.gov/resource/j2bu-swwd.geojson?$limit=100',
   'https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services/Analysis_Neighborhoods/FeatureServer/0/query?where=1=1&outFields=nhood&f=geojson&returnGeometry=true',
 ];
 

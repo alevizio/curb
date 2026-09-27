@@ -31,7 +31,7 @@ def fetch(url, params):
 
 # 1) segments + schedule
 print("fetching segments…", file=sys.stderr)
-rows = fetch('https://data.sfgov.org/resource/yhqp-riqs.json', {'$select':'cnn,weekday,fromhour,tohour,line','$limit':'45000'})
+rows = fetch('https://data.sf.gov/resource/yhqp-riqs.json', {'$select':'cnn,weekday,fromhour,tohour,line','$limit':'45000'})
 seg_line, sched = {}, {}
 for r in rows:
     cnn = r.get('cnn')

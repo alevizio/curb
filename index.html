@@ -53,7 +53,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-<link rel="preconnect" href="https://data.sfgov.org">
+<link rel="preconnect" href="https://data.sf.gov">
 <link rel="preconnect" href="https://tile.googleapis.com">
 <link rel="preconnect" href="https://a.basemaps.cartocdn.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -760,11 +760,11 @@
      loaded before the main script so its exports are on globalThis. Unit-tested separately. -->
 <script src="/lib/sweep-core.js"></script>
 <script>
-const SWEEP="https://data.sfgov.org/resource/yhqp-riqs.json";
-const METER="https://data.sfgov.org/resource/8vzz-qzz9.json";
-const RPP="https://data.sfgov.org/resource/hi6h-neyh.json";
-const ADDR="https://data.sfgov.org/resource/3mea-di5p.json";
-const LOADRULES="https://data.sfgov.org/resource/6cqg-dxku.json"; // metered color-curb operating schedules
+const SWEEP="https://data.sf.gov/resource/yhqp-riqs.json";
+const METER="https://data.sf.gov/resource/8vzz-qzz9.json";
+const RPP="https://data.sf.gov/resource/hi6h-neyh.json";
+const ADDR="https://data.sf.gov/resource/3mea-di5p.json";
+const LOADRULES="https://data.sf.gov/resource/6cqg-dxku.json"; // metered color-curb operating schedules
 // DAYIDX, DAYLBL, normDay, fmtHour and the SF time core (sfWallToInstant/nextSweep/holidays)
 // are defined in lib/sweep-core.js (loaded just before this script) and live on globalThis.
 const MIN_ZOOM_DATA=15;

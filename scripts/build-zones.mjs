@@ -9,8 +9,8 @@
 //
 // Run: npm run build:zones   (Node 18+, no deps)
 
-const METER = 'https://data.sfgov.org/resource/8vzz-qzz9.json';
-const RULES = 'https://data.sfgov.org/resource/6cqg-dxku.json';
+const METER = 'https://data.sf.gov/resource/8vzz-qzz9.json';
+const RULES = 'https://data.sf.gov/resource/6cqg-dxku.json';
 const log = (...a) => console.error('[zones]', ...a);
 
 async function getAll(base, params) {
