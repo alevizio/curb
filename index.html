@@ -45,6 +45,28 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CURB">
+<!-- Anonymous error reports to our own /api/client-error (no IP, no location, no third party — see /privacy).
+     First in <head> so it catches everything; curbReport(kind, detail) logs app-level failures. -->
+<script>
+(function(){
+  var sent=0, seen={}, on=location.hostname==='curb.guide';
+  function app(){ return window.__curbNativePush ? 'ios-app' : (matchMedia('(display-mode: standalone)').matches || navigator.standalone) ? 'pwa' : 'web'; }
+  function send(k,msg,src,line,col,stack){
+    try{
+      msg=String(msg||'').slice(0,300);
+      if(!on || sent>=5 || !msg || msg==='Script error.' || seen[k+msg]) return; // 'Script error.' = opaque cross-origin
+      if(src && src.indexOf(location.origin)!==0) return; // extensions / third-party scripts
+      seen[k+msg]=1; sent++;
+      var body=JSON.stringify({k:k,msg:msg,src:src||'',line:line||0,col:col||0,stack:String(stack||'').slice(0,1200),page:location.pathname,app:app()});
+      if(!(navigator.sendBeacon && navigator.sendBeacon('/api/client-error',body)))
+        fetch('/api/client-error',{method:'POST',body:body,keepalive:true}).catch(function(){});
+    }catch(_){}
+  }
+  addEventListener('error',function(e){ if(e.message) send('error',e.message,e.filename,e.lineno,e.colno,e.error&&e.error.stack); });
+  addEventListener('unhandledrejection',function(e){ var r=e.reason; send('rejection',(r&&r.message)||String(r),'',0,0,r&&r.stack); });
+  window.curbReport=function(kind,detail){ send('event:'+kind,detail,'',0,0,''); };
+})();
+</script>
 <!-- Optional local key injection (config.js is gitignored; absent in the public repo → CARTO fallback). -->
 <script src="config.js"></script>
 <!-- Vercel Speed Insights — anonymous web vitals (no cookies) -->
@@ -1072,7 +1094,7 @@ async function loadViewport(){
     if(!data.length&&!noCovToasted){noCovToasted=true;
       toast('No street-sweeping data here — CURB covers San Francisco.');}
     drawSegments(data);
-  }catch(e){ if(my===fetchTok) toast("Couldn't load that area — pan and try again."); }
+  }catch(e){ if(my===fetchTok){ toast("Couldn't load that area — pan and try again."); curbReport('data-load', String((e&&e.message)||e)); } }
   loadRanges(poly);
   if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
   if(loadOn) drawLoadZones(); else loadLayer.clearLayers();

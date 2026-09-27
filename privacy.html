@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Privacy — CURB</title>
-<meta name="description" content="CURB stores no accounts and no cookies. The only thing saved is your push-alert subscription, so we can warn you before street sweeping. Remove it any time.">
+<meta name="description" content="CURB stores no accounts and no cookies. The only personal thing saved is your anonymous push-alert subscription, so we can warn you before street sweeping. Remove it any time.">
 <link rel="canonical" href="https://curb.guide/privacy">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Privacy — CURB">
@@ -52,7 +52,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   <p>No sign-up. No advertising. No cookies. No selling or sharing data. No third-party trackers. You can use
     the entire map, look up any block, and read the ticket data without giving us anything.</p>
 
-  <h2>The one thing we store</h2>
+  <h2>The one thing we store about you</h2>
   <p>If you tap <b>Sweep alerts</b> on a block, your browser creates a <b>push subscription</b> — an anonymous
     endpoint your browser provides — and we save it with the block and sweep time you picked, so a scheduled
     job can send the "move your car" notification before sweeping. It contains no name, email, or account.</p>
@@ -64,6 +64,12 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
     cookies, no cross-site identifiers, no individual profiles. It tells us "the tickets page got N views,"
     not who you are. A small amount of <b>functional state</b> (e.g. whether you've seen the intro) lives in
     your own browser's localStorage and never leaves your device.</p>
+
+  <h2>Error reports</h2>
+  <p>When something breaks in the app — a script error, or the map failing to load a block — your browser sends
+    a short <b>anonymous error report</b> to our own server (never a third party): the error message, which page,
+    and a coarse device type like "iOS Safari". <b>No IP address, no location, no push subscription</b> is stored
+    with it, and only the most recent reports are kept. It exists so we find out when CURB breaks before you do.</p>
 
   <h2>Where the data comes from</h2>
   <p>Everything CURB shows is public record from <a href="https://datasf.org" rel="noopener">DataSF</a> and

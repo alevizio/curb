@@ -279,6 +279,39 @@ export async function deleteTokensForEndpoint(endpoint) {
   }
 }
 
+// ---- client error log (anonymous; see /privacy) ----
+// A capped list of the most recent browser / iOS-wrapper errors, so the GitHub monitor can alert on
+// real user-facing breakage. Entries carry no IP, no location, no subscription or token.
+const EKEY = 'curb:errors';
+const EMAX = 2000;
+
+/** Append one normalized error entry (newest first), keeping only the last EMAX. */
+export async function pushClientError(entry) {
+  const r = redis();
+  if (!r) return false;
+  await r.lpush(EKEY, JSON.stringify(entry));
+  await r.ltrim(EKEY, 0, EMAX - 1);
+  return true;
+}
+
+/** Every stored entry, newest first. */
+export async function readClientErrors() {
+  const r = redis();
+  if (!r) return [];
+  const rows = (await r.lrange(EKEY, 0, EMAX - 1)) || [];
+  return rows.map((v) => (typeof v === 'string' ? safeParse(v) : v)).filter(Boolean);
+}
+
+/** Global per-minute intake cap (abuse guard): true while this minute is still under `max`. */
+export async function underErrorRate(max = 120) {
+  const r = redis();
+  if (!r) return true;
+  const k = 'curb:errs:rate:' + Math.floor(Date.now() / 60000);
+  const n = await r.incr(k);
+  if (n === 1) await r.expire(k, 120);
+  return n <= max;
+}
+
 function safeParse(s) {
   try { return JSON.parse(s); } catch { return null; }
 }

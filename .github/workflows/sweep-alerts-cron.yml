@@ -30,12 +30,19 @@ jobs:
       - name: Hit the notification endpoint
         env:
           TEST: ${{ github.event.inputs.test }}
+          # Optional healthchecks.io ping URL (repo secret). An outside watcher that emails/pushes the
+          # owner if this timer stops running or keeps failing — even when GitHub itself is lagging.
+          HC_PING_URL: ${{ secrets.HC_PING_URL }}
         run: |
           url="https://curb.guide/api/send-notifications"
           [ -n "$TEST" ] && url="$url?test=$TEST"
           code=$(curl -sS -o /tmp/out.json -w '%{http_code}' \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "$url")
+            "$url") || code=000
           echo "HTTP $code"
-          cat /tmp/out.json; echo
+          cat /tmp/out.json 2>/dev/null; echo
+          if [ -n "$HC_PING_URL" ]; then
+            ping="$HC_PING_URL"; [ "$code" = "200" ] || ping="$HC_PING_URL/fail"
+            curl -fsS -m 10 --retry 3 -o /dev/null "$ping" || echo "heartbeat ping failed (ignored)"
+          fi
           test "$code" = "200"

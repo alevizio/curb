@@ -1,0 +1,90 @@
+# Watches curb.guide so breakage reaches the owner as an email instead of via users.
+#
+# Every 30 min (smoke): home page, every DataSF dataset the app uses (read from the live index.html,
+#   incl. CORS — catches host moves), basemap tiles, /b/ + /n/ SEO pages, sitemaps, ticket data,
+#   the sweep-alerts-cron timer's freshness, and a spike in real-user errors (/api/client-error).
+# Nightly (~4am PT): a real headless-Chrome walk of the core path (map → curb lines → one-tap
+#   locate → block sheet) plus a digest of repeated user errors from the last 24h.
+#
+# Alerts are GitHub issues (label per group) opened/updated/closed by scripts/monitor/alert.mjs:
+# one email when something breaks, one when what's broken changes, one when it recovers.
+# Free: public-repo Actions minutes. Secrets: CRON_SECRET (same as sweep-alerts-cron; reads the error log).
+# Note: GitHub pauses schedules in public repos after 60 days without commits; the monthly
+# data-refresh commits keep it alive.
+name: monitor
+
+on:
+  schedule:
+    - cron: "7,37 * * * *" # smoke, every 30 min (off the hour; GitHub schedules can lag)
+    - cron: "23 11 * * *"  # nightly browser walk + error digest (11:23 UTC ≈ 4am PT)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: monitor-${{ github.event.schedule || 'manual' }}
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '7,37 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/monitor
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run smoke checks
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/monitor/smoke.mjs --out smoke.json
+      - name: Open / update / close the alert issue
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/monitor/alert.mjs smoke.json monitor:site "curb.guide is broken"
+
+  nightly:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 11 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install headless browser driver
+        run: npm ci && npm i --no-save puppeteer-core@25
+      - name: Walk the app in a real browser
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/monitor/browser.mjs --out browser.json --shots shots
+      - name: Alert on the browser walk
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/monitor/alert.mjs browser.json monitor:browser "curb.guide user path is broken"
+      - name: Digest repeated user errors (24h)
+        if: always()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: node scripts/monitor/smoke.mjs --digest --out digest.json
+      - name: Alert on repeated user errors
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/monitor/alert.mjs digest.json monitor:errors "curb.guide users are hitting errors"
+      - name: Keep screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-shots
+          path: shots/
+          retention-days: 7
