@@ -228,6 +228,16 @@ describe('SEC-1: client-supplied text in the public alert issues', () => {
     expect(lit('x'.repeat(500), 80)).toHaveLength(82);
   });
 
+  it('client text printed to the public Actions log cannot run a legacy ##[command] (it fails the step)', async () => {
+    for (const m of ['##[set-env name=A]B', 'x ###[error]phish', '##[##[add-mask]fail']) expect(lit(m)).not.toContain('##[');
+    // One low-rate sender used to be enough: an informational kind is printed in every smoke run's ok line.
+    const f = mockFetch({ 'https://curb.guide/api/client-error': { status: 200, body: log([{ k: 'event:locate-coarse', msg: '##[set-env name=A]B' }]) } });
+    const spike = await withSecret(() => checkErrorSpike(f, now));
+    expect(spike.status).toBe('ok');
+    expect(spike.detail).toContain('set-env');
+    expect(spike.detail).not.toContain('##[');
+  });
+
   it('digest: 3 attacker reports open an issue whose body and title render nothing live, and later nights stay quiet', async () => {
     const f = mockFetch({ 'https://curb.guide/api/client-error': { status: 200, body: log([EVIL, EVIL, EVIL]) } });
     const results = await withSecret(() => digest(f, now));

@@ -193,9 +193,12 @@ async function fetchErrors(f, since) {
  *  script path, stack) only ever appears as ONE inline-code span, so it can't render as Markdown (links,
  *  images, HTML). No backticks or line breaks (they would end the span), a zero-width space after every
  *  @ (no @mention, also in the plain-text issue title), and < > swapped for look-alikes so the text can
- *  never open or close the <!-- monitor-sig --> marker alert.mjs keys on. */
+ *  never open or close the <!-- monitor-sig --> marker alert.mjs keys on. The same text is printed to the
+ *  public Actions log, where the runner obeys a legacy "##[command]" ANYWHERE in a line (a disabled one
+ *  like ##[set-env] fails the step, ##[error] posts an annotation), so "##[" is split by a zero-width
+ *  space too. ("::command::" only counts at the start of a line, and this span never starts one.) */
 export const lit = (s, n = 200) => '`' + String(s ?? '').slice(0, n).replace(/`/g, "'").replace(/[\r\n]+/g, ' ')
-  .replace(/</g, '‹').replace(/>/g, '›').replace(/@/g, '@\u200b') + '`';
+  .replace(/</g, '‹').replace(/>/g, '›').replace(/@/g, '@\u200b').replace(/##\[/g, '#\u200b#[') + '`';
 const describe = (g) => `${g.count}× ${lit(g.msg)}${g.src ? ` (${lit(`${g.src}:${g.line}`)})` : ''} — ${Object.entries(g.clients).map(([c, n]) => `${c} ${n}`).join(', ')}`;
 
 export async function checkErrorSpike(f, now = Date.now()) {
