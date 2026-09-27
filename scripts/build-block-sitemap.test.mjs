@@ -40,3 +40,13 @@ describe('gitDate', () => {
     expect(gitDate('no/such/file.html')).toBe(null);
   });
 });
+
+describe('robots.txt', () => {
+  it('advertises both sitemaps and lets share cards through while /api/ stays blocked', () => {
+    const r = read('robots.txt');
+    expect(r).toMatch(/^Allow: \/api\/og$/m);
+    expect(r).toMatch(/^Disallow: \/api\/$/m);
+    expect(r).toContain('Sitemap: https://curb.guide/sitemap.xml');
+    expect(r).toContain('Sitemap: https://curb.guide/sitemap-blocks.xml');
+  });
+});
