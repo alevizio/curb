@@ -2,10 +2,11 @@
 // production (all /api/save-subscription calls are intercepted and answered here; push is faked).
 // Covers: tie-break on the earliest next sweep, the spot's rules[], "✓ Alerts on" keyed on the curb
 // (not the sweep instant) + the off switch, the "alerts are on for <other block>" note, legacy-key
-// migration, the reverse-ghost guard, debounced/reverted style saves, the night-sweep copy, and the
-// native iOS bridge in both shapes: App Store build 6 (boolean promise, two-argument callback) and
-// build 7 (the real pushScript from ContentView.swift: one {ok,reason,message,status} object and
-// __curbRequestPushDetail) — save-failed vs denied, off, and no reports while notifications are off.
+// migration, the reverse-ghost guard, debounced/reverted style saves, the night-sweep copy, the off row
+// on a short phone, and the native iOS bridge in both shapes: App Store build 6 (boolean promise,
+// two-argument callback) and build 7 (the real pushScript from ContentView.swift: one
+// {ok,reason,message,status} object and __curbRequestPushDetail) — save-failed vs denied, off, and no
+// reports while notifications are off.
 //
 //   npx -y serve . -l 3210 &   node scripts/check-alerts-ui.mjs http://localhost:3210
 // Needs puppeteer-core (like scripts/monitor/browser.mjs) and Chrome (CHROME_PATH or the default).
@@ -80,9 +81,9 @@ function buildBlocks() {
   return { early, late };
 }
 
-async function openPage(native, ctl) {
+async function openPage(native, ctl, size = { width: 390, height: 844 }) {
   const page = await browser.newPage();
-  await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+  await page.setViewport({ ...size, isMobile: true, hasTouch: true });
   page.__posts = [];
   page.on('pageerror', (e) => check(`no page errors (${native ? 'native build ' + native : 'web'})`, false, e.message));
   await page.setRequestInterception(true);
@@ -188,6 +189,26 @@ try {
   check('night sweep: spot carries no eve/morning anchors', !ns.eveningISO && !ns.morningISO);
   check('night sweep: toast promises the ~9 PM push', (await toast(page)).includes('~9 PM the night before'));
   await page.close();
+
+  // ---------------- short phone (375x667): the off row must not open below the peek ----------------
+  // (localStorage is shared by every page here: start from no saved alert and leave none behind)
+  const sp = (await openPage(false, ctl, { width: 375, height: 667 })).page;
+  await sp.evaluate(() => localStorage.removeItem('curbAlert'));
+  await open(sp, '7735000');
+  await tap(sp, '#alertBtn');
+  await sp.waitForFunction(() => document.getElementById('alertBtn').textContent.includes('Alerts on'), { timeout: 5000 }).catch(() => {});
+  await tap(sp, '#alertBtn');
+  await sleep(700); // the reveal scrolls the sheet smoothly
+  const offBox = await sp.evaluate(() => {
+    const o = document.getElementById('alertOff').getBoundingClientRect(), s = document.getElementById('sheet');
+    return { top: Math.round(o.top), bottom: Math.round(o.bottom), sheetTop: Math.round(s.getBoundingClientRect().top), vh: innerHeight, tall: s.classList.contains('tall'), docScroll: document.scrollingElement.scrollTop };
+  });
+  check('375x667: "Turn off / Keep them on" is on screen inside the peek sheet', !(await hidden(sp, '#alertOff')) && offBox.bottom <= offBox.vh && offBox.top >= offBox.sheetTop && !offBox.tall && offBox.docScroll === 0, JSON.stringify(offBox));
+  await tap(sp, '#grabBtn');
+  await sleep(450);
+  check('…and the grab button still expands the sheet', await sp.evaluate(() => document.getElementById('sheet').classList.contains('tall') && document.getElementById('grabBtn').getAttribute('aria-expanded') === 'true'));
+  await sp.evaluate(() => localStorage.removeItem('curbAlert'));
+  await sp.close();
 
   // ---------------- native iOS bridge, App Store build 6 ----------------
   const nat = await openPage(6, ctl);

@@ -1681,8 +1681,14 @@ function openSheet(group, activeKey){
     document.getElementById('calGoogle').onclick=()=>doCal('google');
     document.getElementById('calICS').onclick=()=>doCal('ics');
     // "✓ Alerts on" offers the off switch instead of silently re-arming (and extending) the watch.
+    // On a short phone (375x667) the row opens below the 46dvh peek, so the tap looked dead: scroll the sheet
+    // just far enough to show it. Measured from layout (offsetTop), not the rect the panelin scale-in shrinks.
     document.getElementById('alertBtn').onclick=e=>{
-      if(alertSpotMatches(spot)){document.getElementById('alertOff').hidden=false;return;}
+      if(alertSpotMatches(spot)){const o=document.getElementById('alertOff'), s=document.getElementById('sheet');
+        o.hidden=false;
+        const below=o.offsetTop+o.offsetHeight+12-(s.scrollTop+s.clientHeight);
+        if(below>0)s.scrollBy({top:below,behavior:'smooth'});
+        return;}
       onAlertTap(spot,e.currentTarget);
     };
     document.getElementById('alertOffNo').onclick=()=>{document.getElementById('alertOff').hidden=true;};
