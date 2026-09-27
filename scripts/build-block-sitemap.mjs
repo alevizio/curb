@@ -4,10 +4,10 @@
 // (<cross sts>), SF", each with that block's real schedule + citation-derived ticket time. Great
 // long-tail search targets ("17th St Mission street cleaning").
 //
-// Universe = enforcement blocks (the ones carrying the "tickets land ~X" hook) that ALSO have a
-// baked schedule in data/schedules.json (build:schedules). api/block answers 404 for any cnn not in
-// that file, so intersecting lists only cnns that render a real 200 page — from the same file the
-// page is served from, not a separate live DataSF query that could disagree.
+// Universe = every block with a baked schedule in data/schedules.json (build:schedules) — exactly the
+// cnns api/block serves as a real 200 page (anything else is a 404), read from the same file the page
+// is served from, not a separate live DataSF query that could disagree. All of them, not just the ones
+// with citation data: each is a real, linked (/n/ block lists) page for "<street> street cleaning".
 // <lastmod> is the day the page's content last changed: the block's own schedule entry, a new
 // enforcement or DPW-route build, or the last commit to the page template (scripts/lastmod.mjs).
 // Kept separate from sitemap.xml (core + hoods); both are advertised in robots.txt.
@@ -27,7 +27,7 @@ const enfCnns = Object.keys(enf).filter((k) => k !== '_meta');
 const floor = [gitDate('api/block.js'), enf._meta?.generated, routes._meta?.generated]
   .filter(Boolean).map((d) => String(d).slice(0, 10)).sort().pop() || '';
 
-const cnns = enfCnns.filter((c) => sched[c]).sort((a, b) => Number(a) - Number(b));
+const cnns = Object.keys(sched).sort((a, b) => Number(a) - Number(b));
 const urls = cnns.map((c) => {
   const mod = [sched[c][8] || '', floor].sort().pop();
   return `  <url><loc>${BASE}/b/${c}</loc>${mod ? `<lastmod>${mod}</lastmod>` : ''}<changefreq>monthly</changefreq></url>`;
@@ -38,4 +38,4 @@ ${urls}
 </urlset>
 `;
 writeFileSync(new URL('sitemap-blocks.xml', ROOT), xml);
-console.error(`[blocksitemap] wrote sitemap-blocks.xml — ${cnns.length} block urls (enforcement ${enfCnns.length}, baked ${Object.keys(sched).length}, dropped ${enfCnns.length - cnns.length}; template/data floor ${floor || 'none'})`);
+console.error(`[blocksitemap] wrote sitemap-blocks.xml — ${cnns.length} block urls (every baked block; ${enfCnns.filter((c) => sched[c]).length} with ticket data; template/data floor ${floor || 'none'})`);

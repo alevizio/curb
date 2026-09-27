@@ -12,6 +12,17 @@
   },
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "curb-nu.vercel.app"
+        }
+      ],
+      "destination": "https://curb.guide/:path*",
+      "statusCode": 308
+    },
+    {
       "source": "/n/presidio",
       "destination": "/n/",
       "statusCode": 301

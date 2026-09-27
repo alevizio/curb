@@ -13,6 +13,11 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 describe('sitemap-blocks.xml', () => {
   const S = JSON.parse(read('data/schedules.json')).b;
   const list = urls(read('sitemap-blocks.xml'));
+  it('lists every baked block exactly once', () => {
+    const locs = list.map(({ loc }) => loc.replace('https://curb.guide/b/', ''));
+    expect(new Set(locs).size).toBe(locs.length);
+    expect([...locs].sort()).toEqual(Object.keys(S).sort());
+  });
   it('lists only baked blocks, each with a lastmod no older than its schedule entry', () => {
     expect(list.length).toBeGreaterThan(8000);
     const bad = list.filter(({ loc, lastmod }) => {
