@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2F5BD0)](LICENSE)
 [![Live](https://img.shields.io/badge/live-curb.guide-1F9E5A)](https://curb.guide)
-[![Data: DataSF](https://img.shields.io/badge/data-DataSF-E0322E)](https://data.sfgov.org)
+[![Data: DataSF](https://img.shields.io/badge/data-DataSF-E0322E)](https://data.sf.gov)
 
 ![CURB — every SF curb colored by its next street sweep, with the times tickets actually land on each block](docs/curb-screenshot.png)
 

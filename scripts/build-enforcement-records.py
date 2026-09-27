@@ -26,7 +26,7 @@ def fetch(url, params):
 
 # 1) sweep segments + schedule (DataSF yhqp-riqs) -------------------------------------------------
 print("fetching sweep segments…", file=sys.stderr)
-rows = fetch('https://data.sfgov.org/resource/yhqp-riqs.json',
+rows = fetch('https://data.sf.gov/resource/yhqp-riqs.json',
              {'$select': 'cnn,weekday,fromhour,tohour,line', '$limit': '45000'})
 seg_line, sched = {}, {}
 for r in rows:

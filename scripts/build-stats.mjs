@@ -9,8 +9,8 @@
 // ~2yr of street-cleaning rows and joins addresses → EAS analysis_neighborhood.
 // Run: npm run build:stats   (Node 18+, no deps; ~6-8 min, mostly the stream)
 
-const CITES = 'https://data.sfgov.org/resource/ab4h-6ztd.json';
-const ADDR = 'https://data.sfgov.org/resource/3mea-di5p.json';
+const CITES = 'https://data.sf.gov/resource/ab4h-6ztd.json';
+const ADDR = 'https://data.sf.gov/resource/3mea-di5p.json';
 const SINCE = '2024-06-01T00:00:00';
 const log = (...a) => console.error('[stats]', ...a);
 const sleep = ms => new Promise(r => setTimeout(r, ms));

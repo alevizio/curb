@@ -8,7 +8,7 @@
 
 const CURBS = 'https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services/Curb_Zones_with_All_Policies/FeatureServer/0/query';
 const COLOR = 'https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services/Curb_Color_Locations_WFL1/FeatureServer/0/query';
-const SCHOOLS = 'https://data.sfgov.org/resource/7e7j-59qk.json';
+const SCHOOLS = 'https://data.sf.gov/resource/7e7j-59qk.json';
 const log = (...a) => console.error('[white-zones]', ...a);
 
 async function getJSON(base, params) {

@@ -8,7 +8,7 @@
 //
 // Run: npm run build:overview   (Node 18+, no deps)
 
-const SWEEP = 'https://data.sfgov.org/resource/yhqp-riqs.json';
+const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
 const DAY = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6 };
 const log = (...a) => console.error('[overview]', ...a);
 

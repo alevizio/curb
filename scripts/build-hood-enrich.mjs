@@ -9,7 +9,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const CURBS = 'https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services/Curb_Zones_with_All_Policies/FeatureServer/0/query';
-const GARAGES = 'https://data.sfgov.org/resource/mizu-nf6z.json';
+const GARAGES = 'https://data.sf.gov/resource/mizu-nf6z.json';
 const log = (...a) => console.error('[hood-enrich]', ...a);
 
 const geo = JSON.parse(readFileSync(new URL('../data/neighborhoods.geojson', import.meta.url), 'utf8'));

@@ -15,7 +15,7 @@ STATS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "
 FINE  = 105  # flat SF street-cleaning fine (assessed, not collected), 2024-2026
 
 # 1) SF Analysis Neighborhoods
-u = 'https://data.sfgov.org/resource/j2bu-swwd.json?' + urllib.parse.urlencode({'$select': 'nhood,the_geom', '$limit': '100'})
+u = 'https://data.sf.gov/resource/j2bu-swwd.json?' + urllib.parse.urlencode({'$select': 'nhood,the_geom', '$limit': '100'})
 nb = json.load(urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'curb-hoodstats'}), timeout=90))
 names, polys = [], []
 for r in nb:

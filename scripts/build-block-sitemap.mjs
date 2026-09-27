@@ -12,7 +12,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const ROOT = new URL('../', import.meta.url);
 const BASE = 'https://curb.guide';
-const SWEEP = 'https://data.sfgov.org/resource/yhqp-riqs.json';
+const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
 
 const enf = JSON.parse(readFileSync(new URL('data/enforcement.json', ROOT), 'utf8'));
 const enfCnns = Object.keys(enf);

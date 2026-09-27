@@ -19,7 +19,7 @@
 // - A group is only credited to a block if its avg time lands near that block's
 //   posted window (drops wrong-address matches and outlier typos).
 
-const BASE = 'https://data.sfgov.org/resource';
+const BASE = 'https://data.sf.gov/resource';
 const SWEEP = `${BASE}/yhqp-riqs.json`;
 const ADDR  = `${BASE}/3mea-di5p.json`;
 const CITES = `${BASE}/ab4h-6ztd.json`;
