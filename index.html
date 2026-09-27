@@ -780,6 +780,12 @@ addEventListener('load',()=>{try{if(new URLSearchParams(location.search).get('p'
 // falls back to keyless CARTO. This is a CLIENT key — restrict it by HTTP referrer + API in Google Cloud
 // Console. Set it here, or define window.GMAPS_KEY before this script (e.g. a gitignored config.js).
 const GMAPS_KEY="";  // FORCED OFF (2026-06-29) — free CARTO basemap, no Google Maps billing. To re-enable Google tiles: restore ((typeof window!=='undefined'&&window.GMAPS_KEY)||"").trim()
+// === Self-hosted parchment basemap ($0) =======================================================
+// Google is off (billing) and CARTO's keyless tiles now return an "API KEY REQUIRED" watermark, so
+// the basemap is our own parchment raster, baked offline from MAP_STYLE (scripts/build-basemap.sh →
+// basemap/parchment/, served by Vercel from this repo). Same Leaflet engine, plain <img> tiles →
+// WKWebView-safe (no WebGL). Set to '' to fall back to the Google/CARTO path below.
+const SELF_BASEMAP='/basemap/parchment/{z}/{x}/{y}.png';
 // Basemap style: "Parchment Draft" (styledmap.com) — warm paper tones that match the app's
 // paper/ink palette. Applied via the Map Tiles createSession `styles` field (roadmap only);
 // the keyless CARTO fallback is NOT styled.
@@ -841,7 +847,14 @@ function markGmapsDown(){ try{ const k=gmapsDayKey(); if(k) localStorage.setItem
 // both visible together). Lives in the attribution string, so it's present only while Google is the
 // basemap and disappears with it on the CARTO fallback.
 const GLOGO='<img class="gmlogo" alt="Google" src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png">';
+// Self-hosted parchment raster. Baked z8-13 (Bay Area) + z14-17 (SF): minNativeZoom 8 scales z8 up
+// for world-level zooms, maxNativeZoom 17 overzooms 18-20, bounds skips requests for tiles never baked.
+function addSelfBasemap(){
+  return L.tileLayer(SELF_BASEMAP,{minNativeZoom:8,maxNativeZoom:17,maxZoom:20,bounds:[[37.20,-123.10],[38.30,-121.60]],
+    attribution:'&copy; OpenStreetMap &copy; Protomaps'}).addTo(map);
+}
 (async function initBasemap(){
+  if(SELF_BASEMAP){ addSelfBasemap(); return; } // self-hosted parchment raster ($0)
   if(!GMAPS_KEY || gmapsDownToday()){ addCarto(); return; } // skip the doomed Google call if it was quota-tapped earlier today
   try{
     // 1) Create a session token for 2D roadmap tiles (free; tiles are billed).

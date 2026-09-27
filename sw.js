@@ -24,6 +24,7 @@ self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
   if (u.origin !== location.origin) return;   // map tiles / DataSF
   if (u.pathname.startsWith('/api/')) return;  // never cache API (config key, push, share)
+  if (u.pathname.startsWith('/basemap/')) return; // map tiles: browser HTTP cache only (no refetch per view)
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(e.request);

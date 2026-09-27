@@ -13,3 +13,9 @@ AuthKey_*.p8
 # Local-only: social/marketing asset stash + temp capture scripts (never publish to the repo)
 assets/
 _capture.mjs
+
+# self-host basemap toolchain + intermediates (scripts/build-basemap.sh); only basemap/parchment/ ships
+/pmtiles
+/pmtiles.zip
+basemap/*.pmtiles
+basemap/parchment-style.json

@@ -11,7 +11,11 @@ calendar reminder before the next sweep.
 ## Stack (intentionally minimal)
 - Single static file: `index.html`. No build step, no framework, no bundler.
 - Vanilla JS + Leaflet 1.9.4 (from cdnjs) for the map.
-- Basemap: official Google Map Tiles API when `GMAPS_KEY` (or `window.GMAPS_KEY`) is set —
+- Basemap: self-hosted parchment raster tiles (`basemap/parchment/`, `SELF_BASEMAP` in index.html),
+  baked from MAP_STYLE by `scripts/build-basemap.sh` and served by Vercel from this repo ($0). See
+  `docs/self-host-basemap-plan.md`. Google (forced off 2026-06-29, billing) and CARTO (keyless tiles
+  now watermarked "API KEY REQUIRED") are unreachable while SELF_BASEMAP is set. Legacy path:
+  official Google Map Tiles API when `GMAPS_KEY` (or `window.GMAPS_KEY`) is set —
   session-token flow in `initBasemap()`, viewport attribution refreshed on moveend. Falls
   back to keyless CARTO Voyager raster tiles when no key / on any failure. Leaflet stays the
   map engine either way. The Google key is a client key (referrer-restrict it) kept OUT of the
