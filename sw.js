@@ -1,5 +1,6 @@
 // CURB service worker — app-shell cache + Web Push.
-const CACHE = 'curb-v3';
+// v4: activate purges the /b/ block pages (and retired /n/ slugs, now 301s) that v3 cached and kept serving.
+const CACHE = 'curb-v4';
 const SHELL = ['/', 'index.html', 'manifest.json',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
@@ -18,13 +19,14 @@ self.addEventListener('activate', e => {
 
 // Stale-while-revalidate for same-origin GETs: serve cache instantly (fast app feel),
 // refresh in the background so the next load reflects web deploys, fall back to the shell
-// offline. API routes + cross-origin (map tiles / DataSF) always hit the network.
+// offline. API routes, /b/ block pages + cross-origin (map tiles / DataSF) always hit the network.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const u = new URL(e.request.url);
   if (u.origin !== location.origin) return;   // map tiles / DataSF
   if (u.pathname.startsWith('/api/')) return;  // never cache API (config key, push, share)
   if (u.pathname.startsWith('/basemap/')) return; // map tiles: browser HTTP cache only (no refetch per view)
+  if (u.pathname.startsWith('/b/')) return;       // server-rendered: "Next sweeps" dates change daily, a retired block 404s
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(e.request);
@@ -36,7 +38,7 @@ self.addEventListener('fetch', e => {
   })());
 });
 
-// Push payload shape: { title, body, url, tag }
+// Push payload shape: { title, body, url, tag, requireInteraction? }
 self.addEventListener('push', e => {
   let p = {};
   try { p = e.data ? e.data.json() : {}; } catch (_) { p = { body: e.data && e.data.text() }; }
@@ -47,7 +49,9 @@ self.addEventListener('push', e => {
     badge: 'icons/icon-192.png',
     tag: p.tag || 'curb-sweep',
     renotify: true,
-    requireInteraction: true,
+    // Only the act-now pushes (lead / tonight) stay on screen until dismissed; a sticky night-before
+    // "Sweep day tomorrow" still showing on sweep day read as the wrong day. Tests never stick.
+    requireInteraction: p.requireInteraction === true,
     data: { url: p.url || '/' }
   };
   e.waitUntil(self.registration.showNotification(title, opts));

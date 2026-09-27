@@ -38,7 +38,8 @@ npm run deploy         # = vercel
 
 ## Push notifications (wired end-to-end)
 The "🔔 Sweep alerts" button in the detail sheet subscribes the device to Web Push and
-saves its spot; a Vercel cron pushes "move your car" ~30 min before the next sweep.
+saves its spot; a scheduled sender (Upstash QStash every 15 min, GitHub Actions as backup) pushes
+"move your car" before the next sweep.
 
 Setup (one time):
 1. **VAPID keys** — `npx web-push generate-vapid-keys`. The public key is embedded in
@@ -48,11 +49,27 @@ Setup (one time):
    tab). It sets `KV_REST_API_URL` / `KV_REST_API_TOKEN` automatically. `api/_store.js`
    also accepts `UPSTASH_REDIS_REST_URL` / `_TOKEN` for a standalone Upstash DB.
 3. **Env vars on Vercel** — `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`,
-   `CRON_SECRET` (required — the cron refuses to run without it), plus the KV vars from step 2.
-4. **Cron** — `vercel.json` runs `/api/send-notifications` every 15 min. **Note:** the
-   15-min cadence needs **Vercel Pro**; on Hobby, Vercel throttles crons to ~once/day. As a
-   fallback, point any external scheduler (e.g. cron-job.org) at the endpoint with header
-   `Authorization: Bearer <CRON_SECRET>`.
+   `CRON_SECRET`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY`, optional `HC_PING_URL`,
+   plus the KV vars from step 2. The sender refuses to run unless a QStash signature or the
+   CRON_SECRET bearer checks out.
+4. **Scheduler** — two timers plus a backup. **Vercel Cron** in `vercel.json` runs at :07/:22/:37/:52 (needs Vercel Pro;
+   remove the `crons` block before any move to Hobby, which rejects sub-daily crons).
+   - **Primary: Upstash QStash** (Upstash console → QStash → Schedules): destination
+     `https://curb.guide/api/send-notifications` (exactly — no query string), cron `*/15 * * * *`,
+     method POST, **empty body**, retries 0-1. Copy the QStash signing keys into the two env vars above;
+     the endpoint verifies every call's signature, so QStash never needs `CRON_SECRET`.
+   - **Backup: GitHub Actions** — `.github/workflows/sweep-alerts-cron.yml` curls the endpoint with
+     `Authorization: Bearer <CRON_SECRET>` (repo secret). GitHub schedules are best-effort (they ran
+     ~7x/day in Sep 2026), so it only fills gaps. Overlapping runs never double-notify.
+   - **Watching it**: `HC_PING_URL` = a healthchecks.io check (period 15 min, grace ~30 min); the
+     endpoint pings it after every successful QStash run and `/fail` on errors.
+     `GET /api/send-notifications?status=1` with the CRON_SECRET bearer shows the last run, and the
+     monitor workflow alerts when the latest run failed or, once QStash has run, when no QStash run
+     succeeded for 40 min. Until QStash first runs, only the GitHub backup sends, hours apart, so the
+     monitor then alerts only after 8 h without a successful run.
+   - **Monitor via QStash** (optional): two more QStash schedules dispatch
+     `.github/workflows/monitor.yml` through the GitHub API — smoke every 30 min, nightly once a day
+     (exact request in that file's header). About 145 QStash messages a day in total.
 
 iOS — two paths:
 - **Native app** (the iOS build is a WKWebView wrapper with native **APNs**): the "🔔 Sweep

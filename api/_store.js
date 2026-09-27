@@ -35,31 +35,62 @@ function notifiedMap(rec) {
   return m;
 }
 
+// A same-sweep re-save (the page's daily silent refresh, a style change) omits an anchor the page
+// thinks is too close or past — e.g. opened at 8:05pm the night before, it sends no eveningISO — which
+// would wipe the stored anchor before the next tick sends that push. The anchors of one sweep never
+// change, and `notified` (kept on this path) stops a re-send, so keep the stored ones.
+function carryAnchors(out, prevSpot) {
+  if (!out) return;
+  if (!out.eveningISO && prevSpot.eveningISO) out.eveningISO = prevSpot.eveningISO;
+  if (!out.morningISO && prevSpot.morningISO) out.morningISO = prevSpot.morningISO;
+}
+
+// A save from a sheet left open since before the cron re-armed the watch (the iOS app in the
+// background, a PWA tab) still carries the sweep that has since started: older than the stored one, for
+// the SAME side and schedule. Taking it would move the watch back to that sweep until the next tick
+// re-advances it. Such a save keeps the stored spot (sweep, anchors, rules) and applies only the style
+// dials. Another side, a changed schedule or a future sweep is saved as sent.
+function staleResave(prevSpot, spot) {
+  const p = Date.parse(prevSpot.nextSweepISO), s = Date.parse(spot.nextSweepISO);
+  const sameSide = prevSpot.cnn || spot.cnn
+    ? prevSpot.cnn === spot.cnn && prevSpot.sideKey === spot.sideKey
+    : prevSpot.corridor === spot.corridor && prevSpot.limits === spot.limits && prevSpot.blockside === spot.blockside;
+  const sched = (x) => JSON.stringify(x.rules || x.rule || null);
+  return s < p && s <= Date.now() && sameSide && sched(prevSpot) === sched(spot);
+}
+const withStyle = (prevSpot, spot) =>
+  ({ ...prevSpot, ...(spot.level ? { level: spot.level } : {}), ...(spot.voice ? { voice: spot.voice } : {}) });
+
 /** True once the store env vars are present (used to fail loudly instead of silently). */
 export function storeReady() {
   return Boolean(URL_ && TOKEN);
 }
 
 /** Upsert a subscription + its saved spot, keyed by endpoint.
- *  Notify state resets for a NEW sweep time but is preserved when the user re-arms
- *  the same sweep (re-tapping the button must not let the cron push twice). */
+ *  The de-dupe map is always kept: each entry holds the sweep it fired for, so it can only ever block
+ *  that same sweep. Re-tapping, turning alerts off and on, or switching blocks never re-sends a push
+ *  already delivered, and never blocks a different sweep. */
 export async function saveSub(subscription, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
   let notified = {};
-  const out = spot || null;
+  let out = spot || null;
   try {
     const v = await r.hget(KEY, subscription.endpoint);
     const prev = typeof v === 'string' ? safeParse(v) : v;
-    if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
+    if (prev) notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
+    if (prev && prev.spot && spot && staleResave(prev.spot, spot)) {
+      out = withStyle(prev.spot, spot);
+    } else if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
       // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
-      // forever-watch to one-shot). Carry the prior rule/cnn/sideKey forward when absent.
+      // forever-watch to one-shot). Carry the prior rule(s)/cnn/sideKey forward when absent.
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
+        if (prev.spot.rules) out.rules = prev.spot.rules;
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }
+      carryAnchors(out, prev.spot);
     }
   } catch { /* best effort — worst case is one duplicate push */ }
   // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
@@ -69,21 +100,28 @@ export async function saveSub(subscription, spot) {
   await r.hset(KEY, { [subscription.endpoint]: JSON.stringify(record) });
 }
 
+// The cron computes a re-arm from the spot in its start-of-run snapshot. Before writing, the record is
+// re-read: if the user turned alerts off (spot = null) or re-saved the watch since, their write wins and
+// the re-arm is skipped (the next tick re-arms from what they saved). Otherwise a Turn off landing
+// during a run was silently undone and the watch kept pushing someone who opted out.
+const sameSpot = (a, b) => Boolean(a && b) && JSON.stringify(a) === JSON.stringify(b);
+
 /** Advance a subscription to its next computed sweep occurrence (the cron "forever-watch"
- *  re-arm). Replaces the spot and RESETS the per-window de-dupe so the next sweep can fire.
- *  Preserves savedAt — the re-arm is clock-driven, not a fresh client refresh.
- *  Benign race: a concurrent same-sweep client saveSub is a last-writer-wins read-modify-write;
- *  worst case is one duplicate or missed re-arm that self-corrects on the next 15-min tick. */
-export async function advanceSpot(endpoint, newSpot) {
+ *  re-arm), computed from `seenSpot`. Replaces the spot only if the record still holds exactly
+ *  `seenSpot` (→ true); the de-dupe map is kept (its entries name the sweep they fired for, so the
+ *  next sweep is free to fire). Preserves savedAt — the re-arm is clock-driven, not a fresh client
+ *  refresh. */
+export async function advanceSpot(endpoint, newSpot, seenSpot) {
   const r = redis();
-  if (!r) return;
+  if (!r) return false;
   const v = await r.hget(KEY, endpoint);
   const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return;
+  if (!rec || !sameSpot(rec.spot, seenSpot)) return false;
   rec.spot = newSpot;
-  rec.notified = {};
+  rec.notified = notifiedMap(rec);
   delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
+  return true;
 }
 
 /** Load every stored record as { endpoint, subscription, spot, notifiedFor }. */
@@ -104,6 +142,25 @@ export async function loadAllSubs() {
 export async function deleteSub(endpoint) {
   const r = redis();
   if (r) await r.hdel(KEY, endpoint);
+}
+
+/** Turn a web watch OFF ("✓ Alerts on" → Turn off). Ownership = the endpoint AND its keys.auth, which
+ *  only the browser holding the subscription has, compared in constant time with the stored one.
+ *  Disarms (spot = null — the cron skips spot-less records) rather than deleting, so auto-park and
+ *  its tokens still resolve the subscription, and the de-dupe survives turning it back on for the same
+ *  sweep. → 'ok' | 'not-found' | 'forbidden'. */
+export async function disarmSub(endpoint, auth) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  const v = await r.hget(KEY, endpoint);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return 'not-found';
+  const a = Buffer.from(String(auth || '')), b = Buffer.from(String(rec.subscription?.keys?.auth || ''));
+  if (!b.length || a.length !== b.length || !timingSafeEqual(a, b)) return 'forbidden';
+  rec.spot = null;
+  rec.notified = notifiedMap(rec);
+  await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
+  return 'ok';
 }
 
 /** Record that we already pushed for a given sweep time, so the cron won't repeat.
@@ -136,40 +193,47 @@ export async function getSub(endpoint) {
 // field (endpoint/p256dh/auth) ever appears here, so validSubscription() never sees a hex token.
 const KEY_IOS = 'curb:apns';
 
-/** Upsert an APNs device token + its saved spot. Mirrors saveSub: preserves the per-window de-dupe
- *  on a same-time re-arm and carries the recurrence rule/cnn/sideKey forward when omitted. */
+/** Upsert an APNs device token + its saved spot. Mirrors saveSub: keeps the de-dupe map, carries
+ *  the recurrence rule/cnn/sideKey forward on a same-time re-arm when omitted, and applies only the
+ *  style of a stale-sheet re-save. */
 export async function saveIosSub(token, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
   let notified = {};
-  const out = spot || null;
+  let out = spot || null;
   try {
     const v = await r.hget(KEY_IOS, token);
     const prev = typeof v === 'string' ? safeParse(v) : v;
-    if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      notified = notifiedMap(prev);
+    if (prev) notified = notifiedMap(prev);
+    if (prev && prev.spot && spot && staleResave(prev.spot, spot)) {
+      out = withStyle(prev.spot, spot);
+    } else if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
+        if (prev.spot.rules) out.rules = prev.spot.rules;
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }
+      carryAnchors(out, prev.spot);
     }
   } catch { /* best effort — worst case is one duplicate push */ }
   const record = { token, spot: out, notified, savedAt: Date.now(), platform: 'ios' };
   await r.hset(KEY_IOS, { [token]: JSON.stringify(record) });
 }
 
-/** Advance an iOS watch to its next computed occurrence (forever-watch re-arm). */
-export async function advanceIosSpot(token, newSpot) {
+/** Advance an iOS watch to its next computed occurrence (forever-watch re-arm). Like advanceSpot:
+ *  only while the record still holds exactly `seenSpot` (→ true). */
+export async function advanceIosSpot(token, newSpot, seenSpot) {
   const r = redis();
-  if (!r) return;
+  if (!r) return false;
   const v = await r.hget(KEY_IOS, token);
   const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return;
+  if (!rec || !sameSpot(rec.spot, seenSpot)) return false;
   rec.spot = newSpot;
-  rec.notified = {};
+  rec.notified = notifiedMap(rec);
   delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
+  return true;
 }
 
 /** Load every iOS record as { token, spot, notifiedFor, notifiedEveFor, savedAt }. */
@@ -186,10 +250,31 @@ export async function loadAllIosSubs() {
     .filter(Boolean);
 }
 
+/** True if this APNs token already has a record (re-saves of a known token are never throttled). */
+export async function hasIosSub(token) {
+  const r = redis();
+  if (!r) return false;
+  return Boolean(await r.hexists(KEY_IOS, token));
+}
+
 /** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken). */
 export async function deleteIosSub(token) {
   const r = redis();
   if (r) await r.hdel(KEY_IOS, token);
+}
+
+/** Turn an iOS watch OFF. Like disarmSub: spot = null (the cron skips it) and the de-dupe map is kept,
+ *  so turning alerts back on for the same sweep can't re-send a push already delivered. An unknown
+ *  token stores nothing. */
+export async function disarmIosSub(token) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  const v = await r.hget(KEY_IOS, token);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return;
+  rec.spot = null;
+  rec.notified = notifiedMap(rec);
+  await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
 }
 
 /** Record that we already pushed an iOS token for a given sweep time (per-window de-dupe). */
@@ -245,6 +330,12 @@ export async function claimSlot(material, ms = 60000) {
   return ok === 'OK' || ok === true;
 }
 
+/** Free a claimSlot before it expires (the sender's run lock, once a run has fully succeeded). */
+export async function releaseSlot(material) {
+  const r = redis();
+  if (r) await r.del('curb:rl:' + sha(material));
+}
+
 // ---- auto-park tokens (ALE-168 Tier 2) ----
 // A separate hash maps SHA-256(token) -> { endpoint }. Only the HASH is stored, so a store leak
 // can't be replayed as a live bearer token. The plaintext token is shown to the client once and
@@ -277,6 +368,71 @@ export async function deleteTokensForEndpoint(endpoint) {
     const rec = typeof v === 'string' ? safeParse(v) : v;
     if (rec && rec.endpoint === endpoint) await r.hdel(TKEY, h);
   }
+}
+
+// ---- sender run record (read by the monitor via /api/send-notifications?status=1) ----
+// `last` = the most recent run whatever its outcome; `ok` = the most recent successful one. Holds only
+// counts/outcome/trigger — no subscription, token or spot.
+// `qstash` / `qstashOk` = the same two, for QStash-triggered runs only, so the monitor can tell a dead
+// primary scheduler apart even while GitHub backup runs keep `last`/`ok` fresh. `qstash` is
+// { at, ok, error? } (ok is false only for an erroring run; a lock-skipped tick is a harmless no-op,
+// flagged skipped:true) and `qstashOk` is { at }.
+const CKEY = 'curb:cron';
+
+/** Record one sender run: { at, trigger, outcome: 'ok'|'error'|'skipped', ... }. */
+export async function saveRunStatus(status) {
+  const r = redis();
+  if (!r) return;
+  const v = JSON.stringify(status);
+  const fields = status.outcome === 'ok' ? { last: v, ok: v } : { last: v };
+  if (status.trigger === 'qstash') {
+    fields.qstash = JSON.stringify({ at: status.at, ok: status.outcome !== 'error',
+      ...(status.outcome === 'skipped' ? { skipped: true } : {}), ...(status.error ? { error: status.error } : {}) });
+    if (status.outcome === 'ok') fields.qstashOk = JSON.stringify({ at: status.at });
+  }
+  await r.hset(CKEY, fields);
+}
+
+/** { last, lastOk, lastQstash, lastQstashOk } — any may be null before the first such run. */
+export async function loadRunStatus() {
+  const r = redis();
+  if (!r) return { last: null, lastOk: null, lastQstash: null, lastQstashOk: null };
+  const all = (await r.hgetall(CKEY)) || {};
+  const parse = (v) => (typeof v === 'string' ? safeParse(v) : v) || null;
+  return { last: parse(all.last), lastOk: parse(all.ok), lastQstash: parse(all.qstash), lastQstashOk: parse(all.qstashOk) };
+}
+
+// ---- client error log (anonymous; see /privacy) ----
+// A capped list of the most recent browser / iOS-wrapper errors, so the GitHub monitor can alert on
+// real user-facing breakage. Entries carry no IP, no location, no subscription or token.
+const EKEY = 'curb:errors';
+const EMAX = 2000;
+
+/** Append one normalized error entry (newest first), keeping only the last EMAX. */
+export async function pushClientError(entry) {
+  const r = redis();
+  if (!r) return false;
+  await r.lpush(EKEY, JSON.stringify(entry));
+  await r.ltrim(EKEY, 0, EMAX - 1);
+  return true;
+}
+
+/** Every stored entry, newest first. */
+export async function readClientErrors() {
+  const r = redis();
+  if (!r) return [];
+  const rows = (await r.lrange(EKEY, 0, EMAX - 1)) || [];
+  return rows.map((v) => (typeof v === 'string' ? safeParse(v) : v)).filter(Boolean);
+}
+
+/** Global per-minute intake cap (abuse guard): true while this minute is still under `max`. */
+export async function underErrorRate(max = 120) {
+  const r = redis();
+  if (!r) return true;
+  const k = 'curb:errs:rate:' + Math.floor(Date.now() / 60000);
+  const n = await r.incr(k);
+  if (n === 1) await r.expire(k, 120);
+  return n <= max;
 }
 
 function safeParse(s) {

@@ -20,13 +20,16 @@
     "build:hoodmaps": "node scripts/build-hood-maps.mjs",
     "build:hoodenrich": "node scripts/build-hood-enrich.mjs",
     "build:hoodpages": "node scripts/build-hood-pages.mjs",
+    "build:schedules": "node scripts/build-schedules.mjs",
     "build:blocksitemap": "node scripts/build-block-sitemap.mjs",
     "build:changelog": "node scripts/build-changelog.mjs",
     "validate:data": "node scripts/validate-data.mjs",
+    "indexnow": "node scripts/indexnow.mjs",
     "test": "vitest run"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
+    "@upstash/qstash": "^2.11.3",
     "@upstash/redis": "^1.34.3",
     "satori": "^0.26.0",
     "web-push": "^3.6.7"

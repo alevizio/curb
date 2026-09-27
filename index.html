@@ -45,6 +45,28 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CURB">
+<!-- Anonymous error reports to our own /api/client-error (no IP, no location, no third party — see /privacy).
+     First in <head> so it catches everything; curbReport(kind, detail) logs app-level failures. -->
+<script>
+(function(){
+  var sent=0, seen={}, on=location.hostname==='curb.guide';
+  function app(){ return window.__curbNativePush ? 'ios-app' : (matchMedia('(display-mode: standalone)').matches || navigator.standalone) ? 'pwa' : 'web'; }
+  function send(k,msg,src,line,col,stack){
+    try{
+      msg=String(msg||'').slice(0,300);
+      if(!on || sent>=5 || !msg || msg==='Script error.' || seen[k+msg]) return; // 'Script error.' = opaque cross-origin
+      if(src && src.indexOf(location.origin)!==0) return; // extensions / third-party scripts
+      seen[k+msg]=1; sent++;
+      var body=JSON.stringify({k:k,msg:msg,src:src||'',line:line||0,col:col||0,stack:String(stack||'').slice(0,1200),page:location.pathname,app:app()});
+      if(!(navigator.sendBeacon && navigator.sendBeacon('/api/client-error',body)))
+        fetch('/api/client-error',{method:'POST',body:body,keepalive:true}).catch(function(){});
+    }catch(_){}
+  }
+  addEventListener('error',function(e){ if(e.message) send('error',e.message,e.filename,e.lineno,e.colno,e.error&&e.error.stack); });
+  addEventListener('unhandledrejection',function(e){ var r=e.reason; send('rejection',(r&&r.message)||String(r),'',0,0,r&&r.stack); });
+  window.curbReport=function(kind,detail){ send('event:'+kind,detail,'',0,0,''); };
+})();
+</script>
 <!-- Optional local key injection (config.js is gitignored; absent in the public repo → CARTO fallback). -->
 <script src="config.js"></script>
 <!-- Vercel Speed Insights — anonymous web vitals (no cookies) -->
@@ -81,7 +103,7 @@
      both must be visible together). Sized to the text so it reads as one tidy credit, not a boxed badge. */
   .leaflet-control-attribution img.gmlogo{height:14px;width:auto;vertical-align:-3px;margin-right:4px;filter:drop-shadow(0 0 1.5px #FFFDF6) drop-shadow(0 0 1px #FFFDF6)}
   .srh{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
-  html,body{height:100%}
+  html,body{height:100%;overscroll-behavior:none}  /* full-screen map: no rubber-band bounce of the whole page */
   body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
   #map{position:fixed;inset:0;background:#dfe7ee;z-index:0}
   .leaflet-container{font-family:'Hanken Grotesk',sans-serif}
@@ -350,6 +372,13 @@
   .welcome .wabout:hover{background:rgba(23,21,15,.05)}
   .welcome .wfoot{margin-top:14px;font-size:11.5px;font-weight:600;color:var(--ink-soft);line-height:1.4;text-align:center}
   .welcome .wfoot a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px}
+  /* neighborhood links: the home page's crawlable path to every /n/ page. The card keeps its old
+     ~412px footprint on short screens and scrolls, instead of growing under the search bar + Layers. */
+  .welcome{max-height:max(420px,calc(100dvh - 360px));overflow-y:auto}
+  .welcome .whoods{margin-top:14px;padding-top:10px;border-top:2px solid var(--ink)}
+  .welcome .whoods p{margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .welcome .whoods ul{list-style:none;display:flex;flex-wrap:wrap;gap:0 9px;margin:0;padding:0}
+  .welcome .whoods a{font-size:11.5px;font-weight:700;line-height:1.65;color:var(--ink-soft);text-underline-offset:2px}
   @media (prefers-reduced-motion:no-preference){
     .welcome.open{animation:wpop .35s cubic-bezier(.16,1,.3,1)}
     @keyframes wpop{from{opacity:0;transform:translate(-50%,calc(-50% + 12px))}}
@@ -360,10 +389,14 @@
     transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1),max-height .28s cubic-bezier(.2,.8,.2,1);
     max-height:74dvh;overflow-y:auto}
   .sheet.open{transform:translateY(0)}
-  /* mobile: open at a peek so the map stays visible; the grab button expands */
+  /* mobile: open at a peek so the map stays visible; the grab button expands.
+     One height per state (closed keeps the height it had), so opening/closing slides at a constant size
+     and only transform animates (compositor-only, pre-promoted). Peek↔tall is a FLIP slide in JS (grabBtn).
+     Animating max-height made WebKit re-lay out the sheet every frame and change its size mid-slide:
+     the stutter + wobble in the iOS app. overscroll-behavior stops the sheet's scroll chaining into the page. */
   @media (max-width:767px){
-    .sheet.open{max-height:46dvh}
-    .sheet.open.tall{max-height:84dvh}
+    .sheet{max-height:46dvh;transition:transform .32s cubic-bezier(.2,.8,.2,1);will-change:transform;overscroll-behavior:contain}
+    .sheet.tall{max-height:84dvh}
   }
   .grab{display:block;width:74px;height:21px;padding:8px 16px;margin:0 auto 4px;border:0;background:transparent;cursor:grab}
   .grab i{display:block;width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3)}
@@ -458,6 +491,8 @@
   .calchoice{display:flex;gap:9px;margin-top:9px;flex-basis:100%}
   .calchoice[hidden]{display:none}
   .calchoice .btn{font-size:13px;padding:11px}
+  .alertnote{flex-basis:100%;font-size:11.5px;color:var(--ink-soft);line-height:1.45;display:flex;gap:6px;align-items:flex-start}
+  .alertnote[hidden]{display:none} .alertnote .ic{width:14px;height:14px}
   .btn .vsep{margin-left:1px;padding:2px 2px;opacity:.65}
   .btn{flex:1 1 0;min-width:132px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:2.5px solid var(--ink);border-radius:15px;
     padding:13px;background:var(--ink);color:var(--paper);box-shadow:var(--shadow);transition:transform .1s;
@@ -476,6 +511,7 @@
   .noted p{margin-top:7px;text-align:left}
   .you-dot{width:18px;height:18px;background:var(--meter);border:3px solid #fff;border-radius:50%;
     box-shadow:0 0 0 2px var(--meter),0 0 12px rgba(47,91,208,.6)}
+  .acc-ring{stroke:var(--meter);stroke-width:2;stroke-dasharray:6 5;fill:var(--meter);fill-opacity:.1}  /* coarse fix: "somewhere in here" */
 
   /* iOS "Add to Home Screen" hint (push only works once installed standalone) */
   .ios-mask{position:fixed;inset:0;z-index:800;background:rgba(23,21,15,.45);backdrop-filter:blur(2px);
@@ -723,6 +759,9 @@
   </div>
   <button class="btn-go" id="welcomeGo">Show me the map</button>
   <a class="wabout" href="/about">How it works →</a>
+  <!-- hoods:start — one link per /n/ page, rewritten by scripts/build-hood-pages.mjs -->
+  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/n/bayview-hunters-point">Bayview Hunters Point</a></li><li><a href="/n/bernal-heights">Bernal Heights</a></li><li><a href="/n/castro-upper-market">Castro/Upper Market</a></li><li><a href="/n/chinatown">Chinatown</a></li><li><a href="/n/excelsior">Excelsior</a></li><li><a href="/n/financial-district-south-beach">Financial District/South Beach</a></li><li><a href="/n/glen-park">Glen Park</a></li><li><a href="/n/haight-ashbury">Haight Ashbury</a></li><li><a href="/n/hayes-valley">Hayes Valley</a></li><li><a href="/n/inner-richmond">Inner Richmond</a></li><li><a href="/n/inner-sunset">Inner Sunset</a></li><li><a href="/n/japantown">Japantown</a></li><li><a href="/n/lakeshore">Lakeshore</a></li><li><a href="/n/lone-mountain-usf">Lone Mountain/USF</a></li><li><a href="/n/marina">Marina</a></li><li><a href="/n/mission">Mission</a></li><li><a href="/n/mission-bay">Mission Bay</a></li><li><a href="/n/nob-hill">Nob Hill</a></li><li><a href="/n/noe-valley">Noe Valley</a></li><li><a href="/n/north-beach">North Beach</a></li><li><a href="/n/oceanview-merced-ingleside">Oceanview/Merced/Ingleside</a></li><li><a href="/n/outer-mission">Outer Mission</a></li><li><a href="/n/outer-richmond">Outer Richmond</a></li><li><a href="/n/pacific-heights">Pacific Heights</a></li><li><a href="/n/portola">Portola</a></li><li><a href="/n/potrero-hill">Potrero Hill</a></li><li><a href="/n/presidio-heights">Presidio Heights</a></li><li><a href="/n/russian-hill">Russian Hill</a></li><li><a href="/n/seacliff">Seacliff</a></li><li><a href="/n/south-of-market">South of Market</a></li><li><a href="/n/sunset-parkside">Sunset/Parkside</a></li><li><a href="/n/tenderloin">Tenderloin</a></li><li><a href="/n/twin-peaks">Twin Peaks</a></li><li><a href="/n/visitacion-valley">Visitacion Valley</a></li><li><a href="/n/west-of-twin-peaks">West of Twin Peaks</a></li><li><a href="/n/western-addition">Western Addition</a></li></ul></nav>
+  <!-- hoods:end -->
   <p class="wfoot">Free, no account — built on <a href="https://datasf.org" target="_blank" rel="noopener">SF's open data</a>. The posted sign always wins.</p>
 </div>
 
@@ -757,8 +796,10 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <!-- SF time/sweep core (DAYLBL, normDay, fmtHour, sfWallToInstant, nextSweep, holidays) —
-     loaded before the main script so its exports are on globalThis. Unit-tested separately. -->
-<script src="/lib/sweep-core.js"></script>
+     loaded before the main script so its exports are on globalThis. Unit-tested separately.
+     Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
+     stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
+<script src="/lib/sweep-core.js?v=2"></script>
 <script>
 const SWEEP="https://data.sf.gov/resource/yhqp-riqs.json";
 const METER="https://data.sf.gov/resource/8vzz-qzz9.json";
@@ -920,6 +961,7 @@ let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without
 let statusOn={green:true,amber:true,red:true};  // legend toggles: show/hide curb lines by status
 let noCovToasted=false;  // out-of-coverage notice fires once per session
 let lastRows=[];     // raw sweep rows from the last viewport fetch, for redraws on filter change
+let segBounds=null;  // padded bounds that fetch covered — a point outside them isn't in segCache yet
 let rangeCache={};   // cnn -> {lo,hi} street-number range (EAS); accumulates across pans (static data)
 
 /* ---------- enforcement history (precomputed; data/enforcement.json) ---------- */
@@ -1037,7 +1079,7 @@ const SEG_CAP=2500;  // rows we are willing to pull+draw per viewport (one Socra
 let ovMode=true;     // true = the citywide overview is the active view (low zoom OR over-cap viewport)
 function enterOverviewMode(showHint){
   segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();
-  segCache=[];segCacheAll=[];rppCache=[];lastRows=[];
+  segCache=[];segCacheAll=[];rppCache=[];lastRows=[];segBounds=null;
   ovMode=true;
   const hint=document.getElementById('hint');
   hint.style.opacity=showHint?'1':'0';hint.style.visibility=showHint?'visible':'hidden';
@@ -1066,13 +1108,15 @@ async function loadViewport(){
   try{
     const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line`
       +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
-    const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
+    const r=await fetch(url); if(!r.ok)throw new Error('HTTP '+r.status); const data=await r.json();  // the data-load report carries it
     if(my!==fetchTok)return;
-    lastRows=data;
+    lastRows=data; segBounds=b;
     if(!data.length&&!noCovToasted){noCovToasted=true;
       toast('No street-sweeping data here — CURB covers San Francisco.');}
     drawSegments(data);
-  }catch(e){ if(my===fetchTok) toast("Couldn't load that area — pan and try again."); }
+    tryPendingOpen();  // a locate / tap / link waiting on THIS area's rows
+  }catch(e){ if(my===fetchTok){ toast("Couldn't load that area — pan and try again."); curbReport('data-load', String((e&&e.message)||e));
+    if(pendingOpen&&b.contains([pendingOpen.lat,pendingOpen.lng]))endPendingOpen(); } }  // the fetch that should cover it failed: stop waiting
   loadRanges(poly);
   if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
   if(loadOn) drawLoadZones(); else loadLayer.clearLayers();
@@ -1367,7 +1411,9 @@ function drawSegments(rows){
       // must never arm a reminder for the wrong sweep (multi-day blocks are common).
       if(dayFilter!=null&&!s.rows.some(r=>normDay(r.weekday)===dayFilter))return;
       let best=null,bestRow=s.rows[0],rank=0,color=getCSS('--gray');
-      s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank){rank=st.rank;color=st.color;best=ns;bestRow=r}});
+      // Ties go to the EARLIEST next sweep (same color): the first row in DataSF order used to win, so a
+      // Tue+Fri side could say "Park until Fri" — and arm Fri — when Tue came first.
+      s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank||(st.rank===rank&&ns&&best&&+ns.start<+best.start)){rank=st.rank;color=st.color;best=ns;bestRow=r}});
       const ll=offsetLine(center, OFFSET, signs[s.key]);
       const side={key:s.key, blockside:s.blockside, rows:s.rows, row:bestRow, ns:best, color, latlngs:ll, mid:ll[Math.floor(ll.length/2)]};
       group.sides.push(side);
@@ -1507,28 +1553,28 @@ function openSheet(group, activeKey){
   // permit-area chip is filled async per block (loadRppBlock), clickable to outline the area
   const canRemind = ns && relPhrase(ns).when;
   // Spot for push alerts: the tapped side's block + its next sweep (see api/save-subscription.js).
-  // eveningISO = 8pm SF the evening before (true instant) — the calm night-before push;
-  // skipped when arming after that point, so day-of arming gets only the 30-min alert.
+  // Anchors come from the ONE rule the server re-arms with (lib/sweep-core.js alertAnchors):
+  // eveningISO = 8pm SF the evening before, skipped when arming after that point; morningISO (the
+  // Intense ping) only when start−2h lands 06:00-21:59 SF on the sweep day; a night sweep (before 7am)
+  // carries neither — the server sends it one "move it tonight" push around 9pm instead.
   const spot = ns ? (()=>{
-    const prev=new Date(Date.UTC(ns.y,ns.mo-1,ns.da)-864e5);
-    const eve=sfWallToInstant(prev.getUTCFullYear(),prev.getUTCMonth()+1,prev.getUTCDate(),20);
-    // Carry the raw sweep rule so the server can recompute the next occurrence each cron tick
-    // (the "forever-watch" — alerts keep firing without the user reopening the app). The active
-    // side's row is the rule that produced `ns`; cnn+sideKey let the watch re-identify this curb.
+    const a=alertAnchors(ns.start);
+    // Carry EVERY rule of this side (multi-day sides are ~25% of SF) so the server re-arms to the
+    // earliest next sweep across them each tick (the "forever-watch"). `rule` = the row that produced
+    // `ns`, kept for back-compat; cnn+sideKey identify this curb (also the saved-alert key).
+    const ruleOf=r=>({weekday:r.weekday,fromhour:r.fromhour,tohour:r.tohour,
+      week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0'});
     const r0=active.row||(active.rows&&active.rows[0]);
-    const rule=r0?{weekday:r0.weekday,fromhour:r0.fromhour,tohour:r0.tohour,
-      week1:r0.week1,week2:r0.week2,week3:r0.week3,week4:r0.week4,week5:r0.week5,holidays:r0.holidays||'0'}:null;
-    // morning-of (~2h before) feeds the Intense level; the block's avg ticket time flavors the copy.
-    const morn=new Date(+ns.start-72e5);
+    // the block's avg ticket time flavors the copy
     const _et=enfFor(group.cnn, active.row&&normDay(active.row.weekday));
     return {
       corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
       nextSweepISO: ns.start.toISOString(), leadMinutes: 30,
       level: getAlertLevel(), voice: getAlertVoice(),
       ...(_et?{tip:fmtMin(_et.avg)}:{}),
-      ...(rule?{rule, cnn:String(group.cnn||''), sideKey:String(active.key||'')}:{}),
-      ...(+eve>Date.now()+6e5&&+eve<+ns.start?{eveningISO:eve.toISOString()}:{}),
-      ...(+morn>Date.now()+6e5&&+morn<+ns.start&&+morn>+eve?{morningISO:morn.toISOString()}:{})
+      ...(r0?{rule:ruleOf(r0), rules:(active.rows||[r0]).map(ruleOf), cnn:String(group.cnn||''), sideKey:String(active.key||'')}:{}),
+      ...(!a.night&&+a.eve>Date.now()+6e5&&+a.eve<+ns.start?{eveningISO:a.eve.toISOString()}:{}),
+      ...(!a.night&&a.morn&&+a.morn>Date.now()+6e5?{morningISO:a.morn.toISOString()}:{})
     };
   })() : null;
   const alertOn = alertSpotMatches(spot);
@@ -1591,7 +1637,12 @@ function openSheet(group, activeKey){
       ${canRemind?`<div class="calchoice" id="calChoice" hidden>
         <button class="btn alt" id="calGoogle">Google Calendar</button>
         <button class="btn alt" id="calICS">Apple / .ics</button>
-      </div>`:''}
+      </div>
+      <div class="calchoice" id="alertOff" hidden>
+        <button class="btn alt" id="alertOffYes">Turn off alerts</button>
+        <button class="btn alt" id="alertOffNo">Keep them on</button>
+      </div>
+      <div class="alertnote" id="alertNote" hidden></div>`:''}
     </div>
     ${canRemind?`<details class="alertcfg" id="alertCfg">
       <summary><span>Alert style</span><b class="acfg-st">${alertOn?'On · '+getAlertLevel():'Customize ▸'}</b></summary>
@@ -1612,7 +1663,7 @@ function openSheet(group, activeKey){
     ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping you before sweeping at the intensity you pick under <b>Alert style</b> — Light (~30 min before), Normal (+ the night before), or Intense (+ the morning of); .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
+      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping you before sweeping at the intensity you pick under <b>Alert style</b> — Light (~30 min before), Normal (+ the night before), or Intense (+ the morning of, for sweeps from 8 AM); sweeps before 7 AM get one "move it tonight" ping around 9 PM instead; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
 
@@ -1629,8 +1680,23 @@ function openSheet(group, activeKey){
     if(more)more.onclick=e=>{e.stopPropagation();document.getElementById('calChoice').hidden=false;};
     document.getElementById('calGoogle').onclick=()=>doCal('google');
     document.getElementById('calICS').onclick=()=>doCal('ics');
-    document.getElementById('alertBtn').onclick=e=>onAlertTap(spot,e.currentTarget);
+    // "✓ Alerts on" offers the off switch instead of silently re-arming (and extending) the watch.
+    // On a short phone (375x667) the row opens below the 46dvh peek, so the tap looked dead: scroll the sheet
+    // just far enough to show it. Measured from layout (offsetTop), not the rect the panelin scale-in shrinks,
+    // and clear of the sheet's bottom padding: it carries the home-indicator inset on Face ID iPhones.
+    document.getElementById('alertBtn').onclick=e=>{
+      if(alertSpotMatches(spot)){const o=document.getElementById('alertOff'), s=document.getElementById('sheet');
+        o.hidden=false;
+        const below=o.offsetTop+o.offsetHeight+parseFloat(getComputedStyle(s).paddingBottom)-(s.scrollTop+s.clientHeight);
+        if(below>0)s.scrollBy({top:below,behavior:'smooth'});
+        return;}
+      onAlertTap(spot,e.currentTarget);
+    };
+    document.getElementById('alertOffNo').onclick=()=>{document.getElementById('alertOff').hidden=true;};
+    document.getElementById('alertOffYes').onclick=()=>turnOffAlerts(spot);
     applyAlertCfg(spot);
+    paintAlertState(spot);
+    refreshWatch(spot);
   }
   document.getElementById('centerBtn').onclick=()=>{
     document.getElementById('sheet').classList.remove('tall');  // collapse so the block isn't hidden behind a tall sheet
@@ -1666,6 +1732,7 @@ function openSheet(group, activeKey){
   loadRppBlock(active.latlngs, active.mid, group.cnn);
   fillRange(group.cnn);
   const sheetEl=document.getElementById('sheet');
+  finishSheetSlide();  // settle a peek↔tall slide still in flight before changing state
   if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
     sheetEl.classList.remove('tall');
     document.getElementById('grabBtn').setAttribute('aria-expanded','false');
@@ -1681,12 +1748,35 @@ function openSheet(group, activeKey){
     }
   }catch(_){}
 }
-document.getElementById('sheetClose').onclick=()=>document.getElementById('sheet').classList.remove('open');
+document.getElementById('sheetClose').onclick=()=>{ finishSheetSlide(); document.getElementById('sheet').classList.remove('open'); };
 document.getElementById('shareBtn').innerHTML=ICONS.share;
 document.getElementById('centerBtn').innerHTML=ICONS.center;
+// Peek↔tall as a compositor-only slide (FLIP) instead of animating max-height (which re-laid out the
+// sheet every frame — janky in the iOS WKWebView). Growing: take the new height at once, start offset
+// by the difference, glide up. Shrinking: glide down at the old height (the overflow goes below the
+// screen, so no gap opens under the sheet), then settle at the peek height.
+let sheetSlideDone=null;
+function finishSheetSlide(){ if(sheetSlideDone)sheetSlideDone(); }
 document.getElementById('grabBtn').onclick=function(){
-  const tall=document.getElementById('sheet').classList.toggle('tall');
+  finishSheetSlide();
+  const s=document.getElementById('sheet'), tall=!s.classList.contains('tall');
   this.setAttribute('aria-expanded',tall);
+  const animate=s.classList.contains('open')&&parseFloat(getComputedStyle(s).transitionDuration)>0;
+  const h0=s.offsetHeight;
+  s.classList.toggle('tall',tall);
+  const d=s.offsetHeight-h0;
+  if(!animate||!d)return;
+  s.style.transition='none';
+  if(d>0){ s.style.transform=`translateY(${d}px)`; void s.offsetHeight; s.style.transition=''; s.style.transform=''; return; }
+  s.classList.add('tall'); void s.offsetHeight; s.style.transition='';
+  s.style.transform=`translateY(${-d}px)`;
+  const timer=setTimeout(()=>sheetSlideDone&&sheetSlideDone(),450);  // transitionend can be skipped
+  const onEnd=e=>{ if(e.target===s&&e.propertyName==='transform'&&sheetSlideDone)sheetSlideDone(); };
+  s.addEventListener('transitionend',onEnd);
+  sheetSlideDone=()=>{
+    sheetSlideDone=null; clearTimeout(timer); s.removeEventListener('transitionend',onEnd);
+    s.style.transition='none'; s.classList.remove('tall'); s.style.transform=''; void s.offsetHeight; s.style.transition='';
+  };
 };
 
 
@@ -1737,29 +1827,113 @@ function isStandalone(){
 function pushSupported(){
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 }
-// Key includes nextSweepISO: the button only reads "on" for the *exact* sweep the server is armed
-// for. Once that sweep passes the side rolls to the next occurrence, the key changes, and the button
-// reverts to "🔔 Sweep alerts" — a real cue to re-tap and re-arm (the server has no recurrence rule).
-function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}
+// Which curb this device has alerts on — localStorage 'curbAlert' = {cnn, sideKey, corridor, limits,
+// blockside, level, voice, armedAt, v}. Keyed on the CURB SIDE, not the next sweep instant: the
+// server's forever-watch re-arms every week, so the old instant-keyed "on" flipped to "off" after the
+// first sweep while pushes kept coming (ghost alerts) and style changes stopped reaching the server.
+// "On" is only claimed while the watch is alive: younger than the server's MAX_WATCH_AGE and, on web,
+// with notification permission — a false "on" would be worse than a false "off".
+const WATCH_MAX_AGE=120*864e5, WATCH_REFRESH=864e5;
+function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}  // legacy 'curbAlertKey' format
 function savedAlertKey(){try{return localStorage.getItem('curbAlertKey')||'';}catch(_){return '';}}
 function getAlertLevel(){try{return localStorage.getItem('curbAlertLevel')||'normal';}catch(_){return 'normal';}}
 function getAlertVoice(){try{return localStorage.getItem('curbAlertVoice')||'cheeky';}catch(_){return 'cheeky';}}
-function alertSpotMatches(spot){const k=spotKey(spot);return !!spot && k!=='' && savedAlertKey()===k;}
+function savedAlert(){try{const a=JSON.parse(localStorage.getItem('curbAlert')||'null');return a&&a.cnn?a:null;}catch(_){return null;}}
+function rememberAlert(spot,v){
+  const a={cnn:String(spot.cnn),sideKey:String(spot.sideKey||''),corridor:spot.corridor||'',limits:spot.limits||'',
+    blockside:spot.blockside||'',level:spot.level,voice:spot.voice,armedAt:Date.now(),v:v||2};
+  try{localStorage.setItem('curbAlert',JSON.stringify(a));localStorage.removeItem('curbAlertKey');}catch(_){}
+  return a;
+}
+function markArmed(spot){if(spot.cnn)rememberAlert(spot);else try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}}
+function forgetAlert(){try{localStorage.removeItem('curbAlert');localStorage.removeItem('curbAlertKey');}catch(_){}}
+function sameCurb(a,spot){return !!(a&&spot&&spot.cnn&&a.cnn===String(spot.cnn)&&a.sideKey===String(spot.sideKey||''));}
+function alertLive(a){return !!a&&Date.now()-a.armedAt<WATCH_MAX_AGE&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
+function alertSpotMatches(spot){
+  if(!spot)return false;
+  if(!spot.cnn)return savedAlertKey()===spotKey(spot);  // rule-less spot: the exact-sweep key
+  let a=savedAlert();
+  // Migrate a legacy corridor|limits|blockside|ISO key — its first three fields name the curb. v:1 makes
+  // refreshWatch re-arm right away, which also sends this side's full rules. Only while that server watch
+  // can still be alive (its sweep is < MAX_WATCH_AGE old): an older key would silently revive a watch the
+  // user let lapse months ago.
+  if(!a){const k=savedAlertKey().split('|');
+    if(k.length===4&&k.slice(0,3).join('|')===[spot.corridor,spot.limits,spot.blockside].join('|')&&Date.now()-Date.parse(k[3])<WATCH_MAX_AGE)
+      a=rememberAlert({...spot,level:getAlertLevel(),voice:getAlertVoice()},1);}
+  return sameCurb(a,spot)&&alertLive(a);
+}
+// Button, style summary and the "alerts are on for <other block>" note, from the saved state — so
+// arming a new block visibly replaces the old one.
+function paintAlertState(spot){
+  const on=alertSpotMatches(spot), a=savedAlert();
+  const btn=document.getElementById('alertBtn');
+  if(btn&&!btn.classList.contains('busy')){btn.classList.remove('alt');btn.classList.toggle('on',on);if(on)btn.textContent='✓ Alerts on';else btn.innerHTML=ICONS.bell+' Sweep alerts';}
+  const st=document.querySelector('#alertCfg .acfg-st'); if(st)st.textContent=on?'On · '+getAlertLevel():'Customize ▸';
+  const off=document.getElementById('alertOff'); if(off&&!on)off.hidden=true;
+  const note=document.getElementById('alertNote'); if(!note)return;
+  const other=!on&&alertLive(a)&&!sameCurb(a,spot);
+  note.hidden=!other;
+  if(other){note.innerHTML=ICONS.bell+'<span></span>';
+    note.lastChild.textContent='Alerts are on for '+(a.corridor||'another block')+(a.blockside?' ('+a.blockside+')':'')+' — turning them on here moves them to this curb.';}
+}
+function armedToast(spot,prev){
+  const night=alertAnchors(Date.parse(spot.nextSweepISO)).night;
+  const what=night?" — we'll ping you ~9 PM the night before to move it."
+    :(spot.eveningISO&&spot.level!=='light'?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before.");
+  const moved=prev&&alertLive(prev)&&!sameCurb(prev,spot)?' '+(prev.corridor||'Your other block')+' won\'t alert anymore.':'';
+  toast('Sweep alert set for '+(spot.corridor||'this block')+what+moved);
+}
+// Native bridge, two shapes. Build <= 6: __curbRequestPush resolves a boolean and Swift calls
+// __curbNativePushResult(ok, msg), so capture msg before the original resolves. Build 7+: Swift calls it
+// with ONE object {ok,reason,message,status} and __curbRequestPushDetail resolves that object; classify on
+// its stable `reason` (message is server / iOS text) and keep status + message for reports ("save-failed:429
+// slow down"). Calls are serialized: the bridge keeps ONE pending resolver, so an overlapping second call
+// would strand the first. The 60 s cap only unsticks the queue
+// if the app never answers: a first arm waits on the iOS permission prompt (the app's own 15 s timeout
+// starts after it), and a shorter cap reported slow readers as failures while their watch saved anyway.
+let _nativeMsg='', _nativeQ=Promise.resolve(), _nativeWait=null;
+if(typeof window.__curbNativePushResult==='function'){const _o=window.__curbNativePushResult;
+  window.__curbNativePushResult=function(ok,msg){_nativeMsg=String(ok&&typeof ok==='object'?(ok.reason||ok.message||''):(msg||''));
+    if(_nativeWait){const w=_nativeWait;_nativeWait=null;w();}
+    return _o.apply(this,arguments);};}
+// A test push is a native call too: sent mid-save, the app answers the save's promise with "test-sent"
+// and drops the save (a style change that never lands). It takes its turn and holds the queue until the
+// app answers it.
+function nativeTest(opts){
+  const p=_nativeQ.then(()=>new Promise(res=>{_nativeWait=res;setTimeout(res,60000);window.__curbTestPush(opts);}))
+    .catch(()=>{}).then(()=>{_nativeWait=null;});
+  _nativeQ=p;
+  return p;
+}
+function nativePush(spot){
+  const p=_nativeQ.then(()=>{_nativeMsg='';
+    return Promise.race([Promise.resolve((window.__curbRequestPushDetail||window.__curbRequestPush)(spot)),new Promise(r=>setTimeout(()=>r({ok:false,message:'timeout'}),60000))]);})
+    .then(r=>{const o=(r&&typeof r==='object')?r:{ok:!!r};
+      const why=o.reason?o.reason+(o.status?':'+o.status:'')+(o.message&&o.message!==o.reason?' '+o.message:''):(o.message||o.status);
+      return {ok:!!o.ok,message:String(why||_nativeMsg||'')};},
+      e=>({ok:false,message:String((e&&e.message)||e||'error')}));
+  _nativeQ=p;
+  return p;
+}
+const nativeDenied=m=>/^denied/.test(m);
 function showIosHint(){document.getElementById('iosHint').classList.add('open');}
 function hideIosHint(){document.getElementById('iosHint').classList.remove('open');}
 
 async function onAlertTap(spot, btn){
   if(!spot){toast('No upcoming sweep on this side to alert on.');return;}
+  spot={...spot, level:getAlertLevel(), voice:getAlertVoice()};  // the style picked on this sheet, even before arming
+  const prev=savedAlert();
   track('alert_intent');  // tapped Sweep alerts on a valid spot — funnel denominator for activation
   // Native iOS app (WKWebView wrapper): route to native APNs registration instead of Web Push.
   // Must precede the standalone hint, or the wrapper would wrongly show the "Add to Home Screen" tip.
   if(window.__curbNativePush){
     const original=btn.innerHTML;
     btn.classList.add('busy'); btn.textContent='Enabling…';
-    return window.__curbRequestPush(spot).then(ok=>{
+    return nativePush(spot).then(r=>{
       btn.classList.remove('busy');
-      if(ok){ try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){} track('alert_armed'); btn.classList.remove('alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on'; }
-      else { track('alert_blocked'); btn.innerHTML=original; toast('Allow notifications for CURB in Settings to get sweep alerts.'); }
+      if(r.ok){ markArmed(spot); track('alert_armed'); paintAlertState(spot); armedToast(spot,prev); }
+      else if(nativeDenied(r.message)){ track('alert_blocked'); btn.innerHTML=original; toast('Allow notifications for CURB in Settings to get sweep alerts.'); }
+      else { btn.innerHTML=original; toast("Couldn't save, try again."); curbReport('push-save-failed','ios '+(r.message||'unknown')); }
     });
   }
   // iOS only delivers Web Push when the site is installed to the Home Screen (standalone).
@@ -1793,17 +1967,42 @@ async function onAlertTap(spot, btn){
       body:JSON.stringify({subscription:sub.toJSON(), spot})
     });
     if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.note||d.error||('save failed ('+res.status+')')); }
-    try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}
+    markArmed(spot);
     track('alert_armed');  // the activation→retention metric
-    btn.classList.remove('busy','alt'); btn.classList.add('on'); btn.textContent='✓ Alerts on';
-    const _nb=spot.eveningISO&&getAlertLevel()!=='light';
-    toast('Sweep alert set for '+(spot.corridor||'this block')+(_nb?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before."));
+    btn.classList.remove('busy'); paintAlertState(spot);
+    armedToast(spot,prev);
   }catch(err){
     const on=alertSpotMatches(spot);
     btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.remove('alt');
     if(on)btn.textContent='✓ Alerts on'; else btn.innerHTML=original;
-    if(!/^permission-/.test(String(err&&err.message))) toast('Could not enable alerts — '+((err&&err.message)||'try again')+'.');
+    if(!/^permission-/.test(String(err&&err.message))){ toast('Could not enable alerts — '+((err&&err.message)||'try again')+'.'); curbReport('push-save-failed','web '+((err&&err.message)||err)); }
   }
+}
+
+// "✓ Alerts on" → Turn off: disarms this device's watch on the server (web: DELETE proven by the
+// subscription's own keys; iOS: the bridge posts {off:true} with the device token).
+async function turnOffAlerts(spot){
+  const btn=document.getElementById('alertBtn');
+  document.getElementById('alertOff').hidden=true;
+  if(btn){btn.classList.add('busy');btn.textContent='Turning off…';}
+  const settle=()=>{if(btn)btn.classList.remove('busy');paintAlertState(spot);};
+  const where=spot.corridor||'this block';
+  const fail=why=>{settle();curbReport('push-off-failed',why);toast("Couldn't turn alerts off, try again.");};
+  if(window.__curbNativePush){
+    const r=await nativePush({off:true});
+    if(r.ok){forgetAlert();settle();return toast('Alerts off for '+where+'.');}
+    // no token without permission, so the server watch can't be reached: say so instead of faking "off"
+    if(nativeDenied(r.message)){settle();return toast('Turn notifications back on for CURB in Settings, then turn alerts off here.');}
+    return fail('ios '+(r.message||'unknown'));
+  }
+  try{
+    const sub=pushSupported()?await(await navigator.serviceWorker.ready).pushManager.getSubscription():null;
+    if(sub){  // no subscription = nothing can be delivered here anyway
+      const res=await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON()})});
+      if(!res.ok&&res.status!==404)throw new Error('HTTP '+res.status);
+    }
+    forgetAlert();settle();toast('Alerts off for '+where+'.');
+  }catch(err){fail('web '+((err&&err.message)||err));}
 }
 
 // Alert style (intensity + voice) live picker + the "send me a test" path. Both dials are global
@@ -1820,26 +2019,59 @@ function applyAlertCfg(spot){
         row.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
         const st=cfg.querySelector('.acfg-st');
         if(st&&alertSpotMatches(spot))st.textContent='On · '+getAlertLevel();
-        if(alertSpotMatches(spot))reArm({...spot, level:getAlertLevel(), voice:getAlertVoice()});
+        if(alertSpotMatches(spot))saveStyleSoon(spot);
       };
     });
   });
   const tb=document.getElementById('testPushBtn');
   if(tb)tb.onclick=()=>sendTestPush({...spot, level:getAlertLevel(), voice:getAlertVoice()});
 }
-// Silently push the updated cadence/voice to the server for an already-armed spot (no re-prompt).
+// Push the updated cadence/voice (or a refresh) to the server for an already-armed spot, no re-prompt.
+// → 'ok' | 'gone' (web: this browser has no push subscription, so nothing can arrive) | 'denied' | 'fail:<why>'.
 function reArm(spot){
-  if(window.__curbNativePush){ try{window.__curbRequestPush(spot);}catch(_){ } return; }
-  if(!pushSupported())return;
-  navigator.serviceWorker.ready
+  if(window.__curbNativePush)return nativePush(spot).then(r=>r.ok?'ok':nativeDenied(r.message)?'denied':'fail:'+r.message);
+  if(!pushSupported())return Promise.resolve('gone');
+  return navigator.serviceWorker.ready
     .then(reg=>reg.pushManager.getSubscription())
-    .then(sub=>sub&&fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),spot})}))
-    .catch(()=>{});
+    .then(sub=>sub?fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),spot})})
+      .then(r=>r.ok?'ok':'fail:HTTP '+r.status):'gone')
+    .catch(e=>'fail:'+((e&&e.message)||e));
+}
+// Intensity/Voice taps coalesce into one save (a level-then-voice pair used to race). If it doesn't
+// land, the dials snap back to what the server has, so the sheet never shows a style that isn't armed.
+let _styleT=0;
+function saveStyleSoon(spot){
+  clearTimeout(_styleT);
+  _styleT=setTimeout(()=>{
+    const s={...spot, level:getAlertLevel(), voice:getAlertVoice()};
+    reArm(s).then(r=>{
+      if(r==='ok')return markArmed(s);
+      if(r==='gone'){forgetAlert();paintAlertState(spot);return toast('Alerts are off on this device — tap Sweep alerts to turn them back on.');}
+      const a=savedAlert();
+      try{if(a&&a.level)localStorage.setItem('curbAlertLevel',a.level);if(a&&a.voice)localStorage.setItem('curbAlertVoice',a.voice);}catch(_){}
+      applyAlertCfg(spot);paintAlertState(spot);
+      toast("Couldn't save your alert style, try again.");
+      if(r!=='denied')curbReport('push-save-failed','restyle '+r);
+    });
+  },600);
+}
+// A matching sheet silently re-arms the watch once a day (right away for a migrated legacy key or a
+// style picked elsewhere): refreshes the server's 120-day clock, sends this side's full rules and heals
+// a schedule change. A same-sweep save keeps the server's de-dupe, so this can never double-push.
+function refreshWatch(spot){
+  if(!alertSpotMatches(spot))return;
+  const a=savedAlert(), s={...spot, level:getAlertLevel(), voice:getAlertVoice()};
+  if(!a||(a.v>=2&&Date.now()-a.armedAt<WATCH_REFRESH&&a.level===s.level&&a.voice===s.voice))return;
+  reArm(s).then(r=>{
+    if(r==='ok')markArmed(s);
+    else if(r==='gone'){forgetAlert();paintAlertState(spot);}
+    else if(r!=='denied')curbReport('push-save-failed','refresh '+r);
+  });
 }
 // Send a real test push to THIS device so you can feel the chosen cadence + voice on your lock screen.
 async function sendTestPush(spot){
   if(window.__curbNativePush){
-    if(typeof window.__curbTestPush==='function'){ try{window.__curbTestPush({level:spot.level,voice:spot.voice,which:'all',spot});}catch(_){ } toast('Sending a test — check your lock screen. 🔔'); }
+    if(typeof window.__curbTestPush==='function'){ nativeTest({level:spot.level,voice:spot.voice,which:'all',spot}); toast('Sending a test — check your lock screen. 🔔'); }
     else toast('Update the app from TestFlight to test on iPhone — your alerts still work.');
     return;
   }
@@ -1862,30 +2094,101 @@ async function sendTestPush(spot){
 }
 
 /* ---------- locate / tap ---------- */
+// Live geolocation permission ('granted'|'prompt'|'denied'; '' until the Permissions API answers, or
+// where it's missing). Read synchronously on tap: getCurrentPosition must not wait on the async query.
+let geoPerm='';
+const geoPermReady=(async()=>{try{const s=await navigator.permissions.query({name:'geolocation'});
+  geoPerm=s.state; s.onchange=()=>{geoPerm=s.state;};}catch(_){}})();
+// Bumped by every explicit choice of "where" (map/curb tap, search, a new locate): a fix or block-open
+// that belongs to an older choice must never yank the map or sheet away from what the user picked since.
+let whereGen=0;
+function userPicked(){whereGen++;endPendingOpen();locBusy(false);}
+function locBusy(on){const b=document.getElementById('locate');b.classList.toggle('loading',on);
+  if(on)b.setAttribute('aria-busy','true');else b.removeAttribute('aria-busy');}
 document.getElementById('locate').onclick=()=>{
   track('locate_used');
   const btn=document.getElementById('locate');
-  if(!navigator.geolocation)return locateFail();
+  if(!navigator.geolocation)return locateFailed(0);
   if(btn.classList.contains('loading'))return;
-  btn.classList.add('loading');
-  btn.setAttribute('aria-busy','true');
-  let done=false;
-  const finish=()=>{
-    if(done)return false;
-    done=true;
-    clearTimeout(failsafe);
-    btn.classList.remove('loading');
-    btn.removeAttribute('aria-busy');
-    return true;
+  userPicked(); const gen=whereGen;
+  locBusy(true);
+  // Chrome counts a pending permission prompt INSIDE timeout (WebKit starts it after the answer), so a
+  // possible prompt gets 30 s. The iOS app uses this timeout as its native deadline, and a cold one-shot
+  // fix there takes ~10 s: at 9 s the first tap failed and only the second (served from cache) worked.
+  const app=!!window.__curbNativeGeoInstalled;
+  const timeout=app?15000:geoPerm!=='granted'?30000:9000;
+  let done=false, retried=false, placed=false, failsafe=0, panned=false;
+  // Hang guard only (a dismissed prompt can mean no callback ever), so always ABOVE the real deadline —
+  // the app adds up to 50 s of native prompt grace. Re-armed once the permission query has answered.
+  const guard=t=>t+(app?55000:geoPerm!=='granted'?20000:3000);
+  const arm=ms=>{clearTimeout(failsafe);failsafe=setTimeout(()=>{
+    if(done)return; done=true;
+    // After "try again, or tap where you parked" a pan means they're finding it by hand: a late fix
+    // must not fly the map back out from under them.
+    if(whereGen===gen){locBusy(false);locateFailed(3,'failsafe');map.once('dragstart',()=>{panned=true;});}
+  },ms);};
+  arm(guard(timeout));
+  geoPermReady.then(()=>{if(!done&&!retried)arm(guard(timeout));});
+  const settle=()=>{done=true;clearTimeout(failsafe);if(whereGen===gen)locBusy(false);};
+  const ok=p=>{
+    const late=done; if(!late)settle();
+    // A fix after the guard gave up still counts — unless the user picked another spot or panned meanwhile.
+    if(placed||whereGen!==gen||(late&&panned))return;
+    placed=true;
+    try{localStorage.setItem('curbLocOK','1');}catch(_){}
+    if(late)toast('Found you.');  // replaces the failure toast it contradicts
+    placeFix(p);
   };
-  const failsafe=setTimeout(()=>{ if(finish())locateFail(); },11000);
-  navigator.geolocation.getCurrentPosition(
-    p=>{if(!finish())return;try{localStorage.setItem('curbLocOK','1');}catch(_){}
-      placeYou(p.coords.latitude,p.coords.longitude,true);},
-    e=>{if(!finish())return;locateFail();},
-    {enableHighAccuracy:true,timeout:9000,maximumAge:30000});
+  const fail=e=>{
+    if(done)return;
+    const code=(e&&e.code)||2;
+    // One retry on TIMEOUT/UNAVAILABLE with a coarse fix: Wi-Fi/cell positioning answers in about a
+    // second where a cold GPS fix didn't (app builds ≤6 also report a transient CoreLocation "unknown"
+    // as 2). Same 30 s maximumAge — never an arbitrarily old cached spot; you may have driven since.
+    if(code!==1&&!retried&&whereGen===gen){
+      retried=true; arm(13000);
+      navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:false,timeout:10000,maximumAge:30000});
+      return;
+    }
+    settle();
+    if(whereGen===gen)locateFailed(code,(retried?'after retry ':'')+((e&&e.message)||''));
+  };
+  navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:true,timeout,maximumAge:30000});
 };
-function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
+// Copy per GeolocationPositionError code (0 = no geolocation API). Deliberately NOT named locateFail:
+// app builds ≤6 replace window.locateFail with one "allow CURB in Settings" toast for EVERY failure,
+// which told people who had just tapped Allow that location was off.
+function locateFailed(code,detail){
+  const app=!!window.__curbNativeGeoInstalled;
+  toast(code===1?(app?'Location is off for CURB — turn it on in Settings › CURB › Location, or tap where you parked.'
+      :isIOS()?'Location is blocked — allow Safari Websites in Settings › Privacy › Location Services, or tap where you parked.'
+      :"Location is blocked for this site — allow it in your browser's site settings, or tap where you parked.")
+    :code===2?"Can't find your location right now — try again, or tap where you parked."
+    :code===3?"Couldn't get a fix in time — try again, or tap where you parked."
+    :"This browser can't share your location — search a street, or tap where you parked.");
+  curbReport('locate-failed',(code?'code '+code:'unsupported')+(detail?' '+detail:''));
+}
+// Beyond this a fix can't pick a block (SF blocks are ~100–130 m long): show where, not a verdict.
+const ACC_MAX=100;
+let accRing=null;
+function placeFix(p,quiet){
+  const c=p.coords, acc=c.accuracy;
+  if(!(acc>ACC_MAX)){  // unknown (null/0/NaN) is trusted, as before
+    placeYou(c.latitude,c.longitude,true,null,quiet);
+    if(pendingOpen&&!quiet){pendingOpen.loc=true;locBusy(true);}  // stay busy until the block opens
+    return;
+  }
+  if(youMarker)map.removeLayer(youMarker);
+  if(accRing)map.removeLayer(accRing);
+  youMarker=L.marker([c.latitude,c.longitude],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
+  accRing=L.circle([c.latitude,c.longitude],{radius:acc,className:'acc-ring',interactive:false}).addTo(map);
+  map.fitBounds(accRing.getBounds(),{padding:[24,24]});  // at z17 a wide circle would sit off-screen
+  if(quiet)return;
+  const r=acc>=1000?(acc/1000).toFixed(1)+' km':Math.round(acc)+' m';
+  toast((p.curbReduced?'Precise Location is off for CURB, so this is approximate':'Your location is approximate')
+    +' (±'+r+') — tap your block, or search a street.');
+  curbReport('locate-coarse',(p.curbReduced?'reduced ':'')+'±'+(acc>=1000?Math.round(acc/1000)+'km':Math.round(acc/50)*50+'m'));
+}
 // quiet=true: center + dot only (launch auto-position) — no sheet, the user may not be at their car.
 function placeYou(lat,lng,fly,cnnHint,quiet){
   // "Where I parked" must see every curb side — a day or status filter could otherwise
@@ -1897,9 +2200,10 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
     refreshLayerBadges(); drawSegments(lastRows);
   }
   if(youMarker)map.removeLayer(youMarker);
+  if(accRing){map.removeLayer(accRing);accRing=null;}
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
-  if(!quiet)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);
+  if(!quiet)openWhenLoaded(lat,lng,cnnHint,fly?900:300);
 }
 
 /* Auto-position on launch — ONLY when permission is already granted, so no permission
@@ -1922,7 +2226,7 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
     if(!c||!c.length)return;
     const mid=c[Math.floor(c.length/2)];
     map.setView([mid[1],mid[0]],17);
-    setTimeout(()=>openNearestWhenReady(mid[1],mid[0],m[1],0),700);
+    openWhenLoaded(mid[1],mid[0],m[1],700);
   }catch(_){}
 })();
 
@@ -1934,29 +2238,54 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
   try{ granted=(await navigator.permissions.query({name:'geolocation'})).state==='granted'; }
   catch(_){ try{granted=localStorage.getItem('curbLocOK')==='1';}catch(_){} }
   if(!granted)return;
+  // The launch fix can land seconds later: if the user has since tapped, searched or panned, it
+  // must not yank the map back to where they're standing.
+  const gen=whereGen; let moved=false; const onDrag=()=>{moved=true;}; map.once('dragstart',onDrag);
   navigator.geolocation.getCurrentPosition(
-    p=>placeYou(p.coords.latitude,p.coords.longitude,true,null,true),
-    ()=>{},  // silent: launch convenience, never an error
-    {enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+    p=>{map.off('dragstart',onDrag); if(!moved&&whereGen===gen)placeFix(p,true);},
+    ()=>{map.off('dragstart',onDrag);},  // silent: launch convenience, never an error
+    // curbSilent: the iOS app (build 7+) never shows a permission prompt for this request.
+    {enableHighAccuracy:true,timeout:window.__curbNativeGeoInstalled?15000:8000,maximumAge:60000,curbSilent:true});
 })();
-function openNearestWhenReady(lat,lng,cnnHint,tries){
-  const n=nearestSeg(lat,lng,cnnHint);
-  if(n){openSheet(n.group,n.side.key);return;}
-  if(tries<8)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,tries+1),250);
-  else if(cnnHint){
-    const fallback=nearestSeg(lat,lng);
-    if(fallback)openSheet(fallback.group,fallback.side.key);
-  }
+/* Open the block at a point once curb data that COVERS the point is drawn. segCache can still hold the
+   previous view's rows (a far fix opened a stale, wrong block), and the new view's fetch only starts
+   after the fly + moveend debounce and needs two Socrata round trips — so wait on loadViewport (up to
+   10 s) instead of a fixed ~2.9 s retry budget, which gave up silently on slow links. */
+const NEAR_M=80, OPEN_WAIT_MS=10000;
+let pendingOpen=null;  // {lat,lng,cnnHint,loc} — the one block-open waiting on data (loc: keeps #locate busy)
+function openWhenLoaded(lat,lng,cnnHint,delay){
+  endPendingOpen();  // one at a time: the newest placement wins
+  const po=pendingOpen={lat,lng,cnnHint,loc:false};
+  setTimeout(()=>{if(pendingOpen===po)tryPendingOpen();},delay);  // after the fly: data on hand may already cover it
+  setTimeout(()=>{
+    if(pendingOpen!==po)return;
+    if(!map.getBounds().contains([lat,lng])){endPendingOpen();return;}  // the map moved on — nothing to say
+    if(ovMode){endPendingOpen('Zoom in on your block to see its rules.');return;}
+    endPendingOpen("Couldn't load this block's rules — tap it, or pan and try again.");
+    curbReport('block-open-timeout',cnnHint?'link':po.loc?'locate':'tap');
+  },OPEN_WAIT_MS);
 }
+function tryPendingOpen(){
+  const po=pendingOpen; if(!po)return;
+  const hit=po.cnnHint&&nearestSeg(po.lat,po.lng,po.cnnHint);  // the block's own cnn can't be stale
+  if(hit)return openPending(hit);
+  if(!segBounds||!segBounds.contains([po.lat,po.lng]))return;  // not drawn for here yet — loadViewport retries
+  const n=nearestSeg(po.lat,po.lng);
+  // A search/link cnn fallback skips the cap: big parcels' address points sit >80 m from their block.
+  if(n&&(po.cnnHint||n.d<=NEAR_M))return openPending(n);
+  endPendingOpen(lastRows.length?'No swept curb within 80 m — tap your block on the map.':'No street-sweeping data here — CURB covers San Francisco.');
+}
+function openPending(n){endPendingOpen();openSheet(n.group,n.side.key);}
+function endPendingOpen(msg){const po=pendingOpen; if(!po)return; pendingOpen=null; if(po.loc)locBusy(false); if(msg)toast(msg);}
 function nearestSeg(lat,lng,cnnHint){
   const wanted=cnnHint?String(cnnHint):'';
   let pool=wanted?segCache.filter(o=>String(o.group.cnn)===wanted):segCache;
   if(wanted&&!pool.length)return null;
   let best=null,bd=Infinity;
   pool.forEach(o=>{const d=distSqToLineMeters(lat,lng,o.side.latlngs); if(d<bd){bd=d;best=o}});
-  return best;
+  return best&&{group:best.group,side:best.side,d:Math.sqrt(bd)};
 }
-map.on('click',e=>{ if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
+map.on('click',e=>{ userPicked(); if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
 
 /* ---------- day filter + today's date ---------- */
 let dayChips=[];
@@ -2362,6 +2691,7 @@ function renderSug(showEmpty){
 }
 function pickSug(i){
   const it=sugItems[i]; if(!it)return;
+  userPicked();
   document.getElementById('q').value=it.t;
   hideSug();
   if(it.kind==='addr'&&it.d&&it.d.latitude){placeYou(+it.d.latitude,+it.d.longitude,true,it.d.cnn);}
@@ -2418,6 +2748,7 @@ function normalizedAddressQuery(v){
 async function doSearch(){
   const v=document.getElementById('q').value.trim(); if(v.length<2)return;
   track('search_used');
+  userPicked();
   const addr=normalizedAddressQuery(v);
   if(addr){
     try{

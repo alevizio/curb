@@ -1,7 +1,8 @@
 # Monthly refresh of the precomputed data assets (data/*.json).
 #
 # Rebuilds the citywide overview, meter/loading zones, white (passenger/loading) curb
-# zones, and the /tickets stats from their live sources,
+# zones, the /tickets stats, and the baked block schedules (data/schedules.json, which the
+# /b/ pages read instead of calling DataSF) from their live sources,
 # validates the shapes (scripts/validate-data.mjs — fails loudly if a Socrata/ArcGIS
 # source changed), and commits only if something actually changed. The commit pushes
 # to main, which Vercel auto-deploys.
@@ -27,7 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # full history: the sitemaps date each page by its last commit (scripts/lastmod.mjs)
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -47,25 +51,29 @@ jobs:
           npm run build:zones
           npm run build:whitezones
           npm run build:stats
+          npm run build:schedules
 
       - name: Validate shapes (fail loudly on source drift)
         run: npm run validate:data
 
       # Regenerate the neighborhood map snapshots (from the fresh overview.json),
-      # then the SEO pages + sitemap from the fresh stats.json.
+      # then the SEO pages + sitemap from the fresh stats.json, then the block sitemap
+      # (lastmods from the fresh schedules.json).
       - name: Rebuild neighborhood maps + pages
         run: |
           npm run build:hoodmaps
           npm run build:hoodpages
+          npm run build:blocksitemap
 
       - name: Commit if changed
+        id: commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # _meta.generated carries a fresh timestamp every run, and the daily citation/
           # zone sources almost always move, so in practice this commits each month. The
           # guard is here only for the rare no-op (e.g. a re-run minutes apart).
-          git add data/*.json n/ sitemap.xml
+          git add data/*.json n/ index.html sitemap.xml sitemap-blocks.xml
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit."
             exit 0
@@ -76,4 +84,23 @@ jobs:
           Automated rebuild of overview/zones/white-zones/stats from live
           sources, shape-validated by scripts/validate-data.mjs."
           git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
           echo "Pushed refreshed data — Vercel will redeploy."
+
+      # Optional: tell IndexNow (Bing & co., free) which URLs got a new sitemap <lastmod>. Waits
+      # until Vercel serves the new sitemaps so crawlers don't fetch the old pages; never fails the job.
+      - name: Notify IndexNow
+        if: steps.commit.outputs.pushed == 'true'
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS https://curb.guide/sitemap.xml | cmp -s - sitemap.xml &&
+               curl -fsS https://curb.guide/sitemap-blocks.xml | cmp -s - sitemap-blocks.xml; then
+              npm run indexnow -- --since HEAD~1
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "New sitemaps not live after 10 min — skipping IndexNow."
+          exit 1

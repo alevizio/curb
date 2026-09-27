@@ -2,15 +2,21 @@
 // The native counterpart of save-subscription.js. The token is a hex APNs device token (NOT a
 // web-push subscription), stored in the curb:apns hash; the spot is sanitized by the SAME shared
 // sanitizeSpot as web push, so the cron sees an identical forever-watch shape.
-import { saveIosSub, storeReady, claimSlot } from './_store.js';
+// Turn alerts off: DELETE { token }, or — because the shipped app's bridge can only POST whatever
+// spot the page hands it, and the page never learns the token — POST { token, spot: { off: true } }.
+// Holding the token is the same bar as saving a watch for it.
+import { saveIosSub, storeReady, claimSlot, hasIosSub, disarmIosSub } from './_store.js';
 import { sanitizeSpot } from './_spot.js';
 
 // APNs device tokens are hex strings — historically 64 chars, but Apple has said they may grow, so
 // accept a generous length-bounded hex range rather than a hard 64.
 const HEX_TOKEN = /^[0-9a-fA-F]{64,200}$/;
+// A brand-new token per client IP at most this often (store-bloat guard; see below).
+const NEW_TOKEN_MS = 10000;
+const clientIp = (req) => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || '';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') { res.status(405).json({ error: 'POST only' }); return; }
+  if (req.method !== 'POST' && req.method !== 'DELETE') { res.status(405).json({ error: 'POST or DELETE only' }); return; }
   try {
     const { token, bundleId, spot } = req.body || {};
     if (typeof token !== 'string' || !HEX_TOKEN.test(token)) {
@@ -22,19 +28,30 @@ export default async function handler(req, res) {
     if (bundleId && bundleId !== expected) {
       res.status(400).json({ error: 'bundle mismatch' }); return;
     }
+    const tok = token.toLowerCase();
+    // Off is checked BEFORE sanitizeSpot ({off:true} has no sweep → would 400) and never throttled,
+    // so "arm, then turn off right away" works. It disarms rather than deletes, keeping the de-dupe
+    // so turning alerts back on for the same sweep can't re-send a push already delivered.
+    if (req.method === 'DELETE' || (spot && spot.off === true)) {
+      if (!storeReady()) { res.status(503).json({ error: 'store not configured' }); return; }
+      await disarmIosSub(tok);
+      res.status(200).json({ ok: true, off: true });
+      return;
+    }
     const cleanSpot = sanitizeSpot(spot);
     if (!cleanSpot) { res.status(400).json({ error: 'invalid or missing spot' }); return; }
     if (!storeReady()) {
       res.status(503).json({ error: 'store not configured', note: 'set KV_REST_API_URL / KV_REST_API_TOKEN (Upstash) in your env' });
       return;
     }
-    // Atomic per-token throttle: a real device registers ~once, so cap re-registration to ~1/min to
-    // bound store bloat + APNs fan-out from forged-but-valid-hex tokens. claimSlot hashes the token
-    // into its key (never stored raw) and returns true in dev (no store), so the happy path stays green.
-    if (!(await claimSlot('iossub:' + token.toLowerCase(), 60000))) {
+    // Store-bloat guard for forged-but-valid-hex tokens: only a NEW token costs a record, so throttle
+    // new tokens per client IP. Re-saving a known token (a new block, an Intensity/Voice change seconds
+    // apart) is an idempotent overwrite and must never 429 — the old per-token 60 s throttle silently
+    // dropped those, leaving the old block/level armed. claimSlot hashes its key; true in dev.
+    if (!(await hasIosSub(tok)) && !(await claimSlot('iosnew:' + clientIp(req), NEW_TOKEN_MS))) {
       res.status(429).json({ error: 'slow down' }); return;
     }
-    await saveIosSub(token.toLowerCase(), cleanSpot);
+    await saveIosSub(tok, cleanSpot);
     res.status(200).json({ ok: true, stored: true });
   } catch (e) {
     console.error('save-ios-subscription failed:', e);

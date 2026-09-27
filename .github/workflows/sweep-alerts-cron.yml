@@ -1,20 +1,26 @@
-# Fires the CURB push-notification check every 15 minutes.
-# Vercel Hobby throttles vercel.json crons to ~once a day, which is useless for
-# "move your car in 30 min" alerts — this free Actions schedule is the real trigger.
-# The Vercel cron stays as a harmless backup; sends are de-duped server-side
-# (notifiedFor), so double-firing can never double-notify.
+# BACKUP trigger for the CURB sweep-alert sender (/api/send-notifications).
+# The PRIMARY trigger is an Upstash QStash schedule that POSTs the endpoint every 15 min, signed
+# (see the header of api/send-notifications.js). GitHub schedules are best-effort — in Sep 2026 this
+# ran ~7 times a day instead of 96 — so this only fills gaps if QStash stops. Overlapping runs are
+# safe: a server-side run lock plus per-sweep de-dupe mean double-firing never double-notifies.
+# A Vercel Cron (vercel.json, :07/:22/:37/:52 — the team is on Pro) is a second primary timer, offset from
+# QStash so the two alternate; this workflow is the last resort. The owner is alerted by healthchecks.io,
+# pinged by the endpoint itself on QStash runs, and by the monitor workflow's sender-status check.
 # Secret: CRON_SECRET (repo secret) must match the Vercel env var of the same name.
+# A manual run (workflow_dispatch) is a normal, de-duped run. There is deliberately NO delivery-test
+# input: ?test=ios pushes EVERY iOS device, and anyone holding a token that can dispatch workflows (e.g.
+# the monitor's PAT stored at QStash) must not be able to broadcast it. Run that test from your own
+# machine instead:
+#   curl -H "Authorization: Bearer $CRON_SECRET" 'https://curb.guide/api/send-notifications?test=ios'
+# Caveat: a dispatch may name ANY branch, and repo secrets reach every branch, so a branch that still
+# has the old copy of this file (with the input) can still be dispatched with it. Delete or update such
+# branches, or move CRON_SECRET into an Environment limited to main.
 name: sweep-alerts-cron
 
 on:
   schedule:
     - cron: "*/15 * * * *" # UTC; GitHub schedules are best-effort (may lag a few min)
   workflow_dispatch:
-    inputs:
-      test:
-        description: "Optional delivery test, e.g. 'ios' (sends a one-off test push to registered iOS tokens)"
-        required: false
-        default: ""
 
 permissions: {}
 
@@ -28,14 +34,11 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Hit the notification endpoint
-        env:
-          TEST: ${{ github.event.inputs.test }}
         run: |
           url="https://curb.guide/api/send-notifications"
-          [ -n "$TEST" ] && url="$url?test=$TEST"
           code=$(curl -sS -o /tmp/out.json -w '%{http_code}' \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "$url")
+            "$url") || code=000
           echo "HTTP $code"
-          cat /tmp/out.json; echo
+          cat /tmp/out.json 2>/dev/null; echo
           test "$code" = "200"

@@ -1,6 +1,7 @@
 // POST { subscription, spot } — store a Web Push subscription + the saved spot.
-// spot = { corridor, limits, blockside, nextSweepISO, leadMinutes, eveningISO?, rule?, cnn?, sideKey? }
-import { saveSub, ensureOwnerProof, storeReady } from './_store.js';
+// spot = { corridor, limits, blockside, nextSweepISO, leadMinutes, eveningISO?, rule?, rules?, cnn?, sideKey? }
+// DELETE { subscription } — turn that subscription's alerts off (proven by its endpoint + keys.auth).
+import { saveSub, ensureOwnerProof, storeReady, disarmSub } from './_store.js';
 // Spot/rule sanitizers live in a shared module (also used by save-ios-subscription) so web push and
 // native APNs validate the forever-watch rule identically.
 import { sanitizeSpot } from './_spot.js';
@@ -20,7 +21,22 @@ function validSubscription(s) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') { res.status(405).json({ error: 'POST only' }); return; }
+  if (req.method === 'DELETE') {
+    try {
+      const { subscription } = req.body || {};
+      if (!validSubscription(subscription)) { res.status(400).json({ error: 'invalid subscription' }); return; }
+      if (!storeReady()) { res.status(503).json({ error: 'store not configured' }); return; }
+      const r = await disarmSub(subscription.endpoint, subscription.keys.auth);
+      if (r === 'not-found') { res.status(404).json({ error: 'no alerts for this subscription' }); return; }
+      if (r === 'forbidden') { res.status(403).json({ error: 'not your subscription' }); return; }
+      res.status(200).json({ ok: true, off: true });
+    } catch (e) {
+      console.error('save-subscription delete failed:', e);
+      res.status(500).json({ error: 'internal error' });
+    }
+    return;
+  }
+  if (req.method !== 'POST') { res.status(405).json({ error: 'POST or DELETE only' }); return; }
   try {
     const { subscription, spot } = req.body || {};
     if (!validSubscription(subscription)) { res.status(400).json({ error: 'invalid subscription' }); return; }

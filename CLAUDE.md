@@ -28,8 +28,8 @@ calendar reminder before the next sweep.
   --meter permit-blue / paper+ink). Keep this language if extending the UI.
 
 ## Data sources (all DataSF Socrata, CORS-open: `access-control-allow-origin: *`)
-DataSF moved hosts: `data.sfgov.org` now 301s to `data.sf.gov` with no CORS header (and 403s some
-queries), which silently broke every browser fetch. Always use `https://data.sf.gov` (2026-09-27).
+DataSF moved hosts: `data.sfgov.org` now 301s to `data.sf.gov` with no CORS header (and 403s any
+query using `$select`), which silently broke every browser fetch. Always use `https://data.sf.gov` (2026-09-27).
 1. Street sweeping — `yhqp-riqs`
    https://data.sf.gov/resource/yhqp-riqs.json
    Fields: cnn (segment id), corridor, limits (cross streets), blockside,
@@ -121,9 +121,24 @@ queries), which silently broke every browser fetch. Always use `https://data.sf.
   cnn like ENF/SWP). Local build (needs `pip install xlrd` + the .xls set via CURB_SWEEP_SCHEDULE_XLS;
   NOT in the data-refresh CI, like build:enforcement). The layer's run DIRECTION stays inferred.
 - api/block.js + sitemap-blocks.xml (scripts/build-block-sitemap.mjs, `npm run build:blocksitemap`) —
-  /b/<cnn> server-rendered block share/landing pages (unique <title> + meta + citation ticket-time),
-  ~10.5k long-tail SEO pages. api/block 302-redirects unknown cnns to /, so the sitemap lists ONLY
-  enforcement ∩ currently-swept cnns (all render 200). Separate 2nd sitemap; both are in robots.txt.
+  /b/<cnn> server-rendered block share/landing pages, ~10.5k long-tail SEO pages. NO DataSF call at
+  request time: they read `data/schedules.json` (scripts/build-schedules.mjs, `npm run build:schedules`,
+  in the monthly data-refresh + validate-data): every swept cnn's rows, cleaned street text, its
+  neighborhood (hoodAt), the adjacent block at each end, a title tag for split pairs and a per-block
+  modified date. Unknown cnn → noindex 404; any internal failure → 503 + Retry-After + no-store (NEVER a
+  302 home: that told Google the pages were gone during the Sep 2026 host move). Titles stay < 60 chars
+  and unique (api/_block.test.mjs renders all of them); the "next sweeps" line makes the 200 cacheable
+  only until SF midnight, and sw.js never caches /b/ (network only; bump its CACHE name if it ever cached
+  something it shouldn't, so activate purges it). The sitemap lists every baked cnn (all ~12k swept blocks) with real <lastmod>s
+  (scripts/lastmod.mjs); both sitemaps are in robots.txt (which Allows /api/og for share cards).
+- /n/ pages (scripts/build-hood-pages.mjs): list every block street by street (the only inbound links
+  to /b/), "Nearby" = hoods sharing a border, and the build DELETES pages it no longer generates
+  (vercel.json 301s retired slugs). Which hoods get a page is one rule in lib/hoods.js, shared with the
+  /b/ links. The same build rewrites the home page's neighborhood list between the
+  `<!-- hoods:start/end -->` markers in index.html (welcome card) — don't hand-edit inside them.
+- IndexNow: key file `71aabb1f18854413823b971dfe671c61.txt` at the root; `npm run indexnow -- --since
+  <ref> [--dry-run]` submits URLs whose sitemap entry changed. data-refresh runs it (optional step)
+  once the new sitemaps are live.
 - docs/ — sweeper-data research + ready-to-send public-records requests.
 - README.md — human-facing run/deploy notes.
 
@@ -267,22 +282,45 @@ Files now present for the push feature:
   field = subscription.endpoint). Accepts `KV_REST_API_*` (Vercel Upstash integration)
   or `UPSTASH_REDIS_REST_*`. Exports saveSub / loadAllSubs / deleteSub / markNotified.
 - `api/save-subscription.js` — persists `{ subscription, spot }` via the store, with
-  input validation (https push-host allowlist, size caps, spot sanitize/clamp).
-- `api/send-notifications.js` — Vercel cron handler; loads subs, sends web-push for any
-  spot whose `nextSweepISO` is within `leadMinutes`, de-dupes via `notifiedFor`, deletes
-  on 410/404. Requires `CRON_SECRET` (Bearer) — refuses to run unauthenticated.
-- `vercel.json` — cron every 15 min (needs Vercel Pro; Hobby throttles to ~daily). The REAL
-  trigger is `.github/workflows/sweep-alerts-cron.yml` (free Actions schedule, public repo):
-  curls the endpoint with `Bearer ${{ secrets.CRON_SECRET }}` every 15 min. Requires the
-  `CRON_SECRET` repo secret (gh secret set CRON_SECRET, value from .env / Vercel env — NEVER
-  committed). Both crons may fire; `notifiedFor` de-dupes server-side so nobody gets pushed twice.
-- `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET.
+  input validation (https push-host allowlist, size caps, spot sanitize/clamp). `DELETE
+  { subscription }` turns alerts off: proven by endpoint + a constant-time `keys.auth` match, it
+  DISARMS (`spot = null`, the cron skips it) so auto-park keeps resolving the subscription.
+- `api/send-notifications.js` — the sender: loads subs, sends the touchpoint `dueAlert` says is due
+  over web-push / APNs, de-dupes via `notified`, prunes on 410/404. Auth: an Upstash QStash
+  `Upstash-Signature` JWT (official `Receiver`, raw body — so the schedule's body must be EMPTY — and the exact URL
+  `https://curb.guide/api/send-notifications`) OR `Bearer CRON_SECRET`; refuses anything else.
+  `?test=ios` and `GET ?status=1` (last run time/outcome/trigger, no sends) are Bearer-only.
+- Triggers — TWO primaries + one backup. Vercel Cron in `vercel.json` (`7,22,37,52 * * * *`, Bearer
+  CRON_SECRET sent automatically; offset from QStash so the two alternate). The team is on Vercel Pro — Hobby
+  rejects sub-daily crons, so REMOVE the `crons` block before any move to Hobby or deploys fail. PRIMARY: an Upstash QStash
+  schedule, every 15 min, POST, EMPTY body (REQUIRED: on Vercel the runtime's helpers consume a
+  non-empty body before the handler — `bodyParser:false` doesn't stop them — so even `{}` makes the
+  signature check fail and every QStash run 401s), destination exactly the URL above; env
+  `QSTASH_CURRENT_SIGNING_KEY` / `QSTASH_NEXT_SIGNING_KEY`. QStash never holds CRON_SECRET (it also
+  unlocks `?test=ios`, a push to every iOS device). BACKUP: `.github/workflows/sweep-alerts-cron.yml`
+  curls with `Bearer ${{ secrets.CRON_SECRET }}` (repo secret, NEVER committed); a manual dispatch is a
+  normal run and it deliberately has NO test input (a token able to dispatch workflows, like the
+  monitor's QStash PAT, must not be able to broadcast `?test=ios`; run that test by hand with curl and
+  the bearer). GitHub schedules are best-effort (Sep 2026: ~7 runs/day, not 96). Overlap is safe: a 120 s run lock — released once a run
+  fully succeeds (web loop done, no APNs error), so a GitHub run just before a QStash tick no longer
+  swallows that tick; deliberately NOT released on error (a retry would re-send a push whose
+  markNotified failed) — plus the per-sweep `notified` de-dupe. Every run records itself in Upstash
+  (`curb:cron`: last + last success, plus the last QStash-triggered run `lastQstash` {at, ok, error?}
+  and last successful one `lastQstashOk` {at}, so backup runs can't hide a dead primary) for the
+  monitor's `?status=1` check; optional `HC_PING_URL` (healthchecks.io) is pinged by successful QStash
+  runs and `/fail` on errors. The monitor workflow can also be dispatched by QStash (`mode` input).
+- `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET,
+  QStash signing keys, HC_PING_URL.
 
 **Native iOS (APNs) — added 2026-06-16.** The iOS app is a WKWebView wrapper, so it gets native
 push alongside Web Push:
 - `api/_apns.js` — minimal APNs sender (ES256 .p8 JWT over `node:http2`, no deps; key via
   `APNS_KEY_P8_B64` preferred / `APNS_KEY_P8`). `api/save-ios-subscription.js` stores a hex APNs
   device token + spot in the `curb:apns` Upstash hash (sibling of `curb:subs`, identical shape).
+  Only brand-new tokens are throttled (per client IP); re-saves of a known token always land (a
+  per-token 60 s throttle used to drop block switches and style changes). Off: `DELETE {token}` or
+  `POST {token, spot:{off:true}}` — the shipped app's bridge can only POST the page's spot. Off DISARMS
+  (`spot = null`, like web) rather than deleting, so the de-dupe survives turning alerts back on.
 - `api/send-notifications.js` runs a SECOND loop over `loadAllIosSubs()` with the IDENTICAL
   lead-window / night-before / dedupe / forever-watch logic, delivering over APNs instead of
   web-push; `?test=ios` (authed) sends a one-off delivery test. Env: `APNS_KEY_P8_B64`/`APNS_KEY_P8`,
@@ -302,16 +340,53 @@ DONE (all of it, end-to-end):
    diverts to it. Auto-shown once for un-installed iOS Safari.
 4. Re-subscription + 410/404 prune; cron de-dupe via `notifiedFor`; VAPID-key self-heal.
 
-Forever-watch (implemented): when the saved `spot` carries a recurrence `rule` (weekday +
-week1..week5 flags + hours, via `sanitizeRule`), the cron re-arms it server-side after each sweep
-window ends — `recomputeSpot` advances `nextSweepISO` (and `eveningISO`) to the next occurrence and
-RESETS the per-window de-dupe (`advanceSpot` / `advanceIosSpot`). A watch stops auto-advancing once
-it goes stale past `MAX_WATCH_AGE` (~120 days) so a frozen rule can't track a city schedule change.
-Spots WITHOUT a `rule` still degrade to a single one-shot push (the button reverts from "✓ Alerts on"
-once that one sweep passes, since the saved-alert key includes `nextSweepISO`).
+Forever-watch (implemented): the saved `spot` carries `rules` — EVERY schedule row of the curb side
+(multi-day sides are ~25% of SF; `sanitizeRules` drops invalid rows one by one, dedupes, caps at 16)
+— plus `rule` (the row behind `nextSweepISO`, kept for back-compat). After each sweep window ends the
+cron's `recomputeSpot` advances `nextSweepISO` to the EARLIEST next occurrence across the rules (plus
+fresh anchors) via `advanceSpot` / `advanceIosSpot`, which re-read the record and skip the write if the
+user turned the watch off or re-saved it since the run's snapshot (a Turn off must never be re-armed).
+The `notified` de-dupe map is NEVER reset (not by
+the advance, a re-save, a block switch or Turn off): each entry holds the sweep instant it fired for, so
+it only blocks that sweep — an off → on of the same sweep can't re-send a push. A watch stops
+auto-advancing once it goes stale past `MAX_WATCH_AGE` (~120 days) so a frozen rule can't track a city
+schedule change. In the sheet, ties between a side's rows go to the earliest next sweep.
+
+Cadence (`lib/notify-core.js`, don't regress): Light = lead, Normal = eve + lead, Intense = eve +
+morn + lead; sweeps starting before 07:00 SF get ONE "move it tonight" push from 21:00 SF the evening
+before instead, at every level, derived at send time (sent after SF midnight — a late arm or tick — it
+keeps key `tonight` but uses the `early` copy: no "tonight / before bed"). eve is eligible 20:00 →
+min(23:00, sweep − lead); morn only when start−2h lands 06:00-21:59 SF on the sweep's own day; lead is skipped with
+< 5 min left. The anchor rule is `alertAnchors()` in `lib/sweep-core.js`, shared by the page, the cron
+re-arm and the send-time guard. `dueAlert` returns `expiresAt` (lead/tonight: the sweep; morn: sweep
+− lead; eve: SF midnight) used for web-push TTL (min 60 s) and apns-expiration, and `urgent`
+(lead/tonight: Urgency high + requireInteraction). No web-push Topic (Apple rejects it). Test pushes
+are titled "Test · <which alert> (<when it really fires>)". The holiday table covers through
+2029-01-01 (2027-2028 derived by rule; a test fails 150 days before it runs out).
+
+Saved alert (index.html): localStorage `curbAlert` keyed on the curb side (cnn|sideKey), NOT the
+sweep instant — the old instant key read "off" after the first sweep while pushes kept coming. "On"
+is claimed only while the watch is alive (< MAX_WATCH_AGE, web permission granted); legacy
+`curbAlertKey` values migrate by corridor|limits|blockside; a matching sheet silently re-arms once a
+day (a same-sweep re-save keeps the stored eve/morning anchors and `notified` — the sheet drops anchors
+it thinks are past, and an 8:05pm refresh used to wipe that night's eve push; a save from a sheet left
+open since before the cron re-armed — same side + rules, an older sweep that has already started — keeps
+the stored spot and applies only level/voice, `staleResave` in api/_store.js). Tapping "✓ Alerts on"
+offers Turn off; other blocks show "Alerts are on for <block>". The iOS bridge comes in two shapes: build
+<= 6 calls `__curbNativePushResult(ok, msg)` and `__curbRequestPush(spot)` resolves a boolean; build 7+
+calls `__curbNativePushResult` with ONE object `{ok, reason, message, status}` (`reason` is a stable code:
+saved, denied, denied-settings, save-failed, registration-failed, timeout, …; `message` the server/iOS
+text; `status` the save's HTTP code) and adds `__curbRequestPushDetail(spot)`, which resolves that object
+(`__curbRequestPush` stays boolean). The page prefers `__curbRequestPushDetail`, classifies on `reason`
+(`denied*` → Settings guidance, never a report) and keeps the rest for reports (`ios save-failed:429 slow
+down`). Every native call, test pushes included, goes through ONE queue (the app keeps one pending call);
+failures report `push-save-failed` / `push-off-failed` via `curbReport`. Headless check:
+`scripts/check-alerts-ui.mjs` (runs build 6's bridge and build 7's real pushScript);
+`ios/page-bridge.test.mjs` runs the page's bridge code against both in vitest.
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
-VAPID_SUBJECT, CRON_SECRET, KV_REST_API_URL/TOKEN (Upstash). Embedded VAPID *public* key
+VAPID_SUBJECT, CRON_SECRET, QSTASH_{CURRENT,NEXT}_SIGNING_KEY, HC_PING_URL (optional),
+KV_REST_API_URL/TOKEN (Upstash). Embedded VAPID *public* key
 lives in `index.html` (`const VAPID_PUBLIC_KEY`).
 
 ### Local dev note

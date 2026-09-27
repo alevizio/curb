@@ -3,10 +3,42 @@
     "api/og.js": {
       "includeFiles": "{og/fonts/**,node_modules/@resvg/resvg-wasm/index_bg.wasm}"
     },
+    "api/block.js": {
+      "includeFiles": "data/{schedules,enforcement,routes}.json"
+    },
     "api/send-notifications.js": {
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/send-notifications",
+      "schedule": "7,22,37,52 * * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "curb-nu.vercel.app"
+        }
+      ],
+      "destination": "https://curb.guide/:path*",
+      "statusCode": 308
+    },
+    {
+      "source": "/n/presidio",
+      "destination": "/n/",
+      "statusCode": 301
+    },
+    {
+      "source": "/n/golden-gate-park",
+      "destination": "/n/",
+      "statusCode": 301
+    }
+  ],
   "rewrites": [
     {
       "source": "/config.js",
