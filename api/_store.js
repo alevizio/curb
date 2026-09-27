@@ -281,6 +281,28 @@ export async function deleteTokensForEndpoint(endpoint) {
   }
 }
 
+// ---- sender run record (read by the monitor via /api/send-notifications?status=1) ----
+// `last` = the most recent run whatever its outcome; `ok` = the most recent successful one. Holds only
+// counts/outcome/trigger — no subscription, token or spot.
+const CKEY = 'curb:cron';
+
+/** Record one sender run: { at, trigger, outcome: 'ok'|'error'|'skipped', ... }. */
+export async function saveRunStatus(status) {
+  const r = redis();
+  if (!r) return;
+  const v = JSON.stringify(status);
+  await r.hset(CKEY, status.outcome === 'ok' ? { last: v, ok: v } : { last: v });
+}
+
+/** { last, lastOk } — either may be null before the first run. */
+export async function loadRunStatus() {
+  const r = redis();
+  if (!r) return { last: null, lastOk: null };
+  const all = (await r.hgetall(CKEY)) || {};
+  const parse = (v) => (typeof v === 'string' ? safeParse(v) : v) || null;
+  return { last: parse(all.last), lastOk: parse(all.ok) };
+}
+
 // ---- client error log (anonymous; see /privacy) ----
 // A capped list of the most recent browser / iOS-wrapper errors, so the GitHub monitor can alert on
 // real user-facing breakage. Entries carry no IP, no location, no subscription or token.
