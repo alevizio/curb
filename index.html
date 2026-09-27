@@ -1108,7 +1108,7 @@ async function loadViewport(){
   try{
     const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line`
       +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
-    const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
+    const r=await fetch(url); if(!r.ok)throw new Error('HTTP '+r.status); const data=await r.json();  // the data-load report carries it
     if(my!==fetchTok)return;
     lastRows=data; segBounds=b;
     if(!data.length&&!noCovToasted){noCovToasted=true;

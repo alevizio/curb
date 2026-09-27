@@ -122,6 +122,9 @@ async function open(name, cfg = {}) {
       const body = u.pathname.includes('yhqp-riqs') ? sweepResponse(u) : [];
       const delay = u.pathname.includes('yhqp-riqs') ? (cfg.dataDelay || 0) : 0;
       if (delay) await new Promise((r) => setTimeout(r, delay));
+      if (cfg.dataStatus && u.pathname.includes('yhqp-riqs') && !/count\(\*\)/.test(u.searchParams.get('$select') || '')) {
+        return req.respond({ status: cfg.dataStatus, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"message":"busy"}' }).catch(() => {});
+      }
       return req.respond({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) }).catch(() => {});
     }
     if (u.hostname.includes('fonts.g') || u.pathname.startsWith('/_vercel/') || u.pathname === '/sw.js' || u.pathname.startsWith('/api/')) return req.respond({ status: 404, body: '' }).catch(() => {});
@@ -226,6 +229,15 @@ try {
     const opened = await waitFor(page, () => document.getElementById('sheet').classList.contains('open'), 14000);
     const b = await sheetBlock(page, MISSION);
     return { ok: opened && b.d < 120, detail: `opened=${opened} d=${Math.round(b.d)}m` };
+  });
+
+  // A DataSF failure reaches the error log with its HTTP status (a throttle vs a 5xx), not the bare "0" it used to be.
+  await scenario('a failed DataSF load reports its HTTP status', { dataStatus: 503 }, async (page) => {
+    await page.evaluate((lat, lng) => map.setView([lat, lng], 17, { animate: false }), MISSION[0], MISSION[1]);
+    await waitFor(page, () => window.__reports.some(([k]) => k === 'data-load'), 10000);
+    const rep = await page.evaluate(() => window.__reports.filter(([k]) => k === 'data-load').map(([, d]) => d));
+    const t = await toastText(page);
+    return { ok: rep.length > 0 && rep.every((d) => d === 'HTTP 503') && /Couldn't load that area/.test(t), detail: `data-load reports=${JSON.stringify(rep)} toast="${t}"` };
   });
 
   // Browser deadlines: granted → 9 s; a possible permission prompt (Chrome counts it inside timeout) → 30 s.
