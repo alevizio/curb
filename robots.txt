@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+# /b/ share cards take their og:image from /api/og; the longer Allow wins over Disallow: /api/
+Allow: /api/og
 Disallow: /api/
 
 Sitemap: https://curb.guide/sitemap.xml
