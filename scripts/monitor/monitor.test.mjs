@@ -234,7 +234,8 @@ describe('SEC-1: client-supplied text in the public alert issues', () => {
     const f = mockFetch({ 'https://curb.guide/api/client-error': { status: 200, body: log([{ k: 'event:locate-coarse', msg: '##[set-env name=A]B' }]) } });
     const spike = await withSecret(() => checkErrorSpike(f, now));
     expect(spike.status).toBe('ok');
-    expect(spike.detail).toContain('set-env');
+    expect(spike.detail).toContain('1× event:locate-coarse');   // counted, but the visitor's text is never printed
+    expect(spike.detail).not.toContain('set-env');
     expect(spike.detail).not.toContain('##[');
   });
 
@@ -346,7 +347,8 @@ describe('error log: breakage vs. the visitor\'s own choices', () => {
   it('a code 1 from a permissions policy (our header broke) still fails the digest, informational counts ride along', async () => {
     const out = await run(digest, [...ROUTINE, ...rep('event:locate-failed', 'code 1 Geolocation has been disabled in this document by permissions policy.', 4)]);
     expect(out.map((r) => r.status)).toEqual(['fail', 'ok']);
-    expect(out[0].name).toContain('permissions policy');
+    expect(out[0].name).toMatch(/^error: event:locate-failed #[0-9a-f]{8}$/);   // id, not the message (privacy)
+    expect(out[0].name).not.toContain('permissions policy');
     expect(out[1].detail).toContain('+66 informational');
   });
 
@@ -360,7 +362,7 @@ describe('error log: breakage vs. the visitor\'s own choices', () => {
       ...rep('event:push-save-failed', 'ios save-failed:429 slow down', 3),
       ...rep('event:push-off-failed', 'web HTTP 500', 3),
     ]);
-    expect(out.filter((r) => r.status === 'fail').map((r) => r.name.split(' `')[0]).sort()).toEqual([
+    expect(out.filter((r) => r.status === 'fail').map((r) => r.name.split(' #')[0]).sort()).toEqual([
       'error: error', 'error: event:block-open-timeout', 'error: event:data-load', 'error: event:push-off-failed',
       'error: event:push-save-failed', 'error: rejection',
     ]);
@@ -374,5 +376,29 @@ describe('error log: breakage vs. the visitor\'s own choices', () => {
     expect(loud.status).toBe('fail');
     expect(loud.detail).toMatch(/^25 errors from real users/);
     expect(loud.detail).not.toContain('locate');
+  });
+});
+
+// /privacy promises error reports go to our own server only: the public alert issue and the Actions log
+// carry a stable id, the kind, our source line, a count and device types — never the visitor's text.
+describe('privacy: no visitor error text in public output', () => {
+  const now = Date.parse('2026-09-27T12:00:00Z');
+  it('digest and spike name groups by id, with no message or stack text', async () => {
+    const secretMsg = 'TypeError: user typed 1234 Main St, Apt 5';
+    const entries = Array.from({ length: 25 }, (_, i) => ({ ts: now - 60000, k: 'error', msg: secretMsg, src: '/', line: 42, col: 1,
+      stack: 'at placeYou (https://curb.guide/:42:1) 1234 Main St', page: '/', app: 'web', client: 'iOS Safari' }));
+    const body = { since: 0, total: 25, groups: [{ key: 'x', k: 'error', msg: secretMsg, src: '/', line: 42, count: 25, first: now, last: now,
+      apps: { web: 25 }, clients: { 'iOS Safari': 25 }, sample: { stack: entries[0].stack, page: '/' } }] };
+    const f = async () => ({ status: 200, headers: { get: () => null }, json: async () => body, text: async () => JSON.stringify(body) });
+    const prev = process.env.CRON_SECRET; process.env.CRON_SECRET = 's';
+    try {
+      const out = [...(await digest(f, now)), await checkErrorSpike(f, now)];
+      const text = JSON.stringify(out);
+      expect(text).not.toContain('Main St');
+      expect(text).not.toContain('user typed');
+      expect(out[0].name).toMatch(/^error: error #[0-9a-f]{8}$/);
+      expect(out[0].detail).toContain('25× error #');
+      expect(out[0].detail).toContain('/:42');
+    } finally { if (prev === undefined) delete process.env.CRON_SECRET; else process.env.CRON_SECRET = prev; }
   });
 });

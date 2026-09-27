@@ -10,6 +10,7 @@
 // Env: MONITOR_SITE (default https://curb.guide), CRON_SECRET (error log + sender status; those two
 //      checks are skipped if unset).
 import { writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 export const SITE = process.env.MONITOR_SITE || 'https://curb.guide';
 const UA = 'Mozilla/5.0 (curb-monitor; +https://github.com/alevizio/curb)';
@@ -51,7 +52,7 @@ export function realErrors(d) {
   const infoTotal = info.reduce((n, g) => n + g.count, 0);
   return { total: d.total - infoTotal, groups: d.groups.filter(isBreakage), info, infoTotal };
 }
-const fyi = (d) => d.infoTotal ? ` (+${d.infoTotal} informational, not failing: ${d.info.slice(0, 5).map((g) => `${g.count}× ${g.k} ${lit(g.msg, 60)}`).join(', ')})` : '';
+const fyi = (d) => d.infoTotal ? ` (+${d.infoTotal} informational, not failing: ${d.info.slice(0, 5).map((g) => `${g.count}× ${g.k}`).join(', ')})` : '';
 
 const ok = (name, detail = '') => ({ name, status: 'ok', detail });
 const fail = (name, detail) => ({ name, status: 'fail', detail });
@@ -199,7 +200,12 @@ async function fetchErrors(f, since) {
  *  space too. ("::command::" only counts at the start of a line, and this span never starts one.) */
 export const lit = (s, n = 200) => '`' + String(s ?? '').slice(0, n).replace(/`/g, "'").replace(/[\r\n]+/g, ' ')
   .replace(/</g, '‹').replace(/>/g, '›').replace(/@/g, '@\u200b').replace(/##\[/g, '#\u200b#[') + '`';
-const describe = (g) => `${g.count}× ${lit(g.msg)}${g.src ? ` (${lit(`${g.src}:${g.line}`)})` : ''} — ${Object.entries(g.clients).map(([c, n]) => `${c} ${n}`).join(', ')}`;
+/** Stable short id for an error group. Public issues and Actions logs carry this id, the kind, our own
+ *  source line, a count and coarse device types, NEVER the message or stack a visitor's browser sent:
+ *  /privacy promises error reports go to our own server only. The full text stays in the private error
+ *  log (GET /api/client-error with CRON_SECRET), where the id can be matched. */
+export const groupId = (g) => createHash('sha256').update(`${g.k}|${g.msg}|${g.src}:${g.line}`).digest('hex').slice(0, 8);
+const describe = (g) => `${g.count}× ${g.k} #${groupId(g)}${g.src ? ` at ${lit(`${g.src}:${g.line}`, 60)}` : ''} — ${Object.entries(g.clients).map(([c, n]) => `${c} ${n}`).join(', ')}`;
 
 export async function checkErrorSpike(f, now = Date.now()) {
   const name = 'user error rate';
@@ -221,7 +227,7 @@ export async function digest(f, now = Date.now()) {
     const big = d.groups.filter((g) => g.count >= DIGEST_MIN);
     if (!big.length) return [ok('error digest', `${d.total} errors in 24h, none repeated ${DIGEST_MIN}+ times${fyi(d)}`)];
     return [
-      ...big.map((g) => fail(`error: ${g.k} ${lit(g.msg, 80)}`, describe(g) + (g.sample?.stack ? `\n  ${lit(g.sample.stack, 300)}` : ''))),
+      ...big.map((g) => fail(`error: ${g.k} #${groupId(g)}`, describe(g))),
       ...(d.infoTotal ? [ok('error digest', `informational${fyi(d)}`)] : []),
     ];
   } catch (e) { return [fail('error digest', `error log unreachable: ${e.message}`)]; }
