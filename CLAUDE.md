@@ -128,7 +128,8 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   modified date. Unknown cnn → noindex 404; any internal failure → 503 + Retry-After + no-store (NEVER a
   302 home: that told Google the pages were gone during the Sep 2026 host move). Titles stay < 60 chars
   and unique (api/_block.test.mjs renders all of them); the "next sweeps" line makes the 200 cacheable
-  only until SF midnight. The sitemap lists enforcement ∩ baked cnns with real <lastmod>s
+  only until SF midnight, and sw.js never caches /b/ (network only; bump its CACHE name if it ever cached
+  something it shouldn't, so activate purges it). The sitemap lists enforcement ∩ baked cnns with real <lastmod>s
   (scripts/lastmod.mjs); both sitemaps are in robots.txt (which Allows /api/og for share cards).
 - /n/ pages (scripts/build-hood-pages.mjs): list every block street by street (the only inbound links
   to /b/), "Nearby" = hoods sharing a border, and the build DELETES pages it no longer generates
