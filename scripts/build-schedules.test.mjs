@@ -66,6 +66,10 @@ describe('buildBlocks', () => {
     expect(b.rows).toEqual([['West', 2, 8, 10, 5, 0], ['East', 0, 8, 10, 5, 0]]); // "Holiday" rows have no weekday
     expect(b.tag).toBe('');
   });
+  it('drops rows whose cnn is not a plain number (the /b/ handler would 404 it; it lands in hrefs)', () => {
+    const bs = buildBlocks([row({ cnn: '1"><script>x</script>' }), row({ cnn: '' }), row({ cnn: '2000.0' })]);
+    expect(bs.map((b) => b.cnn)).toEqual(['2000']);
+  });
   it('tags the two halves of a divided road by curb side so their titles differ', () => {
     const bs = buildBlocks([row({ cnn: '188101', corridor: '03rd St', limits: '18th St - 19th St' }),
       row({ cnn: '188201', corridor: '03rd St', limits: '18th St - 19th St', blockside: 'West' })]);

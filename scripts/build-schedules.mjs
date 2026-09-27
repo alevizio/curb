@@ -131,7 +131,8 @@ export function buildBlocks(rows) {
     const cnn = String(r.cnn || '').split('.')[0];
     const dow = DAY[String(r.weekday || '').trim().toLowerCase().slice(0, 3)];
     const fromH = parseInt(r.fromhour, 10);
-    if (!cnn || dow === undefined || isNaN(fromH)) continue;
+    // digits only: api/block.js serves nothing else, and the cnn lands unescaped in /n/ page hrefs
+    if (!/^\d{1,9}$/.test(cnn) || dow === undefined || isNaN(fromH)) continue;
     let toH = parseInt(r.tohour, 10); if (isNaN(toH)) toH = fromH + 2;
     let mask = 0;
     [r.week1, r.week2, r.week3, r.week4, r.week5].forEach((w, i) => { if (String(w) === '1') mask |= 1 << i; });
