@@ -103,7 +103,7 @@
      both must be visible together). Sized to the text so it reads as one tidy credit, not a boxed badge. */
   .leaflet-control-attribution img.gmlogo{height:14px;width:auto;vertical-align:-3px;margin-right:4px;filter:drop-shadow(0 0 1.5px #FFFDF6) drop-shadow(0 0 1px #FFFDF6)}
   .srh{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
-  html,body{height:100%}
+  html,body{height:100%;overscroll-behavior:none}  /* full-screen map: no rubber-band bounce of the whole page */
   body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);overflow:hidden}
   #map{position:fixed;inset:0;background:#dfe7ee;z-index:0}
   .leaflet-container{font-family:'Hanken Grotesk',sans-serif}
@@ -382,10 +382,14 @@
     transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1),max-height .28s cubic-bezier(.2,.8,.2,1);
     max-height:74dvh;overflow-y:auto}
   .sheet.open{transform:translateY(0)}
-  /* mobile: open at a peek so the map stays visible; the grab button expands */
+  /* mobile: open at a peek so the map stays visible; the grab button expands.
+     One height per state (closed keeps the height it had), so opening/closing slides at a constant size
+     and only transform animates (compositor-only, pre-promoted). Peek↔tall is a FLIP slide in JS (grabBtn).
+     Animating max-height made WebKit re-lay out the sheet every frame and change its size mid-slide:
+     the stutter + wobble in the iOS app. overscroll-behavior stops the sheet's scroll chaining into the page. */
   @media (max-width:767px){
-    .sheet.open{max-height:46dvh}
-    .sheet.open.tall{max-height:84dvh}
+    .sheet{max-height:46dvh;transition:transform .32s cubic-bezier(.2,.8,.2,1);will-change:transform;overscroll-behavior:contain}
+    .sheet.tall{max-height:84dvh}
   }
   .grab{display:block;width:74px;height:21px;padding:8px 16px;margin:0 auto 4px;border:0;background:transparent;cursor:grab}
   .grab i{display:block;width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3)}
@@ -1688,6 +1692,7 @@ function openSheet(group, activeKey){
   loadRppBlock(active.latlngs, active.mid, group.cnn);
   fillRange(group.cnn);
   const sheetEl=document.getElementById('sheet');
+  finishSheetSlide();  // settle a peek↔tall slide still in flight before changing state
   if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
     sheetEl.classList.remove('tall');
     document.getElementById('grabBtn').setAttribute('aria-expanded','false');
@@ -1703,12 +1708,35 @@ function openSheet(group, activeKey){
     }
   }catch(_){}
 }
-document.getElementById('sheetClose').onclick=()=>document.getElementById('sheet').classList.remove('open');
+document.getElementById('sheetClose').onclick=()=>{ finishSheetSlide(); document.getElementById('sheet').classList.remove('open'); };
 document.getElementById('shareBtn').innerHTML=ICONS.share;
 document.getElementById('centerBtn').innerHTML=ICONS.center;
+// Peek↔tall as a compositor-only slide (FLIP) instead of animating max-height (which re-laid out the
+// sheet every frame — janky in the iOS WKWebView). Growing: take the new height at once, start offset
+// by the difference, glide up. Shrinking: glide down at the old height (the overflow goes below the
+// screen, so no gap opens under the sheet), then settle at the peek height.
+let sheetSlideDone=null;
+function finishSheetSlide(){ if(sheetSlideDone)sheetSlideDone(); }
 document.getElementById('grabBtn').onclick=function(){
-  const tall=document.getElementById('sheet').classList.toggle('tall');
+  finishSheetSlide();
+  const s=document.getElementById('sheet'), tall=!s.classList.contains('tall');
   this.setAttribute('aria-expanded',tall);
+  const animate=s.classList.contains('open')&&parseFloat(getComputedStyle(s).transitionDuration)>0;
+  const h0=s.offsetHeight;
+  s.classList.toggle('tall',tall);
+  const d=s.offsetHeight-h0;
+  if(!animate||!d)return;
+  s.style.transition='none';
+  if(d>0){ s.style.transform=`translateY(${d}px)`; void s.offsetHeight; s.style.transition=''; s.style.transform=''; return; }
+  s.classList.add('tall'); void s.offsetHeight; s.style.transition='';
+  s.style.transform=`translateY(${-d}px)`;
+  const timer=setTimeout(()=>sheetSlideDone&&sheetSlideDone(),450);  // transitionend can be skipped
+  const onEnd=e=>{ if(e.target===s&&e.propertyName==='transform'&&sheetSlideDone)sheetSlideDone(); };
+  s.addEventListener('transitionend',onEnd);
+  sheetSlideDone=()=>{
+    sheetSlideDone=null; clearTimeout(timer); s.removeEventListener('transitionend',onEnd);
+    s.style.transition='none'; s.classList.remove('tall'); s.style.transform=''; void s.offsetHeight; s.style.transition='';
+  };
 };
 
 

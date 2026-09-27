@@ -81,8 +81,10 @@ private struct CurbWebView: UIViewRepresentable {
         webView.uiDelegate = context.coordinator
         webView.allowsBackForwardNavigationGestures = true
         webView.scrollView.isScrollEnabled = true
-        webView.scrollView.bounces = true
-        webView.scrollView.alwaysBounceVertical = true
+        // The page is a fixed full-screen map that never scrolls; bouncing only rubber-banded the whole
+        // UI (map, sheet, header) on any vertical drag. Scrollable parts (the sheet) scroll inside WebKit.
+        webView.scrollView.bounces = false
+        webView.scrollView.alwaysBounceVertical = false
         webView.scrollView.delaysContentTouches = false
         webView.scrollView.canCancelContentTouches = true
         webView.scrollView.keyboardDismissMode = .interactive
