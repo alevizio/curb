@@ -207,6 +207,19 @@ try {
   await tap(sp, '#grabBtn');
   await sleep(450);
   check('…and the grab button still expands the sheet', await sp.evaluate(() => document.getElementById('sheet').classList.contains('tall') && document.getElementById('grabBtn').getAttribute('aria-expanded') === 'true'));
+  // A Face ID iPhone adds its 34 px home-indicator inset to the sheet's bottom padding (env(safe-area-inset-bottom)
+  // is 0 in headless Chrome, so it is simulated): the row must land above that padding, not under the indicator.
+  await tap(sp, '#grabBtn');
+  await sleep(450);
+  await sp.addStyleTag({ content: '#sheet{padding-bottom:calc(20px + 34px)!important}' });
+  await sp.evaluate(() => { document.getElementById('alertOff').hidden = true; document.getElementById('sheet').scrollTop = 0; });
+  await tap(sp, '#alertBtn');
+  await sleep(700);
+  const inset = await sp.evaluate(() => {
+    const o = document.getElementById('alertOff').getBoundingClientRect(), s = document.getElementById('sheet');
+    return { bottom: Math.round(o.bottom), clear: Math.round(s.getBoundingClientRect().bottom - parseFloat(getComputedStyle(s).paddingBottom)), tall: s.classList.contains('tall') };
+  });
+  check('…and lands above the home-indicator inset (simulated 34 px)', inset.bottom <= inset.clear + 1 && !inset.tall, JSON.stringify(inset));
   await sp.evaluate(() => localStorage.removeItem('curbAlert'));
   await sp.close();
 

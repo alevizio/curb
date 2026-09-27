@@ -1682,11 +1682,12 @@ function openSheet(group, activeKey){
     document.getElementById('calICS').onclick=()=>doCal('ics');
     // "✓ Alerts on" offers the off switch instead of silently re-arming (and extending) the watch.
     // On a short phone (375x667) the row opens below the 46dvh peek, so the tap looked dead: scroll the sheet
-    // just far enough to show it. Measured from layout (offsetTop), not the rect the panelin scale-in shrinks.
+    // just far enough to show it. Measured from layout (offsetTop), not the rect the panelin scale-in shrinks,
+    // and clear of the sheet's bottom padding: it carries the home-indicator inset on Face ID iPhones.
     document.getElementById('alertBtn').onclick=e=>{
       if(alertSpotMatches(spot)){const o=document.getElementById('alertOff'), s=document.getElementById('sheet');
         o.hidden=false;
-        const below=o.offsetTop+o.offsetHeight+12-(s.scrollTop+s.clientHeight);
+        const below=o.offsetTop+o.offsetHeight+parseFloat(getComputedStyle(s).paddingBottom)-(s.scrollTop+s.clientHeight);
         if(below>0)s.scrollBy({top:below,behavior:'smooth'});
         return;}
       onAlertTap(spot,e.currentTarget);
