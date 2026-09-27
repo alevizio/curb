@@ -64,4 +64,14 @@ describe('pickParkedSpot', () => {
     expect(out.rule.weekday).toBe('Tues');
     expect(out.sideKey).toBe('L');
   });
+
+  it('carries EVERY schedule row of the chosen side as rules (multi-day sides), not the other side\'s', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 5, 15, 19, 0))); // Mon
+    const base = rowsAt(37.77, -122.45)[0];
+    const northWed = { ...base, weekday: 'Wed' }, northFri = { ...base, weekday: 'Fri' };
+    const south = { ...base, cnnrightleft: 'L', blockside: 'South', weekday: 'Thu' };
+    const out = pickParkedSpot([northFri, south, northWed], 37.77, -122.45);
+    expect(out.rule.weekday).toBe('Wed');
+    expect(out.rules.map((r) => r.weekday)).toEqual(['Fri', 'Wed']);
+  });
 });

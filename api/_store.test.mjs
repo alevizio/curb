@@ -125,6 +125,13 @@ describe('saveSub de-dupe preservation', () => {
     expect(r.spot.rule).toEqual(RULE);
     expect(r.spot.cnn).toBe('123');
   });
+
+  it('a re-tap that omits the rule also carries the side\'s full rules forward', async () => {
+    const TUE = { ...RULE, weekday: 'Tue' };
+    await saveSub(SUB, { ...spotA, rules: [RULE, TUE] });
+    await saveSub(SUB, { corridor: 'Haight St', nextSweepISO: spotA.nextSweepISO, leadMinutes: 30 });
+    expect((await rec()).spot.rules).toEqual([RULE, TUE]);
+  });
 });
 
 describe('advanceSpot', () => {

@@ -38,3 +38,62 @@ describe('recomputeSpot — forever-watch re-arm', () => {
     expect(recomputeSpot({ nextSweepISO: new Date(THIS_WED).toISOString() })).toBe(null);
   });
 });
+
+// Kansas St West (cnn 7735000) is swept Tue AND Fri 6-8; DataSF lists the Fri row first. A single
+// `rule` alerted on only one of the two days forever. 2026-10-02 is a Friday.
+const TUE = { ...RULE, weekday: 'Tue', fromhour: '9', tohour: '11' };
+const FRI = { ...RULE, weekday: 'Fri', fromhour: '9', tohour: '11' };
+
+describe('recomputeSpot — multi-rule sides', () => {
+  it('advances to the EARLIEST next sweep across rules (Tue after the Fri window, then Fri again)', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 2, 19, 0))); // Fri Oct 2, 12pm PDT (after 9-11)
+    const spot = { nextSweepISO: '2026-10-02T16:00:00.000Z', rule: FRI, rules: [FRI, TUE], leadMinutes: 30 };
+    const out = recomputeSpot(spot);
+    expect(out.nextSweepISO).toBe('2026-10-06T16:00:00.000Z'); // Tue Oct 6 9am PDT, not Fri Oct 9
+    vi.setSystemTime(new Date(Date.UTC(2026, 9, 6, 19, 0)));   // Tue after its window
+    expect(recomputeSpot(out).nextSweepISO).toBe('2026-10-09T16:00:00.000Z');
+  });
+
+  it('a legacy watch that stored the later day is corrected to the earlier one', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 3, 17, 0))); // Sat Oct 3
+    const out = recomputeSpot({ nextSweepISO: '2026-10-09T16:00:00.000Z', rule: FRI, rules: [FRI, TUE] });
+    expect(out.nextSweepISO).toBe('2026-10-06T16:00:00.000Z');
+  });
+
+  it('a rule-only (legacy) record still re-arms off its single rule', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 2, 19, 0)));
+    expect(recomputeSpot({ nextSweepISO: '2026-10-02T16:00:00.000Z', rule: FRI }).nextSweepISO).toBe('2026-10-09T16:00:00.000Z');
+  });
+
+  it('overlapping windows (Mon 7-8 then 8-10): advances to the already-started second window, which then gets no lead push', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 15, 1))); // Mon Oct 5 8:01am PDT
+    const A = { ...RULE, weekday: 'Mon', fromhour: '7', tohour: '8' }, B = { ...RULE, weekday: 'Mon', fromhour: '8', tohour: '10' };
+    const out = recomputeSpot({ nextSweepISO: '2026-10-05T14:00:00.000Z', rules: [A, B], rule: A });
+    expect(out.nextSweepISO).toBe('2026-10-05T15:00:00.000Z');
+  });
+});
+
+describe('recomputeSpot — anchors follow the shared SF-hour rule', () => {
+  const advanceTo = (fromhour) => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 5, 17, 21, 0))); // Wed 2pm PDT, all windows over
+    const r = { ...RULE, fromhour: String(fromhour), tohour: String(fromhour + 2) };
+    return recomputeSpot({ nextSweepISO: '2026-06-17T00:00:00.000Z', rule: r, eveningISO: 'x', morningISO: 'y' });
+  };
+  it('8 AM: eve 8pm the night before + morn 6am', () => {
+    const out = advanceTo(8);
+    expect(out.eveningISO).toBe('2026-06-24T03:00:00.000Z');
+    expect(out.morningISO).toBe('2026-06-24T13:00:00.000Z');
+  });
+  it('7 AM: eve but no 5am morning-of', () => {
+    const out = advanceTo(7);
+    expect(out.eveningISO).toBe('2026-06-24T03:00:00.000Z');
+    expect('morningISO' in out).toBe(false);
+  });
+  it('midnight / 2 AM (night sweeps): neither anchor — the send-time "tonight" push covers them', () => {
+    for (const h of [0, 2]) {
+      const out = advanceTo(h);
+      expect('eveningISO' in out, `${h}`).toBe(false);
+      expect('morningISO' in out, `${h}`).toBe(false);
+    }
+  });
+});

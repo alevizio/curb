@@ -31,6 +31,25 @@ export function sanitizeRule(rule) {
   };
 }
 
+// Every rule of the curb side: a quarter of SF sides are swept on several days (or on one weekday split
+// across week bits), and a single `rule` alerted on only one of them. The cron re-arms to the EARLIEST
+// next sweep across all of them. Invalid rows (e.g. weekday "Holiday", 824 real rows) are dropped one
+// by one, duplicates collapse, and the list is capped — 30 real sides have 12 distinct rules.
+export const MAX_RULES = 16;
+export function sanitizeRules(rules) {
+  if (!Array.isArray(rules)) return [];
+  const out = [], seen = new Set();
+  for (const r of rules) {
+    const c = sanitizeRule(r);
+    if (!c) continue;
+    const k = JSON.stringify(c);
+    if (seen.has(k)) continue;
+    seen.add(k); out.push(c);
+    if (out.length >= MAX_RULES) break;
+  }
+  return out;
+}
+
 // Coerce/clamp the untrusted spot into the exact shape the cron expects, or null if unusable.
 export function sanitizeSpot(spot) {
   if (!spot || typeof spot !== 'object') return null;
@@ -62,9 +81,12 @@ export function sanitizeSpot(spot) {
   // never arbitrary client text, so nothing odd can ever land in a push body.
   const tipRaw = String(spot.tip || '').trim().slice(0, 14);
   if (/^~?\d{1,2}:\d{2}\s?[ap]\.?m\.?$/i.test(tipRaw)) out.tip = tipRaw;
+  // `rule` stays for back-compat (stored watches + cached pages send only it); `rules` wins when present.
   const rule = sanitizeRule(spot.rule);
-  if (rule) {
-    out.rule = rule;
+  const rules = sanitizeRules(spot.rules);
+  if (rule || rules.length) {
+    out.rule = rule || rules[0];
+    if (rules.length) out.rules = rules;
     out.cnn = String(spot.cnn || '').replace(/[^0-9]/g, '').slice(0, 12);
     out.sideKey = t(spot.sideKey, 8);
   }

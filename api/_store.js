@@ -54,9 +54,10 @@ export async function saveSub(subscription, spot) {
     if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
       notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
       // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
-      // forever-watch to one-shot). Carry the prior rule/cnn/sideKey forward when absent.
+      // forever-watch to one-shot). Carry the prior rule(s)/cnn/sideKey forward when absent.
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
+        if (prev.spot.rules) out.rules = prev.spot.rules;
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }
@@ -150,6 +151,7 @@ export async function saveIosSub(token, spot) {
       notified = notifiedMap(prev);
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
+        if (prev.spot.rules) out.rules = prev.spot.rules;
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }

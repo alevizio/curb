@@ -42,7 +42,8 @@ function distToLine(lat, lng, coords) {
 //  1. nearest segment by centreline distance (must be within `maxM`, default 35m — else null),
 //  2. among that segment's sides/schedules, the one whose NEXT sweep is soonest (conservative:
 //     warn for the nearest upcoming sweep when we can't resolve which curb side the car is on).
-// Returns { corridor, limits, blockside, cnn, sideKey, rule, ns } or null. Pure given the clock.
+// Returns { corridor, limits, blockside, cnn, sideKey, rule, rules, ns } or null. Pure given the clock.
+// `rules` = every schedule row of the chosen curb side, so the forever-watch covers all its sweep days.
 export function pickParkedSpot(rows, lat, lng, maxM = 35) {
   if (!Array.isArray(rows) || !rows.length) return null;
   let bestCnn = null, bestDist = Infinity;
@@ -60,14 +61,17 @@ export function pickParkedSpot(rows, lat, lng, maxM = 35) {
   }
   if (!chosen || !chosenNs) return null;
   const bit = (v) => (String(v) === '1' ? '1' : '0');
+  const ruleOf = (r) => ({
+    weekday: r.weekday, fromhour: r.fromhour, tohour: r.tohour,
+    week1: bit(r.week1), week2: bit(r.week2), week3: bit(r.week3),
+    week4: bit(r.week4), week5: bit(r.week5), holidays: bit(r.holidays),
+  });
+  const side = (r) => r.blockside || r.cnnrightleft || '';
   return {
     corridor: chosen.corridor || '', limits: chosen.limits || '', blockside: chosen.blockside || '',
     cnn: String(bestCnn), sideKey: String(chosen.cnnrightleft || ''),
-    rule: {
-      weekday: chosen.weekday, fromhour: chosen.fromhour, tohour: chosen.tohour,
-      week1: bit(chosen.week1), week2: bit(chosen.week2), week3: bit(chosen.week3),
-      week4: bit(chosen.week4), week5: bit(chosen.week5), holidays: bit(chosen.holidays),
-    },
+    rule: ruleOf(chosen),
+    rules: sideRows.filter((r) => side(r) === side(chosen)).map(ruleOf),
     ns: chosenNs,
   };
 }

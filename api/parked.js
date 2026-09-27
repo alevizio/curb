@@ -8,6 +8,7 @@
 import webpush from 'web-push';
 import { resolveToken, claimSlot, getSub, saveSub, deleteSub, storeReady } from './_store.js';
 import { inSfBbox, polygonAround, pickParkedSpot } from './_geo.js';
+import { sanitizeRules } from './_spot.js';
 import '../lib/sweep-core.js';
 const { sfWallToInstant, fmtHour, DAYLBL } = globalThis;
 
@@ -54,7 +55,7 @@ export default async function handler(req, res) {
     const newSpot = {
       corridor: spot.corridor, limits: spot.limits, blockside: spot.blockside,
       nextSweepISO: ns.start.toISOString(), leadMinutes: 30,
-      rule: spot.rule, cnn: spot.cnn, sideKey: spot.sideKey,
+      rule: spot.rule, rules: sanitizeRules(spot.rules), cnn: spot.cnn, sideKey: spot.sideKey,
       ...(+eve < +ns.start ? { eveningISO: eve.toISOString() } : {}),
     };
     await saveSub(sub.subscription, newSpot);
