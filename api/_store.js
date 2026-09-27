@@ -35,6 +35,16 @@ function notifiedMap(rec) {
   return m;
 }
 
+// A same-sweep re-save (the page's daily silent refresh, a style change) omits an anchor the page
+// thinks is too close or past — e.g. opened at 8:05pm the night before, it sends no eveningISO — which
+// would wipe the stored anchor before the next tick sends that push. The anchors of one sweep never
+// change, and `notified` (kept on this path) stops a re-send, so keep the stored ones.
+function carryAnchors(out, prevSpot) {
+  if (!out) return;
+  if (!out.eveningISO && prevSpot.eveningISO) out.eveningISO = prevSpot.eveningISO;
+  if (!out.morningISO && prevSpot.morningISO) out.morningISO = prevSpot.morningISO;
+}
+
 /** True once the store env vars are present (used to fail loudly instead of silently). */
 export function storeReady() {
   return Boolean(URL_ && TOKEN);
@@ -61,6 +71,7 @@ export async function saveSub(subscription, spot) {
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }
+      carryAnchors(out, prev.spot);
     }
   } catch { /* best effort — worst case is one duplicate push */ }
   // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
@@ -173,6 +184,7 @@ export async function saveIosSub(token, spot) {
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }
+      carryAnchors(out, prev.spot);
     }
   } catch { /* best effort — worst case is one duplicate push */ }
   const record = { token, spot: out, notified, savedAt: Date.now(), platform: 'ios' };

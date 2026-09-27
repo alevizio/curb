@@ -20,7 +20,7 @@ vi.mock('@upstash/redis', () => ({
   },
 }));
 
-const { saveSub, advanceSpot, markNotified, loadAllSubs, getSub,
+const { saveSub, saveIosSub, advanceSpot, markNotified, loadAllSubs, getSub,
   saveToken, resolveToken, deleteTokensForEndpoint,
   ensureOwnerProof, verifyOwnerProof, claimSlot } = await import('./_store.js');
 
@@ -131,6 +131,22 @@ describe('saveSub de-dupe preservation', () => {
     await saveSub(SUB, { ...spotA, rules: [RULE, TUE] });
     await saveSub(SUB, { corridor: 'Haight St', nextSweepISO: spotA.nextSweepISO, leadMinutes: 30 });
     expect((await rec()).spot.rules).toEqual([RULE, TUE]);
+  });
+
+  it('a same-sweep re-save that omits the eve/morning anchors keeps the stored ones (8:05pm refresh)', async () => {
+    const eve = '2026-06-17T03:00:00.000Z', morn = '2026-06-17T13:00:00.000Z';
+    await saveSub(SUB, { ...spotA, eveningISO: eve, morningISO: morn });
+    await saveSub(SUB, { ...spotA, level: 'intense' }); // the page dropped anchors it judged too close
+    expect((await rec()).spot).toMatchObject({ eveningISO: eve, morningISO: morn, level: 'intense' });
+    await saveSub(SUB, { ...spotB });                    // a different sweep never inherits them
+    expect((await rec()).spot.eveningISO).toBe(undefined);
+  });
+
+  it('iOS: the same anchor carry-forward on a same-sweep re-save', async () => {
+    const eve = '2026-06-17T03:00:00.000Z', tok = 'ab'.repeat(32);
+    await saveIosSub(tok, { ...spotA, eveningISO: eve });
+    await saveIosSub(tok, { ...spotA, voice: 'drill' });
+    expect(JSON.parse(mem['curb:apns'][tok]).spot).toMatchObject({ eveningISO: eve, voice: 'drill' });
   });
 });
 
