@@ -349,16 +349,25 @@ private struct CurbWebView: UIViewRepresentable {
           if (!window.webkit || !window.webkit.messageHandlers || !window.webkit.messageHandlers.curbPush) return;
           window.__curbNativePush = true;
           var resolveFn = null;
-          window.__curbNativePushResult = function (ok, msg) {
-            if (resolveFn) resolveFn({ ok: ok, message: msg });
+          // r = { ok, status, message, reason } — see PushBridge.resolve.
+          window.__curbNativePushResult = function (r) {
+            if (resolveFn) resolveFn(r || { ok: false, status: 0, message: 'no-result', reason: 'no-result' });
             resolveFn = null;
           };
-          window.__curbRequestPush = function (spot) {
+          function requestPush(spot) {
             return new Promise(function (resolve) {
               resolveFn = resolve;
               window.webkit.messageHandlers.curbPush.postMessage({ spot: spot || null });
-            }).then(function (r) { return !!(r && r.ok); });
+            });
+          }
+          // Legacy contract (pages that do .then(ok => ...)): a plain boolean, as in builds <= 6.
+          window.__curbRequestPush = function (spot) {
+            return requestPush(spot).then(function (r) { return !!(r && r.ok); });
           };
+          // Detailed contract: resolves { ok, status, message, reason } so the page can tell
+          // "couldn't save, try again" (status = HTTP code, message = server error) from a permission
+          // problem (reason 'denied' / 'denied-settings'). Feature-detect it; fall back to the boolean.
+          window.__curbRequestPushDetail = requestPush;
           // Fire a one-off TEST push to this device (fire-and-forget) so the user can feel the cadence.
           window.__curbTestPush = function (opts) {
             window.webkit.messageHandlers.curbPush.postMessage({ test: true, opts: opts || {} });
@@ -967,22 +976,33 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
         req.httpBody = data
         Task { @MainActor in
             do {
-                let (_, resp) = try await URLSession.shared.data(for: req)
-                let ok = (resp as? HTTPURLResponse).map { (200...299).contains($0.statusCode) } ?? false
-                self.resolve(ok, ok ? "saved" : "save-failed")
+                let (body, resp) = try await URLSession.shared.data(for: req)
+                let status = (resp as? HTTPURLResponse)?.statusCode ?? 0
+                let ok = (200...299).contains(status)
+                // Pass the server's reason through (e.g. 429 "slow down", 503 store down) so the page can
+                // say "couldn't save, try again" instead of blaming notification permissions.
+                let json = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
+                let serverMsg = (json?["note"] as? String) ?? (json?["error"] as? String) ?? (ok ? "saved" : "HTTP \(status)")
+                self.resolve(ok, ok ? "saved" : "save-failed", message: serverMsg, status: status)
             } catch {
-                self.resolve(false, "save-failed")
+                self.resolve(false, "save-failed", message: error.localizedDescription)
             }
         }
     }
 
-    func didFailRegistration(_ message: String) { resolve(false, message) }
+    func didFailRegistration(_ message: String) { resolve(false, "registration-failed", message: message) }
 
-    private func resolve(_ ok: Bool, _ msg: String) {
+    /// Resolves the page's pending promise with { ok, status, message, reason }: `reason` is a stable code
+    /// (saved, test-sent, denied, denied-settings, timeout, save-failed, registration-failed, no-spot, encode),
+    /// `message` the server's / system's own words (defaults to the reason), `status` the save call's HTTP
+    /// status (0 when no request was made or it never got a response).
+    private func resolve(_ ok: Bool, _ reason: String, message: String? = nil, status: Int = 0) {
         registrationTimeout?.cancel()
         registrationTimeout = nil
-        let safe = msg.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "'", with: "\\'")
-        webView?.evaluateJavaScript("window.__curbNativePushResult && window.__curbNativePushResult(\(ok ? "true" : "false"), '\(safe)');")
+        let result: [String: Any] = ["ok": ok, "reason": reason, "message": String((message ?? reason).prefix(300)), "status": status]
+        guard let data = try? JSONSerialization.data(withJSONObject: result),
+              let json = String(data: data, encoding: .utf8) else { return }
+        webView?.evaluateJavaScript("window.__curbNativePushResult && window.__curbNativePushResult(\(json));")
     }
 }
 
