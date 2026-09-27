@@ -10,6 +10,18 @@
       "maxDuration": 60
     }
   },
+  "redirects": [
+    {
+      "source": "/n/presidio",
+      "destination": "/n/",
+      "statusCode": 301
+    },
+    {
+      "source": "/n/golden-gate-park",
+      "destination": "/n/",
+      "statusCode": 301
+    }
+  ],
   "rewrites": [
     {
       "source": "/config.js",

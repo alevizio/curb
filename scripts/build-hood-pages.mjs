@@ -12,17 +12,17 @@
 //
 // Run: npm run build:hoodpages   (Node 18+, no deps)
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
+import { slug, pagedHoods } from '../lib/hoods.js';   // MIN_TICKETS floor lives there (shared with /b/ links)
+import { schedShort } from '../api/block.js';         // same schedule wording as the /b/ pages
 
 const ROOT = new URL('../', import.meta.url);
 const stats = JSON.parse(readFileSync(new URL('data/stats.json', ROOT), 'utf8'));
 
-const MIN_TICKETS = 1500;   // editorial floor — below this a hood page is too thin to be useful
 const FINE = 105;           // current SF street-cleaning fine (2026)
 const DOW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DOW_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const slug = (h) => h.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // Safe to embed in <script type="application/ld+json">: \u-escape the HTML/script delimiters so a
 // neighborhood/street name containing < > & (or a literal </script>) can't break out of the element.
@@ -123,9 +123,62 @@ const peakFromArr = (arr) => arr.reduce((best, n, i) => (n > best.n ? { i, n } :
 const peakFromList = (list, key) => list.reduce((best, r) => (+r.n > best.n ? { i: +r[key], n: +r.n } : best), { i: 0, n: -1 });
 
 // pick + rank the hoods
-const all = (stats.hoods || []).filter((h) => h.n >= MIN_TICKETS && slug(h.hood));
+const all = pagedHoods(stats);
 all.forEach((h, i) => (h.rank = i + 1));
 const hoods = all; // already sorted desc by n in stats.json
+
+// Every swept block per hood (data/schedules.json, build:schedules) — the /n/ → /b/ crawl path (the
+// ~10k block pages had no inbound links) and the "find my block" list for people.
+const SCHED = JSON.parse(readFileSync(new URL('data/schedules.json', ROOT), 'utf8'));
+const BLOCKS = new Map();
+for (const [cnn, e] of Object.entries(SCHED.b)) {
+  const h = SCHED.hoods[e[3]];
+  if (h) (BLOCKS.get(h[1]) || BLOCKS.set(h[1], []).get(h[1])).push([cnn, e]);
+}
+const natural = new Intl.Collator('en', { numeric: true }); // 2nd Ave before 10th Ave
+const blocksSection = (name, sl) => {
+  const list = BLOCKS.get(sl) || [];
+  if (!list.length) return '';
+  const byStreet = new Map();
+  for (const b of list) (byStreet.get(b[1][0]) || byStreet.set(b[1][0], []).get(b[1][0])).push(b);
+  const li = ([cnn, e]) => {
+    const span = e[1] && e[2] ? `${e[1]} – ${e[2]}` : e[1] ? `at ${e[1]}` : '';
+    return `<li><a href="/b/${cnn}">${esc([span, e[7]].filter(Boolean).join(' · ') || 'Whole street')}</a><span>${esc(schedShort(e[4]))}</span></li>`;
+  };
+  const streets = [...byStreet].sort((x, y) => natural.compare(x[0], y[0])).map(([st, bs]) =>
+    `<details><summary>${esc(st)} <span>${bs.length} block${bs.length > 1 ? 's' : ''}</span></summary><ul>${bs.sort((x, y) => +x[0] - +y[0]).map(li).join('')}</ul></details>`);
+  return `
+  <section>
+    <div class="sec-k">Every swept block · ${num(list.length)} in ${esc(name)}</div>
+    <h2>Street cleaning, <b>block by block</b></h2>
+    <p class="lede">Every swept street in ${esc(name)} — open one for its blocks, then a block for its posted days and times, the next sweep dates and when tickets actually land.</p>
+    <div class="blocks">
+      ${streets.join('\n      ')}
+    </div>
+  </section>`;
+};
+
+// "Nearby" = neighborhoods that share a border (common vertices in data/neighborhoods.geojson),
+// longest border first; hoods with few paged neighbors (coast, parks) are topped up by distance.
+const GEO = JSON.parse(readFileSync(new URL('data/neighborhoods.geojson', ROOT), 'utf8'));
+const SHAPE = new Map(GEO.features.map((f) => {
+  const pts = (f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates]).flat(2);
+  const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length, cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+  return [slug(f.properties.nhood), { verts: new Set(pts.map((p) => p[0].toFixed(5) + ',' + p[1].toFixed(5))), cx, cy }];
+}));
+const nearby = (h) => {
+  const me = SHAPE.get(slug(h.hood));
+  if (!me) return hoods.filter((x) => x !== h).sort((a, b) => Math.abs(a.rank - h.rank) - Math.abs(b.rank - h.rank)).slice(0, 6);
+  const c = hoods.filter((x) => x !== h && SHAPE.has(slug(x.hood))).map((x) => {
+    const o = SHAPE.get(slug(x.hood));
+    let shared = 0;
+    for (const v of o.verts) if (me.verts.has(v)) shared++;
+    return { x, shared, dist: Math.hypot((o.cx - me.cx) * Math.cos((me.cy * Math.PI) / 180), o.cy - me.cy) };
+  });
+  const border = c.filter((o) => o.shared >= 2).sort((a, b) => b.shared - a.shared);
+  const rest = c.filter((o) => o.shared < 2).sort((a, b) => a.dist - b.dist);
+  return [...border, ...rest.slice(0, Math.max(0, 4 - border.length))].slice(0, 8).map((o) => o.x);
+};
 
 const CSS = `
 *{box-sizing:border-box;margin:0;padding:0}
@@ -194,6 +247,14 @@ h2 b{color:var(--red-text)}
 ul.streets{list-style:none;margin-top:6px;display:grid;gap:8px}
 ul.streets li{display:flex;justify-content:space-between;gap:12px;border-bottom:1.5px dashed rgba(23,21,15,.2);padding-bottom:7px;font-weight:700}
 ul.streets li .n{color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.blocks{columns:2 300px;column-gap:26px;margin-top:14px}
+.blocks details{break-inside:avoid;border-bottom:1.5px dashed rgba(23,21,15,.2);padding:9px 0}
+.blocks summary{font-weight:800;cursor:pointer}
+.blocks summary span{font-size:13px;font-weight:700;color:var(--ink-soft)}
+.blocks ul{list-style:none;display:grid;gap:6px;margin:8px 0 4px}
+.blocks li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;font-size:14px}
+.blocks li a{font-weight:700;text-underline-offset:3px}
+.blocks li span{font-size:13px;font-weight:600;color:var(--ink-soft)}
 .faq{margin-top:10px}
 .faq details{border:2.5px solid var(--ink);border-radius:13px;background:var(--sign);box-shadow:3px 3px 0 var(--ink);padding:14px 18px;margin-top:12px}
 .faq summary{font-family:'Anton',sans-serif;font-size:19px;text-transform:uppercase;cursor:pointer;letter-spacing:.01em}
@@ -407,10 +468,8 @@ function renderHood(h, idx) {
   ];
   const faqHtml = faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${mdBold(f.a)}</p></details>`).join('\n      ');
 
-  // related hoods: neighbors by rank (prev/next a few) — keeps internal links relevant
-  const related = hoods.filter((x) => x.hood !== h.hood)
-    .sort((a, b) => Math.abs(a.rank - h.rank) - Math.abs(b.rank - h.rank)).slice(0, 6);
-  const relatedHtml = related.map(hoodCard).join('\n    ');
+  // related hoods: the ones that border this one on the map
+  const relatedHtml = nearby(h).map(hoodCard).join('\n    ');
 
   // JSON-LD: FAQPage + Dataset + BreadcrumbList (jsonLd() \u-escapes script delimiters)
   const jsonld = jsonLd({
@@ -485,6 +544,7 @@ function renderHood(h, idx) {
 
   ${parkingSection(name, ENRICH[sl])}
   ${mapEmbed(name)}
+${blocksSection(name, sl)}
 
   <section>
     <div class="sec-k">When tickets happen${isHoodTiming ? ` in ${esc(name)}` : ' (citywide)'}</div>
@@ -588,6 +648,11 @@ for (let i = 0; i < hoods.length; i++) {
   written++;
 }
 writeFileSync(new URL('n/index.html', ROOT), renderIndex());
+// a page this build no longer writes (its hood fell under the floor) is deleted, not left live with
+// stale numbers; vercel.json 301s retired slugs to /n/
+const keep = new Set(['index.html', ...hoods.map((h) => `${slug(h.hood)}.html`)]);
+const removed = readdirSync(new URL('n/', ROOT)).filter((f) => f.endsWith('.html') && !keep.has(f));
+for (const f of removed) unlinkSync(new URL(`n/${f}`, ROOT));
 
 // ---- refresh sitemap.xml ----
 const today = (stats._meta?.generated || new Date().toISOString()).slice(0, 10);
@@ -613,4 +678,4 @@ ${[...staticUrls, ...hoodUrls].map(([loc, freq, pri]) => `  <url>
 writeFileSync(new URL('sitemap.xml', ROOT), sitemap);
 
 const usingDetail = Object.keys(detail).length > 0;
-console.error(`[hoodpages] wrote ${written} hood pages + index + sitemap (${5 + hoodUrls.length} urls). per-hood detail: ${usingDetail ? 'YES' : 'NO (citywide fallback)'}`);
+console.error(`[hoodpages] wrote ${written} hood pages + index + sitemap (${5 + hoodUrls.length} urls). per-hood detail: ${usingDetail ? 'YES' : 'NO (citywide fallback)'}${removed.length ? `. deleted stale: ${removed.join(', ')}` : ''}`);
