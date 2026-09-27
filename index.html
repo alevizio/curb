@@ -1837,9 +1837,20 @@ function armedToast(spot,prev){
 // resolver, so an overlapping second call would strand the first. The 60 s cap only unsticks the queue
 // if the app never answers: a first arm waits on the iOS permission prompt (the app's own 15 s timeout
 // starts after it), and a shorter cap reported slow readers as failures while their watch saved anyway.
-let _nativeMsg='', _nativeQ=Promise.resolve();
+let _nativeMsg='', _nativeQ=Promise.resolve(), _nativeWait=null;
 if(typeof window.__curbNativePushResult==='function'){const _o=window.__curbNativePushResult;
-  window.__curbNativePushResult=function(ok,msg){_nativeMsg=String(msg||'');return _o.apply(this,arguments);};}
+  window.__curbNativePushResult=function(ok,msg){_nativeMsg=String(msg||'');
+    if(_nativeWait){const w=_nativeWait;_nativeWait=null;w();}
+    return _o.apply(this,arguments);};}
+// A test push is a native call too: sent mid-save, the app answers the save's promise with "test-sent"
+// and drops the save (a style change that never lands). It takes its turn and holds the queue until the
+// app answers it.
+function nativeTest(opts){
+  const p=_nativeQ.then(()=>new Promise(res=>{_nativeWait=res;setTimeout(res,60000);window.__curbTestPush(opts);}))
+    .catch(()=>{}).then(()=>{_nativeWait=null;});
+  _nativeQ=p;
+  return p;
+}
 function nativePush(spot){
   const p=_nativeQ.then(()=>{_nativeMsg='';
     return Promise.race([Promise.resolve(window.__curbRequestPush(spot)),new Promise(r=>setTimeout(()=>r({ok:false,message:'timeout'}),60000))]);})
@@ -2004,7 +2015,7 @@ function refreshWatch(spot){
 // Send a real test push to THIS device so you can feel the chosen cadence + voice on your lock screen.
 async function sendTestPush(spot){
   if(window.__curbNativePush){
-    if(typeof window.__curbTestPush==='function'){ try{window.__curbTestPush({level:spot.level,voice:spot.voice,which:'all',spot});}catch(_){ } toast('Sending a test — check your lock screen. 🔔'); }
+    if(typeof window.__curbTestPush==='function'){ nativeTest({level:spot.level,voice:spot.voice,which:'all',spot}); toast('Sending a test — check your lock screen. 🔔'); }
     else toast('Update the app from TestFlight to test on iPhone — your alerts still work.');
     return;
   }

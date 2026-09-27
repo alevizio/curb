@@ -24,8 +24,12 @@ function installFakes(native) {
   window.__reports = [];
   const sub = { endpoint: 'https://fcm.googleapis.com/fcm/send/test-endpoint', options: {}, toJSON() { return { endpoint: this.endpoint, keys: { p256dh: 'p256', auth: 'auth-secret' } }; } };
   if (native) {
-    window.__nativeMode = 'saved'; window.__nativePosts = [];
-    window.webkit = { messageHandlers: { curbPush: { postMessage: (m) => { window.__nativePosts.push(JSON.parse(JSON.stringify(m))); setTimeout(() => window.__curbNativePushResult(window.__nativeMode === 'saved', window.__nativeMode), 30); } } } };
+    window.__nativeMode = 'saved'; window.__nativePosts = []; window.__nativeLog = []; window.__nativeDelay = 30;
+    window.webkit = { messageHandlers: { curbPush: { postMessage: (m) => {
+      window.__nativePosts.push(JSON.parse(JSON.stringify(m))); window.__nativeLog.push('post:' + (m.test ? 'test' : 'save'));
+      const [ok, msg] = m.test ? [true, 'test-sent'] : [window.__nativeMode === 'saved', window.__nativeMode];
+      setTimeout(() => { window.__nativeLog.push('answer:' + msg); window.__curbNativePushResult(ok, msg); }, window.__nativeDelay);
+    } } } };
     (function () {
       if (!window.webkit || !window.webkit.messageHandlers || !window.webkit.messageHandlers.curbPush) return;
       window.__curbNativePush = true;
@@ -35,6 +39,7 @@ function installFakes(native) {
         return new Promise(function (resolve) { resolveFn = resolve; window.webkit.messageHandlers.curbPush.postMessage({ spot: spot || null }); })
           .then(function (r) { return !!(r && r.ok); });
       };
+      window.__curbTestPush = function (opts) { window.webkit.messageHandlers.curbPush.postMessage({ test: true, opts: opts || {} }); };
     })();
   } else {
     Object.defineProperty(Notification, 'permission', { get: () => 'granted' });
@@ -179,6 +184,16 @@ try {
   await tap(np, '#alertBtn');
   await sleep(400);
   check('iOS saved: "✓ Alerts on" + rules posted through the bridge', (await text(np, '#alertBtn')) === '✓ Alerts on' && (await np.evaluate(() => window.__nativePosts.at(-1).spot.rules.length)) === 2);
+  // "Send me a test" right after a style change: the app tracks ONE pending call, so a test posted while
+  // the style save is in flight would answer it "test-sent" and drop it. The test must wait its turn.
+  await np.evaluate(() => { window.__nativeDelay = 300; window.__nativeLog.length = 0; });
+  await tap(np, '[data-k="curbAlertVoice"] button[data-v="deadpan"]');
+  await sleep(750); // past the 600 ms style debounce: the save is in flight for 300 ms
+  await tap(np, '#testPushBtn');
+  await sleep(1000);
+  const nlog = await np.evaluate(() => window.__nativeLog.join(' '));
+  check('iOS: a test tapped mid-save waits for the save\'s answer', nlog === 'post:save answer:saved post:test answer:test-sent' && (await ls(np, 'curbAlertVoice')) === 'deadpan', nlog);
+  await np.evaluate(() => { window.__nativeDelay = 30; });
   await tap(np, '#alertBtn');
   await tap(np, '#alertOffYes');
   await sleep(400);
