@@ -1,7 +1,8 @@
 # Monthly refresh of the precomputed data assets (data/*.json).
 #
 # Rebuilds the citywide overview, meter/loading zones, white (passenger/loading) curb
-# zones, and the /tickets stats from their live sources,
+# zones, the /tickets stats, and the baked block schedules (data/schedules.json, which the
+# /b/ pages read instead of calling DataSF) from their live sources,
 # validates the shapes (scripts/validate-data.mjs — fails loudly if a Socrata/ArcGIS
 # source changed), and commits only if something actually changed. The commit pushes
 # to main, which Vercel auto-deploys.
@@ -47,6 +48,7 @@ jobs:
           npm run build:zones
           npm run build:whitezones
           npm run build:stats
+          npm run build:schedules
 
       - name: Validate shapes (fail loudly on source drift)
         run: npm run validate:data

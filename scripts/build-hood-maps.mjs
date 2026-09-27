@@ -72,7 +72,7 @@ const inPoly = (x, y, rings) => {                   // rings[0]=outer, rest=hole
 };
 
 // normalize a GeoJSON feature to { name, polys:[rings...], bbox:[mnLng,mnLat,mxLng,mxLat] }
-const toHood = (f) => {
+export const toHood = (f) => {
   const g = f.geometry;
   const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
   let mnLng = 180, mnLat = 90, mxLng = -180, mxLat = -90;
@@ -83,7 +83,7 @@ const toHood = (f) => {
   return { name: f.properties.nhood, polys, bbox: [mnLng, mnLat, mxLng, mxLat] };
 };
 
-const hoodAt = (lng, lat, hoods) => {
+export const hoodAt = (lng, lat, hoods) => {
   for (const h of hoods) {
     const [a, b, c, d] = h.bbox;
     if (lng < a || lng > c || lat < b || lat > d) continue;
@@ -113,28 +113,30 @@ const renderAmber = (segs) => {
   return { vb: `0 0 ${W} ${H}`, d };
 };
 
-// ---- main ----
-const gj = await loadNeighborhoods();
-const hoods = gj.features.map(toHood);
-const ov = JSON.parse(readFileSync(new URL('data/overview.json', ROOT), 'utf8'));
+// ---- main ---- (only when run directly — build-schedules.mjs imports toHood/hoodAt)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const gj = await loadNeighborhoods();
+  const hoods = gj.features.map(toHood);
+  const ov = JSON.parse(readFileSync(new URL('data/overview.json', ROOT), 'utf8'));
 
-const segsByHood = new Map();
-let assigned = 0;
-for (const b of ov.b) {
-  const mLng = (b[0] + b[2]) / 2, mLat = (b[1] + b[3]) / 2;
-  const name = hoodAt(mLng, mLat, hoods);
-  if (!name) continue;
-  assigned++;
-  (segsByHood.get(name) || segsByHood.set(name, []).get(name)).push({ a: [b[0], b[1]], b: [b[2], b[3]] });
-}
+  const segsByHood = new Map();
+  let assigned = 0;
+  for (const b of ov.b) {
+    const mLng = (b[0] + b[2]) / 2, mLat = (b[1] + b[3]) / 2;
+    const name = hoodAt(mLng, mLat, hoods);
+    if (!name) continue;
+    assigned++;
+    (segsByHood.get(name) || segsByHood.set(name, []).get(name)).push({ a: [b[0], b[1]], b: [b[2], b[3]] });
+  }
 
-const maps = {};
-const thin = [];
-for (const h of hoods) {
-  const segs = segsByHood.get(h.name) || [];
-  if (segs.length < 8) { thin.push(`${h.name} (${segs.length})`); }
-  maps[slug(h.name)] = { ...renderAmber(segs.length ? segs : [{ a: [h.bbox[0], h.bbox[1]], b: [h.bbox[2], h.bbox[3]] }]), blocks: segs.length, bbox: h.bbox.map((n) => +n.toFixed(5)) };
+  const maps = {};
+  const thin = [];
+  for (const h of hoods) {
+    const segs = segsByHood.get(h.name) || [];
+    if (segs.length < 8) { thin.push(`${h.name} (${segs.length})`); }
+    maps[slug(h.name)] = { ...renderAmber(segs.length ? segs : [{ a: [h.bbox[0], h.bbox[1]], b: [h.bbox[2], h.bbox[3]] }]), blocks: segs.length, bbox: h.bbox.map((n) => +n.toFixed(5)) };
+  }
+  writeFileSync(new URL('data/hood-maps.json', ROOT), JSON.stringify(maps));
+  console.log(`[hood-maps] assigned ${assigned}/${ov.b.length} blocks → ${Object.keys(maps).length} hood snapshots`);
+  if (thin.length) console.log(`[hood-maps] sparse hoods (parks/islands): ${thin.join(', ')}`);
 }
-writeFileSync(new URL('data/hood-maps.json', ROOT), JSON.stringify(maps));
-console.log(`[hood-maps] assigned ${assigned}/${ov.b.length} blocks → ${Object.keys(maps).length} hood snapshots`);
-if (thin.length) console.log(`[hood-maps] sparse hoods (parks/islands): ${thin.join(', ')}`);
