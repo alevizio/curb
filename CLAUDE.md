@@ -128,7 +128,8 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   modified date. Unknown cnn → noindex 404; any internal failure → 503 + Retry-After + no-store (NEVER a
   302 home: that told Google the pages were gone during the Sep 2026 host move). Titles stay < 60 chars
   and unique (api/_block.test.mjs renders all of them); the "next sweeps" line makes the 200 cacheable
-  only until SF midnight. The sitemap lists every baked cnn (all ~12k swept blocks) with real <lastmod>s
+  only until SF midnight, and sw.js never caches /b/ (network only; bump its CACHE name if it ever cached
+  something it shouldn't, so activate purges it). The sitemap lists every baked cnn (all ~12k swept blocks) with real <lastmod>s
   (scripts/lastmod.mjs); both sitemaps are in robots.txt (which Allows /api/og for share cards).
 - /n/ pages (scripts/build-hood-pages.mjs): list every block street by street (the only inbound links
   to /b/), "Nearby" = hoods sharing a border, and the build DELETES pages it no longer generates
@@ -354,10 +355,17 @@ is claimed only while the watch is alive (< MAX_WATCH_AGE, web permission grante
 `curbAlertKey` values migrate by corridor|limits|blockside; a matching sheet silently re-arms once a
 day (a same-sweep re-save keeps the stored eve/morning anchors and `notified` — the sheet drops anchors
 it thinks are past, and an 8:05pm refresh used to wipe that night's eve push). Tapping "✓ Alerts on"
-offers Turn off; other blocks show "Alerts are on for <block>". The iOS bridge result may be a boolean
-or {ok,status,message}; every native call, test pushes included, goes through ONE queue (the app keeps
-one pending call); failures report `push-save-failed` / `push-off-failed` via `curbReport`. Headless
-check: `scripts/check-alerts-ui.mjs`.
+offers Turn off; other blocks show "Alerts are on for <block>". The iOS bridge comes in two shapes: build
+<= 6 calls `__curbNativePushResult(ok, msg)` and `__curbRequestPush(spot)` resolves a boolean; build 7+
+calls `__curbNativePushResult` with ONE object `{ok, reason, message, status}` (`reason` is a stable code:
+saved, denied, denied-settings, save-failed, registration-failed, timeout, …; `message` the server/iOS
+text; `status` the save's HTTP code) and adds `__curbRequestPushDetail(spot)`, which resolves that object
+(`__curbRequestPush` stays boolean). The page prefers `__curbRequestPushDetail`, classifies on `reason`
+(`denied*` → Settings guidance, never a report) and keeps the rest for reports (`ios save-failed:429 slow
+down`). Every native call, test pushes included, goes through ONE queue (the app keeps one pending call);
+failures report `push-save-failed` / `push-off-failed` via `curbReport`. Headless check:
+`scripts/check-alerts-ui.mjs` (runs build 6's bridge and build 7's real pushScript);
+`ios/page-bridge.test.mjs` runs the page's bridge code against both in vitest.
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
 VAPID_SUBJECT, CRON_SECRET, QSTASH_{CURRENT,NEXT}_SIGNING_KEY, HC_PING_URL (optional),

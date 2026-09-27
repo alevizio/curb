@@ -1108,7 +1108,7 @@ async function loadViewport(){
   try{
     const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line`
       +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
-    const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
+    const r=await fetch(url); if(!r.ok)throw new Error('HTTP '+r.status); const data=await r.json();  // the data-load report carries it
     if(my!==fetchTok)return;
     lastRows=data; segBounds=b;
     if(!data.length&&!noCovToasted){noCovToasted=true;
@@ -1681,8 +1681,15 @@ function openSheet(group, activeKey){
     document.getElementById('calGoogle').onclick=()=>doCal('google');
     document.getElementById('calICS').onclick=()=>doCal('ics');
     // "✓ Alerts on" offers the off switch instead of silently re-arming (and extending) the watch.
+    // On a short phone (375x667) the row opens below the 46dvh peek, so the tap looked dead: scroll the sheet
+    // just far enough to show it. Measured from layout (offsetTop), not the rect the panelin scale-in shrinks,
+    // and clear of the sheet's bottom padding: it carries the home-indicator inset on Face ID iPhones.
     document.getElementById('alertBtn').onclick=e=>{
-      if(alertSpotMatches(spot)){document.getElementById('alertOff').hidden=false;return;}
+      if(alertSpotMatches(spot)){const o=document.getElementById('alertOff'), s=document.getElementById('sheet');
+        o.hidden=false;
+        const below=o.offsetTop+o.offsetHeight+parseFloat(getComputedStyle(s).paddingBottom)-(s.scrollTop+s.clientHeight);
+        if(below>0)s.scrollBy({top:below,behavior:'smooth'});
+        return;}
       onAlertTap(spot,e.currentTarget);
     };
     document.getElementById('alertOffNo').onclick=()=>{document.getElementById('alertOff').hidden=true;};
@@ -1876,15 +1883,17 @@ function armedToast(spot,prev){
   const moved=prev&&alertLive(prev)&&!sameCurb(prev,spot)?' '+(prev.corridor||'Your other block')+' won\'t alert anymore.':'';
   toast('Sweep alert set for '+(spot.corridor||'this block')+what+moved);
 }
-// Native bridge: it resolves a boolean today (a newer app build may resolve {ok,status,message}); the
-// page needs the reason either way, so capture the message the app hands __curbNativePushResult (Swift
-// calls it by name) before the original resolves. Calls are serialized: the bridge keeps ONE pending
-// resolver, so an overlapping second call would strand the first. The 60 s cap only unsticks the queue
+// Native bridge, two shapes. Build <= 6: __curbRequestPush resolves a boolean and Swift calls
+// __curbNativePushResult(ok, msg), so capture msg before the original resolves. Build 7+: Swift calls it
+// with ONE object {ok,reason,message,status} and __curbRequestPushDetail resolves that object; classify on
+// its stable `reason` (message is server / iOS text) and keep status + message for reports ("save-failed:429
+// slow down"). Calls are serialized: the bridge keeps ONE pending resolver, so an overlapping second call
+// would strand the first. The 60 s cap only unsticks the queue
 // if the app never answers: a first arm waits on the iOS permission prompt (the app's own 15 s timeout
 // starts after it), and a shorter cap reported slow readers as failures while their watch saved anyway.
 let _nativeMsg='', _nativeQ=Promise.resolve(), _nativeWait=null;
 if(typeof window.__curbNativePushResult==='function'){const _o=window.__curbNativePushResult;
-  window.__curbNativePushResult=function(ok,msg){_nativeMsg=String(msg||'');
+  window.__curbNativePushResult=function(ok,msg){_nativeMsg=String(ok&&typeof ok==='object'?(ok.reason||ok.message||''):(msg||''));
     if(_nativeWait){const w=_nativeWait;_nativeWait=null;w();}
     return _o.apply(this,arguments);};}
 // A test push is a native call too: sent mid-save, the app answers the save's promise with "test-sent"
@@ -1898,8 +1907,10 @@ function nativeTest(opts){
 }
 function nativePush(spot){
   const p=_nativeQ.then(()=>{_nativeMsg='';
-    return Promise.race([Promise.resolve(window.__curbRequestPush(spot)),new Promise(r=>setTimeout(()=>r({ok:false,message:'timeout'}),60000))]);})
-    .then(r=>{const o=(r&&typeof r==='object')?r:{ok:!!r};return {ok:!!o.ok,message:String(o.message||o.status||_nativeMsg||'')};},
+    return Promise.race([Promise.resolve((window.__curbRequestPushDetail||window.__curbRequestPush)(spot)),new Promise(r=>setTimeout(()=>r({ok:false,message:'timeout'}),60000))]);})
+    .then(r=>{const o=(r&&typeof r==='object')?r:{ok:!!r};
+      const why=o.reason?o.reason+(o.status?':'+o.status:'')+(o.message&&o.message!==o.reason?' '+o.message:''):(o.message||o.status);
+      return {ok:!!o.ok,message:String(why||_nativeMsg||'')};},
       e=>({ok:false,message:String((e&&e.message)||e||'error')}));
   _nativeQ=p;
   return p;
