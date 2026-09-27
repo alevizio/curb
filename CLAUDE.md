@@ -290,7 +290,9 @@ Files now present for the push feature:
   `Upstash-Signature` JWT (official `Receiver`, raw body — so the schedule's body must be EMPTY — and the exact URL
   `https://curb.guide/api/send-notifications`) OR `Bearer CRON_SECRET`; refuses anything else.
   `?test=ios` and `GET ?status=1` (last run time/outcome/trigger, no sends) are Bearer-only.
-- Triggers — `vercel.json` has NO cron (Hobby runs crons ~once a day). PRIMARY: an Upstash QStash
+- Triggers — TWO primaries + one backup. Vercel Cron in `vercel.json` (`7,22,37,52 * * * *`, Bearer
+  CRON_SECRET sent automatically; offset from QStash so the two alternate). The team is on Vercel Pro — Hobby
+  rejects sub-daily crons, so REMOVE the `crons` block before any move to Hobby or deploys fail. PRIMARY: an Upstash QStash
   schedule, every 15 min, POST, EMPTY body (REQUIRED: on Vercel the runtime's helpers consume a
   non-empty body before the handler — `bodyParser:false` doesn't stop them — so even `{}` makes the
   signature check fail and every QStash run 401s), destination exactly the URL above; env

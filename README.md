@@ -52,7 +52,8 @@ Setup (one time):
    `CRON_SECRET`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY`, optional `HC_PING_URL`,
    plus the KV vars from step 2. The sender refuses to run unless a QStash signature or the
    CRON_SECRET bearer checks out.
-4. **Scheduler** — `vercel.json` has no cron (Vercel Hobby runs crons ~once a day).
+4. **Scheduler** — two timers plus a backup. **Vercel Cron** in `vercel.json` runs at :07/:22/:37/:52 (needs Vercel Pro;
+   remove the `crons` block before any move to Hobby, which rejects sub-daily crons).
    - **Primary: Upstash QStash** (Upstash console → QStash → Schedules): destination
      `https://curb.guide/api/send-notifications` (exactly — no query string), cron `*/15 * * * *`,
      method POST, **empty body**, retries 0-1. Copy the QStash signing keys into the two env vars above;

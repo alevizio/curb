@@ -1,7 +1,8 @@
 // Sweep-alert sender: fires a push for any saved spot with a touchpoint due now (web push + APNs).
 // Generate keys: npx web-push generate-vapid-keys
 //
-// Triggers (vercel.json has no cron — Vercel Hobby runs crons ~once a day):
+// Triggers (any one alone covers every window; overlaps are safe):
+//  - Vercel Cron (vercel.json, :07/:22/:37/:52; team on Pro) GETs with `Authorization: Bearer CRON_SECRET`.
 //  - PRIMARY: an Upstash QStash schedule POSTs here every 15 min, signed with an Upstash-Signature JWT
 //    that is verified below against the raw body and SELF_URL. QStash never holds CRON_SECRET. The
 //    schedule MUST have an EMPTY body (see rawBody below).
