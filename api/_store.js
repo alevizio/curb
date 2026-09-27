@@ -45,6 +45,22 @@ function carryAnchors(out, prevSpot) {
   if (!out.morningISO && prevSpot.morningISO) out.morningISO = prevSpot.morningISO;
 }
 
+// A save from a sheet left open since before the cron re-armed the watch (the iOS app in the
+// background, a PWA tab) still carries the sweep that has since started: older than the stored one, for
+// the SAME side and schedule. Taking it would move the watch back to that sweep until the next tick
+// re-advances it. Such a save keeps the stored spot (sweep, anchors, rules) and applies only the style
+// dials. Another side, a changed schedule or a future sweep is saved as sent.
+function staleResave(prevSpot, spot) {
+  const p = Date.parse(prevSpot.nextSweepISO), s = Date.parse(spot.nextSweepISO);
+  const sameSide = prevSpot.cnn || spot.cnn
+    ? prevSpot.cnn === spot.cnn && prevSpot.sideKey === spot.sideKey
+    : prevSpot.corridor === spot.corridor && prevSpot.limits === spot.limits && prevSpot.blockside === spot.blockside;
+  const sched = (x) => JSON.stringify(x.rules || x.rule || null);
+  return s < p && s <= Date.now() && sameSide && sched(prevSpot) === sched(spot);
+}
+const withStyle = (prevSpot, spot) =>
+  ({ ...prevSpot, ...(spot.level ? { level: spot.level } : {}), ...(spot.voice ? { voice: spot.voice } : {}) });
+
 /** True once the store env vars are present (used to fail loudly instead of silently). */
 export function storeReady() {
   return Boolean(URL_ && TOKEN);
@@ -58,12 +74,14 @@ export async function saveSub(subscription, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
   let notified = {};
-  const out = spot || null;
+  let out = spot || null;
   try {
     const v = await r.hget(KEY, subscription.endpoint);
     const prev = typeof v === 'string' ? safeParse(v) : v;
     if (prev) notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
-    if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
+    if (prev && prev.spot && spot && staleResave(prev.spot, spot)) {
+      out = withStyle(prev.spot, spot);
+    } else if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
       // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
       // forever-watch to one-shot). Carry the prior rule(s)/cnn/sideKey forward when absent.
       if (out && !out.rule && prev.spot.rule) {
@@ -169,18 +187,21 @@ export async function getSub(endpoint) {
 // field (endpoint/p256dh/auth) ever appears here, so validSubscription() never sees a hex token.
 const KEY_IOS = 'curb:apns';
 
-/** Upsert an APNs device token + its saved spot. Mirrors saveSub: keeps the de-dupe map and carries
- *  the recurrence rule/cnn/sideKey forward on a same-time re-arm when omitted. */
+/** Upsert an APNs device token + its saved spot. Mirrors saveSub: keeps the de-dupe map, carries
+ *  the recurrence rule/cnn/sideKey forward on a same-time re-arm when omitted, and applies only the
+ *  style of a stale-sheet re-save. */
 export async function saveIosSub(token, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
   let notified = {};
-  const out = spot || null;
+  let out = spot || null;
   try {
     const v = await r.hget(KEY_IOS, token);
     const prev = typeof v === 'string' ? safeParse(v) : v;
     if (prev) notified = notifiedMap(prev);
-    if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
+    if (prev && prev.spot && spot && staleResave(prev.spot, spot)) {
+      out = withStyle(prev.spot, spot);
+    } else if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
         if (prev.spot.rules) out.rules = prev.spot.rules;

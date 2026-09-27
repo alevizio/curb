@@ -3,7 +3,7 @@
 // its entries name the sweep they fired for, so re-arming, an off → on or a re-arm by the cron can't
 // double-push the same sweep, and they never block a different one — and a re-tap must not drop the
 // recurrence rule.
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 process.env.KV_REST_API_URL = 'https://fake.upstash.io';
 process.env.KV_REST_API_TOKEN = 'fake-token';
@@ -24,7 +24,7 @@ vi.mock('@upstash/redis', () => ({
 const { saveSub, saveIosSub, advanceSpot, markNotified, loadAllSubs, getSub,
   saveToken, resolveToken, deleteTokensForEndpoint,
   ensureOwnerProof, verifyOwnerProof, claimSlot,
-  disarmSub, disarmIosSub, markIosNotified, loadAllIosSubs } = await import('./_store.js');
+  disarmSub, disarmIosSub, markIosNotified, loadAllIosSubs, advanceIosSpot } = await import('./_store.js');
 const { dueAlert } = await import('../lib/notify-core.js');
 
 const SUB = { endpoint: 'https://web.push.apple.com/abc123', keys: { p256dh: 'p', auth: 'a' } };
@@ -176,6 +176,58 @@ describe('saveSub de-dupe preservation', () => {
     await saveIosSub(tok, { ...spotA, eveningISO: eve });
     await saveIosSub(tok, { ...spotA, voice: 'drill' });
     expect(JSON.parse(mem['curb:apns'][tok]).spot).toMatchObject({ eveningISO: eve, voice: 'drill' });
+  });
+});
+
+describe('a stale-sheet re-save (the sheet stayed open while the cron re-armed the watch)', () => {
+  // A side swept daily 8-10 AM. The sheet was opened Mon 9:30 during Monday's sweep, so its spot says
+  // Mon 8:00; at 10:00 the cron re-armed to Tue 8:00 and at 20:00 it sent Tuesday's eve push.
+  const DAILY = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((weekday) => ({ ...RULE, weekday }));
+  const mon = { corridor: 'Daily St', limits: 'A - B', blockside: 'North', nextSweepISO: '2026-10-26T15:00:00.000Z', leadMinutes: 30,
+    level: 'normal', voice: 'cheeky', rule: DAILY[0], rules: DAILY, cnn: '555', sideKey: 'L' };
+  const tue = { ...mon, rule: DAILY[1], nextSweepISO: '2026-10-27T15:00:00.000Z', eveningISO: '2026-10-27T03:00:00.000Z' };
+  const tok = 'ab'.repeat(32);
+  beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(Date.parse('2026-10-26T16:30:00Z'));   // Mon 9:30 PDT
+    await saveSub(SUB, mon);
+    await saveIosSub(tok, mon);
+    vi.setSystemTime(Date.parse('2026-10-27T03:00:05Z'));   // Mon 20:00 PDT: re-armed, eve sent
+    await advanceSpot(EP, tue);
+    await markNotified(EP, tue.nextSweepISO, 'eve');
+    await advanceIosSpot(tok, tue);
+    await markIosNotified(tok, tue.nextSweepISO, 'eve');
+    vi.setSystemTime(Date.parse('2026-10-27T03:30:00Z'));   // Mon 20:30 PDT
+  });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('keeps the newer stored sweep, its anchors and de-dupe, and applies only level/voice (web + iOS)', async () => {
+    await saveSub(SUB, { ...mon, level: 'intense', voice: 'drill' });
+    const r = await rec();
+    expect(r.spot).toEqual({ ...tue, level: 'intense', voice: 'drill' });
+    expect(r.notified).toEqual({ eve: tue.nextSweepISO });
+    expect(dueAlert(r.spot, r.notified, Date.parse('2026-10-27T04:00:00Z'))).toBe(null); // 21:00: no 2nd eve
+
+    await saveIosSub(tok, { ...mon, voice: 'deadpan' });
+    const i = JSON.parse(mem['curb:apns'][tok]);
+    expect(i.spot).toEqual({ ...tue, voice: 'deadpan' });
+    expect(i.notified).toEqual({ eve: tue.nextSweepISO });
+  });
+
+  it('still saves a real change as sent: another side, a changed schedule, or an earlier FUTURE sweep', async () => {
+    const other = { ...mon, cnn: '556' };
+    await saveSub(SUB, other);
+    expect((await rec()).spot).toEqual(other);
+
+    await saveSub(SUB, tue);
+    const newRules = { ...mon, rules: DAILY.slice(0, 5) };           // the city dropped the weekend
+    await saveSub(SUB, newRules);
+    expect((await rec()).spot).toEqual(newRules);
+
+    await saveSub(SUB, { ...tue, nextSweepISO: '2026-10-28T15:00:00.000Z' });
+    const earlier = { ...tue, voice: 'drill' };                        // earlier than stored, still ahead
+    await saveSub(SUB, earlier);
+    expect((await rec()).spot).toEqual(earlier);
   });
 });
 

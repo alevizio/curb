@@ -236,6 +236,28 @@ describe('de-dupe across a user\'s off → on', () => {
   });
 });
 
+describe('a style change from a sheet left open since before the re-arm', () => {
+  it('keeps the re-armed sweep and sends the night-before push once', async () => {
+    const R = (weekday) => ({ weekday, fromhour: '8', tohour: '10', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' });
+    const rules = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(R);
+    const at = (iso) => vi.setSystemTime(Date.parse(iso));
+    const stored = () => JSON.parse(mem['curb:subs'][EP]).spot;
+    // Mon 9:30 PDT, Monday's 8-10 sweep in progress: the sheet opens and arms with that sweep
+    const sheet = { corridor: 'Daily St', limits: 'A - B', blockside: 'North', nextSweepISO: '2026-10-26T15:00:00.000Z',
+      leadMinutes: 30, level: 'normal', voice: 'cheeky', rule: rules[0], rules, cnn: '555', sideKey: 'L' };
+    at('2026-10-26T16:30:00Z'); await saveSub(SUB, { ...sheet });
+    at('2026-10-26T17:00:05Z'); expect((await run(await qstash())).body.web.rearmed).toBe(1);   // 10:00 → Tue 8:00
+    at('2026-10-27T03:00:05Z'); expect((await run(await qstash())).body.web.sent).toBe(1);      // 20:00 eve push
+    at('2026-10-27T03:30:00Z'); await saveSub(SUB, { ...sheet, voice: 'drill' });               // 20:30 Voice tap
+    expect(stored()).toMatchObject({ nextSweepISO: '2026-10-27T15:00:00.000Z', eveningISO: '2026-10-27T03:00:00.000Z', voice: 'drill' });
+    for (const t of ['2026-10-27T03:45:05Z', '2026-10-27T04:00:05Z', '2026-10-27T04:15:05Z']) {
+      at(t); expect((await run(await qstash())).body.web).toMatchObject({ sent: 0, rearmed: 0 });
+    }
+    at('2026-10-27T14:30:05Z'); await run(await qstash());                                       // Tue 7:30 lead
+    expect(send.mock.calls.map(([, p]) => JSON.parse(p).title)).toEqual(['🧹 Sweep day tomorrow', '🚨 30 min — move the car']);
+  });
+});
+
 describe('web-push options', () => {
   it('lead: TTL until the sweep, high urgency, stays on screen, no Topic', async () => {
     await run(bearer());

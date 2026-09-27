@@ -359,7 +359,9 @@ sweep instant — the old instant key read "off" after the first sweep while pus
 is claimed only while the watch is alive (< MAX_WATCH_AGE, web permission granted); legacy
 `curbAlertKey` values migrate by corridor|limits|blockside; a matching sheet silently re-arms once a
 day (a same-sweep re-save keeps the stored eve/morning anchors and `notified` — the sheet drops anchors
-it thinks are past, and an 8:05pm refresh used to wipe that night's eve push). Tapping "✓ Alerts on"
+it thinks are past, and an 8:05pm refresh used to wipe that night's eve push; a save from a sheet left
+open since before the cron re-armed — same side + rules, an older sweep that has already started — keeps
+the stored spot and applies only level/voice, `staleResave` in api/_store.js). Tapping "✓ Alerts on"
 offers Turn off; other blocks show "Alerts are on for <block>". The iOS bridge result may be a boolean
 or {ok,status,message}; every native call, test pushes included, goes through ONE queue (the app keeps
 one pending call); failures report `push-save-failed` / `push-off-failed` via `curbReport`. Headless
