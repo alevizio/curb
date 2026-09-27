@@ -502,6 +502,7 @@
   .noted p{margin-top:7px;text-align:left}
   .you-dot{width:18px;height:18px;background:var(--meter);border:3px solid #fff;border-radius:50%;
     box-shadow:0 0 0 2px var(--meter),0 0 12px rgba(47,91,208,.6)}
+  .acc-ring{stroke:var(--meter);stroke-width:2;stroke-dasharray:6 5;fill:var(--meter);fill-opacity:.1}  /* coarse fix: "somewhere in here" */
 
   /* iOS "Add to Home Screen" hint (push only works once installed standalone) */
   .ios-mask{position:fixed;inset:0;z-index:800;background:rgba(23,21,15,.45);backdrop-filter:blur(2px);
@@ -946,6 +947,7 @@ let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without
 let statusOn={green:true,amber:true,red:true};  // legend toggles: show/hide curb lines by status
 let noCovToasted=false;  // out-of-coverage notice fires once per session
 let lastRows=[];     // raw sweep rows from the last viewport fetch, for redraws on filter change
+let segBounds=null;  // padded bounds that fetch covered — a point outside them isn't in segCache yet
 let rangeCache={};   // cnn -> {lo,hi} street-number range (EAS); accumulates across pans (static data)
 
 /* ---------- enforcement history (precomputed; data/enforcement.json) ---------- */
@@ -1063,7 +1065,7 @@ const SEG_CAP=2500;  // rows we are willing to pull+draw per viewport (one Socra
 let ovMode=true;     // true = the citywide overview is the active view (low zoom OR over-cap viewport)
 function enterOverviewMode(showHint){
   segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();
-  segCache=[];segCacheAll=[];rppCache=[];lastRows=[];
+  segCache=[];segCacheAll=[];rppCache=[];lastRows=[];segBounds=null;
   ovMode=true;
   const hint=document.getElementById('hint');
   hint.style.opacity=showHint?'1':'0';hint.style.visibility=showHint?'visible':'hidden';
@@ -1094,11 +1096,13 @@ async function loadViewport(){
       +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
     const r=await fetch(url); if(!r.ok)throw 0; const data=await r.json();
     if(my!==fetchTok)return;
-    lastRows=data;
+    lastRows=data; segBounds=b;
     if(!data.length&&!noCovToasted){noCovToasted=true;
       toast('No street-sweeping data here — CURB covers San Francisco.');}
     drawSegments(data);
-  }catch(e){ if(my===fetchTok){ toast("Couldn't load that area — pan and try again."); curbReport('data-load', String((e&&e.message)||e)); } }
+    tryPendingOpen();  // a locate / tap / link waiting on THIS area's rows
+  }catch(e){ if(my===fetchTok){ toast("Couldn't load that area — pan and try again."); curbReport('data-load', String((e&&e.message)||e));
+    if(pendingOpen&&b.contains([pendingOpen.lat,pendingOpen.lng]))endPendingOpen(); } }  // the fetch that should cover it failed: stop waiting
   loadRanges(poly);
   if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
   if(loadOn) drawLoadZones(); else loadLayer.clearLayers();
@@ -1912,30 +1916,101 @@ async function sendTestPush(spot){
 }
 
 /* ---------- locate / tap ---------- */
+// Live geolocation permission ('granted'|'prompt'|'denied'; '' until the Permissions API answers, or
+// where it's missing). Read synchronously on tap: getCurrentPosition must not wait on the async query.
+let geoPerm='';
+const geoPermReady=(async()=>{try{const s=await navigator.permissions.query({name:'geolocation'});
+  geoPerm=s.state; s.onchange=()=>{geoPerm=s.state;};}catch(_){}})();
+// Bumped by every explicit choice of "where" (map/curb tap, search, a new locate): a fix or block-open
+// that belongs to an older choice must never yank the map or sheet away from what the user picked since.
+let whereGen=0;
+function userPicked(){whereGen++;endPendingOpen();locBusy(false);}
+function locBusy(on){const b=document.getElementById('locate');b.classList.toggle('loading',on);
+  if(on)b.setAttribute('aria-busy','true');else b.removeAttribute('aria-busy');}
 document.getElementById('locate').onclick=()=>{
   track('locate_used');
   const btn=document.getElementById('locate');
-  if(!navigator.geolocation)return locateFail();
+  if(!navigator.geolocation)return locateFailed(0);
   if(btn.classList.contains('loading'))return;
-  btn.classList.add('loading');
-  btn.setAttribute('aria-busy','true');
-  let done=false;
-  const finish=()=>{
-    if(done)return false;
-    done=true;
-    clearTimeout(failsafe);
-    btn.classList.remove('loading');
-    btn.removeAttribute('aria-busy');
-    return true;
+  userPicked(); const gen=whereGen;
+  locBusy(true);
+  // Chrome counts a pending permission prompt INSIDE timeout (WebKit starts it after the answer), so a
+  // possible prompt gets 30 s. The iOS app uses this timeout as its native deadline, and a cold one-shot
+  // fix there takes ~10 s: at 9 s the first tap failed and only the second (served from cache) worked.
+  const app=!!window.__curbNativeGeoInstalled;
+  const timeout=app?15000:geoPerm!=='granted'?30000:9000;
+  let done=false, retried=false, placed=false, failsafe=0, panned=false;
+  // Hang guard only (a dismissed prompt can mean no callback ever), so always ABOVE the real deadline —
+  // the app adds up to 50 s of native prompt grace. Re-armed once the permission query has answered.
+  const guard=t=>t+(app?55000:geoPerm!=='granted'?20000:3000);
+  const arm=ms=>{clearTimeout(failsafe);failsafe=setTimeout(()=>{
+    if(done)return; done=true;
+    // After "try again, or tap where you parked" a pan means they're finding it by hand: a late fix
+    // must not fly the map back out from under them.
+    if(whereGen===gen){locBusy(false);locateFailed(3,'failsafe');map.once('dragstart',()=>{panned=true;});}
+  },ms);};
+  arm(guard(timeout));
+  geoPermReady.then(()=>{if(!done&&!retried)arm(guard(timeout));});
+  const settle=()=>{done=true;clearTimeout(failsafe);if(whereGen===gen)locBusy(false);};
+  const ok=p=>{
+    const late=done; if(!late)settle();
+    // A fix after the guard gave up still counts — unless the user picked another spot or panned meanwhile.
+    if(placed||whereGen!==gen||(late&&panned))return;
+    placed=true;
+    try{localStorage.setItem('curbLocOK','1');}catch(_){}
+    if(late)toast('Found you.');  // replaces the failure toast it contradicts
+    placeFix(p);
   };
-  const failsafe=setTimeout(()=>{ if(finish())locateFail(); },11000);
-  navigator.geolocation.getCurrentPosition(
-    p=>{if(!finish())return;try{localStorage.setItem('curbLocOK','1');}catch(_){}
-      placeYou(p.coords.latitude,p.coords.longitude,true);},
-    e=>{if(!finish())return;locateFail();},
-    {enableHighAccuracy:true,timeout:9000,maximumAge:30000});
+  const fail=e=>{
+    if(done)return;
+    const code=(e&&e.code)||2;
+    // One retry on TIMEOUT/UNAVAILABLE with a coarse fix: Wi-Fi/cell positioning answers in about a
+    // second where a cold GPS fix didn't (app builds ≤6 also report a transient CoreLocation "unknown"
+    // as 2). Same 30 s maximumAge — never an arbitrarily old cached spot; you may have driven since.
+    if(code!==1&&!retried&&whereGen===gen){
+      retried=true; arm(13000);
+      navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:false,timeout:10000,maximumAge:30000});
+      return;
+    }
+    settle();
+    if(whereGen===gen)locateFailed(code,(retried?'after retry ':'')+((e&&e.message)||''));
+  };
+  navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:true,timeout,maximumAge:30000});
 };
-function locateFail(){toast("Location's blocked in this preview — tap where you parked, or search a street. (Full GPS works in a browser tab.)");}
+// Copy per GeolocationPositionError code (0 = no geolocation API). Deliberately NOT named locateFail:
+// app builds ≤6 replace window.locateFail with one "allow CURB in Settings" toast for EVERY failure,
+// which told people who had just tapped Allow that location was off.
+function locateFailed(code,detail){
+  const app=!!window.__curbNativeGeoInstalled;
+  toast(code===1?(app?'Location is off for CURB — turn it on in Settings › CURB › Location, or tap where you parked.'
+      :isIOS()?'Location is blocked — allow Safari Websites in Settings › Privacy › Location Services, or tap where you parked.'
+      :"Location is blocked for this site — allow it in your browser's site settings, or tap where you parked.")
+    :code===2?"Can't find your location right now — try again, or tap where you parked."
+    :code===3?"Couldn't get a fix in time — try again, or tap where you parked."
+    :"This browser can't share your location — search a street, or tap where you parked.");
+  curbReport('locate-failed',(code?'code '+code:'unsupported')+(detail?' '+detail:''));
+}
+// Beyond this a fix can't pick a block (SF blocks are ~100–130 m long): show where, not a verdict.
+const ACC_MAX=100;
+let accRing=null;
+function placeFix(p,quiet){
+  const c=p.coords, acc=c.accuracy;
+  if(!(acc>ACC_MAX)){  // unknown (null/0/NaN) is trusted, as before
+    placeYou(c.latitude,c.longitude,true,null,quiet);
+    if(pendingOpen&&!quiet){pendingOpen.loc=true;locBusy(true);}  // stay busy until the block opens
+    return;
+  }
+  if(youMarker)map.removeLayer(youMarker);
+  if(accRing)map.removeLayer(accRing);
+  youMarker=L.marker([c.latitude,c.longitude],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
+  accRing=L.circle([c.latitude,c.longitude],{radius:acc,className:'acc-ring',interactive:false}).addTo(map);
+  map.fitBounds(accRing.getBounds(),{padding:[24,24]});  // at z17 a wide circle would sit off-screen
+  if(quiet)return;
+  const r=acc>=1000?(acc/1000).toFixed(1)+' km':Math.round(acc)+' m';
+  toast((p.curbReduced?'Precise Location is off for CURB, so this is approximate':'Your location is approximate')
+    +' (±'+r+') — tap your block, or search a street.');
+  curbReport('locate-coarse',(p.curbReduced?'reduced ':'')+'±'+(acc>=1000?Math.round(acc/1000)+'km':Math.round(acc/50)*50+'m'));
+}
 // quiet=true: center + dot only (launch auto-position) — no sheet, the user may not be at their car.
 function placeYou(lat,lng,fly,cnnHint,quiet){
   // "Where I parked" must see every curb side — a day or status filter could otherwise
@@ -1947,9 +2022,10 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
     refreshLayerBadges(); drawSegments(lastRows);
   }
   if(youMarker)map.removeLayer(youMarker);
+  if(accRing){map.removeLayer(accRing);accRing=null;}
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
   if(fly)map.flyTo([lat,lng],17,{duration:.7}); else map.setView([lat,lng],Math.max(map.getZoom(),17));
-  if(!quiet)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,0), fly?900:300);
+  if(!quiet)openWhenLoaded(lat,lng,cnnHint,fly?900:300);
 }
 
 /* Auto-position on launch — ONLY when permission is already granted, so no permission
@@ -1972,7 +2048,7 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
     if(!c||!c.length)return;
     const mid=c[Math.floor(c.length/2)];
     map.setView([mid[1],mid[0]],17);
-    setTimeout(()=>openNearestWhenReady(mid[1],mid[0],m[1],0),700);
+    openWhenLoaded(mid[1],mid[0],m[1],700);
   }catch(_){}
 })();
 
@@ -1984,29 +2060,54 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
   try{ granted=(await navigator.permissions.query({name:'geolocation'})).state==='granted'; }
   catch(_){ try{granted=localStorage.getItem('curbLocOK')==='1';}catch(_){} }
   if(!granted)return;
+  // The launch fix can land seconds later: if the user has since tapped, searched or panned, it
+  // must not yank the map back to where they're standing.
+  const gen=whereGen; let moved=false; const onDrag=()=>{moved=true;}; map.once('dragstart',onDrag);
   navigator.geolocation.getCurrentPosition(
-    p=>placeYou(p.coords.latitude,p.coords.longitude,true,null,true),
-    ()=>{},  // silent: launch convenience, never an error
-    {enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+    p=>{map.off('dragstart',onDrag); if(!moved&&whereGen===gen)placeFix(p,true);},
+    ()=>{map.off('dragstart',onDrag);},  // silent: launch convenience, never an error
+    // curbSilent: the iOS app (build 7+) never shows a permission prompt for this request.
+    {enableHighAccuracy:true,timeout:window.__curbNativeGeoInstalled?15000:8000,maximumAge:60000,curbSilent:true});
 })();
-function openNearestWhenReady(lat,lng,cnnHint,tries){
-  const n=nearestSeg(lat,lng,cnnHint);
-  if(n){openSheet(n.group,n.side.key);return;}
-  if(tries<8)setTimeout(()=>openNearestWhenReady(lat,lng,cnnHint,tries+1),250);
-  else if(cnnHint){
-    const fallback=nearestSeg(lat,lng);
-    if(fallback)openSheet(fallback.group,fallback.side.key);
-  }
+/* Open the block at a point once curb data that COVERS the point is drawn. segCache can still hold the
+   previous view's rows (a far fix opened a stale, wrong block), and the new view's fetch only starts
+   after the fly + moveend debounce and needs two Socrata round trips — so wait on loadViewport (up to
+   10 s) instead of a fixed ~2.9 s retry budget, which gave up silently on slow links. */
+const NEAR_M=80, OPEN_WAIT_MS=10000;
+let pendingOpen=null;  // {lat,lng,cnnHint,loc} — the one block-open waiting on data (loc: keeps #locate busy)
+function openWhenLoaded(lat,lng,cnnHint,delay){
+  endPendingOpen();  // one at a time: the newest placement wins
+  const po=pendingOpen={lat,lng,cnnHint,loc:false};
+  setTimeout(()=>{if(pendingOpen===po)tryPendingOpen();},delay);  // after the fly: data on hand may already cover it
+  setTimeout(()=>{
+    if(pendingOpen!==po)return;
+    if(!map.getBounds().contains([lat,lng])){endPendingOpen();return;}  // the map moved on — nothing to say
+    if(ovMode){endPendingOpen('Zoom in on your block to see its rules.');return;}
+    endPendingOpen("Couldn't load this block's rules — tap it, or pan and try again.");
+    curbReport('block-open-timeout',cnnHint?'link':po.loc?'locate':'tap');
+  },OPEN_WAIT_MS);
 }
+function tryPendingOpen(){
+  const po=pendingOpen; if(!po)return;
+  const hit=po.cnnHint&&nearestSeg(po.lat,po.lng,po.cnnHint);  // the block's own cnn can't be stale
+  if(hit)return openPending(hit);
+  if(!segBounds||!segBounds.contains([po.lat,po.lng]))return;  // not drawn for here yet — loadViewport retries
+  const n=nearestSeg(po.lat,po.lng);
+  // A search/link cnn fallback skips the cap: big parcels' address points sit >80 m from their block.
+  if(n&&(po.cnnHint||n.d<=NEAR_M))return openPending(n);
+  endPendingOpen(lastRows.length?'No swept curb within 80 m — tap your block on the map.':'No street-sweeping data here — CURB covers San Francisco.');
+}
+function openPending(n){endPendingOpen();openSheet(n.group,n.side.key);}
+function endPendingOpen(msg){const po=pendingOpen; if(!po)return; pendingOpen=null; if(po.loc)locBusy(false); if(msg)toast(msg);}
 function nearestSeg(lat,lng,cnnHint){
   const wanted=cnnHint?String(cnnHint):'';
   let pool=wanted?segCache.filter(o=>String(o.group.cnn)===wanted):segCache;
   if(wanted&&!pool.length)return null;
   let best=null,bd=Infinity;
   pool.forEach(o=>{const d=distSqToLineMeters(lat,lng,o.side.latlngs); if(d<bd){bd=d;best=o}});
-  return best;
+  return best&&{group:best.group,side:best.side,d:Math.sqrt(bd)};
 }
-map.on('click',e=>{ if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
+map.on('click',e=>{ userPicked(); if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
 
 /* ---------- day filter + today's date ---------- */
 let dayChips=[];
@@ -2412,6 +2513,7 @@ function renderSug(showEmpty){
 }
 function pickSug(i){
   const it=sugItems[i]; if(!it)return;
+  userPicked();
   document.getElementById('q').value=it.t;
   hideSug();
   if(it.kind==='addr'&&it.d&&it.d.latitude){placeYou(+it.d.latitude,+it.d.longitude,true,it.d.cnn);}
@@ -2468,6 +2570,7 @@ function normalizedAddressQuery(v){
 async function doSearch(){
   const v=document.getElementById('q').value.trim(); if(v.length<2)return;
   track('search_used');
+  userPicked();
   const addr=normalizedAddressQuery(v);
   if(addr){
     try{

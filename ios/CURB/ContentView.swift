@@ -124,10 +124,17 @@ private struct CurbWebView: UIViewRepresentable {
 
           var callbacks = {};
           var nextId = 1;
+          // Last known native CLAuthorizationStatus as a PermissionState. NOT seeded from a past success:
+          // Allow Once / Ask Next Time revert to notDetermined, and a stale 'granted' made the launch
+          // auto-locate pop the system prompt by itself. permissions.query asks native each time.
           var permissionState = 'prompt';
-          try {
-            if (localStorage.getItem('curbLocOK') === '1') permissionState = 'granted';
-          } catch (_) {}
+          var statusWaiters = [];
+          window.__curbNativeGeoStatus = function (state) {
+            if (state) permissionState = state;
+            var waiters = statusWaiters;
+            statusWaiters = [];
+            waiters.forEach(function (answer) { answer(); });
+          };
 
           function geoError(code, message) {
             return {
@@ -150,7 +157,8 @@ private struct CurbWebView: UIViewRepresentable {
                 heading: result.heading == null ? null : result.heading,
                 speed: result.speed == null ? null : result.speed
               },
-              timestamp: result.timestamp || Date.now()
+              timestamp: result.timestamp || Date.now(),
+              curbReduced: !!result.reduced   // Precise Location off: the page words its "approximate" toast
             };
           }
 
@@ -160,7 +168,6 @@ private struct CurbWebView: UIViewRepresentable {
             delete callbacks[String(id)];
             if (result && result.ok) {
               permissionState = 'granted';
-              try { localStorage.setItem('curbLocOK', '1'); } catch (_) {}
               callback.success(geoPosition(result));
             } else {
               if (result && result.code === 1) permissionState = 'denied';
@@ -210,7 +217,17 @@ private struct CurbWebView: UIViewRepresentable {
             var originalQuery = navigator.permissions.query.bind(navigator.permissions);
             navigator.permissions.query = function (descriptor) {
               if (descriptor && descriptor.name === 'geolocation') {
-                return Promise.resolve({ name: 'geolocation', state: permissionState, onchange: null });
+                return new Promise(function (resolve) {
+                  var answered = false;
+                  function answer() {
+                    if (answered) return;
+                    answered = true;
+                    resolve({ name: 'geolocation', state: permissionState, onchange: null });
+                  }
+                  statusWaiters.push(answer);
+                  setTimeout(answer, 1000);   // a lost native reply must not hang the page's launch auto-locate
+                  window.webkit.messageHandlers.curbLocation.postMessage({ type: 'status' });
+                });
               }
               return originalQuery(descriptor);
             };
@@ -284,27 +301,14 @@ private struct CurbWebView: UIViewRepresentable {
             host.insertBefore(button, host.firstChild);
             syncCurbAppRoute();
           }
-          function installCurbAppCopy() {
-            if (typeof window.locateFail !== 'function' || window.locateFail.__curbIosAppCopy) return;
-            var replacement = function () {
-              if (typeof window.toast === 'function') {
-                window.toast('Location is unavailable — allow CURB in Settings, or search/tap the map.');
-              }
-            };
-            replacement.__curbIosAppCopy = true;
-            window.locateFail = replacement;
-          }
+          // (No locate-failure copy override any more: the page words each failure itself — denied vs
+          // timeout vs unavailable — and a blanket "allow CURB in Settings" misled people who had allowed it.)
           installCurbAppChrome();
           syncCurbAppRoute();
-          installCurbAppCopy();
           document.addEventListener('DOMContentLoaded', function () {
             installCurbAppChrome();
             installCurbBackButton();
             syncCurbAppRoute();
-          }, { once: true });
-          document.addEventListener('DOMContentLoaded', function () {
-            installCurbAppCopy();
-            setTimeout(installCurbAppCopy, 500);
           }, { once: true });
         })();
         """,
@@ -347,16 +351,25 @@ private struct CurbWebView: UIViewRepresentable {
           if (!window.webkit || !window.webkit.messageHandlers || !window.webkit.messageHandlers.curbPush) return;
           window.__curbNativePush = true;
           var resolveFn = null;
-          window.__curbNativePushResult = function (ok, msg) {
-            if (resolveFn) resolveFn({ ok: ok, message: msg });
+          // r = { ok, status, message, reason } — see PushBridge.resolve.
+          window.__curbNativePushResult = function (r) {
+            if (resolveFn) resolveFn(r || { ok: false, status: 0, message: 'no-result', reason: 'no-result' });
             resolveFn = null;
           };
-          window.__curbRequestPush = function (spot) {
+          function requestPush(spot) {
             return new Promise(function (resolve) {
               resolveFn = resolve;
               window.webkit.messageHandlers.curbPush.postMessage({ spot: spot || null });
-            }).then(function (r) { return !!(r && r.ok); });
+            });
+          }
+          // Legacy contract (pages that do .then(ok => ...)): a plain boolean, as in builds <= 6.
+          window.__curbRequestPush = function (spot) {
+            return requestPush(spot).then(function (r) { return !!(r && r.ok); });
           };
+          // Detailed contract: resolves { ok, status, message, reason } so the page can tell
+          // "couldn't save, try again" (status = HTTP code, message = server error) from a permission
+          // problem (reason 'denied' / 'denied-settings'). Feature-detect it; fall back to the boolean.
+          window.__curbRequestPushDetail = requestPush;
           // Fire a one-off TEST push to this device (fire-and-forget) so the user can feel the cadence.
           window.__curbTestPush = function (opts) {
             window.webkit.messageHandlers.curbPush.postMessage({ test: true, opts: opts || {} });
@@ -511,6 +524,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     private struct PendingRequest {
         let id: String
         let timeoutMs: Int
+        let precise: Bool                         // enableHighAccuracy: wants a curb-side-grade fix
         var workItem: DispatchWorkItem?
     }
 
@@ -519,12 +533,21 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     private let locationManager = CLLocationManager()
     private var pendingRequests: [String: PendingRequest] = [:]
     private var lastLocation: CLLocation?
-    private var fixInFlight = false               // one shared requestLocation() outstanding (see requestFixIfNeeded)
+    private var updating = false                  // one shared startUpdatingLocation() serves every pending request
+    private var acquireStart = Date.distantPast   // deliveries older than this acquisition are stale cache
+    private var bestFix: CLLocation?              // most accurate fix of THIS acquisition
+    private var relaxWork: DispatchWorkItem?
+    private var askingPrecise = false             // the temporary full-accuracy sheet is up
     private static let promptGraceMs = 50_000     // extra grace so the permission prompt never trips the backstop
+    private static let preciseM: CLLocationAccuracy = 25   // good enough at once: picks the curb side
+    private static let relaxedM: CLLocationAccuracy = 65   // good enough after relaxAfterMs: still picks the block
+    private static let coarseM: CLLocationAccuracy = 100   // all an enableHighAccuracy:false request needs
+    private static let relaxAfterMs = 5_000
+    private static let precisePurposeKey = "PreciseCurb"   // Info.plist NSLocationTemporaryUsageDescriptionDictionary
 
     // THREADING: every LocationBridge access is main-thread only — WKScriptMessage delivery, the
-    // CLLocationManager delegate callbacks (the manager is created on main), and the main-queue timeout
-    // work items all serialize there, so the plain dictionaries need no extra locking.
+    // CLLocationManager delegate callbacks and completion blocks (the manager is created on main), and the
+    // main-queue timeout work items all serialize there, so the plain dictionaries need no extra locking.
 
     override init() {
         super.init()
@@ -541,35 +564,47 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         assertMain()
-        guard
-            message.name == "curbLocation",
-            let body = message.body as? [String: Any],
-            let id = body["id"] as? String
-        else {
+        guard message.name == "curbLocation", let body = message.body as? [String: Any] else {
+            return
+        }
+        if (body["type"] as? String) == "status" {   // the shim's navigator.permissions.query
+            sendStatus()
+            return
+        }
+        guard let id = body["id"] as? String else {
             return
         }
 
         let options = body["options"] as? [String: Any] ?? [:]
         let maximumAge = milliseconds(from: options["maximumAge"], fallback: 0)
-        let timeout = min(max(milliseconds(from: options["timeout"], fallback: 10_000), 1_000), 30_000)
-        let highAccuracy = options["enableHighAccuracy"] as? Bool ?? true
+        let timeout = min(max(milliseconds(from: options["timeout"], fallback: 15_000), 1_000), 30_000)
+        let precise = options["enableHighAccuracy"] as? Bool ?? true
+        // The page's launch auto-locate: it must never surface a system prompt the user didn't ask for.
+        let silent = options["curbSilent"] as? Bool ?? false
+        let status = locationManager.authorizationStatus
 
-        if let lastLocation,
-           maximumAge > 0,
+        // Register first: finish() resolves by REMOVING the entry, so a request that skipped
+        // registration would never reach send() and the JS promise would never resolve.
+        pendingRequests[id] = PendingRequest(id: id, timeoutMs: timeout, precise: precise, workItem: nil)
+
+        // Cache: only while authorized with full accuracy (an expired Allow Once must not keep serving fixes,
+        // and a reduced-accuracy one must not skip asking for precise), and only if good enough for this request.
+        if status == .authorizedWhenInUse || status == .authorizedAlways,
+           locationManager.accuracyAuthorization == .fullAccuracy,
+           let lastLocation, maximumAge > 0,
+           lastLocation.horizontalAccuracy <= (precise ? Self.relaxedM : Self.coarseM),
            Date().timeIntervalSince(lastLocation.timestamp) * 1_000 <= Double(maximumAge) {
-            // Register first: finish() resolves by REMOVING the entry, so a cache hit that skipped
-            // registration would never reach send() and the JS promise would never resolve.
-            pendingRequests[id] = PendingRequest(id: id, timeoutMs: timeout, workItem: nil)
             finish(id: id, with: lastLocation)
             return
         }
 
-        locationManager.desiredAccuracy = highAccuracy ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
-
-        pendingRequests[id] = PendingRequest(id: id, timeoutMs: timeout, workItem: nil)
-
-        switch locationManager.authorizationStatus {
+        switch status {
         case .notDetermined:
+            if silent {
+                // Not code 1: the shim would then report 'denied', which isn't true.
+                finish(id: id, code: 2, message: "Location permission not granted yet.")
+                return
+            }
             // First run: the acquisition timeout must NOT fire while the "Allow Location?" prompt is up
             // (that was the original bug — the very first locate timed out mid-prompt). But a request with
             // no timer can leak/hang forever if the prompt is abandoned or interrupted, so arm a generous
@@ -578,8 +613,19 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
             armTimeout(id: id, ms: timeout + Self.promptGraceMs)
             locationManager.requestWhenInUseAuthorization()
         case .authorizedAlways, .authorizedWhenInUse:
+            if askingPrecise {   // the full-accuracy sheet is up: wait for its answer like the others
+                armTimeout(id: id, ms: timeout + Self.promptGraceMs)
+                return
+            }
+            if precise, !silent, locationManager.accuracyAuthorization == .reducedAccuracy {
+                // Precise Location is off, so fixes are ~5 km region points that can't pick a block. Ask for
+                // full accuracy for this locate; it's a system sheet, so the deadline waits like the prompt.
+                armTimeout(id: id, ms: timeout + Self.promptGraceMs)
+                requestPreciseOnce()
+                return
+            }
             armTimeout(id: id, ms: timeout)
-            requestFixIfNeeded()
+            startAcquiring()
         case .denied, .restricted:
             finish(id: id, code: 1, message: "Location permission is off for CURB.")
         @unknown default:
@@ -587,41 +633,123 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
         }
     }
 
-    /// (Re)arm a request's timeout for `ms` from now, cancelling any prior one. The .notDetermined path
+    /// (Re)arm a request's deadline for `ms` from now, cancelling any prior one. The .notDetermined path
     /// arms a generous backstop (so the permission prompt never trips it); resolving auth re-arms the
     /// tight acquisition deadline. Every registered request always has exactly one live timer.
     private func armTimeout(id: String, ms: Int) {
         guard var pending = pendingRequests[id] else { return }
         pending.workItem?.cancel()
         let work = DispatchWorkItem { [weak self] in
-            self?.finish(id: id, code: 3, message: "Location timed out.")
+            self?.deadline(id: id)
         }
         pending.workItem = work
         pendingRequests[id] = pending
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(ms), execute: work)
     }
 
-    /// One shared one-shot fix serves every pending request (didUpdateLocations / didFailWithError fan
-    /// out to all). Guarding avoids re-issuing requestLocation() mid-flight, which iOS treats as a
-    /// cancel-and-restart and would surface as a spurious failure for overlapping locates.
-    private func requestFixIfNeeded() {
-        guard !fixInFlight else { return }
-        fixInFlight = true
-        locationManager.requestLocation()
+    /// A request's deadline: serve the best fix of this acquisition instead of failing — the page shows a
+    /// coarse one as approximate. Only having no fix at all is a timeout.
+    private func deadline(id: String) {
+        if updating, !askingPrecise, let fix = bestFix {
+            finish(id: id, with: fix)
+        } else {
+            finish(id: id, code: 3, message: "Location timed out.")
+            if pendingRequests.isEmpty { askingPrecise = false }   // a sheet that never called back must not park every later locate
+        }
+    }
+
+    /// One shared acquisition serves every pending request. startUpdatingLocation — not the one-shot
+    /// requestLocation(), which holds out ~10 s for a Best fix and so blew the page's 9 s deadline (the
+    /// first tap failed, the second got the late fix from cache) — streams fixes as they improve; each
+    /// request takes the first good-enough one, or the best of this acquisition at its deadline.
+    private func startAcquiring() {
+        locationManager.desiredAccuracy = pendingRequests.values.contains { $0.precise }
+            ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
+        if !updating {
+            updating = true
+            acquireStart = Date()
+            bestFix = nil
+            let relax = DispatchWorkItem { [weak self] in
+                self?.resolveReady()
+            }
+            relaxWork = relax
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.relaxAfterMs), execute: relax)
+            locationManager.startUpdatingLocation()
+        }
+        resolveReady()   // a request joining a running acquisition may already be satisfied
+    }
+
+    private func stopAcquiringIfIdle() {
+        guard updating, pendingRequests.isEmpty else { return }
+        updating = false
+        relaxWork?.cancel()
+        relaxWork = nil
+        locationManager.stopUpdatingLocation()   // GPS off as soon as nobody is waiting (battery)
+    }
+
+    /// Resolve every pending request the best fix so far is good enough for: curb-side grade at first,
+    /// block grade after relaxAfterMs, and anything under reduced accuracy (it won't get better).
+    private func resolveReady() {
+        guard updating, !askingPrecise, let fix = bestFix else { return }
+        let reduced = locationManager.accuracyAuthorization == .reducedAccuracy
+        let relaxed = Date().timeIntervalSince(acquireStart) * 1_000 >= Double(Self.relaxAfterMs)
+        let snapshot = pendingRequests
+        for (id, pending) in snapshot {
+            let need = reduced ? CLLocationAccuracy.greatestFiniteMagnitude
+                : pending.precise ? (relaxed ? Self.relaxedM : Self.preciseM) : Self.coarseM
+            if fix.horizontalAccuracy <= need { finish(id: id, with: fix) }
+        }
+    }
+
+    private func requestPreciseOnce() {
+        guard !askingPrecise else { return }
+        askingPrecise = true
+        // Called back granted or not (or with an error when iOS declines to show the sheet); hop to main
+        // explicitly rather than rely on the manager's run loop.
+        locationManager.requestTemporaryFullAccuracyAuthorization(withPurposeKey: Self.precisePurposeKey) { [weak self] _ in
+            DispatchQueue.main.async { self?.preciseAnswered() }
+        }
+    }
+
+    /// The full-accuracy sheet closed (or iOS declined to show it): acquire at whatever accuracy we have now.
+    private func preciseAnswered() {
+        assertMain()
+        askingPrecise = false
+        lastLocation = nil
+        let ids = Array(pendingRequests.keys)
+        guard !ids.isEmpty else { return }
+        ids.forEach { id in
+            if let ms = pendingRequests[id]?.timeoutMs { armTimeout(id: id, ms: ms) }
+        }
+        startAcquiring()
+    }
+
+    /// Tell the page the REAL authorization (the shim's permissions.query waits on this): Allow Once and
+    /// Ask Next Time read as 'prompt' once they lapse, so the launch auto-locate stays quiet.
+    private func sendStatus() {
+        let state: String
+        switch locationManager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse: state = "granted"
+        case .denied, .restricted: state = "denied"
+        default: state = "prompt"
+        }
+        webView?.evaluateJavaScript("window.__curbNativeGeoStatus && window.__curbNativeGeoStatus('\(state)');")
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         assertMain()
+        lastLocation = nil   // a fix cached under the old authorization/accuracy must not be served under the new one
+        sendStatus()
         switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             // Only act if something is actually waiting — iOS fires this once when the delegate is set,
-            // so an unconditional requestLocation() here would pull a stray fix on every launch.
+            // so an unconditional start here would pull a stray fix on every launch.
             let ids = Array(pendingRequests.keys)
-            guard !ids.isEmpty else { break }
+            guard !ids.isEmpty, !askingPrecise else { break }
             ids.forEach { id in
                 if let ms = pendingRequests[id]?.timeoutMs { armTimeout(id: id, ms: ms) }   // tighten the backstop now that we're acquiring
             }
-            requestFixIfNeeded()
+            startAcquiring()
         case .denied, .restricted:
             finishAll(code: 1, message: "Location permission is off for CURB.")
         case .notDetermined:
@@ -633,24 +761,35 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         assertMain()
-        fixInFlight = false
-        guard let location = locations.last else {
-            finishAll(code: 2, message: "Location is unavailable.")
-            return
+        guard updating else { return }
+        let reduced = manager.accuracyAuthorization == .reducedAccuracy
+        for location in locations {
+            // Skip invalid fixes (negative accuracy) and the cached delivery an acquisition often opens with:
+            // it can be minutes old, i.e. where you were before you drove and parked. (Reduced-accuracy
+            // region fixes are documented as up to 20 min old, and waiting won't bring a fresher one.)
+            guard location.horizontalAccuracy >= 0,
+                  reduced || location.timestamp.timeIntervalSince(acquireStart) >= -2 else { continue }
+            if let best = bestFix, best.horizontalAccuracy < location.horizontalAccuracy { continue }
+            bestFix = location
         }
-        lastLocation = location
-        let requestIds = Array(pendingRequests.keys)
-        requestIds.forEach { finish(id: $0, with: location) }
+        if let bestFix { lastLocation = bestFix }
+        resolveReady()
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         assertMain()
-        fixInFlight = false
         let nsError = error as NSError
-        if nsError.domain == kCLErrorDomain as String, nsError.code == CLError.denied.rawValue {
-            finishAll(code: 1, message: "Location permission is off for CURB.")
-        } else {
+        guard nsError.domain == kCLErrorDomain as String else {
             finishAll(code: 2, message: "Location is unavailable.")
+            return
+        }
+        switch nsError.code {
+        case CLError.locationUnknown.rawValue:
+            break   // transient ("no fix yet"): updates keep coming, and each request's deadline decides
+        case CLError.denied.rawValue:
+            finishAll(code: 1, message: "Location permission is off for CURB.")
+        default:
+            finishAll(code: 2, message: "Location is unavailable (CLError \(nsError.code)).")
         }
     }
 
@@ -677,7 +816,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
             return
         }
         pending.workItem?.cancel()
-        if pendingRequests.isEmpty { fixInFlight = false }   // no request still needs the shared fix
+        stopAcquiringIfIdle()
 
         let payload: [String: Any] = [
             "ok": true,
@@ -688,7 +827,8 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
             "altitudeAccuracy": location.verticalAccuracy >= 0 ? location.verticalAccuracy : NSNull(),
             "heading": location.course >= 0 ? location.course : NSNull(),
             "speed": location.speed >= 0 ? location.speed : NSNull(),
-            "timestamp": location.timestamp.timeIntervalSince1970 * 1_000
+            "timestamp": location.timestamp.timeIntervalSince1970 * 1_000,
+            "reduced": locationManager.accuracyAuthorization == .reducedAccuracy
         ]
         send(payload, to: id)
     }
@@ -698,7 +838,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
             return
         }
         pending.workItem?.cancel()
-        if pendingRequests.isEmpty { fixInFlight = false }   // last request reaped (e.g. by timeout) — don't strand the flag
+        stopAcquiringIfIdle()
         send(["ok": false, "code": code, "message": message], to: id)
     }
 
@@ -838,22 +978,34 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
         req.httpBody = data
         Task { @MainActor in
             do {
-                let (_, resp) = try await URLSession.shared.data(for: req)
-                let ok = (resp as? HTTPURLResponse).map { (200...299).contains($0.statusCode) } ?? false
-                self.resolve(ok, ok ? "saved" : "save-failed")
+                let (body, resp) = try await URLSession.shared.data(for: req)
+                let status = (resp as? HTTPURLResponse)?.statusCode ?? 0
+                let ok = (200...299).contains(status)
+                // Pass the server's reason through (e.g. 429 "slow down", 503 store down) so the page can
+                // say "couldn't save, try again" instead of blaming notification permissions.
+                let json = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
+                // `error` is the reason ("slow down", "store not configured"); `note` is only operator advice.
+                let serverMsg = (json?["error"] as? String) ?? (ok ? "saved" : "HTTP \(status)")
+                self.resolve(ok, ok ? "saved" : "save-failed", message: serverMsg, status: status)
             } catch {
-                self.resolve(false, "save-failed")
+                self.resolve(false, "save-failed", message: error.localizedDescription)
             }
         }
     }
 
-    func didFailRegistration(_ message: String) { resolve(false, message) }
+    func didFailRegistration(_ message: String) { resolve(false, "registration-failed", message: message) }
 
-    private func resolve(_ ok: Bool, _ msg: String) {
+    /// Resolves the page's pending promise with { ok, status, message, reason }: `reason` is a stable code
+    /// (saved, test-sent, denied, denied-settings, timeout, save-failed, registration-failed, no-spot, encode),
+    /// `message` the server's / system's own words (defaults to the reason), `status` the save call's HTTP
+    /// status (0 when no request was made or it never got a response).
+    private func resolve(_ ok: Bool, _ reason: String, message: String? = nil, status: Int = 0) {
         registrationTimeout?.cancel()
         registrationTimeout = nil
-        let safe = msg.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "'", with: "\\'")
-        webView?.evaluateJavaScript("window.__curbNativePushResult && window.__curbNativePushResult(\(ok ? "true" : "false"), '\(safe)');")
+        let result: [String: Any] = ["ok": ok, "reason": reason, "message": String((message ?? reason).prefix(300)), "status": status]
+        guard let data = try? JSONSerialization.data(withJSONObject: result),
+              let json = String(data: data, encoding: .utf8) else { return }
+        webView?.evaluateJavaScript("window.__curbNativePushResult && window.__curbNativePushResult(\(json));")
     }
 }
 
