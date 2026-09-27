@@ -1,6 +1,7 @@
 // The JavaScript the iOS app injects into curb.guide lives in ContentView.swift as Swift multi-line string
 // literals (`private static let <name> = WKUserScript(source: """ … """`). This pulls them out as runnable
-// JS so tests can exercise the real bridge code: ios/CURB/ContentView.test.mjs and scripts/check-locate.mjs.
+// JS so tests can exercise the real bridge code: ios/CURB/ContentView.test.mjs, ios/page-bridge.test.mjs,
+// scripts/check-locate.mjs and scripts/check-alerts-ui.mjs.
 const SWIFT_ESCAPES = { '\\': '\\', n: '\n', t: '\t', r: '\r', '"': '"', "'": "'", 0: '\0' };
 
 export function userScripts(swiftSource) {

@@ -3,12 +3,15 @@
 // Covers: tie-break on the earliest next sweep, the spot's rules[], "✓ Alerts on" keyed on the curb
 // (not the sweep instant) + the off switch, the "alerts are on for <other block>" note, legacy-key
 // migration, the reverse-ghost guard, debounced/reverted style saves, the night-sweep copy, and the
-// native iOS bridge (boolean or {ok,status,message} results, save-failed vs denied, off).
+// native iOS bridge in both shapes: App Store build 6 (boolean promise, two-argument callback) and
+// build 7 (the real pushScript from ContentView.swift: one {ok,reason,message,status} object and
+// __curbRequestPushDetail) — save-failed vs denied, off, and no reports while notifications are off.
 //
 //   npx -y serve . -l 3210 &   node scripts/check-alerts-ui.mjs http://localhost:3210
 // Needs puppeteer-core (like scripts/monitor/browser.mjs) and Chrome (CHROME_PATH or the default).
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
+import { userScripts } from '../ios/user-scripts.mjs';
 
 const BASE = process.argv[2] || 'http://localhost:3210';
 const CHROME = process.env.CHROME_PATH
@@ -16,14 +19,25 @@ const CHROME = process.env.CHROME_PATH
 let failures = 0;
 const check = (name, cond, detail = '') => { if (!cond) failures++; console.log(`${cond ? '✅' : '❌'} ${name}${!cond && detail ? ' — ' + detail : ''}`); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const APP7 = userScripts(readFileSync(new URL('../ios/CURB/ContentView.swift', import.meta.url), 'utf8'));
 
 // Installed before any page script. Web: a granted permission + a fake service worker / push
-// subscription. Native: the bridge the shipped iOS app injects (ContentView.swift pushScript), with
-// window.webkit faked so each message resolves with window.__nativeMode as the app's message.
+// subscription. native 6: the bridge App Store build 6 injects (a copy of its pushScript), with window.webkit
+// faked so each message resolves with window.__nativeMode as the app's message. native 7: window.webkit
+// answers the way build 7's Swift does — ONE object {ok, reason, message (defaults to the reason), status};
+// __nativeMode is a reason string or {reason, status, message} — and openPage installs the real pushScript.
 function installFakes(native) {
   window.__reports = [];
   const sub = { endpoint: 'https://fcm.googleapis.com/fcm/send/test-endpoint', options: {}, toJSON() { return { endpoint: this.endpoint, keys: { p256dh: 'p256', auth: 'auth-secret' } }; } };
-  if (native) {
+  if (native === 7) {
+    window.__nativeMode = 'saved'; window.__nativePosts = []; window.__nativeLog = []; window.__nativeDelay = 30;
+    window.webkit = { messageHandlers: { curbPush: { postMessage: (m) => {
+      window.__nativePosts.push(JSON.parse(JSON.stringify(m))); window.__nativeLog.push('post:' + (m.test ? 'test' : 'save'));
+      const a = m.test ? { reason: 'test-sent' } : typeof window.__nativeMode === 'string' ? { reason: window.__nativeMode } : window.__nativeMode;
+      const r = { ok: a.reason === 'saved' || a.reason === 'test-sent', reason: a.reason, message: String(a.message ?? a.reason).slice(0, 300), status: a.status || 0 };
+      setTimeout(() => { window.__nativeLog.push('answer:' + a.reason); window.__curbNativePushResult(r); }, window.__nativeDelay);
+    } } } };
+  } else if (native) {
     window.__nativeMode = 'saved'; window.__nativePosts = []; window.__nativeLog = []; window.__nativeDelay = 30;
     window.webkit = { messageHandlers: { curbPush: { postMessage: (m) => {
       window.__nativePosts.push(JSON.parse(JSON.stringify(m))); window.__nativeLog.push('post:' + (m.test ? 'test' : 'save'));
@@ -70,7 +84,7 @@ async function openPage(native, ctl) {
   const page = await browser.newPage();
   await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
   page.__posts = [];
-  page.on('pageerror', (e) => check(`no page errors (${native ? 'native' : 'web'})`, false, e.message));
+  page.on('pageerror', (e) => check(`no page errors (${native ? 'native build ' + native : 'web'})`, false, e.message));
   await page.setRequestInterception(true);
   page.on('request', (r) => {
     const p = new URL(r.url()).pathname;
@@ -82,6 +96,7 @@ async function openPage(native, ctl) {
     return r.continue();
   });
   await page.evaluateOnNewDocument(installFakes, native);
+  if (native === 7) await page.evaluateOnNewDocument(APP7.pushScript);
   await page.goto(BASE + '/', { waitUntil: 'load', timeout: 45000 });
   await page.waitForFunction(() => typeof drawSegments === 'function' && typeof segLayer !== 'undefined' && typeof map !== 'undefined', { timeout: 20000 });
   await page.evaluate(() => { window.curbReport = (k, d) => window.__reports.push([k, d]); });
@@ -174,8 +189,8 @@ try {
   check('night sweep: toast promises the ~9 PM push', (await toast(page)).includes('~9 PM the night before'));
   await page.close();
 
-  // ---------------- native iOS bridge ----------------
-  const nat = await openPage(true, ctl);
+  // ---------------- native iOS bridge, App Store build 6 ----------------
+  const nat = await openPage(6, ctl);
   const np = nat.page;
   await open(np, '7735000');
   await np.evaluate(() => { window.__nativeMode = 'save-failed'; });
@@ -222,6 +237,52 @@ try {
   await sleep(900);
   check('iOS: a slow permission prompt (answered after 25 s) still arms, no false failure', (await text(np, '#alertBtn')) === '✓ Alerts on' && await np.evaluate(() => !window.__reports.length));
   await np.close();
+
+  // ---------------- native iOS bridge, build 7 (real pushScript from ContentView.swift) ----------------
+  const p7 = (await openPage(7, ctl)).page;
+  const reports = (page) => page.evaluate(() => window.__reports.map(([k, d]) => k + ' ' + d));
+  await p7.evaluate(() => localStorage.removeItem('curbAlert')); // the build 6 pass left Kansas St armed
+  await open(p7, '7735000');
+  check('iOS build 7: the real pushScript offers __curbRequestPushDetail', await p7.evaluate(() => typeof window.__curbRequestPushDetail === 'function'));
+  for (const reason of ['denied', 'denied-settings']) {
+    await p7.evaluate((r) => { window.__nativeMode = r; window.__reports.length = 0; }, reason);
+    await tap(p7, '#alertBtn');
+    await sleep(400);
+    const rep = await reports(p7);
+    check(`iOS build 7 ${reason}: points at Settings, no push-save-failed report`, (await toast(p7)).includes('Allow notifications for CURB in Settings') && (await text(p7, '#alertBtn')).includes('Sweep alerts') && !rep.length, `toast="${await toast(p7)}" reports=${JSON.stringify(rep)}`);
+  }
+  await p7.evaluate(() => { window.__nativeMode = { reason: 'save-failed', status: 429, message: 'slow down' }; window.__reports.length = 0; });
+  await tap(p7, '#alertBtn');
+  await sleep(400);
+  check('iOS build 7 save failure (429): "Couldn\'t save, try again." + reported with the status and server text', (await toast(p7)) === "Couldn't save, try again." && (await reports(p7)).includes('push-save-failed ios save-failed:429 slow down'), JSON.stringify(await reports(p7)));
+  await p7.evaluate(() => { window.__nativeMode = 'saved'; });
+  await tap(p7, '#alertBtn');
+  await sleep(400);
+  check('iOS build 7 saved: "✓ Alerts on" + rules posted through the bridge', (await text(p7, '#alertBtn')) === '✓ Alerts on' && (await p7.evaluate(() => window.__nativePosts.at(-1).spot.rules.length)) === 2);
+  // Notifications turned off in Settings after arming: style saves and the daily refresh fail as 'denied'
+  // and must not report — refreshWatch never marks the watch refreshed, so it retries on every sheet open.
+  await p7.evaluate(() => { window.__nativeMode = 'denied-settings'; window.__reports.length = 0; });
+  const posts0 = await p7.evaluate(() => window.__nativePosts.length);
+  await tap(p7, '[data-k="curbAlertVoice"] button[data-v="drill"]');
+  await sleep(1000);
+  await p7.evaluate(() => { const a = JSON.parse(localStorage.getItem('curbAlert')); a.armedAt = Date.now() - WATCH_REFRESH - 60000; localStorage.setItem('curbAlert', JSON.stringify(a)); });
+  await open(p7, '7735000');
+  await sleep(300);
+  await open(p7, '7735000');
+  await sleep(300);
+  const posts1 = await p7.evaluate(() => window.__nativePosts.length);
+  check('iOS build 7, notifications off: a style change + two refreshes reach the app but send no reports', posts1 - posts0 === 3 && !(await reports(p7)).length, `${posts1 - posts0} posts, reports=${JSON.stringify(await reports(p7))}`);
+  await p7.evaluate(() => { window.__reports.length = 0; });
+  await tap(p7, '#alertBtn');
+  await tap(p7, '#alertOffYes');
+  await sleep(400);
+  check('iOS build 7 turn-off while denied in Settings: Settings guidance, no push-off-failed', (await toast(p7)).includes('Turn notifications back on for CURB in Settings') && (await text(p7, '#alertBtn')) === '✓ Alerts on' && !(await reports(p7)).length, `toast="${await toast(p7)}" reports=${JSON.stringify(await reports(p7))}`);
+  await p7.evaluate(() => { window.__nativeMode = 'saved'; });
+  await tap(p7, '#alertBtn');
+  await tap(p7, '#alertOffYes');
+  await sleep(400);
+  check('iOS build 7 turn-off posts {spot:{off:true}} and reads off', await p7.evaluate(() => window.__nativePosts.at(-1).spot?.off === true) && (await text(p7, '#alertBtn')).includes('Sweep alerts') && (await toast(p7)).includes('Alerts off for Kansas St'));
+  await p7.close();
 } catch (e) {
   check('run', false, e.stack || e.message);
 } finally {
