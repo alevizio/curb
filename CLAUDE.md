@@ -338,9 +338,12 @@ Saved alert (index.html): localStorage `curbAlert` keyed on the curb side (cnn|s
 sweep instant — the old instant key read "off" after the first sweep while pushes kept coming. "On"
 is claimed only while the watch is alive (< MAX_WATCH_AGE, web permission granted); legacy
 `curbAlertKey` values migrate by corridor|limits|blockside; a matching sheet silently re-arms once a
-day. Tapping "✓ Alerts on" offers Turn off; other blocks show "Alerts are on for <block>". The iOS
-bridge result may be a boolean or {ok,status,message}; failures report `push-save-failed` /
-`push-off-failed` via `curbReport`. Headless check: `scripts/check-alerts-ui.mjs`.
+day (a same-sweep re-save keeps the stored eve/morning anchors and `notified` — the sheet drops anchors
+it thinks are past, and an 8:05pm refresh used to wipe that night's eve push). Tapping "✓ Alerts on"
+offers Turn off; other blocks show "Alerts are on for <block>". The iOS bridge result may be a boolean
+or {ok,status,message}; every native call, test pushes included, goes through ONE queue (the app keeps
+one pending call); failures report `push-save-failed` / `push-off-failed` via `curbReport`. Headless
+check: `scripts/check-alerts-ui.mjs`.
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
 VAPID_SUBJECT, CRON_SECRET, QSTASH_{CURRENT,NEXT}_SIGNING_KEY, HC_PING_URL (optional),
