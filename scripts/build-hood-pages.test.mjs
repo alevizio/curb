@@ -31,6 +31,12 @@ describe('neighborhood pages', () => {
     }
   });
 
+  it('the home page links every neighborhood page, once, from its static HTML', () => {
+    const block = read('index.html').match(/<!-- hoods:start[^>]*-->([\s\S]*?)<!-- hoods:end -->/)[1];
+    const hrefs = [...block.matchAll(/href="\/n\/([a-z0-9-]+)"/g)].map((m) => `${m[1]}.html`);
+    expect(hrefs.sort()).toEqual(pages.sort());
+  });
+
   it('retired pages (Presidio, Golden Gate Park) are deleted and 301 to /n/', () => {
     const v = JSON.parse(read('vercel.json'));
     for (const s of ['presidio', 'golden-gate-park']) {

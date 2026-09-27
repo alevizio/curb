@@ -662,6 +662,17 @@ const keep = new Set(['index.html', ...hoods.map((h) => `${slug(h.hood)}.html`)]
 const removed = readdirSync(new URL('n/', ROOT)).filter((f) => f.endsWith('.html') && !keep.has(f));
 for (const f of removed) unlinkSync(new URL(`n/${f}`, ROOT));
 
+// ---- home page neighborhood links ----
+// The home page holds most of the site's outside links but linked no neighborhood; index.html carries
+// one link per /n/ page between the hoods:start/end markers (welcome card), rewritten here so it never
+// links a deleted page.
+const homeHtml = readFileSync(new URL('index.html', ROOT), 'utf8');
+const hoodLinks = [...hoods].sort((a, b) => a.hood.localeCompare(b.hood)).map((h) => `<li><a href="/n/${slug(h.hood)}">${esc(h.hood)}</a></li>`).join('');
+const homeNext = homeHtml.replace(/(<!-- hoods:start[^>]*-->)[\s\S]*?(<!-- hoods:end -->)/, (_, a, b) =>
+  `${a}\n  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul>${hoodLinks}</ul></nav>\n  ${b}`);
+if (homeNext === homeHtml && !homeHtml.includes('<!-- hoods:start')) console.error('[hoodpages] WARN: index.html has no hoods:start/end markers — home neighborhood links not updated');
+if (homeNext !== homeHtml) writeFileSync(new URL('index.html', ROOT), homeNext);
+
 // ---- refresh sitemap.xml ----
 // <lastmod> = the day each page really changed (scripts/lastmod.mjs): today for pages this run
 // rewrote with different HTML, else the file's last commit.
