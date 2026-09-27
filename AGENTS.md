@@ -104,11 +104,10 @@ Files now present for the push feature:
   or `UPSTASH_REDIS_REST_*`. Exports saveSub / loadAllSubs / deleteSub / markNotified.
 - `api/save-subscription.js` — persists `{ subscription, spot }` via the store, with
   input validation (https push-host allowlist, size caps, spot sanitize/clamp).
-- `api/send-notifications.js` — Vercel cron handler; loads subs, sends web-push for any
-  spot whose `nextSweepISO` is within `leadMinutes`, de-dupes via `notifiedFor`, deletes
-  on 410/404. Requires `CRON_SECRET` (Bearer) — refuses to run unauthenticated.
-- `vercel.json` — cron every 15 min (needs Vercel Pro; Hobby throttles to ~daily — use an
-  external scheduler hitting the endpoint with `Authorization: Bearer <CRON_SECRET>`).
+- `api/send-notifications.js` — the sweep-alert sender; loads subs, sends the touchpoint
+  `dueAlert` says is due, de-dupes via `notified`, prunes on 410/404. Auth: an Upstash QStash
+  signature (PRIMARY trigger, every 15 min) or `Bearer CRON_SECRET` (the GitHub
+  `sweep-alerts-cron.yml` BACKUP). `vercel.json` has no cron. See CLAUDE.md for the details.
 - `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET.
 
 ### What's DONE vs TODO
@@ -127,10 +126,9 @@ Forever-watch (SHIPPED): when the saved `spot` carries a recurrence `rule` (week
 week1..week5 flags + hours, via `sanitizeRule`), the cron re-arms it server-side after each
 sweep window ends — `recomputeSpot` advances `nextSweepISO` and RESETS the per-window
 de-dupe, so the watch keeps firing every occurrence (it stops auto-advancing past
-`MAX_WATCH_AGE` ~120 days so a frozen rule can't track a city schedule change). Spots
-WITHOUT a `rule` still degrade to a single **one-shot** push: after that sweep passes the
-button reverts from "✓ Alerts on" to "🔔 Sweep alerts" (the saved-alert key includes
-`nextSweepISO`), cueing a re-tap to arm the next occurrence.
+`MAX_WATCH_AGE` ~120 days so a frozen rule can't track a city schedule change). The spot
+carries every rule of the curb side (`rules`) and re-arms to the earliest; the page keys
+"✓ Alerts on" on the curb side (not the sweep instant) and offers a Turn off. See CLAUDE.md.
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
 VAPID_SUBJECT, CRON_SECRET, KV_REST_API_URL/TOKEN (Upstash). Embedded VAPID *public* key

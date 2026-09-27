@@ -35,6 +35,16 @@ function notifiedMap(rec) {
   return m;
 }
 
+// A same-sweep re-save (the page's daily silent refresh, a style change) omits an anchor the page
+// thinks is too close or past — e.g. opened at 8:05pm the night before, it sends no eveningISO — which
+// would wipe the stored anchor before the next tick sends that push. The anchors of one sweep never
+// change, and `notified` (kept on this path) stops a re-send, so keep the stored ones.
+function carryAnchors(out, prevSpot) {
+  if (!out) return;
+  if (!out.eveningISO && prevSpot.eveningISO) out.eveningISO = prevSpot.eveningISO;
+  if (!out.morningISO && prevSpot.morningISO) out.morningISO = prevSpot.morningISO;
+}
+
 /** True once the store env vars are present (used to fail loudly instead of silently). */
 export function storeReady() {
   return Boolean(URL_ && TOKEN);
@@ -54,12 +64,14 @@ export async function saveSub(subscription, spot) {
     if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
       notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
       // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
-      // forever-watch to one-shot). Carry the prior rule/cnn/sideKey forward when absent.
+      // forever-watch to one-shot). Carry the prior rule(s)/cnn/sideKey forward when absent.
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
+        if (prev.spot.rules) out.rules = prev.spot.rules;
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }
+      carryAnchors(out, prev.spot);
     }
   } catch { /* best effort — worst case is one duplicate push */ }
   // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
@@ -106,6 +118,24 @@ export async function deleteSub(endpoint) {
   if (r) await r.hdel(KEY, endpoint);
 }
 
+/** Turn a web watch OFF ("✓ Alerts on" → Turn off). Ownership = the endpoint AND its keys.auth, which
+ *  only the browser holding the subscription has, compared in constant time with the stored one.
+ *  Disarms (spot = null — the cron skips spot-less records) rather than deleting, so auto-park and
+ *  its tokens still resolve the subscription. → 'ok' | 'not-found' | 'forbidden'. */
+export async function disarmSub(endpoint, auth) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  const v = await r.hget(KEY, endpoint);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return 'not-found';
+  const a = Buffer.from(String(auth || '')), b = Buffer.from(String(rec.subscription?.keys?.auth || ''));
+  if (!b.length || a.length !== b.length || !timingSafeEqual(a, b)) return 'forbidden';
+  rec.spot = null;
+  rec.notified = {};
+  await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
+  return 'ok';
+}
+
 /** Record that we already pushed for a given sweep time, so the cron won't repeat.
  *  field: 'notifiedFor' (the ~30-min lead push) or 'notifiedEveFor' (night-before). */
 export async function markNotified(endpoint, nextSweepISO, key = 'lead') {
@@ -150,9 +180,11 @@ export async function saveIosSub(token, spot) {
       notified = notifiedMap(prev);
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
+        if (prev.spot.rules) out.rules = prev.spot.rules;
         if (prev.spot.cnn) out.cnn = prev.spot.cnn;
         if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
       }
+      carryAnchors(out, prev.spot);
     }
   } catch { /* best effort — worst case is one duplicate push */ }
   const record = { token, spot: out, notified, savedAt: Date.now(), platform: 'ios' };
@@ -186,7 +218,14 @@ export async function loadAllIosSubs() {
     .filter(Boolean);
 }
 
-/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken). */
+/** True if this APNs token already has a record (re-saves of a known token are never throttled). */
+export async function hasIosSub(token) {
+  const r = redis();
+  if (!r) return false;
+  return Boolean(await r.hexists(KEY_IOS, token));
+}
+
+/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken) or turn a watch off. */
 export async function deleteIosSub(token) {
   const r = redis();
   if (r) await r.hdel(KEY_IOS, token);
@@ -277,6 +316,28 @@ export async function deleteTokensForEndpoint(endpoint) {
     const rec = typeof v === 'string' ? safeParse(v) : v;
     if (rec && rec.endpoint === endpoint) await r.hdel(TKEY, h);
   }
+}
+
+// ---- sender run record (read by the monitor via /api/send-notifications?status=1) ----
+// `last` = the most recent run whatever its outcome; `ok` = the most recent successful one. Holds only
+// counts/outcome/trigger — no subscription, token or spot.
+const CKEY = 'curb:cron';
+
+/** Record one sender run: { at, trigger, outcome: 'ok'|'error'|'skipped', ... }. */
+export async function saveRunStatus(status) {
+  const r = redis();
+  if (!r) return;
+  const v = JSON.stringify(status);
+  await r.hset(CKEY, status.outcome === 'ok' ? { last: v, ok: v } : { last: v });
+}
+
+/** { last, lastOk } — either may be null before the first run. */
+export async function loadRunStatus() {
+  const r = redis();
+  if (!r) return { last: null, lastOk: null };
+  const all = (await r.hgetall(CKEY)) || {};
+  const parse = (v) => (typeof v === 'string' ? safeParse(v) : v) || null;
+  return { last: parse(all.last), lastOk: parse(all.ok) };
 }
 
 // ---- client error log (anonymous; see /privacy) ----
