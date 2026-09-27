@@ -188,6 +188,17 @@ try {
   await tap(np, '#alertBtn');
   await sleep(300);
   check('iOS {ok,status,message} result is understood', (await toast(np)) === "Couldn't save, try again." && await np.evaluate(() => window.__reports.some(([, d]) => d === 'ios save-failed:429')));
+  // A first arm waits on the iOS permission prompt: an answer 25 s later must still count. Page timers
+  // >= 1 s run 100x faster here (the app's 25 s → 250 ms vs the page's cap) so the check stays quick.
+  await np.evaluate(() => {
+    const st = window.setTimeout;
+    window.setTimeout = (fn, ms, ...a) => st(fn, ms >= 1000 ? ms / 100 : ms, ...a);
+    window.__curbRequestPush = () => new Promise((resolve) => st(() => resolve(true), 250));
+    window.__reports.length = 0;
+  });
+  await tap(np, '#alertBtn');
+  await sleep(900);
+  check('iOS: a slow permission prompt (answered after 25 s) still arms, no false failure', (await text(np, '#alertBtn')) === '✓ Alerts on' && await np.evaluate(() => !window.__reports.length));
   await np.close();
 } catch (e) {
   check('run', false, e.stack || e.message);

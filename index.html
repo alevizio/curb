@@ -1834,13 +1834,15 @@ function armedToast(spot,prev){
 // Native bridge: it resolves a boolean today (a newer app build may resolve {ok,status,message}); the
 // page needs the reason either way, so capture the message the app hands __curbNativePushResult (Swift
 // calls it by name) before the original resolves. Calls are serialized: the bridge keeps ONE pending
-// resolver, so an overlapping second call would strand the first.
+// resolver, so an overlapping second call would strand the first. The 60 s cap only unsticks the queue
+// if the app never answers: a first arm waits on the iOS permission prompt (the app's own 15 s timeout
+// starts after it), and a shorter cap reported slow readers as failures while their watch saved anyway.
 let _nativeMsg='', _nativeQ=Promise.resolve();
 if(typeof window.__curbNativePushResult==='function'){const _o=window.__curbNativePushResult;
   window.__curbNativePushResult=function(ok,msg){_nativeMsg=String(msg||'');return _o.apply(this,arguments);};}
 function nativePush(spot){
   const p=_nativeQ.then(()=>{_nativeMsg='';
-    return Promise.race([Promise.resolve(window.__curbRequestPush(spot)),new Promise(r=>setTimeout(()=>r({ok:false,message:'timeout'}),20000))]);})
+    return Promise.race([Promise.resolve(window.__curbRequestPush(spot)),new Promise(r=>setTimeout(()=>r({ok:false,message:'timeout'}),60000))]);})
     .then(r=>{const o=(r&&typeof r==='object')?r:{ok:!!r};return {ok:!!o.ok,message:String(o.message||o.status||_nativeMsg||'')};},
       e=>({ok:false,message:String((e&&e.message)||e||'error')}));
   _nativeQ=p;
