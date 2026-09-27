@@ -16,12 +16,18 @@ Object.assign(process.env, {
 
 const mem = {}, kv = {};
 let failSubsLoad = false;
+let afterSnapshot = null; // runs right after the sender's start-of-run read of curb:subs
 vi.mock('@upstash/redis', () => ({
   Redis: class {
     async hget(k, f) { return mem[k] && mem[k][f]; }
     async hset(k, obj) { (mem[k] || (mem[k] = {})); Object.assign(mem[k], obj); }
     async hdel(k, f) { if (mem[k]) delete mem[k][f]; }
-    async hgetall(k) { if (k === 'curb:subs' && failSubsLoad) throw new Error('upstash down'); return mem[k] ? { ...mem[k] } : null; }
+    async hgetall(k) {
+      if (k === 'curb:subs' && failSubsLoad) throw new Error('upstash down');
+      const out = mem[k] ? { ...mem[k] } : null;
+      if (k === 'curb:subs' && afterSnapshot) { const f = afterSnapshot; afterSnapshot = null; await f(); }
+      return out;
+    }
     async hexists(k, f) { return mem[k] && f in mem[k] ? 1 : 0; }
     async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
     async del(k) { delete kv[k]; }
@@ -61,7 +67,7 @@ const status = () => ({ last: JSON.parse(mem['curb:cron']?.last || 'null'), ok: 
 
 beforeEach(() => {
   for (const o of [mem, kv]) for (const k of Object.keys(o)) delete o[k];
-  failSubsLoad = false; send.mockClear(); fetchMock.mockClear();
+  failSubsLoad = false; afterSnapshot = null; send.mockClear(); fetchMock.mockClear();
   process.env.CRON_SECRET = 'cron-s3cret';
   vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(NOW);
   armSub(SPOT);
@@ -233,6 +239,26 @@ describe('de-dupe across a user\'s off → on', () => {
     vi.setSystemTime(NOW + 5 * 60000);
     expect((await run(await qstash())).body.web.sent).toBe(0);
     expect(send).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('forever-watch re-arm vs a Turn off during the run', () => {
+  const TUE = { weekday: 'Tue', fromhour: '9', tohour: '11', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
+  const lastTue = { corridor: 'Steiner St', nextSweepISO: '2026-09-22T16:00:00.000Z', leadMinutes: 30, rule: TUE, rules: [TUE], cnn: '1', sideKey: 'L' };
+  beforeEach(() => { armSub(lastTue); vi.setSystemTime(Date.parse('2026-09-23T17:00:00Z')); }); // Wed: Tue's sweep is over
+
+  it('without one, the run re-arms to next Tuesday', async () => {
+    expect((await run(bearer())).body.web.rearmed).toBe(1);
+    expect(JSON.parse(mem['curb:subs'][EP]).spot.nextSweepISO).toBe('2026-09-29T16:00:00.000Z');
+  });
+
+  it('a Turn off that lands after the run read the watch is not undone by the re-arm', async () => {
+    afterSnapshot = () => disarmSub(EP, SUB.keys.auth);
+    expect((await run(bearer())).body.web.rearmed).toBe(0);
+    expect(JSON.parse(mem['curb:subs'][EP]).spot).toBe(null);
+    vi.setSystemTime(Date.parse('2026-09-29T15:40:00Z'));          // next Tuesday, 20 min before
+    expect((await run(bearer())).body.web).toMatchObject({ sent: 0, rearmed: 0 });
+    expect(send).not.toHaveBeenCalled();
   });
 });
 

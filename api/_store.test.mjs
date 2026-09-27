@@ -193,9 +193,9 @@ describe('a stale-sheet re-save (the sheet stayed open while the cron re-armed t
     await saveSub(SUB, mon);
     await saveIosSub(tok, mon);
     vi.setSystemTime(Date.parse('2026-10-27T03:00:05Z'));   // Mon 20:00 PDT: re-armed, eve sent
-    await advanceSpot(EP, tue);
+    await advanceSpot(EP, tue, mon);
     await markNotified(EP, tue.nextSweepISO, 'eve');
-    await advanceIosSpot(tok, tue);
+    await advanceIosSpot(tok, tue, mon);
     await markIosNotified(tok, tue.nextSweepISO, 'eve');
     vi.setSystemTime(Date.parse('2026-10-27T03:30:00Z'));   // Mon 20:30 PDT
   });
@@ -236,7 +236,7 @@ describe('advanceSpot', () => {
     await saveSub(SUB, spotA);
     await markNotified(EP, spotA.nextSweepISO, 'lead');
     await markNotified(EP, spotA.nextSweepISO, 'eve');
-    await advanceSpot(EP, spotB);
+    expect(await advanceSpot(EP, spotB, spotA)).toBe(true);
     const r = await rec();
     expect(r.spot.nextSweepISO).toBe(spotB.nextSweepISO);
     expect(r.notified).toEqual({ lead: spotA.nextSweepISO, eve: spotA.nextSweepISO });
@@ -247,8 +247,28 @@ describe('advanceSpot', () => {
     await saveSub(SUB, spotA);
     const before = (await rec()).savedAt;
     expect(typeof before).toBe('number');
-    await advanceSpot(EP, spotB);
+    await advanceSpot(EP, spotB, spotA);
+    expect((await rec()).spot.nextSweepISO).toBe(spotB.nextSweepISO);
     expect((await rec()).savedAt).toBe(before); // cron advance must NOT reset the staleness clock
+  });
+
+  it('skips the re-arm if the user turned alerts off or re-saved since the run read the spot (web + iOS)', async () => {
+    await saveSub(SUB, spotA);
+    expect(await disarmSub(EP, 'a')).toBe('ok');                  // Turn off lands mid-run
+    expect(await advanceSpot(EP, spotB, spotA)).toBe(false);
+    expect((await rec()).spot).toBe(null);                         // stays off
+    await saveSub(SUB, { ...spotA, level: 'light' });              // a style change lands mid-run
+    expect(await advanceSpot(EP, spotB, spotA)).toBe(false);
+    expect((await rec()).spot).toMatchObject({ nextSweepISO: spotA.nextSweepISO, level: 'light' });
+
+    const tok = 'ab'.repeat(32);
+    await saveIosSub(tok, spotA);
+    await disarmIosSub(tok);
+    expect(await advanceIosSpot(tok, spotB, spotA)).toBe(false);
+    expect(JSON.parse(mem['curb:apns'][tok]).spot).toBe(null);
+    await saveIosSub(tok, spotA);
+    expect(await advanceIosSpot(tok, spotB, spotA)).toBe(true);   // unchanged since the read → re-armed
+    expect(JSON.parse(mem['curb:apns'][tok]).spot.nextSweepISO).toBe(spotB.nextSweepISO);
   });
 });
 

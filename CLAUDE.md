@@ -337,7 +337,9 @@ Forever-watch (implemented): the saved `spot` carries `rules` — EVERY schedule
 (multi-day sides are ~25% of SF; `sanitizeRules` drops invalid rows one by one, dedupes, caps at 16)
 — plus `rule` (the row behind `nextSweepISO`, kept for back-compat). After each sweep window ends the
 cron's `recomputeSpot` advances `nextSweepISO` to the EARLIEST next occurrence across the rules (plus
-fresh anchors) via `advanceSpot` / `advanceIosSpot`. The `notified` de-dupe map is NEVER reset (not by
+fresh anchors) via `advanceSpot` / `advanceIosSpot`, which re-read the record and skip the write if the
+user turned the watch off or re-saved it since the run's snapshot (a Turn off must never be re-armed).
+The `notified` de-dupe map is NEVER reset (not by
 the advance, a re-save, a block switch or Turn off): each entry holds the sweep instant it fired for, so
 it only blocks that sweep — an off → on of the same sweep can't re-send a push. A watch stops
 auto-advancing once it goes stale past `MAX_WATCH_AGE` (~120 days) so a frozen rule can't track a city

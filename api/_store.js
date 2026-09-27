@@ -100,22 +100,28 @@ export async function saveSub(subscription, spot) {
   await r.hset(KEY, { [subscription.endpoint]: JSON.stringify(record) });
 }
 
+// The cron computes a re-arm from the spot in its start-of-run snapshot. Before writing, the record is
+// re-read: if the user turned alerts off (spot = null) or re-saved the watch since, their write wins and
+// the re-arm is skipped (the next tick re-arms from what they saved). Otherwise a Turn off landing
+// during a run was silently undone and the watch kept pushing someone who opted out.
+const sameSpot = (a, b) => Boolean(a && b) && JSON.stringify(a) === JSON.stringify(b);
+
 /** Advance a subscription to its next computed sweep occurrence (the cron "forever-watch"
- *  re-arm). Replaces the spot; the de-dupe map is kept (its entries name the sweep they fired for,
- *  so the next sweep is free to fire).
- *  Preserves savedAt — the re-arm is clock-driven, not a fresh client refresh.
- *  Benign race: a concurrent same-sweep client saveSub is a last-writer-wins read-modify-write;
- *  worst case is one duplicate or missed re-arm that self-corrects on the next 15-min tick. */
-export async function advanceSpot(endpoint, newSpot) {
+ *  re-arm), computed from `seenSpot`. Replaces the spot only if the record still holds exactly
+ *  `seenSpot` (→ true); the de-dupe map is kept (its entries name the sweep they fired for, so the
+ *  next sweep is free to fire). Preserves savedAt — the re-arm is clock-driven, not a fresh client
+ *  refresh. */
+export async function advanceSpot(endpoint, newSpot, seenSpot) {
   const r = redis();
-  if (!r) return;
+  if (!r) return false;
   const v = await r.hget(KEY, endpoint);
   const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return;
+  if (!rec || !sameSpot(rec.spot, seenSpot)) return false;
   rec.spot = newSpot;
   rec.notified = notifiedMap(rec);
   delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
+  return true;
 }
 
 /** Load every stored record as { endpoint, subscription, spot, notifiedFor }. */
@@ -215,17 +221,19 @@ export async function saveIosSub(token, spot) {
   await r.hset(KEY_IOS, { [token]: JSON.stringify(record) });
 }
 
-/** Advance an iOS watch to its next computed occurrence (forever-watch re-arm). */
-export async function advanceIosSpot(token, newSpot) {
+/** Advance an iOS watch to its next computed occurrence (forever-watch re-arm). Like advanceSpot:
+ *  only while the record still holds exactly `seenSpot` (→ true). */
+export async function advanceIosSpot(token, newSpot, seenSpot) {
   const r = redis();
-  if (!r) return;
+  if (!r) return false;
   const v = await r.hget(KEY_IOS, token);
   const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return;
+  if (!rec || !sameSpot(rec.spot, seenSpot)) return false;
   rec.spot = newSpot;
   rec.notified = notifiedMap(rec);
   delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
+  return true;
 }
 
 /** Load every iOS record as { token, spot, notifiedFor, notifiedEveFor, savedAt }. */

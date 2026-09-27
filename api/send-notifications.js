@@ -178,10 +178,11 @@ export default async function handler(req, res) {
       // Forever-watch re-arm: advance to the next occurrence once the window ends (its OWN pass —
       // never coupled to the lead push, which still returns the same instant at lead time). Stops
       // while stale (MAX_WATCH_AGE) so a frozen rule can't track a city schedule change. The
-      // advanced occurrence is in the future, so nothing pushes this tick → continue.
+      // advanced occurrence is in the future, so nothing pushes this tick → continue. Skipped when the
+      // user turned the watch off or re-saved it since the snapshot (advanceSpot re-reads it).
       if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
         const advanced = recomputeSpot(spot);
-        if (advanced) { await advanceSpot(endpoint, advanced); rearmed++; continue; }
+        if (advanced) { if (await advanceSpot(endpoint, advanced, spot)) rearmed++; continue; }
       }
       const due = dueAlert(spot, notified, now);
       if (!due) continue;
@@ -221,7 +222,7 @@ export default async function handler(req, res) {
           if (!spot || !spot.nextSweepISO) continue;
           if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
             const advanced = recomputeSpot(spot);
-            if (advanced) { await advanceIosSpot(token, advanced); iosRearmed++; continue; }
+            if (advanced) { if (await advanceIosSpot(token, advanced, spot)) iosRearmed++; continue; }
           }
           const due = dueAlert(spot, notified, now);
           if (!due) continue;
