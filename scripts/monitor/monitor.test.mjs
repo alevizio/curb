@@ -1,8 +1,9 @@
 // Tests for the production monitor: the alert-issue state machine (alert.mjs) and the smoke checks
 // (smoke.mjs) against mocked fetch — including a replay of the Sep 2026 DataSF host move.
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { decide, signature, lastSig, withSig } from './alert.mjs';
-import { parsePage, checkDataSF, checkBasemap, checkPages, checkAlertsSender, judgeAlertsStatus, ALERTS_MAX_AGE_MIN, lit, digest, checkErrorSpike } from './smoke.mjs';
+import { parsePage, checkDataSF, checkBasemap, checkPages, checkAlertsSender, judgeAlertsStatus, ALERTS_MAX_AGE_MIN, lit, digest, checkErrorSpike, REPORT_KINDS, isBreakage } from './smoke.mjs';
 import { normalize, group } from '../../api/client-error.js';
 
 const OPTS = { title: 'curb.guide is broken', mention: 'alevizio', runUrl: 'https://github.com/x/y/actions/runs/1' };
@@ -203,5 +204,101 @@ describe('SEC-1: client-supplied text in the public alert issues', () => {
     expect(next).toBe("quoted <!-- monitor-sig:x --> text\n\n<!-- monitor-sig:a$&b$`c$'d -->");
     expect(lastSig(next)[1]).toBe("a$&b$`c$'d");
     expect(withSig('no marker', 'y')).toBe('no marker\n\n<!-- monitor-sig:y -->');
+  });
+});
+
+// The digest and the spike check count only breakage; a visitor's own choices (blocked location, a coarse
+// fix, a notification denial) and device conditions stay in the log as informational counts.
+describe('error log: breakage vs. the visitor\'s own choices', () => {
+  const now = Date.parse('2026-09-27T12:00:00Z');
+  const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
+  const rep = (k, msg, n) => Array.from({ length: n }, () => ({ k, msg }));
+  const log = (reports) => group(reports.map((r, i) => normalize(r, UA, now - (i + 1) * 1000)), 0);
+  const run = async (fn, reports) => {
+    const prev = process.env.CRON_SECRET;
+    process.env.CRON_SECRET = 'x';
+    try { return await fn(mockFetch({ 'https://curb.guide/api/client-error': { status: 200, body: log(reports) } }), now); }
+    finally { if (prev === undefined) delete process.env.CRON_SECRET; else process.env.CRON_SECRET = prev; }
+  };
+  // Message formats exactly as index.html's curbReport calls build them.
+  const ROUTINE = [
+    ...rep('event:locate-failed', 'code 1 User denied Geolocation', 30),                   // Chrome / Safari
+    ...rep('event:locate-failed', 'code 1 User denied geolocation prompt', 5),             // Firefox
+    ...rep('event:locate-failed', 'code 1 Location permission is off for CURB.', 5),       // the iOS app
+    ...rep('event:locate-failed', 'code 3 after retry Timeout expired', 4),
+    ...rep('event:locate-failed', 'code 2 after retry Location is unavailable.', 3),
+    ...rep('event:locate-failed', 'unsupported', 3),
+    ...rep('event:locate-coarse', 'reduced ±3km', 5),
+    ...rep('event:locate-coarse', '±150m', 5),
+    ...rep('event:push-save-failed', 'ios denied-settings', 3),
+    ...rep('event:push-save-failed', 'refresh fail:denied', 3),
+  ];
+
+  it('every kind index.html reports is classified', () => {
+    const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+    const kinds = new Set([...html.matchAll(/curbReport\('([a-z0-9-]+)'/g)].map((m) => 'event:' + m[1]));
+    for (const m of html.matchAll(/send\('(error|rejection)'/g)) kinds.add(m[1]);
+    expect(kinds.size).toBeGreaterThanOrEqual(8); // error, rejection + 6 curbReport kinds (Sep 2026)
+    for (const k of kinds) expect(Object.keys(REPORT_KINDS), `add ${k} to REPORT_KINDS in smoke.mjs`).toContain(k);
+  });
+
+  it('classifies breakage vs. choices, and counts an unknown kind as breakage', () => {
+    const b = (k, msg) => isBreakage({ k, msg });
+    expect(b('error', "TypeError: x is undefined")).toBe(true);
+    expect(b('rejection', 'Load failed')).toBe(true);
+    expect(b('event:data-load', 'HTTP 503')).toBe(true);
+    expect(b('event:block-open-timeout', 'link')).toBe(true);
+    expect(b('event:push-save-failed', 'ios save-failed:429 slow down')).toBe(true);
+    expect(b('event:push-save-failed', 'ios unknown')).toBe(true);
+    expect(b('event:push-off-failed', 'web HTTP 500')).toBe(true);
+    expect(b('event:push-off-failed', 'ios denied')).toBe(false);
+    expect(b('event:push-save-failed', 'web permission-denied')).toBe(false);
+    expect(b('event:locate-failed', 'code 1 Geolocation has been disabled in this document by permissions policy.')).toBe(true);
+    expect(b('event:locate-failed', 'code 1 Origin does not have permission to use Geolocation service')).toBe(true);
+    expect(b('event:locate-failed', 'code 1 User denied Geolocation')).toBe(false);
+    expect(b('event:locate-failed', 'code 3 Timeout expired')).toBe(false);
+    expect(b('event:locate-coarse', '±2km')).toBe(false);
+    expect(b('event:something-new', 'x')).toBe(true);
+  });
+
+  it('REPLAY INT-2/PD-2: a day of denied, failed and coarse locates keeps the digest green, with the counts shown', async () => {
+    const out = await run(digest, ROUTINE);
+    expect(out.map((r) => r.status)).toEqual(['ok']);
+    expect(out[0].detail).toContain('0 errors in 24h');
+    expect(out[0].detail).toContain('+66 informational');
+    expect(out[0].detail).toContain('event:locate-failed');
+  });
+
+  it('a code 1 from a permissions policy (our header broke) still fails the digest, informational counts ride along', async () => {
+    const out = await run(digest, [...ROUTINE, ...rep('event:locate-failed', 'code 1 Geolocation has been disabled in this document by permissions policy.', 4)]);
+    expect(out.map((r) => r.status)).toEqual(['fail', 'ok']);
+    expect(out[0].name).toContain('permissions policy');
+    expect(out[1].detail).toContain('+66 informational');
+  });
+
+  it('real breakage kinds each fail the digest', async () => {
+    const out = await run(digest, [
+      ...ROUTINE,
+      ...rep('error', "TypeError: Cannot read properties of undefined (reading 'lat')", 3),
+      ...rep('rejection', 'Load failed', 3),
+      ...rep('event:data-load', 'HTTP 503', 3),
+      ...rep('event:block-open-timeout', 'locate', 3),
+      ...rep('event:push-save-failed', 'ios save-failed:429 slow down', 3),
+      ...rep('event:push-off-failed', 'web HTTP 500', 3),
+    ]);
+    expect(out.filter((r) => r.status === 'fail').map((r) => r.name.split(' `')[0]).sort()).toEqual([
+      'error: error', 'error: event:block-open-timeout', 'error: event:data-load', 'error: event:push-off-failed',
+      'error: event:push-save-failed', 'error: rejection',
+    ]);
+  });
+
+  it('REPLAY PD-3: a burst of routine locates never trips the spike check; 25 real errors do', async () => {
+    const quiet = await run(checkErrorSpike, ROUTINE);
+    expect(quiet.status).toBe('ok');
+    expect(quiet.detail).toMatch(/^0 errors in the last 35 min \(\+66 informational/);
+    const loud = await run(checkErrorSpike, [...ROUTINE, ...rep('event:data-load', 'Load failed', 25)]);
+    expect(loud.status).toBe('fail');
+    expect(loud.detail).toMatch(/^25 errors from real users/);
+    expect(loud.detail).not.toContain('locate');
   });
 });

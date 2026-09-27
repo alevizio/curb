@@ -6,7 +6,7 @@
 //
 //   node scripts/monitor/smoke.mjs [--digest] [--out results.json]
 //     default   uptime + data + basemap + SEO pages + sweep-alert sender freshness + error spike
-//     --digest  nightly: error groups seen >= 3 times in the last 24h (from /api/client-error)
+//     --digest  nightly: breakage groups seen >= 3 times in the last 24h (from /api/client-error)
 // Env: MONITOR_SITE (default https://curb.guide), CRON_SECRET (error log + sender status; those two
 //      checks are skipped if unset).
 import { writeFileSync } from 'node:fs';
@@ -21,6 +21,35 @@ const TILE = { z: 16, x: 10483, y: 25333 }; // Mission, inside the baked SF set
 export const ALERTS_MAX_AGE_MIN = 40;       // the sender runs every 15 min (QStash); 40 = two missed ticks + slack
 export const ERROR_SPIKE = 25;               // errors per 30 min that mean "something broke for many"
 export const DIGEST_MIN = 3;                 // nightly: only groups seen at least this often
+
+// Which reports mean something broke, per kind, from index.html's reporters (the error / rejection
+// listeners and every curbReport call). The rest is the visitor's own choice or device: blocked location,
+// no fix (code 2) or a timeout (code 3), no geolocation API, a coarse fix (Precise Location off), a
+// notification denial. Those stay in the log and in the digest as informational counts, never failing.
+// A code 1 that is NOT a user denial (a permissions policy, an insecure origin) is ours to fix. Browser
+// denial texts: Chrome/WebKit "User denied Geolocation", Firefox "User denied geolocation prompt"; the
+// iOS app's own is in ContentView.swift. monitor.test.mjs fails if index.html reports an unlisted kind;
+// an unlisted kind (or a group past the log's top 50) still counts as breakage, never silently dropped.
+const DENIED_LOCATE = /^code 1 (User denied|Location permission is off for CURB)/i;
+const DENIED_PUSH = /^(ios|web|restyle|refresh) (fail:)?(denied|permission-)/; // the page filters these; belt and braces
+export const REPORT_KINDS = {
+  error: () => true,                                      // uncaught script error
+  rejection: () => true,                                  // unhandled promise rejection
+  'event:data-load': () => true,                          // a DataSF viewport load failed
+  'event:block-open-timeout': () => true,                 // a tapped / located / linked block never opened
+  'event:push-save-failed': (msg) => !DENIED_PUSH.test(msg),
+  'event:push-off-failed': (msg) => !DENIED_PUSH.test(msg),
+  'event:locate-failed': (msg) => /^code 1\b/.test(msg) && !DENIED_LOCATE.test(msg), // only a code 1 we caused
+  'event:locate-coarse': () => false,                     // an approximate fix: a device setting
+};
+export const isBreakage = (g) => (Object.hasOwn(REPORT_KINDS, g.k) ? REPORT_KINDS[g.k](String(g.msg)) : true);
+/** Split the error log into breakage and informational groups (total = everything minus informational). */
+export function realErrors(d) {
+  const info = d.groups.filter((g) => !isBreakage(g));
+  const infoTotal = info.reduce((n, g) => n + g.count, 0);
+  return { total: d.total - infoTotal, groups: d.groups.filter(isBreakage), info, infoTotal };
+}
+const fyi = (d) => d.infoTotal ? ` (+${d.infoTotal} informational, not failing: ${d.info.slice(0, 5).map((g) => `${g.count}× ${g.k} ${lit(g.msg, 60)}`).join(', ')})` : '';
 
 const ok = (name, detail = '') => ({ name, status: 'ok', detail });
 const fail = (name, detail) => ({ name, status: 'fail', detail });
@@ -149,22 +178,25 @@ export async function checkErrorSpike(f, now = Date.now()) {
   const name = 'user error rate';
   if (!process.env.CRON_SECRET) return skip(name, 'CRON_SECRET not set');
   try {
-    const d = await fetchErrors(f, now - 35 * 60000);
+    const d = realErrors(await fetchErrors(f, now - 35 * 60000));
     return d.total >= ERROR_SPIKE
       ? fail(name, `${d.total} errors from real users in the last 35 min. Top: ${d.groups.slice(0, 3).map(describe).join(' · ')}`)
-      : ok(name, `${d.total} errors in the last 35 min`);
+      : ok(name, `${d.total} errors in the last 35 min${fyi(d)}`);
   } catch (e) { return fail(name, `error log unreachable: ${e.message}`); }
 }
 
-/** Nightly digest: one "check" per error group seen >= DIGEST_MIN times in 24h (stable names → the
+/** Nightly digest: one "check" per breakage group seen >= DIGEST_MIN times in 24h (stable names → the
  *  alert issue only gets a new comment when a NEW kind of error shows up). */
 export async function digest(f, now = Date.now()) {
   if (!process.env.CRON_SECRET) return [skip('error digest', 'CRON_SECRET not set')];
   try {
-    const d = await fetchErrors(f, now - 24 * 3600e3);
+    const d = realErrors(await fetchErrors(f, now - 24 * 3600e3));
     const big = d.groups.filter((g) => g.count >= DIGEST_MIN);
-    if (!big.length) return [ok('error digest', `${d.total} errors in 24h, none repeated ${DIGEST_MIN}+ times`)];
-    return big.map((g) => fail(`error: ${g.k} ${lit(g.msg, 80)}`, describe(g) + (g.sample?.stack ? `\n  ${lit(g.sample.stack, 300)}` : '')));
+    if (!big.length) return [ok('error digest', `${d.total} errors in 24h, none repeated ${DIGEST_MIN}+ times${fyi(d)}`)];
+    return [
+      ...big.map((g) => fail(`error: ${g.k} ${lit(g.msg, 80)}`, describe(g) + (g.sample?.stack ? `\n  ${lit(g.sample.stack, 300)}` : ''))),
+      ...(d.infoTotal ? [ok('error digest', `informational${fyi(d)}`)] : []),
+    ];
   } catch (e) { return [fail('error digest', `error log unreachable: ${e.message}`)]; }
 }
 
