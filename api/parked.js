@@ -65,7 +65,8 @@ export default async function handler(req, res) {
       webpush.setVapidDetails(VAPID_SUBJECT || 'mailto:you@example.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
       const body = `${spot.corridor || 'This block'} — next sweep ${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)}. Alerts armed.`;
       try {
-        await webpush.sendNotification(sub.subscription, JSON.stringify({ title: '🚗 Parked', body, url: '/', tag: 'curb-parked' }));
+        // an immediate confirmation: worthless (and names a stale spot) if delivered hours later
+        await webpush.sendNotification(sub.subscription, JSON.stringify({ title: '🚗 Parked', body, url: '/', tag: 'curb-parked' }), { TTL: 3600 });
       } catch (err) {
         if (err.statusCode === 410 || err.statusCode === 404) await deleteSub(rec.endpoint);
       }

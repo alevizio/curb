@@ -47,7 +47,9 @@ self.addEventListener('push', e => {
     badge: 'icons/icon-192.png',
     tag: p.tag || 'curb-sweep',
     renotify: true,
-    requireInteraction: true,
+    // Only the act-now pushes (lead / tonight) stay on screen until dismissed; a sticky night-before
+    // "Sweep day tomorrow" still showing on sweep day read as the wrong day. Tests never stick.
+    requireInteraction: p.requireInteraction === true,
     data: { url: p.url || '/' }
   };
   e.waitUntil(self.registration.showNotification(title, opts));

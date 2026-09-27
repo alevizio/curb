@@ -4,13 +4,17 @@
 //
 // Security model: you can only ever target your OWN web-push subscription or APNs token (which you
 // already possess), so the worst anyone can do is spam themselves — no auth needed beyond a short
-// per-identity rate cap. Copy is rendered by the SAME pure lib/notify-core.js the cron uses, so a
-// test is byte-identical to the real thing.
+// per-identity rate cap. Copy is rendered by the SAME pure lib/notify-core.js the cron uses, against
+// the caller's REAL next sweep, but each push is labelled "Test · <which alert> (<when it really
+// fires>)" with the real title moved into the body — so a Saturday test never claims "Sweep day
+// tomorrow" or "in ~30 min" about a Tuesday sweep.
 //
 // ?dryRun=1  -> returns the rendered payloads WITHOUT sending (QA: inspect copy end-to-end, no device).
-// Body: { which?: 'eve'|'morn'|'lead'|'all', level?, voice?, spot?, subscription? | token? }
+// Body: { which?: 'eve'|'morn'|'lead'|'tonight'|'all', level?, voice?, spot?, subscription? | token? }
 import webpush from 'web-push';
-import { renderOne, normLevel, normVoice, LEVELS } from '../lib/notify-core.js';
+import { renderOne, normLevel, normVoice, touchpointsFor, sfHour } from '../lib/notify-core.js';
+import '../lib/sweep-core.js';
+const { alertAnchors, sfParts, sfWallToInstant } = globalThis;
 import { apnsConfigured, getProviderToken, openSession, sendOne, altHost } from './_apns.js';
 import { claimSlot } from './_store.js';
 
@@ -24,9 +28,11 @@ function validWebSub(s) {
   if (u.protocol !== 'https:' || !PUSH_HOST.test(u.hostname)) return false;
   return Boolean(s.keys && typeof s.keys.p256dh === 'string' && typeof s.keys.auth === 'string');
 }
-const WHICH = ['eve', 'morn', 'lead', 'all'];
+const WHICH = ['eve', 'morn', 'lead', 'tonight', 'all'];
 // Distinct tags so a test never collapses/replaces a genuinely-armed alert's pending notification.
 const testTag = (key) => 'curb-test-' + key;
+const LABEL = { eve: 'Night before', morn: 'Morning of', lead: '30 min before', tonight: 'Night before' };
+const sfDay = (t) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short' }).format(new Date(t));
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'POST only' }); return; }
@@ -37,21 +43,29 @@ export default async function handler(req, res) {
     const voice = normVoice(body.voice);
     const which = WHICH.includes(body.which) ? body.which : 'lead';
 
-    // A demo sweep 30 min out, carrying the caller's real block context (name/side/ticket-time) so the
-    // copy reads naturally. renderOne only needs nextSweepISO + corridor/tip — not the eve/morn anchors.
+    // The caller's real next sweep (so times are real, round hours) + block context; with no future
+    // sweep, a demo one tomorrow at 9 AM SF.
     const real = (body.spot && typeof body.spot === 'object') ? body.spot : {};
+    let sweep = Date.parse(real.nextSweepISO);
+    if (!(sweep > Date.now())) {
+      const p = sfParts(new Date()), t = new Date(Date.UTC(p.y, p.mo - 1, p.da) + 864e5);
+      sweep = +sfWallToInstant(t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate(), 9);
+    }
     const spot = {
       corridor: String(real.corridor || '').slice(0, 120) || 'Your block',
       blockside: String(real.blockside || '').slice(0, 60),
       tip: String(real.tip || '').replace(/[^0-9apmAPM:.\s~-]/g, '').trim().slice(0, 14),
-      nextSweepISO: new Date(Date.now() + 30 * 60000).toISOString(),
+      nextSweepISO: new Date(sweep).toISOString(),
       level, voice,
     };
-    // "all" replays the caller's ACTUAL cadence for their chosen level (Light=1, Normal=2, Intense=3).
-    const plan = (which === 'all' ? LEVELS[level].touchpoints : [which]).map((tp) => {
+    const a = alertAnchors(sweep);
+    const fireAt = { eve: +a.eve, morn: sweep - 2 * 3600e3, lead: sweep - 30 * 60000, tonight: +a.tonight };
+    // "all" replays the caller's ACTUAL cadence (Light=1, Normal=2, Intense=3; a night sweep = tonight).
+    const plan = (which === 'all' ? touchpointsFor(level, spot.nextSweepISO) : [which]).map((tp) => {
       const mins = tp === 'lead' ? 30 : tp === 'morn' ? 120 : undefined;
       const r = renderOne(spot, tp, { level, voice, mins });
-      return { key: r.key, tag: testTag(r.key), title: r.title, body: r.body };
+      const when = `${sfDay(fireAt[r.key])} ${sfHour(new Date(fireAt[r.key]).toISOString())}`;
+      return { key: r.key, tag: testTag(r.key), title: `Test · ${LABEL[r.key]} (${when})`, body: `${r.title} — ${r.body}` };
     });
 
     if (dryRun) { res.status(200).json({ ok: true, dryRun: true, level, voice, which, plan }); return; }
@@ -75,7 +89,8 @@ export default async function handler(req, res) {
       const results = [];
       for (const p of plan) {
         try {
-          await webpush.sendNotification(sub, JSON.stringify({ title: p.title, body: p.body, url: '/', tag: p.tag }));
+          // a test has no real deadline — let the push service drop it after 5 min (like the APNs test)
+          await webpush.sendNotification(sub, JSON.stringify({ title: p.title, body: p.body, url: '/', tag: p.tag }), { TTL: 300 });
           results.push({ key: p.key, ok: true });
         } catch (e) {
           results.push({ key: p.key, ok: false, status: e.statusCode || 0 });
