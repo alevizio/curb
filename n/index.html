@@ -96,6 +96,14 @@ h2 b{color:var(--red-text)}
 ul.streets{list-style:none;margin-top:6px;display:grid;gap:8px}
 ul.streets li{display:flex;justify-content:space-between;gap:12px;border-bottom:1.5px dashed rgba(23,21,15,.2);padding-bottom:7px;font-weight:700}
 ul.streets li .n{color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.blocks{columns:2 300px;column-gap:26px;margin-top:14px}
+.blocks details{break-inside:avoid;border-bottom:1.5px dashed rgba(23,21,15,.2);padding:9px 0}
+.blocks summary{font-weight:800;cursor:pointer}
+.blocks summary span{font-size:13px;font-weight:700;color:var(--ink-soft)}
+.blocks ul{list-style:none;display:grid;gap:6px;margin:8px 0 4px}
+.blocks li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;font-size:14px}
+.blocks li a{font-weight:700;text-underline-offset:3px}
+.blocks li span{font-size:13px;font-weight:600;color:var(--ink-soft)}
 .faq{margin-top:10px}
 .faq details{border:2.5px solid var(--ink);border-radius:13px;background:var(--sign);box-shadow:3px 3px 0 var(--ink);padding:14px 18px;margin-top:12px}
 .faq summary{font-family:'Anton',sans-serif;font-size:19px;text-transform:uppercase;cursor:pointer;letter-spacing:.01em}

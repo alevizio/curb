@@ -53,6 +53,14 @@ try {
   check('stats.json', 'sweepDow[] length', Array.isArray(stats.sweepDow) ? stats.sweepDow.length : NaN, 7, 7);
   check('stats.json', 'sweepHour[] length', Array.isArray(stats.sweepHour) ? stats.sweepHour.length : NaN, 18, 26);
 
+  // schedules.json — every swept block baked for the /b/ pages + /n/ block lists (build:schedules);
+  // a short DataSF page or a moved column shrinks it, and /b/ pages would start 404ing
+  const sch = load('schedules.json');
+  check('schedules.json', 'meta.rows', sch._meta?.rows, 25000, 60000);
+  check('schedules.json', 'keyed entries', Object.keys(sch.b || {}).length, 8000, 20000);
+  check('schedules.json', 'entries with a neighborhood', Object.values(sch.b || {}).filter((e) => e[3] >= 0).length, 8000, 20000);
+  check('schedules.json', 'neighborhoods with a page', (sch.hoods || []).filter((h) => h[2]).length, 25, 60);
+
   // sweeps.json — sweeper-GPS pass times keyed by cnn (#26-5451), counts live in _meta
   const sw = load('sweeps.json');
   check('sweeps.json', 'meta.blocks', sw._meta?.blocks, 50, 400);

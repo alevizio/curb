@@ -141,6 +141,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   /* chart hover: full-column/row hit zones + a paper tooltip */
   svg .hit{fill:transparent}
   svg .hit:hover{fill:rgba(23,21,15,.08)}
+  svg a:hover text,svg a:focus text{text-decoration:underline}
   #tip{position:fixed;z-index:60;pointer-events:none;background:var(--sign);border:2.5px solid var(--ink);
     border-radius:11px;padding:9px 12px 10px;font-size:13px;font-weight:600;line-height:1.5;
     color:var(--ink-soft);box-shadow:4px 4px 0 var(--ink);max-width:280px;opacity:0;transition:opacity .12s}
@@ -501,23 +502,27 @@ function renderCharts(S){
   {
     const rows=S.hoods.slice(0,15);
     const W=MOB?CW:960,rh=MOB?40:32,P={t:4},H=P.t+rows.length*rh+6,max=rows[0].rev;
+    // hood labels link to their /n/ page (top 15 by fines are all far over the page floor), drawn after
+    // the row's hit zone so the name is tappable while the rest of the row keeps its tooltip
+    const hslug=h=>h.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
     let s='';
     rows.forEach((r,i)=>{
       const y=P.t+i*rh;
+      let lbl;
       if(MOB){
         const w=Math.max((W-4)*(r.rev/max),4);
-        s+=`<text x="0" y="${y+11}" font-size="12" font-weight="${i<3?800:700}" fill="${INK}">${r.hood}</text>
-          <text x="${W}" y="${y+11}" text-anchor="end" font-size="10.5" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>
+        lbl=`<text x="0" y="${y+11}" font-size="12" font-weight="${i<3?800:700}" fill="${INK}">${r.hood}</text>`;
+        s+=`<text x="${W}" y="${y+11}" text-anchor="end" font-size="10.5" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>
           <rect x="0" y="${y+16}" width="${w}" height="13" rx="3" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>`;
       }else{
         const w=(W-300)*(r.rev/max);
+        lbl=`<text x="218" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>`;
         s+=`<rect x="226" y="${y+5}" width="${Math.max(w,4)}" height="${rh-11}" rx="4" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>
-          <text x="218" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>
           <text x="${230+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>`;
       }
       s+=`<rect class="hit" x="0" y="${y}" width="${W}" height="${rh}" rx="6"${tipA(
         `<span class="tt">${r.hood}</span>${fmt$(r.rev)} in sweep fines (2 yrs)<br>`+
-        `${fmtN(r.n)} tickets · ~$${Math.round(r.rev/r.n)} each`)}/>`;
+        `${fmtN(r.n)} tickets · ~$${Math.round(r.rev/r.n)} each`)}/><a href="/n/${hslug(r.hood)}">${lbl}</a>`;
     });
     $('chartHoods').setAttribute('height',H);
     draw('chartHoods',`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">${s}</svg>`);

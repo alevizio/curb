@@ -372,6 +372,13 @@
   .welcome .wabout:hover{background:rgba(23,21,15,.05)}
   .welcome .wfoot{margin-top:14px;font-size:11.5px;font-weight:600;color:var(--ink-soft);line-height:1.4;text-align:center}
   .welcome .wfoot a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px}
+  /* neighborhood links: the home page's crawlable path to every /n/ page. The card keeps its old
+     ~412px footprint on short screens and scrolls, instead of growing under the search bar + Layers. */
+  .welcome{max-height:max(420px,calc(100dvh - 360px));overflow-y:auto}
+  .welcome .whoods{margin-top:14px;padding-top:10px;border-top:2px solid var(--ink)}
+  .welcome .whoods p{margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .welcome .whoods ul{list-style:none;display:flex;flex-wrap:wrap;gap:0 9px;margin:0;padding:0}
+  .welcome .whoods a{font-size:11.5px;font-weight:700;line-height:1.65;color:var(--ink-soft);text-underline-offset:2px}
   @media (prefers-reduced-motion:no-preference){
     .welcome.open{animation:wpop .35s cubic-bezier(.16,1,.3,1)}
     @keyframes wpop{from{opacity:0;transform:translate(-50%,calc(-50% + 12px))}}
@@ -752,6 +759,9 @@
   </div>
   <button class="btn-go" id="welcomeGo">Show me the map</button>
   <a class="wabout" href="/about">How it works →</a>
+  <!-- hoods:start — one link per /n/ page, rewritten by scripts/build-hood-pages.mjs -->
+  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/n/bayview-hunters-point">Bayview Hunters Point</a></li><li><a href="/n/bernal-heights">Bernal Heights</a></li><li><a href="/n/castro-upper-market">Castro/Upper Market</a></li><li><a href="/n/chinatown">Chinatown</a></li><li><a href="/n/excelsior">Excelsior</a></li><li><a href="/n/financial-district-south-beach">Financial District/South Beach</a></li><li><a href="/n/glen-park">Glen Park</a></li><li><a href="/n/haight-ashbury">Haight Ashbury</a></li><li><a href="/n/hayes-valley">Hayes Valley</a></li><li><a href="/n/inner-richmond">Inner Richmond</a></li><li><a href="/n/inner-sunset">Inner Sunset</a></li><li><a href="/n/japantown">Japantown</a></li><li><a href="/n/lakeshore">Lakeshore</a></li><li><a href="/n/lone-mountain-usf">Lone Mountain/USF</a></li><li><a href="/n/marina">Marina</a></li><li><a href="/n/mission">Mission</a></li><li><a href="/n/mission-bay">Mission Bay</a></li><li><a href="/n/nob-hill">Nob Hill</a></li><li><a href="/n/noe-valley">Noe Valley</a></li><li><a href="/n/north-beach">North Beach</a></li><li><a href="/n/oceanview-merced-ingleside">Oceanview/Merced/Ingleside</a></li><li><a href="/n/outer-mission">Outer Mission</a></li><li><a href="/n/outer-richmond">Outer Richmond</a></li><li><a href="/n/pacific-heights">Pacific Heights</a></li><li><a href="/n/portola">Portola</a></li><li><a href="/n/potrero-hill">Potrero Hill</a></li><li><a href="/n/presidio-heights">Presidio Heights</a></li><li><a href="/n/russian-hill">Russian Hill</a></li><li><a href="/n/seacliff">Seacliff</a></li><li><a href="/n/south-of-market">South of Market</a></li><li><a href="/n/sunset-parkside">Sunset/Parkside</a></li><li><a href="/n/tenderloin">Tenderloin</a></li><li><a href="/n/twin-peaks">Twin Peaks</a></li><li><a href="/n/visitacion-valley">Visitacion Valley</a></li><li><a href="/n/west-of-twin-peaks">West of Twin Peaks</a></li><li><a href="/n/western-addition">Western Addition</a></li></ul></nav>
+  <!-- hoods:end -->
   <p class="wfoot">Free, no account — built on <a href="https://datasf.org" target="_blank" rel="noopener">SF's open data</a>. The posted sign always wins.</p>
 </div>
 
