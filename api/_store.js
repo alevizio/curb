@@ -107,6 +107,24 @@ export async function deleteSub(endpoint) {
   if (r) await r.hdel(KEY, endpoint);
 }
 
+/** Turn a web watch OFF ("✓ Alerts on" → Turn off). Ownership = the endpoint AND its keys.auth, which
+ *  only the browser holding the subscription has, compared in constant time with the stored one.
+ *  Disarms (spot = null — the cron skips spot-less records) rather than deleting, so auto-park and
+ *  its tokens still resolve the subscription. → 'ok' | 'not-found' | 'forbidden'. */
+export async function disarmSub(endpoint, auth) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  const v = await r.hget(KEY, endpoint);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return 'not-found';
+  const a = Buffer.from(String(auth || '')), b = Buffer.from(String(rec.subscription?.keys?.auth || ''));
+  if (!b.length || a.length !== b.length || !timingSafeEqual(a, b)) return 'forbidden';
+  rec.spot = null;
+  rec.notified = {};
+  await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
+  return 'ok';
+}
+
 /** Record that we already pushed for a given sweep time, so the cron won't repeat.
  *  field: 'notifiedFor' (the ~30-min lead push) or 'notifiedEveFor' (night-before). */
 export async function markNotified(endpoint, nextSweepISO, key = 'lead') {
@@ -188,7 +206,14 @@ export async function loadAllIosSubs() {
     .filter(Boolean);
 }
 
-/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken). */
+/** True if this APNs token already has a record (re-saves of a known token are never throttled). */
+export async function hasIosSub(token) {
+  const r = redis();
+  if (!r) return false;
+  return Boolean(await r.hexists(KEY_IOS, token));
+}
+
+/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken) or turn a watch off. */
 export async function deleteIosSub(token) {
   const r = redis();
   if (r) await r.hdel(KEY_IOS, token);
