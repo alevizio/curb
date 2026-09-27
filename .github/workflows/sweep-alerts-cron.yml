@@ -11,6 +11,9 @@
 # the monitor's PAT stored at QStash) must not be able to broadcast it. Run that test from your own
 # machine instead:
 #   curl -H "Authorization: Bearer $CRON_SECRET" 'https://curb.guide/api/send-notifications?test=ios'
+# Caveat: a dispatch may name ANY branch, and repo secrets reach every branch, so a branch that still
+# has the old copy of this file (with the input) can still be dispatched with it. Delete or update such
+# branches, or move CRON_SECRET into an Environment limited to main.
 name: sweep-alerts-cron
 
 on:
