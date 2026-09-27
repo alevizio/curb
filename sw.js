@@ -36,7 +36,7 @@ self.addEventListener('fetch', e => {
   })());
 });
 
-// Push payload shape: { title, body, url, tag }
+// Push payload shape: { title, body, url, tag, requireInteraction? }
 self.addEventListener('push', e => {
   let p = {};
   try { p = e.data ? e.data.json() : {}; } catch (_) { p = { body: e.data && e.data.text() }; }
