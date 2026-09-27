@@ -2,7 +2,8 @@
 // Generate the neighborhood street-cleaning SEO pages from data/stats.json.
 //   n/<slug>.html   — one editorial page per SF neighborhood
 //   n/index.html    — the directory of all neighborhoods
-// Plus refreshed <url> entries in sitemap.xml.
+// Plus refreshed <url> entries in sitemap.xml, and the home page's neighborhood links (the
+// hoods:start/end block in index.html). Each hood page lists its blocks from data/schedules.json.
 //
 // Each page targets "street cleaning in <hood>" long-tail queries with REAL stats
 // (volume, fines, when tickets actually happen, heaviest streets, 5yr surge) — not a

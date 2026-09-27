@@ -10,7 +10,8 @@
 //     rows            [[side, dow, fromH, toH, weeksMask, holidays], ...]  side '' = no blockside;
 //                     dow = JS getDay; weeksMask bit i = week i+1; holidays 1 = sweeps through most
 //     prev/next       adjacent swept block on the same street (shared endpoint), '' if none
-//     tag             side label that tells apart blocks sharing street+cross streets ('' if unique)
+//     tag             label (side, roadway, address range…) that tells apart blocks sharing
+//                     street + cross streets ('' if unique)
 //     modified        YYYY-MM-DD this entry last changed (carried over from the previous file) —
 //                     the real <lastmod> for sitemap-blocks.xml
 //
