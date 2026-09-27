@@ -69,18 +69,41 @@ describe('iOS: throttle + off switch', () => {
     expect((await call(ios, 'POST', { token: t3, spot: SPOT }, '5.6.7.8')).code).toBe(200);
   });
 
-  it('POST {spot:{off:true}} (what the shipped app can send) deletes the watch, even right after arming', async () => {
+  it('POST {spot:{off:true}} (what the shipped app can send) disarms the watch, even right after arming', async () => {
     await call(ios, 'POST', { token: TOKEN, spot: SPOT });
     const out = await call(ios, 'POST', { token: TOKEN, spot: { off: true } });
     expect(out.code).toBe(200);
     expect(out.body.off).toBe(true);
-    expect(iosRec()).toBeFalsy();
+    expect(iosRec().spot).toBe(null);
   });
 
-  it('DELETE {token} deletes too; a bad token is still rejected', async () => {
+  it('DELETE {token} disarms too; an unknown token stores nothing; a bad token is still rejected', async () => {
     await call(ios, 'POST', { token: TOKEN, spot: SPOT });
     expect((await call(ios, 'DELETE', { token: TOKEN.toUpperCase() })).code).toBe(200);
-    expect(iosRec()).toBeFalsy();
+    expect(iosRec().spot).toBe(null);
+    expect((await call(ios, 'DELETE', { token: 'cd'.repeat(32) })).code).toBe(200);
+    expect(iosRec('cd'.repeat(32))).toBeFalsy();
     expect((await call(ios, 'DELETE', { token: 'nope' })).code).toBe(400);
+  });
+});
+
+describe('off → on for the same sweep keeps the de-dupe (no repeat of a push already sent)', () => {
+  const sent = { lead: SPOT.nextSweepISO };
+  it('web: DELETE then POST', async () => {
+    await call(web, 'POST', { subscription: SUB, spot: SPOT });
+    mem['curb:subs'][SUB.endpoint] = JSON.stringify({ ...webRec(), notified: sent });
+    await call(web, 'DELETE', { subscription: SUB });
+    expect(webRec().notified).toEqual(sent);
+    expect((await call(web, 'POST', { subscription: SUB, spot: SPOT })).code).toBe(200);
+    expect(webRec()).toMatchObject({ notified: sent, spot: { nextSweepISO: SPOT.nextSweepISO } });
+  });
+
+  it('iOS: {spot:{off:true}} then POST, never throttled as a new token', async () => {
+    await call(ios, 'POST', { token: TOKEN, spot: SPOT });
+    mem['curb:apns'][TOKEN] = JSON.stringify({ ...iosRec(), notified: sent });
+    await call(ios, 'POST', { token: TOKEN, spot: { off: true } });
+    expect(iosRec().notified).toEqual(sent);
+    expect((await call(ios, 'POST', { token: TOKEN, spot: SPOT })).code).toBe(200);
+    expect(iosRec()).toMatchObject({ notified: sent, spot: { nextSweepISO: SPOT.nextSweepISO } });
   });
 });

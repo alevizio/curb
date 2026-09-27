@@ -312,7 +312,8 @@ push alongside Web Push:
   device token + spot in the `curb:apns` Upstash hash (sibling of `curb:subs`, identical shape).
   Only brand-new tokens are throttled (per client IP); re-saves of a known token always land (a
   per-token 60 s throttle used to drop block switches and style changes). Off: `DELETE {token}` or
-  `POST {token, spot:{off:true}}` — the shipped app's bridge can only POST the page's spot.
+  `POST {token, spot:{off:true}}` — the shipped app's bridge can only POST the page's spot. Off DISARMS
+  (`spot = null`, like web) rather than deleting, so the de-dupe survives turning alerts back on.
 - `api/send-notifications.js` runs a SECOND loop over `loadAllIosSubs()` with the IDENTICAL
   lead-window / night-before / dedupe / forever-watch logic, delivering over APNs instead of
   web-push; `?test=ios` (authed) sends a one-off delivery test. Env: `APNS_KEY_P8_B64`/`APNS_KEY_P8`,
@@ -336,7 +337,9 @@ Forever-watch (implemented): the saved `spot` carries `rules` — EVERY schedule
 (multi-day sides are ~25% of SF; `sanitizeRules` drops invalid rows one by one, dedupes, caps at 16)
 — plus `rule` (the row behind `nextSweepISO`, kept for back-compat). After each sweep window ends the
 cron's `recomputeSpot` advances `nextSweepISO` to the EARLIEST next occurrence across the rules (plus
-fresh anchors) and RESETS the per-window de-dupe (`advanceSpot` / `advanceIosSpot`). A watch stops
+fresh anchors) via `advanceSpot` / `advanceIosSpot`. The `notified` de-dupe map is NEVER reset (not by
+the advance, a re-save, a block switch or Turn off): each entry holds the sweep instant it fired for, so
+it only blocks that sweep — an off → on of the same sweep can't re-send a push. A watch stops
 auto-advancing once it goes stale past `MAX_WATCH_AGE` (~120 days) so a frozen rule can't track a city
 schedule change. In the sheet, ties between a side's rows go to the earliest next sweep.
 

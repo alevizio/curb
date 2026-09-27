@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     if (!sub || !sub.subscription) { res.status(410).json({ error: 'subscription gone' }); return; }
 
     // Build + persist the watch (carries the recurring rule → forever-watch). saveSub stamps a fresh
-    // savedAt (this IS live data) and resets de-dupe since it's a new sweep time.
+    // savedAt (this IS live data); its de-dupe entries name the sweep they fired for, so a new sweep fires.
     const ns = spot.ns;
     const prev = new Date(Date.UTC(ns.y, ns.mo - 1, ns.da) - 864e5);
     const eve = sfWallToInstant(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate(), 20);

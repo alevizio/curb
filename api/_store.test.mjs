@@ -1,7 +1,8 @@
 // Tests for the subscription store invariants (api/_store.js) with an in-memory Upstash mock.
-// The load-bearing invariant (judge-flagged, previously untested): re-arming the SAME sweep
-// preserves the de-dupe fields (no double push), a DIFFERENT sweep resets them, and a re-tap
-// must not drop the recurrence rule.
+// The load-bearing invariant (judge-flagged, previously untested): the de-dupe map is never reset —
+// its entries name the sweep they fired for, so re-arming, an off → on or a re-arm by the cron can't
+// double-push the same sweep, and they never block a different one — and a re-tap must not drop the
+// recurrence rule.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 process.env.KV_REST_API_URL = 'https://fake.upstash.io';
@@ -22,7 +23,9 @@ vi.mock('@upstash/redis', () => ({
 
 const { saveSub, saveIosSub, advanceSpot, markNotified, loadAllSubs, getSub,
   saveToken, resolveToken, deleteTokensForEndpoint,
-  ensureOwnerProof, verifyOwnerProof, claimSlot } = await import('./_store.js');
+  ensureOwnerProof, verifyOwnerProof, claimSlot,
+  disarmSub, disarmIosSub, markIosNotified, loadAllIosSubs } = await import('./_store.js');
+const { dueAlert } = await import('../lib/notify-core.js');
 
 const SUB = { endpoint: 'https://web.push.apple.com/abc123', keys: { p256dh: 'p', auth: 'a' } };
 const EP = SUB.endpoint;
@@ -108,14 +111,40 @@ describe('saveSub de-dupe preservation', () => {
     expect(r.notified.eve).toBe(spotA.nextSweepISO);
   });
 
-  it('a DIFFERENT sweep resets the de-dupe map', async () => {
+  it('a DIFFERENT sweep keeps the map, whose entries name the old sweep and so cannot block the new one', async () => {
     await saveSub(SUB, spotA);
     await markNotified(EP, spotA.nextSweepISO, 'lead');
     await saveSub(SUB, spotB);
     const r = await rec();
-    expect(r.notified.lead).toBe(undefined);
-    expect(r.notified.eve).toBe(undefined);
+    expect(r.notified).toEqual({ lead: spotA.nextSweepISO });
     expect(r.spot.nextSweepISO).toBe(spotB.nextSweepISO);
+    const leadTime = Date.parse(spotB.nextSweepISO) - 20 * 60000;
+    expect(dueAlert(r.spot, r.notified, leadTime)).toMatchObject({ key: 'lead' });
+  });
+
+  it('turning alerts off then on for the SAME sweep never re-sends what was already pushed (web + iOS)', async () => {
+    const leadTime = Date.parse(spotA.nextSweepISO) - 20 * 60000, tok = 'ab'.repeat(32);
+    await saveSub(SUB, spotA);
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    expect(await disarmSub(EP, 'a')).toBe('ok');
+    expect((await rec()).spot).toBe(null);
+    await saveSub(SUB, { ...spotA });
+    const r = await rec();
+    expect(r.notified).toEqual({ lead: spotA.nextSweepISO });
+    expect(dueAlert(r.spot, r.notified, leadTime)).toBe(null);
+
+    await saveIosSub(tok, spotA);
+    await markIosNotified(tok, spotA.nextSweepISO, 'lead');
+    await disarmIosSub(tok);
+    expect(JSON.parse(mem['curb:apns'][tok])).toMatchObject({ spot: null, notified: { lead: spotA.nextSweepISO } });
+    await saveIosSub(tok, { ...spotA });
+    const i = (await loadAllIosSubs()).find((x) => x.token === tok);
+    expect(dueAlert(i.spot, i.notified, leadTime)).toBe(null);
+  });
+
+  it('turning an unknown iOS token off stores nothing', async () => {
+    await disarmIosSub('cd'.repeat(32));
+    expect(mem['curb:apns']).toBe(undefined);
   });
 
   it('a re-tap that omits the rule does not drop it (forever-watch survives)', async () => {
@@ -151,14 +180,15 @@ describe('saveSub de-dupe preservation', () => {
 });
 
 describe('advanceSpot', () => {
-  it('replaces the spot and resets the de-dupe map', async () => {
+  it('replaces the spot and keeps the de-dupe map (its entries only block the sweep they name)', async () => {
     await saveSub(SUB, spotA);
     await markNotified(EP, spotA.nextSweepISO, 'lead');
     await markNotified(EP, spotA.nextSweepISO, 'eve');
     await advanceSpot(EP, spotB);
     const r = await rec();
     expect(r.spot.nextSweepISO).toBe(spotB.nextSweepISO);
-    expect(r.notified).toEqual({});
+    expect(r.notified).toEqual({ lead: spotA.nextSweepISO, eve: spotA.nextSweepISO });
+    expect(dueAlert(r.spot, r.notified, Date.parse(spotB.nextSweepISO) - 20 * 60000)).toMatchObject({ key: 'lead' });
   });
 
   it('preserves savedAt (the staleness clock is client-refresh, not cron-advance)', async () => {

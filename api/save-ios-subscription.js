@@ -5,7 +5,7 @@
 // Turn alerts off: DELETE { token }, or — because the shipped app's bridge can only POST whatever
 // spot the page hands it, and the page never learns the token — POST { token, spot: { off: true } }.
 // Holding the token is the same bar as saving a watch for it.
-import { saveIosSub, storeReady, claimSlot, hasIosSub, deleteIosSub } from './_store.js';
+import { saveIosSub, storeReady, claimSlot, hasIosSub, disarmIosSub } from './_store.js';
 import { sanitizeSpot } from './_spot.js';
 
 // APNs device tokens are hex strings — historically 64 chars, but Apple has said they may grow, so
@@ -30,10 +30,11 @@ export default async function handler(req, res) {
     }
     const tok = token.toLowerCase();
     // Off is checked BEFORE sanitizeSpot ({off:true} has no sweep → would 400) and never throttled,
-    // so "arm, then turn off right away" works.
+    // so "arm, then turn off right away" works. It disarms rather than deletes, keeping the de-dupe
+    // so turning alerts back on for the same sweep can't re-send a push already delivered.
     if (req.method === 'DELETE' || (spot && spot.off === true)) {
       if (!storeReady()) { res.status(503).json({ error: 'store not configured' }); return; }
-      await deleteIosSub(tok);
+      await disarmIosSub(tok);
       res.status(200).json({ ok: true, off: true });
       return;
     }

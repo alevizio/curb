@@ -51,8 +51,9 @@ export function storeReady() {
 }
 
 /** Upsert a subscription + its saved spot, keyed by endpoint.
- *  Notify state resets for a NEW sweep time but is preserved when the user re-arms
- *  the same sweep (re-tapping the button must not let the cron push twice). */
+ *  The de-dupe map is always kept: each entry holds the sweep it fired for, so it can only ever block
+ *  that same sweep. Re-tapping, turning alerts off and on, or switching blocks never re-sends a push
+ *  already delivered, and never blocks a different sweep. */
 export async function saveSub(subscription, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
@@ -61,8 +62,8 @@ export async function saveSub(subscription, spot) {
   try {
     const v = await r.hget(KEY, subscription.endpoint);
     const prev = typeof v === 'string' ? safeParse(v) : v;
+    if (prev) notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
     if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
       // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
       // forever-watch to one-shot). Carry the prior rule(s)/cnn/sideKey forward when absent.
       if (out && !out.rule && prev.spot.rule) {
@@ -82,7 +83,8 @@ export async function saveSub(subscription, spot) {
 }
 
 /** Advance a subscription to its next computed sweep occurrence (the cron "forever-watch"
- *  re-arm). Replaces the spot and RESETS the per-window de-dupe so the next sweep can fire.
+ *  re-arm). Replaces the spot; the de-dupe map is kept (its entries name the sweep they fired for,
+ *  so the next sweep is free to fire).
  *  Preserves savedAt — the re-arm is clock-driven, not a fresh client refresh.
  *  Benign race: a concurrent same-sweep client saveSub is a last-writer-wins read-modify-write;
  *  worst case is one duplicate or missed re-arm that self-corrects on the next 15-min tick. */
@@ -93,7 +95,7 @@ export async function advanceSpot(endpoint, newSpot) {
   const rec = typeof v === 'string' ? safeParse(v) : v;
   if (!rec) return;
   rec.spot = newSpot;
-  rec.notified = {};
+  rec.notified = notifiedMap(rec);
   delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
 }
@@ -121,7 +123,8 @@ export async function deleteSub(endpoint) {
 /** Turn a web watch OFF ("✓ Alerts on" → Turn off). Ownership = the endpoint AND its keys.auth, which
  *  only the browser holding the subscription has, compared in constant time with the stored one.
  *  Disarms (spot = null — the cron skips spot-less records) rather than deleting, so auto-park and
- *  its tokens still resolve the subscription. → 'ok' | 'not-found' | 'forbidden'. */
+ *  its tokens still resolve the subscription, and the de-dupe survives turning it back on for the same
+ *  sweep. → 'ok' | 'not-found' | 'forbidden'. */
 export async function disarmSub(endpoint, auth) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
@@ -131,7 +134,7 @@ export async function disarmSub(endpoint, auth) {
   const a = Buffer.from(String(auth || '')), b = Buffer.from(String(rec.subscription?.keys?.auth || ''));
   if (!b.length || a.length !== b.length || !timingSafeEqual(a, b)) return 'forbidden';
   rec.spot = null;
-  rec.notified = {};
+  rec.notified = notifiedMap(rec);
   await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
   return 'ok';
 }
@@ -166,8 +169,8 @@ export async function getSub(endpoint) {
 // field (endpoint/p256dh/auth) ever appears here, so validSubscription() never sees a hex token.
 const KEY_IOS = 'curb:apns';
 
-/** Upsert an APNs device token + its saved spot. Mirrors saveSub: preserves the per-window de-dupe
- *  on a same-time re-arm and carries the recurrence rule/cnn/sideKey forward when omitted. */
+/** Upsert an APNs device token + its saved spot. Mirrors saveSub: keeps the de-dupe map and carries
+ *  the recurrence rule/cnn/sideKey forward on a same-time re-arm when omitted. */
 export async function saveIosSub(token, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
@@ -176,8 +179,8 @@ export async function saveIosSub(token, spot) {
   try {
     const v = await r.hget(KEY_IOS, token);
     const prev = typeof v === 'string' ? safeParse(v) : v;
+    if (prev) notified = notifiedMap(prev);
     if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      notified = notifiedMap(prev);
       if (out && !out.rule && prev.spot.rule) {
         out.rule = prev.spot.rule;
         if (prev.spot.rules) out.rules = prev.spot.rules;
@@ -199,7 +202,7 @@ export async function advanceIosSpot(token, newSpot) {
   const rec = typeof v === 'string' ? safeParse(v) : v;
   if (!rec) return;
   rec.spot = newSpot;
-  rec.notified = {};
+  rec.notified = notifiedMap(rec);
   delete rec.notifiedFor; delete rec.notifiedEveFor;
   await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
 }
@@ -225,10 +228,24 @@ export async function hasIosSub(token) {
   return Boolean(await r.hexists(KEY_IOS, token));
 }
 
-/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken) or turn a watch off. */
+/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken). */
 export async function deleteIosSub(token) {
   const r = redis();
   if (r) await r.hdel(KEY_IOS, token);
+}
+
+/** Turn an iOS watch OFF. Like disarmSub: spot = null (the cron skips it) and the de-dupe map is kept,
+ *  so turning alerts back on for the same sweep can't re-send a push already delivered. An unknown
+ *  token stores nothing. */
+export async function disarmIosSub(token) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  const v = await r.hget(KEY_IOS, token);
+  const rec = typeof v === 'string' ? safeParse(v) : v;
+  if (!rec) return;
+  rec.spot = null;
+  rec.notified = notifiedMap(rec);
+  await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
 }
 
 /** Record that we already pushed an iOS token for a given sweep time (per-window de-dupe). */

@@ -33,6 +33,7 @@ const fetchMock = vi.fn(async () => ({ ok: true }));
 vi.stubGlobal('fetch', fetchMock);
 
 const { default: handler } = await import('./send-notifications.js');
+const { saveSub, disarmSub } = await import('./_store.js');
 
 const SELF = 'https://curb.guide/api/send-notifications';
 const EP = 'https://fcm.googleapis.com/fcm/send/abc';
@@ -219,6 +220,19 @@ describe('failures + the run lock', () => {
     expect(err).toHaveBeenCalledWith('web push failed:', 400, 'BadWebPushTopic');
     expect(mem['curb:subs'][EP]).toBeTruthy();
     err.mockRestore();
+  });
+});
+
+describe('de-dupe across a user\'s off → on', () => {
+  it('turning alerts off and back on for the same sweep does not re-send the push already delivered', async () => {
+    expect((await run(bearer())).body.web.sent).toBe(1);          // the 30-min push
+    vi.setSystemTime(NOW + 2 * 60000);
+    expect(await disarmSub(EP, SUB.keys.auth)).toBe('ok');         // ✓ Alerts on → Turn off
+    vi.setSystemTime(NOW + 4 * 60000);
+    await saveSub(SUB, { ...SPOT });                               // Sweep alerts again, same sweep
+    vi.setSystemTime(NOW + 5 * 60000);
+    expect((await run(await qstash())).body.web.sent).toBe(0);
+    expect(send).toHaveBeenCalledTimes(1);
   });
 });
 
