@@ -286,11 +286,13 @@ Files now present for the push feature:
   DISARMS (`spot = null`, the cron skips it) so auto-park keeps resolving the subscription.
 - `api/send-notifications.js` — the sender: loads subs, sends the touchpoint `dueAlert` says is due
   over web-push / APNs, de-dupes via `notified`, prunes on 410/404. Auth: an Upstash QStash
-  `Upstash-Signature` JWT (official `Receiver`, raw body — body parser off — and the exact URL
+  `Upstash-Signature` JWT (official `Receiver`, raw body — so the schedule's body must be EMPTY — and the exact URL
   `https://curb.guide/api/send-notifications`) OR `Bearer CRON_SECRET`; refuses anything else.
   `?test=ios` and `GET ?status=1` (last run time/outcome/trigger, no sends) are Bearer-only.
 - Triggers — `vercel.json` has NO cron (Hobby runs crons ~once a day). PRIMARY: an Upstash QStash
-  schedule, every 15 min, POST, empty body, destination exactly the URL above; env
+  schedule, every 15 min, POST, EMPTY body (REQUIRED: on Vercel the runtime's helpers consume a
+  non-empty body before the handler — `bodyParser:false` doesn't stop them — so even `{}` makes the
+  signature check fail and every QStash run 401s), destination exactly the URL above; env
   `QSTASH_CURRENT_SIGNING_KEY` / `QSTASH_NEXT_SIGNING_KEY`. QStash never holds CRON_SECRET (it also
   unlocks `?test=ios`, a push to every iOS device). BACKUP: `.github/workflows/sweep-alerts-cron.yml`
   curls with `Bearer ${{ secrets.CRON_SECRET }}` (repo secret, NEVER committed); a manual dispatch is a

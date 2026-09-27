@@ -3,7 +3,8 @@
 //
 // Triggers (vercel.json has no cron — Vercel Hobby runs crons ~once a day):
 //  - PRIMARY: an Upstash QStash schedule POSTs here every 15 min, signed with an Upstash-Signature JWT
-//    that is verified below against the raw body and SELF_URL. QStash never holds CRON_SECRET.
+//    that is verified below against the raw body and SELF_URL. QStash never holds CRON_SECRET. The
+//    schedule MUST have an EMPTY body (see rawBody below).
 //  - BACKUP: .github/workflows/sweep-alerts-cron.yml GETs with `Authorization: Bearer CRON_SECRET`.
 //    GitHub schedules are best-effort (Sep 2026: ~7 runs/day, not 96), so it only fills gaps.
 // Overlapping runs are safe: the run lock + per-sweep de-dupe below.
@@ -41,8 +42,12 @@ const deepLink = (spot) => (spot && spot.cnn ? '/b/' + spot.cnn : '/');
 // (no query string), so a signed request can never reach ?test / ?status.
 const SELF_URL = 'https://curb.guide/api/send-notifications';
 
-// The QStash signature covers a hash of the exact request bytes, so Vercel must not parse the body
-// (documented for plain Node functions). Nothing here reads a parsed body.
+// The QStash signature covers a hash of the exact request bytes. DEPLOY REQUIREMENT: the QStash schedule
+// must send an EMPTY body. On Vercel the Node runtime's request helpers read the whole stream before this
+// handler runs whenever a Content-Type is sent (the config below does not switch them off), and replay it
+// only to 'data'/'end' listeners, so rawBody() gets '' for e.g. a `{}` JSON body; a body sent without a
+// Content-Type is dropped the same way. The hash then never matches and every primary run is refused
+// (401), leaving alerts to the sparse GitHub backup. An empty body verifies on every path.
 export const config = { api: { bodyParser: false } };
 
 async function rawBody(req) {

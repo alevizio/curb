@@ -99,6 +99,8 @@ describe('auth', () => {
   });
 
   it('verifies against the raw body, the exact URL, expiry and both signing keys', async () => {
+    // A bare stream, not Vercel's request helpers: in production only an EMPTY body verifies (see the
+    // note above rawBody in send-notifications.js), so the QStash schedule must not send one.
     expect((await run(await qstash({ body: '{"a":1}' }))).code).toBe(200);                     // body hash matches
     expect((await run(await qstash({ body: '', sentBody: 'tampered' }))).code).toBe(401);      // body swapped
     expect((await run(await qstash({ url: SELF + '?test=ios' }))).code).toBe(401);              // other destination
