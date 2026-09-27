@@ -284,6 +284,12 @@ export async function claimSlot(material, ms = 60000) {
   return ok === 'OK' || ok === true;
 }
 
+/** Free a claimSlot before it expires (the sender's run lock, once a run has fully succeeded). */
+export async function releaseSlot(material) {
+  const r = redis();
+  if (r) await r.del('curb:rl:' + sha(material));
+}
+
 // ---- auto-park tokens (ALE-168 Tier 2) ----
 // A separate hash maps SHA-256(token) -> { endpoint }. Only the HASH is stored, so a store leak
 // can't be replayed as a live bearer token. The plaintext token is shown to the client once and

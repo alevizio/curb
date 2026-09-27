@@ -294,9 +294,10 @@ Files now present for the push feature:
   `QSTASH_CURRENT_SIGNING_KEY` / `QSTASH_NEXT_SIGNING_KEY`. QStash never holds CRON_SECRET (it also
   unlocks `?test=ios`, a push to every iOS device). BACKUP: `.github/workflows/sweep-alerts-cron.yml`
   curls with `Bearer ${{ secrets.CRON_SECRET }}` (repo secret, NEVER committed); GitHub schedules are
-  best-effort (Sep 2026: ~7 runs/day, not 96). Overlap is safe: a 120 s run lock — deliberately NOT
-  released on error (a retry would re-send a push whose markNotified failed) — plus the per-sweep
-  `notified` de-dupe. Every run records itself in Upstash (`curb:cron`: last + last success) for the
+  best-effort (Sep 2026: ~7 runs/day, not 96). Overlap is safe: a 120 s run lock — released once a run
+  fully succeeds (web loop done, no APNs error), so a GitHub run just before a QStash tick no longer
+  swallows that tick; deliberately NOT released on error (a retry would re-send a push whose
+  markNotified failed) — plus the per-sweep `notified` de-dupe. Every run records itself in Upstash (`curb:cron`: last + last success) for the
   monitor's `?status=1` check; optional `HC_PING_URL` (healthchecks.io) is pinged by successful QStash
   runs and `/fail` on errors. The monitor workflow can also be dispatched by QStash (`mode` input).
 - `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET,

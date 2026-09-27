@@ -14,7 +14,7 @@ import webpush from 'web-push';
 import { Receiver } from '@upstash/qstash';
 import {
   loadAllSubs, deleteSub, markNotified, advanceSpot, storeReady,
-  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot,
+  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot,
   saveRunStatus, loadRunStatus,
 } from './_store.js';
 import { recomputeSpot } from './_schedule.js';
@@ -24,6 +24,8 @@ import { dueAlert } from '../lib/notify-core.js';
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
 // live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
 const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
+// The run lock's lifetime: longer than the 60 s maxDuration (vercel.json), so it outlives any run.
+const RUN_LOCK_MS = 120000;
 
 // The cadence brain — which push is due for a spot right now, with what copy, at the user's chosen
 // intensity + voice — lives in lib/notify-core.js. It's a pure, unit-tested module shared by BOTH
@@ -154,9 +156,11 @@ export default async function handler(req, res) {
   // invocations can overlap. The per-sweep markNotified dedupe is a non-atomic read-modify-write, so
   // overlapping runs could both pass it and double-fire. A short atomic claim (longer than the 60s
   // maxDuration) lets at most one run process a given ~2-min window; a skipped run is a harmless no-op.
+  // Released as soon as a run has fully succeeded (every markNotified landed), so a GitHub run a minute
+  // before a QStash tick no longer swallows that tick and delays its pushes by 15 min.
   // Deliberately NOT released on error: a retry would then re-send any push whose markNotified failed.
   // No-op in dev (no store).
-  if (!(await claimSlot('cron-run', 120000))) {
+  if (!(await claimSlot('cron-run', RUN_LOCK_MS))) {
     await finish(200, { ok: true, skipped: 'another run holds the lock' }); return;
   }
 
@@ -257,6 +261,13 @@ export default async function handler(req, res) {
       console.error('APNs pass failed:', e);
     }
 
+    // Fully successful = the web loop finished (any store error throws past here) and the APNs pass
+    // did too (its errors, markIosNotified's included, land in iosError). Only then free the lock —
+    // and only while it is surely still ours (maxDuration 60 s < RUN_LOCK_MS). If the release fails,
+    // the lock simply expires.
+    if (!iosError && Date.now() - started < RUN_LOCK_MS) {
+      try { await releaseSlot('cron-run'); } catch { /* expires on its own */ }
+    }
     await finish(200, { ok: true, web: { checked: subs.length, sent, pruned, rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, sent: iosSent, pruned: iosPruned, rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } });
   } catch (e) {
     console.error('send-notifications failed:', e);

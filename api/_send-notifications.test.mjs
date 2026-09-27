@@ -24,6 +24,7 @@ vi.mock('@upstash/redis', () => ({
     async hgetall(k) { if (k === 'curb:subs' && failSubsLoad) throw new Error('upstash down'); return mem[k] ? { ...mem[k] } : null; }
     async hexists(k, f) { return mem[k] && f in mem[k] ? 1 : 0; }
     async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
+    async del(k) { delete kv[k]; }
   },
 }));
 const send = vi.fn(async () => ({ statusCode: 201 }));
@@ -132,6 +133,52 @@ describe('failures + the run lock', () => {
     const retry = await run(await qstash());
     expect(retry.body.skipped).toBeTruthy();
     expect(send).not.toHaveBeenCalled();
+  });
+
+  it('two schedulers: a GitHub run just before a QStash tick no longer swallows it, and nothing is sent twice', async () => {
+    vi.setSystemTime(Date.parse('2026-06-19T15:29:00Z'));         // 8:29 PDT, the 9 AM sweep is 31 min out
+    const gh = await run(bearer());
+    expect(gh.body.web.sent).toBe(0);
+    vi.setSystemTime(Date.parse('2026-06-19T15:30:05Z'));         // the QStash tick 65 s later
+    const q = await run(await qstash());
+    expect(q.body.skipped).toBeUndefined();
+    expect(q.body.web.sent).toBe(1);                              // the 30-min push, on time (not at 8:45)
+    vi.setSystemTime(Date.parse('2026-06-19T15:30:40Z'));         // a lagging GitHub run right after it
+    const gh2 = await run(bearer());
+    expect(gh2.body.skipped).toBeUndefined();
+    expect(gh2.body.web.sent).toBe(0);                            // de-duped, not re-sent
+    vi.setSystemTime(Date.parse('2026-06-19T15:45:05Z'));
+    expect((await run(await qstash())).body.web.sent).toBe(0);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(Object.keys(kv)).toEqual([]);                          // each good run freed the lock
+  });
+
+  it('runs that really overlap still skip: the lock holds while a run is in flight', async () => {
+    let release;
+    send.mockImplementationOnce(() => new Promise((r) => { release = () => r({ statusCode: 201 }); }));
+    const first = run(await qstash());
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+    expect((await run(bearer())).body.skipped).toBeTruthy();
+    release();
+    expect((await first).body.web.sent).toBe(1);
+    expect((await run(bearer())).body.web.sent).toBe(0);         // lock freed once it finished; de-duped
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('an APNs pass failure keeps the lock (markIosNotified errors are swallowed into ios.error)', async () => {
+    const tok = 'ab'.repeat(32);
+    mem['curb:apns'] = { [tok]: JSON.stringify({ token: tok, spot: SPOT, notified: {}, savedAt: NOW }) };
+    Object.assign(process.env, { APNS_KEY_P8: 'not a key', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const out = await run(bearer());
+      expect(out.code).toBe(200);
+      expect(out.body.ios.error).toBeTruthy();
+      expect((await run(await qstash())).body.skipped).toBeTruthy();
+    } finally {
+      err.mockRestore();
+      for (const k of ['APNS_KEY_P8', 'APNS_KEY_ID', 'APNS_TEAM_ID']) delete process.env[k];
+    }
   });
 
   it('logs web-push failures other than 404/410 instead of swallowing them, without pruning', async () => {
