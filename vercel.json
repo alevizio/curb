@@ -3,6 +3,9 @@
     "api/og.js": {
       "includeFiles": "{og/fonts/**,node_modules/@resvg/resvg-wasm/index_bg.wasm}"
     },
+    "api/block.js": {
+      "includeFiles": "data/{schedules,enforcement,routes}.json"
+    },
     "api/send-notifications.js": {
       "maxDuration": 60
     }
