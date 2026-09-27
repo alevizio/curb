@@ -96,11 +96,18 @@ describe('smoke checks', () => {
     expect((await checkBasemap(f, '/basemap/parchment/{z}/{x}/{y}.png')).status).toBe('fail');
   });
 
-  it('a /b/ block page that 302s home is reported as a DataSF failure affecting all block pages', async () => {
-    const f = mockFetch({ 'https://curb.guide/b/': { status: 302, headers: { location: '/' } } });
-    const [block] = await checkPages(f);
-    expect(block.status).toBe('fail');
-    expect(block.detail).toContain('redirects home');
+  it('a /b/ 503 is reported as every block page failing, a 404 as the known block missing', async () => {
+    const [down] = await checkPages(mockFetch({ 'https://curb.guide/b/': { status: 503, headers: { 'retry-after': '300' } } }));
+    expect(down.status).toBe('fail');
+    expect(down.detail).toContain('block pages failing (503)');
+    const [gone] = await checkPages(mockFetch({ 'https://curb.guide/b/': { status: 404 } }));
+    expect(gone.status).toBe('fail');
+    expect(gone.detail).toContain('block page missing');
+    expect(gone.detail).toContain('8753101');
+    const [odd] = await checkPages(mockFetch({ 'https://curb.guide/b/': { status: 301, headers: { location: '/' } } }));
+    expect(odd.detail).toBe('HTTP 301 → /, schedule missing');
+    const [good] = await checkPages(mockFetch({ 'https://curb.guide/b/': { status: 200, body: '<h1>STREET CLEANING</h1>' } }));
+    expect(good.status).toBe('ok');
   });
 
   it('alerts sender (status without lastQstash*): a recent successful run passes; stale, never-succeeded or erroring runs fail', () => {

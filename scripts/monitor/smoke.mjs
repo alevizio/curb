@@ -120,14 +120,17 @@ export async function checkBasemap(f, template) {
     : fail('basemap tiles', `HTTP ${r.status}${moved(r)}, ${type || 'no type'}, ${size} bytes for ${url}`);
 }
 
-/** Server-rendered SEO pages: a /b/ block page that 302s home means its DataSF fetch failed. */
+/** Server-rendered SEO pages. /b/ reads baked data (never DataSF, never a redirect): a 503 means
+ *  api/block.js itself is failing, a 404 means the known-good block is gone from the bake. */
 export async function checkPages(f) {
   const out = [];
   const b = await get(f, `${SITE}/b/${BLOCK_CNN}`);
   const bhtml = b.status === 200 ? await b.text() : '';
   out.push(b.status === 200 && bhtml.includes('STREET CLEANING')
     ? ok('block page /b/')
-    : fail('block page /b/', b.status === 302 ? `redirects home${moved(b)} — its DataSF fetch is failing (all ~10k block pages are affected)` : `HTTP ${b.status}, schedule missing`));
+    : fail('block page /b/', b.status === 503 ? 'block pages failing (503) — api/block.js could not load its baked data (check vercel.json includeFiles / data/schedules.json); all ~10k block pages are down'
+      : b.status === 404 ? `block page missing — HTTP 404 for known block ${BLOCK_CNN}: dropped from data/schedules.json, or the /b/ rewrite broke`
+      : `HTTP ${b.status}${moved(b)}, schedule missing`));
   const n = await get(f, `${SITE}/n/mission`);
   out.push(n.status === 200 && (await n.text()).includes('<title>') ? ok('neighborhood page /n/') : fail('neighborhood page /n/', `HTTP ${n.status}${moved(n)}`));
   for (const sm of ['/sitemap.xml', '/sitemap-blocks.xml']) {
