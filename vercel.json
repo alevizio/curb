@@ -10,6 +10,12 @@
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/send-notifications",
+      "schedule": "7,22,37,52 * * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/:path*",
