@@ -50,15 +50,16 @@ Built by one person in San Francisco who got tired of the parking math.
 Free. No ads. No signup. No account. No data collection.
 ```
 
-## What's New (v1.0.2) — DRAFT
-Build 7. The last bullet assumes the web page's sweep-alert copy change (notifications workstream) is live; drop it if not.
+## What's New (v1.0.2)
+Build 7. Paste the block below into App Store Connect as-is.
 ```
-Location fixes:
+Location fixes and a smoother feel:
 
-- "Locate me" works on the first tap. CURB used to give up after 9 seconds while your iPhone was still getting a GPS fix, so only a second tap worked. Now it uses the best fix it has and opens your block once its rules have loaded.
-- If Precise Location is off, tapping locate asks for precise access. Without it, CURB shows the approximate area instead of guessing the wrong block.
-- CURB no longer asks for your location on its own when the app opens. It only asks when you tap locate.
-- Clearer messages when location is off, unavailable or slow, and when sweep alerts couldn't be saved (instead of pointing you to Settings).
+• Locate works on the first tap. CURB used to give up after 9 seconds while your iPhone was still getting a GPS fix, so only a second tap worked. Now it uses the best fix it has and opens your block once its rules have loaded.
+• If Precise Location is off, CURB asks for precise access once. Without it, CURB shows the approximate area instead of guessing the wrong block.
+• CURB no longer asks for your location on its own when the app opens. It only asks when you tap locate.
+• Block details slide up and expand smoothly, and the screen no longer bounces when you drag.
+• Clearer messages when location is off, unavailable or slow, and when sweep alerts couldn't be saved.
 
 The posted sign is always the final authority.
 ```

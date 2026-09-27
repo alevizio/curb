@@ -538,6 +538,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     private var bestFix: CLLocation?              // most accurate fix of THIS acquisition
     private var relaxWork: DispatchWorkItem?
     private var askingPrecise = false             // the temporary full-accuracy sheet is up
+    private var preciseAskedThisLaunch = false    // ask for precise access at most once per launch (owner call: not on every tap)
     private static let promptGraceMs = 50_000     // extra grace so the permission prompt never trips the backstop
     private static let preciseM: CLLocationAccuracy = 25   // good enough at once: picks the curb side
     private static let relaxedM: CLLocationAccuracy = 65   // good enough after relaxAfterMs: still picks the block
@@ -617,9 +618,10 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
                 armTimeout(id: id, ms: timeout + Self.promptGraceMs)
                 return
             }
-            if precise, !silent, locationManager.accuracyAuthorization == .reducedAccuracy {
+            if precise, !silent, !preciseAskedThisLaunch, locationManager.accuracyAuthorization == .reducedAccuracy {
                 // Precise Location is off, so fixes are ~5 km region points that can't pick a block. Ask for
-                // full accuracy for this locate; it's a system sheet, so the deadline waits like the prompt.
+                // full accuracy for this locate — once per launch; after a "no" later taps just show the
+                // approximate area. It's a system sheet, so the deadline waits like the prompt.
                 armTimeout(id: id, ms: timeout + Self.promptGraceMs)
                 requestPreciseOnce()
                 return
@@ -704,6 +706,7 @@ private final class LocationBridge: NSObject, WKScriptMessageHandler, @preconcur
     private func requestPreciseOnce() {
         guard !askingPrecise else { return }
         askingPrecise = true
+        preciseAskedThisLaunch = true
         // Called back granted or not (or with an error when iOS declines to show the sheet); hop to main
         // explicitly rather than rely on the manager's run loop.
         locationManager.requestTemporaryFullAccuracyAuthorization(withPurposeKey: Self.precisePurposeKey) { [weak self] _ in
