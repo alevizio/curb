@@ -982,7 +982,8 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
                 // Pass the server's reason through (e.g. 429 "slow down", 503 store down) so the page can
                 // say "couldn't save, try again" instead of blaming notification permissions.
                 let json = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
-                let serverMsg = (json?["note"] as? String) ?? (json?["error"] as? String) ?? (ok ? "saved" : "HTTP \(status)")
+                // `error` is the reason ("slow down", "store not configured"); `note` is only operator advice.
+                let serverMsg = (json?["error"] as? String) ?? (ok ? "saved" : "HTTP \(status)")
                 self.resolve(ok, ok ? "saved" : "save-failed", message: serverMsg, status: status)
             } catch {
                 self.resolve(false, "save-failed", message: error.localizedDescription)
