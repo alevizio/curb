@@ -174,7 +174,7 @@ export function judgeAlertsStatus(s, now) {
   if (qRan) {
     const q = age(newShape ? (s.lastQstash?.ok ? s.lastQstash : s.lastQstashOk) : s.lastOk);
     if (q === null) return fail(ALERTS, `QStash runs the sender but no QStash run has succeeded — alerts are not going out on time.${last}`);
-    if (q > ALERTS_MAX_AGE_MIN) return fail(ALERTS, `last good QStash run ${q} min ago (expected every 15 min) — the primary scheduler stopped; only the GitHub backup is sending, hours apart.${last}`);
+    if (q > ALERTS_MAX_AGE_MIN) return fail(ALERTS, `last good QStash run ${q} min ago (expected every 15 min) — the primary scheduler stopped (the GitHub backup, if it runs at all, sends hours apart).${last}`);
     return ok(ALERTS, `last good QStash run ${q} min ago`);
   }
   const a = age(s.lastOk);
