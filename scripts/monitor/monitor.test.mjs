@@ -2,7 +2,7 @@
 // (smoke.mjs) against mocked fetch — including a replay of the Sep 2026 DataSF host move.
 import { describe, it, expect } from 'vitest';
 import { decide, signature } from './alert.mjs';
-import { parsePage, checkDataSF, checkBasemap, checkPages, judgeAlertsRuns, ALERTS_MAX_AGE_MIN } from './smoke.mjs';
+import { parsePage, checkDataSF, checkBasemap, checkPages, checkAlertsSender, judgeAlertsStatus, ALERTS_MAX_AGE_MIN } from './smoke.mjs';
 
 const OPTS = { title: 'curb.guide is broken', mention: 'alevizio', runUrl: 'https://github.com/x/y/actions/runs/1' };
 const pass = (name) => ({ name, status: 'ok', detail: '' });
@@ -101,13 +101,32 @@ describe('smoke checks', () => {
     expect(block.detail).toContain('redirects home');
   });
 
-  it('alerts timer: fresh success passes, stale or repeatedly failing runs fail', () => {
+  it('alerts sender: a recent successful run passes; stale, never-succeeded or erroring runs fail', () => {
     const now = Date.parse('2026-09-27T12:00:00Z');
-    const run = (minAgo, conclusion) => ({ status: 'completed', conclusion, updated_at: new Date(now - minAgo * 60000).toISOString(), html_url: 'u' });
-    expect(judgeAlertsRuns([run(10, 'success')], now).status).toBe('ok');
-    expect(judgeAlertsRuns([run(ALERTS_MAX_AGE_MIN + 5, 'success')], now).status).toBe('fail');
-    expect(judgeAlertsRuns([run(10, 'failure'), run(25, 'failure'), run(40, 'success')], now).status).toBe('fail');
-    expect(judgeAlertsRuns([run(10, 'failure'), run(25, 'success')], now).status).toBe('ok');
-    expect(judgeAlertsRuns([], now).status).toBe('fail');
+    const run = (minAgo, outcome, trigger = 'qstash', extra = {}) => ({ at: new Date(now - minAgo * 60000).toISOString(), outcome, trigger, ...extra });
+    expect(judgeAlertsStatus({ last: run(10, 'ok'), lastOk: run(10, 'ok') }, now).status).toBe('ok');
+    const stale = judgeAlertsStatus({ last: run(ALERTS_MAX_AGE_MIN + 5, 'ok', 'bearer'), lastOk: run(ALERTS_MAX_AGE_MIN + 5, 'ok', 'bearer') }, now);
+    expect(stale.status).toBe('fail');
+    expect(stale.detail).toContain('via bearer');
+    const erroring = judgeAlertsStatus({ last: run(5, 'error', 'qstash', { error: 'upstash down' }), lastOk: run(90, 'ok') }, now);
+    expect(erroring.status).toBe('fail');
+    expect(erroring.detail).toContain('upstash down');
+    expect(judgeAlertsStatus({ last: run(5, 'skipped'), lastOk: run(12, 'ok') }, now).status).toBe('ok'); // a lock-skipped tick is fine
+    expect(judgeAlertsStatus({ last: null, lastOk: null }, now).status).toBe('fail');
+  });
+
+  it('alerts sender: reads /api/send-notifications?status=1 with CRON_SECRET; skipped without it', async () => {
+    const now = Date.parse('2026-09-27T12:00:00Z');
+    const prev = process.env.CRON_SECRET;
+    delete process.env.CRON_SECRET;
+    expect((await checkAlertsSender(mockFetch({}), now)).status).toBe('skip');
+    process.env.CRON_SECRET = 'x';
+    const seen = [];
+    const base = mockFetch({ 'https://curb.guide/api/send-notifications?status=1': { status: 200, body: { lastOk: { at: new Date(now - 6e5).toISOString(), trigger: 'qstash', outcome: 'ok' } } } });
+    const f = (url, opts) => { seen.push(opts.headers.authorization); return base(url, opts); };
+    expect((await checkAlertsSender(f, now)).status).toBe('ok');
+    expect(seen).toEqual(['Bearer x']);
+    expect((await checkAlertsSender(mockFetch({}), now)).status).toBe('fail'); // endpoint 404 = broken
+    if (prev === undefined) delete process.env.CRON_SECRET; else process.env.CRON_SECRET = prev;
   });
 });

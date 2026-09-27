@@ -1,8 +1,10 @@
-# Fires the CURB push-notification check every 15 minutes.
-# Vercel Hobby throttles vercel.json crons to ~once a day, which is useless for
-# "move your car in 30 min" alerts — this free Actions schedule is the real trigger.
-# The Vercel cron stays as a harmless backup; sends are de-duped server-side
-# (notifiedFor), so double-firing can never double-notify.
+# BACKUP trigger for the CURB sweep-alert sender (/api/send-notifications).
+# The PRIMARY trigger is an Upstash QStash schedule that POSTs the endpoint every 15 min, signed
+# (see the header of api/send-notifications.js). GitHub schedules are best-effort — in Sep 2026 this
+# ran ~7 times a day instead of 96 — so this only fills gaps if QStash stops. Overlapping runs are
+# safe: a server-side run lock plus per-sweep de-dupe mean double-firing never double-notifies.
+# There is no Vercel cron (Hobby runs crons ~once a day). The owner is alerted by healthchecks.io,
+# pinged by the endpoint itself on QStash runs, and by the monitor workflow's sender-status check.
 # Secret: CRON_SECRET (repo secret) must match the Vercel env var of the same name.
 name: sweep-alerts-cron
 
@@ -30,9 +32,6 @@ jobs:
       - name: Hit the notification endpoint
         env:
           TEST: ${{ github.event.inputs.test }}
-          # Optional healthchecks.io ping URL (repo secret). An outside watcher that emails/pushes the
-          # owner if this timer stops running or keeps failing — even when GitHub itself is lagging.
-          HC_PING_URL: ${{ secrets.HC_PING_URL }}
         run: |
           url="https://curb.guide/api/send-notifications"
           [ -n "$TEST" ] && url="$url?test=$TEST"
@@ -41,8 +40,4 @@ jobs:
             "$url") || code=000
           echo "HTTP $code"
           cat /tmp/out.json 2>/dev/null; echo
-          if [ -n "$HC_PING_URL" ]; then
-            ping="$HC_PING_URL"; [ "$code" = "200" ] || ping="$HC_PING_URL/fail"
-            curl -fsS -m 10 --retry 3 -o /dev/null "$ping" || echo "heartbeat ping failed (ignored)"
-          fi
           test "$code" = "200"

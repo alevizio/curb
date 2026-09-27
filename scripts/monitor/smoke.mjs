@@ -1,13 +1,14 @@
-// CURB production smoke checks — run every 30 min by .github/workflows/monitor.yml (free Actions).
+// CURB production smoke checks — run every 30 min by .github/workflows/monitor.yml (free Actions;
+// triggered by a QStash schedule through the GitHub API, with GitHub's own schedule as fallback).
 // Each check hits curb.guide the way a visitor's browser would and returns { name, status, detail }
 // with status 'ok' | 'fail' | 'skip'. The DataSF URLs are read straight out of the live index.html, so
 // a host move like data.sfgov.org → data.sf.gov (Sep 2026) is caught within one run, not by users.
 //
 //   node scripts/monitor/smoke.mjs [--digest] [--out results.json]
-//     default   uptime + data + basemap + SEO pages + alerts-timer freshness + error spike
+//     default   uptime + data + basemap + SEO pages + sweep-alert sender freshness + error spike
 //     --digest  nightly: error groups seen >= 3 times in the last 24h (from /api/client-error)
-// Env: MONITOR_SITE (default https://curb.guide), CRON_SECRET (error log; skipped if unset),
-//      GITHUB_TOKEN + GITHUB_REPOSITORY (alerts-timer freshness; skipped if unset).
+// Env: MONITOR_SITE (default https://curb.guide), CRON_SECRET (error log + sender status; those two
+//      checks are skipped if unset).
 import { writeFileSync } from 'node:fs';
 
 export const SITE = process.env.MONITOR_SITE || 'https://curb.guide';
@@ -17,7 +18,7 @@ const ORIGIN = 'https://curb.guide';
 const BLOCK_CNN = '8753101';
 const POLY = "POLYGON((-122.42 37.76,-122.41 37.76,-122.41 37.77,-122.42 37.77,-122.42 37.76))";
 const TILE = { z: 16, x: 10483, y: 25333 }; // Mission, inside the baked SF set
-export const ALERTS_MAX_AGE_MIN = 90;       // sweep-alerts-cron is */15 but GitHub schedules can lag
+export const ALERTS_MAX_AGE_MIN = 40;       // the sender runs every 15 min (QStash); 40 = two missed ticks + slack
 export const ERROR_SPIKE = 25;               // errors per 30 min that mean "something broke for many"
 export const DIGEST_MIN = 3;                 // nightly: only groups seen at least this often
 
@@ -110,28 +111,24 @@ export async function checkPages(f) {
   return out;
 }
 
-/** The push alerts only go out when the sweep-alerts-cron workflow actually runs and succeeds. */
-export async function checkAlertsTimer(f, now = Date.now()) {
-  const name = 'alerts timer (sweep-alerts-cron)';
-  const token = process.env.GITHUB_TOKEN, repo = process.env.GITHUB_REPOSITORY;
-  if (!token || !repo) return skip(name, 'GITHUB_TOKEN / GITHUB_REPOSITORY not set');
-  const r = await get(f, `https://api.github.com/repos/${repo}/actions/workflows/sweep-alerts-cron.yml/runs?per_page=10&event=schedule`,
-    { redirect: 'follow', headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json' } });
-  // An API hiccup (rate limit, outage) must not page anyone; healthchecks.io watches the timer independently.
-  if (r.status !== 200) return skip(name, `GitHub API HTTP ${r.status} — couldn't check this run`);
-  return judgeAlertsRuns((await r.json()).workflow_runs || [], now);
+/** Push alerts only go out when the sender actually runs: each run records itself, and
+ *  /api/send-notifications?status=1 (CRON_SECRET, read-only, no sends) reads that record back — so
+ *  this watches the real sender whichever scheduler (QStash or the GitHub backup) is driving it. */
+const ALERTS = 'sweep alerts sender';
+export async function checkAlertsSender(f, now = Date.now()) {
+  if (!process.env.CRON_SECRET) return skip(ALERTS, 'CRON_SECRET not set');
+  const r = await get(f, `${SITE}/api/send-notifications?status=1`, { headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } });
+  if (r.status !== 200) return fail(ALERTS, `status endpoint HTTP ${r.status}${moved(r)}`);
+  return judgeAlertsStatus(await r.json(), now);
 }
 
-export function judgeAlertsRuns(runs, now) {
-  const name = 'alerts timer (sweep-alerts-cron)';
-  const done = runs.filter((x) => x.status === 'completed');
-  if (!done.length) return fail(name, 'no completed scheduled runs found');
-  const ageMin = Math.round((now - Date.parse(done[0].updated_at)) / 60000);
-  if (ageMin > ALERTS_MAX_AGE_MIN) return fail(name, `last run finished ${ageMin} min ago (expected every 15 min) — alerts are not going out`);
-  const recent = done.slice(0, 2); // two failures in a row = broken, not a one-off blip
-  if (recent.length === 2 && recent.every((x) => x.conclusion !== 'success'))
-    return fail(name, `last ${recent.length} runs failed (${recent.map((x) => x.conclusion).join(', ')}) — see ${recent[0].html_url}`);
-  return ok(name, `last run ${ageMin} min ago, ${done[0].conclusion}`);
+export function judgeAlertsStatus(s, now) {
+  const at = Date.parse(s?.lastOk?.at);
+  const last = s?.last && s.last.outcome !== 'ok' ? ` Last run: ${s.last.outcome}${s.last.error ? ` (${s.last.error})` : ''} via ${s.last.trigger}.` : '';
+  if (!Number.isFinite(at)) return fail(ALERTS, `no successful run recorded — alerts are not going out.${last}`);
+  const ageMin = Math.round((now - at) / 60000);
+  if (ageMin > ALERTS_MAX_AGE_MIN) return fail(ALERTS, `last successful run ${ageMin} min ago via ${s.lastOk.trigger} (expected every 15 min) — alerts are not going out.${last}`);
+  return ok(ALERTS, `last successful run ${ageMin} min ago via ${s.lastOk.trigger}`);
 }
 
 async function fetchErrors(f, since) {
@@ -174,7 +171,7 @@ export async function runSmoke(f = fetch, now = Date.now()) {
     await safe('basemap tiles', () => checkBasemap(f, page.basemap));
   }
   await safe('SEO pages', () => checkPages(f));
-  await safe('alerts timer (sweep-alerts-cron)', () => checkAlertsTimer(f, now));
+  await safe(ALERTS, () => checkAlertsSender(f, now));
   await safe('user error rate', () => checkErrorSpike(f, now));
   return results;
 }

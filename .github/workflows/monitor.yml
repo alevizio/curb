@@ -2,13 +2,23 @@
 #
 # Every 30 min (smoke): home page, every DataSF dataset the app uses (read from the live index.html,
 #   incl. CORS — catches host moves), basemap tiles, /b/ + /n/ SEO pages, sitemaps, ticket data,
-#   the sweep-alerts-cron timer's freshness, and a spike in real-user errors (/api/client-error).
+#   the sweep-alert sender's last successful run (/api/send-notifications?status=1), and a spike in
+#   real-user errors (/api/client-error).
 # Nightly (~4am PT): a real headless-Chrome walk of the core path (map → curb lines → one-tap
 #   locate → block sheet) plus a digest of repeated user errors from the last 24h.
 #
+# Triggers: GitHub schedules are best-effort (Sep 2026: hours late), so the reliable clock is two
+# Upstash QStash schedules calling the GitHub API — smoke every 30 min, nightly once a day:
+#   POST https://api.github.com/repos/alevizio/curb/actions/workflows/monitor.yml/dispatches
+#   headers: Upstash-Forward-Authorization: Bearer <fine-grained PAT, this repo only, Actions: read+write>
+#            Upstash-Forward-Accept: application/vnd.github+json
+#   body:    {"ref":"main","inputs":{"mode":"smoke"}}   (or "nightly")
+# The schedules below stay as the fallback; a manual run defaults to mode "all".
+#
 # Alerts are GitHub issues (label per group) opened/updated/closed by scripts/monitor/alert.mjs:
 # one email when something breaks, one when what's broken changes, one when it recovers.
-# Free: public-repo Actions minutes. Secrets: CRON_SECRET (same as sweep-alerts-cron; reads the error log).
+# Free: public-repo Actions minutes. Secrets: CRON_SECRET (same as sweep-alerts-cron; reads the error
+# log and the sender status).
 # Note: GitHub pauses schedules in public repos after 60 days without commits; the monthly
 # data-refresh commits keep it alive.
 name: monitor
@@ -17,20 +27,26 @@ on:
   schedule:
     - cron: "7,37 * * * *" # smoke, every 30 min (off the hour; GitHub schedules can lag)
     - cron: "23 11 * * *"  # nightly browser walk + error digest (11:23 UTC ≈ 4am PT)
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Which checks to run (QStash sends smoke every 30 min, nightly once a day)"
+        type: choice
+        options: [smoke, nightly, all]
+        default: all
 
 permissions:
   contents: read
   issues: write
-  actions: read
-
-concurrency:
-  group: monitor-${{ github.event.schedule || 'manual' }}
-  cancel-in-progress: false
 
 jobs:
   smoke:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '7,37 * * * *'
+    if: github.event.schedule == '7,37 * * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'nightly')
+    # one group per check type, shared by the schedule and the QStash dispatch, so two runs can never
+    # open duplicate alert issues
+    concurrency:
+      group: monitor-smoke
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -43,7 +59,6 @@ jobs:
       - name: Run smoke checks
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/monitor/smoke.mjs --out smoke.json
       - name: Open / update / close the alert issue
         if: always()
@@ -52,7 +67,10 @@ jobs:
         run: node scripts/monitor/alert.mjs smoke.json monitor:site "curb.guide is broken"
 
   nightly:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 11 * * *'
+    if: github.event.schedule == '23 11 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'smoke')
+    concurrency:
+      group: monitor-nightly
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
