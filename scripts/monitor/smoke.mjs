@@ -29,9 +29,10 @@ export const DIGEST_MIN = 3;                 // nightly: only groups seen at lea
 // notification denial. Those stay in the log and in the digest as informational counts, never failing.
 // A code 1 that is NOT a user denial (a permissions policy, an insecure origin) is ours to fix. Browser
 // denial texts: Chrome/WebKit "User denied Geolocation", Firefox "User denied geolocation prompt"; the
-// iOS app's own is in ContentView.swift. monitor.test.mjs fails if index.html reports an unlisted kind;
-// an unlisted kind (or a group past the log's top 50) still counts as breakage, never silently dropped.
-const DENIED_LOCATE = /^code 1 (User denied|Location permission is off for CURB)/i;
+// iOS app's own is in ContentView.swift. A denial can also follow a timed-out first try ("code 1 after
+// retry …": Chrome counts a pending prompt inside the timeout). monitor.test.mjs fails if index.html
+// reports an unlisted kind; an unlisted kind (or a group past the log's top 50) still counts as breakage.
+const DENIED_LOCATE = /^code 1 (after retry )?(User denied|Location permission is off for CURB)/i;
 const DENIED_PUSH = /^(ios|web|restyle|refresh) (fail:)?(denied|permission-)/; // the page filters these; belt and braces
 export const REPORT_KINDS = {
   error: () => true,                                      // uncaught script error

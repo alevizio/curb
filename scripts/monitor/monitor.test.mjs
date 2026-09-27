@@ -316,6 +316,10 @@ describe('error log: breakage vs. the visitor\'s own choices', () => {
     expect(b('event:locate-failed', 'code 1 Geolocation has been disabled in this document by permissions policy.')).toBe(true);
     expect(b('event:locate-failed', 'code 1 Origin does not have permission to use Geolocation service')).toBe(true);
     expect(b('event:locate-failed', 'code 1 User denied Geolocation')).toBe(false);
+    // index.html prefixes "after retry " when a timed-out first try is followed by the denial
+    expect(b('event:locate-failed', 'code 1 after retry User denied Geolocation')).toBe(false);
+    expect(b('event:locate-failed', 'code 1 after retry Location permission is off for CURB.')).toBe(false);
+    expect(b('event:locate-failed', 'code 1 after retry Geolocation has been disabled in this document by permissions policy.')).toBe(true);
     expect(b('event:locate-failed', 'code 3 Timeout expired')).toBe(false);
     expect(b('event:locate-coarse', '±2km')).toBe(false);
     expect(b('event:something-new', 'x')).toBe(true);
