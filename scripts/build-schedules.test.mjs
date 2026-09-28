@@ -46,8 +46,8 @@ describe('street text cleanup', () => {
     expect(cleanLimits('Lake St', 'Start: 01-99 Block  -  25th Ave', new Set(['25th Ave']))).toEqual(['25th Ave', '']);
   });
   it('reads address ranges out of placeholders for tags', () => {
-    expect(blockRange('Dorado Ter  -  End: 161-199 Block')).toBe('161–199 block');
-    expect(blockRange('lock Of  701  -  749')).toBe('701–749 block');
+    expect(blockRange('Dorado Ter  -  End: 161-199 Block')).toBe('161 to 199 block');
+    expect(blockRange('lock Of  701  -  749')).toBe('701 to 749 block');
     expect(blockRange('Pine St  -  California St')).toBe('');
   });
   it('builds known names only from well-formed text', () => {

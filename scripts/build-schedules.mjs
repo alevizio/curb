@@ -182,7 +182,7 @@ export function buildBlocks(rows) {
 // "Start: 01-99 Block" / "Block Of 701 - 749" → "1–99 block" ('' if the limits carry no range)
 export function blockRange(limits) {
   const m = squash(limits).match(/(?:start|end):\s*(\d+)-(\d+) block|b?lock of (\d+) - (\d+)/i);
-  return m ? `${+(m[1] || m[3])}–${+(m[2] || m[4])} block` : '';
+  return m ? `${+(m[1] || m[3])} to ${+(m[2] || m[4])} block` : '';
 }
 
 // Name each block by where its centerline sits relative to the group's: a divided road's twin

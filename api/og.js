@@ -15,7 +15,7 @@ function windowStr(from, to) {
   const f = parseInt(from, 10), t = parseInt(to, 10);
   if (isNaN(f)) return '';
   const fa = f >= 12 ? 'PM' : 'AM', ta = (isNaN(t) ? f : t) >= 12 ? 'PM' : 'AM';
-  return fa === ta ? `${h12(f)}–${h12(t)}${ta}` : `${h12(f)}${fa}–${h12(t)}${ta}`;
+  return fa === ta ? `${h12(f)} TO ${h12(t)}${ta}` : `${h12(f)}${fa} TO ${h12(t)}${ta}`;
 }
 const fmtMin = (m) => { let h = Math.floor(m / 60), mm = m % 60; const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12; return `${h}:${String(mm).padStart(2, '0')}${ap}`; };
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     const e = ENF[cnn] && dow != null ? ENF[cnn][dow] : null;
     const png = await renderCard({
       corridor: (r0.corridor || 'This block').slice(0, 40),
-      limits: (r0.limits || '').replace(/\s+-\s+/, ' – ').slice(0, 60),
+      limits: (r0.limits || '').replace(/\s+-\s+/g, ' to ').slice(0, 60),
       day: (DAYLBL[dow] || r0.weekday || '').toUpperCase().slice(0, 9),
       window: windowStr(r0.fromhour, r0.tohour),
       enf: e ? fmtMin(e[1]) : null,

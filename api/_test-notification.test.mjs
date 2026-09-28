@@ -20,8 +20,9 @@ describe('test push', () => {
   it('is labelled "Test", names each alert and when it really fires, and makes no false day claim', async () => {
     const { plan } = await call({ which: 'all', level: 'normal', spot: { corridor: 'Haight St', blockside: 'North', nextSweepISO: TUE9 } });
     expect(plan.map((p) => p.title)).toEqual(['Test · Night before (Mon 8 PM)', 'Test · 30 min before (Tue 8:30 AM)']);
-    for (const p of plan) expect(p.title).not.toMatch(/today|tomorrow|min — /i);
-    expect(plan[0].body).toMatch(/^🧹 Sweep day tomorrow — Haight St \(North\) gets cleaned at 9 AM/);
+    for (const p of plan) expect(p.title).not.toMatch(/today|tomorrow|min( ·|:)/i);
+    for (const p of plan) expect(`${p.title} ${p.body}`).not.toMatch(/[—–]| - /);  // no dashes in user copy
+    expect(plan[0].body).toMatch(/^🧹 Sweep day tomorrow\. Haight St \(North\) gets cleaned at 9 AM/);
     expect(plan.every((p) => p.tag.startsWith('curb-test-'))).toBe(true);
   });
 
