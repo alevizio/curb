@@ -65,7 +65,7 @@ export default async function handler(req, res) {
       const mins = tp === 'lead' ? 30 : tp === 'morn' ? 120 : undefined;
       const r = renderOne(spot, tp, { level, voice, mins });
       const when = `${sfDay(fireAt[r.key])} ${sfHour(new Date(fireAt[r.key]).toISOString())}`;
-      return { key: r.key, tag: testTag(r.key), title: `Test · ${LABEL[r.key]} (${when})`, body: `${r.title} — ${r.body}` };
+      return { key: r.key, tag: testTag(r.key), title: `Test · ${LABEL[r.key]} (${when})`, body: `${r.title}. ${r.body}` };
     });
 
     if (dryRun) { res.status(200).json({ ok: true, dryRun: true, level, voice, which, plan }); return; }

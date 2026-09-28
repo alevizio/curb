@@ -63,7 +63,7 @@ export default async function handler(req, res) {
     // Confirmation push (best-effort; prune a dead endpoint).
     if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
       webpush.setVapidDetails(VAPID_SUBJECT || 'mailto:you@example.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-      const body = `${spot.corridor || 'This block'} — next sweep ${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)}. Alerts armed.`;
+      const body = `${spot.corridor || 'This block'}: next sweep ${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)}. Alerts armed.`;
       try {
         // an immediate confirmation: worthless (and names a stale spot) if delivered hours later
         await webpush.sendNotification(sub.subscription, JSON.stringify({ title: '🚗 Parked', body, url: '/', tag: 'curb-parked' }), { TTL: 3600 });

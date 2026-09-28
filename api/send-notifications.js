@@ -119,7 +119,7 @@ export default async function handler(req, res) {
       try {
         const jwt = getProviderToken();
         session = openSession();
-        const aps = { aps: { alert: { title: 'CURB test ✅', body: 'Native push is working — you can move your car with confidence.' }, sound: 'default' }, url: '/', tag: 'curb-test' };
+        const aps = { aps: { alert: { title: 'CURB test ✅', body: 'Native push is working. You can move your car with confidence.' }, sound: 'default' }, url: '/', tag: 'curb-test' };
         const testExp = Math.floor(Date.now() / 1000) + 300; // a test alert has no real deadline — let APNs drop it after 5 min if undeliverable
         for (const { token } of tokens) {
           let { status, reason } = await sendOne(session, jwt, token, aps, 'curb-test', testExp);

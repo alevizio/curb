@@ -309,7 +309,7 @@ describe('a style change from a sheet left open since before the re-arm', () => 
       at(t); expect((await run(await qstash())).body.web).toMatchObject({ sent: 0, rearmed: 0 });
     }
     at('2026-10-27T14:30:05Z'); await run(await qstash());                                       // Tue 7:30 lead
-    expect(send.mock.calls.map(([, p]) => JSON.parse(p).title)).toEqual(['🧹 Sweep day tomorrow', '🚨 30 min — move the car']);
+    expect(send.mock.calls.map(([, p]) => JSON.parse(p).title)).toEqual(['🧹 Sweep day tomorrow', '🚨 30 min: move the car']);
   });
 });
 
