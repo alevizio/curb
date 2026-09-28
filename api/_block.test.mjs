@@ -39,6 +39,9 @@ describe('block page — content', () => {
     expect(title(body).length).toBeLessThan(60);
     expect(desc(body)).toBe('Street cleaning on Pierce St between Pine St and California St, SF: ' +
       'Mon, Thu 8 to 10am; Mon 8 to 10am (1st & 3rd wks). Tickets usually land ~8:14am. $105 fine.'); // with the hood it can't fit 160 even without the fine, so the hood goes
+    const e = DATA.S.b['1000'], clay = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b, '1000': [e[0], e[1], 'Clay St', ...e.slice(3)] } } };
+    expect(desc(renderBlock('1000', clay).body)).toBe('Street cleaning on Pierce St between Pine St and Clay St, Pacific Heights, SF: ' +
+      'Mon, Thu 8 to 10am; Mon 8 to 10am (1st & 3rd wks). Tickets usually land ~8:14am.'); // the fine is shed first to fit 160
     expect(desc(renderBlock('999', DATA).body)).toBe('Street cleaning on Pierce St between Bush St and Pine St, Pacific Heights, SF: Tue 9 to 11am. $105 fine.');
   });
 
