@@ -55,9 +55,9 @@ const cleanAddr = (s) => String(s || '').replace(/[^\x20-\x7E]+/g, ' ').replace(
 const parkingSection = (name, en) => {
   if (!en) return '';
   const m = en.mix;
-  const mixLine = m ? `Of ${esc(name)}'s mapped curb, about <b>${m.general}%</b> is general street parking${m.rpp >= 3 ? `, <b>${m.rpp}%</b> residential-permit (RPP)` : ''}${m.loading >= 4 ? `, and <b>${m.loading}%</b> loading zones` : ''}. (Share of curb in SFMTA's Digital Curb data — the posted sign on your block always wins.)` : '';
+  const mixLine = m ? `Of ${esc(name)}'s mapped curb, about <b>${m.general}%</b> is general street parking${m.rpp >= 3 ? `, <b>${m.rpp}%</b> residential-permit (RPP)` : ''}${m.loading >= 4 ? `, and <b>${m.loading}%</b> loading zones` : ''}. (Share of curb in SFMTA's Digital Curb data. The posted sign on your block always wins.)` : '';
   const gar = (en.garages || []).length
-    ? `<div class="panel"><div class="sec-k">Off-street parking nearby</div><ul class="streets">${en.garages.map((g) => `<li><span>${esc(cleanAddr(g.addr))} <i style="font-style:normal;color:var(--ink-soft);font-weight:600">· ${g.type}</i></span><span class="n">${num(g.cap)} spaces${g.hr ? ` · $${g.hr}/hr` : ''}</span></li>`).join('')}</ul></div><p class="lede" style="margin-top:10px;font-size:13.5px">No street spot? Rates are operator-supplied — confirm on arrival.</p>`
+    ? `<div class="panel"><div class="sec-k">Off-street parking nearby</div><ul class="streets">${en.garages.map((g) => `<li><span>${esc(cleanAddr(g.addr))} <i style="font-style:normal;color:var(--ink-soft);font-weight:600">· ${g.type}</i></span><span class="n">${num(g.cap)} spaces${g.hr ? ` · $${g.hr}/hr` : ''}</span></li>`).join('')}</ul></div><p class="lede" style="margin-top:10px;font-size:13.5px">No street spot? Rates are operator-supplied. Confirm on arrival.</p>`
     : '';
   if (!mixLine && !gar) return '';
   return `
@@ -84,7 +84,7 @@ const mapEmbed = (name) => {
   return `<section class="hmap-sec" aria-label="${esc(name)} parking map">
     <div class="sec-k">The live map</div>
     <h2>${esc(name)} <b>parking</b>, live</h2>
-    <p class="lede">Every curb in ${esc(name)}, colored by its next street sweep. Tap a block for its posted schedule, meters, permit zone — and a free move-your-car reminder.</p>
+    <p class="lede">Every curb in ${esc(name)}, colored by its next street sweep. Tap a block for its posted schedule, meters, permit zone, and a free move-your-car reminder.</p>
     <button type="button" class="hmap" data-bbox="${m.bbox.join(',')}" aria-label="Load the live CURB map for ${esc(name)}">
       <svg class="hmap-shot" viewBox="${m.vb}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="300" height="130" fill="var(--paper)"/><path d="${m.d}" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="hmap-cta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Explore the live map</span>
@@ -99,9 +99,9 @@ const enforcementSection = (name, typical, dowIdx) => `
   <section>
     <div class="sec-k">How enforcement works</div>
     <h2>The 2-hour sign, the <b>20-minute</b> reality</h2>
-    <p class="lede">San Francisco posts a street-cleaning window — often two hours — but the ticket doesn't wait. Across about a million GPS-located citations (~815,000 matched to blocks), the typical SF block gets <b>most of its tickets inside the same ~20 minutes</b>, usually right after the window opens. In ${esc(name)}, that cluster lands around <b>${typical}</b> on <b>${DOW[dowIdx]}s</b>.</p>
+    <p class="lede">San Francisco posts a street-cleaning window, often two hours, but the ticket doesn't wait. Across about a million GPS-located citations (~815,000 matched to blocks), the typical SF block gets <b>most of its tickets inside the same ~20 minutes</b>, usually right after the window opens. In ${esc(name)}, that cluster lands around <b>${typical}</b> on <b>${DOW[dowIdx]}s</b>.</p>
     <div class="panel">
-      <p class="lede"><b>Once the sweeper has physically passed your side of the street</b>, SFMTA's own rules let you re-park there — even before the posted hours end. But don't park early assuming it's done, and being even a minute off is still ticketable.</p>
+      <p class="lede"><b>Once the sweeper has physically passed your side of the street</b>, SFMTA's own rules let you re-park there, even before the posted hours end. But don't park early assuming it's done, and being even a minute off is still ticketable.</p>
       <p class="lede" style="margin-top:10px">Good to know: a residential parking permit (RPP) runs <b>$215/yr</b>; meters are free on <b>Sundays</b> and three holidays; and a car can't sit in one spot more than <b>72 hours</b>, even with a permit. The posted sign is always the final word.</p>
     </div>
   </section>`;
@@ -144,7 +144,7 @@ const blocksSection = (name, sl) => {
   const byStreet = new Map();
   for (const b of list) (byStreet.get(b[1][0]) || byStreet.set(b[1][0], []).get(b[1][0])).push(b);
   const li = ([cnn, e]) => {
-    const span = e[1] && e[2] ? `${e[1]} – ${e[2]}` : e[1] ? `at ${e[1]}` : '';
+    const span = e[1] && e[2] ? `${e[1]} to ${e[2]}` : e[1] ? `at ${e[1]}` : '';
     return `<li><a href="/b/${cnn}">${esc([span, e[7]].filter(Boolean).join(' · ') || 'Whole street')}</a><span>${esc(schedShort(e[4]))}</span></li>`;
   };
   const streets = [...byStreet].sort((x, y) => natural.compare(x[0], y[0])).map(([st, bs]) =>
@@ -153,7 +153,7 @@ const blocksSection = (name, sl) => {
   <section>
     <div class="sec-k">Every swept block · ${num(list.length)} in ${esc(name)}</div>
     <h2>Street cleaning, <b>block by block</b></h2>
-    <p class="lede">Every swept street in ${esc(name)} — open one for its blocks, then a block for its posted days and times, the next sweep dates and when tickets actually land.</p>
+    <p class="lede">Every swept street in ${esc(name)}. Open one for its blocks, then a block for its posted days and times, the next sweep dates and when tickets actually land.</p>
     <div class="blocks">
       ${streets.join('\n      ')}
     </div>
@@ -333,7 +333,7 @@ const NAV_UNUSED = (current) => `
 <header class="wrap">
   <div class="mast">
     <a class="backbtn" href="/" aria-label="Back to map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg></a>
-    <a class="logo" href="/" aria-label="CURB — open the map"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></a>
+    <a class="logo" href="/" aria-label="CURB: open the map"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></a>
     <nav class="topnav" aria-label="Pages">
       <a href="/"${cur(current, 'map')}>Map</a>
       <a href="/n/"${cur(current, 'hoods')}>Neighborhoods</a>
@@ -369,10 +369,10 @@ const FOOTER_UNUSED = `
   <a href="/press">Press</a>
   <a href="/changelog">Changelog</a>
   <a href="https://data.sf.gov" rel="noopener">Data: DataSF</a>
-  <a href="https://github.com/alevizio/curb" rel="noopener">Open source — GitHub</a>
+  <a href="https://github.com/alevizio/curb" rel="noopener">Open source on GitHub</a>
   <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
   <a href="/privacy">Privacy</a>
-  <span class="fine">Schedules are set block by block — the <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies — only anonymous page counts. Made in San Francisco.</span>
+  <span class="fine">Schedules are set block by block. The <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies: only anonymous page counts. Made in San Francisco.</span>
 </div></footer>
 <script>
   (function(){var b=document.getElementById('navBtn'),m=document.getElementById('navMenu');if(!b||!m)return;
@@ -441,31 +441,31 @@ function renderHood(h, idx) {
   const faqs = [
     {
       q: `When is street cleaning in ${name}?`,
-      a: `Street-cleaning schedules in ${name} are set block by block — each side of each street has its own day and time, so there's no single neighborhood-wide schedule. *Open ${name} on the CURB map* to see the exact posted schedule and next sweep for any block. In practice, most ${name} street-cleaning tickets are written on *${DOW[peakDow.i]}s*, clustered around *${typical}*.`,
+      a: `Street-cleaning schedules in ${name} are set block by block: each side of each street has its own day and time, so there's no single neighborhood-wide schedule. *Open ${name} on the CURB map* to see the exact posted schedule and next sweep for any block. In practice, most ${name} street-cleaning tickets are written on *${DOW[peakDow.i]}s*, clustered around *${typical}*.`,
     },
     {
       q: `How much is a street-cleaning ticket in San Francisco?`,
-      a: `As of 2026 the street-cleaning fine is *$${FINE}* citywide (many older sites still list $73–97 — those are out of date). Over the last ~2 years, ${name} drivers were issued *${num(h.n)}* street-cleaning tickets totaling about *${money(h.rev)}* in fines.`,
+      a: `As of 2026 the street-cleaning fine is *$${FINE}* citywide (many older sites still list $73 to $97; those are out of date). Over the last ~2 years, ${name} drivers were issued *${num(h.n)}* street-cleaning tickets totaling about *${money(h.rev)}* in fines.`,
     },
     {
       q: `How do I avoid a street-cleaning ticket in ${name}?`,
-      a: `Move your car before the posted window — most tickets here are written around ${typical} on ${DOW[peakDow.i]}s. CURB lets you tap your block, see the next sweep, and *set a free reminder (calendar or push)* ~30 minutes before, plus the night before. The posted sign always wins if it differs.`,
+      a: `Move your car before the posted window: most tickets here are written around ${typical} on ${DOW[peakDow.i]}s. CURB lets you tap your block, see the next sweep, and *set a free reminder (calendar or push)* ~30 minutes before, plus the night before. The posted sign always wins if it differs.`,
     },
     {
       q: `Can I park after the street sweeper passes in ${name}?`,
-      a: `Yes — under SFMTA's rules, once the sweeper has physically swept your side of the street you can re-park there, *even if the posted hours haven't ended*. But you can't park during the posted window just because it looks done early, and being even a minute off is ticketable. On most ${name} blocks the sweep clusters around *${typical}* on *${DOW[peakDow.i]}s* — check your exact block on the map.`,
+      a: `Yes. Under SFMTA's rules, once the sweeper has physically swept your side of the street you can re-park there, *even if the posted hours haven't ended*. But you can't park during the posted window just because it looks done early, and being even a minute off is ticketable. On most ${name} blocks the sweep clusters around *${typical}* on *${DOW[peakDow.i]}s*. Check your exact block on the map.`,
     },
     {
       q: `Is street cleaning enforced on holidays?`,
-      a: `Residential street sweeping is suspended on roughly a dozen observed city holidays (for example New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving and Christmas); many overnight commercial routes still run. Temporary signs and the posted schedule always override — when in doubt, *read the sign on your block.*`,
+      a: `Residential street sweeping is suspended on roughly a dozen observed city holidays (for example New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving and Christmas); many overnight commercial routes still run. Temporary signs and the posted schedule always override. When in doubt, *read the sign on your block.*`,
     },
     {
       q: `What if my car was towed for street cleaning in ${name}?`,
-      a: `SF street-cleaning tows go to *AutoReturn* at 450 7th Street (open 24/7) — call *(415) 865-8200* or check autoreturn.com to find your car. Expect a tow fee plus daily storage on top of the $${FINE} ticket; a discounted low-income rate is available. Note: SF's "Text Before Tow" alerts do *not* cover street-cleaning tows.`,
+      a: `SF street-cleaning tows go to *AutoReturn* at 450 7th Street (open 24/7). Call *(415) 865-8200* or check autoreturn.com to find your car. Expect a tow fee plus daily storage on top of the $${FINE} ticket; a discounted low-income rate is available. Note: SF's "Text Before Tow" alerts do *not* cover street-cleaning tows.`,
     },
     {
       q: `How do I contest a street-cleaning ticket?`,
-      a: `File a protest within *21 days* of the citation through the SFMTA citation portal — ideally with a photo from where you parked showing a missing, faded, or blocked sign, or that you were ticketed outside the posted window. A meaningful share of first-level protests are dismissed, so it's often worth contesting if your sign was unclear.`,
+      a: `File a protest within *21 days* of the citation through the SFMTA citation portal, ideally with a photo from where you parked showing a missing, faded, or blocked sign, or that you were ticketed outside the posted window. A meaningful share of first-level protests are dismissed, so it's often worth contesting if your sign was unclear.`,
     },
   ];
   const faqHtml = faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${mdBold(f.a)}</p></details>`).join('\n      ');
@@ -509,7 +509,7 @@ function renderHood(h, idx) {
   <section>
     <div class="sec-k">Heaviest-ticketed streets</div>
     <h2>Where tickets <b>cluster</b></h2>
-    <p class="lede">The ${esc(name)} streets with the most street-cleaning citations over ~2 years. High counts usually mean a busy corridor with frequent sweeping — check the exact block on the map.</p>
+    <p class="lede">The ${esc(name)} streets with the most street-cleaning citations over ~2 years. High counts usually mean a busy corridor with frequent sweeping. Check the exact block on the map.</p>
     <div class="panel"><ul class="streets">
       ${topStreets.map((s) => `<li><span>${esc(s.street)}</span><span class="n">${num(s.n)} tickets</span></li>`).join('\n      ')}
     </ul></div>
@@ -524,7 +524,7 @@ function renderHood(h, idx) {
   <div class="hero">
     <div class="kicker">San Francisco · street cleaning</div>
     <h1>Street cleaning in <b>${esc(name)}</b></h1>
-    <p class="sub">Schedules here are set <b>block by block</b> — tap any block on the map for its exact posted day, time, and next sweep, then set a free reminder. Below: what the public ticket record shows about ${esc(name)}.</p>
+    <p class="sub">Schedules here are set <b>block by block</b>. Tap any block on the map for its exact posted day, time, and next sweep, then set a free reminder. Below: what the public ticket record shows about ${esc(name)}.</p>
     <div class="cta">
       <a class="btn" href="/">Open the map →</a>
       <a class="btn ghost" href="/tickets">The ticket economy →</a>
@@ -541,7 +541,7 @@ function renderHood(h, idx) {
       <div class="stat"><div class="v">#${h.rank}</div><div class="l">of ${hoods.length} hoods by volume</div></div>
       ${surgeStat}
     </div>
-    <p class="lede" style="margin-top:16px">The street-cleaning fine is <b>$${FINE}</b> (2026). ${isHoodTiming ? `In ${esc(name)}, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b>.` : `Citywide, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b> — ${esc(name)} follows the same pattern.`}</p>
+    <p class="lede" style="margin-top:16px">The street-cleaning fine is <b>$${FINE}</b> (2026). ${isHoodTiming ? `In ${esc(name)}, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b>.` : `Citywide, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b>. ${esc(name)} follows the same pattern.`}</p>
   </section>
 
   ${parkingSection(name, ENRICH[sl])}
@@ -551,7 +551,7 @@ ${blocksSection(name, sl)}
   <section>
     <div class="sec-k">When tickets happen${isHoodTiming ? ` in ${esc(name)}` : ' (citywide)'}</div>
     <h2>By <b>day</b> &amp; <b>hour</b></h2>
-    <p class="lede">Enforcement clusters at predictable times, not at random. These are the days and hours when ${isHoodTiming ? `${esc(name)} street-cleaning tickets` : 'SF street-cleaning tickets'} are actually written — your block's posted window is what counts, but the pattern shows when to be careful.</p>
+    <p class="lede">Enforcement clusters at predictable times, not at random. These are the days and hours when ${isHoodTiming ? `${esc(name)} street-cleaning tickets` : 'SF street-cleaning tickets'} are actually written. Your block's posted window is what counts, but the pattern shows when to be careful.</p>
     <div class="panel">
       <div class="sec-k" id="dowcap-${sl}">By day of week</div>
       <div class="bars" role="list" aria-labelledby="dowcap-${sl}">${dowBars}</div>
@@ -620,7 +620,7 @@ function renderIndex() {
   <div class="hero">
     <div class="kicker">San Francisco · street cleaning</div>
     <h1>Street cleaning by <b>neighborhood</b></h1>
-    <p class="sub">Schedules are set block by block, but the <b>ticket record</b> tells a story per neighborhood. Pick yours for real numbers — or just open the map and tap your block.</p>
+    <p class="sub">Schedules are set block by block, but the <b>ticket record</b> tells a story per neighborhood. Pick yours for real numbers, or just open the map and tap your block.</p>
     <div class="statrow">
       <div class="stat"><div class="v red">${num(totTickets)}</div><div class="l">Street-cleaning tickets analyzed</div></div>
       <div class="stat"><div class="v">${money(totFines)}</div><div class="l">In fines · last ~2 years</div></div>
