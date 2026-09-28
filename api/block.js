@@ -68,7 +68,7 @@ const label = (e) => place(e) + (e[7] ? `, ${e[7]}` : '');
 const ABBR = { north: 'N', south: 'S', east: 'E', west: 'W', northeast: 'NE', northwest: 'NW', southeast: 'SE', southwest: 'SW' };
 export function titleFor(e) {
   const [street, a, b, , , , , tag] = e;
-  const span = a && b ? `${shortSt(a)} & ${shortSt(b)}` : a ? `at ${shortSt(a)}` : '';
+  const span = a && b ? `${shortSt(a)}/${shortSt(b)}` : a ? `at ${shortSt(a)}` : '';
   const par = (t) => { const inner = [span, t].filter(Boolean).join(', '); return inner ? ` (${inner})` : ''; };
   const short = tag.replace(/\b(north|south)?(east|west)?\b/g, (m) => ABBR[m] || m);
   const tries = [];
@@ -77,7 +77,7 @@ export function titleFor(e) {
   if (fit) return fit;
   // long ramp/boulevard names: clip the cross streets, never the tag that tells twins apart
   const end = `…${short ? `, ${short}` : ''}), SF | CURB`;
-  return `${street} (${span.slice(0, Math.max(0, 59 - street.length - 2 - end.length)).trimEnd().replace(/\s*&$/, '')}${end}`;
+  return `${street} (${span.slice(0, Math.max(0, 59 - street.length - 2 - end.length)).trimEnd().replace(/\s*\/$/, '')}${end}`;
 }
 
 // Next n sweep dates across all rows, SF calendar days (same rules as nextSweep: nth-weekday flags,

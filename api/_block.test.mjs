@@ -35,7 +35,7 @@ describe('block page — content', () => {
   it('renders a short, SF-specific title and a street-naming description', () => {
     const { status, body } = renderBlock('1000', DATA);
     expect(status).toBe(200);
-    expect(title(body)).toBe('Pierce St Street Cleaning (Pine & California), SF | CURB');
+    expect(title(body)).toBe('Pierce St Street Cleaning (Pine/California), SF | CURB');
     expect(title(body).length).toBeLessThan(60);
     expect(desc(body)).toBe('Street cleaning on Pierce St between Pine St and California St, SF: ' +
       'Mon, Thu 8 to 10am; Mon 8 to 10am (1st & 3rd wks). Tickets usually land ~8:14am. $105 fine.'); // with the hood it can't fit 160 even without the fine, so the hood goes
@@ -90,8 +90,8 @@ describe('block page — content', () => {
 
   it('gives the two halves of a divided road distinct titles and H1s', () => {
     const a = renderBlock('188101', DATA).body, b = renderBlock('188201', DATA).body;
-    expect(title(a)).toBe('3rd St Street Cleaning (18th & 19th, east side), SF | CURB');
-    expect(title(b)).toBe('3rd St Street Cleaning (18th & 19th, west side), SF | CURB');
+    expect(title(a)).toBe('3rd St Street Cleaning (18th/19th, east side), SF | CURB');
+    expect(title(b)).toBe('3rd St Street Cleaning (18th/19th, west side), SF | CURB');
     expect(a).toContain('<h1>3rd St between 18th St and 19th St, east side</h1>');
   });
 
@@ -174,7 +174,7 @@ describe('block page — every baked block (data/schedules.json)', () => {
     for (const cnn of Object.keys(d.S.b)) {
       const { status, body } = renderBlock(cnn, d);
       const t = title(body), text = body.replace(/<[^>]+>/g, ' ');
-      if (status !== 200 || t.length >= 60 || titles.has(t) || /&…/.test(t) || desc(body).length > 160 ||
+      if (status !== 200 || t.length >= 60 || titles.has(t) || /\/…/.test(t) || desc(body).length > 160 ||
         /Curbside|Start:|End:|\b0\d+(st|nd|rd|th)\b/.test(text) || /[—–]| - /.test(body) || / between (.+) and \1\b/.test(body.match(/<h1>(.*?)<\/h1>/)[1])) bad.push(cnn);
       titles.add(t);
     }
