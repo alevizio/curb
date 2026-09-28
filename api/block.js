@@ -77,7 +77,7 @@ export function titleFor(e) {
   if (fit) return fit;
   // long ramp/boulevard names: clip the cross streets, never the tag that tells twins apart
   const end = `…${short ? `, ${short}` : ''}), SF | CURB`;
-  return `${street} (${span.slice(0, Math.max(0, 59 - street.length - 2 - end.length)).trimEnd()}${end}`;
+  return `${street} (${span.slice(0, Math.max(0, 59 - street.length - 2 - end.length)).trimEnd().replace(/\s*&$/, '')}${end}`;
 }
 
 // Next n sweep dates across all rows, SF calendar days (same rules as nextSweep: nth-weekday flags,

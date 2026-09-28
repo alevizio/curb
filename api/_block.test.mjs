@@ -171,7 +171,7 @@ describe('block page — every baked block (data/schedules.json)', () => {
     for (const cnn of Object.keys(d.S.b)) {
       const { status, body } = renderBlock(cnn, d);
       const t = title(body), text = body.replace(/<[^>]+>/g, ' ');
-      if (status !== 200 || t.length >= 60 || titles.has(t) || desc(body).length > 160 ||
+      if (status !== 200 || t.length >= 60 || titles.has(t) || /&…/.test(t) || desc(body).length > 160 ||
         /Curbside|Start:|End:|\b0\d+(st|nd|rd|th)\b/.test(text) || /[—–]| - /.test(body) || / between (.+) and \1\b/.test(body.match(/<h1>(.*?)<\/h1>/)[1])) bad.push(cnn);
       titles.add(t);
     }
