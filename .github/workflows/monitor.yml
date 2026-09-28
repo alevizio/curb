@@ -3,7 +3,8 @@
 # Every 30 min (smoke): home page, every DataSF dataset the app uses (read from the live index.html,
 #   incl. CORS — catches host moves), basemap tiles, /b/ + /n/ SEO pages, sitemaps, ticket data,
 #   the sweep-alert sender's last successful run (/api/send-notifications?status=1), and a spike in
-#   real-user errors (/api/client-error).
+#   real-user errors (/api/client-error). Plus the App Store review watch (scripts/monitor/reviews.mjs):
+#   a 1 to 3 star review with no reply yet opens its own issue, which closes once it is answered.
 # Nightly (~4am PT): a real headless-Chrome walk of the core path (map → curb lines → one-tap
 #   locate → block sheet) plus a digest of repeated user errors from the last 24h.
 #
@@ -19,7 +20,8 @@
 # Alerts are GitHub issues (label per group) opened/updated/closed by scripts/monitor/alert.mjs:
 # one email when something breaks, one when what's broken changes, one when it recovers.
 # Free: public-repo Actions minutes. Secrets: CRON_SECRET (same as sweep-alerts-cron; reads the error
-# log and the sender status).
+# log and the sender status); ASC_ISSUER_ID, ASC_KEY_ID, ASC_KEY_P8 (an App Store Connect API key with the
+# Customer Support role, for the review watch; without them that check is skipped).
 # Note: GitHub pauses schedules in public repos after 60 days without commits; the monthly
 # data-refresh commits keep it alive.
 name: monitor
@@ -66,6 +68,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/monitor/alert.mjs smoke.json monitor:site "curb.guide is broken"
+      - name: Check App Store reviews
+        if: always()
+        env:
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: node scripts/monitor/reviews.mjs --out reviews.json
+      - name: Open / update / close the review issue
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/monitor/alert.mjs reviews.json monitor:reviews "App Store review needs a reply"
 
   nightly:
     if: github.event.schedule == '23 11 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'smoke')

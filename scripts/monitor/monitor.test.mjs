@@ -402,3 +402,70 @@ describe('privacy: no visitor error text in public output', () => {
     } finally { if (prev === undefined) delete process.env.CRON_SECRET; else process.env.CRON_SECRET = prev; }
   });
 });
+
+describe('App Store review watch', async () => {
+  const { judgeReviews, checkReviews, apiToken, reviewTag, LOW_STARS, WINDOW_DAYS } = await import('./reviews.mjs');
+  const crypto = await import('node:crypto');
+  const NOW = Date.parse('2026-09-28T18:00:00Z');
+  const day = (d) => new Date(NOW - d * 86400e3).toISOString();
+  const rev = (id, rating, ageDays, replied = false, extra = {}) => ({
+    type: 'customerReviews', id,
+    attributes: { rating, createdDate: day(ageDays), territory: 'USA', title: 'SECRET TITLE', body: 'SECRET BODY', reviewerNickname: 'SECRET NICK', ...extra },
+    relationships: { response: { data: replied ? { type: 'customerReviewResponses', id: 'r' + id } : null } },
+  });
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: 'P-256' });
+  const P8 = privateKey.export({ type: 'pkcs8', format: 'pem' });
+  const ENV = { ASC_ISSUER_ID: 'iss-1', ASC_KEY_ID: 'KEY123', ASC_KEY_P8: P8 };
+
+  it('stays green when every low review has a reply, or is good, or is old', () => {
+    const r = judgeReviews({ data: [rev('a', 5, 1), rev('b', 1, 2, true), rev('c', 2, WINDOW_DAYS + 1)] }, NOW);
+    expect(r).toHaveLength(1);
+    expect(r[0].status).toBe('ok');
+  });
+  it('fails once per unanswered low review, and a 4 star review is not low', () => {
+    const r = judgeReviews({ data: [rev('a', 1, 0), rev('b', LOW_STARS, 3), rev('c', 4, 0)] }, NOW);
+    expect(r.map((x) => x.status)).toEqual(['fail', 'fail']);
+    expect(r[0].name).toBe(`App Store review ${reviewTag('a')}`);
+    expect(r[0].detail).toMatch(/^1★ review \(USA, 2026-09-28\) has no reply yet/);
+  });
+  it('counts a reply that only shows up in `included`', () => {
+    const page = { data: [rev('a', 1, 0)], included: [{ type: 'customerReviewResponses', id: 'x', relationships: { review: { data: { type: 'customerReviews', id: 'a' } } } }] };
+    expect(judgeReviews(page, NOW)[0].status).toBe('ok');
+  });
+  it('never puts the reviewer, title or text into results (the repo and its issues are public)', () => {
+    const out = JSON.stringify(judgeReviews({ data: [rev('a', 1, 0, false, { territory: 'USA<!-- x -->' })] }, NOW));
+    for (const s of ['SECRET TITLE', 'SECRET BODY', 'SECRET NICK', '<!--']) expect(out).not.toContain(s);
+  });
+  it('skips (never fails) without a key', async () => {
+    const r = await checkReviews(() => { throw new Error('must not fetch'); }, {}, NOW);
+    expect(r).toEqual([{ name: 'App Store reviews', status: 'skip', detail: expect.stringContaining('ASC_KEY_ID') }]);
+  });
+  it('signs a valid ES256 token for the App Store Connect API', () => {
+    const t = apiToken({ issuer: 'iss-1', keyId: 'KEY123', p8: P8 }, 1000);
+    const [h, c, s] = t.split('.');
+    expect(JSON.parse(Buffer.from(h, 'base64url'))).toEqual({ alg: 'ES256', kid: 'KEY123', typ: 'JWT' });
+    expect(JSON.parse(Buffer.from(c, 'base64url'))).toEqual({ iss: 'iss-1', iat: 1000, exp: 1900, aud: 'appstoreconnect-v1' });
+    expect(crypto.verify('SHA256', Buffer.from(`${h}.${c}`), { key: publicKey, dsaEncoding: 'ieee-p1363' }, Buffer.from(s, 'base64url'))).toBe(true);
+  });
+  it('accepts the .p8 as base64 too', () => {
+    expect(() => apiToken({ issuer: 'i', keyId: 'k', p8: Buffer.from(P8).toString('base64') })).not.toThrow();
+  });
+  it('calls the reviews endpoint with the token and turns an auth error into a readable failure', async () => {
+    let seen;
+    const f = async (url, opts) => { seen = { url, auth: opts.headers.authorization }; return { ok: false, status: 403 }; };
+    const r = await checkReviews(f, ENV, NOW);
+    expect(seen.url).toContain('/v1/apps/6780998238/customerReviews?sort=-createdDate');
+    expect(seen.url).toContain('include=response');
+    expect(seen.auth).toMatch(/^Bearer [\w-]+\.[\w-]+\.[\w-]+$/);
+    expect(r).toEqual([{ name: 'App Store reviews', status: 'fail', detail: expect.stringContaining('HTTP 403') }]);
+  });
+  it('feeds the alert state machine: opens on a new low review, closes once it is answered', async () => {
+    const f = (page) => async () => ({ ok: true, status: 200, json: async () => page });
+    const opts = { title: 'App Store review needs a reply', mention: 'alevizio', runUrl: '' };
+    const open = decide(await checkReviews(f({ data: [rev('a', 2, 0)] }), ENV, NOW), null, opts);
+    expect(open.type).toBe('open');
+    expect(open.title).toBe(`App Store review needs a reply: App Store review ${reviewTag('a')}`);
+    const closed = decide(await checkReviews(f({ data: [rev('a', 2, 0, true)] }), ENV, NOW), { number: 9, body: open.body }, opts);
+    expect(closed.type).toBe('close');
+  });
+});
