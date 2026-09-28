@@ -24,7 +24,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const jsonLd = (o) => JSON.stringify(o).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
 const h12 = (h) => h % 12 || 12;
 const ap = (h) => (h % 24 >= 12 ? 'pm' : 'am');
-const win = (f, t) => (ap(f) === ap(t) ? `${h12(f)}–${h12(t)}${ap(t)}` : `${h12(f)}${ap(f)}–${h12(t)}${ap(t)}`);
+const win = (f, t) => (ap(f) === ap(t) ? `${h12(f)} to ${h12(t)}${ap(t)}` : `${h12(f)}${ap(f)} to ${h12(t)}${ap(t)}`);
 const fmtMin = m => { let h = Math.floor(m / 60), mm = m % 60; const a = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12; return `${h}:${String(mm).padStart(2, '0')}${a}`; };
 const weeksOf = (mask) => ORD.filter((_, i) => (mask >> i) & 1);
 const andList = (xs) => (xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]);
@@ -68,7 +68,7 @@ const label = (e) => place(e) + (e[7] ? `, ${e[7]}` : '');
 const ABBR = { north: 'N', south: 'S', east: 'E', west: 'W', northeast: 'NE', northwest: 'NW', southeast: 'SE', southwest: 'SW' };
 export function titleFor(e) {
   const [street, a, b, , , , , tag] = e;
-  const span = a && b ? `${shortSt(a)}–${shortSt(b)}` : a ? `at ${shortSt(a)}` : '';
+  const span = a && b ? `${shortSt(a)} & ${shortSt(b)}` : a ? `at ${shortSt(a)}` : '';
   const par = (t) => { const inner = [span, t].filter(Boolean).join(', '); return inner ? ` (${inner})` : ''; };
   const short = tag.replace(/\b(north|south)?(east|west)?\b/g, (m) => ABBR[m] || m);
   const tries = [];
@@ -125,7 +125,7 @@ function sweptPhrase(rows) {
 
 // "Mon, Thu 8–10am (1st & 3rd wks)" — every window once, for the meta description
 export const schedShort = (rows) => windows(rows, false)
-  .map((w) => `${dayRuns(w.dows, DAYLBL, '–').join(', ')} ${win(w.from, w.to)}${w.mask === 31 ? '' : ` (${weeksOf(w.mask).join(' & ')} wks)`}`).join('; ');
+  .map((w) => `${dayRuns(w.dows, DAYLBL, ' to ').join(', ')} ${win(w.from, w.to)}${w.mask === 31 ? '' : ` (${weeksOf(w.mask).join(' & ')} wks)`}`).join('; ');
 
 // One ticket line for the whole block (enforcement.json is per cnn × weekday, not per side).
 function ticketLine(enf, rows) {
@@ -303,7 +303,7 @@ export function makeHandler(load) {
     } catch (err) {
       console.error('block page failed:', cnn, err);
       out = { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '300' },
-        body: plainPage('Back in a moment', 'This block page is temporarily unavailable. Please try again in a few minutes — the live map still works.') };
+        body: plainPage('Back in a moment', 'This block page is temporarily unavailable. Please try again in a few minutes. The live map still works.') };
     }
     res.statusCode = out.status;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
