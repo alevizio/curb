@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SF Street Cleaning Map — When Tickets Actually Land | CURB</title>
-<meta name="description" content="Free SF street sweeping map: every block's cleaning schedule, permit areas, and the times tickets actually land — with move-your-car alerts. Tap your curb.">
+<title>SF Street Cleaning Map: When Tickets Actually Land | CURB</title>
+<meta name="description" content="Free SF street sweeping map: every block's cleaning schedule, permit areas, and the times tickets actually land, with move-your-car alerts. Tap your curb.">
 <link rel="canonical" href="https://curb.guide/">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"CURB",
- "alternateName":"CURB — SF Street Cleaning Map","url":"https://curb.guide/",
+ "alternateName":"CURB: SF Street Cleaning Map","url":"https://curb.guide/",
  "applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)",
  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
- "description":"San Francisco street sweeping schedules block by block, residential permit areas, metered and loading zones, and real-world parking-ticket times reconstructed from public SFMTA citation data — with push alerts before your block is swept.",
+ "description":"San Francisco street sweeping schedules block by block, residential permit areas, metered and loading zones, and real-world parking-ticket times reconstructed from public SFMTA citation data, with push alerts before your block is swept.",
  "image":"https://curb.guide/og.png?v=2",
  "sameAs":["https://github.com/alevizio/curb"],
  "publisher":{"@type":"Organization","name":"CURB","url":"https://curb.guide/",
@@ -21,19 +21,19 @@
 <!-- Social cards: og.png is a static 1200x630 asset regenerated via `npm run og` (og/template.html). URLs must stay absolute. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
-<meta property="og:title" content="CURB — Know where to park in SF">
+<meta property="og:title" content="CURB: Know where to park in SF">
 <meta property="og:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts. From SF open data.">
 <meta property="og:url" content="https://curb.guide/">
 <meta property="og:image" content="https://curb.guide/og.png?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png">
-<meta property="og:image:alt" content="CURB — SF street parking map with green, amber and red curb lines showing sweeping status">
+<meta property="og:image:alt" content="CURB: SF street parking map with green, amber and red curb lines showing sweeping status">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CURB — Know where to park in SF">
+<meta name="twitter:title" content="CURB: Know where to park in SF">
 <meta name="twitter:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts.">
 <meta name="twitter:image" content="https://curb.guide/og.png?v=2">
-<meta name="twitter:image:alt" content="CURB — SF street parking map with colored curb lines">
+<meta name="twitter:image:alt" content="CURB: SF street parking map with colored curb lines">
 <link rel="preconnect" href="https://tile.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
 <link rel="manifest" href="manifest.json">
@@ -640,12 +640,12 @@
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<h1 class="srh">San Francisco street cleaning map — sweeping schedules, permit areas, and real ticket times by block</h1>
+<h1 class="srh">San Francisco street cleaning map: sweeping schedules, permit areas, and real ticket times by block</h1>
 <main id="map" aria-label="San Francisco parking map"></main>
 
 <div class="top">
   <div class="barrow">
-    <button class="logo" id="logoBtn" aria-label="About CURB — what the colors mean"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></button>
+    <button class="logo" id="logoBtn" aria-label="About CURB: what the colors mean"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></button>
     <div class="fwrap">
     <div class="field">
       <svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-amber)" d="M6 11.375c2.96853 0 5.375 -2.40647 5.375 -5.375S8.96853 0.625 6 0.625 0.625 3.03147 0.625 6 3.03147 11.375 6 11.375Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M1.25 6c0 -2.62335 2.12665 -4.75 4.75 -4.75S10.75 3.37665 10.75 6 8.62335 10.75 6 10.75 1.25 8.62335 1.25 6ZM6 0C2.68629 0 0 2.68629 0 6s2.68629 6 6 6c1.20461 0 2.3263 -0.355 3.26617 -0.9661l2.60003 2.6001c0.4881 0.4881 1.2796 0.4881 1.7678 0 0.4881 -0.4882 0.4881 -1.2797 0 -1.7678l-2.6001 -2.60003C11.645 8.3263 12 7.20461 12 6c0 -3.31371 -2.68629 -6 -6 -6Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>
@@ -676,7 +676,7 @@
         </a>
         <a class="im-item" href="/tickets" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V7Z"/><path d="M12 6v2M12 11v2M12 16v2"/></svg></span>
-          <span class="im-tx"><b>Parking tickets</b><small>What SF fines — by year &amp; area</small></span>
+          <span class="im-tx"><b>Parking tickets</b><small>What SF fines, by year &amp; area</small></span>
         </a>
         <a class="im-item" href="/about" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
@@ -689,7 +689,7 @@
         </div>
         <div class="im-foot">
           <div class="im-flinks"><a href="https://datasf.org" target="_blank" rel="noopener">SF open data</a><a href="https://github.com/alevizio/curb" target="_blank" rel="noopener">Open source</a><a href="/privacy">Privacy</a></div>
-          Free &amp; open source. Built on SF open data (DataSF) — the posted sign is always the final word.
+          Free &amp; open source. Built on SF open data (DataSF). The posted sign is always the final word.
         </div>
       </div>
     </div>
@@ -751,7 +751,7 @@
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
-  <p>Every curb in SF, colored by its <b>next street sweep</b>. Tap where you parked for the rules — and <b>when tickets actually land</b>.</p>
+  <p>Every curb in SF, colored by its <b>next street sweep</b>. Tap where you parked for the rules and <b>when tickets actually land</b>.</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps soon</span>
@@ -762,7 +762,7 @@
   <!-- hoods:start — one link per /n/ page, rewritten by scripts/build-hood-pages.mjs -->
   <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/n/bayview-hunters-point">Bayview Hunters Point</a></li><li><a href="/n/bernal-heights">Bernal Heights</a></li><li><a href="/n/castro-upper-market">Castro/Upper Market</a></li><li><a href="/n/chinatown">Chinatown</a></li><li><a href="/n/excelsior">Excelsior</a></li><li><a href="/n/financial-district-south-beach">Financial District/South Beach</a></li><li><a href="/n/glen-park">Glen Park</a></li><li><a href="/n/haight-ashbury">Haight Ashbury</a></li><li><a href="/n/hayes-valley">Hayes Valley</a></li><li><a href="/n/inner-richmond">Inner Richmond</a></li><li><a href="/n/inner-sunset">Inner Sunset</a></li><li><a href="/n/japantown">Japantown</a></li><li><a href="/n/lakeshore">Lakeshore</a></li><li><a href="/n/lone-mountain-usf">Lone Mountain/USF</a></li><li><a href="/n/marina">Marina</a></li><li><a href="/n/mission">Mission</a></li><li><a href="/n/mission-bay">Mission Bay</a></li><li><a href="/n/nob-hill">Nob Hill</a></li><li><a href="/n/noe-valley">Noe Valley</a></li><li><a href="/n/north-beach">North Beach</a></li><li><a href="/n/oceanview-merced-ingleside">Oceanview/Merced/Ingleside</a></li><li><a href="/n/outer-mission">Outer Mission</a></li><li><a href="/n/outer-richmond">Outer Richmond</a></li><li><a href="/n/pacific-heights">Pacific Heights</a></li><li><a href="/n/portola">Portola</a></li><li><a href="/n/potrero-hill">Potrero Hill</a></li><li><a href="/n/presidio-heights">Presidio Heights</a></li><li><a href="/n/russian-hill">Russian Hill</a></li><li><a href="/n/seacliff">Seacliff</a></li><li><a href="/n/south-of-market">South of Market</a></li><li><a href="/n/sunset-parkside">Sunset/Parkside</a></li><li><a href="/n/tenderloin">Tenderloin</a></li><li><a href="/n/twin-peaks">Twin Peaks</a></li><li><a href="/n/visitacion-valley">Visitacion Valley</a></li><li><a href="/n/west-of-twin-peaks">West of Twin Peaks</a></li><li><a href="/n/western-addition">Western Addition</a></li></ul></nav>
   <!-- hoods:end -->
-  <p class="wfoot">Free, no account — built on <a href="https://datasf.org" target="_blank" rel="noopener">SF's open data</a>. The posted sign always wins.</p>
+  <p class="wfoot">Free, no account. Built on <a href="https://datasf.org" target="_blank" rel="noopener">SF's open data</a>. The posted sign always wins.</p>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1030,7 +1030,7 @@ function relPhrase(ns){
   const now=new Date();
   if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.toH);return {txt:t,short:t,rel:'now',cls:'red'};}
   const hrs=(ns.start-now)/36e5;
-  const when=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+', '+fmtHour(ns.fromH)+'–'+fmtHour(ns.toH);
+  const when=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+', '+fmtHour(ns.fromH)+' to '+fmtHour(ns.toH);
   const rel = sweepCountdown(ns, now);  // SF calendar days, never hours/24 (lib/sweep-core.js)
   const cls = hrs<3?'red':hrs<24?'amber':'green';
   // short = date + countdown only (the sign badge beside it already shows day + window)
@@ -1112,10 +1112,10 @@ async function loadViewport(){
     if(my!==fetchTok)return;
     lastRows=data; segBounds=b;
     if(!data.length&&!noCovToasted){noCovToasted=true;
-      toast('No street-sweeping data here — CURB covers San Francisco.');}
+      toast('No street-sweeping data here. CURB covers San Francisco.');}
     drawSegments(data);
     tryPendingOpen();  // a locate / tap / link waiting on THIS area's rows
-  }catch(e){ if(my===fetchTok){ toast("Couldn't load that area — pan and try again."); curbReport('data-load', String((e&&e.message)||e));
+  }catch(e){ if(my===fetchTok){ toast("Couldn't load that area. Pan and try again."); curbReport('data-load', String((e&&e.message)||e));
     if(pendingOpen&&b.contains([pendingOpen.lat,pendingOpen.lng]))endPendingOpen(); } }  // the fetch that should cover it failed: stop waiting
   loadRanges(poly);
   if(rppOn) loadRpp(poly, my); else {rppLayer.clearLayers();rppCache=[];}
@@ -1338,13 +1338,13 @@ async function drawLoadZones(){
     L.polyline(z.line,{color:'#17150F',weight:ww+3,opacity:.85,lineCap:'round',interactive:false}).addTo(loadLayer);
     const w=L.polyline(z.line,{color:'#FFFDF6',weight:ww,opacity:1,lineCap:'round'});
     const head=z.cat==='A'?'Accessible loading':'Passenger loading';
-    const sched=(z.sched||[]).map(s=>`<div class="lp-s">${s.d}${s.f?` · ${s.f}–${s.t}`:''}${s.mx?` · max ${s.mx}`:''}</div>`).join('');
+    const sched=(z.sched||[]).map(s=>`<div class="lp-s">${String(s.d||'').replace(/–/g,' to ')}${s.f?` · ${s.f} to ${s.t}`:''}${s.mx?` · max ${s.mx}`:''}</div>`).join('');
     w.bindPopup(`<div class="lp-h">White curb</div>`
       +`<div class="lp-m">${head}${z.sch?' · 🏫 '+z.sch:''}</div>`
-      +`<div class="lp-s">${z.st}${z.x1?` (${z.x1} – ${z.x2})`:''}${z.side?` · ${z.side} side`:''}${z.ft?` · ${z.ft} ft`:''}</div>`
+      +`<div class="lp-s">${z.st}${z.x1?` (${z.x1} to ${z.x2})`:''}${z.side?` · ${z.side} side`:''}${z.ft?` · ${z.ft} ft`:''}</div>`
       +sched
       +(z.spec?`<div class="lp-s" style="margin-top:5px">${z.spec}</div>`:'')
-      +`<div class="lp-s" style="margin-top:5px">SFMTA Digital Curb data — the posted sign is the source of truth.</div>`,
+      +`<div class="lp-s" style="margin-top:5px">SFMTA Digital Curb data. The posted sign is the source of truth.</div>`,
       {className:'loadpop',maxWidth:260});
     w.addTo(loadLayer);
   });
@@ -1353,7 +1353,7 @@ async function drawLoadZones(){
     const m=L.circleMarker([z.lat,z.lng],{radius:lr,color:'#17150F',weight:2,
       fillColor:LOAD_COLORS[z.color]||'#888',fillOpacity:1,className:'loaddot'});
     const days=z.days&&z.days.length>14?'daily':z.days;
-    const hrs=z.from?`${z.from}–${z.to}`:'';
+    const hrs=z.from?`${z.from} to ${z.to}`:'';
     const lim=z.limit&&z.limit!=='0 minutes'?` · ${z.limit}`:'';
     m.bindPopup(`<div class="lp-h" style="color:${z.color==='White'?'#17150F':LOAD_COLORS[z.color]}">${z.color} curb</div>`
       +`<div class="lp-m">${z.label}</div>`
@@ -1372,7 +1372,11 @@ async function loadRanges(poly){
     d.forEach(x=>{if(x.cnn&&x.lo)rangeCache[x.cnn]={lo:x.lo,hi:x.hi}});
   }catch(e){}
 }
-function fmtRange(cnn){const g=rangeCache[cnn];return g?(g.lo===g.hi?g.lo:g.lo+'–'+g.hi)+' ':'';}
+function fmtRange(cnn){const g=rangeCache[cnn];return g?(g.lo===g.hi?g.lo:g.lo+' to '+g.hi)+' ':'';}
+// DataSF limits read "20th St  -  Liberty St": show the cross streets as a range, no dash
+function fmtLimits(s){return String(s||'').replace(/\s+-\s+/g,' to ');}
+// sign-badge window, compact enough for the 66px badge: "8 TO 10AM", "10AM TO 12PM"
+function badgeWin(f,t){const a=fmtHour(f),b=fmtHour(t);if(!a||!b)return a||b;return (a.slice(-2)===b.slice(-2)?a.slice(0,-2):a)+' TO '+b;}
 async function fillRange(cnn){
   if(!cnn)return;
   if(!rangeCache[cnn]){
@@ -1441,11 +1445,11 @@ function drawSegments(rows){
   if(rows.length&&!segCache.length){  // a filter combination emptied the map — say which one
     const hidden=['green','amber','red'].filter(k=>!statusOn[k]);
     if(dayFilter!=null&&hidden.length)
-      toast('Nothing matches the '+DAYLBL[dayFilter]+' filter with curb colors hidden — reset the legend or tap "All".');
+      toast('Nothing matches the '+DAYLBL[dayFilter]+' filter with curb colors hidden. Reset the legend or tap "All".');
     else if(dayFilter!=null)
-      toast('No '+DAYLBL[dayFilter]+' sweeping on these blocks — tap "All" to reset.');
+      toast('No '+DAYLBL[dayFilter]+' sweeping on these blocks. Tap "All" to reset.');
     else if(hidden.length)
-      toast('All matching curb colors are hidden — re-show them in the legend (bottom left).');
+      toast('All matching curb colors are hidden. Re-show them in the legend (bottom left).');
   }
   if(routeOn)drawRoutes();  // routes derive from the drawn segments — redraw together
 }
@@ -1502,8 +1506,8 @@ function previewHtml(group, side){
   const rpp=nearestRpp(side.mid);
   const e=enfFor(group.cnn, normDay(r.weekday));
   return `<div class="tip-head">${head}</div>
-    <div class="tip-where">${fmtRange(group.cnn)}${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></div>
-    <div class="tip-side">${side.blockside||'Curbside'} · sweeps ${day} ${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div>
+    <div class="tip-where">${fmtRange(group.cnn)}${group.corridor||'This block'} <span class="blk">· ${fmtLimits(group.limits)}</span></div>
+    <div class="tip-side">${side.blockside||'Curbside'} · sweeps ${day} ${fmtHour(r.fromhour)} to ${fmtHour(r.tohour)}</div>
     <div class="tip-next ${rp.cls}">${rp.txt}</div>
     ${e?`<div class="tip-enf">${ICONS.target} Ticketed ~${fmtMin(e.avg)} · earliest ${fmtMin(e.lo)}</div>`:''}
     ${rpp?`<div class="tip-rpp">Permit Zone ${rpp.area}${rpp.hrlimit?' · '+rpp.hrlimit+'hr limit':''} · holders exempt</div>`:''}
@@ -1522,7 +1526,7 @@ const ICONS={
 function openSheet(group, activeKey){
   const active=group.sides.find(s=>s.key===activeKey)||group.sides[0];
   const ns=active.ns, now=new Date();
-  let vClass=verdictClass(ns),kicker='Park until',head='—';
+  let vClass=verdictClass(ns),kicker='Park until',head='';
   if(!ns){kicker='Schedule';head='Posted sign';}
   else if(now>=ns.start&&now<ns.end){kicker='Restricted';head='Sweeping now';}
   else{head=DAYLBL[ns.dow]+' '+fmtHour(ns.fromH);}
@@ -1539,7 +1543,7 @@ function openSheet(group, activeKey){
     const e=enfFor(group.cnn, normDay(r.weekday));
     const sw=swpFor(group.cnn, normDay(r.weekday));
     return `<div class="srow tap" data-side="${s.key}" role="button" tabindex="0" aria-label="Switch to the ${s.blockside||'other'} side">
-      <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${fmtHour(r.fromhour)}–${fmtHour(r.tohour)}</div><div class="sc">STREET CLEANING</div></div>
+      <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${badgeWin(r.fromhour,r.tohour)}</div><div class="sc">STREET CLEANING</div></div>
       <div class="smeta">
         <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.short||rp.txt}</div>
@@ -1592,8 +1596,8 @@ function openSheet(group, activeKey){
     const intoTxt=into<60?into+' min':Math.floor(into/60)+'h'+(into%60?' '+(into%60)+'m':'');
     const lead=as?ae.avg-as.avg:null;
     const etxt=(lead!=null&&lead>0)
-      ? `The city's GPS shows the sweeper passing <b>~${fmtMin(as.avg)}</b>, then tickets land <b>~${fmtMin(ae.avg)}</b> — ${lead} min later.`
-      : `Tickets here usually land <b>~${fmtMin(ae.avg)}</b> — ${intoTxt} into the window.`;
+      ? `The city's GPS shows the sweeper passing <b>~${fmtMin(as.avg)}</b>, then tickets land <b>~${fmtMin(ae.avg)}</b>, ${lead} min later.`
+      : `Tickets here usually land <b>~${fmtMin(ae.avg)}</b>, ${intoTxt} into the window.`;
     enfHtml=`<button class="enf" id="enfBtn" type="button" aria-label="Where this estimate comes from">
       <span class="tgt" aria-hidden="true">${ICONS.target}</span>
       <span class="etxt">${etxt}<span class="enfsrc">where from?</span></span>
@@ -1603,7 +1607,7 @@ function openSheet(group, activeKey){
   const _ar=active.row||active.rows[0];
   const _aw=_ar?[_ar.week1,_ar.week2,_ar.week3,_ar.week4,_ar.week5].map(x=>String(x)==='1'):[true,true,true,true,true];
   const _arp=relPhrase(ns);
-  const aSched=ns?`<div class="asched ${_arp.cls}">${fmtHour(ns.fromH)}–${fmtHour(ns.toH)} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
+  const aSched=ns?`<div class="asched ${_arp.cls}">${fmtHour(ns.fromH)} to ${fmtHour(ns.toH)} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
   // The "park after the sweeper passes" rule — most useful when a sweep is active now or imminent (within 24h).
   const _soon=ns&&((now>=ns.start&&now<ns.end)||(ns.start-now)<864e5);
   // Holiday heads-up: if this side's next scheduled sweep is cancelled for a city holiday, say so.
@@ -1611,24 +1615,24 @@ function openSheet(group, activeKey){
   const _hol=(_hrec&&typeof holidaySkip==='function')?holidaySkip(_hrec):null;
   const _WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const _holDate=_hol?`${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da}`:'';
-  const _holNote=_hol?`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div><div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate} — leave your car where it is.</div></div></div>`:'';
+  const _holNote=_hol?`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div><div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Leave your car where it is.</div></div></div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   // Crowdsourced "Correct a Sign": opens the repo's existing wrong-data issue FORM with this block's
   // context pre-filled (block + what CURB shows), so the reporter just adds the sign + a photo. The
   // form auto-applies the "data" label.
-  const _repSched = ns ? `${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)}–${fmtHour(ns.toH)}` : 'no posted street-sweeping';
-  const _repBlock = (group.corridor||'')+(group.limits?' · '+group.limits:'')+((active&&active.blockside)?' ('+active.blockside+' side)':'')+(group.cnn?'  ·  curb.guide/b/'+group.cnn:'');
+  const _repSched = ns ? `${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)} to ${fmtHour(ns.toH)}` : 'no posted street-sweeping';
+  const _repBlock = (group.corridor||'')+(group.limits?' · '+fmtLimits(group.limits):'')+((active&&active.blockside)?' ('+active.blockside+' side)':'')+(group.cnn?'  ·  curb.guide/b/'+group.cnn:'');
   const _report = `https://github.com/alevizio/curb/issues/new?template=wrong-data.yml&block=${encodeURIComponent(_repBlock)}&app=${encodeURIComponent(_repSched)}`;
   document.getElementById('sheetBody').innerHTML=`
     <div class="verdict ${vClass}"><span class="kicker">${kicker}</span>
-      <div class="headrow"><span class="head">${head}</span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb — pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div></div>
-    <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${group.limits||''}</span></span></div>
+      <div class="headrow"><span class="head">${head}</span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb: pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div></div>
+    <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${fmtLimits(group.limits)}</span></span></div>
     ${aSched}
     ${_holNote}
     ${enfHtml}
     ${rtHtml}
-    ${_soon?`<div class="afterpass">Once the sweeper has passed, you can re-park here — even before the posted window ends. <a href="https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets" target="_blank" rel="noopener">SFMTA rule ↗</a></div>`:''}
+    ${_soon?`<div class="afterpass">Once the sweeper has passed, you can re-park here, even before the posted window ends. <a href="https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets" target="_blank" rel="noopener">SFMTA rule ↗</a></div>`:''}
     <div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>
     ${canRemind?'<hr class="shdiv">':''}
     <div class="actions">
@@ -1662,8 +1666,8 @@ function openSheet(group, activeKey){
     </details>`:''}
     ${sidesBlock}
     <details class="noted">
-      <summary>The <b>posted sign</b> wins — temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block — historical guidance, never a guarantee. ':''}Sweep alerts ping you before sweeping at the intensity you pick under <b>Alert style</b> — Light (~30 min before), Normal (+ the night before), or Intense (+ the morning of, for sweeps from 8 AM); sweeps before 7 AM get one "move it tonight" ping around 9 PM instead; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
+      <summary>The <b>posted sign</b> wins. Temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
+      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block: historical guidance, never a guarantee. ':''}Sweep alerts ping you before sweeping at the intensity you pick under <b>Alert style</b>: Light (~30 min before), Normal (+ the night before), or Intense (+ the morning of, for sweeps from 8 AM); sweeps before 7 AM get one "move it tonight" ping around 9 PM instead; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
 
@@ -1671,7 +1675,7 @@ function openSheet(group, activeKey){
     const doCal=k=>{try{localStorage.setItem('curbCalPref',k);}catch(_){}
       document.getElementById('calChoice').hidden=true;
       track('calendar_added');
-      k==='google'?openGoogleCal(group.corridor||'SF',group.limits||'',ns):downloadICS(group.corridor||'SF',group.limits||'',ns);};
+      k==='google'?openGoogleCal(group.corridor||'SF',fmtLimits(group.limits),ns):downloadICS(group.corridor||'SF',fmtLimits(group.limits),ns);};
     document.getElementById('calBtn').onclick=()=>{
       const p=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
       p?doCal(p):document.getElementById('calChoice').hidden=false;
@@ -1711,11 +1715,11 @@ function openSheet(group, activeKey){
     const url=location.origin+'/b/'+group.cnn;
     const r0=active.row||active.rows[0];
     const e=enfFor(group.cnn, normDay(r0.weekday));
-    const text=`${group.corridor||'This block'} (${group.limits||''}): sweeps ${DAYLBL[normDay(r0.weekday)]||r0.weekday} ${fmtHour(r0.fromhour)}–${fmtHour(r0.tohour)}`
-      +(e?` — tickets usually ~${fmtMin(e.avg)}`:'');
+    const text=`${group.corridor||'This block'} (${fmtLimits(group.limits)}): sweeps ${DAYLBL[normDay(r0.weekday)]||r0.weekday} ${fmtHour(r0.fromhour)} to ${fmtHour(r0.tohour)}`
+      +(e?`, tickets usually ~${fmtMin(e.avg)}`:'');
     try{
       if(navigator.share)await navigator.share({title:'CURB',text,url});
-      else{await navigator.clipboard.writeText(url);toast('Link copied — text it to whoever asked.');}
+      else{await navigator.clipboard.writeText(url);toast('Link copied. Text it to whoever asked.');}
       track('block_shared');  // native share resolved, or clipboard copy succeeded (AbortError skips this)
     }catch(err){
       if(err&&err.name==='AbortError')return;  // user closed the share sheet
@@ -1785,14 +1789,14 @@ function downloadICS(street,block,ns){
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CURB//SF Sweeping//EN','CALSCALE:GREGORIAN',
     'BEGIN:VEVENT','UID:curb-'+Date.now()+'@sweep','DTSTAMP:'+dt(new Date()),
     'DTSTART:'+dt(ns.start),'DTEND:'+dt(ns.end),
-    'SUMMARY:🧹 Move car — street sweeping ('+street+')','LOCATION:'+street+' · '+block,
+    'SUMMARY:🧹 Move car: street sweeping ('+street+')','LOCATION:'+street+' · '+block,
     'DESCRIPTION:Street sweeping starts now. Move your car. Block: '+block,
     'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:Move your car in 30 min','END:VALARM',
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download='sweep-reminder.ics';
   document.body.appendChild(a); a.click(); a.remove();
-  toast('Reminder downloaded — open it to add to your calendar.');
+  toast('Reminder downloaded. Open it to add to your calendar.');
 }
 
 function openGoogleCal(street,block,ns){
@@ -1802,7 +1806,7 @@ function openGoogleCal(street,block,ns){
   const dt=d=>{const p=sfParts(d),z=n=>String(n).padStart(2,'0');
     return p.y+z(p.mo)+z(p.da)+'T'+z(p.h)+z(p.mi)+'00';};
   const u='https://calendar.google.com/calendar/render?action=TEMPLATE'
-    +'&text='+encodeURIComponent('🧹 Move car — street sweeping ('+street+')')
+    +'&text='+encodeURIComponent('🧹 Move car: street sweeping ('+street+')')
     +'&dates='+dt(ns.start)+'/'+dt(ns.end)+'&ctz=America/Los_Angeles'
     +'&location='+encodeURIComponent(street+' · '+block)
     +'&details='+encodeURIComponent('Street sweeping starts. Move your car.\nBlock: '+block);
@@ -1874,12 +1878,12 @@ function paintAlertState(spot){
   const other=!on&&alertLive(a)&&!sameCurb(a,spot);
   note.hidden=!other;
   if(other){note.innerHTML=ICONS.bell+'<span></span>';
-    note.lastChild.textContent='Alerts are on for '+(a.corridor||'another block')+(a.blockside?' ('+a.blockside+')':'')+' — turning them on here moves them to this curb.';}
+    note.lastChild.textContent='Alerts are on for '+(a.corridor||'another block')+(a.blockside?' ('+a.blockside+')':'')+'. Turning them on here moves them to this curb.';}
 }
 function armedToast(spot,prev){
   const night=alertAnchors(Date.parse(spot.nextSweepISO)).night;
-  const what=night?" — we'll ping you ~9 PM the night before to move it."
-    :(spot.eveningISO&&spot.level!=='light'?" — heads-up the night before, plus ~30 min before the truck.":" — we'll ping you ~30 min before.");
+  const what=night?". We'll ping you ~9 PM the night before to move it."
+    :(spot.eveningISO&&spot.level!=='light'?". Heads-up the night before, plus ~30 min before the truck.":". We'll ping you ~30 min before.");
   const moved=prev&&alertLive(prev)&&!sameCurb(prev,spot)?' '+(prev.corridor||'Your other block')+' won\'t alert anymore.':'';
   toast('Sweep alert set for '+(spot.corridor||'this block')+what+moved);
 }
@@ -1938,7 +1942,7 @@ async function onAlertTap(spot, btn){
   }
   // iOS only delivers Web Push when the site is installed to the Home Screen (standalone).
   if(isIOS() && !isStandalone()){ track('ios_install_gate'); showIosHint(); return; }
-  if(!pushSupported()){ toast('This browser does not support push alerts — use ＋ Reminder instead.'); return; }
+  if(!pushSupported()){ toast('This browser does not support push alerts. Use ＋ Reminder instead.'); return; }
   if(Notification.permission==='denied'){ track('permission_denied'); toast('Notifications are blocked. Re-enable them in your browser settings, then retry.'); return; }
 
   const original=btn.innerHTML;  // innerHTML: the label carries an inline SVG glyph
@@ -1975,7 +1979,7 @@ async function onAlertTap(spot, btn){
     const on=alertSpotMatches(spot);
     btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.remove('alt');
     if(on)btn.textContent='✓ Alerts on'; else btn.innerHTML=original;
-    if(!/^permission-/.test(String(err&&err.message))){ toast('Could not enable alerts — '+((err&&err.message)||'try again')+'.'); curbReport('push-save-failed','web '+((err&&err.message)||err)); }
+    if(!/^permission-/.test(String(err&&err.message))){ toast('Could not enable alerts: '+((err&&err.message)||'try again')+'.'); curbReport('push-save-failed','web '+((err&&err.message)||err)); }
   }
 }
 
@@ -2046,7 +2050,7 @@ function saveStyleSoon(spot){
     const s={...spot, level:getAlertLevel(), voice:getAlertVoice()};
     reArm(s).then(r=>{
       if(r==='ok')return markArmed(s);
-      if(r==='gone'){forgetAlert();paintAlertState(spot);return toast('Alerts are off on this device — tap Sweep alerts to turn them back on.');}
+      if(r==='gone'){forgetAlert();paintAlertState(spot);return toast('Alerts are off on this device. Tap Sweep alerts to turn them back on.');}
       const a=savedAlert();
       try{if(a&&a.level)localStorage.setItem('curbAlertLevel',a.level);if(a&&a.voice)localStorage.setItem('curbAlertVoice',a.voice);}catch(_){}
       applyAlertCfg(spot);paintAlertState(spot);
@@ -2071,13 +2075,13 @@ function refreshWatch(spot){
 // Send a real test push to THIS device so you can feel the chosen cadence + voice on your lock screen.
 async function sendTestPush(spot){
   if(window.__curbNativePush){
-    if(typeof window.__curbTestPush==='function'){ nativeTest({level:spot.level,voice:spot.voice,which:'all',spot}); toast('Sending a test — check your lock screen. 🔔'); }
-    else toast('Update the app from TestFlight to test on iPhone — your alerts still work.');
+    if(typeof window.__curbTestPush==='function'){ nativeTest({level:spot.level,voice:spot.voice,which:'all',spot}); toast('Sending a test. Check your lock screen. 🔔'); }
+    else toast('Update the app from TestFlight to test on iPhone. Your alerts still work.');
     return;
   }
   if(isIOS()&&!isStandalone()){ showIosHint(); return; }
-  if(!pushSupported()){ toast('This browser can\'t do push — use the Calendar button instead.'); return; }
-  if(Notification.permission==='denied'){ toast('Notifications are blocked — re-enable them to test.'); return; }
+  if(!pushSupported()){ toast('This browser can\'t do push. Use the Calendar button instead.'); return; }
+  if(Notification.permission==='denied'){ toast('Notifications are blocked. Re-enable them to test.'); return; }
   const tb=document.getElementById('testPushBtn'); const orig=tb?tb.innerHTML:'';
   if(tb){tb.disabled=true;tb.textContent='Sending…';}
   try{
@@ -2087,8 +2091,8 @@ async function sendTestPush(spot){
     let sub=await reg.pushManager.getSubscription();
     if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
     const res=await fetch('/api/test-notification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),level:spot.level,voice:spot.voice,which:'all',spot})});
-    if(res.ok){ try{track('alert_test');}catch(_){ } toast('Test sent — check your notifications. 🔔'); }
-    else toast('Could not send a test — try again.');
+    if(res.ok){ try{track('alert_test');}catch(_){ } toast('Test sent. Check your notifications. 🔔'); }
+    else toast('Could not send a test. Try again.');
   }catch(err){ if(!/perm/.test(String(err&&err.message)))toast('Could not send a test.'); }
   finally{ if(tb){tb.disabled=false;tb.innerHTML=orig;} }
 }
@@ -2160,12 +2164,12 @@ document.getElementById('locate').onclick=()=>{
 // which told people who had just tapped Allow that location was off.
 function locateFailed(code,detail){
   const app=!!window.__curbNativeGeoInstalled;
-  toast(code===1?(app?'Location is off for CURB — turn it on in Settings › CURB › Location, or tap where you parked.'
-      :isIOS()?'Location is blocked — allow Safari Websites in Settings › Privacy › Location Services, or tap where you parked.'
-      :"Location is blocked for this site — allow it in your browser's site settings, or tap where you parked.")
-    :code===2?"Can't find your location right now — try again, or tap where you parked."
-    :code===3?"Couldn't get a fix in time — try again, or tap where you parked."
-    :"This browser can't share your location — search a street, or tap where you parked.");
+  toast(code===1?(app?'Location is off for CURB. Turn it on in Settings › CURB › Location, or tap where you parked.'
+      :isIOS()?'Location is blocked. Allow Safari Websites in Settings › Privacy › Location Services, or tap where you parked.'
+      :"Location is blocked for this site. Allow it in your browser's site settings, or tap where you parked.")
+    :code===2?"Can't find your location right now. Try again, or tap where you parked."
+    :code===3?"Couldn't get a fix in time. Try again, or tap where you parked."
+    :"This browser can't share your location. Search a street, or tap where you parked.");
   curbReport('locate-failed',(code?'code '+code:'unsupported')+(detail?' '+detail:''));
 }
 // Beyond this a fix can't pick a block (SF blocks are ~100–130 m long): show where, not a verdict.
@@ -2186,7 +2190,7 @@ function placeFix(p,quiet){
   if(quiet)return;
   const r=acc>=1000?(acc/1000).toFixed(1)+' km':Math.round(acc)+' m';
   toast((p.curbReduced?'Precise Location is off for CURB, so this is approximate':'Your location is approximate')
-    +' (±'+r+') — tap your block, or search a street.');
+    +' (±'+r+'). Tap your block, or search a street.');
   curbReport('locate-coarse',(p.curbReduced?'reduced ':'')+'±'+(acc>=1000?Math.round(acc/1000)+'km':Math.round(acc/50)*50+'m'));
 }
 // quiet=true: center + dot only (launch auto-position) — no sheet, the user may not be at their car.
@@ -2261,7 +2265,7 @@ function openWhenLoaded(lat,lng,cnnHint,delay){
     if(pendingOpen!==po)return;
     if(!map.getBounds().contains([lat,lng])){endPendingOpen();return;}  // the map moved on — nothing to say
     if(ovMode){endPendingOpen('Zoom in on your block to see its rules.');return;}
-    endPendingOpen("Couldn't load this block's rules — tap it, or pan and try again.");
+    endPendingOpen("Couldn't load this block's rules. Tap it, or pan and try again.");
     curbReport('block-open-timeout',cnnHint?'link':po.loc?'locate':'tap');
   },OPEN_WAIT_MS);
 }
@@ -2273,7 +2277,7 @@ function tryPendingOpen(){
   const n=nearestSeg(po.lat,po.lng);
   // A search/link cnn fallback skips the cap: big parcels' address points sit >80 m from their block.
   if(n&&(po.cnnHint||n.d<=NEAR_M))return openPending(n);
-  endPendingOpen(lastRows.length?'No swept curb within 80 m — tap your block on the map.':'No street-sweeping data here — CURB covers San Francisco.');
+  endPendingOpen(lastRows.length?'No swept curb within 80 m. Tap your block on the map.':'No street-sweeping data here. CURB covers San Francisco.');
 }
 function openPending(n){endPendingOpen();openSheet(n.group,n.side.key);}
 function endPendingOpen(msg){const po=pendingOpen; if(!po)return; pendingOpen=null; if(po.loc)locBusy(false); if(msg)toast(msg);}
@@ -2297,9 +2301,9 @@ function dayHeadsUp(v){
   const n=DAY_BLOCKS[v]; if(n==null)return;
   const approx=n>=1000?Math.round(n/100)*100:n;  // ~6,100 / ~1,000
   if(v===0||v===6)  // weekend = the high-signal "is my block a gotcha?" case
-    toast(`Only ~${approx.toLocaleString()} SF blocks sweep on ${FULLDAY[v]}s — about a sixth of a weekday. Any block still colored here gets cleaned today; the rest are clear.`);
+    toast(`Only ~${approx.toLocaleString()} SF blocks sweep on ${FULLDAY[v]}s, about a sixth of a weekday. Any block still colored here gets cleaned today; the rest are clear.`);
   else
-    toast(`~${approx.toLocaleString()} SF blocks sweep on ${FULLDAY[v]}s — the colored ones are the blocks to move off.`);
+    toast(`~${approx.toLocaleString()} SF blocks sweep on ${FULLDAY[v]}s. The colored ones are the blocks to move off.`);
 }
 function setDayFilter(v){
   dayFilter=v;
@@ -2326,7 +2330,7 @@ let rppBlockCache={};
 function renderRpp(rp){
   const slot=document.getElementById('rppSlot'); if(!slot)return;
   if(!rp){slot.style.display='none';return;}
-  const meta=[rp.hrlimit?rp.hrlimit+'hr limit':'',rp.days||'',rp.from?rp.from+(rp.to?'–'+rp.to:''):''].filter(Boolean).join(' ');
+  const meta=[rp.hrlimit?rp.hrlimit+'hr limit':'',rp.days||'',rp.from?rp.from+(rp.to?' to '+rp.to:''):''].filter(Boolean).join(' ');
   slot.style.display='inline-flex';
   slot.innerHTML=`<span class="adisc" style="background:${areaColor(rp.area)}">${rp.area}</span><span class="rpptxt"><b>Permit Area ${rp.area}</b>${meta?' · '+meta:''} · holders exempt</span><span class="rppgo">outline ▸</span>`;
   slot.title=`Tap to outline Permit Area ${rp.area} on the map`;
@@ -2465,8 +2469,8 @@ function closeInfoMenu(){
   btn.onclick=()=>{const open=menu.hidden; menu.hidden=!open; btn.setAttribute('aria-expanded',open);};
   document.getElementById('imGuide').onclick=()=>{closeInfoMenu();showWelcome();};
   document.getElementById('imShare').onclick=async()=>{closeInfoMenu();
-    const data={title:'CURB',text:'Free SF street-parking map — every block colored by its next street sweep, plus when tickets actually land.',url:'https://curb.guide'};
-    try{ if(navigator.share)await navigator.share(data); else {await navigator.clipboard.writeText(data.url);toast('Link copied — text it to a friend.');} track('app_shared'); }catch(_){}
+    const data={title:'CURB',text:'Free SF street-parking map: every block colored by its next street sweep, plus when tickets actually land.',url:'https://curb.guide'};
+    try{ if(navigator.share)await navigator.share(data); else {await navigator.clipboard.writeText(data.url);toast('Link copied. Text it to a friend.');} track('app_shared'); }catch(_){}
   };
   document.addEventListener('click',e=>{ if(!menu.hidden&&!e.target.closest('.infowrap'))closeInfoMenu(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!menu.hidden)closeInfoMenu(); });
@@ -2625,8 +2629,8 @@ async function showArea(letter){
     d.forEach(x=>{if(!x.hrlimit)return;const k=`${x.hrlimit}|${x.days||''}|${x.from_time||''}|${x.to_time||''}`;tally[k]=(tally[k]||0)+1;});
     const top=Object.entries(tally).sort((a,b)=>b[1]-a[1])[0];
     if(top){const [hr,days,f,t]=top[0].split('|');
-      toast(`Permit Area ${letter} — typically ${hr}hr limit ${days} ${f}–${t}; Area ${letter} permits exempt. (2017 data — check signs.)`);}
-  }catch(e){ if(my===areaTok)toast("Couldn't load that permit area — try again."); }
+      toast(`Permit Area ${letter}: typically ${hr}hr limit ${days} ${f} to ${t}; Area ${letter} permits exempt. (2017 data, check signs.)`);}
+  }catch(e){ if(my===areaTok)toast("Couldn't load that permit area. Try again."); }
 }
 
 document.getElementById('loadToggle').onclick=function(){
@@ -2640,7 +2644,7 @@ document.getElementById('meterToggle').onclick=function(){
   meterOn=!meterOn; this.classList.toggle('on',meterOn); this.setAttribute('aria-pressed',meterOn);
   refreshLayerBadges(); renderOvlLegend();
   if(meterOn){ this.classList.add('busy'); drawMeters().finally(()=>this.classList.remove('busy'));
-    toast('Metered curbs shown as grey dots — check the meter for hours & rates.');
+    toast('Metered curbs shown as grey dots. Check the meter for hours & rates.');
   } else meterLayer.clearLayers();
 };
 document.getElementById('routeToggle').onclick=function(){
@@ -2650,14 +2654,14 @@ document.getElementById('routeToggle').onclick=function(){
     if(ovMode){
       // the overview has no street data — zoom in and let the redraw chain take over
       closeLayersPanel();
-      toast('Truck routes show at street zoom — zooming you in. Pick a day chip to change the day.');
+      toast('Truck routes show at street zoom. Zooming you in. Pick a day chip to change the day.');
       map.setView(map.getCenter(),Math.max(MIN_ZOOM_DATA+1,map.getZoom()+1));
       return;
     }
     const dow=dayFilter!=null?dayFilter:todaySF();
     const n=drawRoutes();
-    toast(n?`${DAYLBL[dow]} sweep runs, colored by DPW route (Mission, Marina…). Arrows infer direction from 2 yrs of ticket times. Pick a day chip to change day — routes real, direction estimated.`
-           :`No ${DAYLBL[dow]} runs to show here — try another day chip or pan to a residential area.`);
+    toast(n?`${DAYLBL[dow]} sweep runs, colored by DPW route (Mission, Marina…). Arrows infer direction from 2 yrs of ticket times. Pick a day chip to change day. Routes real, direction estimated.`
+           :`No ${DAYLBL[dow]} runs to show here. Try another day chip or pan to a residential area.`);
   } else routeLayer.clearLayers();
 };
 
@@ -2684,7 +2688,7 @@ function renderSug(showEmpty){
   s.innerHTML=sugItems.length?sugItems.map((it,i)=>
     `<button class="sugi${i===sugIdx?' sel':''}" role="option" aria-selected="${i===sugIdx}" data-i="${i}">
       <i class="k ${it.kind==='addr'?'addr':'st'}"></i><span>${it.t}</span></button>`).join('')
-    :`<div class="sugi none">No matching SF street — try an address like “214 Steiner St”.</div>`;
+    :`<div class="sugi none">No matching SF street. Try an address like “214 Steiner St”.</div>`;
   s.hidden=false;
   document.getElementById('q').setAttribute('aria-expanded','true');
   s.querySelectorAll('button.sugi').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>pickSug(+b.dataset.i);});
@@ -2768,7 +2772,7 @@ async function doSearch(){
     const r=await fetch(url); const d=await r.json();
     if(d.length&&d[0].line){const c=d[0].line.coordinates[0];map.flyTo([c[1],c[0]],17,{duration:.8});}
     else toast('No street matched "'+v+'".');
-  }catch(e){toast('Search failed — try again.');}
+  }catch(e){toast('Search failed. Try again.');}
 }
 
 /* ---------- misc ---------- */
@@ -2781,8 +2785,8 @@ loadEnforcement();  // background; populates the "real-world ticket time" lines 
 loadSweeps();       // background; populates the "sweeper passes" lines where we have the city's truck GPS (#26-5451)
 loadRoutes();       // background; the block's DPW sweeper-route line + colors the Truck Routes layer
 
-window.addEventListener('offline',()=>toast("You're offline — showing cached data; sweep times may be stale."));
-window.addEventListener('online',()=>{toast('Back online — refreshing.');loadViewport();});
+window.addEventListener('offline',()=>toast("You're offline. Showing cached data; sweep times may be stale."));
+window.addEventListener('online',()=>{toast('Back online. Refreshing.');loadViewport();});
 
 /* First-run onboarding: one welcome card until dismissed or the first curb is tapped.
    The sheet itself is the "aha" — we never tour past it. Tracked, never repeated. */
