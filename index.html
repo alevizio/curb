@@ -1029,9 +1029,9 @@ function relPhrase(ns){
   if(!ns)return {txt:'see posted sign',short:'see posted sign',rel:'',cls:'green'};
   const now=new Date();
   if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.toH);return {txt:t,short:t,rel:'now',cls:'red'};}
-  const hrs=(ns.start-now)/36e5, days=Math.floor(hrs/24);
+  const hrs=(ns.start-now)/36e5;
   const when=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+', '+fmtHour(ns.fromH)+'–'+fmtHour(ns.toH);
-  const rel = hrs<1?'in <1 hr':hrs<24?('in '+Math.round(hrs)+' hr'):days===1?'tomorrow':('in '+days+' days');
+  const rel = sweepCountdown(ns, now);  // SF calendar days, never hours/24 (lib/sweep-core.js)
   const cls = hrs<3?'red':hrs<24?'amber':'green';
   // short = date + countdown only (the sign badge beside it already shows day + window)
   const short=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+' · '+rel;
