@@ -10,6 +10,10 @@ import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
 
 const SITE = process.env.MONITOR_SITE || 'https://curb.guide';
+// A local copy (CI, the on-call routine) has no /config.js (on Vercel a rewrite to /api/config) and no
+// /_vercel/ analytics scripts, so their 404s are expected there.
+const LOCAL = /^http:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(SITE);
+const localOnly = (url) => { const u = String(url || '').split('?')[0]; return LOCAL && (u.endsWith('/config.js') || u.includes('/_vercel/')); };
 const CHROME = process.env.CHROME_PATH
   || ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable'].find(existsSync);
 const HERE = { latitude: 37.7596, longitude: -122.4148, accuracy: 20 }; // Mission, a dense swept area
@@ -33,10 +37,10 @@ try {
   await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   await page.setGeolocation(HERE);
   page.on('pageerror', (e) => errors.push(`page error: ${e.message}`));
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
+  page.on('console', (m) => { if (m.type() === 'error' && !localOnly(m.location()?.url)) errors.push(`console: ${m.text()}`); });
   page.on('response', (r) => {
     const u = r.url();
-    if (r.status() >= 400 && (u.startsWith(origin) || u.includes('data.sf.gov')) && !u.includes('/_vercel/')) errors.push(`HTTP ${r.status()} ${u.split('?')[0]}`);
+    if (r.status() >= 400 && (u.startsWith(origin) || u.includes('data.sf.gov')) && !u.includes('/_vercel/') && !localOnly(u)) errors.push(`HTTP ${r.status()} ${u.split('?')[0]}`);
   });
   const shot = (n) => shots && page.screenshot({ path: `${shots}/${n}.png` }).catch(() => {});
   const waitFor = (fn, ms, ...a) => page.waitForFunction(fn, { timeout: ms, polling: 250 }, ...a).then(() => true, () => false);
@@ -84,3 +88,5 @@ errors.length ? fail('browser: no script or network errors', [...new Set(errors)
 
 for (const r of results) console.log(`${r.status === 'ok' ? '✅' : '❌'} ${r.name}${r.detail ? ' — ' + r.detail : ''}`);
 if (out) writeFileSync(out, JSON.stringify(results, null, 2));
+// --strict (the verify workflow): a failing check fails the job
+if (args.includes('--strict') && results.some((r) => r.status === 'fail')) process.exitCode = 1;
