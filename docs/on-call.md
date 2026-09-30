@@ -27,6 +27,14 @@ nicknames) in commits, issue comments or code; describe it instead.
 skip the issue list and issue comments (use the payload and email only) and verify a deploy by polling
 `curl -s https://curb.guide/...` until your change is live (give it up to 5 minutes) instead of the commit status.
 
+## Wiring test (payload label `monitor:test`)
+
+The owner checks that this routine works. Change nothing and push nothing. Check each and note pass or fail:
+`git clone`/`pull` works; `gh auth status`; `npm ci && npm test`; `curl -sI https://curb.guide/` and
+`curl -sI 'https://data.sf.gov/resource/yhqp-riqs.json?$limit=1'`; can a headless Chrome be installed for the
+browser walk; the Gmail connector. Then email the owner (see Report) with subject `CURB on-call: wiring test`
+and the list, plus anything that would stop you from fixing and shipping a real bug.
+
 ## Daily run (no payload)
 
 List open issues labeled `monitor:*` (`gh issue list --label ...`). Handle any that you have not reported on
