@@ -1085,6 +1085,13 @@ function enterOverviewMode(showHint){
   hint.style.opacity=showHint?'1':'0';hint.style.visibility=showHint?'visible':'hidden';
   drawOverview();  // complete citywide picture (hides the hint when ready)
 }
+// A phone's connection can drop for a moment mid-load (Safari says "Load failed", Chrome "Failed to fetch"): 7 of 8
+// data-load reports in late Sep 2026 were that, never an HTTP error. Retry a network failure once after a short
+// pause, and only while the view still wants this area; HTTP errors resolve normally and are not retried.
+async function fetchRetry(url, wanted=()=>true, pause=1200){
+  try{ return await fetch(url); }
+  catch(e){ if(!wanted())throw e; await new Promise(r=>setTimeout(r,pause)); if(!wanted())throw e; return fetch(url); }
+}
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
   if(z<MIN_ZOOM_DATA){enterOverviewMode(true);return;}
@@ -1108,7 +1115,7 @@ async function loadViewport(){
   try{
     const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line`
       +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
-    const r=await fetch(url); if(!r.ok)throw new Error('HTTP '+r.status); const data=await r.json();  // the data-load report carries it
+    const r=await fetchRetry(url, ()=>my===fetchTok); if(!r.ok)throw new Error('HTTP '+r.status); const data=await r.json();  // the data-load report carries it
     if(my!==fetchTok)return;
     lastRows=data; segBounds=b;
     if(!data.length&&!noCovToasted){noCovToasted=true;
