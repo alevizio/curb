@@ -42,6 +42,10 @@ jobs:
           MONITOR_SITE: http://localhost:3077
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/monitor/browser.mjs --strict --shots shots
+      - name: Alert buttons while a block is being swept
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/check-sweeping-sheet.mjs http://localhost:3077
       - name: Keep screenshots
         if: always()
         uses: actions/upload-artifact@v4
