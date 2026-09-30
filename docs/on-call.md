@@ -23,9 +23,9 @@ nicknames) in commits, issue comments or code; describe it instead.
 
 ## Tools in the cloud session
 
-`git` pushes through the session's GitHub access. The `gh` CLI may be missing or not logged in: if `gh` fails,
-skip the issue list and issue comments (use the payload and email only) and verify a deploy by polling
-`curl -s https://curb.guide/...` until your change is live (give it up to 5 minutes) instead of the commit status.
+`git` pushes through the session's GitHub access. There is no `gh` CLI: read and comment on issues with the
+GitHub connector, and read check runs and deploy statuses from the public GitHub API with `curl` (the repo is
+public, no token needed).
 
 ## Wiring test (payload label `monitor:test`)
 
@@ -48,19 +48,20 @@ since its last update. If there are none, end the run without writing anything a
 3. **Our bug**: work on a `claude/` branch.
    - Smallest change that fixes the cause. Match the surrounding code style and comment density.
    - Add a test that fails before the fix and passes after (vitest, next to similar tests).
-   - Gates, all must pass, read each result:
-     - `npm ci && npm test`
-     - `npm run validate:data`
-     - Workflow files (`.github/`) can't be checked here: if the fix needs one, stop at step 5.
-     - Browser walk against a local copy: `npx --yes serve . -l 3077 &` then
-       `MONITOR_SITE=http://localhost:3077 node scripts/monitor/browser.mjs` (install the driver first with
-       `npm i --no-save puppeteer-core@25` and a browser with `npx --yes @puppeteer/browsers install chrome@stable`,
-       then set `CHROME_PATH`). The local-only `config.js` 404 is expected; every other check must pass.
-     - If a gate can't run, the fix is not shippable: stop at step 5.
+   - Local gates, all must pass, read each result: `npm ci && npm test` and `npm run validate:data`.
+     Workflow files (`.github/`) can't be checked here: if the fix needs one, stop at step 5.
+   - **Ship gate**: commit to your `claude/` branch and push it. That runs `.github/workflows/verify.yml` in
+     GitHub Actions: the tests, the data checks and the real-browser walk against your branch (this sandbox's
+     browser can't do the walk: it rejects the sandbox proxy's certificate; never turn certificate checks off).
+     Wait for it on your exact commit, polling every 30 s for up to 15 min:
+     `curl -s https://api.github.com/repos/alevizio/curb/commits/<sha>/check-runs` → the run named `verify`
+     must be `completed` with conclusion `success`. Anything else: stop at step 5 and say which step failed
+     (the run's log is on GitHub; its URL is in `html_url`).
    - **Ship**: `git checkout main && git pull --ff-only && git merge --no-ff <branch>` (a merge commit, never a
      rebase or force push), rerun `npm test`, `git push origin main`.
-   - **Verify**: wait for the Vercel status on the commit (`gh api repos/alevizio/curb/commits/<sha>/status`
-     until `success`), then confirm the change is live (`curl -s https://curb.guide/ | grep ...`).
+   - **Verify**: wait for the Vercel deploy of the merge commit
+     (`curl -s https://api.github.com/repos/alevizio/curb/commits/<sha>/status` until `state` is `success`),
+     then confirm the change is live (`curl -s https://curb.guide/ | grep ...`).
 4. **Never** touch `ios/` (needs the owner's Mac and Xcode Cloud), the `crons` block or function count in
    `vercel.json`, `.env` files or secrets; never send pushes, call `?test=ios`, or dispatch a workflow with a
    test input; never close a monitor issue yourself (it closes itself; closing early makes it reopen as a

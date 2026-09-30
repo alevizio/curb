@@ -1,0 +1,51 @@
+# The ship gate for the on-call Claude routine (docs/on-call.md): every push to a claude/ branch runs the
+# unit tests, the data checks and the real-browser walk (map → curb lines → one-tap locate → block sheet)
+# against that branch served locally. The routine merges to main only after this workflow succeeds on its
+# commit. The cloud sandbox can't run the browser walk itself (its browser rejects the sandbox's proxy
+# certificate), and here Chrome works. A manual run checks any branch.
+name: verify
+
+on:
+  push:
+    branches: ["claude/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci && npm i --no-save puppeteer-core@25
+      - name: Unit tests
+        run: npm test
+      - name: Data checks
+        run: npm run validate:data
+      - name: Serve this branch locally
+        run: |
+          npx --yes serve . -l 3077 > serve.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:3077/ && exit 0; sleep 1; done
+          cat serve.log; exit 1
+      - name: Walk the app in a real browser
+        env:
+          MONITOR_SITE: http://localhost:3077
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/monitor/browser.mjs --strict --shots shots
+      - name: Keep screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-shots
+          path: shots/
+          retention-days: 7
