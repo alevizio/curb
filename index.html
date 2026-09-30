@@ -799,7 +799,7 @@
      loaded before the main script so its exports are on globalThis. Unit-tested separately.
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
-<script src="/lib/sweep-core.js?v=3"></script>
+<script src="/lib/sweep-core.js?v=4"></script>
 <script>
 const SWEEP="https://data.sf.gov/resource/yhqp-riqs.json";
 const METER="https://data.sf.gov/resource/8vzz-qzz9.json";
@@ -1533,6 +1533,13 @@ const ICONS={
 function openSheet(group, activeKey){
   const active=group.sides.find(s=>s.key===activeKey)||group.sides[0];
   const ns=active.ns, now=new Date();
+  // While this side is being swept, the alert and calendar buttons arm the NEXT sweep (the earliest after
+  // this window across the side's rules): drivers re-park right behind the sweeper and want the reminder
+  // then. The buttons used to vanish for the whole window. The verdict still says "Sweeping now".
+  const sweepingNow=!!ns&&now>=ns.start&&now<ns.end;
+  let armNs=ns, armRow=active.row||(active.rows&&active.rows[0]);
+  if(sweepingNow){armNs=null;(active.rows||[armRow]).forEach(r=>{const n=nextSweep(r,ns.end);if(n&&(!armNs||+n.start<+armNs.start)){armNs=n;armRow=r;}});}
+  sheetArmNote=sweepingNow&&armNs?`, next sweep ${DAYLBL[armNs.dow]} ${armNs.mo}/${armNs.da}`:'';
   let vClass=verdictClass(ns),kicker='Park until',head='';
   if(!ns){kicker='Schedule';head='Posted sign';}
   else if(now>=ns.start&&now<ns.end){kicker='Restricted';head='Sweeping now';}
@@ -1562,29 +1569,29 @@ function openSheet(group, activeKey){
   const sidesBlock=others.length?`<div class="sideslbl">Other side${others.length>1?'s':''}</div><div class="sides">${sidesHtml}</div>`:'';
 
   // permit-area chip is filled async per block (loadRppBlock), clickable to outline the area
-  const canRemind = ns && relPhrase(ns).when;
+  const canRemind = armNs && relPhrase(armNs).when;
   // Spot for push alerts: the tapped side's block + its next sweep (see api/save-subscription.js).
   // Anchors come from the ONE rule the server re-arms with (lib/sweep-core.js alertAnchors):
   // eveningISO = 8pm SF the evening before, skipped when arming after that point; morningISO (the
   // Intense ping) only when start−2h lands 06:00-21:59 SF on the sweep day; a night sweep (before 7am)
   // carries neither — the server sends it one "move it tonight" push around 9pm instead.
-  const spot = ns ? (()=>{
-    const a=alertAnchors(ns.start);
+  const spot = armNs ? (()=>{
+    const a=alertAnchors(armNs.start);
     // Carry EVERY rule of this side (multi-day sides are ~25% of SF) so the server re-arms to the
     // earliest next sweep across them each tick (the "forever-watch"). `rule` = the row that produced
     // `ns`, kept for back-compat; cnn+sideKey identify this curb (also the saved-alert key).
     const ruleOf=r=>({weekday:r.weekday,fromhour:r.fromhour,tohour:r.tohour,
       week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0'});
-    const r0=active.row||(active.rows&&active.rows[0]);
+    const r0=armRow;
     // the block's avg ticket time flavors the copy
-    const _et=enfFor(group.cnn, active.row&&normDay(active.row.weekday));
+    const _et=enfFor(group.cnn, r0&&normDay(r0.weekday));
     return {
       corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
-      nextSweepISO: ns.start.toISOString(), leadMinutes: 30,
+      nextSweepISO: armNs.start.toISOString(), leadMinutes: 30,
       level: getAlertLevel(), voice: getAlertVoice(),
       ...(_et?{tip:fmtMin(_et.avg)}:{}),
       ...(r0?{rule:ruleOf(r0), rules:(active.rows||[r0]).map(ruleOf), cnn:String(group.cnn||''), sideKey:String(active.key||'')}:{}),
-      ...(!a.night&&+a.eve>Date.now()+6e5&&+a.eve<+ns.start?{eveningISO:a.eve.toISOString()}:{}),
+      ...(!a.night&&+a.eve>Date.now()+6e5&&+a.eve<+armNs.start?{eveningISO:a.eve.toISOString()}:{}),
       ...(!a.night&&a.morn&&+a.morn>Date.now()+6e5?{morningISO:a.morn.toISOString()}:{})
     };
   })() : null;
@@ -1682,7 +1689,7 @@ function openSheet(group, activeKey){
     const doCal=k=>{try{localStorage.setItem('curbCalPref',k);}catch(_){}
       document.getElementById('calChoice').hidden=true;
       track('calendar_added');
-      k==='google'?openGoogleCal(group.corridor||'SF',fmtLimits(group.limits),ns):downloadICS(group.corridor||'SF',fmtLimits(group.limits),ns);};
+      k==='google'?openGoogleCal(group.corridor||'SF',fmtLimits(group.limits),armNs):downloadICS(group.corridor||'SF',fmtLimits(group.limits),armNs);};
     document.getElementById('calBtn').onclick=()=>{
       const p=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
       p?doCal(p):document.getElementById('calChoice').hidden=false;
@@ -1887,12 +1894,14 @@ function paintAlertState(spot){
   if(other){note.innerHTML=ICONS.bell+'<span></span>';
     note.lastChild.textContent='Alerts are on for '+(a.corridor||'another block')+(a.blockside?' ('+a.blockside+')':'')+'. Turning them on here moves them to this curb.';}
 }
+// set by openSheet while its side is being swept: the alert it arms is for the sweep after this one
+let sheetArmNote='';
 function armedToast(spot,prev){
   const night=alertAnchors(Date.parse(spot.nextSweepISO)).night;
   const what=night?". We'll ping you ~9 PM the night before to move it."
     :(spot.eveningISO&&spot.level!=='light'?". Heads-up the night before, plus ~30 min before the truck.":". We'll ping you ~30 min before.");
   const moved=prev&&alertLive(prev)&&!sameCurb(prev,spot)?' '+(prev.corridor||'Your other block')+' won\'t alert anymore.':'';
-  toast('Sweep alert set for '+(spot.corridor||'this block')+what+moved);
+  toast('Sweep alert set for '+(spot.corridor||'this block')+sheetArmNote+what+moved);
 }
 // Native bridge, two shapes. Build <= 6: __curbRequestPush resolves a boolean and Swift calls
 // __curbNativePushResult(ok, msg), so capture msg before the original resolves. Build 7+: Swift calls it
