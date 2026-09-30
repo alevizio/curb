@@ -1,6 +1,9 @@
 // CURB service worker — app-shell cache + Web Push.
 // v4: activate purges the /b/ block pages (and retired /n/ slugs, now 301s) that v3 cached and kept serving.
-const CACHE = 'curb-v4';
+// v5: pages and /data/*.json go network first (see NETWORK_FIRST), so a returning visitor's first load after a
+//     deploy or a data refresh is the new one; stale-while-revalidate served the previous build until a 2nd visit.
+const CACHE = 'curb-v5';
+const NET_TIMEOUT_MS = 3000;  // a slow network falls back to the cached copy after this, and still refreshes it
 const SHELL = ['/', 'index.html', 'manifest.json',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
@@ -17,9 +20,28 @@ self.addEventListener('activate', e => {
   })());
 });
 
-// Stale-while-revalidate for same-origin GETs: serve cache instantly (fast app feel),
-// refresh in the background so the next load reflects web deploys, fall back to the shell
-// offline. API routes, /b/ block pages + cross-origin (map tiles / DataSF) always hit the network.
+// Pages (navigations) and the data files: network first, so a deploy or data refresh shows on the next load;
+// the cached copy answers when offline or when the network takes longer than NET_TIMEOUT_MS (and the
+// network answer still refreshes the cache). Everything else same-origin (icons, lib, manifest):
+// stale-while-revalidate. API routes, /b/ block pages + cross-origin (map tiles / DataSF) always hit the network.
+const NETWORK_FIRST = (req, u) => req.mode === 'navigate' || u.pathname.startsWith('/data/');
+async function networkFirst(e) {
+  const req = e.request, cache = await caches.open(CACHE);
+  const fresh = fetch(req).then(resp => {
+    if (resp && resp.ok && resp.type === 'basic') cache.put(req, resp.clone());
+    return resp;
+  });
+  fresh.catch(() => {});
+  if (e.waitUntil) e.waitUntil(fresh.catch(() => {}));  // a slow answer still lands in the cache
+  try {
+    return await Promise.race([fresh, new Promise((_, no) => setTimeout(() => no(new Error('slow')), NET_TIMEOUT_MS))]);
+  } catch (_) {
+    const cached = await cache.match(req, { ignoreSearch: req.mode === 'navigate' });
+    if (cached) return cached;
+    try { return await fresh; } catch (_) { return (req.mode === 'navigate' && await cache.match('/')) || Response.error(); }
+  }
+}
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const u = new URL(e.request.url);
@@ -27,6 +49,7 @@ self.addEventListener('fetch', e => {
   if (u.pathname.startsWith('/api/')) return;  // never cache API (config key, push, share)
   if (u.pathname.startsWith('/basemap/')) return; // map tiles: browser HTTP cache only (no refetch per view)
   if (u.pathname.startsWith('/b/')) return;       // server-rendered: "Next sweeps" dates change daily, a retired block 404s
+  if (NETWORK_FIRST(e.request, u)) { e.respondWith(networkFirst(e)); return; }
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(e.request);

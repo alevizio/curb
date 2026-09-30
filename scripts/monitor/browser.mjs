@@ -1,7 +1,7 @@
 // Nightly real-browser check of curb.guide (headless Chrome, phone-sized), run by monitor.yml.
 // Walks the core user path and returns { name, status, detail } results like smoke.mjs:
 //   map loads → basemap tiles render → curb lines draw at street zoom → ONE tap on "use my location"
-//   finds you → tapping a block opens its sheet → no script errors along the way.
+//   finds you → tapping a block opens its sheet → street search finds a street → no script errors along the way.
 // It never taps "Sweep alerts" (that would create a real push subscription in production).
 //
 //   node scripts/monitor/browser.mjs [--out results.json] [--shots dir]
@@ -79,6 +79,17 @@ try {
     ? ok('browser: tapping a block opens its sheet')
     : fail('browser: tapping a block opens its sheet', 'no parking sheet within 10s of tapping Valencia St');
   await shot('3-sheet');
+
+  // Street search finds a street (Sep 2026: every search sent DataSF an unencoded % wildcard, got HTTP 400
+  // and said "No street matched"; the mocked check-locate never noticed). Real DataSF, real page.
+  await page.evaluate(() => { document.getElementById('sheet')?.classList.remove('open'); map.setView([37.79, -122.46], 15, { animate: false }); });
+  await page.click('#q');
+  await page.type('#q', 'Valencia');
+  await page.keyboard.press('Enter');
+  (await waitFor(() => { const c = map.getCenter(); return c.lng > -122.426 && c.lng < -122.417 && c.lat > 37.74 && c.lat < 37.78; }, 15000))
+    ? ok('browser: street search finds Valencia St')
+    : fail('browser: street search finds Valencia St', `the map did not move to Valencia St within 15s (toast: ${await page.evaluate(() => document.getElementById('toast')?.textContent || 'none')})`);
+  await shot('4-search');
 } catch (e) {
   fail('browser: run', `crashed: ${e.message}`);
 } finally {
