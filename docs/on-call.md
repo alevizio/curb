@@ -34,8 +34,8 @@ The owner checks that this routine works. Change nothing and push nothing. Check
 `curl -sI 'https://data.sf.gov/resource/yhqp-riqs.json?$limit=1'`; can a headless Chrome be installed for the
 browser walk; the Gmail connector; and the ship gate: push an empty commit
 (`git commit --allow-empty -m "test: on-call wiring"`) to a new `claude/wiring-test-<date>` branch, wait for its
-`verify` check run with `node scripts/monitor/wait-verify.mjs <sha>`, then delete that branch (`git push origin --delete`)
-and never merge it. Then email the owner (see Report) with subject `CURB on-call: wiring test`
+`verify` check run with `node scripts/monitor/wait-verify.mjs <sha>`, and never merge it. Don't try to delete
+branches: the sandbox can't, and the owner's session cleans them up. Then email the owner (see Report) with subject `CURB on-call: wiring test`
 and the list, plus anything that would stop you from fixing and shipping a real bug.
 
 ## Daily run (no payload)
