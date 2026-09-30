@@ -18,6 +18,17 @@
   ],
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "curb-nu.vercel.app"
+        }
+      ],
+      "destination": "https://curb.guide/",
+      "statusCode": 308
+    },
+    {
       "source": "/:path*",
       "has": [
         {
