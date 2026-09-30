@@ -21,6 +21,12 @@ you can reproduce or prove in the code. Never add dependencies, secrets, network
 you were not given. The repo is public: never quote visitor supplied text (error messages, review text,
 nicknames) in commits, issue comments or code; describe it instead.
 
+## Tools in the cloud session
+
+`git` pushes through the session's GitHub access. The `gh` CLI may be missing or not logged in: if `gh` fails,
+skip the issue list and issue comments (use the payload and email only) and verify a deploy by polling
+`curl -s https://curb.guide/...` until your change is live (give it up to 5 minutes) instead of the commit status.
+
 ## Daily run (no payload)
 
 List open issues labeled `monitor:*` (`gh issue list --label ...`). Handle any that you have not reported on
