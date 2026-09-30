@@ -318,7 +318,7 @@ describe('web-push options', () => {
     await run(bearer());
     const [sub, payload, opts] = send.mock.calls[0];
     expect(sub.endpoint).toBe(EP);
-    expect(opts).toEqual({ TTL: 20 * 60, urgency: 'high' });
+    expect(opts).toEqual({ TTL: 20 * 60, urgency: 'high', timeout: 10000 });  // timeout: one stuck push service must not stall the run
     expect('topic' in opts).toBe(false);
     expect(JSON.parse(payload)).toMatchObject({ tag: 'curb-sweep', requireInteraction: true });
   });
@@ -327,7 +327,7 @@ describe('web-push options', () => {
     vi.setSystemTime(Date.parse('2026-06-19T03:05:00Z')); // 8:05 PM PDT
     await run(bearer());
     const [, payload, opts] = send.mock.calls[0];
-    expect(opts).toEqual({ TTL: (4 * 60 - 5) * 60, urgency: 'normal' });
+    expect(opts).toEqual({ TTL: (4 * 60 - 5) * 60, urgency: 'normal', timeout: 10000 });
     expect(JSON.parse(payload).requireInteraction).toBe(false);
   });
 

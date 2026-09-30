@@ -7,6 +7,8 @@
 import http2 from 'node:http2';
 import crypto from 'node:crypto';
 
+const STREAM_TIMEOUT_MS = 10000; // one APNs request; a stream that never answers resolves as a failed send
+
 const BUNDLE = () => process.env.APNS_BUNDLE_ID || 'guide.curb.ios';
 export const PROD_HOST = 'api.push.apple.com';
 export const SANDBOX_HOST = 'api.development.push.apple.com';
@@ -113,6 +115,8 @@ export function sendOne(session, jwt, token, payload, collapseId, expiration) {
       resolve({ status, reason });
     });
     req.on('error', (e) => resolve({ status: 0, reason: e.message }));
+    // an APNs stream that never answers must not hold the run: give up on it like a failed send
+    req.setTimeout(STREAM_TIMEOUT_MS, () => { try { req.close(http2.constants.NGHTTP2_CANCEL); } catch { /* already closed */ } resolve({ status: 0, reason: 'timeout' }); });
     req.end(body);
   });
 }

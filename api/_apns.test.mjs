@@ -3,7 +3,7 @@
 // base64 (_B64) load, recovery from a newline-collapsed PEM, the ES256 signature, and JWT caching.
 import { describe, it, expect, beforeEach } from 'vitest';
 import crypto from 'node:crypto';
-import { getProviderToken, resetProviderToken, apnsConfigured } from './_apns.js';
+import { getProviderToken, resetProviderToken, apnsConfigured, sendOne } from './_apns.js';
 
 // A throwaway P-256 keypair stands in for the real APNs .p8 (same curve + PKCS#8 PEM shape APNs uses).
 function makeKey() {
@@ -78,5 +78,18 @@ describe('getProviderToken — ES256 provider JWT', () => {
     const t3 = getProviderToken();
     expect(t3).not.toBe(t1); // re-minted (ECDSA signatures are randomized, so the token differs)
     expect(sigVerifies(t3, KEY_A.publicKey)).toBe(true);
+  });
+});
+
+describe('sendOne timeout', () => {
+  // A stream APNs never answers used to hold the whole cron run until the 60 s function limit.
+  it('resolves as a failed send (status 0, "timeout") and cancels the stream', async () => {
+    let onTimeout = null, closed = false, ms = 0;
+    const req = { on() {}, setEncoding() {}, end() {}, setTimeout(t, cb) { ms = t; onTimeout = cb; }, close() { closed = true; } };
+    const p = sendOne({ request: () => req }, 'jwt', 'a'.repeat(64), { aps: {} }, null, null);
+    expect(ms).toBe(10000);
+    onTimeout();
+    await expect(p).resolves.toEqual({ status: 0, reason: 'timeout' });
+    expect(closed).toBe(true);
   });
 });

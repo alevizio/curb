@@ -970,7 +970,7 @@ let rangeCache={};   // cnn -> {lo,hi} street-number range (EAS); accumulates ac
 let ENF=null, enfTried=false;
 async function loadEnforcement(){
   if(ENF||enfTried)return; enfTried=true;
-  try{const r=await fetch('data/enforcement.json',{cache:'force-cache'}); if(r.ok)ENF=await r.json();}catch(_){}
+  try{const r=await fetch('data/enforcement.json'); if(r.ok)ENF=await r.json();}catch(_){}
 }
 function enfFor(cnn,dow){
   if(!ENF||dow==null)return null;
@@ -984,7 +984,7 @@ function enfFor(cnn,dow){
 let SWP=null, swpTried=false;
 async function loadSweeps(){
   if(SWP||swpTried)return; swpTried=true;
-  try{const r=await fetch('data/sweeps.json',{cache:'force-cache'}); if(r.ok)SWP=await r.json();}catch(_){}
+  try{const r=await fetch('data/sweeps.json'); if(r.ok)SWP=await r.json();}catch(_){}
 }
 function swpFor(cnn,dow){
   if(!SWP||dow==null)return null;
@@ -998,7 +998,7 @@ function swpFor(cnn,dow){
 let ROUTES=null, rtTried=false;
 async function loadRoutes(){
   if(ROUTES||rtTried)return; rtTried=true;
-  try{const r=await fetch('data/routes.json',{cache:'force-cache'}); if(r.ok){ROUTES=await r.json(); if(routeOn)drawRoutes();}}catch(_){}
+  try{const r=await fetch('data/routes.json'); if(r.ok){ROUTES=await r.json(); if(routeOn)drawRoutes();}}catch(_){}
 }
 function routeFor(cnn){
   if(!ROUTES)return null;
@@ -1133,7 +1133,7 @@ async function loadViewport(){
 /* ---------- citywide overview (zoom < 15): block endpoints + rules, colored live ---------- */
 async function ensureOverview(){
   if(OVR)return OVR;
-  const r=await fetch('data/overview.json',{cache:'force-cache'}); if(!r.ok)throw 0;
+  const r=await fetch('data/overview.json'); if(!r.ok)throw 0;
   const d=await r.json();
   OVR=d.b.map(b=>({a:[b[1],b[0]],z:[b[3],b[2]],rules:b[4].map(([dw,f,t,m,h])=>({
     weekday:DAYLBL[dw],fromhour:String(f),tohour:String(t),holidays:h?'1':'0',
@@ -1162,6 +1162,7 @@ function overviewStyle(b,ow){
 }
 async function drawOverview(){
   try{await ensureOverview();}catch(e){return;}  // on failure the "find your spot" hint stays
+  if(!ovMode)return;  // street detail took over while overview.json loaded (a deep link on a slow network)
   buildOverviewLines();
   const ow=map.getZoom()>=MIN_ZOOM_DATA?3:2;  // primary view at z15+ fallback: slightly bolder
   const key=String(dayFilter)+'|'+statusOn.green+statusOn.amber+statusOn.red+'|'+ow+'|'+Math.floor(Date.now()/6e5);
@@ -1179,6 +1180,7 @@ async function drawOverview(){
       if(i+CHUNK<ovrLines.length)await new Promise(r=>requestAnimationFrame(r));
     }
   }
+  if(!ovMode)return;  // ...or during the chunked restyle
   if(!map.hasLayer(overviewLayer))overviewLayer.addTo(map);
   const hint=document.getElementById('hint');
   hint.style.opacity='0';hint.style.visibility='hidden';  // the overview replaces the empty-map hint
@@ -1293,7 +1295,7 @@ async function ensureLoadCache(){
   if(loadCache)return loadCache;
   // Precomputed static asset first (one cached CDN file, ~250KB wired vs ~3MB live).
   try{
-    const r=await fetch('data/zones.json',{cache:'force-cache'});
+    const r=await fetch('data/zones.json');
     if(r.ok){
       const d=await r.json();
       meterPts=d.meters;
@@ -1328,7 +1330,7 @@ let whiteCache=null;
 async function ensureWhiteCache(){
   if(whiteCache)return whiteCache;
   try{
-    const r=await fetch('data/white-zones.json',{cache:'force-cache'});
+    const r=await fetch('data/white-zones.json');
     whiteCache=r.ok?(await r.json()).zones:[];
   }catch(_){whiteCache=[];}
   return whiteCache;
@@ -1690,24 +1692,24 @@ function openSheet(group, activeKey){
       document.getElementById('calChoice').hidden=true;
       track('calendar_added');
       k==='google'?openGoogleCal(group.corridor||'SF',fmtLimits(group.limits),armNs):downloadICS(group.corridor||'SF',fmtLimits(group.limits),armNs);};
+    // Rows that open under the actions (calendar chooser, alerts off switch) can land below the 46dvh peek,
+    // so the tap looked dead: scroll the sheet just far enough to show them. Measured from layout (offsetTop),
+    // not the rect the panelin scale-in shrinks, and clear of the sheet's bottom padding (home-indicator inset).
+    const reveal=o=>{const s=document.getElementById('sheet');
+      const below=o.offsetTop+o.offsetHeight+parseFloat(getComputedStyle(s).paddingBottom)-(s.scrollTop+s.clientHeight);
+      if(below>0)s.scrollBy({top:below,behavior:'smooth'});};
+    const openCalChoice=()=>{const c=document.getElementById('calChoice');c.hidden=false;reveal(c);};
     document.getElementById('calBtn').onclick=()=>{
       const p=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
-      p?doCal(p):document.getElementById('calChoice').hidden=false;
+      p?doCal(p):openCalChoice();
     };
     const more=document.getElementById('calMore');
-    if(more)more.onclick=e=>{e.stopPropagation();document.getElementById('calChoice').hidden=false;};
+    if(more)more.onclick=e=>{e.stopPropagation();openCalChoice();};
     document.getElementById('calGoogle').onclick=()=>doCal('google');
     document.getElementById('calICS').onclick=()=>doCal('ics');
     // "✓ Alerts on" offers the off switch instead of silently re-arming (and extending) the watch.
-    // On a short phone (375x667) the row opens below the 46dvh peek, so the tap looked dead: scroll the sheet
-    // just far enough to show it. Measured from layout (offsetTop), not the rect the panelin scale-in shrinks,
-    // and clear of the sheet's bottom padding: it carries the home-indicator inset on Face ID iPhones.
     document.getElementById('alertBtn').onclick=e=>{
-      if(alertSpotMatches(spot)){const o=document.getElementById('alertOff'), s=document.getElementById('sheet');
-        o.hidden=false;
-        const below=o.offsetTop+o.offsetHeight+parseFloat(getComputedStyle(s).paddingBottom)-(s.scrollTop+s.clientHeight);
-        if(below>0)s.scrollBy({top:below,behavior:'smooth'});
-        return;}
+      if(alertSpotMatches(spot)){const o=document.getElementById('alertOff');o.hidden=false;reveal(o);return;}
       onAlertTap(spot,e.currentTarget);
     };
     document.getElementById('alertOffNo').onclick=()=>{document.getElementById('alertOff').hidden=true;};
@@ -1767,6 +1769,19 @@ function openSheet(group, activeKey){
   }catch(_){}
 }
 document.getElementById('sheetClose').onclick=()=>{ finishSheetSlide(); document.getElementById('sheet').classList.remove('open'); };
+// Off screen is not gone: a closed sheet or a hidden install hint stayed in the Tab order and the accessibility
+// tree. Mirror the .open class into `inert`, wherever it gets toggled.
+['sheet','iosHint'].forEach(id=>{const el=document.getElementById(id); if(!el)return;
+  const sync=()=>{el.inert=!el.classList.contains('open');}; sync();
+  new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:['class']});});
+// Esc closes the install hint, else the block sheet (when no menu, panel, suggestion list or welcome is up)
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('iosHint').classList.contains('open')){hideIosHint();return;}
+  const up=id=>{const x=document.getElementById(id);return x&&!x.hidden;};
+  if(document.getElementById('welcome').classList.contains('open')||up('layersPanel')||up('infoMenu')||up('sug'))return;
+  const sh=document.getElementById('sheet'); if(sh.classList.contains('open'))document.getElementById('sheetClose').click();
+});
 document.getElementById('shareBtn').innerHTML=ICONS.share;
 document.getElementById('centerBtn').innerHTML=ICONS.center;
 // Peek↔tall as a compositor-only slide (FLIP) instead of animating max-height (which re-laid out the
@@ -1958,7 +1973,7 @@ async function onAlertTap(spot, btn){
   }
   // iOS only delivers Web Push when the site is installed to the Home Screen (standalone).
   if(isIOS() && !isStandalone()){ track('ios_install_gate'); showIosHint(); return; }
-  if(!pushSupported()){ toast('This browser does not support push alerts. Use ＋ Reminder instead.'); return; }
+  if(!pushSupported()){ toast('This browser does not support push alerts. Use Calendar instead.'); return; }
   if(Notification.permission==='denied'){ track('permission_denied'); toast('Notifications are blocked. Re-enable them in your browser settings, then retry.'); return; }
 
   const original=btn.innerHTML;  // innerHTML: the label carries an inline SVG glyph
@@ -2713,7 +2728,7 @@ function pickSug(i){
   const it=sugItems[i]; if(!it)return;
   userPicked();
   document.getElementById('q').value=it.t;
-  hideSug();
+  hideSug(); document.getElementById('q').blur();  // the phone keyboard would stay over the sheet
   if(it.kind==='addr'&&it.d&&it.d.latitude){placeYou(+it.d.latitude,+it.d.longitude,true,it.d.cnn);}
   else doSearch();
 }
@@ -2744,7 +2759,7 @@ document.getElementById('q').addEventListener('keydown',ev=>{
   if(ev.key==='ArrowDown'&&open){ev.preventDefault();sugIdx=Math.min(sugIdx+1,sugItems.length-1);renderSug();}
   else if(ev.key==='ArrowUp'&&open){ev.preventDefault();sugIdx=Math.max(sugIdx-1,-1);renderSug();}
   else if(ev.key==='Escape'&&open){hideSug();}
-  else if(ev.key==='Enter'){ev.preventDefault(); if(open&&sugIdx>=0)pickSug(sugIdx); else {hideSug();doSearch();}}
+  else if(ev.key==='Enter'){ev.preventDefault(); if(open&&sugIdx>=0)pickSug(sugIdx); else {hideSug();document.getElementById('q').blur();doSearch();}}
 });
 document.getElementById('q').addEventListener('input',()=>{clearTimeout(sugTimer);sugTimer=setTimeout(updateSug,220);});
 document.getElementById('q').addEventListener('focus',ensureCorridors);
@@ -2784,8 +2799,9 @@ async function doSearch(){
   }
   const Q=soql(v.toUpperCase());
   try{
-    const url=SWEEP+`?$select=corridor,line&$where=upper(corridor) like '%${Q}%' AND line IS NOT NULL&$limit=1`;
-    const r=await fetch(url); const d=await r.json();
+    // encoded: raw % wildcards make DataSF answer 400, which read as "No street matched" (see the Socrata gotcha in CLAUDE.md)
+    const url=SWEEP+`?$select=corridor,line&$where=${encodeURIComponent(`upper(corridor) like '%${Q}%' AND line IS NOT NULL`)}&$limit=1`;
+    const r=await fetch(url); if(!r.ok)throw new Error('HTTP '+r.status); const d=await r.json();
     if(d.length&&d[0].line){const c=d[0].line.coordinates[0];map.flyTo([c[1],c[0]],17,{duration:.8});}
     else toast('No street matched "'+v+'".');
   }catch(e){toast('Search failed. Try again.');}
