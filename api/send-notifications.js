@@ -25,6 +25,8 @@ import { recomputeSpot } from './_schedule.js';
 import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
 import { dueAlert } from '../lib/notify-core.js';
 
+const SEND_TIMEOUT_MS = 10000; // per push request (web push and APNs), well inside the 60 s function limit
+
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
 // live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
 const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
@@ -197,7 +199,9 @@ export default async function handler(req, res) {
       // Bounded TTL (web-push's default is 4 weeks: an offline phone would get "move your car" days
       // late) + high urgency for act-now pushes (Android Doze holds normal ones). No Topic header:
       // Apple's web push service rejects it, which would silently drop every Safari/iOS PWA alert.
-      const opts = { TTL: Math.max(60, Math.floor((due.expiresAt - Date.now()) / 1000)), urgency: due.urgent ? 'high' : 'normal' };
+      // timeout: web-push has none, and one push service that never answers stalled the whole run (every
+      // later sub, the APNs pass) until the 60 s function limit killed it before finish() recorded anything.
+      const opts = { TTL: Math.max(60, Math.floor((due.expiresAt - Date.now()) / 1000)), urgency: due.urgent ? 'high' : 'normal', timeout: SEND_TIMEOUT_MS };
       let delivered = false;
       try {
         await webpush.sendNotification(subscription, payload, opts);
