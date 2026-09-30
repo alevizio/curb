@@ -493,3 +493,18 @@ describe('waking the on-call routine', async () => {
     expect(t.endsWith('[trimmed]')).toBe(true);
   });
 });
+
+describe('on-call ship gate (wait-verify)', async () => {
+  const { verdict } = await import('./wait-verify.mjs');
+  const run = (status, conclusion) => ({ check_runs: [{ name: 'Vercel Preview Comments', status: 'completed', conclusion: 'success' }, { name: 'verify', status, conclusion, html_url: 'https://github.com/x/runs/1' }] });
+  it('waits while verify has not started or is running (another check passing does not count)', () => {
+    expect(verdict({ check_runs: [{ name: 'Vercel Preview Comments', status: 'completed', conclusion: 'success' }] }).state).toBe('pending');
+    expect(verdict(run('in_progress', null)).state).toBe('pending');
+  });
+  it('passes only on a completed, successful verify run', () => {
+    expect(verdict(run('completed', 'success'))).toEqual({ state: 'success', url: 'https://github.com/x/runs/1', conclusion: 'success' });
+  });
+  it('fails on any other conclusion', () => {
+    for (const c of ['failure', 'cancelled', 'timed_out', 'skipped']) expect(verdict(run('completed', c)).state).toBe('failure');
+  });
+});

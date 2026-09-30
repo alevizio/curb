@@ -34,7 +34,7 @@ The owner checks that this routine works. Change nothing and push nothing. Check
 `curl -sI 'https://data.sf.gov/resource/yhqp-riqs.json?$limit=1'`; can a headless Chrome be installed for the
 browser walk; the Gmail connector; and the ship gate: push an empty commit
 (`git commit --allow-empty -m "test: on-call wiring"`) to a new `claude/wiring-test-<date>` branch, wait for its
-`verify` check run to succeed (see Handling an alert, step 3), then delete that branch (`git push origin --delete`)
+`verify` check run with `node scripts/monitor/wait-verify.mjs <sha>`, then delete that branch (`git push origin --delete`)
 and never merge it. Then email the owner (see Report) with subject `CURB on-call: wiring test`
 and the list, plus anything that would stop you from fixing and shipping a real bug.
 
@@ -56,10 +56,8 @@ since its last update. If there are none, end the run without writing anything a
    - **Ship gate**: commit to your `claude/` branch and push it. That runs `.github/workflows/verify.yml` in
      GitHub Actions: the tests, the data checks and the real-browser walk against your branch (this sandbox's
      browser can't do the walk: it rejects the sandbox proxy's certificate; never turn certificate checks off).
-     Wait for it on your exact commit, polling every 30 s for up to 15 min:
-     `curl -s https://api.github.com/repos/alevizio/curb/commits/<sha>/check-runs` → the run named `verify`
-     must be `completed` with conclusion `success`. Anything else: stop at step 5 and say which step failed
-     (the run's log is on GitHub; its URL is in `html_url`).
+     Wait for it on your exact commit with `node scripts/monitor/wait-verify.mjs <sha>` (don't write your
+     own poller): exit 0 means it passed; anything else, stop at step 5 and include the run URL it prints.
    - **Ship**: `git checkout main && git pull --ff-only && git merge --no-ff <branch>` (a merge commit, never a
      rebase or force push), rerun `npm test`, `git push origin main`.
    - **Verify**: wait for the Vercel deploy of the merge commit
