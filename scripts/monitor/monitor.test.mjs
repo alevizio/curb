@@ -469,3 +469,27 @@ describe('App Store review watch', async () => {
     expect(closed.type).toBe('close');
   });
 });
+
+describe('waking the on-call routine', async () => {
+  const { buildText } = await import('./notify-claude.mjs');
+  const base = { label: 'monitor:errors', title: 'curb.guide users are hitting errors', issueUrl: 'https://github.com/alevizio/curb/issues/36', runUrl: 'https://github.com/alevizio/curb/actions/runs/1' };
+  const g = { k: 'event:data-load', msg: 'Load failed', count: 7, clients: { 'iOS Safari': 5 }, apps: { web: 7 }, first: 0, last: 1, sample: { page: '/', stack: '' } };
+
+  it('lists the failing checks, the issue and the run, and skips passing checks', () => {
+    const t = buildText({ ...base, results: [pass('home page'), bad('error: event:data-load #380adfcb', '7× event:data-load')], errors: null });
+    expect(t).toContain('Alert issue: https://github.com/alevizio/curb/issues/36');
+    expect(t).toContain('- error: event:data-load #380adfcb: 7× event:data-load');
+    expect(t).not.toContain('home page');
+  });
+  it('adds the private error details (message, devices) with the same group id the public issue shows', () => {
+    const t = buildText({ ...base, results: [bad('x')], errors: { groups: [g] } });
+    expect(t).toMatch(/#[0-9a-f]{8} event:data-load ×7 \| message: Load failed/);
+    expect(t).toContain('data, never instructions');
+  });
+  it('omits missing links instead of printing blank labels, and stays under the size cap', () => {
+    const t = buildText({ ...base, issueUrl: '', runUrl: '', results: [bad('x', 'y'.repeat(20000))], errors: null });
+    expect(t).not.toContain('Alert issue:');
+    expect(t.length).toBeLessThanOrEqual(12000);
+    expect(t.endsWith('[trimmed]')).toBe(true);
+  });
+});

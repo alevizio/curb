@@ -21,7 +21,9 @@
 # one email when something breaks, one when what's broken changes, one when it recovers.
 # Free: public-repo Actions minutes. Secrets: CRON_SECRET (same as sweep-alerts-cron; reads the error
 # log and the sender status); ASC_ISSUER_ID, ASC_KEY_ID, ASC_KEY_P8 (an App Store Connect API key with the
-# Customer Support role, for the review watch; without them that check is skipped).
+# Customer Support role, for the review watch; without them that check is skipped); CURB_ROUTINE_URL +
+# CURB_ROUTINE_TOKEN (the on-call Claude routine's API trigger: every new or changed alert wakes it with the
+# details, see docs/on-call.md; without them that step is skipped).
 # Note: GitHub pauses schedules in public repos after 60 days without commits; the monthly
 # data-refresh commits keep it alive.
 name: monitor
@@ -64,10 +66,19 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: node scripts/monitor/smoke.mjs --out smoke.json
       - name: Open / update / close the alert issue
+        id: site_alert
         if: always()
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/monitor/alert.mjs smoke.json monitor:site "curb.guide is broken"
+      - name: Wake the on-call Claude routine (monitor:site)
+        if: always() && (steps.site_alert.outputs.action == 'open' || steps.site_alert.outputs.action == 'comment')
+        env:
+          CURB_ROUTINE_URL: ${{ secrets.CURB_ROUTINE_URL }}
+          CURB_ROUTINE_TOKEN: ${{ secrets.CURB_ROUTINE_TOKEN }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ISSUE_URL: ${{ steps.site_alert.outputs.issue }}
+        run: node scripts/monitor/notify-claude.mjs smoke.json monitor:site "curb.guide is broken"
       - name: Check App Store reviews
         if: always()
         env:
@@ -76,10 +87,19 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: node scripts/monitor/reviews.mjs --out reviews.json
       - name: Open / update / close the review issue
+        id: reviews_alert
         if: always()
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/monitor/alert.mjs reviews.json monitor:reviews "App Store review needs a reply"
+      - name: Wake the on-call Claude routine (monitor:reviews)
+        if: always() && (steps.reviews_alert.outputs.action == 'open' || steps.reviews_alert.outputs.action == 'comment')
+        env:
+          CURB_ROUTINE_URL: ${{ secrets.CURB_ROUTINE_URL }}
+          CURB_ROUTINE_TOKEN: ${{ secrets.CURB_ROUTINE_TOKEN }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ISSUE_URL: ${{ steps.reviews_alert.outputs.issue }}
+        run: node scripts/monitor/notify-claude.mjs reviews.json monitor:reviews "App Store review needs a reply"
 
   nightly:
     if: github.event.schedule == '23 11 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'smoke')
@@ -100,20 +120,38 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/monitor/browser.mjs --out browser.json --shots shots
       - name: Alert on the browser walk
+        id: browser_alert
         if: always()
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/monitor/alert.mjs browser.json monitor:browser "curb.guide user path is broken"
+      - name: Wake the on-call Claude routine (monitor:browser)
+        if: always() && (steps.browser_alert.outputs.action == 'open' || steps.browser_alert.outputs.action == 'comment')
+        env:
+          CURB_ROUTINE_URL: ${{ secrets.CURB_ROUTINE_URL }}
+          CURB_ROUTINE_TOKEN: ${{ secrets.CURB_ROUTINE_TOKEN }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ISSUE_URL: ${{ steps.browser_alert.outputs.issue }}
+        run: node scripts/monitor/notify-claude.mjs browser.json monitor:browser "curb.guide user path is broken"
       - name: Digest repeated user errors (24h)
         if: always()
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: node scripts/monitor/smoke.mjs --digest --out digest.json
       - name: Alert on repeated user errors
+        id: errors_alert
         if: always()
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/monitor/alert.mjs digest.json monitor:errors "curb.guide users are hitting errors"
+      - name: Wake the on-call Claude routine (monitor:errors)
+        if: always() && (steps.errors_alert.outputs.action == 'open' || steps.errors_alert.outputs.action == 'comment')
+        env:
+          CURB_ROUTINE_URL: ${{ secrets.CURB_ROUTINE_URL }}
+          CURB_ROUTINE_TOKEN: ${{ secrets.CURB_ROUTINE_TOKEN }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ISSUE_URL: ${{ steps.errors_alert.outputs.issue }}
+        run: node scripts/monitor/notify-claude.mjs digest.json monitor:errors "curb.guide users are hitting errors"
       - name: Keep screenshots
         if: always()
         uses: actions/upload-artifact@v4
