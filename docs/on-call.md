@@ -32,7 +32,10 @@ public, no token needed).
 The owner checks that this routine works. Change nothing and push nothing. Check each and note pass or fail:
 `git clone`/`pull` works; `gh auth status`; `npm ci && npm test`; `curl -sI https://curb.guide/` and
 `curl -sI 'https://data.sf.gov/resource/yhqp-riqs.json?$limit=1'`; can a headless Chrome be installed for the
-browser walk; the Gmail connector. Then email the owner (see Report) with subject `CURB on-call: wiring test`
+browser walk; the Gmail connector; and the ship gate: push an empty commit
+(`git commit --allow-empty -m "test: on-call wiring"`) to a new `claude/wiring-test-<date>` branch, wait for its
+`verify` check run to succeed (see Handling an alert, step 3), then delete that branch (`git push origin --delete`)
+and never merge it. Then email the owner (see Report) with subject `CURB on-call: wiring test`
 and the list, plus anything that would stop you from fixing and shipping a real bug.
 
 ## Daily run (no payload)
