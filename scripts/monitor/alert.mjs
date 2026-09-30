@@ -5,7 +5,7 @@
 //   node scripts/monitor/alert.mjs <results.json> <label> "<issue title>"
 // Env: GITHUB_TOKEN (issues: write), GITHUB_REPOSITORY, MONITOR_MENTION (default: repo owner),
 //      GITHUB_SERVER_URL + GITHUB_RUN_ID (link to the run), MONITOR_DRY_RUN=1 (print, don't call API).
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 
 const SIG = /<!-- monitor-sig:([^<>]*?) -->/g;
 
@@ -81,9 +81,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`${label}: ${action.type}`);
   if (dry) { console.log(JSON.stringify(action, null, 2)); process.exit(0); }
 
+  let issueUrl = open?.html_url || '';
   if (action.type === 'open') {
     await gh('POST', '/labels', { name: label, color: 'd73a4a', description: 'Opened and closed automatically by the monitor workflow' });
     const issue = await gh('POST', '/issues', { title: action.title, body: action.body, labels: [label] });
+    issueUrl = issue.html_url;
     console.log(issue.html_url);
   } else if (action.type === 'comment') {
     await gh('POST', `/issues/${open.number}/comments`, { body: action.body });
@@ -92,4 +94,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     await gh('POST', `/issues/${open.number}/comments`, { body: action.body });
     await gh('PATCH', `/issues/${open.number}`, { state: 'closed', state_reason: 'completed' });
   }
+  // for the next workflow step: notify-claude.mjs wakes the on-call routine only on open / comment
+  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `action=${action.type}\nissue=${issueUrl}\n`);
 }
