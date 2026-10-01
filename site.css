@@ -9,6 +9,13 @@
 .sn-nav{position:sticky;top:12px;z-index:600;display:block;width:min(1080px, calc(100% - 40px));margin:12px auto 0;
   background:var(--_sign);border:2px solid var(--_ink);border-radius:999px;padding:0;box-shadow:4px 4px 0 var(--_ink);transition:transform .28s ease}
 .sn-nav.sn-hide{transform:translateY(calc(-100% - 22px))}
+/* Inside the iOS app: its injected chrome (appChromeScript in ios/CURB/ContentView.swift, written before this
+   pill) pads body>header by 78px to clear the status bar and drops it to z-index 70. On the pill that made an
+   empty white blob with the logo and menu at its bottom edge, on every page the ⓘ menu opens. Undo it here
+   (the web ships at once, an app fix waits for review) and clear the status bar with the pill's own offset. */
+html.curb-ios-app.curb-ios-page body>header.sn-nav{padding-top:0!important;position:sticky!important;z-index:600!important;
+  top:calc(env(safe-area-inset-top,0px) + 8px);margin-top:calc(env(safe-area-inset-top,0px) + 8px)!important}
+html.curb-ios-app .sn-nav a[href*="apps.apple.com"],html.curb-ios-app .sn-foot a[href*="apps.apple.com"]{display:none}  /* already in the app */
 .sn-mast{margin:0;padding:0 16px 0 28px;height:64px;display:flex;align-items:center;gap:11px}
 .sn-logo{display:inline-flex;align-items:center;flex:none;text-decoration:none}
 .sn-logo img{height:42px;width:auto;display:block}
