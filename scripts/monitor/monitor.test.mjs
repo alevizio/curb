@@ -151,6 +151,23 @@ describe('smoke checks', () => {
     expect(judge({ last: run(ALERTS_BACKUP_MAX_AGE_MIN + 1, 'ok', 'bearer'), lastOk: run(ALERTS_BACKUP_MAX_AGE_MIN + 1, 'ok', 'bearer') }).status).toBe('fail');
   });
 
+  it('alerts sender: on time but its pushes are not being delivered (the sender\'s own verdict) fails', () => {
+    const now = Date.parse('2026-09-27T12:00:00Z');
+    const at = (minAgo) => new Date(now - minAgo * 60000).toISOString();
+    const fresh = { last: { at: at(8), outcome: 'ok', trigger: 'qstash' }, lastOk: { at: at(8), outcome: 'ok', trigger: 'qstash' }, lastQstash: { at: at(8), ok: true }, lastQstashOk: { at: at(8) } };
+    const ios = 'iOS: 4 of the last 5 devices failed (403 InvalidProviderToken ×4)';
+    const undelivered = judgeAlertsStatus({ ...fresh, delivery: { web: [], ios: [], failing: [ios] } }, now);
+    expect(undelivered.status).toBe('fail');
+    expect(undelivered.detail).toContain(ios);
+    expect(undelivered.detail).toContain('8 min ago');                // the sender itself is fine
+    const both = judgeAlertsStatus({ ...fresh, lastQstash: { at: at(60), ok: true }, lastQstashOk: { at: at(60) }, delivery: { failing: [ios, 'web: 3 of the last 3 devices failed (403 ×3)'] } }, now);
+    expect(both.status).toBe('fail');
+    expect(both.detail).toMatch(/60 min ago.*InvalidProviderToken.*403 ×3/);
+    // healthy, or a status from before `delivery` existed: unchanged
+    expect(judgeAlertsStatus({ ...fresh, delivery: { web: [{ id: 'a', ok: true }], ios: [] } }, now)).toEqual(judgeAlertsStatus(fresh, now));
+    expect(judgeAlertsStatus({ ...fresh, delivery: null }, now).status).toBe('ok');
+  });
+
   it('alerts sender: no run record at all (fresh deploy) is a skip with a note, in either status shape', () => {
     const now = Date.parse('2026-09-27T12:00:00Z');
     for (const s of [{ last: null, lastOk: null }, { last: null, lastOk: null, lastQstash: null, lastQstashOk: null }, {}, null]) {

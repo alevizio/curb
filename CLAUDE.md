@@ -309,6 +309,12 @@ Files now present for the push feature:
   and last successful one `lastQstashOk` {at}, so backup runs can't hide a dead primary) for the
   monitor's `?status=1` check; optional `HC_PING_URL` (healthchecks.io) is pinged by successful QStash
   runs and `/fail` on errors. The monitor workflow can also be dispatched by QStash (`mode` input).
+  A 200 run is not proof of delivery: each run counts attempted / sent / failed (by status) / pruned per
+  channel, and `judgeDelivery` keeps the last 6 devices tried per channel in `curb:cron` `delivery`. At
+  least 3 failed and twice the deliveries (or the APNs pass erroring 2 runs in a row, or armed iOS
+  watches with no APNs config) sets `delivery.failing`: HC gets `/fail` and the monitor's alerts-sender
+  check fails. Devices, not sends, so one dead subscription retried every tick can't trip it; 410/404
+  prunes never count.
 - `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET,
   QStash signing keys, HC_PING_URL.
 

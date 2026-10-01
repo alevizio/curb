@@ -161,7 +161,21 @@ export async function checkAlertsSender(f, now = Date.now()) {
   return judgeAlertsStatus(await r.json(), now);
 }
 
+/** Running on time is not enough: the sender can finish every run and deliver nothing (a revoked APNs
+ *  key, rotated VAPID keys). It judges its recent sends itself (judgeDelivery in
+ *  api/send-notifications.js, the same verdict it gives healthchecks) and ?status=1 carries the readable
+ *  lines in delivery.failing; any line fails this check. */
 export function judgeAlertsStatus(s, now) {
+  const r = judgeRuns(s, now);
+  const failing = s?.delivery?.failing;
+  if (r.status === 'skip' || !Array.isArray(failing) || !failing.length) return r;
+  const lines = failing.map((f) => String(f).slice(0, 200)).join('; ');
+  return r.status === 'fail'
+    ? fail(ALERTS, `${r.detail} Pushes are not being delivered either: ${lines}.`)
+    : fail(ALERTS, `pushes are not being delivered: ${lines}. The sender itself runs (${r.detail}).`);
+}
+
+function judgeRuns(s, now) {
   s = s || {};
   if (!s.last && !s.lastOk && !s.lastQstash && !s.lastQstashOk) return skip(ALERTS, 'no sender run recorded yet (fresh deploy?) — the first QStash or GitHub backup run creates it');
   const last = s.last && s.last.outcome !== 'ok' ? ` Last run: ${s.last.outcome}${s.last.error ? ` (${s.last.error})` : ''} via ${s.last.trigger}.` : '';

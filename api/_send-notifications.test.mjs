@@ -40,6 +40,16 @@ vi.mock('@upstash/redis', () => ({
 }));
 const send = vi.fn(async () => ({ statusCode: 201 }));
 vi.mock('web-push', () => ({ default: { setVapidDetails: () => {}, sendNotification: (...a) => send(...a) } }));
+// APNs stays real (a malformed key really throws) unless a test sets apnsReply(token) → { status, reason }:
+// then no key and no network, every send answers with that.
+let apnsReply = null;
+vi.mock('./_apns.js', async (importOriginal) => {
+  const real = await importOriginal();
+  return { ...real,
+    getProviderToken: () => (apnsReply ? 'jwt' : real.getProviderToken()),
+    openSession: (h) => (apnsReply ? { close() {} } : real.openSession(h)),
+    sendOne: (...a) => (apnsReply ? Promise.resolve(apnsReply(a[2])) : real.sendOne(...a)) };
+});
 const fetchMock = vi.fn(async () => ({ ok: true }));
 vi.stubGlobal('fetch', fetchMock);
 
@@ -72,7 +82,7 @@ const status = () => ({ last: JSON.parse(mem['curb:cron']?.last || 'null'), ok: 
 
 beforeEach(() => {
   for (const o of [mem, kv]) for (const k of Object.keys(o)) delete o[k];
-  failSubsLoad = false; afterSnapshot = null; send.mockClear(); fetchMock.mockClear();
+  failSubsLoad = false; afterSnapshot = null; apnsReply = null; send.mockReset(); send.mockImplementation(async () => ({ statusCode: 201 })); fetchMock.mockClear();
   process.env.CRON_SECRET = 'cron-s3cret';
   vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(NOW);
   armSub(SPOT);
@@ -343,5 +353,120 @@ describe('web-push options', () => {
     expect(JSON.parse(payload).title).toBe('🌙 Move it tonight');
     expect(opts.urgency).toBe('high');
     expect(opts.TTL).toBe(2 * 3600 + 55 * 60);
+  });
+});
+
+describe('delivery health (a run that works can still deliver nothing)', () => {
+  const statusNow = async () => (await run(bearer({ query: { status: '1' } }))).body;
+  const webErr = (code) => Object.assign(new Error('push service said no'), { statusCode: code });
+  const armMany = (n, spot = SPOT) => {
+    mem['curb:subs'] = {};
+    for (let i = 0; i < n; i++) {
+      const sub = { endpoint: EP + i, keys: { p256dh: 'p', auth: 'a' } };
+      mem['curb:subs'][sub.endpoint] = JSON.stringify({ subscription: sub, spot, notified: {}, savedAt: NOW });
+    }
+  };
+  const armIos = (n, spot = SPOT) => {
+    mem['curb:apns'] = {};
+    for (let i = 0; i < n; i++) { const t = String(i).repeat(64); mem['curb:apns'][t] = JSON.stringify({ token: t, spot, notified: {}, savedAt: NOW }); }
+  };
+  const pinged = () => fetchMock.mock.calls.map(([u]) => u);
+  let quiet;
+  beforeEach(() => { quiet = vi.spyOn(console, 'error').mockImplementation(() => {}); });
+  afterEach(() => { quiet.mockRestore(); for (const k of ['APNS_KEY_P8', 'APNS_KEY_ID', 'APNS_TEAM_ID']) delete process.env[k]; });
+
+  it('records per run what was attempted, delivered, failed (by status) and pruned', async () => {
+    armMany(4);
+    send.mockImplementation(async (sub) => {
+      if (sub.endpoint === EP + 1) throw webErr(403);
+      if (sub.endpoint === EP + 2) throw webErr(410);
+      if (sub.endpoint === EP + 3) throw new Error('Socket timeout');   // web-push's own timeout: no status
+      return { statusCode: 201 };
+    });
+    const web = { checked: 4, attempted: 4, sent: 1, failed: 2, pruned: 1, failures: { 403: 1, '0 timeout': 1 } };
+    expect((await run(bearer())).body.web).toMatchObject(web);
+    expect(status().last.web).toMatchObject(web);
+  });
+
+  it('every web push failing (rotated VAPID keys): ?status=1 says so and healthchecks gets /fail', async () => {
+    armMany(3);
+    send.mockImplementation(async () => { throw webErr(403); });
+    const out = await run(await qstash());
+    expect(out.code).toBe(200);                                     // the run itself worked
+    expect(pinged()).toEqual(['https://hc-ping.com/uuid/fail']);
+    const s = await statusNow();
+    expect(s.delivery.failing).toEqual(['web: 3 of the last 3 devices failed (403 ×3)']);
+    expect(s.lastQstash.ok).toBe(true);
+  });
+
+  it('every iOS push failing (revoked APNs key): counted by status and reason, after the one re-mint', async () => {
+    armMany(0); armIos(3);
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const tokens = [];
+    apnsReply = (t) => { tokens.push(t); return { status: 403, reason: 'InvalidProviderToken' }; };
+    const out = await run(await qstash());
+    expect(out.body.ios).toMatchObject({ attempted: 3, sent: 0, failed: 3, pruned: 0, failures: { '403 InvalidProviderToken': 3 } });
+    expect(tokens).toHaveLength(4);                                 // the first token was retried once with a fresh JWT
+    expect((await statusNow()).delivery.failing).toEqual(['iOS: 3 of the last 3 devices failed (403 InvalidProviderToken ×3)']);
+    expect(pinged()).toEqual(['https://hc-ping.com/uuid/fail']);
+  });
+
+  it('an iOS token that is dead on both hosts is pruned, not counted as a failure', async () => {
+    armMany(0); armIos(3);
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    apnsReply = () => ({ status: 410, reason: 'Unregistered' });
+    expect((await run(await qstash())).body.ios).toMatchObject({ attempted: 3, failed: 0, pruned: 3 });
+    expect((await statusNow()).delivery.failing).toBeUndefined();
+    expect(pinged()).toEqual(['https://hc-ping.com/uuid']);
+  });
+
+  it('no false alarm from one dead subscription retried on every tick of its window, or from prunes', async () => {
+    armMany(5);                                                      // all five get the 8 PM night-before push
+    send.mockImplementation(async (sub) => { if (sub.endpoint === EP + 0) throw webErr(500); if (sub.endpoint === EP + 4) throw webErr(404); return { statusCode: 201 }; });
+    for (let t = Date.parse('2026-06-19T03:00:05Z'); t <= Date.parse('2026-06-19T05:45:05Z'); t += 15 * 60000) {
+      vi.setSystemTime(t);
+      await run(await qstash());
+    }
+    expect(send.mock.calls.filter(([s]) => s.endpoint === EP + 0)).toHaveLength(12); // retried all evening
+    expect((await statusNow()).delivery.failing).toBeUndefined();
+    expect(new Set(pinged())).toEqual(new Set(['https://hc-ping.com/uuid']));
+  });
+
+  it('stays failing through runs with nothing due, and recovers once deliveries land again', async () => {
+    armMany(4);
+    send.mockImplementation(async () => { throw webErr(403); });
+    await run(await qstash());
+    vi.setSystemTime(Date.parse('2026-06-19T17:00:00Z'));           // after the sweep: nothing due
+    fetchMock.mockClear();
+    await run(await qstash());
+    expect((await statusNow()).delivery.failing).toHaveLength(1);   // nothing delivered since: still failing
+    expect(pinged()).toEqual(['https://hc-ping.com/uuid/fail']);
+    send.mockImplementation(async () => ({ statusCode: 201 }));    // keys fixed
+    vi.setSystemTime(NOW);
+    armMany(3);                                                      // three devices get their push
+    fetchMock.mockClear();
+    await run(await qstash());
+    expect((await statusNow()).delivery.failing).toBeUndefined();
+    expect(pinged()).toEqual(['https://hc-ping.com/uuid']);
+  });
+
+  it('an APNs pass that errors two runs in a row (a mangled key) fails, a single blip does not', async () => {
+    armMany(0); armIos(1);
+    Object.assign(process.env, { APNS_KEY_P8: 'not a key', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    await run(await qstash());
+    expect((await statusNow()).delivery.failing).toBeUndefined();
+    for (const k of Object.keys(kv)) delete kv[k];                   // the kept run lock expires
+    vi.setSystemTime(NOW + 15 * 60000);
+    fetchMock.mockClear();
+    await run(await qstash());
+    const [line] = (await statusNow()).delivery.failing;
+    expect(line).toMatch(/^iOS: the APNs pass failed 2 runs in a row \(.+\)$/);
+    expect(pinged()).toEqual(['https://hc-ping.com/uuid/fail']);
+  });
+
+  it('armed iOS watches with APNs not configured at all fail at once', async () => {
+    armIos(2);
+    await run(await qstash());
+    expect((await statusNow()).delivery.failing).toEqual(['iOS: APNs is not configured (APNS_* env vars), so 2 armed iOS watches get no push']);
   });
 });

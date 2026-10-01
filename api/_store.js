@@ -399,10 +399,14 @@ export async function deleteTokensForEndpoint(endpoint) {
 // primary scheduler apart even while GitHub backup runs keep `last`/`ok` fresh. `qstash` is
 // { at, ok, error? } (ok is false only for an erroring run; a lock-skipped tick is a harmless no-op,
 // flagged skipped:true) and `qstashOk` is { at }.
+// `delivery` = the sender's rolling view of whether pushes actually arrive (judgeDelivery in
+// send-notifications): the last few devices tried per channel, each as an 8-hex hash of its endpoint or
+// token (only to tell devices apart) with ok or the failure status, plus `failing` while it judges a
+// channel broken. Rewritten by every full run, in the same HSET.
 const CKEY = 'curb:cron';
 
-/** Record one sender run: { at, trigger, outcome: 'ok'|'error'|'skipped', ... }. */
-export async function saveRunStatus(status) {
+/** Record one sender run: { at, trigger, outcome: 'ok'|'error'|'skipped', ... } (+ the delivery window). */
+export async function saveRunStatus(status, delivery) {
   const r = redis();
   if (!r) return;
   const v = JSON.stringify(status);
@@ -412,16 +416,25 @@ export async function saveRunStatus(status) {
       ...(status.outcome === 'skipped' ? { skipped: true } : {}), ...(status.error ? { error: status.error } : {}) });
     if (status.outcome === 'ok') fields.qstashOk = JSON.stringify({ at: status.at });
   }
+  if (delivery) fields.delivery = JSON.stringify(delivery);
   await r.hset(CKEY, fields);
 }
 
-/** { last, lastOk, lastQstash, lastQstashOk } — any may be null before the first such run. */
+/** The stored delivery window, or null (the one extra read a full run makes). */
+export async function loadDelivery() {
+  const r = redis();
+  if (!r) return null;
+  const v = await r.hget(CKEY, 'delivery');
+  return (typeof v === 'string' ? safeParse(v) : v) || null;
+}
+
+/** { last, lastOk, lastQstash, lastQstashOk, delivery } — any may be null before the first such run. */
 export async function loadRunStatus() {
   const r = redis();
-  if (!r) return { last: null, lastOk: null, lastQstash: null, lastQstashOk: null };
+  if (!r) return { last: null, lastOk: null, lastQstash: null, lastQstashOk: null, delivery: null };
   const all = (await r.hgetall(CKEY)) || {};
   const parse = (v) => (typeof v === 'string' ? safeParse(v) : v) || null;
-  return { last: parse(all.last), lastOk: parse(all.ok), lastQstash: parse(all.qstash), lastQstashOk: parse(all.qstashOk) };
+  return { last: parse(all.last), lastOk: parse(all.ok), lastQstash: parse(all.qstash), lastQstashOk: parse(all.qstashOk), delivery: parse(all.delivery) };
 }
 
 // ---- client error log (anonymous; see /privacy) ----
