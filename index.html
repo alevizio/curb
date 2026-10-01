@@ -41,6 +41,7 @@
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-itunes-app" content="app-id=6780998238">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -529,6 +530,8 @@
     font-size:13px;font-weight:800;display:grid;place-items:center}
   .ios-steps .shareglyph{display:inline-grid;place-items:center;width:20px;height:20px;color:var(--meter);vertical-align:-4px}
   .ios-note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
+  .ios-get{display:flex;justify-content:center;align-items:center;text-decoration:none;margin:12px 0 2px;width:100%}
+  .ios-or{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:14px 0 0}
   @keyframes spin{to{transform:rotate(360deg)}}
 
   /* ---- motion (gated: transform/opacity only, exponential ease-outs) ---- */
@@ -780,9 +783,11 @@
 <div class="ios-mask" id="iosHint" role="dialog" aria-modal="true" aria-labelledby="iosHintHead">
   <div class="ios-card">
     <button class="sheet-close" id="iosClose" aria-label="Close">×</button>
-    <span class="kicker">iPhone setup</span>
-    <div class="ios-head" id="iosHintHead">Install CURB for alerts</div>
-    <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.45">Apple only allows push notifications once CURB lives on your Home Screen as an app.</p>
+    <span class="kicker">iPhone</span>
+    <div class="ios-head" id="iosHintHead">Get sweep alerts</div>
+    <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.45">The free CURB app for iPhone turns on alerts with one tap.</p>
+    <a class="btn ios-get" id="iosGet" href="https://apps.apple.com/app/id6780998238" target="_blank" rel="noopener">Get the free iPhone app</a>
+    <p class="ios-or">Or add this site to your Home Screen:</p>
     <ol class="ios-steps">
       <li><span class="n">1</span><span>Tap the <b>Share</b> button
         <span class="shareglyph"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m8 7 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></span>
@@ -2844,6 +2849,7 @@ function showWelcome(){
 
 /* iOS install hint: close on × or backdrop tap; auto-show once for un-installed iOS Safari. */
 document.getElementById('iosClose').onclick=hideIosHint;
+document.getElementById('iosGet').onclick=()=>track('ios_app_offer_tap');
 document.getElementById('iosHint').addEventListener('click',e=>{ if(e.target.id==='iosHint') hideIosHint(); });
 (function maybeIosHint(){
   if(!onboarded()) return; // never stack on the welcome card — it shows on a later visit
