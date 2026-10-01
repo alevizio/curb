@@ -63,6 +63,9 @@ function windows(rows, bySide) {
 
 const place = ([street, a, b]) => (a && b ? `${street} between ${a} and ${b}` : a ? `${street} at ${a}` : street);
 const label = (e) => place(e) + (e[7] ? `, ${e[7]}` : '');
+// "2900 to 2949 " — the block's house numbers as the app's sheet shows them ('' if none baked): drivers
+// know the number they parked at, not the cross streets
+const nums = (r) => (r && r.length ? (r[0] === r[1] ? `${r[0]} ` : `${r[0]} to ${r[1]} `) : '');
 
 // Under 60 chars (Google cuts ~60): keep the keyword + "SF", shed words before meaning.
 const ABBR = { north: 'N', south: 'S', east: 'E', west: 'W', northeast: 'NE', northwest: 'NW', southeast: 'SE', southwest: 'SW' };
@@ -213,12 +216,12 @@ export function renderBlock(cnn, { S, ENF, R }) {
     return { status: 404, headers: { 'Cache-Control': 'public, s-maxage=86400' },
       body: plainPage('Block not found', 'We don’t have a street-cleaning schedule for this block. It may no longer be swept, or the link is mistyped. Find it on the map, or browse <a href="/n/">street cleaning by neighborhood</a>.') };
   }
-  const [street, , , hoodIdx, rows, prevCnn, nextCnn, tag] = e;
+  const [street, , , hoodIdx, rows, prevCnn, nextCnn, tag, , range] = e;
   const hood = hoodIdx >= 0 ? S.hoods[hoodIdx] : null;       // [name, slug, hasPage]
   const hoodUrl = hood && hood[2] ? `/n/${hood[1]}` : null;
   const pageUrl = `https://curb.guide/b/${cnn}`;
   const title = titleFor(e);
-  const h1 = label(e);
+  const h1 = nums(range) + label(e);
   const tl = ticketLine(ENF[cnn], rows);
   const rnum = R.blocks && R.blocks[cnn];
   const route = rnum != null ? (R.routeNames && R.routeNames[rnum]) || `Route ${rnum}` : null;
@@ -246,7 +249,7 @@ export function renderBlock(cnn, { S, ENF, R }) {
   // the ticket time until it fits a SERP (~160)
   const tick = tl ? ` Tickets usually land ${tl.short}.` : '', fine = ` $${FINE} fine.`;
   const sched = schedShort(rows);
-  const lead = (h) => `Street cleaning on ${place(e)}${tag ? ` (${tag})` : ''}${h && hood ? `, ${hood[0]}` : ''}, SF: ${sched}.`;
+  const lead = (h) => `Street cleaning on ${nums(range)}${place(e)}${tag ? ` (${tag})` : ''}${h && hood ? `, ${hood[0]}` : ''}, SF: ${sched}.`;
   const desc = [lead(1) + tick + fine, lead(1) + tick, lead(0) + tick + fine, lead(0) + tick, lead(0)].find((d) => d.length <= 160) ||
     lead(0).slice(0, 150).replace(/[;,]?\s*\S*$/, '') + ' + more.';
 

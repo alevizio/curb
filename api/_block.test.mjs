@@ -111,6 +111,17 @@ describe('block page — content', () => {
     expect(renderBlock('2000', DATA).body).toContain('Next sweeps: <b>Wed, Oct 14</b>');
   });
 
+  it('leads the H1, the first line and the description with the baked house numbers', () => {
+    const e = DATA.S.b['999'], at = (r) => ({ ...DATA, S: { ...DATA.S, b: { ...DATA.S.b, '999': [...e, r] } } });
+    const { body } = renderBlock('999', at([2100, 2199]));
+    expect(body).toContain('<h1>2100 to 2199 Pierce St between Bush St and Pine St</h1>');
+    expect(body).toContain('<p class="lede">2100 to 2199 Pierce St between Bush St and Pine St, in the Pacific Heights neighborhood of San Francisco, is swept');
+    expect(desc(body)).toBe('Street cleaning on 2100 to 2199 Pierce St between Bush St and Pine St, Pacific Heights, SF: Tue 9 to 11am. $105 fine.');
+    expect(title(body)).toBe('Pierce St Street Cleaning (Bush/Pine), SF | CURB');               // the title keeps its cross streets
+    expect(renderBlock('999', at([2101, 2101])).body).toContain('<h1>2101 Pierce St between'); // one address
+    expect(renderBlock('999', at([])).body).toContain('<h1>Pierce St between Bush St and Pine St</h1>');
+  });
+
   it('shortens long titles below 60 characters without losing the side tag', () => {
     const t = titleFor(['Diamond Heights Blvd', 'Gold Mine Dr', 'Diamond Heights Blvd Frontage', 0, [], '', '', 'northeast side']);
     expect(t.length).toBeLessThan(60);
@@ -171,15 +182,19 @@ describe('block page — every baked block (data/schedules.json)', () => {
     const d = loadData();
     const titles = new Set();
     const bad = [];
+    let numbered = 0;
     for (const cnn of Object.keys(d.S.b)) {
       const { status, body } = renderBlock(cnn, d);
-      const t = title(body), text = body.replace(/<[^>]+>/g, ' ');
+      const t = title(body), text = body.replace(/<[^>]+>/g, ' '), r = d.S.b[cnn][9];
+      if (r && r.length) numbered++;
       if (status !== 200 || t.length >= 60 || titles.has(t) || /\/…/.test(t) || desc(body).length > 160 ||
+        (r && r.length && !(body.includes(`<h1>${r[0]} `) && desc(body).startsWith(`Street cleaning on ${r[0]} `))) ||
         /Curbside|Start:|End:|\b0\d+(st|nd|rd|th)\b/.test(text) || /[—–]| - /.test(body) || / between (.+) and \1\b/.test(body.match(/<h1>(.*?)<\/h1>/)[1])) bad.push(cnn);
       titles.add(t);
     }
     expect(bad).toEqual([]);
     expect(titles.size).toBeGreaterThan(8000);
+    expect(numbered).toBeGreaterThan(8000); // house numbers baked for most blocks (EAS)
   });
 
   it('the default export serves a real block from the committed data', async () => {

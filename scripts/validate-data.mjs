@@ -60,6 +60,7 @@ try {
   check('schedules.json', 'keyed entries', Object.keys(sch.b || {}).length, 8000, 20000);
   check('schedules.json', 'entries with a neighborhood', Object.values(sch.b || {}).filter((e) => e[3] >= 0).length, 8000, 20000);
   check('schedules.json', 'neighborhoods with a page', (sch.hoods || []).filter((h) => h[2]).length, 25, 60);
+  check('schedules.json', 'entries with a house-number range', Object.values(sch.b || {}).filter((e) => e[9] && e[9].length).length, 8000, 20000);
 
   // sweeps.json — sweeper-GPS pass times keyed by cnn (#26-5451), counts live in _meta
   const sw = load('sweeps.json');
