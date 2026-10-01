@@ -25,7 +25,7 @@ vi.mock('@upstash/redis', () => ({
   },
 }));
 
-const { default: handler, normalize, cleanSrc, coarseClient, group } = await import('./client-error.js');
+const { default: handler, normalize, cleanSrc, coarseClient, isCrawler, group } = await import('./client-error.js');
 
 // A controllable clock: the per-client limit lives in module memory, so every test starts a minute later.
 vi.useFakeTimers({ toFake: ['Date'] });
@@ -73,6 +73,73 @@ describe('normalize', () => {
     expect(e.msg).toHaveLength(300);
     expect(e.stack).toHaveLength(1200);
     expect(e.app).toBe('web');
+  });
+});
+
+describe('crawlers are not visitors', () => {
+  const META = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 (compatible; meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler))';
+  const CRAWLERS = [
+    META,
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0 (compatible; meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler))',
+    'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 (compatible; GoogleOther)',
+    'Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)',
+    'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amazonbot/0.1; +https://developer.amazon.com/support/amazonbot) Chrome/119.0.6045.214 Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 7.0;) AppleWebKit/537.36 (HTML, like Gecko) Mobile Safari/537.36 (compatible; PetalBot;+https://webmaster.petalsearch.com/site/petalbot)',
+    'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2; +https://openai.com/gptbot)',
+    'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)',
+    'Mozilla/5.0 (Linux; Android 5.0) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36 (compatible; Bytespider; spider-feedback@bytedance.com)',
+    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+    // the same crawlers without a contact URL (Meta documents both forms)
+    'meta-externalagent/1.1',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 (compatible; meta-externalagent/1.1)',
+    'meta-externalfetcher/1.1',
+    'meta-webindexer/1.1',
+    'facebookexternalhit/1.1',
+    // renderers with neither a contact URL nor a "bot/" token
+    'Mozilla/5.0 (compatible; Google-InspectionTool/1.0)',
+    'Mozilla/5.0 (X11; Linux x86_64; Storebot-Google/1.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 7.0; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4695.0 Mobile Safari/537.36 Chrome-Lighthouse',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/534+ (KHTML, like Gecko) BingPreview/1.0b',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 GTmetrix',
+    'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amzn-User/0.1) Chrome/119.0.6045.214 Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 5.0) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36 (compatible; TikTokSpider; ttspider-feedback@tiktok.com)',
+    'Mozilla/5.0 (Linux; Android 7.0;) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36 (compatible; AspiegelBot)',
+    'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1; 360Spider',
+    'ChatGPT-User/1.0',
+    'Screaming Frog SEO Spider/21.0',
+    'ExampleCrawler/1.0',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/140.0.0.0 Safari/537.36',
+  ];
+  const VISITORS = [
+    IPHONE,
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15',
+    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+    // a phone brand with "bot" in its name
+    'Mozilla/5.0 (Linux; Android 11; CUBOT NOTE 20 PRO) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 9; CUBOT_X19 Build/PPR1.180610.011) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Mobile Safari/537.36',
+    // the same brand as in-app browsers print it
+    'Mozilla/5.0 (Linux; Android 12; KINGKONG 9 Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/140.0.0.0 Mobile Safari/537.36 Instagram 398.0.0.20.80 Android (31/12; 320dpi; 720x1560; CUBOT; KINGKONG 9; KINGKONG_9; mt6765; en_US; 780000000)',
+    'Mozilla/5.0 (Linux; Android 11; CUBOT NOTE S Build/RP1A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/140.0.0.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/480.0.0.0.0;FBMF/CUBOT;FBBD/CUBOT;FBDV/CUBOT NOTE S;]',
+    // in-app browsers: people, not crawlers (CURB is shared on Instagram and Facebook)
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/22G86 Instagram 398.0.0.20.80 (iPhone15,2; iOS 18_6; en_US; en; scale=3.00; 1179x2556; 780000000)',
+    'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/AP2A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/140.0.0.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/480.0.0.0.0;]',
+    '',
+  ];
+
+  it('isCrawler: self-declared crawlers and headless browsers yes, every real browser no', () => {
+    for (const ua of CRAWLERS) expect(isCrawler(ua), ua).toBe(true);
+    for (const ua of VISITORS) expect(isCrawler(ua), ua).toBe(false);
+    expect(isCrawler(undefined)).toBe(false);
+  });
+
+  it('normalize drops a crawler report that would otherwise be labelled "Windows Chrome"', () => {
+    expect(coarseClient(META)).toBe('Windows Chrome'); // why the monitor read it as a real desktop visitor
+    expect(normalize(REPORT, META)).toBeNull();
+    expect(normalize(REPORT, VISITORS[1])).toMatchObject({ client: 'Windows Chrome' });
   });
 });
 
@@ -130,6 +197,19 @@ describe('handler', () => {
     await other(post({ ...REPORT, msg: 'third' }, '8.8.8.8'), mockRes());
     expect(storedMsgs()).toEqual(['third', 'first']);
   });
+  it('POST from a crawler answers 204, stores nothing and spends no Redis command', async () => {
+    const req = post(REPORT, '9.9.9.9');
+    req.headers['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 (compatible; meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler))';
+    const res = mockRes();
+    await handler(req, res);
+    expect(res.statusCode).toBe(204);
+    expect(storedMsgs()).toEqual([]);
+    expect(cmds.n).toBe(0);
+    // and it does not use up the address's slot: a visitor behind the same address still gets through
+    await handler(post(REPORT, '9.9.9.9'), mockRes());
+    expect(storedMsgs()).toHaveLength(1);
+  });
+
   it('POST ignores oversized or malformed bodies without failing', async () => {
     const r1 = mockRes(); await handler(post('x'.repeat(5000)), r1);
     const r2 = mockRes(); await handler(post('{not json'), r2);
