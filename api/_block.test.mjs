@@ -26,9 +26,9 @@ const DATA = {
   R: { routeNames: { 2: 'Pacific Hts./ Jordan Park' }, blocks: { '1000': 2 } },
 };
 
-function call(h, cnn) {
+function call(h, cnn, extra = {}) {
   const res = { statusCode: 0, headers: {}, body: '', setHeader(k, v) { this.headers[k] = v; }, end(b) { this.body = b; } };
-  return Promise.resolve(h({ query: { cnn } }, res)).then(() => res);
+  return Promise.resolve(h({ query: { cnn, ...extra } }, res)).then(() => res);
 }
 
 describe('block page — content', () => {
@@ -127,6 +127,17 @@ describe('block page — content', () => {
     expect(t.length).toBeLessThan(60);
     expect(t).toContain('NE side');
     expect(t).toMatch(/, SF \| CURB$/);
+  });
+});
+
+describe('block page — shared side', () => {
+  it('passes a shared link\'s curb side on to the live map link, letters only', async () => {
+    const h = makeHandler(() => DATA);
+    expect((await call(h, '1000', { side: 'East' })).body).toContain('href="/?b=1000&amp;side=East"');
+    expect((await call(h, '1000')).body).toContain('href="/?b=1000"');
+    const evil = (await call(h, '1000', { side: '"><script>x' })).body;
+    expect(evil).toContain('href="/?b=1000"');
+    expect(evil).not.toContain('<script>x');
   });
 });
 

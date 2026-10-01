@@ -308,6 +308,12 @@ export function makeHandler(load) {
       out = { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '300' },
         body: plainPage('Back in a moment', 'This block page is temporarily unavailable. Please try again in a few minutes. The live map still works.') };
     }
+    // A shared link names the curb side (?side=North, from the app's share button): the live map link
+    // passes it on, so the map opens the side that was shared. Letters only, never echoed anywhere else.
+    const side = String((req.query && req.query.side) || '');
+    if (out.status === 200 && /^[A-Za-z]{1,12}$/.test(side)) {
+      out = { ...out, body: out.body.replace(`href="/?b=${cnn}"`, `href="/?b=${cnn}&amp;side=${side}"`) };
+    }
     res.statusCode = out.status;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     for (const [k, v] of Object.entries(out.headers)) res.setHeader(k, v);
