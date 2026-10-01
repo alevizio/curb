@@ -57,7 +57,9 @@ self.addEventListener('fetch', e => {
       if (resp && resp.ok && resp.type === 'basic') cache.put(e.request, resp.clone());
       return resp;
     }).catch(() => null);
-    return cached || (await fresh) || cache.match('/');
+    // No copy and no network: fail the request. Only a page load falls back to the app shell (networkFirst
+    // above); answering a script or an icon with that HTML made a missing file look like a broken one.
+    return cached || (await fresh) || Response.error();
   })());
 });
 

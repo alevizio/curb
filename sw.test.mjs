@@ -27,7 +27,7 @@ function worker({ online = true, net = (path) => res('net ' + path), stores = {}
   };
   const g = {
     self: { addEventListener: (t, fn) => { handlers[t] = fn; }, skipWaiting() {}, clients: { claim: async () => {} } },
-    caches, URL, location: { origin: ORIGIN },
+    caches, URL, location: { origin: ORIGIN }, Response: { error: () => ({ type: 'error', status: 0, ok: false }) },
     setTimeout: (...a) => setTimeout(...a), clearTimeout: (...a) => clearTimeout(...a),  // late-bound: fake timers apply
     fetch: async (r) => { fetched.push(key(r)); if (!online) throw new TypeError('Failed to fetch'); return net(key(r)); },
   };
@@ -99,6 +99,16 @@ describe('sw.js', () => {
     expect((await w.request('/icons/icon-192.png', 'GET', 'no-cors')).body).toBe('shell /icons/icon-192.png');
     await new Promise((r) => setTimeout(r, 0)); // the background refresh lands
     expect((await w.request('/icons/icon-192.png', 'GET', 'no-cors')).body).toBe('net /icons/icon-192.png');
+  });
+
+  it('a script or icon with no cached copy and no network fails cleanly, never the app shell HTML', async () => {
+    const w = worker({ online: false });
+    await w.lifecycle('install');
+    const r = await w.request('/lib/sweep-core.js?v=4', 'GET', 'no-cors');
+    expect(r.type).toBe('error');
+    expect(r.body).toBeUndefined();
+    // a page load offline still gets the cached shell
+    expect((await w.request('/', 'GET', 'navigate')).body).toBe('shell /');
   });
 });
 afterEach(() => { vi.useRealTimers(); });
