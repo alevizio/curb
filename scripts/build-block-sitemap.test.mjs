@@ -66,4 +66,12 @@ describe('robots.txt', () => {
     for (const p of ['/', '/b/13065000', '/b/13065000?side=West', '/n/mission', '/about', '/tickets', '/api/og?b=13065000', '/sitemap-blocks.xml']) expect(allowed(p), p).toBe(true);
     expect(allowed('/api/block?cnn=1')).toBe(false);
   });
+  it('is one group that names Meta\'s crawlers, so the matcher above is the whole story', () => {
+    const lines = read('robots.txt').split('\n').filter((l) => /^(User-agent|Allow|Disallow):/.test(l));
+    const firstRule = lines.findIndex((l) => !l.startsWith('User-agent:'));
+    expect(lines.slice(firstRule).some((l) => l.startsWith('User-agent:'))).toBe(false);
+    expect(lines.slice(0, firstRule)).toEqual(['User-agent: *', 'User-agent: meta-externalagent', 'User-agent: meta-webindexer']);
+    // first-match parsers stop at the first rule that matches, so nothing broad may come before a Disallow
+    expect(lines).not.toContain('Allow: /');
+  });
 });
