@@ -65,7 +65,7 @@ describe('sw.js', () => {
     await w.lifecycle('activate');
     expect(Object.keys(stores)).toHaveLength(1);
     expect(Object.keys(stores)[0]).not.toBe('curb-v3');
-    expect([...Object.values(stores)[0].keys()]).toEqual(['/', '/index.html', '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png']);
+    expect([...Object.values(stores)[0].keys()]).toEqual(['/', '/index.html', '/manifest.json', '/lib/sweep-core.js', '/icons/icon-192.png', '/icons/icon-512.png']);
   });
 
   it('pages are network first: the first load after a deploy is the new build, the cached shell when offline', async () => {
@@ -101,14 +101,21 @@ describe('sw.js', () => {
     expect((await w.request('/icons/icon-192.png', 'GET', 'no-cors')).body).toBe('net /icons/icon-192.png');
   });
 
+  it('precaches the time core at the exact URL index.html loads, so one visit is enough to work offline', async () => {
+    const tag = readFileSync(new URL('./index.html', import.meta.url), 'utf8').match(/<script src="(\/lib\/sweep-core\.js[^"]*)"><\/script>/)[1];
+    const shell = SW.match(/const SHELL = \[([^\]]*)\]/)[1];
+    expect(shell).toContain(`'${tag}'`);
+  });
+
   it('a script or icon with no cached copy and no network fails cleanly, never the app shell HTML', async () => {
     const w = worker({ online: false });
     await w.lifecycle('install');
-    const r = await w.request('/lib/sweep-core.js?v=4', 'GET', 'no-cors');
+    const r = await w.request('/config.js', 'GET', 'no-cors');
     expect(r.type).toBe('error');
     expect(r.body).toBeUndefined();
-    // a page load offline still gets the cached shell
+    // a page load offline still gets the cached shell, and the precached time core with it
     expect((await w.request('/', 'GET', 'navigate')).body).toBe('shell /');
+    expect((await w.request('/lib/sweep-core.js?v=4', 'GET', 'no-cors')).body).toBe('shell /lib/sweep-core.js');
   });
 });
 afterEach(() => { vi.useRealTimers(); });
