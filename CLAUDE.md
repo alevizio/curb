@@ -140,6 +140,11 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   <ref> [--dry-run]` submits URLs whose sitemap entry changed. data-refresh runs it (optional step)
   once the new sitemaps are live.
 - docs/ — sweeper-data research + ready-to-send public-records requests.
+- docs/multi-city/ — the plan for more cities (Boston, Buenos Aires researched 2026-10-01): README (plan,
+  levels, phases), data-contract.md (the one format a city's data is converted into), adding-a-city.md.
+  Groundwork already in the code: `lib/sweep-core.js` is `makeTimeCore({ tz, suspended, holidayName })`,
+  one instance per city; SF's instance is attached under the same global names as before (sfParts,
+  nextSweep, alertAnchors, …), so SF callers are unchanged. A rule may carry `months` (a season).
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy
