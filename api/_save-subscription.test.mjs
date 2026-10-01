@@ -53,6 +53,25 @@ describe('web: DELETE turns alerts off', () => {
   });
 });
 
+describe('web: throttle on brand-new subscriptions only (a flood of fake ones would stall the sender)', () => {
+  const sub = (n) => ({ ...SUB, endpoint: SUB.endpoint + n });
+  it('re-saves of a known endpoint seconds apart always land (block switch, then Intensity, then Voice)', async () => {
+    expect((await call(web, 'POST', { subscription: SUB, spot: SPOT })).code).toBe(200);
+    expect((await call(web, 'POST', { subscription: SUB, spot: { ...SPOT, cnn: '456' } })).code).toBe(200);
+    expect((await call(web, 'POST', { subscription: SUB, spot: { ...SPOT, cnn: '456', level: 'light', voice: 'drill' } })).code).toBe(200);
+    expect(webRec().spot).toMatchObject({ cnn: '456', level: 'light', voice: 'drill' });
+  });
+
+  it('a second NEW endpoint from the same IP within the window gets 429 and stores nothing; other IPs and Turn off are unaffected', async () => {
+    expect((await call(web, 'POST', { subscription: SUB, spot: SPOT })).code).toBe(200);
+    const flood = await call(web, 'POST', { subscription: sub(2), spot: SPOT });
+    expect(flood.code).toBe(429);
+    expect(mem['curb:subs'][sub(2).endpoint]).toBeFalsy();
+    expect((await call(web, 'POST', { subscription: sub(3), spot: SPOT }, '5.6.7.8')).code).toBe(200);
+    expect((await call(web, 'DELETE', { subscription: SUB })).code).toBe(200);
+  });
+});
+
 describe('iOS: throttle + off switch', () => {
   it('re-saving a known token seconds apart always lands (block switch, then Intensity, then Voice)', async () => {
     expect((await call(ios, 'POST', { token: TOKEN, spot: SPOT })).code).toBe(200);

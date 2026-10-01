@@ -282,7 +282,8 @@ Files now present for the push feature:
   field = subscription.endpoint). Accepts `KV_REST_API_*` (Vercel Upstash integration)
   or `UPSTASH_REDIS_REST_*`. Exports saveSub / loadAllSubs / deleteSub / markNotified.
 - `api/save-subscription.js` — persists `{ subscription, spot }` via the store, with
-  input validation (https push-host allowlist, size caps, spot sanitize/clamp). `DELETE
+  input validation (https push-host allowlist, size caps, spot sanitize/clamp); like the iOS twin, only a
+  brand-new endpoint is throttled (per client IP, 10 s), a re-save of a known one always lands. `DELETE
   { subscription }` turns alerts off: proven by endpoint + a constant-time `keys.auth` match, it
   DISARMS (`spot = null`, the cron skips it) so auto-park keeps resolving the subscription.
 - `api/send-notifications.js` — the sender: loads subs, sends the touchpoint `dueAlert` says is due
@@ -309,6 +310,12 @@ Files now present for the push feature:
   and last successful one `lastQstashOk` {at}, so backup runs can't hide a dead primary) for the
   monitor's `?status=1` check; optional `HC_PING_URL` (healthchecks.io) is pinged by successful QStash
   runs and `/fail` on errors. The monitor workflow can also be dispatched by QStash (`mode` input).
+  A 200 run is not proof of delivery: each run counts attempted / sent / failed (by status) / pruned per
+  channel, and `judgeDelivery` keeps the last 6 devices tried per channel in `curb:cron` `delivery`. At
+  least 3 failed and twice the deliveries (or the APNs pass erroring 2 runs in a row, or armed iOS
+  watches with no APNs config) sets `delivery.failing`: HC gets `/fail` and the monitor's alerts-sender
+  check fails. Devices, not sends, so one dead subscription retried every tick can't trip it; 410/404
+  prunes never count.
 - `.env.example` — VAPID keys (`npx web-push generate-vapid-keys`), KV/Upstash vars, CRON_SECRET,
   QStash signing keys, HC_PING_URL.
 
@@ -346,6 +353,9 @@ Forever-watch (implemented): the saved `spot` carries `rules` — EVERY schedule
 cron's `recomputeSpot` advances `nextSweepISO` to the EARLIEST next occurrence across the rules (plus
 fresh anchors) via `advanceSpot` / `advanceIosSpot`, which re-read the record and skip the write if the
 user turned the watch off or re-saved it since the run's snapshot (a Turn off must never be re-armed).
+Those and `markNotified` / `markIosNotified` write through one compare-and-set EVAL (`casUpdate` in
+api/_store.js), so a Turn off or block switch landing between a cron read and its write is never
+overwritten either; don't turn them back into a plain HGET + HSET.
 The `notified` de-dupe map is NEVER reset (not by
 the advance, a re-save, a block switch or Turn off): each entry holds the sweep instant it fired for, so
 it only blocks that sweep — an off → on of the same sweep can't re-send a push. A watch stops

@@ -10,16 +10,18 @@
 //    GitHub schedules are best-effort (Sep 2026: ~7 runs/day, not 96), so it only fills gaps.
 // Overlapping runs are safe: the run lock + per-sweep de-dupe below.
 //  - GET ?status=1 (Bearer only) returns the last run's time/outcome/trigger for the monitor, plus the
-//    last QStash-triggered run (lastQstash {at, ok, error?}) and last successful one (lastQstashOk {at});
-//    no sends.
-//  - HC_PING_URL (optional healthchecks.io check): pinged on successful QStash runs, /fail on errors,
-//    so a dead primary scheduler emails the owner even while the GitHub backup limps along.
+//    last QStash-triggered run (lastQstash {at, ok, error?}) and last successful one (lastQstashOk {at}),
+//    and `delivery` (judgeDelivery: recent send outcomes, `failing` while pushes don't arrive); no sends.
+//  - HC_PING_URL (optional healthchecks.io check): pinged on successful QStash runs, /fail on errors
+//    and while pushes are not being delivered (judgeDelivery), so a dead primary scheduler or a dead
+//    push channel emails the owner even while the GitHub backup limps along.
 import webpush from 'web-push';
 import { Receiver } from '@upstash/qstash';
+import { createHash } from 'node:crypto';
 import {
   loadAllSubs, deleteSub, markNotified, advanceSpot, storeReady,
   loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot,
-  saveRunStatus, loadRunStatus,
+  saveRunStatus, loadRunStatus, loadDelivery,
 } from './_store.js';
 import { recomputeSpot } from './_schedule.js';
 import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
@@ -32,6 +34,42 @@ const SEND_TIMEOUT_MS = 10000; // per push request (web push and APNs), well ins
 const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
 // The run lock's lifetime: longer than the 60 s maxDuration (vercel.json), so it outlives any run.
 const RUN_LOCK_MS = 120000;
+
+// Delivery health. A run can finish 200 and deliver nothing: a revoked or mangled APNs key, a bundle id
+// change or rotated VAPID keys fail every send with a 4xx, one by one. So each run counts per channel
+// what it attempted, delivered, failed (by status) and pruned, and the store keeps the last
+// DELIVERY_WINDOW different devices tried per channel with their latest outcome. A channel is failing
+// when at least 3 of them failed and failures are at least twice the deliveries (all failed, or a clear
+// majority). Devices, not sends: one dead subscription is retried on every tick of its window (12 for
+// the eve push) and must not read as a run of failures. 410/404 prunes are expected and not counted; a
+// run with nothing due leaves the window as it was (nothing delivered since means still failing). The
+// APNs pass erroring as a whole (a key that won't parse) fails after 2 runs in a row, as do armed iOS
+// watches with APNs not configured at all. The verdict feeds healthchecks and ?status=1 (the monitor).
+const DELIVERY_WINDOW = 6;
+const deviceId = (s) => createHash('sha256').update(String(s)).digest('hex').slice(0, 8);
+
+/** Fold one run's device outcomes ({ web, ios: [{ id, ok, why? }], iosError?, iosUnconfigured? }) into
+ *  the stored window → { delivery (to store), failing: readable lines, empty while healthy }. */
+export function judgeDelivery(prev, run) {
+  const fold = (win, outs) => {
+    let w = Array.isArray(win) ? win : [];
+    for (const o of outs) w = [o, ...w.filter((x) => x.id !== o.id)];
+    return w.slice(0, DELIVERY_WINDOW);
+  };
+  const web = fold(prev?.web, run.web), ios = fold(prev?.ios, run.ios);
+  const iosErrorRuns = run.iosError ? (prev?.iosErrorRuns || 0) + 1 : 0;
+  const failing = [];
+  for (const [name, w] of [['web', web], ['iOS', ios]]) {
+    const bad = w.filter((x) => !x.ok);
+    if (bad.length < 3 || bad.length < 2 * (w.length - bad.length)) continue;
+    const why = {};
+    for (const x of bad) why[x.why] = (why[x.why] || 0) + 1;
+    failing.push(`${name}: ${bad.length} of the last ${w.length} devices failed (${Object.entries(why).map(([k, n]) => `${k} ×${n}`).join(', ')})`);
+  }
+  if (iosErrorRuns >= 2) failing.push(`iOS: the APNs pass failed ${iosErrorRuns} runs in a row (${run.iosError})`);
+  if (run.iosUnconfigured) failing.push(`iOS: APNs is not configured (APNS_* env vars), so ${run.iosUnconfigured} armed iOS watches get no push`);
+  return { delivery: { web, ios, ...(iosErrorRuns ? { iosErrorRuns } : {}), ...(failing.length ? { failing } : {}) }, failing };
+}
 
 // The cadence brain — which push is due for a spot right now, with what copy, at the user's chosen
 // intensity + voice — lives in lib/notify-core.js. It's a pure, unit-tested module shared by BOTH
@@ -79,11 +117,12 @@ async function authenticate(req) {
 }
 
 /** healthchecks.io: success only for QStash runs (the sparse GitHub backup must not mask a dead
- *  primary), /fail for an erroring run from either trigger. Best effort, never throws. */
-async function pingHealth(trigger, outcome) {
+ *  primary), /fail for an erroring or undelivering run from either trigger. Best effort, never throws. */
+async function pingHealth(trigger, outcome, undelivered = false) {
   const url = process.env.HC_PING_URL;
-  if (!url || outcome === 'skipped' || (outcome === 'ok' && trigger !== 'qstash')) return;
-  try { await fetch(outcome === 'ok' ? url : url + '/fail', { signal: AbortSignal.timeout(5000) }); } catch { /* ignored */ }
+  const good = outcome === 'ok' && !undelivered;
+  if (!url || outcome === 'skipped' || (good && trigger !== 'qstash')) return;
+  try { await fetch(good ? url : url + '/fail', { signal: AbortSignal.timeout(5000) }); } catch { /* ignored */ }
 }
 
 export default async function handler(req, res) {
@@ -142,15 +181,18 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Every real run is recorded (for ?status=1) and reported to healthchecks before responding.
+  // Every real run is recorded (for ?status=1) and reported to healthchecks before responding. A full
+  // run also folds its device outcomes (`sends`) into the delivery window: one extra read, same write.
   const started = Date.now();
-  const finish = async (code, body, detail) => {
+  const finish = async (code, body, detail, sends) => {
     const outcome = code !== 200 ? 'error' : body.skipped ? 'skipped' : 'ok';
+    let delivery, failing = [];
+    if (sends) try { ({ delivery, failing } = judgeDelivery(await loadDelivery(), sends)); } catch { /* keep the stored window */ }
     try {
       await saveRunStatus({ at: new Date(started).toISOString(), trigger, outcome, ms: Date.now() - started,
-        ...(body.web ? { web: body.web, ios: body.ios } : {}), ...(body.error ? { error: detail || body.error } : {}) });
+        ...(body.web ? { web: body.web, ios: body.ios } : {}), ...(body.error ? { error: detail || body.error } : {}) }, delivery);
     } catch { /* a status write must never fail the run */ }
-    await pingHealth(trigger, outcome);
+    await pingHealth(trigger, outcome, failing.length > 0);
     res.status(code).json(body);
   };
 
@@ -179,6 +221,9 @@ export default async function handler(req, res) {
     const now = Date.now();
     let sent = 0, pruned = 0, rearmed = 0;
     let iosSent = 0, iosPruned = 0, iosRearmed = 0;
+    // Delivery health: failures by status per channel, and each device's outcome (see judgeDelivery).
+    const webFailures = {}, iosFailures = {}, webOut = [], iosOut = [];
+    const failedOn = (map, out, id, why) => { map[why] = (map[why] || 0) + 1; out.push({ id: deviceId(id), ok: false, why }); };
 
     // ---- Web Push ----
     const subs = await loadAllSubs();
@@ -205,10 +250,16 @@ export default async function handler(req, res) {
       let delivered = false;
       try {
         await webpush.sendNotification(subscription, payload, opts);
-        delivered = true; sent++;
+        delivered = true; sent++; webOut.push({ id: deviceId(endpoint), ok: true });
       } catch (err) {
         if (err.statusCode === 410 || err.statusCode === 404) { await deleteSub(endpoint); pruned++; }
-        else console.error('web push failed:', err.statusCode || 0, String(err.body || err.message || '').slice(0, 200));
+        else {
+          console.error('web push failed:', err.statusCode || 0, String(err.body || err.message || '').slice(0, 200));
+          // Keyed by status only (the monitor's issues are public: no push-service text in them). No
+          // status: no answer (a timeout, a network error code) or a send that never left (bad keys).
+          failedOn(webFailures, webOut, endpoint, err.statusCode ? String(err.statusCode)
+            : '0 ' + (/timeout/i.test(String(err.message)) ? 'timeout' : String(err.code || 'error').slice(0, 24)));
+        }
       }
       // De-dupe write lives OUTSIDE the send try/catch: a transient store error here must not be
       // mistaken for a send failure (which would let the next 15-min tick re-push the same sweep).
@@ -262,8 +313,9 @@ export default async function handler(req, res) {
             ({ status, reason } = await sendOne(session, jwt, token, aps, due.tag, exp));
           }
           let delivered = false;
-          if (status === 200) { delivered = true; iosSent++; }
+          if (status === 200) { delivered = true; iosSent++; iosOut.push({ id: deviceId(token), ok: true }); }
           else if (isBadToken(status, reason)) { await deleteIosSub(token); iosPruned++; }
+          else failedOn(iosFailures, iosOut, token, `${status}${reason ? ' ' + String(reason).slice(0, 40) : ''}`); // e.g. 403 InvalidProviderToken
           if (delivered) await markIosNotified(token, spot.nextSweepISO, due.key);
         }
       } finally {
@@ -282,7 +334,12 @@ export default async function handler(req, res) {
     if (!iosError && Date.now() - started < RUN_LOCK_MS) {
       try { await releaseSlot('cron-run'); } catch { /* expires on its own */ }
     }
-    await finish(200, { ok: true, web: { checked: subs.length, sent, pruned, rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, sent: iosSent, pruned: iosPruned, rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } });
+    const tally = (ok, gone, failures) => {
+      const failed = Object.values(failures).reduce((n, c) => n + c, 0);
+      return { attempted: ok + failed + gone, sent: ok, failed, pruned: gone, ...(failed ? { failures } : {}) };
+    };
+    await finish(200, { ok: true, web: { checked: subs.length, ...tally(sent, pruned, webFailures), rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, ...tally(iosSent, iosPruned, iosFailures), rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } },
+      undefined, { web: webOut, ios: iosOut, iosError, iosUnconfigured: iosConfigured ? 0 : iosSubs.filter((t) => t.spot).length });
   } catch (e) {
     console.error('send-notifications failed:', e);
     await finish(500, { error: 'internal error' }, String((e && e.message) || e).slice(0, 200));
