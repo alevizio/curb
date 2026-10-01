@@ -54,8 +54,9 @@ since its last update. If there are none, end the run without writing anything a
    - Local gates, all must pass, read each result: `npm ci && npm test` and `npm run validate:data`.
      Workflow files (`.github/`) can't be checked here: if the fix needs one, stop at step 5.
    - **Ship gate**: commit to your `claude/` branch and push it. That runs `.github/workflows/verify.yml` in
-     GitHub Actions: the tests, the data checks and the real-browser walk against your branch (this sandbox's
-     browser can't do the walk: it rejects the sandbox proxy's certificate; never turn certificate checks off).
+     GitHub Actions: the tests, the data checks, the real-browser walk and the browser checks it lists, against
+     your branch (this sandbox's browser can't do the walk: it rejects the sandbox proxy's certificate; never
+     turn certificate checks off).
      Wait for it on your exact commit with `node scripts/monitor/wait-verify.mjs <sha>` (don't write your
      own poller): exit 0 means it passed; anything else, stop at step 5 and include the run URL it prints.
    - **Ship**: `git checkout main && git pull --ff-only && git merge --no-ff <branch>` (a merge commit, never a
