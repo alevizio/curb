@@ -12,8 +12,10 @@
 /* Inside the iOS app: its injected chrome (appChromeScript in ios/CURB/ContentView.swift, written before this
    pill) pads body>header by 78px to clear the status bar and drops it to z-index 70. On the pill that made an
    empty white blob with the logo and menu at its bottom edge, on every page the ⓘ menu opens. Undo it here
-   (the web ships at once, an app fix waits for review) and clear the status bar with the pill's own offset. */
-html.curb-ios-app.curb-ios-page body>header.sn-nav{padding-top:0!important;position:sticky!important;z-index:600!important;
+   (the web ships at once, an app fix waits for review) and clear the status bar with the pill's own offset.
+   Keyed on .curb-ios-app alone: the app's .curb-ios-page class comes and goes (when it's missing the pill sat
+   under the status bar instead), and this selector still outranks the app's padding rule when it's there. */
+html.curb-ios-app body>header.sn-nav{padding-top:0!important;position:sticky!important;z-index:600!important;
   top:calc(env(safe-area-inset-top,0px) + 8px);margin-top:calc(env(safe-area-inset-top,0px) + 8px)!important}
 html.curb-ios-app .sn-nav a[href*="apps.apple.com"],html.curb-ios-app .sn-foot a[href*="apps.apple.com"]{display:none}  /* already in the app */
 .sn-mast{margin:0;padding:0 16px 0 28px;height:64px;display:flex;align-items:center;gap:11px}
