@@ -169,6 +169,13 @@ export async function loadAllSubs() {
     .filter(Boolean);
 }
 
+/** True if this endpoint already has a record (re-saves of a known endpoint are never throttled). */
+export async function hasSub(endpoint) {
+  const r = redis();
+  if (!r) return false;
+  return Boolean(await r.hexists(KEY, endpoint));
+}
+
 /** Remove an expired/invalid subscription (called on push 410/404). */
 export async function deleteSub(endpoint) {
   const r = redis();

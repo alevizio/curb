@@ -1,13 +1,16 @@
 // POST { subscription, spot } — store a Web Push subscription + the saved spot.
 // spot = { corridor, limits, blockside, nextSweepISO, leadMinutes, eveningISO?, rule?, rules?, cnn?, sideKey? }
 // DELETE { subscription } — turn that subscription's alerts off (proven by its endpoint + keys.auth).
-import { saveSub, ensureOwnerProof, storeReady, disarmSub } from './_store.js';
+import { saveSub, ensureOwnerProof, storeReady, disarmSub, claimSlot, hasSub } from './_store.js';
 // Spot/rule sanitizers live in a shared module (also used by save-ios-subscription) so web push and
 // native APNs validate the forever-watch rule identically.
 import { sanitizeSpot } from './_spot.js';
 
 // Known browser push services. Endpoints are always https on one of these hosts.
 const PUSH_HOST = /(\.googleapis\.com|\.push\.services\.mozilla\.com|\.notify\.windows\.com|\.push\.apple\.com)$/i;
+// A brand-new endpoint per client IP at most this often (same guard as save-ios-subscription; see below).
+const NEW_SUB_MS = 10000;
+const clientIp = (req) => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || '';
 
 function validSubscription(s) {
   if (!s || typeof s.endpoint !== 'string' || s.endpoint.length > 1024) return false;
@@ -45,6 +48,14 @@ export default async function handler(req, res) {
     if (!storeReady()) {
       res.status(503).json({ error: 'store not configured', note: 'set KV_REST_API_URL / KV_REST_API_TOKEN (Upstash) in your env' });
       return;
+    }
+    // Flood guard: every stored endpoint costs the sender a push request per due tick, one at a time, so
+    // a script posting thousands of fake (but well-formed) endpoints could push each run past its 60 s
+    // limit and drop the real alerts after them. Only a NEW endpoint costs a record, so throttle those
+    // per client IP; re-saving a known endpoint (a block switch, an Intensity/Voice change, the daily
+    // refresh) is an overwrite and must always land. claimSlot hashes its key; true in dev.
+    if (!(await hasSub(subscription.endpoint)) && !(await claimSlot('webnew:' + clientIp(req), NEW_SUB_MS))) {
+      res.status(429).json({ error: 'slow down' }); return;
     }
     await saveSub(subscription, cleanSpot);
     // Mint the auto-park ownership proof on first save; return the plaintext exactly once so the

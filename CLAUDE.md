@@ -282,7 +282,8 @@ Files now present for the push feature:
   field = subscription.endpoint). Accepts `KV_REST_API_*` (Vercel Upstash integration)
   or `UPSTASH_REDIS_REST_*`. Exports saveSub / loadAllSubs / deleteSub / markNotified.
 - `api/save-subscription.js` — persists `{ subscription, spot }` via the store, with
-  input validation (https push-host allowlist, size caps, spot sanitize/clamp). `DELETE
+  input validation (https push-host allowlist, size caps, spot sanitize/clamp); like the iOS twin, only a
+  brand-new endpoint is throttled (per client IP, 10 s), a re-save of a known one always lands. `DELETE
   { subscription }` turns alerts off: proven by endpoint + a constant-time `keys.auth` match, it
   DISARMS (`spot = null`, the cron skips it) so auto-park keeps resolving the subscription.
 - `api/send-notifications.js` — the sender: loads subs, sends the touchpoint `dueAlert` says is due
