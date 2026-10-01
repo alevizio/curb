@@ -430,10 +430,14 @@ function renderHood(h, idx) {
   const hourMax = Math.max(...hoursWindow.map((r) => r.n), 1);
   const hourBars = hoursWindow.map((r) => barRow(fmtHour(r.i), r.n, hourMax, r.i === peakHour.i)).join('');
 
-  // ---- copy ---- (title ≤~56, desc ≤~165 so SERPs don't truncate; name stays raw — HEAD_COMMON esc()s it.
+  // ---- copy ---- (title < 60, desc ≤~165 so SERPs don't truncate; name stays raw — HEAD_COMMON esc()s it.
   // Tail keywords like "schedule"/"ticket data" live in the H1, description and body, not the title.)
-  const title = `Street cleaning in ${name} | CURB`;
-  const desc = `When is street cleaning in ${name}? Per-block schedules on a live map, plus when tickets actually hit (~${typical} on ${DOW[peakDow.i]}s) and the $${FINE} fine.`;
+  // Searchers add "SF"/"San Francisco" (Mission, Marina, Sunset… exist elsewhere), so both carry it,
+  // shortened to "SF" (then the brand dropped) when a long name would push past the limit.
+  const titles = [`Street cleaning in ${name}, San Francisco | CURB`, `Street cleaning in ${name}, SF | CURB`, `Street cleaning in ${name}, SF`];
+  const title = titles.find((t) => t.length < 60) || titles[2];
+  const descs = ['San Francisco', 'SF'].map((g) => `When is street cleaning in ${name}, ${g}? Per-block schedules on a live map, plus when tickets actually hit (~${typical} on ${DOW[peakDow.i]}s) and the $${FINE} fine.`);
+  const desc = descs.find((d) => d.length <= 165) || descs[1];
 
   // FAQ — answers carry the RAW hood name + *emphasis* markers; faqHtml renders via mdBold() (escapes
   // then bolds), the JSON-LD below renders via plain() (strips markers, keeps raw text). No "morning"
@@ -523,7 +527,7 @@ function renderHood(h, idx) {
   <nav class="crumb" aria-label="Breadcrumb"><a href="/">CURB</a> <span aria-hidden="true">›</span> <a href="/n/">Neighborhoods</a> <span aria-hidden="true">›</span> ${esc(name)}</nav>
   <div class="hero">
     <div class="kicker">San Francisco · street cleaning</div>
-    <h1>Street cleaning in <b>${esc(name)}</b></h1>
+    <h1>Street cleaning in <b>${esc(name)}</b>, SF</h1>
     <p class="sub">Schedules here are set <b>block by block</b>. Tap any block on the map for its exact posted day, time, and next sweep, then set a free reminder. Below: what the public ticket record shows about ${esc(name)}.</p>
     <div class="cta">
       <a class="btn" href="/">Open the map →</a>
