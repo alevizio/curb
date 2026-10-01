@@ -346,6 +346,9 @@ Forever-watch (implemented): the saved `spot` carries `rules` — EVERY schedule
 cron's `recomputeSpot` advances `nextSweepISO` to the EARLIEST next occurrence across the rules (plus
 fresh anchors) via `advanceSpot` / `advanceIosSpot`, which re-read the record and skip the write if the
 user turned the watch off or re-saved it since the run's snapshot (a Turn off must never be re-armed).
+Those and `markNotified` / `markIosNotified` write through one compare-and-set EVAL (`casUpdate` in
+api/_store.js), so a Turn off or block switch landing between a cron read and its write is never
+overwritten either; don't turn them back into a plain HGET + HSET.
 The `notified` de-dupe map is NEVER reset (not by
 the advance, a re-save, a block switch or Turn off): each entry holds the sweep instant it fired for, so
 it only blocks that sweep — an off → on of the same sweep can't re-send a push. A watch stops

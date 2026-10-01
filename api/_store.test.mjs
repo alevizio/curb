@@ -9,15 +9,26 @@ process.env.KV_REST_API_URL = 'https://fake.upstash.io';
 process.env.KV_REST_API_TOKEN = 'fake-token';
 
 // In-memory Redis mock: hash-aware (curb:subs / curb:tokens) + a kv space for SET NX (rate slots).
+// `eval` plays the store's one Lua script (a compare-and-set of one hash field). `onRead` runs once,
+// right after the next HGET has read its value: a user's write landing inside a cron read-modify-write.
 const mem = {};
 const kv = {};
+let onRead = null;
 vi.mock('@upstash/redis', () => ({
   Redis: class {
-    async hget(k, f) { return mem[k] && mem[k][f]; }
+    async hget(k, f) {
+      const v = mem[k] && mem[k][f];
+      if (onRead) { const h = onRead; onRead = null; await h(); }
+      return v;
+    }
     async hset(k, obj) { (mem[k] || (mem[k] = {})); Object.assign(mem[k], obj); }
     async hdel(k, f) { if (mem[k]) delete mem[k][f]; }
     async hgetall(k) { return mem[k] ? { ...mem[k] } : null; }
     async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
+    async eval(script, [k], [f, expected, next]) {
+      if (!(mem[k] && mem[k][f] === expected)) return 0;
+      mem[k][f] = next; return 1;
+    }
   },
 }));
 
@@ -36,6 +47,7 @@ const spotB = { corridor: 'Haight St', nextSweepISO: '2026-06-24T15:00:00.000Z',
 beforeEach(() => {
   for (const k of Object.keys(mem)) delete mem[k];
   for (const k of Object.keys(kv)) delete kv[k];
+  onRead = null;
 });
 
 describe('owner proof (auto-park auth)', () => {
@@ -269,6 +281,55 @@ describe('advanceSpot', () => {
     await saveIosSub(tok, spotA);
     expect(await advanceIosSpot(tok, spotB, spotA)).toBe(true);   // unchanged since the read → re-armed
     expect(JSON.parse(mem['curb:apns'][tok]).spot.nextSweepISO).toBe(spotB.nextSweepISO);
+  });
+});
+
+describe('a Turn off or block switch landing INSIDE a cron write (between its read and its write)', () => {
+  const tok = 'ab'.repeat(32);
+  const ios = () => JSON.parse(mem['curb:apns'][tok]);
+  const other = { ...spotA, corridor: 'Page St', cnn: '456' };
+
+  it('advanceSpot does not re-arm over the Turn off (web + iOS)', async () => {
+    await saveSub(SUB, spotA);
+    onRead = () => disarmSub(EP, 'a');
+    expect(await advanceSpot(EP, spotB, spotA)).toBe(false);
+    expect((await rec()).spot).toBe(null);
+
+    await saveIosSub(tok, spotA);
+    onRead = () => disarmIosSub(tok);
+    expect(await advanceIosSpot(tok, spotB, spotA)).toBe(false);
+    expect(ios().spot).toBe(null);
+  });
+
+  it('markNotified keeps the Turn off and still records the de-dupe (web + iOS)', async () => {
+    await saveSub(SUB, spotA);
+    onRead = () => disarmSub(EP, 'a');
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    expect(await rec()).toMatchObject({ spot: null, notified: { lead: spotA.nextSweepISO } });
+
+    await saveIosSub(tok, spotA);
+    onRead = () => disarmIosSub(tok);
+    await markIosNotified(tok, spotA.nextSweepISO, 'lead');
+    expect(ios()).toMatchObject({ spot: null, notified: { lead: spotA.nextSweepISO } });
+  });
+
+  it('markNotified does not switch the watch back to the old block (web + iOS)', async () => {
+    await saveSub(SUB, spotA);
+    onRead = () => saveSub(SUB, other);
+    await markNotified(EP, spotA.nextSweepISO, 'eve');
+    expect(await rec()).toMatchObject({ spot: other, notified: { eve: spotA.nextSweepISO } });
+
+    await saveIosSub(tok, spotA);
+    onRead = () => saveIosSub(tok, other);
+    await markIosNotified(tok, spotA.nextSweepISO, 'eve');
+    expect(ios()).toMatchObject({ spot: other, notified: { eve: spotA.nextSweepISO } });
+  });
+
+  it('a record deleted in between (a prune) is not brought back', async () => {
+    await saveSub(SUB, spotA);
+    onRead = () => { delete mem['curb:subs'][EP]; };
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    expect(mem['curb:subs'][EP]).toBe(undefined);
   });
 });
 

@@ -19,6 +19,14 @@ function redis() {
   if (!_redis) _redis = new Redis({ url: URL_, token: TOKEN });
   return _redis;
 }
+// The same database, with replies left as the stored strings (no JSON parsing): a compare-and-set must
+// send back the exact bytes it read. Only casUpdate uses it (its HGETALL would return a flat array).
+let _raw = null;
+function rawRedis() {
+  if (!URL_ || !TOKEN) return null;
+  if (!_raw) _raw = new Redis({ url: URL_, token: TOKEN, automaticDeserialization: false });
+  return _raw;
+}
 
 // One hash, field = subscription.endpoint, value = { subscription, spot, notified, savedAt, proofHash? }.
 const KEY = 'curb:subs';
@@ -106,22 +114,45 @@ export async function saveSub(subscription, spot) {
 // during a run was silently undone and the watch kept pushing someone who opted out.
 const sameSpot = (a, b) => Boolean(a && b) && JSON.stringify(a) === JSON.stringify(b);
 
+// That re-read alone still left a window: the cron's writes (advanceSpot, markNotified and their iOS
+// twins) put back the WHOLE record they read, so a Turn off or a block switch landing between their
+// read and their write was overwritten (pushing someone who opted out, or for the block they left).
+// So each cron write is one Upstash EVAL, a compare-and-set: the field is written only if it still
+// holds the exact string the cron read; otherwise nothing is written and the cron re-reads and decides
+// again on the user's version. Chosen over moving `notified` into its own field: no migration of live
+// records, and it also covers advanceSpot, whose decision depends on the spot. The user's writes stay
+// plain HGET/HSET: they win any race, losing at worst a de-dupe entry (one repeat push), as before.
+const CAS = "if redis.call('HGET', KEYS[1], ARGV[1]) == ARGV[2] then redis.call('HSET', KEYS[1], ARGV[1], ARGV[3]) return 1 end return 0";
+
+/** Rewrite one record with `edit(rec)` (→ the new record, or null to leave it) unless it changed
+ *  meanwhile, in which case `edit` runs again on the fresh copy. → true once written, false if the
+ *  record is gone or `edit` declined. */
+async function casUpdate(key, field, edit) {
+  const r = rawRedis();
+  if (!r) return false;
+  for (let i = 0; i < 3; i++) {
+    const raw = await r.hget(key, field);
+    const rec = typeof raw === 'string' ? safeParse(raw) : null;
+    const next = rec && edit(rec);
+    if (!next) return false;
+    if (Number(await r.eval(CAS, [key], [field, raw, JSON.stringify(next)])) === 1) return true;
+  }
+  throw new Error('record kept changing during the cron write'); // like a store error: the run fails
+}
+
 /** Advance a subscription to its next computed sweep occurrence (the cron "forever-watch"
  *  re-arm), computed from `seenSpot`. Replaces the spot only if the record still holds exactly
  *  `seenSpot` (→ true); the de-dupe map is kept (its entries name the sweep they fired for, so the
  *  next sweep is free to fire). Preserves savedAt — the re-arm is clock-driven, not a fresh client
  *  refresh. */
 export async function advanceSpot(endpoint, newSpot, seenSpot) {
-  const r = redis();
-  if (!r) return false;
-  const v = await r.hget(KEY, endpoint);
-  const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec || !sameSpot(rec.spot, seenSpot)) return false;
-  rec.spot = newSpot;
-  rec.notified = notifiedMap(rec);
-  delete rec.notifiedFor; delete rec.notifiedEveFor;
-  await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
-  return true;
+  return casUpdate(KEY, endpoint, (rec) => {
+    if (!sameSpot(rec.spot, seenSpot)) return null;
+    rec.spot = newSpot;
+    rec.notified = notifiedMap(rec);
+    delete rec.notifiedFor; delete rec.notifiedEveFor;
+    return rec;
+  });
 }
 
 /** Load every stored record as { endpoint, subscription, spot, notifiedFor }. */
@@ -166,15 +197,12 @@ export async function disarmSub(endpoint, auth) {
 /** Record that we already pushed for a given sweep time, so the cron won't repeat.
  *  field: 'notifiedFor' (the ~30-min lead push) or 'notifiedEveFor' (night-before). */
 export async function markNotified(endpoint, nextSweepISO, key = 'lead') {
-  const r = redis();
-  if (!r) return;
-  const v = await r.hget(KEY, endpoint);
-  const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return;
-  rec.notified = notifiedMap(rec);
-  rec.notified[key] = nextSweepISO;
-  delete rec.notifiedFor; delete rec.notifiedEveFor; // migrate off the legacy fields once touched
-  await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
+  await casUpdate(KEY, endpoint, (rec) => {
+    rec.notified = notifiedMap(rec);
+    rec.notified[key] = nextSweepISO;
+    delete rec.notifiedFor; delete rec.notifiedEveFor; // migrate off the legacy fields once touched
+    return rec;
+  });
 }
 
 /** Load a single subscription record by endpoint, or null. */
@@ -224,16 +252,13 @@ export async function saveIosSub(token, spot) {
 /** Advance an iOS watch to its next computed occurrence (forever-watch re-arm). Like advanceSpot:
  *  only while the record still holds exactly `seenSpot` (→ true). */
 export async function advanceIosSpot(token, newSpot, seenSpot) {
-  const r = redis();
-  if (!r) return false;
-  const v = await r.hget(KEY_IOS, token);
-  const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec || !sameSpot(rec.spot, seenSpot)) return false;
-  rec.spot = newSpot;
-  rec.notified = notifiedMap(rec);
-  delete rec.notifiedFor; delete rec.notifiedEveFor;
-  await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
-  return true;
+  return casUpdate(KEY_IOS, token, (rec) => {
+    if (!sameSpot(rec.spot, seenSpot)) return null;
+    rec.spot = newSpot;
+    rec.notified = notifiedMap(rec);
+    delete rec.notifiedFor; delete rec.notifiedEveFor;
+    return rec;
+  });
 }
 
 /** Load every iOS record as { token, spot, notifiedFor, notifiedEveFor, savedAt }. */
@@ -279,15 +304,12 @@ export async function disarmIosSub(token) {
 
 /** Record that we already pushed an iOS token for a given sweep time (per-window de-dupe). */
 export async function markIosNotified(token, nextSweepISO, key = 'lead') {
-  const r = redis();
-  if (!r) return;
-  const v = await r.hget(KEY_IOS, token);
-  const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return;
-  rec.notified = notifiedMap(rec);
-  rec.notified[key] = nextSweepISO;
-  delete rec.notifiedFor; delete rec.notifiedEveFor;
-  await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
+  await casUpdate(KEY_IOS, token, (rec) => {
+    rec.notified = notifiedMap(rec);
+    rec.notified[key] = nextSweepISO;
+    delete rec.notifiedFor; delete rec.notifiedEveFor;
+    return rec;
+  });
 }
 
 const sha = (s) => createHash('sha256').update(String(s)).digest('hex');

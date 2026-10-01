@@ -32,6 +32,10 @@ vi.mock('@upstash/redis', () => ({
     async hexists(k, f) { return mem[k] && f in mem[k] ? 1 : 0; }
     async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
     async del(k) { delete kv[k]; }
+    async eval(script, [k], [f, expected, next]) { // the store's compare-and-set of one hash field
+      if (!(mem[k] && mem[k][f] === expected)) return 0;
+      mem[k][f] = next; return 1;
+    }
   },
 }));
 const send = vi.fn(async () => ({ statusCode: 201 }));
