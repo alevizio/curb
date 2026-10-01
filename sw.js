@@ -4,7 +4,9 @@
 //     deploy or a data refresh is the new one; stale-while-revalidate served the previous build until a 2nd visit.
 const CACHE = 'curb-v5';
 const NET_TIMEOUT_MS = 3000;  // a slow network falls back to the cached copy after this, and still refreshes it
-const SHELL = ['/', 'index.html', 'manifest.json',
+// The time core rides with the shell: it loads before this worker controls the first visit, so without it a
+// single visit left an offline reload with a dead map. Its ?v= must match index.html's tag (sw.test.mjs).
+const SHELL = ['/', 'index.html', 'manifest.json', '/lib/sweep-core.js?v=4',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -57,7 +59,9 @@ self.addEventListener('fetch', e => {
       if (resp && resp.ok && resp.type === 'basic') cache.put(e.request, resp.clone());
       return resp;
     }).catch(() => null);
-    return cached || (await fresh) || cache.match('/');
+    // No copy and no network: fail the request. Only a page load falls back to the app shell (networkFirst
+    // above); answering a script or an icon with that HTML made a missing file look like a broken one.
+    return cached || (await fresh) || Response.error();
   })());
 });
 

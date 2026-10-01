@@ -776,6 +776,13 @@
   <p class="wfoot">Free, no account. Built on <a href="https://datasf.org" target="_blank" rel="noopener">SF's open data</a>. The posted sign always wins.</p>
 </div>
 
+<!-- Shown only when Leaflet or the time core never loaded (see the retry right after their script tags). -->
+<div class="welcome" id="loadFail" role="alertdialog" aria-labelledby="loadFailT" aria-describedby="loadFailP">
+  <div class="big" id="loadFailT">CURB didn't load</div>
+  <p id="loadFailP">Part of the map didn't download. Check your connection and try again.</p>
+  <button class="btn-go" id="loadFailGo">Try again</button>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="sheet" id="sheet" role="dialog" aria-label="Parking details for this block">
@@ -813,6 +820,25 @@
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=4"></script>
+<!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
+     missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
+     retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
+     again. Tested in a real browser by scripts/check-load-guard.mjs, and by load-guard.test.mjs. -->
+<script>
+{const again=(sel)=>{const s=document.querySelector(sel).getAttribute('src');document.write('<script src="'+s+(s.includes('?')?'&':'?')+'retry=1"><\/script>');};
+if(!window.L)again('script[src*="/leaflet.min.js"]');
+if(!window.nextSweep)again('script[src^="/lib/sweep-core.js"]');}
+</script>
+<script>
+if(!window.L||!window.nextSweep){
+  const card=document.getElementById('loadFail'),go=document.getElementById('loadFailGo');
+  for(const el of document.body.children)if(el!==card&&el.tagName!=='SCRIPT')el.inert=true;  // nothing behind it works
+  document.getElementById('hint').style.display='none';
+  card.classList.add('open');
+  go.onclick=()=>location.reload();
+  go.focus();
+}
+</script>
 <script>
 const SWEEP="https://data.sf.gov/resource/yhqp-riqs.json";
 const METER="https://data.sf.gov/resource/8vzz-qzz9.json";
