@@ -1740,7 +1740,9 @@ function openSheet(group, activeKey){
   if(_enf&&ae)_enf.onclick=()=>toast(`Estimated from ~${ae.n} street-cleaning tickets on this block over ~2 years (SFMTA citations via DataSF). Earliest seen ${fmtMin(ae.lo)}. The posted sign is the source of truth.`);
   // Share: the block gets a real URL (/b/<cnn>, server-rendered card for unfurls).
   document.getElementById('shareBtn').onclick=async()=>{
-    const url=location.origin+'/b/'+group.cnn;
+    // the side travels too: both curb sides sit exactly as far from the block's midpoint, so without it the
+    // recipient's map picked either one, and could show the other side's verdict than the one shared
+    const url=location.origin+'/b/'+group.cnn+(active.blockside?'?side='+encodeURIComponent(active.blockside):'');
     const r0=active.row||active.rows[0];
     const e=enfFor(group.cnn, normDay(r0.weekday));
     const text=`${group.corridor||'This block'} (${fmtLimits(group.limits)}): sweeps ${DAYLBL[normDay(r0.weekday)]||r0.weekday} ${fmtHour(r0.fromhour)} to ${fmtHour(r0.tohour)}`
@@ -2267,13 +2269,14 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
 /* Deep link: /?b=<cnn> (from share pages) — fly to the block and open its sheet. */
 (async function deepLink(){
   const m=location.search.match(/[?&]b=(\d+)/); if(!m)return;
+  const side=QS.get('side')||'';  // the curb side a shared link was about (see the share button)
   try{
     const r=await fetch(SWEEP+`?$select=line&$where=cnn='${m[1]}'&$limit=1`);
     const d=await r.json(); const c=d[0]&&d[0].line&&d[0].line.coordinates;
     if(!c||!c.length)return;
     const mid=c[Math.floor(c.length/2)];
     map.setView([mid[1],mid[0]],17);
-    openWhenLoaded(mid[1],mid[0],m[1],700);
+    openWhenLoaded(mid[1],mid[0],m[1],700,side);
   }catch(_){}
 })();
 
@@ -2300,9 +2303,9 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
    10 s) instead of a fixed ~2.9 s retry budget, which gave up silently on slow links. */
 const NEAR_M=80, OPEN_WAIT_MS=10000;
 let pendingOpen=null;  // {lat,lng,cnnHint,loc} — the one block-open waiting on data (loc: keeps #locate busy)
-function openWhenLoaded(lat,lng,cnnHint,delay){
+function openWhenLoaded(lat,lng,cnnHint,delay,sideHint){
   endPendingOpen();  // one at a time: the newest placement wins
-  const po=pendingOpen={lat,lng,cnnHint,loc:false};
+  const po=pendingOpen={lat,lng,cnnHint,sideHint:sideHint||'',loc:false};
   setTimeout(()=>{if(pendingOpen===po)tryPendingOpen();},delay);  // after the fly: data on hand may already cover it
   setTimeout(()=>{
     if(pendingOpen!==po)return;
@@ -2314,6 +2317,9 @@ function openWhenLoaded(lat,lng,cnnHint,delay){
 }
 function tryPendingOpen(){
   const po=pendingOpen; if(!po)return;
+  // a shared link names its side: open exactly that one (blockside as DataSF spells it, e.g. "West")
+  const sided=po.cnnHint&&po.sideHint&&segCache.find(o=>String(o.group.cnn)===String(po.cnnHint)&&String(o.side.blockside||'').toLowerCase()===po.sideHint.toLowerCase());
+  if(sided)return openPending({group:sided.group,side:sided.side});
   const hit=po.cnnHint&&nearestSeg(po.lat,po.lng,po.cnnHint);  // the block's own cnn can't be stale
   if(hit)return openPending(hit);
   if(!segBounds||!segBounds.contains([po.lat,po.lng]))return;  // not drawn for here yet — loadViewport retries
