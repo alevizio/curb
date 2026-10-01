@@ -211,7 +211,8 @@ try {
   // is 0 in headless Chrome, so it is simulated): the row must land above that padding, not under the indicator.
   await tap(sp, '#grabBtn');
   await sleep(450);
-  await sp.addStyleTag({ content: '#sheet{padding-bottom:calc(20px + 34px)!important}' });
+  // the sheet's bottom padding is --sheet-pb (the pinned action bar pads by the same value), so simulate through it
+  await sp.addStyleTag({ content: '#sheet{--sheet-pb:calc(20px + 34px)!important}' });
   await sp.evaluate(() => { document.getElementById('alertOff').hidden = true; document.getElementById('sheet').scrollTop = 0; });
   await tap(sp, '#alertBtn');
   await sleep(700);

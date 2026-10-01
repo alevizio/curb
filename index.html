@@ -41,6 +41,7 @@
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-itunes-app" content="app-id=6780998238">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -385,7 +386,7 @@
   }
 
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
-    border-radius:25px 22px 0 0;box-shadow:0 -6px 0 var(--ink);padding:8px 16px calc(20px + env(safe-area-inset-bottom));
+    border-radius:25px 22px 0 0;box-shadow:0 -6px 0 var(--ink);--sheet-pb:calc(20px + env(safe-area-inset-bottom));padding:8px 16px var(--sheet-pb);
     transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1),max-height .28s cubic-bezier(.2,.8,.2,1);
     max-height:74dvh;overflow-y:auto}
   .sheet.open{transform:translateY(0)}
@@ -397,6 +398,13 @@
   @media (max-width:767px){
     .sheet{max-height:46dvh;transition:transform .32s cubic-bezier(.2,.8,.2,1);will-change:transform;overscroll-behavior:contain}
     .sheet.tall{max-height:84dvh}
+    /* Sweep alerts + Calendar stay pinned to the bottom of the sheet: at the 46dvh peek they sat below the
+       fold on real iPhones, worst on blocks that sweep soon (the most content). The bar carries its own rule,
+       so the divider above it goes. It covers the sheet's bottom padding (--sheet-pb, incl. the home indicator)
+       and pads by the same amount, so its rows end exactly where the sheet's content area does. */
+    .sheet .actions{position:sticky;bottom:calc(-1 * var(--sheet-pb));z-index:2;background:var(--paper);
+      margin:14px -16px 0;padding:10px 16px var(--sheet-pb);border-top:2px solid rgba(23,21,15,.12)}
+    .sheet .shdiv{display:none}
   }
   .grab{display:block;width:74px;height:21px;padding:8px 16px;margin:0 auto 4px;border:0;background:transparent;cursor:grab}
   .grab i{display:block;width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3)}
@@ -529,6 +537,8 @@
     font-size:13px;font-weight:800;display:grid;place-items:center}
   .ios-steps .shareglyph{display:inline-grid;place-items:center;width:20px;height:20px;color:var(--meter);vertical-align:-4px}
   .ios-note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
+  .ios-get{display:flex;justify-content:center;align-items:center;text-decoration:none;margin:12px 0 2px;width:100%}
+  .ios-or{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:14px 0 0}
   @keyframes spin{to{transform:rotate(360deg)}}
 
   /* ---- motion (gated: transform/opacity only, exponential ease-outs) ---- */
@@ -780,9 +790,11 @@
 <div class="ios-mask" id="iosHint" role="dialog" aria-modal="true" aria-labelledby="iosHintHead">
   <div class="ios-card">
     <button class="sheet-close" id="iosClose" aria-label="Close">×</button>
-    <span class="kicker">iPhone setup</span>
-    <div class="ios-head" id="iosHintHead">Install CURB for alerts</div>
-    <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.45">Apple only allows push notifications once CURB lives on your Home Screen as an app.</p>
+    <span class="kicker">iPhone</span>
+    <div class="ios-head" id="iosHintHead">Get sweep alerts</div>
+    <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.45">The free CURB app for iPhone turns on alerts with one tap.</p>
+    <a class="btn ios-get" id="iosGet" href="https://apps.apple.com/app/id6780998238" target="_blank" rel="noopener">Get the free iPhone app</a>
+    <p class="ios-or">Or add this site to your Home Screen:</p>
     <ol class="ios-steps">
       <li><span class="n">1</span><span>Tap the <b>Share</b> button
         <span class="shareglyph"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m8 7 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></span>
@@ -1728,7 +1740,9 @@ function openSheet(group, activeKey){
   if(_enf&&ae)_enf.onclick=()=>toast(`Estimated from ~${ae.n} street-cleaning tickets on this block over ~2 years (SFMTA citations via DataSF). Earliest seen ${fmtMin(ae.lo)}. The posted sign is the source of truth.`);
   // Share: the block gets a real URL (/b/<cnn>, server-rendered card for unfurls).
   document.getElementById('shareBtn').onclick=async()=>{
-    const url=location.origin+'/b/'+group.cnn;
+    // the side travels too: both curb sides sit exactly as far from the block's midpoint, so without it the
+    // recipient's map picked either one, and could show the other side's verdict than the one shared
+    const url=location.origin+'/b/'+group.cnn+(active.blockside?'?side='+encodeURIComponent(active.blockside):'');
     const r0=active.row||active.rows[0];
     const e=enfFor(group.cnn, normDay(r0.weekday));
     const text=`${group.corridor||'This block'} (${fmtLimits(group.limits)}): sweeps ${DAYLBL[normDay(r0.weekday)]||r0.weekday} ${fmtHour(r0.fromhour)} to ${fmtHour(r0.tohour)}`
@@ -2255,13 +2269,14 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
 /* Deep link: /?b=<cnn> (from share pages) — fly to the block and open its sheet. */
 (async function deepLink(){
   const m=location.search.match(/[?&]b=(\d+)/); if(!m)return;
+  const side=QS.get('side')||'';  // the curb side a shared link was about (see the share button)
   try{
     const r=await fetch(SWEEP+`?$select=line&$where=cnn='${m[1]}'&$limit=1`);
     const d=await r.json(); const c=d[0]&&d[0].line&&d[0].line.coordinates;
     if(!c||!c.length)return;
     const mid=c[Math.floor(c.length/2)];
     map.setView([mid[1],mid[0]],17);
-    openWhenLoaded(mid[1],mid[0],m[1],700);
+    openWhenLoaded(mid[1],mid[0],m[1],700,side);
   }catch(_){}
 })();
 
@@ -2288,9 +2303,9 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
    10 s) instead of a fixed ~2.9 s retry budget, which gave up silently on slow links. */
 const NEAR_M=80, OPEN_WAIT_MS=10000;
 let pendingOpen=null;  // {lat,lng,cnnHint,loc} — the one block-open waiting on data (loc: keeps #locate busy)
-function openWhenLoaded(lat,lng,cnnHint,delay){
+function openWhenLoaded(lat,lng,cnnHint,delay,sideHint){
   endPendingOpen();  // one at a time: the newest placement wins
-  const po=pendingOpen={lat,lng,cnnHint,loc:false};
+  const po=pendingOpen={lat,lng,cnnHint,sideHint:sideHint||'',loc:false};
   setTimeout(()=>{if(pendingOpen===po)tryPendingOpen();},delay);  // after the fly: data on hand may already cover it
   setTimeout(()=>{
     if(pendingOpen!==po)return;
@@ -2302,6 +2317,9 @@ function openWhenLoaded(lat,lng,cnnHint,delay){
 }
 function tryPendingOpen(){
   const po=pendingOpen; if(!po)return;
+  // a shared link names its side: open exactly that one (blockside as DataSF spells it, e.g. "West")
+  const sided=po.cnnHint&&po.sideHint&&segCache.find(o=>String(o.group.cnn)===String(po.cnnHint)&&String(o.side.blockside||'').toLowerCase()===po.sideHint.toLowerCase());
+  if(sided)return openPending({group:sided.group,side:sided.side});
   const hit=po.cnnHint&&nearestSeg(po.lat,po.lng,po.cnnHint);  // the block's own cnn can't be stale
   if(hit)return openPending(hit);
   if(!segBounds||!segBounds.contains([po.lat,po.lng]))return;  // not drawn for here yet — loadViewport retries
@@ -2844,6 +2862,7 @@ function showWelcome(){
 
 /* iOS install hint: close on × or backdrop tap; auto-show once for un-installed iOS Safari. */
 document.getElementById('iosClose').onclick=hideIosHint;
+document.getElementById('iosGet').onclick=()=>track('ios_app_offer_tap');
 document.getElementById('iosHint').addEventListener('click',e=>{ if(e.target.id==='iosHint') hideIosHint(); });
 (function maybeIosHint(){
   if(!onboarded()) return; // never stack on the welcome card — it shows on a later visit
