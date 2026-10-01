@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://curb.guide/n/</loc>
-    <lastmod>2026-09-27</lastmod>
+    <lastmod>2026-10-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -85,13 +85,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://curb.guide/n/inner-richmond</loc>
+    <loc>https://curb.guide/n/castro-upper-market</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://curb.guide/n/castro-upper-market</loc>
+    <loc>https://curb.guide/n/inner-richmond</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -151,13 +151,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://curb.guide/n/lone-mountain-usf</loc>
+    <loc>https://curb.guide/n/presidio-heights</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://curb.guide/n/presidio-heights</loc>
+    <loc>https://curb.guide/n/lone-mountain-usf</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -211,13 +211,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://curb.guide/n/portola</loc>
+    <loc>https://curb.guide/n/chinatown</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://curb.guide/n/chinatown</loc>
+    <loc>https://curb.guide/n/portola</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
