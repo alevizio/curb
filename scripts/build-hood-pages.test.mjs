@@ -37,6 +37,29 @@ describe('neighborhood pages', () => {
     expect(hrefs.sort()).toEqual(pages.sort());
   });
 
+  it('say San Francisco (or SF) in the title, description and H1, with unique titles under 60 characters', () => {
+    const titles = new Set();
+    for (const f of pages) {
+      const html = read(`n/${f}`);
+      const title = html.match(/<title>(.*?)<\/title>/)[1];
+      const desc = html.match(/<meta name="description" content="(.*?)"/)[1];
+      const h1 = html.match(/<h1>(.*?)<\/h1>/)[1];
+      for (const t of [title, desc, h1]) expect(t, f).toMatch(/\b(San Francisco|SF)\b/);
+      expect(title.length, f).toBeLessThan(60);
+      expect(desc.length, f).toBeLessThanOrEqual(165);
+      expect(titles.has(title), f).toBe(false);
+      titles.add(title);
+    }
+  });
+
+  it('"Open the map" opens the map framed on that neighborhood (/?bbox=), not the default center', () => {
+    const maps = JSON.parse(read('data/hood-maps.json'));
+    for (const f of pages) {
+      const cta = read(`n/${f}`).match(/<a class="btn" href="([^"]*)">Open the map/)[1];
+      expect(cta, f).toBe(`/?bbox=${maps[f.replace('.html', '')].bbox.join(',')}`);
+    }
+  });
+
   it('retired pages (Presidio, Golden Gate Park) are deleted and 301 to /n/', () => {
     const v = JSON.parse(read('vercel.json'));
     for (const s of ['presidio', 'golden-gate-park']) {

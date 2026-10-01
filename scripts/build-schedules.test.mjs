@@ -1,7 +1,7 @@
 // Tests for the pure parts of the schedule bake (scripts/build-schedules.mjs): DataSF street-text
 // cleanup, neighbor detection along a street, and the tags that keep block titles distinct.
 import { describe, it, expect } from 'vitest';
-import { cleanStreet, cleanEnd, cleanLimits, knownNames, blockRange, buildBlocks, neighbors } from './build-schedules.mjs';
+import { cleanStreet, cleanEnd, cleanLimits, knownNames, blockRange, buildBlocks, neighbors, parseRanges, samePage } from './build-schedules.mjs';
 
 const row = (o) => ({ cnn: '1000', corridor: 'Pierce St', limits: 'Pine St  -  California St', blockside: 'East', weekday: 'Mon',
   fromhour: '8', tohour: '10', week1: '1', week2: '0', week3: '1', week4: '0', week5: '0', holidays: '0',
@@ -99,5 +99,34 @@ describe('neighbors', () => {
     expect(adj.get('1000')).toEqual(['', '2000']);
     expect(adj.get('2000')).toEqual(['1000', '']);
     expect(adj.get('3000')).toEqual(['', '']);
+  });
+});
+
+describe('house-number ranges', () => {
+  it('reads the EAS min/max per cnn, dropping junk cnns and the 0 placeholder', () => {
+    const r = parseRanges([{ cnn: '870000', lo: '2900', hi: '2949' }, { cnn: '2672000.0', lo: '2600', hi: '2655' },
+      { cnn: 'x"><b>', lo: '1', hi: '2' }, { cnn: '9510000', lo: '0', hi: '431' }, { cnn: '1000' }]);
+    expect([...r]).toEqual([['870000', [2900, 2949]], ['2672000', [2600, 2655]]]);
+  });
+});
+
+describe('samePage (carries the modified date)', () => {
+  const entry = ['Pierce St', 'Pine St', 'California St', 3, [['East', 1, 8, 10, 31, 0]], '999', '2000', ''];
+  const old = [...entry, '2026-09-01']; // baked before the range field existed
+  it('keeps the date of an entry baked before ranges existed when only the range is new', () => {
+    expect(samePage(old, 'Pacific Heights', entry, 'Pacific Heights', [2100, 2199])).toBe(true);
+    expect(samePage(old, 'Pacific Heights', entry, 'Pacific Heights', [])).toBe(true);
+  });
+  it('moves it once a baked range changes, appears or goes away', () => {
+    expect(samePage([...old, [2100, 2199]], 'Pacific Heights', entry, 'Pacific Heights', [2100, 2199])).toBe(true);
+    expect(samePage([...old, [2100, 2199]], 'Pacific Heights', entry, 'Pacific Heights', [2100, 2150])).toBe(false);
+    expect(samePage([...old, []], 'Pacific Heights', entry, 'Pacific Heights', [2100, 2199])).toBe(false);
+    expect(samePage([...old, [2100, 2199]], 'Pacific Heights', entry, 'Pacific Heights', [])).toBe(false);
+  });
+  it('still moves it for a new block, a schedule change or another neighborhood (compared by name)', () => {
+    expect(samePage(undefined, undefined, entry, 'Pacific Heights', [])).toBe(false);
+    expect(samePage(old, 'Pacific Heights', [...entry.slice(0, 4), [['East', 2, 8, 10, 31, 0]], ...entry.slice(5)], 'Pacific Heights', [])).toBe(false);
+    expect(samePage(old, 'Presidio', entry, 'Pacific Heights', [])).toBe(false);
+    expect(samePage([...entry.slice(0, 3), 7, ...entry.slice(4), '2026-09-01'], 'Pacific Heights', entry, 'Pacific Heights', [])).toBe(true);
   });
 });

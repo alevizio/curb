@@ -4,7 +4,7 @@
 // host move (Sep 2026: 18 days of /b/ pages 302ing home) can no longer take the pages down.
 //
 //   data/schedules.json = { _meta, hoods: [[name, slug, hasPage], ...], b: { <cnn>: entry } }
-//   entry = [street, from, to, hoodIdx, rows, prev, next, tag, modified]
+//   entry = [street, from, to, hoodIdx, rows, prev, next, tag, modified, range]
 //     street/from/to  cleaned DataSF text ('' = no usable cross street)
 //     hoodIdx         index into hoods (-1 = outside every neighborhood polygon)
 //     rows            [[side, dow, fromH, toH, weeksMask, holidays], ...]  side '' = no blockside;
@@ -14,6 +14,7 @@
 //                     street + cross streets ('' if unique)
 //     modified        YYYY-MM-DD this entry last changed (carried over from the previous file) —
 //                     the real <lastmod> for sitemap-blocks.xml
+//     range           [lo, hi] house numbers on the block (EAS addresses), [] if none
 //
 // Street text is cleaned here, once: "09th Ave" zero padding, "Start: 01-99 Block" placeholders,
 // the same street at both ends, and cross streets with their first letters clipped ("ission Bay
@@ -26,6 +27,7 @@ import { slug, pagedHoods } from '../lib/hoods.js';
 
 const ROOT = new URL('../', import.meta.url);
 const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
+const ADDR = 'https://data.sf.gov/resource/3mea-di5p.json'; // EAS addresses, cnn keys match SWEEP
 const PAGE = 10000;
 const DAY = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 const log = (...a) => console.error('[schedules]', ...a);
@@ -202,6 +204,41 @@ export function compass(g, noun) {
   });
 }
 
+// House-number range per cnn: the same EAS min/max the app's block sheet shows (index.html
+// loadRanges), minus address number 0: EAS's no-number placeholder, which made "0 to 2655 Balboa St".
+export function parseRanges(rows) {
+  const out = new Map();
+  for (const r of rows) {
+    const cnn = String(r.cnn || '').split('.')[0], lo = +r.lo, hi = +r.hi;
+    if (/^\d{1,9}$/.test(cnn) && lo > 0 && hi >= lo) out.set(cnn, [lo, hi]);
+  }
+  return out;
+}
+
+// Does a block's page data match the previous bake? (hood compared by name, modified ignored.) An
+// entry baked before the range field existed is compared without it, so adding the field doesn't
+// move every block's lastmod.
+export function samePage(old, oldHood, entry, hood, range) {
+  return !!old && JSON.stringify([...old.slice(0, 3), oldHood ?? null, ...old.slice(4, 8)]) ===
+    JSON.stringify([...entry.slice(0, 3), hood ?? null, ...entry.slice(4, 8)]) &&
+    (old.length < 10 || JSON.stringify(old[9]) === JSON.stringify(range));
+}
+
+async function fetchRanges() {
+  const u = new URL(ADDR);
+  u.searchParams.set('$select', 'cnn,min(address_number) as lo,max(address_number) as hi');
+  u.searchParams.set('$where', 'address_number > 0');
+  u.searchParams.set('$group', 'cnn');
+  u.searchParams.set('$order', 'cnn');
+  u.searchParams.set('$limit', 50000); // ~13k cnns: one page
+  const r = await fetch(u, { headers: { 'User-Agent': 'curb-schedules-build' } });
+  if (!r.ok) throw new Error('fetch ranges ' + r.status);
+  const rows = await r.json();
+  if (rows.length >= 50000) throw new Error('ranges truncated at ' + rows.length);
+  log(`  ${rows.length} cnns with addresses`);
+  return parseRanges(rows);
+}
+
 async function fetchAll() {
   const rows = [];
   let last = '';
@@ -225,6 +262,7 @@ async function fetchAll() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const OUT = new URL('data/schedules.json', ROOT);
   const rows = await fetchAll();
+  const ranges = await fetchRanges();
   const blocks = buildBlocks(rows);
 
   // neighborhood per block (midpoint of its centerline), flagged when it has a /n/ page
@@ -246,16 +284,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const e = x.ends;
     const hood = e ? hoodAt((e[0][0] + e[1][0]) / 2, (e[0][1] + e[1][1]) / 2, polys) : null;
     const entry = [x.street, x.a, x.b, hood ? hoodIdx.get(hood) : -1, x.rows, ...adj.get(x.cnn), x.tag];
-    // carry the previous modified date when nothing on the page's data changed (hood compared by name)
+    const range = ranges.get(x.cnn) || [];
+    // carry the previous modified date when nothing on the page's data changed
     const old = prev && prev.b[x.cnn];
-    const same = old && JSON.stringify([...old.slice(0, 3), prevHoods[old[3]] ?? null, ...old.slice(4, 8)]) ===
-      JSON.stringify([...entry.slice(0, 3), hood, ...entry.slice(4, 8)]);
+    const same = samePage(old, old && prevHoods[old[3]], entry, hood, range);
     if (!same) changed++;
-    b[x.cnn] = [...entry, same ? old[8] : today];
+    b[x.cnn] = [...entry, same ? old[8] : today, range];
   }
   const out = {
-    _meta: { generated: new Date().toISOString(), source: 'DataSF yhqp-riqs (street sweeping schedule)', rows: rows.length, blocks: blocks.length, changed,
-      note: 'entry = [street, from, to, hoodIdx, rows[[side,dow,fromH,toH,weeksMask,holidays]], prev, next, tag, modified]' },
+    _meta: { generated: new Date().toISOString(), source: 'DataSF yhqp-riqs (street sweeping schedule) + 3mea-di5p (EAS addresses, house-number ranges)', rows: rows.length, blocks: blocks.length, changed,
+      note: 'entry = [street, from, to, hoodIdx, rows[[side,dow,fromH,toH,weeksMask,holidays]], prev, next, tag, modified, range[lo,hi]]' },
     hoods,
     b,
   };
