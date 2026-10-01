@@ -52,6 +52,14 @@ describe('neighborhood pages', () => {
     }
   });
 
+  it('"Open the map" opens the map framed on that neighborhood (/?bbox=), not the default center', () => {
+    const maps = JSON.parse(read('data/hood-maps.json'));
+    for (const f of pages) {
+      const cta = read(`n/${f}`).match(/<a class="btn" href="([^"]*)">Open the map/)[1];
+      expect(cta, f).toBe(`/?bbox=${maps[f.replace('.html', '')].bbox.join(',')}`);
+    }
+  });
+
   it('retired pages (Presidio, Golden Gate Park) are deleted and 301 to /n/', () => {
     const v = JSON.parse(read('vercel.json'));
     for (const s of ['presidio', 'golden-gate-park']) {

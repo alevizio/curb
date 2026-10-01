@@ -438,6 +438,9 @@ function renderHood(h, idx) {
   const title = titles.find((t) => t.length < 60) || titles[2];
   const descs = ['San Francisco', 'SF'].map((g) => `When is street cleaning in ${name}, ${g}? Per-block schedules on a live map, plus when tickets actually hit (~${typical} on ${DOW[peakDow.i]}s) and the $${FINE} fine.`);
   const desc = descs.find((d) => d.length <= 165) || descs[1];
+  // "Open the map" lands on this neighborhood (the app's /?bbox= deep link), not the default center
+  const m = HOOD_MAPS[sl];
+  const mapHref = m && m.bbox ? `/?bbox=${m.bbox.join(',')}` : '/';
 
   // FAQ — answers carry the RAW hood name + *emphasis* markers; faqHtml renders via mdBold() (escapes
   // then bolds), the JSON-LD below renders via plain() (strips markers, keeps raw text). No "morning"
@@ -530,7 +533,7 @@ function renderHood(h, idx) {
     <h1>Street cleaning in <b>${esc(name)}</b>, SF</h1>
     <p class="sub">Schedules here are set <b>block by block</b>. Tap any block on the map for its exact posted day, time, and next sweep, then set a free reminder. Below: what the public ticket record shows about ${esc(name)}.</p>
     <div class="cta">
-      <a class="btn" href="/">Open the map →</a>
+      <a class="btn" href="${mapHref}">Open the map →</a>
       <a class="btn ghost" href="/tickets">The ticket economy →</a>
     </div>
   </div>
