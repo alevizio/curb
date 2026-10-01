@@ -352,7 +352,8 @@
     display:inline-block;padding:9px 8px}  /* 16px text -> ~38px tappable row */
 
   /* first-run welcome — shown once, until dismissed or the first curb is tapped */
-  .welcome{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:560;background:var(--paper);
+  /* z-index 640: above the layers button (620) and legend (600), which covered the card's bottom on short phone screens; under the sheet (650) */
+  .welcome{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:640;background:var(--paper);
     border:3px solid var(--ink);border-radius:19px;box-shadow:var(--shadow);padding:20px 22px 18px;
     width:min(340px,86vw);display:none;text-align:left}
   .welcome.open{display:block}
