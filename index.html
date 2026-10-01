@@ -386,7 +386,7 @@
   }
 
   .sheet{position:fixed;left:0;right:0;bottom:0;z-index:650;background:var(--paper);border-top:3px solid var(--ink);
-    border-radius:25px 22px 0 0;box-shadow:0 -6px 0 var(--ink);padding:8px 16px calc(20px + env(safe-area-inset-bottom));
+    border-radius:25px 22px 0 0;box-shadow:0 -6px 0 var(--ink);--sheet-pb:calc(20px + env(safe-area-inset-bottom));padding:8px 16px var(--sheet-pb);
     transform:translateY(115%);transition:transform .32s cubic-bezier(.2,.8,.2,1),max-height .28s cubic-bezier(.2,.8,.2,1);
     max-height:74dvh;overflow-y:auto}
   .sheet.open{transform:translateY(0)}
@@ -398,6 +398,13 @@
   @media (max-width:767px){
     .sheet{max-height:46dvh;transition:transform .32s cubic-bezier(.2,.8,.2,1);will-change:transform;overscroll-behavior:contain}
     .sheet.tall{max-height:84dvh}
+    /* Sweep alerts + Calendar stay pinned to the bottom of the sheet: at the 46dvh peek they sat below the
+       fold on real iPhones, worst on blocks that sweep soon (the most content). The bar carries its own rule,
+       so the divider above it goes. It covers the sheet's bottom padding (--sheet-pb, incl. the home indicator)
+       and pads by the same amount, so its rows end exactly where the sheet's content area does. */
+    .sheet .actions{position:sticky;bottom:calc(-1 * var(--sheet-pb));z-index:2;background:var(--paper);
+      margin:14px -16px 0;padding:10px 16px var(--sheet-pb);border-top:2px solid rgba(23,21,15,.12)}
+    .sheet .shdiv{display:none}
   }
   .grab{display:block;width:74px;height:21px;padding:8px 16px;margin:0 auto 4px;border:0;background:transparent;cursor:grab}
   .grab i{display:block;width:42px;height:5px;border-radius:3px;background:rgba(23,21,15,.3)}
