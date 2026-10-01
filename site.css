@@ -59,13 +59,12 @@ html.curb-ios-app .sn-nav a[href*="apps.apple.com"],html.curb-ios-app .sn-foot a
 .sn-menu .sn-ext{opacity:.5;font-size:12px;margin-left:auto}
 [hidden]{display:none!important}
 @media (max-width:720px){ .sn-links,.sn-cta{display:none} .sn-burger{display:flex} .sn-nav{width:auto;margin:12px;max-width:none} }
-/* Phones: no pill, just the ≡ button (owner call, Sep 30). The row stays in the flow, as tall as the button, so
-   pages keep their spacing; it's see-through and lets taps through, only the button and its menu catch them. */
+/* Phones: no pill, just the logo and the ≡ button (owner call, Sep 30). The row stays in the flow, as tall as the
+   button, so pages keep their spacing; it's see-through and lets taps through except on the logo, button and menu. */
 @media (max-width:720px){
   .sn-nav{background:none;border:0;box-shadow:none;pointer-events:none}
-  .sn-mast{padding:0;height:44px}
-  .sn-logo{display:none}
-  .sn-burger,.sn-menu{pointer-events:auto}
+  .sn-mast{padding:0 8px;height:44px}  /* logo and button line up with the page content (20px in) */
+  .sn-logo,.sn-burger,.sn-menu{pointer-events:auto}
   .sn-menu{right:0}
 }
 
