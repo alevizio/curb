@@ -36,9 +36,26 @@ export function coarseClient(ua) {
   return os + ' ' + br;
 }
 
+/** True for a user agent that names itself a crawler or an automated browser. The log is for errors real
+ *  visitors hit. A crawler that renders the page is not: on 2026-10-01 Meta's AI crawler ran thousands of
+ *  block deep links, DataSF refused it and it skipped some scripts, and its reports (labelled "Windows
+ *  Chrome" once coarseClient drops the bot tag) opened a false "broken" alert and buried real reports.
+ *  Matches the contact URL crawlers carry ("+https://…"), "name/version" bot tokens, and the renderers
+ *  that carry neither. Never a bare "bot", and never "bot;" or "bot)": CUBOT is a phone brand, and in-app
+ *  browsers print it as "CUBOT;". Known limit: an automated browser with a plain browser user agent
+ *  (current Lighthouse, Playwright) cannot be told apart here. */
+const CRAWLER = new RegExp([
+  '\\+https?://', '(?:bot|crawler|spider)/',
+  'meta-external', 'meta-webindexer', 'facebookexternalhit', 'bytespider', 'tiktokspider',
+  'googleother', 'google-inspectiontool', 'storebot-google', 'chrome-lighthouse', 'bingpreview',
+  'chatgpt-user', 'amzn-user', 'aspiegelbot', '360spider', 'gtmetrix', 'headlesschrome',
+].join('|'), 'i');
+export const isCrawler = (ua) => CRAWLER.test(String(ua || ''));
+
 /** Validate + normalize a raw report. Returns null for junk / noise we never want to store. */
 export function normalize(body, ua, now = Date.now()) {
   if (!body || typeof body !== 'object') return null;
+  if (isCrawler(ua)) return null; // not a visitor; checked before any rate-limit or store call
   const k = clip(body.k, 40);
   if (!KINDS.test(k)) return null;
   const msg = clip(body.msg, 300);
