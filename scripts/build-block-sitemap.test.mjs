@@ -54,4 +54,16 @@ describe('robots.txt', () => {
     expect(r).toContain('Sitemap: https://curb.guide/sitemap.xml');
     expect(r).toContain('Sitemap: https://curb.guide/sitemap-blocks.xml');
   });
+
+  // The longest matching rule wins (RFC 9309); Allow wins a tie.
+  const allowed = (path) => {
+    const rules = [...read('robots.txt').matchAll(/^(Allow|Disallow): (\S+)$/gm)].map((m) => ({ allow: m[1] === 'Allow', prefix: m[2] }));
+    const hit = rules.filter((x) => path.startsWith(x.prefix)).sort((a, b) => b.prefix.length - a.prefix.length || b.allow - a.allow)[0];
+    return !hit || hit.allow;
+  };
+  it('keeps crawlers off the live map deep links, and the pages that link to them stay crawlable', () => {
+    for (const p of ['/?b=13065000', '/?b=13065000&side=West', '/?bbox=-122.43,37.75,-122.40,37.77']) expect(allowed(p), p).toBe(false);
+    for (const p of ['/', '/b/13065000', '/b/13065000?side=West', '/n/mission', '/about', '/tickets', '/api/og?b=13065000', '/sitemap-blocks.xml']) expect(allowed(p), p).toBe(true);
+    expect(allowed('/api/block?cnn=1')).toBe(false);
+  });
 });

@@ -1,4 +1,9 @@
 User-agent: *
+# The live map's deep links (the "Open the live map" link on every /b/ page, the /n/ pages' map link).
+# They are the app, not content: a crawler that renders them runs the whole map, and SF's data service
+# refuses crawlers. The /b/ and /n/ pages themselves stay crawlable.
+Disallow: /?b=
+Disallow: /?bbox=
 Allow: /
 # /b/ share cards take their og:image from /api/og; the longer Allow wins over Disallow: /api/
 Allow: /api/og
