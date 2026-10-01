@@ -14,6 +14,7 @@ process.env.KV_REST_API_TOKEN = 'fake-token';
 const mem = {};
 const kv = {};
 let onRead = null;
+let evalFails = false;  // a store that refuses EVAL (the safety net must fall back to the plain write)
 vi.mock('@upstash/redis', () => ({
   Redis: class {
     async hget(k, f) {
@@ -26,6 +27,7 @@ vi.mock('@upstash/redis', () => ({
     async hgetall(k) { return mem[k] ? { ...mem[k] } : null; }
     async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
     async eval(script, [k], [f, expected, next]) {
+      if (evalFails) throw new Error('ERR unknown command EVAL');
       if (!(mem[k] && mem[k][f] === expected)) return 0;
       mem[k][f] = next; return 1;
     }
@@ -330,6 +332,19 @@ describe('a Turn off or block switch landing INSIDE a cron write (between its re
     onRead = () => { delete mem['curb:subs'][EP]; };
     await markNotified(EP, spotA.nextSweepISO, 'lead');
     expect(mem['curb:subs'][EP]).toBe(undefined);
+  });
+});
+
+describe('compare-and-set safety net', () => {
+  it('a store that refuses EVAL still records the de-dupe (plain write), so a delivered push is never repeated', async () => {
+    await saveSub(SUB, spotA);
+    evalFails = true;
+    try {
+      await markNotified(EP, spotA.nextSweepISO, 'lead');
+      expect((await rec()).notified.lead).toBe(spotA.nextSweepISO);
+      expect(await advanceSpot(EP, spotB, spotA)).toBe(true);
+      expect((await rec()).spot.nextSweepISO).toBe(spotB.nextSweepISO);
+    } finally { evalFails = false; }
   });
 });
 

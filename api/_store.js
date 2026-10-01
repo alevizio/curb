@@ -135,7 +135,17 @@ async function casUpdate(key, field, edit) {
     const rec = typeof raw === 'string' ? safeParse(raw) : null;
     const next = rec && edit(rec);
     if (!next) return false;
-    if (Number(await r.eval(CAS, [key], [field, raw, JSON.stringify(next)])) === 1) return true;
+    let won;
+    try { won = Number(await r.eval(CAS, [key], [field, raw, JSON.stringify(next)])) === 1; }
+    catch (e) {
+      // Safety net, not the design: if the store ever refuses EVAL, write the way this code always did
+      // (plain HSET, the old race included) rather than fail. A failed markNotified after a delivered
+      // push would let the next tick repeat that push every 15 minutes.
+      console.error('compare-and-set unavailable, plain write:', String(e && e.message || e).slice(0, 120));
+      await r.hset(key, { [field]: JSON.stringify(next) });
+      return true;
+    }
+    if (won) return true;
   }
   throw new Error('record kept changing during the cron write'); // like a store error: the run fails
 }
