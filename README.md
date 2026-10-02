@@ -8,8 +8,8 @@
 
 ![CURB — every SF curb colored by its next street sweep, with the times tickets actually land on each block](docs/curb-screenshot.png)
 
-San Francisco posts a 2-hour street-cleaning window. We matched **about a million real
-citations** (~815,000 to their exact blocks): on the median block, the tickets land inside a
+San Francisco posts a 2-hour street-cleaning window. We pulled **about a million real
+citations** (~815,000 matched to their exact blocks): on the median block, most of the tickets land inside a
 **~20-minute span**. CURB puts that on a map — every curb in SF colored by its next
 sweep, with the posted schedule AND the times tickets are actually written there,
 plus permit (RPP) areas, meters, loading zones (including the unmetered white school
@@ -98,7 +98,7 @@ The key is kept out of this public repo:
 - Loading / color-curb zones: DataSF `6cqg-dxku` (Meter Operating Schedules) ⋈ meters
 - Unmetered white zones (passenger loading, school zones): SFMTA Digital Curb on the
   city ArcGIS hub — snapshot via `npm run build:whitezones` (data DataSF excludes)
-- Enforcement history: DataSF `ab4h-6ztd` (parking citations) — precomputed into
+- Enforcement history: SFMTA street-cleaning citations with GPS, records request #26-5453 (the public feed is DataSF `ab4h-6ztd`) — precomputed into
   `data/enforcement.json` by `npm run build:enforcement` (see `scripts/build-enforcement-records.py`)
 - /tickets aggregates: `npm run build:stats` → `data/stats.json` (yearly fines,
   violations, hour histograms, neighborhood totals + five-year surge)
@@ -128,14 +128,14 @@ The headline finding — *"the median block is ticketed within ~20 minutes"* —
    segment (CNN) within ≤40 m (`yhqp-riqs` geometry), recovering **~815,000 of ~1,000,000** tickets — far
    more, and more accurately, than the lossy address join.
 3. **Reduce to a per-block-side distribution.** `data/enforcement.json` stores, per block side,
-   `[count, mean-minutes-into-window, earliest, latest]`. The window is really **~20 minutes** — the median
+   `[count, mean-minute-of-day, earliest, latest]`. The window is really **~20 minutes** — the median
    ticket lands ~25 min in, and **~77% of tickets fall within the first 45 minutes (~90% within the first
    hour)**. A companion dataset — the city's actual **sweeper GPS** (request **#26-5451** → `data/sweeps.json`
    via `scripts/build-sweeps.py`) — shows tickets land a median of **~19 minutes after** the sweeper passes.
 
-**Known limits (also stated on the About page):** it's an address-string→block join, not GPS, so any
+**Known limits (also stated on the About page):** it's a GPS point snapped to the nearest street segment (within 40 m), so any
 single block can be off; the distribution is conditional on enforcement happening — it shows *when*
-tickets land, not *whether* a block is swept (survivorship); data is refreshed monthly; and it's
+tickets land, not *whether* a block is swept (survivorship); the ticket times are a June 2026 snapshot rebuilt by hand, not by the monthly refresh; and it's
 predictive from history, never live (SF publishes no real-time sweeper GPS). The posted sign is always
 the source of truth.
 

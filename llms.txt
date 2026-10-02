@@ -19,7 +19,7 @@ Street-cleaning tickets are $105 (2026).
   ticket times, permit rules, and one-tap alerts
 - [Per-block share pages](https://curb.guide/b/12120000): server-rendered
   schedule card for any block by CNN id (replace the number)
-- [The ticket economy](https://curb.guide/tickets): 23.8M citations since 2008
+- [The ticket economy](https://curb.guide/tickets): 24M citations since 2008
   visualized — yearly fines, violation types, hour-of-day, neighborhood totals,
   five-year surge
 - [About + FAQ](https://curb.guide/about): how it works, data sources, methodology

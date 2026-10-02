@@ -3,7 +3,7 @@
 The real GPS movements of San Francisco's **broom-sweeper fleet**, obtained through a public-records
 request and published here openly so anyone can use it. This is the data behind CURB's *"🧹 Sweeper
 passes ~9:04a"* lines and the finding that **a street-cleaning ticket lands a median of ~19 minutes
-after the sweeper actually passes** (the truck is first on ~76% of blocks where we have both).
+after the sweeper actually passes** (the truck is first on ~75% of blocks where we have both).
 
 ## 🙏 Thank you, San Francisco
 
