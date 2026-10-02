@@ -69,7 +69,7 @@ records request #26-5451 supplies sweeper-pass times (data/sweeps.json, build-sw
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy
-- Local: just open index.html, or `npx serve .` for a localhost origin (better for
+- Local: just open index.html, or `npm run dev` (http://localhost:3077, never 3000) for a localhost origin (better for
   geolocation testing).
 - Deploy (static): `vercel` from this folder (zero config), or any static host.
 

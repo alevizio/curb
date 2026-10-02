@@ -39,4 +39,4 @@ rm -rf basemap/parchment
 node scripts/render-basemap.mjs
 
 du -sh basemap/parchment
-echo "✅ Next: check it with npm run dev → http://localhost:3000, then commit basemap/parchment."
+echo "✅ Next: check it with npm run dev → http://localhost:3077, then commit basemap/parchment."
