@@ -525,3 +525,35 @@ describe('on-call ship gate (wait-verify)', async () => {
     for (const c of ['failure', 'cancelled', 'timed_out', 'skipped']) expect(verdict(run('completed', c)).state).toBe('failure');
   });
 });
+
+describe('monthly data refresh → monitor:data alert', async () => {
+  const { refreshResults } = await import('./refresh-results.mjs');
+  const steps = (o) => JSON.stringify(Object.fromEntries(Object.entries(o).map(([k, outcome]) => [k, { outcome, conclusion: outcome, outputs: {} }])));
+  const run = { title: 'curb.guide data refresh failed', mention: 'alevizio', runUrl: 'https://github.com/alevizio/curb/actions/runs/1' };
+
+  it('a clean run passes, and closes an open refresh alert', () => {
+    const r = refreshResults(steps({ install: 'success', build: 'success', validate: 'success', pages: 'success', commit: 'success' }));
+    expect(r).toEqual([expect.objectContaining({ name: 'monthly data refresh', status: 'pass' })]);
+    expect(decide(r, null, run).type).toBe('none');
+    expect(decide(r, { body: '<!-- monitor-sig:monthly data refresh -->' }, run).type).toBe('close');
+  });
+
+  it('names the step that failed, and opens one issue for it', () => {
+    const r = refreshResults(steps({ install: 'success', build: 'success', validate: 'failure', pages: 'skipped', commit: 'skipped' }), 'failure');
+    expect(r[0].status).toBe('fail');
+    expect(r[0].detail).toMatch(/"Validate shapes" failed/);
+    const a = decide(r, null, run);
+    expect(a.type).toBe('open');
+    expect(a.title).toBe('curb.guide data refresh failed: monthly data refresh');
+    // the next failing month, same check: no second email
+    expect(decide(r, { body: a.body }, run).type).toBe('none');
+  });
+
+  it('a failure outside the named steps (checkout, setup) still fails', () => {
+    for (const [s, status] of [[steps({}), 'failure'], ['', 'failure'], ['not json', 'failure'], [steps({ install: 'success' }), 'cancelled']]) {
+      const r = refreshResults(s, status);
+      expect(r[0].status).toBe('fail');
+      expect(r[0].detail).toMatch(/before the refresh started/);
+    }
+  });
+});
