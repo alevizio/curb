@@ -30,7 +30,7 @@ contrast. **Never darken roads.**
 
 ```
 bash scripts/build-basemap.sh   # bump PLANET first; ~5 min on an M-series Mac
-npm run dev                     # check http://localhost:3000, then commit basemap/parchment
+npm run dev                     # check http://localhost:3077, then commit basemap/parchment
 ```
 
 Pipeline: `pmtiles extract` streams just the SF + Bay Area byte ranges from a daily Protomaps planet

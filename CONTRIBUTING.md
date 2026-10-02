@@ -10,7 +10,7 @@ steps.
 
 ```bash
 npm install        # only for the web-push dep used by the API routes
-npm run dev        # http://localhost:3000 (localhost origin needed for geolocation + SW)
+npm run dev        # http://localhost:3077 (localhost origin needed for geolocation + SW)
 ```
 
 The map works immediately against live DataSF APIs. Push notifications need env

@@ -27,9 +27,9 @@ see [CONTRIBUTING.md](CONTRIBUTING.md) · Security: [SECURITY.md](SECURITY.md)
 ## Run locally
 ```bash
 npm install            # for the web-push dep used by the API
-npm run dev            # = npx serve . -l 3000  (http://localhost:3000)
+npm run dev            # = npx serve . -l 3077  (http://localhost:3077)
 ```
-Open http://localhost:3000. A localhost origin is needed for geolocation + service worker.
+Open http://localhost:3077. A localhost origin is needed for geolocation + service worker.
 
 ## Deploy
 ```bash
@@ -82,7 +82,7 @@ iOS — two paths:
 ## Map basemap (Google Maps, optional)
 With a Google **Map Tiles API** key the basemap uses official Google tiles; without one it
 falls back to keyless CARTO Voyager. The key is a *client* key — **restrict it by HTTP referrer
-+ API** in Google Cloud Console (add `http://localhost:3000/*`, `https://*.vercel.app/*`, and
++ API** in Google Cloud Console (add `http://localhost:3077/*`, `https://*.vercel.app/*`, and
 your domain).
 
 The key is kept out of this public repo:
