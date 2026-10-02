@@ -7,6 +7,9 @@
 # source changed), and commits only if something actually changed. The commit pushes
 # to main, which Vercel auto-deploys.
 #
+# A failed run opens one alert issue (label monitor:data) and wakes the on-call Claude routine, like the
+# monitor's checks (docs/on-call.md); the next good run closes it.
+#
 # Manual run: Actions tab → "data-refresh" → Run workflow.
 name: data-refresh
 
@@ -18,6 +21,7 @@ on:
 # Need write access to commit the refreshed assets back to the repo.
 permissions:
   contents: write
+  issues: write   # the monitor:data alert issue
 
 concurrency:
   group: data-refresh
@@ -38,6 +42,7 @@ jobs:
           node-version: 22
 
       - name: Install deps
+        id: install
         run: npm ci
 
       # Each build hits live DataSF/ArcGIS. They're independent; run sequentially so a
@@ -46,6 +51,7 @@ jobs:
       # SFMTA citations xlsx (records #26-5453) from a local path, so it only runs on
       # Alejandro's machine; data/enforcement.json is rebuilt + committed by hand.
       - name: Rebuild data assets
+        id: build
         run: |
           npm run build:overview
           npm run build:zones
@@ -54,12 +60,14 @@ jobs:
           npm run build:schedules
 
       - name: Validate shapes (fail loudly on source drift)
+        id: validate
         run: npm run validate:data
 
       # Regenerate the neighborhood map snapshots (from the fresh overview.json),
       # then the SEO pages + sitemap from the fresh stats.json, then the block sitemap
       # (lastmods from the fresh schedules.json).
       - name: Rebuild neighborhood maps + pages
+        id: pages
         run: |
           npm run build:hoodmaps
           npm run build:hoodpages
@@ -104,3 +112,25 @@ jobs:
           done
           echo "New sitemaps not live after 10 min — skipping IndexNow."
           exit 1
+
+      # The run as a monitor result (scripts/monitor/refresh-results.mjs): a failure opens one alert issue and
+      # wakes the on-call routine; the next good refresh closes the issue. No secrets reach the public issue.
+      - name: Results for the alert
+        if: always()
+        env:
+          STEPS: ${{ toJSON(steps) }}
+          JOB_STATUS: ${{ job.status }}
+        run: node scripts/monitor/refresh-results.mjs refresh.json
+      - name: Open / update / close the alert issue
+        id: refresh_alert
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/monitor/alert.mjs refresh.json monitor:data "curb.guide data refresh failed"
+      - name: Wake the on-call Claude routine (monitor:data)
+        if: always() && (steps.refresh_alert.outputs.action == 'open' || steps.refresh_alert.outputs.action == 'comment')
+        env:
+          CURB_ROUTINE_URL: ${{ secrets.CURB_ROUTINE_URL }}
+          CURB_ROUTINE_TOKEN: ${{ secrets.CURB_ROUTINE_TOKEN }}
+          ISSUE_URL: ${{ steps.refresh_alert.outputs.issue }}
+        run: node scripts/monitor/notify-claude.mjs refresh.json monitor:data "curb.guide data refresh failed"

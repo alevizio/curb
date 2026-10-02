@@ -70,6 +70,16 @@ since its last update. If there are none, end the run without writing anything a
    duplicate); never post App Store review replies.
 5. **Not shippable** (design, unsure, a gate failed, over ~50 changed lines): push the `claude/` branch only.
 
+## Data refresh alerts (label `monitor:data`)
+
+The monthly refresh (`.github/workflows/data-refresh.yml`) failed, and the payload names the step. Until it is
+fixed the site keeps serving last month's data, so this is never an outage. You can't read the run log here:
+reproduce by running that step's commands from the workflow file (`npm ci`, then its `npm run build:*` lines and
+`npm run validate:data`). A source that changed shape (a renamed field, a moved dataset, counts outside the
+bounds in `scripts/validate-data.mjs`) is our bug: fix the build script or the bounds, with a test, through the
+ship gate. A source that is down is not ours. Never commit rebuilt `data/` files yourself. Either way, end your
+report with: re-run the refresh (Actions, data-refresh, Run workflow). A good run closes the issue.
+
 ## App Store review alerts
 
 Reviews carry no text in the payload. If the owner's report of the review points at a bug you can find, handle
