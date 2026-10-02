@@ -18,7 +18,7 @@ San Francisco posts a **two-hour** street-cleaning window on every block, but th
 - Example — **214–255 Steiner St** (posted 9–11am): 221 tickets, median at **9:11am**, 90% written by **9:21am**.
 - Heaviest neighborhood: the **Mission** — **97,805 tickets / ~$10.3M**, peaking 8am Thursdays.
 
-CURB also obtained the street sweepers' **actual GPS** (records request #26-5451) and confirmed the story directly: the ticket lands a median of **~19 minutes after the sweeper passes** (190 blocks covered and growing). The dataset is published openly in the repo.
+CURB also obtained the street sweepers' **actual GPS** (records request #26-5451) and confirmed the story directly: the ticket lands a median of **~19 minutes after the sweeper passes** (227 blocks covered and growing). The dataset is published openly in the repo.
 
 ## Press
 - **SFGate** (June 2026) — feature on CURB; noted SFMTA has **not objected** to the app's use of public data, and that CURB had drawn 2,500+ visitors.

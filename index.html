@@ -1722,7 +1722,7 @@ function openSheet(group, activeKey){
     ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins. Temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block: historical guidance, never a guarantee. ':''}Sweep alerts ping you before sweeping at the intensity you pick under <b>Alert style</b>: Light (~30 min before), Normal (+ the night before), or Intense (+ the morning of, for sweeps from 8 AM); sweeps before 7 AM get one "move it tonight" ping around 9 PM instead; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. All data live from DataSF.</p>
+      <p>${ae?'"Ticketed" times summarize ~2 yrs of SFMTA street-cleaning citations on this block: historical guidance, never a guarantee. ':''}Sweep alerts ping you before sweeping at the intensity you pick under <b>Alert style</b>: Light (~30 min before), Normal (+ the night before), or Intense (+ the morning of, for sweeps from 8 AM); sweeps before 7 AM get one "move it tonight" ping around 9 PM instead; .ics reminders fire ~30 min before; Google Calendar events use your calendar's default notifications. Permit data is SFMTA's 2017 set and may be incomplete. Schedules live from DataSF.</p>
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
 
@@ -2148,7 +2148,7 @@ function refreshWatch(spot){
 async function sendTestPush(spot){
   if(window.__curbNativePush){
     if(typeof window.__curbTestPush==='function'){ nativeTest({level:spot.level,voice:spot.voice,which:'all',spot}); toast('Sending a test. Check your lock screen. 🔔'); }
-    else toast('Update the app from TestFlight to test on iPhone. Your alerts still work.');
+    else toast('Update the app from the App Store to test on iPhone. Your alerts still work.');
     return;
   }
   if(isIOS()&&!isStandalone()){ showIosHint(); return; }
