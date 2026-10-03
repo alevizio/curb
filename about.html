@@ -18,7 +18,7 @@
  {"@type":"Question","name":"When does street sweeping happen in San Francisco?",
   "acceptedAnswer":{"@type":"Answer","text":"Most residential blocks are swept weekly or twice a month in a fixed weekday window (for example, Tuesday 9–11am); many commercial corridors are swept overnight. Every block has its own schedule — CURB shows the exact rule for any curb when you tap it on the map."}},
  {"@type":"Question","name":"When do street-cleaning parking tickets actually get written?",
-  "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from the city's complete street-cleaning citation record — on a typical 9–11am block, the median ticket lands around 9:30am. The posted sign is always the source of truth."}},
+  "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from about a million GPS-located street-cleaning citations (a public records request, 2024 to mid 2026) — on a typical 9–11am block, the median ticket lands around 9:30am. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"Can I park after the street sweeper passes?",
   "acceptedAnswer":{"@type":"Answer","text":"Yes — it's SFMTA's own rule: once the street sweeper has physically swept the curbside, you may park there, even if the posted sweeping hours haven't expired. The flip side: during the posted hours you may not park until the street has actually been swept — so if you're parked before the sweeper arrives, you can still be ticketed. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"What are the dashed truck routes on the map?",
@@ -174,8 +174,8 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   .bar .track{position:absolute;left:0;right:0;top:26px;height:14px;border:2.5px solid var(--ink);border-radius:8px;background:var(--paper)}
   .bar .zone{position:absolute;left:0;top:26px;height:14px;width:17.5%;border:2.5px solid var(--ink);border-radius:8px 4px 4px 8px;
     background:repeating-linear-gradient(-55deg,var(--red),var(--red) 7px,#EE6B5E 7px,#EE6B5E 14px)}
-  .bar .med{position:absolute;left:9.2%;top:14px;width:4px;height:38px;background:var(--ink);border-radius:2px}
-  .bar .med::after{content:'median ticket · 9:11am';position:absolute;left:10px;top:-4px;white-space:nowrap;
+  .bar .med{position:absolute;left:10%;top:14px;width:4px;height:38px;background:var(--ink);border-radius:2px}
+  .bar .med::after{content:'median ticket · 9:12am';position:absolute;left:10px;top:-4px;white-space:nowrap;
     font-size:12.5px;font-weight:800}
   .bar .tick{position:absolute;top:48px;font-size:12px;font-weight:700;color:var(--ink-soft);transform:translateX(-50%)}
   .legendline{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;font-weight:700;margin-top:14px}
@@ -327,7 +327,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
       </div>
     </div>
 
-    <div class="post rise d2" role="img" aria-label="A real SF sign pole: a red street-cleaning sign reading No Parking, 9 to 11 AM, Tuesday, Street Cleaning; below it a green sign reading 2 Hour Parking, 8 AM to 6 PM, Monday through Friday, except vehicles with Area K and M permits; and a CURB plate reading: tickets land around 9:11 AM">
+    <div class="post rise d2" role="img" aria-label="A real SF sign pole: a red street-cleaning sign reading No Parking, 9 to 11 AM, Tuesday, Street Cleaning; below it a green sign reading 2 Hour Parking, 8 AM to 6 PM, Monday through Friday, except vehicles with Area K and M permits; and a CURB plate reading: tickets land around 9:12 AM">
       <div class="rail r1"></div><div class="rail r2"></div>
       <div class="sign red">
         <div class="s-no">NO PARKING</div>
@@ -345,19 +345,20 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
         <div class="g-area">AREA <i class="disc b">K</i> <i class="disc g">M</i> PERMITS</div>
       </div>
       <div class="plate">
-        <div class="t">Tickets land <em>~9:11 am</em></div>
-        <div class="s">curb.guide · from 815k citations</div>
+        <div class="t">Tickets land <em>~9:12 am</em></div>
+        <div class="s">curb.guide · from city ticket records</div>
       </div>
     </div>
   </section>
 
   <section class="wrap">
     <div class="proof rise d4">
-      <div class="k">A real block — 214–255 Steiner St</div>
-      <h2>The sign says 9–11. <b>The tickets say 9:11.</b></h2>
-      <p class="src">221 street-cleaning citations on this block, 2024–2026: the earliest at 9:00am sharp,
-        90% written by 9:21am. The posted two-hour window is real — the risk is not evenly spread inside it.</p>
-      <div class="bar" role="img" aria-label="Timeline of the 9 to 11 AM window. Tickets cluster between 9:00 and 9:21, with the median at 9:11 AM.">
+      <div class="k">A real block: the 200 block of Steiner St</div>
+      <h2>The sign says 9–11. <b>The tickets say 9:12.</b></h2>
+      <p class="src">278 street-cleaning citations on this block, 2024–2026: the earliest at 9:00am sharp,
+        90% written by 9:21am. The posted two-hour window is real — the risk is not evenly spread inside it.
+        Counted from the city's open ticket feed by the address on each ticket, both sides of the street, Jan 2024 to Jun 2026.</p>
+      <div class="bar" role="img" aria-label="Timeline of the 9 to 11 AM window. Tickets cluster between 9:00 and 9:21, with the median at 9:12 AM.">
         <div class="track"></div>
         <div class="zone"></div>
         <div class="med"></div>
@@ -430,8 +431,8 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
       <div class="qa">
         <h3>When do street-cleaning parking tickets actually get written?</h3>
         <p>Usually in the <b>first 30–40 minutes</b> of the posted window, not spread across it. CURB
-          reconstructs each block's real ticket times from the city's complete street-cleaning citation
-          record — on a typical 9–11am block, the median ticket lands around 9:30am. The posted sign is always the source of truth.</p>
+          reconstructs each block's real ticket times from about a million GPS-located street-cleaning citations
+          (a public records request, 2024 to mid 2026) — on a typical 9–11am block, the median ticket lands around 9:30am. The posted sign is always the source of truth.</p>
       </div>
       <div class="qa">
         <h3>Can I park after the street sweeper passes?</h3>
@@ -487,7 +488,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
 
     <div class="srcs">
       <div class="src"><div class="sh">Sweep schedule</div><p>The posted day &amp; window for every block. <a href="https://data.sf.gov/d/yhqp-riqs" rel="noopener">DataSF · <code>yhqp-riqs</code></a></p></div>
-      <div class="src"><div class="sh">Parking citations</div><p>~1M street-cleaning tickets (2024–mid-2026), stamped to the minute and <b>GPS-located</b> — the complete record via SF public-records request #26-5453. The open feed drops coordinates. <a href="https://data.sf.gov/d/ab4h-6ztd" rel="noopener">DataSF · <code>ab4h-6ztd</code></a></p></div>
+      <div class="src"><div class="sh">Parking citations</div><p>~1M street-cleaning tickets (2024–mid-2026), stamped to the minute and <b>GPS-located</b>, from SF public-records request #26-5453. The open feed places tickets only by the typed address. <a href="https://data.sf.gov/d/ab4h-6ztd" rel="noopener">DataSF · <code>ab4h-6ztd</code></a></p></div>
       <div class="src"><div class="sh">Address index</div><p>The city's addressing system (EAS) — pins older, address-only citations to a block (the 2024+ pull is GPS-located). <a href="https://data.sf.gov/d/3mea-di5p" rel="noopener">DataSF · <code>3mea-di5p</code></a></p></div>
       <div class="src"><div class="sh">Permit areas</div><p>The ~30 lettered residential permit (RPP) zones. <a href="https://data.sf.gov/d/hi6h-neyh" rel="noopener">DataSF · <code>hi6h-neyh</code></a> <span>(2017 set)</span></p></div>
       <div class="src"><div class="sh">Meters &amp; color curb</div><p>Metered streets and their commercial / passenger / red loading rules. <a href="https://data.sf.gov/d/6cqg-dxku" rel="noopener">DataSF · <code>6cqg-dxku</code></a></p></div>
@@ -496,11 +497,11 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
     </div>
 
     <div class="method">
-      <div class="mk">How the "9:11" is built</div>
+      <div class="mk">How the ticket times are built</div>
       <h3>From a million tickets to one minute</h3>
-      <p>SFMTA logs every citation with a timestamp, but <b>stopped attaching coordinates to the public feed
-        around 2021</b> — leaving an officer-typed string like <code>0121 STEINER ST</code>. So I filed a
-        public-records request (#26-5453) and got the <b>complete record back with GPS</b>: about a million
+      <p>SFMTA logs every citation with a timestamp, but the public feed <b>places it only by the officer-typed
+        address</b>, a string like <code>0121 STEINER ST</code>. So I filed a
+        public-records request (#26-5453) and got <b>about a million tickets back with GPS</b>:
         street-cleaning tickets, 2024 to mid-2026, each one located. From there it's direct:</p>
       <ol>
         <li>Snap each ticket's GPS to the <b>nearest street segment</b> (within ~40m), then
@@ -509,10 +510,9 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
           <b>when they actually fall</b> inside the posted window.</li>
         <li>Across ~22,000 block-sides, the typical block's tickets land in a <b>~15-minute burst</b> — a
           median of about <b>25 minutes</b> into the two-hour window. Citywide, ~77% are written in the first
-          45 minutes and ~90% within the first hour; on the example block above, the median ticket lands at
-          <b>9:11</b>.</li>
+          45 minutes and ~90% within the first hour.</li>
       </ol>
-      <p class="lim"><b>Said plainly:</b> the 2024-onward tickets are GPS-located, so each is matched to its
+      <p class="lim"><b>Said plainly:</b> the map's per-block ticket times come from GPS-located tickets, so each is matched to its
         block directly, not guessed from a text string — and the posted sign is still the real answer. The
         pattern shows when tickets land, not whether your block gets swept (you only see blocks that were
         ticketed). It's rebuilt from the city's own record and predictive from history — there's no live
