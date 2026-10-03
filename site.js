@@ -82,7 +82,7 @@
         '</nav>' +
       '</div>' +
       '<div class="sn-fbar"><span class="sn-fine">The posted street sign is always the source of truth — temporary signs &amp; holidays override everything here. ' +
-        'Free &amp; open source (MIT), no accounts, no ads, only anonymous page counts. Made in San Francisco, on public data — ' +
+        'Free &amp; open source (MIT), no accounts, no ads, no cookies. Made in San Francisco, on public data — ' +
         'with thanks to <b>SF Public Works</b> &amp; <b>SFMTA</b> for the records behind it.</span></div>' +
     '</footer>';
 

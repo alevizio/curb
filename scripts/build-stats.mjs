@@ -5,8 +5,8 @@
 // Neighborhoods: `hoods`, `hoodDetail` and their streets use the analysis_neighborhood the city sets on each
 // citation (99.6% of street-cleaning rows), over a rolling 24 months. Until 2 Oct 2026 they came from an
 // address -> EAS join that matched ~60% of tickets (Mission ~73k of ~130k); the surge chart still uses that join.
-// Server-side SoQL group-bys where possible; the neighborhood breakdown streams
-// ~2yr of street-cleaning rows and joins addresses → EAS analysis_neighborhood.
+// Server-side SoQL group-bys where possible; the neighborhood breakdown streams 24 months of
+// street-cleaning rows by their analysis_neighborhood (only the surge chart joins addresses → EAS).
 // Run: npm run build:stats   (Node 18+, no deps; ~6-8 min, mostly the stream)
 
 const CITES = 'https://data.sf.gov/resource/ab4h-6ztd.json';
@@ -60,7 +60,7 @@ const sweepDow = (await soda(CITES, {
   '$where': `${SWEEP_WHERE} AND citation_issued_datetime >= '2024-01-01'`, '$group': 'd', '$order': 'd',
 })).map(r => ({ d: +r.d, n: +r.n }));
 
-// ---- neighborhood + street breakdown: stream the 2yr sweep rows, join EAS ----
+// ---- neighborhood + street breakdown: stream 24 months of sweep rows (EAS is loaded for the surge chart) ----
 log('loading EAS address → neighborhood map…');
 const TYPES = new Set(['ST','STREET','AVE','AVENUE','BLVD','BOULEVARD','RD','ROAD','DR','DRIVE','WAY','LN','LANE',
   'CT','COURT','PL','PLACE','TER','TERRACE','HWY','HIGHWAY','PKWY','CIR','CIRCLE','ALY','ALLEY','PLZ','PLAZA','ROW']);

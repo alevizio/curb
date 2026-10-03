@@ -15,8 +15,8 @@ San Francisco posts a **two-hour** street-cleaning window on every block, but th
 
 - The posted 2-hour window is really **~20 minutes** of real risk — the typical block's tickets land in a **~15-minute burst**, a median of **~25 minutes** into the window.
 - **~77%** of tickets are written within the first **45 minutes**; **~90%** within the first **hour**.
-- Example — **214–255 Steiner St** (posted 9–11am): 221 tickets, median at **9:11am**, 90% written by **9:21am**.
-- Heaviest neighborhood: the **Mission** — **97,805 tickets / ~$10.3M**, peaking 8am Thursdays.
+- Example: **the 200 block of Steiner St** (posted 9–11am): 278 tickets Jan 2024 to Jun 2026, median at **9:12am**, 90% written by **9:21am** (counted by address in the city's open feed).
+- Heaviest neighborhood: the **Mission**: about **109,000 tickets / $11.1M** over the last two years (Oct 2024 to Sep 2026), peaking 8am Thursdays.
 
 CURB also obtained the street sweepers' **actual GPS** (records request #26-5451) and confirmed the story directly: the ticket lands a median of **~19 minutes after the sweeper passes** (227 blocks covered and growing). The dataset is published openly in the repo.
 

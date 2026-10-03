@@ -240,7 +240,7 @@ h2 b{color:var(--red-text)}
 .stat .l{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:5px}
 .panel{border:3px solid var(--ink);border-radius:18px;background:var(--sign);box-shadow:var(--shadow);padding:clamp(16px,3vw,26px);margin-top:18px}
 .bars{display:grid;gap:8px;margin-top:6px}
-.bar{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;font-weight:700;font-size:14px}
+.bar{display:grid;grid-template-columns:42px 1fr 8.5em;align-items:center;gap:10px;font-weight:700;font-size:14px} /* fixed value column: a 'busiest' tag must not shorten its own track */
 .bar .track{height:16px;background:rgba(23,21,15,.1);border-radius:8px;overflow:hidden}
 .bar .fill{display:block;height:100%;background:var(--amber);border-radius:8px}
 .bar .fill.peak{background:var(--red)}
@@ -302,12 +302,12 @@ const HEAD_COMMON = (title, desc, canonical, jsonld) => `<!DOCTYPE html>
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${esc(canonical)}">
-<meta property="og:image" content="https://curb.guide/og.png">
+<meta property="og:image" content="https://curb.guide/og.png?v=3">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
-<meta name="twitter:image" content="https://curb.guide/og.png">
+<meta name="twitter:image" content="https://curb.guide/og.png?v=3">
 <meta name="theme-color" content="#C1121F">
 <script type="application/ld+json">
 ${jsonld}
@@ -372,7 +372,7 @@ const FOOTER_UNUSED = `
   <a href="https://github.com/alevizio/curb" rel="noopener">Open source on GitHub</a>
   <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
   <a href="/privacy">Privacy</a>
-  <span class="fine">Schedules are set block by block. The <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies: only anonymous page counts. Made in San Francisco.</span>
+  <span class="fine">Schedules are set block by block. The <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies. Made in San Francisco.</span>
 </div></footer>
 <script>
   (function(){var b=document.getElementById('navBtn'),m=document.getElementById('navMenu');if(!b||!m)return;

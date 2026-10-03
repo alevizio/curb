@@ -1,5 +1,13 @@
 # CURB Launch Kit
 
+> **Numbers updated 3 Oct 2026. Use these, not the June figures in the drafts below:**
+> - Ticket times: about 815,000 street-cleaning citations matched to their blocks, from about a million GPS-located citations obtained by public records request (2024 to mid 2026). Not "the complete record": the file looks cut at Excel's row limit (about Sep 2025 to Mar 2026 missing).
+> - About 77% of tickets in the first 45 minutes of the posted window, about 90% in the first hour; a typical block's tickets land in about 15 minutes.
+> - Steiner St example: the 200 block (not 214 to 255), 278 citations Jan 2024 to Jun 2026, earliest 9:00am, median 9:12am, 90% by 9:21am, counted by the address on each ticket in the city's open feed.
+> - Mission: about 109,000 street-cleaning tickets and $11.1M over the last two years (Oct 2024 to Sep 2026, by the neighborhood the city records on each ticket), busiest around 8am on Thursdays.
+> - Privacy: never "no data collection" or "collects nothing". Say "no account, no ads, no cookies".
+> - The iPhone app has been on the App Store since 24 Jun 2026.
+
 _Ready-to-post assets. Stats computed 2026-06-11 from data/enforcement.json
 (~815k of ~1M street-cleaning tickets matched to 9,107 blocks / 18,077 block-days)._
 

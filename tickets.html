@@ -515,7 +515,7 @@ function renderCharts(S){
         s+=`<text x="${W}" y="${y+11}" text-anchor="end" font-size="10.5" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>
           <rect x="0" y="${y+16}" width="${w}" height="13" rx="3" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>`;
       }else{
-        const w=(W-300)*(r.rev/max);
+        const w=(W-340)*(r.rev/max);  // room for a two-digit '$11.1M · 109K' label
         lbl=`<text x="218" y="${y+rh/2+4}" text-anchor="end" font-size="12.5" fill="${INK}">${r.hood}</text>`;
         s+=`<rect x="226" y="${y+5}" width="${Math.max(w,4)}" height="${rh-11}" rx="4" fill="${i<3?RED:INK}" fill-opacity="${i<3?1:.8}"/>
           <text x="${230+Math.max(w,4)}" y="${y+rh/2+4}" font-size="12" font-weight="800" fill="${i<3?RED:SOFT}">${fmt$(r.rev)} · ${fmtN(r.n)}</text>`;
