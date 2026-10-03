@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SUPERSEDED 2 Oct 2026: stats.json `hoods` now come from the analysis_neighborhood the city sets on each
+# citation (scripts/build-stats.mjs, complete and monthly). The records file this reads is cut at Excel's
+# row limit (about Sep 2025 to Mar 2026 missing), so running this would put an undercount back. Kept for reference.
 # Regenerate data/stats.json `hoods` from the GPS records pull (SFMTA request #26-5453): point each
 # GPS-located street-cleaning citation into an SF Analysis Neighborhood (DataSF j2bu-swwd) and roll up
 # n + rev (rev = n * $105, the flat street-cleaning fine, which reproduces the canonical figures e.g.

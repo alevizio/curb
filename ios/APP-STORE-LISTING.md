@@ -15,13 +15,13 @@ street cleaning,sweeping,parking,SF,tickets,RPP,meters,reminder,alert,curb,SFMTA
 
 ## Description
 ```
-Your street-cleaning sign says 9–11am. The tickets say 9:11am.
+Your street-cleaning sign says 9–11am. The tickets say 9:12am.
 
 CURB is a free map of San Francisco street-parking rules — and the only one that shows you WHEN tickets actually get written, not just when the sign says you're at risk.
 
-I matched the city's complete record — about a million GPS-located SFMTA street-cleaning citations — to the blocks where they were issued. The finding: that posted 2-hour window is mostly a 20-minute reality. On a typical block, the tickets land in a tight ~15-minute burst right after sweeping starts — about 90% within the first hour.
+I obtained about a million GPS-located SFMTA street-cleaning citations through a public records request and matched about 815,000 of them to the blocks where they were issued. The finding: that posted 2-hour window is mostly a 20-minute reality. On a typical block, the tickets land in a tight ~15-minute burst right after sweeping starts, and about 90% are written within the first hour.
 
-Take 214–255 Steiner St. Posted window: 9–11am. In 2024–2026: 221 tickets, earliest at 9:00am sharp, the median ticket at 9:11am, and 90% already written by 9:21am. The "2 hours" was never real.
+Take the 200 block of Steiner St. Posted window: 9–11am. In 2024–2026: 278 tickets, earliest at 9:00am sharp, the median ticket at 9:12am, and 90% already written by 9:21am. The "2 hours" was never real.
 
 WHAT CURB SHOWS YOU
 - Every block colored by its next street sweep — see at a glance where it's safe to park
@@ -122,7 +122,7 @@ CURB surfaces patterns in public data as guidance only. The app clearly states t
 
 ## Screenshots — 6.7" iPhone shotlist
 1. **Full-screen SF map** zoomed to a neighborhood, blocks color-coded by next sweep, locate button visible. → *"Every SF block, colored by its next street sweep."*
-2. **Steiner St block card** over the map: posted 9–11am window + the real ticket-timing spike right after 9:00am. → *"Posted 9–11am. Median ticket: 9:11am. The 2-hour window is really ~20 minutes."*
+2. **Steiner St block card** over the map: posted 9–11am window + the real ticket-timing spike right after 9:00am. → "Posted 9–11am. Median ticket: 9:12am. The 2-hour window is really ~20 minutes."
 3. **Stat view** / zoomed-out map with a data panel: ~1M citations, ~90% in first hour, $105 fine. → *"Over a million real tickets, mapped. ~90% land in the first hour."*
 4. **Move-your-car alert flow**: sweep schedule with Add-to-Calendar + an iOS push banner preview. → *"Get a calendar event or a push alert before your block is swept."*
 5. **Layers view**: RPP shading, meter pins, color curb, white loading zones near a school. → *"Permit zones, meters, color curb, and ~1,975 loading zones the city's data leaves out."*

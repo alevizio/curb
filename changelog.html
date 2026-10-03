@@ -7,9 +7,9 @@
 <meta property="og:title" content="Changelog — CURB">
 <meta property="og:description" content="Watch CURB take shape — three weeks of building, commit by commit, with a design timelapse.">
 <meta property="og:url" content="https://curb.guide/changelog">
-<meta property="og:image" content="https://curb.guide/og.png?v=2">
+<meta property="og:image" content="https://curb.guide/og.png?v=3">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://curb.guide/og.png?v=2">
+<meta name="twitter:image" content="https://curb.guide/og.png?v=3">
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -81,6 +81,139 @@
   </div>
 
   <!-- changelog:start -->
+    <div class="entry">
+      <h2 class="date">October 2, 2026</h2>
+      <div class="cl"><span class="tag fix">Fix</span><p>Neighborhood totals by the city's own label, rolling 24 months</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Steiner example from the 200 block, plain sourcing, no 'complete record', owner's quotes</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Correct stale and false numbers across the site before launch</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">October 1, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>A failed monthly data refresh opens an alert and wakes the on-call routine</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Retry a dropped Leaflet or time core, then say CURB didn't load</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Precache the time core with the app shell</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Name Meta's crawlers in the group, drop the broad Allow</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>A failed script or icon request fails cleanly, not with the app shell</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Keep crawlers off the live map deep links</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Skip reports from self-declared crawlers</p></div>
+      <div class="cl"><span class="tag fix">Design</span><p>One time core per city, SF is the default instance</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">September 30, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Keep the logo on phones, still no white pill</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Phones show just the ≡ button, no white nav pill</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Key the sub-page top bar fix on the app class alone</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>The welcome card sits above the layers button and legend</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Sub-page top bar no longer balloons into an empty white pill</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Fall back to the plain write if the store ever refuses the compare-and-set</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Throttle brand-new web push subscriptions per IP</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Fail the monitor and healthchecks when pushes stop arriving</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Block pages pass the shared curb side on to the live map</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Shared block links open the side that was shared</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Pin Sweep alerts and Calendar to the bottom of the phone sheet</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Offer the free iPhone app when Safari users want alerts</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>A Turn off or block switch mid-write can no longer be undone by the cron</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Show house-number ranges on block pages</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Open the map on the neighborhood, not Civic Center</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Say San Francisco on every neighborhood page</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Redirect the curb-nu.vercel.app home page too</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Time out a push service that never answers</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Street search, deep-link overview race, stale caches, and sheet keyboard gaps (audit)</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Keep the alert and calendar buttons while a block is being swept</p></div>
+      <div class="cl"><span class="tag new">New</span><p>A ready-made wait-for-verify script for the ship gate</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Verify claude/ branches with tests and a real-browser walk before they ship</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">September 29, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Wake an on-call Claude routine when an alert opens or changes</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Retry a dropped connection once before "Couldn't load that area"</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">September 28, 2026</h2>
+      <div class="cl"><span class="tag ios">iOS</span><p>Watch App Store reviews and alert on unanswered low ones</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">September 27, 2026</h2>
+      <div class="cl"><span class="tag fix">Fix</span><p>Join cross streets with a slash in /b/ titles, not an ampersand</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>No dangling "&amp;…" in clipped /b/ titles</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Bump the sweep-core script version for sweepCountdown</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Dash-free neighborhood pages</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Dash-free /b/ pages and share cards</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Write the map's UI copy without dashes</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Drop dashes from every push title and body</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Use the canonical fine and ticket-timing numbers</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Say "tomorrow" only for the next SF calendar day</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Keep visitors' error text out of public issues and logs</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Vercel Cron as a second 15-minute sweep-alert timer (team is on Pro)</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Don't send the iOS delivery test to watches turned off</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Land the Turn off row above the home-indicator inset</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Keep error-log text from running workflow commands in the Actions log</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Ask for precise location at most once per launch; final 1.0.2 notes</p></div>
+      <div class="cl"><span class="tag new">New</span><p>List all 12,253 block pages and redirect the curb-nu.vercel.app duplicate</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Treat a location denial after a timed-out first try as the visitor's choice</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Drop the delivery-test input from the backup sender workflow</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Word a night sweep's push for the morning after SF midnight</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Leave /b/ block pages to the network and purge the v3 cache</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Don't claim the backup is sending when QStash stops</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Never re-arm a watch the user turned off during a run</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Report a failed DataSF load with its HTTP status, not "0"</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Don't let a stale sheet move a re-armed watch back</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Report /b/ failures the way api/block.js fails now</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Scroll the Turn off / Keep them on row into view at the peek</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Stop the sender check flapping while only the GitHub backup runs</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Keep the push de-dupe across turn off/on and re-arms</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Alert only on real breakage, not visitors' own location choices</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Report the last QStash run in the sender status</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Read build 7's one-object push result so denials reach Settings guidance</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Free the sender run lock after a fully successful run</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Rate-limit error reports per client before the global cap</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Never render error-log text as live Markdown in public alert issues</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Underscore-prefix handler tests so Vercel never deploys them as functions</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Pass the save error, not the operator note, to the page</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>A late fix no longer flies the map after the user panned</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Make indexnow refuse a --since ref that doesn't exist</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Bake only numeric cnns</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Repair clipped cross streets toward the street's own name</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Don't revive a months-old legacy alert on sheet open</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>A same-sweep re-save keeps the stored eve/morning anchors</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Queue iOS test pushes behind in-flight saves</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Don't time out an iOS arm while the permission prompt is up</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Test push no longer previews a 5 AM morning-of that never fires</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Pass the save-subscription status and reason through to the page</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Native locate answers inside its deadline, reports real permission</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>First tap finds you; honest copy; coarse fixes shown as an area</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Open the block only once data covering it is drawn</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Link the neighborhood chart labels to their /n/ pages</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Smooth the mobile block sheet and stop the iOS app rubber-banding</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Link every neighborhood page from the home page's static HTML</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Version the sweep-core script so the page never runs a stale core</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Watch the real sender, let QStash drive the monitor</p></div>
+      <div class="cl"><span class="tag new">New</span><p>IndexNow key + `npm run indexnow` for changed URLs</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Sheet shows the real alert state, with an off switch</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Let crawlers fetch /api/og share-card images</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Real lastmod in both sitemaps, /support listed, block sitemap from baked data</p></div>
+      <div class="cl"><span class="tag new">New</span><p>List every block on /n/ pages, nearby by border, retire stale pages</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Serve /b/ pages from baked schedules; 404 unknown, 503 on failure</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Label test pushes, keep only act-now pushes on screen</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Bake every swept block's schedule into data/schedules.json</p></div>
+      <div class="cl"><span class="tag ios">iOS</span><p>Server-side off switch + stop the iOS 60 s save throttle</p></div>
+      <div class="cl"><span class="tag new">New</span><p>QStash as the primary sweep-alert trigger, with a status record</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Watch every rule of a multi-day curb side</p></div>
+      <div class="cl"><span class="tag new">New</span><p>One "move it tonight" push for night sweeps + timing hardening</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Shared push-anchor rule + holiday table through 2028</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Catch breakage before users do — smoke checks, browser walk, error log, heartbeat</p></div>
+      <div class="cl"><span class="tag new">New</span><p>Self-hosted parchment basemap, $0</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Move DataSF calls to data.sf.gov</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">July 4, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Block-page sitemap — ~10.5k long-tail /b/&lt;cnn&gt; landing pages</p></div>
+    </div>
+    <div class="entry">
+      <h2 class="date">July 1, 2026</h2>
+      <div class="cl"><span class="tag new">New</span><p>Real DPW sweeper routes — Truck Routes layer + block sheet</p></div>
+      <div class="cl"><span class="tag fix">Fix</span><p>Drop build:enforcement from data-refresh (needs a local xlsx)</p></div>
+    </div>
     <div class="entry">
       <h2 class="date">June 30, 2026</h2>
       <div class="cl"><span class="tag data">Data</span><p>June 30 #26-5451 batch — denser export, 190 -&gt; 227 blocks</p></div>

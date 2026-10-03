@@ -37,7 +37,7 @@ const mdBold = (s) => esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>');
 const plain = (s) => s.replace(/\*/g, '');
 const titleCaseHood = (h) => h; // EAS nhood values are already display-cased
 const num = (n) => n.toLocaleString('en-US');
-const money = (n) => n >= 1e6 ? '$' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n >= 1e3 ? '$' + Math.round(n / 1e3) + 'k' : '$' + n;
+const money = (n) => n >= 1e6 ? '$' + (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? '$' + Math.round(n / 1e3) + 'k' : '$' + n;
 const fmtHour = (h) => { const ap = h >= 12 ? 'pm' : 'am'; let hh = h % 12; if (hh === 0) hh = 12; return hh + ap; };
 const fmtMin = (m) => { let h = Math.floor(m / 60), mm = m % 60; const ap = h >= 12 ? 'pm' : 'am'; h = h % 12; if (h === 0) h = 12; return h + ':' + String(mm).padStart(2, '0') + ap; };
 const kfmt = (n) => n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n); // 18116 → "18.1k"
@@ -240,7 +240,7 @@ h2 b{color:var(--red-text)}
 .stat .l{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-top:5px}
 .panel{border:3px solid var(--ink);border-radius:18px;background:var(--sign);box-shadow:var(--shadow);padding:clamp(16px,3vw,26px);margin-top:18px}
 .bars{display:grid;gap:8px;margin-top:6px}
-.bar{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;font-weight:700;font-size:14px}
+.bar{display:grid;grid-template-columns:42px 1fr 8.5em;align-items:center;gap:10px;font-weight:700;font-size:14px} /* fixed value column: a 'busiest' tag must not shorten its own track */
 .bar .track{height:16px;background:rgba(23,21,15,.1);border-radius:8px;overflow:hidden}
 .bar .fill{display:block;height:100%;background:var(--amber);border-radius:8px}
 .bar .fill.peak{background:var(--red)}
@@ -302,12 +302,12 @@ const HEAD_COMMON = (title, desc, canonical, jsonld) => `<!DOCTYPE html>
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${esc(canonical)}">
-<meta property="og:image" content="https://curb.guide/og.png">
+<meta property="og:image" content="https://curb.guide/og.png?v=3">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
-<meta name="twitter:image" content="https://curb.guide/og.png">
+<meta name="twitter:image" content="https://curb.guide/og.png?v=3">
 <meta name="theme-color" content="#C1121F">
 <script type="application/ld+json">
 ${jsonld}
@@ -372,7 +372,7 @@ const FOOTER_UNUSED = `
   <a href="https://github.com/alevizio/curb" rel="noopener">Open source on GitHub</a>
   <a href="https://github.com/alevizio/curb/issues" rel="noopener">Report a bug</a>
   <a href="/privacy">Privacy</a>
-  <span class="fine">Schedules are set block by block. The <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies: only anonymous page counts. Made in San Francisco.</span>
+  <span class="fine">Schedules are set block by block. The <b>posted sign is always the source of truth</b>, and temporary signs &amp; holidays override everything here. Ticket figures are historical guidance from public SFMTA citation records (last ~2 years), never a guarantee. Free and open source (MIT). No accounts, no ads, no cookies. Made in San Francisco.</span>
 </div></footer>
 <script>
   (function(){var b=document.getElementById('navBtn'),m=document.getElementById('navMenu');if(!b||!m)return;
@@ -437,7 +437,7 @@ function renderHood(h, idx) {
   const titles = [`Street cleaning in ${name}, San Francisco | CURB`, `Street cleaning in ${name}, SF | CURB`, `Street cleaning in ${name}, SF`];
   const title = titles.find((t) => t.length < 60) || titles[2];
   const descs = ['San Francisco', 'SF'].map((g) => `When is street cleaning in ${name}, ${g}? Per-block schedules on a live map, plus when tickets actually hit (~${typical} on ${DOW[peakDow.i]}s) and the $${FINE} fine.`);
-  const desc = descs.find((d) => d.length <= 165) || descs[1];
+  const desc = descs.find((d) => d.length <= 165) || descs[1].replace(' on a live map', ''); // long names: drop the least useful phrase
   // "Open the map" lands on this neighborhood (the app's /?bbox= deep link), not the default center
   const m = HOOD_MAPS[sl];
   const mapHref = m && m.bbox ? `/?bbox=${m.bbox.join(',')}` : '/';
@@ -491,7 +491,7 @@ function renderHood(h, idx) {
       {
         '@type': 'Dataset',
         name: `Street-cleaning citations in ${name}, San Francisco`,
-        description: `Aggregated SFMTA street-cleaning citations for the ${name} neighborhood over the last ~2 years: total tickets and fines, distribution by day of week and hour, and the heaviest-ticketed streets. Derived from the public DataSF citations dataset, address-matched to neighborhoods.`,
+        description: `Aggregated SFMTA street-cleaning citations for the ${name} neighborhood over the last ~2 years: total tickets and fines, distribution by day of week and hour, and the heaviest-ticketed streets. Derived from the public DataSF citations dataset, by the neighborhood recorded on each citation.`,
         url: canonical,
         isBasedOn: 'https://data.sf.gov/Transportation/SFMTA-Parking-Citations-Fines/ab4h-6ztd',
         license: 'https://opendatacommons.org/licenses/pddl/1-0/',

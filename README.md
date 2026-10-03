@@ -120,8 +120,8 @@ The headline finding — *"the median block is ticketed within ~20 minutes"* —
 `scripts/build-enforcement-records.py` + `scripts/build-stats.mjs`:
 
 1. **Pull the citations.** The 2024–2026 street-cleaning citations came via SFMTA public-records request
-   **#26-5453** — about a million rows, **with GPS coordinates** restored (the public DataSF feed
-   `ab4h-6ztd` has dropped coordinates since ~2021). The older address-only path — normalize to
+   **#26-5453** — about a million rows, **with GPS coordinates** from the handheld (the public DataSF feed
+   `ab4h-6ztd` places each ticket only by its typed address). The older address-only path — normalize to
    `stripZeros(number)|UPPERCASE(street)` and join to a block (CNN) via the Enterprise Addressing System
    `3mea-di5p`, in `scripts/build-enforcement.mjs` — survives only as a pre-2024 fallback.
 2. **Match by GPS, not address strings.** Each citation's GPS point is matched to the nearest street

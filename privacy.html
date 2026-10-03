@@ -7,9 +7,9 @@
 <meta property="og:title" content="Privacy — CURB">
 <meta property="og:description" content="No accounts, no ads, no cookies, no tracking. CURB only stores your anonymous push-alert subscription — remove it any time.">
 <meta property="og:url" content="https://curb.guide/privacy">
-<meta property="og:image" content="https://curb.guide/og.png?v=2">
+<meta property="og:image" content="https://curb.guide/og.png?v=3">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://curb.guide/og.png?v=2">
+<meta name="twitter:image" content="https://curb.guide/og.png?v=3">
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -55,14 +55,17 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   <h2>The one thing we store about you</h2>
   <p>If you tap <b>Sweep alerts</b> on a block, your browser creates a <b>push subscription</b> — an anonymous
     endpoint your browser provides — and we save it with the block and sweep time you picked, so a scheduled
-    job can send the "move your car" notification before sweeping. It contains no name, email, or account.</p>
-  <p><b>Remove it any time:</b> turn off notifications for curb.guide in your browser/phone settings, or just
-    don't arm an alert. Once revoked, the subscription is automatically pruned on the next send.</p>
+    job can send the "move your car" notification before sweeping. It contains no name, email, or account. In the iPhone app it is the anonymous device push token Apple provides, saved the same way.</p>
+  <p><b>Remove it any time:</b> tap <b>Turn off</b> on the block's alert, which removes the block and sweep time
+    (the anonymous endpoint is kept, with nothing to send, so turning alerts back on doesn't repeat a push you
+    already got), or turn off notifications for curb.guide in your browser or phone settings. A subscription the
+    browser has revoked is deleted the next time CURB tries to send to it.</p>
 
   <h2>Analytics</h2>
   <p>We count anonymous, aggregate page views with <b>cookieless</b> analytics (Vercel Web Analytics) — no
     cookies, no cross-site identifiers, no individual profiles. It tells us "the tickets page got N views,"
-    not who you are. A small amount of <b>functional state</b> (e.g. whether you've seen the intro) lives in
+    not who you are. Vercel Speed Insights measures page load speed the same cookieless way, and a few
+    anonymous feature counts (for example, how often a block sheet is opened) tell us what gets used. A small amount of <b>functional state</b> (e.g. whether you've seen the intro) lives in
     your own browser's localStorage and never leaves your device.</p>
 
   <h2>Error reports</h2>

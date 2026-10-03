@@ -18,8 +18,8 @@ Several Linear tickets and older drafts contain **stale figures**. Always use th
 | ~1,000,000 GPS-located citations (≈815,000 matched to blocks) | 659,000 / 650,000 |
 | Posted 2-hr window is really **~20 minutes** | "~22 minutes" |
 | ~77% within 45 min · ~90% within the first hour | "87%" |
-| Steiner 200-block: **221 tickets, median 9:11, 90% by 9:21** | "203 / 9:14 / 9:39" |
-| Mission: **97,805 tickets / ~$10.3M**, #1, peaks 8am Thursdays | "71,129 / $7.2M" |
+| Steiner 200-block: **278 tickets (Jan 2024 to Jun 2026), median 9:12, 90% by 9:21** | "203 / 9:14 / 9:39" |
+| Mission: **about 109,000 tickets / $11.1M** (last two years), #1, peaks 8am Thursdays | "71,129 / $7.2M" |
 | Sweeper GPS: ticket lands **~19 min after the sweeper**, 227 blocks | — |
 
 Source: SFMTA citations via records request **#26-5453**; sweeper-GPS via **#26-5451**. Verified + reproducible from this repo.
