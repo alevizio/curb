@@ -37,7 +37,7 @@ const mdBold = (s) => esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>');
 const plain = (s) => s.replace(/\*/g, '');
 const titleCaseHood = (h) => h; // EAS nhood values are already display-cased
 const num = (n) => n.toLocaleString('en-US');
-const money = (n) => n >= 1e6 ? '$' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n >= 1e3 ? '$' + Math.round(n / 1e3) + 'k' : '$' + n;
+const money = (n) => n >= 1e6 ? '$' + (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? '$' + Math.round(n / 1e3) + 'k' : '$' + n;
 const fmtHour = (h) => { const ap = h >= 12 ? 'pm' : 'am'; let hh = h % 12; if (hh === 0) hh = 12; return hh + ap; };
 const fmtMin = (m) => { let h = Math.floor(m / 60), mm = m % 60; const ap = h >= 12 ? 'pm' : 'am'; h = h % 12; if (h === 0) h = 12; return h + ':' + String(mm).padStart(2, '0') + ap; };
 const kfmt = (n) => n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n); // 18116 → "18.1k"
@@ -437,7 +437,7 @@ function renderHood(h, idx) {
   const titles = [`Street cleaning in ${name}, San Francisco | CURB`, `Street cleaning in ${name}, SF | CURB`, `Street cleaning in ${name}, SF`];
   const title = titles.find((t) => t.length < 60) || titles[2];
   const descs = ['San Francisco', 'SF'].map((g) => `When is street cleaning in ${name}, ${g}? Per-block schedules on a live map, plus when tickets actually hit (~${typical} on ${DOW[peakDow.i]}s) and the $${FINE} fine.`);
-  const desc = descs.find((d) => d.length <= 165) || descs[1];
+  const desc = descs.find((d) => d.length <= 165) || descs[1].replace(' on a live map', ''); // long names: drop the least useful phrase
   // "Open the map" lands on this neighborhood (the app's /?bbox= deep link), not the default center
   const m = HOOD_MAPS[sl];
   const mapHref = m && m.bbox ? `/?bbox=${m.bbox.join(',')}` : '/';
@@ -491,7 +491,7 @@ function renderHood(h, idx) {
       {
         '@type': 'Dataset',
         name: `Street-cleaning citations in ${name}, San Francisco`,
-        description: `Aggregated SFMTA street-cleaning citations for the ${name} neighborhood over the last ~2 years: total tickets and fines, distribution by day of week and hour, and the heaviest-ticketed streets. Derived from the public DataSF citations dataset, address-matched to neighborhoods.`,
+        description: `Aggregated SFMTA street-cleaning citations for the ${name} neighborhood over the last ~2 years: total tickets and fines, distribution by day of week and hour, and the heaviest-ticketed streets. Derived from the public DataSF citations dataset, by the neighborhood recorded on each citation.`,
         url: canonical,
         isBasedOn: 'https://data.sf.gov/Transportation/SFMTA-Parking-Citations-Fines/ab4h-6ztd',
         license: 'https://opendatacommons.org/licenses/pddl/1-0/',

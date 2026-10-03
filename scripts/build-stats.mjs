@@ -2,16 +2,17 @@
 // Aggregate SF parking-citation history for the /tickets data story.
 //   data/stats.json = { yearly, yearlySweep, byViolation, sweepHour, sweepDow,
 //                       hoods, topStreets, _meta }
-// NOTE: the `hoods` this produces is the LOSSY address->EAS join (understated, e.g. Mission ~71k).
-// The canonical per-hood totals are GPS-derived — re-run `npm run build:hoodstats`
-// (scripts/build-hood-stats.py, records #26-5453) AFTER this, or the /n/ pages revert to old numbers.
+// Neighborhoods: `hoods`, `hoodDetail` and their streets use the analysis_neighborhood the city sets on each
+// citation (99.6% of street-cleaning rows), over a rolling 24 months. Until 2 Oct 2026 they came from an
+// address -> EAS join that matched ~60% of tickets (Mission ~73k of ~130k); the surge chart still uses that join.
 // Server-side SoQL group-bys where possible; the neighborhood breakdown streams
 // ~2yr of street-cleaning rows and joins addresses → EAS analysis_neighborhood.
 // Run: npm run build:stats   (Node 18+, no deps; ~6-8 min, mostly the stream)
 
 const CITES = 'https://data.sf.gov/resource/ab4h-6ztd.json';
 const ADDR = 'https://data.sf.gov/resource/3mea-di5p.json';
-const SINCE = '2024-06-01T00:00:00';
+// Rolling 24 months, from the first of the month, so "last 2 years" on the pages stays literally true.
+const SINCE = (() => { const d = new Date(); return `${d.getUTCFullYear() - 2}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-01T00:00:00`; })();
 const log = (...a) => console.error('[stats]', ...a);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -84,24 +85,25 @@ const hoodOf = new Map();
   }
 }
 
-log('streaming 2yr street-cleaning rows for hoods/streets…');
+log(`streaming street-cleaning rows since ${SINCE} for hoods/streets…`);
 // hoods: citywide rollup (n, rev). hoodDetail: per-hood histograms for the neighborhood SEO
 // pages (sweep hour/dow distribution, mean minute-of-day, heaviest streets IN that hood).
 const hoods = new Map(), streets = new Map(), hoodDetail = new Map();
 const newDetail = () => ({ n: 0, rev: 0, minSum: 0, minN: 0, hours: Array(24).fill(0), dows: Array(7).fill(0), streets: new Map() });
-let cursor = '', seen = 0;
+let cursor = '', seen = 0, latest = '';
 for (;;) {
   const rows = await soda(CITES, {
-    '$select': ':id,citation_location,fine_amount,citation_issued_datetime',
+    '$select': ':id,citation_location,fine_amount,citation_issued_datetime,analysis_neighborhood',
     '$where': `${SWEEP_WHERE} AND citation_issued_datetime > '${SINCE}'` + (cursor ? ` AND :id > '${cursor}'` : ''),
     '$order': ':id', '$limit': 50000,
   });
   if (!rows.length) break;
   for (const r of rows) {
     seen++;
-    const p = parseLoc(r.citation_location); if (!p) continue;
+    const p = parseLoc(r.citation_location); // null for an unparseable location: still counted in its hood
     const fine = +r.fine_amount || 0;
-    const hood = hoodOf.get(`${p.num}|${p.name}`);
+    const hood = r.analysis_neighborhood || null;
+    if (r.citation_issued_datetime > latest) latest = r.citation_issued_datetime;
     // citation_issued_datetime is SF local wall time (no offset) — parse the fields directly.
     const m = String(r.citation_issued_datetime || '').match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/);
     const hh = m ? +m[4] : null, mi = m ? +m[5] : null;
@@ -110,9 +112,10 @@ for (;;) {
       const h = hoods.get(hood) || { n: 0, rev: 0 }; h.n++; h.rev += fine; hoods.set(hood, h);
       const d = hoodDetail.get(hood) || newDetail(); d.n++; d.rev += fine;
       if (hh !== null) { d.hours[hh]++; d.dows[dow]++; d.minSum += hh * 60 + mi; d.minN++; }
-      d.streets.set(p.name, (d.streets.get(p.name) || 0) + 1);
+      if (p) d.streets.set(p.name, (d.streets.get(p.name) || 0) + 1);
       hoodDetail.set(hood, d);
     }
+    if (!p) continue;
     const s = streets.get(p.name) || { n: 0, rev: 0 }; s.n++; s.rev += fine; streets.set(p.name, s);
   }
   cursor = rows[rows.length - 1][':id'];
@@ -155,9 +158,10 @@ const hoodSurge = {
 };
 
 const out = {
-  _meta: { generated: new Date().toISOString(), source: 'DataSF ab4h-6ztd ⋈ 3mea-di5p',
-    note: 'rev = fines ISSUED (assessed), not collected. hoods/topStreets = street-cleaning only, last ~2yr.',
-    hood_window_since: SINCE },
+  _meta: { generated: new Date().toISOString(), source: 'DataSF ab4h-6ztd (hoods by its analysis_neighborhood; surge via ⋈ 3mea-di5p)',
+    note: 'rev = fines ISSUED (assessed), not collected. hoods/hoodDetail/topStreets = street-cleaning only, rolling 24 months.',
+    hood_window_since: SINCE, hood_window_until: latest.slice(0, 19), hoods_source: 'analysis_neighborhood',
+    window_total: seen },
   yearly, yearlySweep, byViolation, sweepHour, sweepDow, hoodSurge,
   hoods: [...hoods.entries()].map(([k, v]) => ({ hood: k, n: v.n, rev: Math.round(v.rev) }))
     .sort((a, b) => b.n - a.n),

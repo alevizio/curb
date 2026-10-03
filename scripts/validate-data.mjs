@@ -52,6 +52,11 @@ try {
   check('stats.json', 'topStreets[] length', Array.isArray(stats.topStreets) ? stats.topStreets.length : NaN, 15, 50);
   check('stats.json', 'sweepDow[] length', Array.isArray(stats.sweepDow) ? stats.sweepDow.length : NaN, 7, 7);
   check('stats.json', 'sweepHour[] length', Array.isArray(stats.sweepHour) ? stats.sweepHour.length : NaN, 18, 26);
+  // Per-hood totals come from the city's own analysis_neighborhood on each citation (build-stats.mjs). Until
+  // 2 Oct 2026 an address join matched only ~60% of tickets: fail if the totals stop covering the window.
+  if (stats._meta?.hoods_source !== 'analysis_neighborhood') errors.push(`stats.json: hoods are not from analysis_neighborhood (got ${JSON.stringify(stats._meta?.hoods_source)})`);
+  const hoodSum = (stats.hoods || []).reduce((a, h) => a + (+h.n || 0), 0);
+  check('stats.json', 'hoods[] share of street-cleaning tickets in the window (%)', stats._meta?.window_total ? Math.round(hoodSum / stats._meta.window_total * 100) : NaN, 95, 100);
 
   // schedules.json — every swept block baked for the /b/ pages + /n/ block lists (build:schedules);
   // a short DataSF page or a moved column shrinks it, and /b/ pages would start 404ing
