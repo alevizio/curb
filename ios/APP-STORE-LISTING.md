@@ -6,7 +6,7 @@
 **Support URL:** https://curb.guide
 
 **Promotional text** (≤170, editable anytime without review):
-> 1M+ SF tickets mapped: the posted 2-hour street-cleaning window is really ~20 minutes. See your block's real ticket time. Free.
+`About 815,000 SF tickets mapped: on a typical block the posted 2-hour street-cleaning window is really about 20 minutes. See your block's real ticket time. Free.`
 
 **Keywords** (≤100 chars):
 ```
@@ -14,40 +14,54 @@ street cleaning,sweeping,parking,SF,tickets,RPP,meters,reminder,alert,curb,SFMTA
 ```
 
 ## Description
+Version 1.0.3 (corrected numbers, 3 Oct 2026). Paste as-is.
 ```
-Your street-cleaning sign says 9–11am. The tickets say 9:12am.
+Your street-cleaning sign says 9 to 11am. The tickets say 9:12am.
 
-CURB is a free map of San Francisco street-parking rules — and the only one that shows you WHEN tickets actually get written, not just when the sign says you're at risk.
+CURB is a free map of San Francisco street-parking rules, and the only one that shows you WHEN tickets actually get written, not just when the sign says you're at risk.
 
-I obtained about a million GPS-located SFMTA street-cleaning citations through a public records request and matched about 815,000 of them to the blocks where they were issued. The finding: that posted 2-hour window is mostly a 20-minute reality. On a typical block, the tickets land in a tight ~15-minute burst right after sweeping starts, and about 90% are written within the first hour.
+I obtained about a million GPS-located SFMTA street-cleaning citations through a public records request and matched about 815,000 of them to the blocks where they were issued (2024 to mid 2026). The finding: that posted 2-hour window is mostly a 20-minute reality. On a typical block, most tickets land within about 20 minutes of each other. Citywide, about 77% are written in the first 45 minutes of the posted window and about 90% in the first hour.
 
-Take the 200 block of Steiner St. Posted window: 9–11am. In 2024–2026: 278 tickets, earliest at 9:00am sharp, the median ticket at 9:12am, and 90% already written by 9:21am. The "2 hours" was never real.
+Take the 200 block of Steiner St. Posted window: 9 to 11am. From 2024 to mid 2026: 278 tickets, the earliest at 9:00am, the median at 9:12am, and 90% written by 9:21am. The "2 hours" was never real.
 
 WHAT CURB SHOWS YOU
-- Every block colored by its next street sweep — see at a glance where it's safe to park
-- When tickets actually get written on your block, rebuilt from public SFMTA citation data
-- Residential permit (RPP) zones, meters, and color curb
-- ~1,975 unmetered white passenger-loading zones (627 of them by schools) pulled straight from the city's own curb map — the ones DataSF leaves out
-- Holiday enforcement flags — like SF suspending daytime street-sweeping enforcement on Juneteenth
+• Every block colored by its next street sweep. See at a glance where it's safe to park
+• When tickets actually get written on your block, rebuilt from public SFMTA citation data
+• Residential permit (RPP) zones, meters, and color curb
+• ~1,975 unmetered white passenger-loading zones (627 of them by schools) pulled straight from the city's own curb map, the ones DataSF leaves out
+• Holiday enforcement flags, like SF suspending daytime street-sweeping enforcement on Juneteenth
 
 MOVE-YOUR-CAR ALERTS
-- Pick how hard CURB nags you: a single 30-minute heads-up (Light), plus the night before (Normal), or add a morning-of warning too (Intense)
-- Choose the voice — warm and funny, drill-sergeant, or deadpan-with-the-receipts
-- Native iOS push, plus a one-tap calendar (.ics) sweep event
-- No more "I forgot it was Tuesday"
+• Pick how hard CURB nags you: a single 30-minute heads-up (Light), plus the night before (Normal), or add a morning-of warning too (Intense)
+• Choose the voice: warm and funny, drill-sergeant, or deadpan-with-the-receipts
+• Native iOS push, plus a one-tap calendar (.ics) sweep event
+• No more "I forgot it was Tuesday"
 
 THE SCALE OF IT
-- $105 street-cleaning fine in 2026
-- 23.8M total parking citations in SF since 2008
-- Over a million street-cleaning tickets in 2024–2026 alone
-- Enforcement is surging where the city is building: Mission Bay +107%, Financial District / South Beach +68% vs. five years ago
+• $105 street-cleaning fine in 2026
+• 24M total parking citations in SF since 2008
+• Over a million street-cleaning tickets since 2024 alone
+• Enforcement is surging where the city is building: Mission Bay and Financial District / South Beach are up the most vs. five years ago
 
 A NOTE ON HONESTY
-CURB reads the patterns in public data so you don't have to. But the posted physical sign is always the final authority — CURB never overrides it, and neither should you.
+CURB reads the patterns in public data so you don't have to. But the posted physical sign is always the final authority. CURB never overrides it, and neither should you.
 
 Built by one person in San Francisco who got tired of the parking math.
 
-Free. No ads. No signup. No account. No data collection.
+Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB stores an anonymous push token with the curb you picked.
+```
+
+## What's New (v1.0.3)
+Build 8. Paste the block below into App Store Connect as-is.
+```
+Fresher numbers and steadier alerts:
+
+• Sweep alerts and Calendar stay pinned to the bottom of the block card, and they still work while your block is being swept, so you can arm the next sweep right after you re-park.
+• Neighborhood totals now count every ticket by the neighborhood the city records on it, over the last two years.
+• If part of the map fails to download, CURB tries again and tells you, instead of leaving a blank map.
+• Small fixes across the map and the block pages.
+
+The posted sign is always the final authority.
 ```
 
 ## What's New (v1.0.2)
@@ -100,7 +114,7 @@ DATA SOURCE
 All data is public and open: SFMTA street-sweeping schedules and parking-citation records, DataSF, and the City of San Francisco's own ArcGIS curb layer. The "when tickets get written" feature is a statistical analysis of public SFMTA citation data, not private or personal information.
 
 ACCOUNT / LOGIN
-There is NO account, login, or sign-up of any kind. The app collects no personal data and uses no analytics or tracking. There is no demo account because none is needed — the app is fully usable on launch.
+There is NO account, login, or sign-up of any kind, and no tracking across apps. The web app inside uses cookieless, aggregate analytics, and optional sweep alerts store an anonymous push token with the block the user picked. The App Privacy answers reflect this. There is no demo account because none is needed — the app is fully usable on launch.
 
 ARCHITECTURE
 The iOS app is a WKWebView wrapper of the live website at https://curb.guide. It adds native bridges: Core Location for the "locate me" button, the native share sheet, and native Calendar (.ics) event previews.
@@ -109,15 +123,15 @@ PUSH NOTIFICATIONS
 Push is used solely for optional "move your car" street-sweeping reminders that the user explicitly opts into per block. Users choose an intensity (Light = 30 min before; Normal = also the night before; Intense = also the morning of) and a copy "voice." A "Send me a test" button sends a single test notification to the user's OWN device only (rate-limited; it cannot target any other device). The app supports both web push and native APNs push. No marketing or promotional notifications are sent. Push has been built and verified end-to-end (test push returned APNs status 200).
 
 LOCATION
-Location is used only to center the map on the user, requested in-context when the user taps the locate button. Location is never stored or transmitted to a server.
+Location is used only when the user taps the locate button, to center the map and look up the nearby blocks. CURB's server never stores it.
 
 DISCLAIMER
 CURB surfaces patterns in public data as guidance only. The app clearly states that the posted physical street sign is always the final authority.
 ```
 
 ## App Privacy (questionnaire answers)
-- **Data collection:** Data Not Collected (no account, no analytics, no tracking).
-- **Location:** used on-device only for the locate button; not collected/linked/transmitted.
+- **Data collection:** keep what the live label says, "Data Not Linked to You": Precise Location and Device ID (App Functionality), Product Interaction (Analytics). Never "Data Not Collected".
+- **Location:** used when the user taps locate; not stored by CURB.
 - `PrivacyInfo.xcprivacy` is already in the app.
 
 ## Screenshots — 6.7" iPhone shotlist
