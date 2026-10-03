@@ -52,7 +52,7 @@ jobs:
         run: node scripts/check-load-guard.mjs http://localhost:3077
       - name: Keep screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: verify-shots
           path: shots/
