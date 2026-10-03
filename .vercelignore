@@ -1,0 +1,18 @@
+# Internal files: public in the GitHub repo, not served on curb.guide (they were reachable at
+# curb.guide/launch-kit.md, /CLAUDE.md, /docs/... until 3 Oct 2026). Nothing here is read at runtime:
+# the functions need only api/, lib/, data/, og/fonts/ and node_modules (see vercel.json includeFiles).
+docs/
+ios/
+scripts/
+social-trailer/
+og/template.html
+og/template-home.html
+og/template-tickets.html
+og/render.sh
+launch-kit.md
+CLAUDE.md
+AGENTS.md
+.github/
+*.test.mjs
+api/*.test.mjs
+lib/*.test.mjs
