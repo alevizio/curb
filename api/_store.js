@@ -9,6 +9,7 @@
 // functions, so this module is import-only.
 import { Redis } from '@upstash/redis';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
+import { watchDead } from './_schedule.js';
 
 const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -135,6 +136,12 @@ async function readWatches(key, base) {
   });
 }
 
+const armed = (s) => Boolean(s.rec && s.rec.spot);
+const off = (s) => Boolean(s.rec && !s.rec.spot);
+const onSide = (spot) => (s) => armed(s) && sameSide(s.rec.spot, spot);
+const offOnSide = (spot) => (s) => off(s) && Boolean(s.rec.offSide) && sameSide(s.rec.offSide, spot);
+const preMultiOff = (s) => off(s) && !s.rec.offSide;
+
 // Which watch a save of `spot` writes, first match wins:
 //  1. the watch already on this side, armed → updated in place (no duplicate watch);
 //  2. a watch turned off on this side → re-armed with its de-dupe, so off → on of one sweep can't repeat a push;
@@ -142,17 +149,18 @@ async function readWatches(key, base) {
 //     every save did before;
 //  4. an empty slot → a fresh watch;
 //  5. a watch turned off on another side → reused with a fresh de-dupe (its entries name the other side's
-//     sweeps and could block this side's push for the same instant).
-// → { n, keep } (keep = carry that watch's de-dupe and spot forward), or null when 5 watches are armed.
-function pickSlot(slots, spot) {
-  const armed = (s) => Boolean(s.rec && s.rec.spot);
-  const off = (s) => Boolean(s.rec && !s.rec.spot);
+//     sweeps and could block this side's push for the same instant);
+//  6. a dead watch (watchDead: stale or one-shot, its sweep over, so it can never push again) → reused with a
+//     fresh de-dupe, else such watches would hold slots forever and a device could be full with nothing to free.
+// → { n, keep } (keep = carry that watch's de-dupe and spot forward), or null when 5 watches are live.
+function pickSlot(slots, spot, now = Date.now()) {
   const order = [
-    [(s) => armed(s) && sameSide(s.rec.spot, spot), true],
-    [(s) => off(s) && Boolean(s.rec.offSide) && sameSide(s.rec.offSide, spot), true],
-    [(s) => off(s) && !s.rec.offSide, true],
+    [onSide(spot), true],
+    [offOnSide(spot), true],
+    [preMultiOff, true],
     [(s) => !s.rec, false],
     [off, false],
+    [(s) => armed(s) && watchDead(s.rec, now), false],
   ];
   for (const [test, keep] of order) { const s = slots.find(test); if (s) return { n: s.n, keep }; }
   return null;
@@ -177,7 +185,7 @@ async function claimField(key, field, raw, value) {
  *  watch on the same side so it doesn't push twice. `record(n, spot, notified)` builds the stored value.
  *  The de-dupe map of the watch is kept: each entry holds the sweep it fired for, so it only ever blocks
  *  that same sweep (re-taps, off → on and re-saves never re-send a push already delivered).
- *  → { slot } | { full: true } (MAX_WATCHES armed, none on this side). */
+ *  → { slot } | { full: true } (MAX_WATCHES live, none on this side). */
 async function saveWatch(key, base, spot, atBase, record) {
   for (let i = 0; i < 3; i++) {
     const slots = await readWatches(key, base);
@@ -186,8 +194,8 @@ async function saveWatch(key, base, spot, atBase, record) {
     const s = slots[pick.n], prev = pick.keep ? s.rec : null;
     const out = carryForward(prev, spot);
     // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
-    // re-arming once a watch goes stale past MAX_WATCH_AGE (see send-notifications) so a frozen rule
-    // can't push wrong times forever after a city schedule change. advanceSpot preserves it.
+    // re-arming once a watch goes stale past MAX_WATCH_AGE (api/_schedule.js) so a frozen rule can't push
+    // wrong times forever after a city schedule change. advanceSpot preserves it.
     const value = JSON.stringify(record(pick.n, out, prev ? notifiedMap(prev) : {}));
     if (!(await claimField(key, s.field, s.raw, value))) continue;
     if (atBase && spot) {

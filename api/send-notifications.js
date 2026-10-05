@@ -23,15 +23,15 @@ import {
   loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot,
   saveRunStatus, loadRunStatus, loadDelivery,
 } from './_store.js';
-import { recomputeSpot } from './_schedule.js';
+import { recomputeSpot, MAX_WATCH_AGE } from './_schedule.js';
 import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
 import { dueAlert } from '../lib/notify-core.js';
 
 const SEND_TIMEOUT_MS = 10000; // per push request (web push and APNs), well inside the 60 s function limit
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
-// live data) for this long — bounds wrong-time pushes if the city changes a block's schedule.
-const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
+// live data) for MAX_WATCH_AGE (~120 days, api/_schedule.js, shared with the store) — bounds wrong-time
+// pushes if the city changes a block's schedule.
 // The run lock's lifetime: longer than the 60 s maxDuration (vercel.json), so it outlives any run.
 const RUN_LOCK_MS = 120000;
 

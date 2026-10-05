@@ -293,6 +293,11 @@ describe('saved alerts: a map of watched sides', () => {
     expect(s.run('otherAlerts(x).full')).toBe(false);
   });
 
+  it('"on" lapses at the server\'s MAX_WATCH_AGE (one value, api/_schedule.js)', async () => {
+    const { MAX_WATCH_AGE } = await import('../api/_schedule.js');
+    expect(alertState().run('WATCH_MAX_AGE')).toBe(MAX_WATCH_AGE);
+  });
+
   it('labels a watch "Crestline Dr, NE side", adding the cross streets only to tell two blocks apart', () => {
     const s = alertState();
     s.g.list = [side('1', 'Northeast', 'Crestline Dr'), side('2', 'West'), { ...side('3', 'West'), limits: '17th St - Mariposa St' }];

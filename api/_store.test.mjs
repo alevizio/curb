@@ -605,3 +605,52 @@ describe('multi-watch: up to 5 curb sides per device, each its own record', () =
     expect(w(0).spot).toMatchObject({ cnn: '555', sideKey: 'R' });
   });
 });
+
+// A watch nothing will ever push for again still held one of the device's 5 slots, so a device could get 409
+// with nothing it could free: a watch the cron stopped re-arming (savedAt past MAX_WATCH_AGE) or a one-shot
+// spot with no rule, once its sweep is over. pickSlot reuses one, with a fresh de-dupe, before saying full.
+describe('dead watches free their slot', () => {
+  const w = (n = 0) => { const v = mem['curb:subs'] && mem['curb:subs'][n ? `${EP}#${n}` : EP]; return v ? JSON.parse(v) : undefined; };
+  const DAY = 864e5;
+  const iso = (t) => new Date(t).toISOString();
+  // five armed watches on other sides, written directly: `make(i)` → { spot overrides, savedAt }
+  const fill = (make) => {
+    mem['curb:subs'] = {};
+    for (let i = 0; i < 5; i++) {
+      const { savedAt = Date.now(), ...over } = make(i) || {};
+      mem['curb:subs'][i ? `${EP}#${i}` : EP] = JSON.stringify({ subscription: SUB, spot: { ...spotA, cnn: String(100 + i), ...over }, notified: { lead: 'x' + i }, savedAt });
+    }
+  };
+  const SIX = { ...spotA, cnn: '999', nextSweepISO: iso(Date.now() + 3 * DAY) };
+
+  it('a stale watch (the cron stopped re-arming it) whose sweep is over is reused, with a fresh de-dupe', async () => {
+    fill((i) => (i === 3 ? { nextSweepISO: iso(Date.now() - 10 * DAY), savedAt: Date.now() - 130 * DAY } : {}));
+    expect(await saveSub(SUB, SIX)).toEqual({ slot: 3 });
+    expect(w(3)).toMatchObject({ spot: { cnn: '999' }, notified: {} });
+  });
+
+  it('a one-shot watch (no rule, an old cached page\'s) whose sweep has passed is reused', async () => {
+    fill((i) => (i === 1 ? { rule: undefined, rules: undefined, cnn: undefined, sideKey: undefined, corridor: 'Old St', nextSweepISO: iso(Date.now() - 2 * DAY) } : {}));
+    expect(await saveSub(SUB, SIX)).toEqual({ slot: 1 });
+  });
+
+  it('never a watch whose sweep window has not ended, however old, and never a fresh one past its sweep', async () => {
+    const r = { weekday: 'Wed', fromhour: '8', tohour: '14', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
+    fill((i) => [
+      { nextSweepISO: iso(Date.now() + 2 * DAY), savedAt: Date.now() - 130 * DAY },                 // stale, sweep ahead
+      { nextSweepISO: iso(Date.now() - 5 * 36e5), rule: r, rules: [r], savedAt: Date.now() - 130 * DAY }, // stale, 6 h window still on
+      { rule: undefined, rules: undefined, nextSweepISO: iso(Date.now() - 36e5) },                    // one-shot, swept an hour ago
+      { nextSweepISO: iso(Date.now() - 30 * DAY) },                                                   // re-armed by the cron next tick
+      {},
+    ][i]);
+    const before = JSON.stringify(mem);
+    expect(await saveSub(SUB, SIX)).toEqual({ full: true });
+    expect(JSON.stringify(mem)).toBe(before);
+  });
+
+  it('a free or turned-off slot still goes first: a dead watch is the last resort', async () => {
+    fill((i) => (i === 0 ? { nextSweepISO: iso(Date.now() - 10 * DAY), savedAt: Date.now() - 130 * DAY } : {}));
+    await disarmSub(EP, 'a', { cnn: '104', sideKey: 'L', corridor: 'Haight St', limits: '', blockside: '' });
+    expect(await saveSub(SUB, SIX)).toEqual({ slot: 4 });
+  });
+});
