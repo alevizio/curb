@@ -30,9 +30,13 @@ export function withHolidayRules(spot, holidayRows) {
   const rows = holidayRows(spot.cnn);
   if (!rows || !rows.length) return spot;
   const b = String(spot.blockside || '').toLowerCase(), k = String(spot.sideKey || '').toLowerCase();
+  // Only a named side (blockside, or a compass sideKey) can be matched. The bake merges DataSF's side-less
+  // rows (no blockside) across both directions, and on 12 such blocks only ONE direction posts a holiday
+  // schedule, so an L/R/C key could hand a holiday sweep to the side that has none: no fill there.
+  if (!b && k.length <= 1) return spot;
   const onSide = (side) => {
     const s = String(side || '').toLowerCase();
-    return b ? s === b : k.length > 1 ? s.startsWith(k) : s === '';
+    return b ? s === b : s.startsWith(k);
   };
   const bit = (mask, i) => ((mask >> i) & 1 ? '1' : '0');
   const add = rows.filter((r) => onSide(r[0])).map(([, , from, to, mask, hol]) => sanitizeRule({ weekday: 'Holiday', fromhour: from, tohour: to,

@@ -130,10 +130,14 @@ describe('withHolidayRules — an old watch gets its side\'s posted holiday sche
     expect(out.rules[4]).toEqual(sanitizeSpot({ ...old(), rules: [row('Holiday')] }).rules[0]);
     expect(out.rule).toEqual(old().rule);                                  // the back-compat rule stays
     expect(withHolidayRules(old({ blockside: 'southwest' }), rowsOf).rules).toEqual(out.rules);
-    // no blockside: the sideKey, clamped to 8 ('Southwes'), names the side; a cnnrightleft key matches DataSF's side-less rows
+    // no blockside: the sideKey, clamped to 8 ('Southwes'), names the side
     expect(withHolidayRules(old({ blockside: '' }), rowsOf).rules).toEqual(out.rules);
-    const lr = withHolidayRules(old({ cnn: '227102', blockside: '', sideKey: 'R' }), rowsOf);
-    expect(lr.rules.at(-1)).toMatchObject({ weekday: 'holiday', fromhour: '2', tohour: '6', holidays: '1' });
+    // a side-less block keyed only by L/R/C is never filled: the bake merges both directions, and on 12 such
+    // blocks (e.g. The Embarcadero 12553102, Market St 8746102) only one direction posts a holiday schedule
+    const lr = old({ cnn: '227102', blockside: '', sideKey: 'R' });
+    expect(withHolidayRules(lr, rowsOf)).toBe(lr);
+    const emb = old({ cnn: '12553102', blockside: '', sideKey: 'R' });
+    expect(withHolidayRules(emb, () => [['', 7, 1, 6, 31, 1]])).toBe(emb);
     // a legacy record with only `rule`
     expect(withHolidayRules({ ...old(), rules: undefined }, rowsOf).rules.map((r) => r.weekday)).toEqual(['mon', 'holiday']);
   });
