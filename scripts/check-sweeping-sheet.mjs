@@ -1,7 +1,7 @@
 // Regression check (owner report 2026-09-30), run by .github/workflows/verify.yml. Real browser, clock frozen at Wed 2026-09-30 8:49 AM PDT (Delmar St West side is being swept, 8 to 10 AM):
 // open the block and check the alert + calendar buttons exist and arm NEXT Wednesday's sweep. Then a midnight block
 // (4th St, Tue 12 to 2 AM) the evening before, after 9 PM, mid-sweep and at 12:30 AM: the sheet, tooltip and toast
-// word it by the night, and the toast names the night its 9 PM push lands on.
+// word it by the night, and the toast names the night its 9 PM push lands on. Last, the first-sheet tip's alert timing.
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 const puppeteer = createRequire(import.meta.url)('puppeteer-core');
@@ -118,4 +118,37 @@ const okEarly = early.head === 'Mon night' && /^Tue 12 to 2 AM · .* · tomorrow
   && blockless(early.toast) === "Sweep alert set for <block>. We'll ping you ~9 PM tomorrow night to move it." && !early.errors.length;
 console.log(okEarly ? '✅ 12:30 AM: Monday night reads "tomorrow night"' : '❌ 12:30 AM: Monday night counted from the new date ("tonight")');
 if (!okEarly) process.exitCode = 1;
+
+// The one-time tip on someone's first block sheet: a night sweep's alert is one push around 9 PM the evening
+// before (not "~30 min before the truck"), a daytime one keeps the 30 min wording.
+async function firstTip(target, center, cnn, side) {
+  const pg = await b.newPage();
+  await pg.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  await pg.evaluateOnNewDocument((t) => {
+    const R = Date, off = t - R.now();
+    class F extends R { constructor(...a) { if (a.length) super(...a); else super(R.now() + off); } static now() { return R.now() + off; } }
+    globalThis.Date = F;
+    try { localStorage.removeItem('curbFirstSheet'); } catch (_) {}
+  }, target);
+  await pg.goto(SITE + '/', { waitUntil: 'load' });
+  await pg.waitForFunction(() => { const x = document.getElementById('welcomeGo'); return x && x.offsetParent; }, { timeout: 8000 }).then(() => pg.click('#welcomeGo'), () => {});
+  await pg.waitForFunction(() => typeof map !== 'undefined');
+  await pg.evaluate((c) => map.setView(c, 17, { animate: false }), center);
+  await pg.waitForFunction((n) => typeof segCacheAll !== 'undefined' && segCacheAll.some((x) => String(x.group.cnn) === n), { timeout: 30000 }, cnn);
+  const text = await pg.evaluate(async (n, sd) => {
+    const hit = segCacheAll.find((x) => String(x.group.cnn) === n && new RegExp(sd, 'i').test(x.side.blockside || ''));
+    openSheet(hit.group, hit.side.key);
+    await new Promise((r) => setTimeout(r, 1200));
+    return document.querySelector('#toast')?.textContent;
+  }, cnn, side);
+  await pg.close();
+  return text;
+}
+const tipNight = await firstTip(Date.UTC(2026, 9, 6, 3, 0), [37.77606, -122.39370], '269000', 'northeast'); // Mon 8 PM
+const tipDay = await firstTip(Date.UTC(2026, 8, 29, 19, 0), [37.76825, -122.44573], '4695000', 'west');      // Tue noon
+console.log(JSON.stringify({ tipNight, tipDay }));
+const okTip = tipNight === "That's this curb's verdict. 🔔 Sweep alerts pings you around 9 PM the evening before it starts."
+  && tipDay === "That's this curb's verdict. 🔔 Sweep alerts pings you ~30 min before the truck.";
+console.log(okTip ? '✅ first-sheet tip: night sweeps say 9 PM the evening before, day sweeps 30 min' : '❌ first-sheet tip: wrong alert timing for this sweep');
+if (!okTip) process.exitCode = 1;
 await b.close();

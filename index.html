@@ -1818,7 +1818,11 @@ function openSheet(group, activeKey){
   try{
     if(canRemind&&!localStorage.getItem('curbFirstSheet')){
       localStorage.setItem('curbFirstSheet','1');
-      setTimeout(()=>toast("That's this curb's verdict. 🔔 Sweep alerts pings you ~30 min before the truck."),800);
+      // a sweep starting before 7 AM gets one push around 9 PM the evening before, not a 30 min heads-up
+      // (alertAnchors / lib/notify-core.js); and the tip never covers a toast that arrived in the meantime
+      const night=!!(active.ns&&alertAnchors(active.ns.start).night), shown=document.getElementById('toast').textContent;
+      const tip="That's this curb's verdict. 🔔 Sweep alerts pings you "+(night?"around 9 PM the evening before it starts.":"~30 min before the truck.");
+      setTimeout(()=>{ if(document.getElementById('toast').textContent===shown) toast(tip); },800);
     }
   }catch(_){}
 }
