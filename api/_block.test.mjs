@@ -104,6 +104,18 @@ describe('block page — content', () => {
     expect(body).toContain('Next sweeps: <b>Thu, Oct 15</b>, <b>Mon, Oct 19</b> and <b>Thu, Oct 22</b>.');
   });
 
+  it('links the holiday list right under the next sweep dates, and only when there are dates', () => {
+    const { body } = renderBlock('1000', DATA);
+    const line = '<p class="hol">These dates already skip <a href="/holidays">street sweeping holidays</a>.</p>';
+    expect(body.split(line)).toHaveLength(2);
+    expect(body.indexOf('<p class="lede">')).toBeLessThan(body.indexOf(line));
+    expect(body.indexOf(line)).toBeLessThan(body.indexOf('<div class="row">'));
+    const never = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b, '777': ['Pierce St', 'Bush St', 'Pine St', 0, [['East', 2, 9, 11, 0, 0]], '', '', '', '2026-09-27'] } } };
+    const none = renderBlock('777', never).body;
+    expect(none).not.toContain('Next sweep');
+    expect(none).not.toContain('class="hol"');
+  });
+
   it('keeps today in the next dates only until its window ends', () => {
     vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 7, 20, 0))); // Wed Oct 7, 1pm PDT (window 12–2pm)
     expect(renderBlock('2000', DATA).body).toContain('Next sweeps: <b>Wed, Oct 7</b>');

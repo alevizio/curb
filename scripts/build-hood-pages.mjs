@@ -689,6 +689,7 @@ const staticUrls = [
   ['https://curb.guide/', 'weekly', '1.0', 'index.html'],
   ['https://curb.guide/about', 'monthly', '0.8', 'about.html'],
   ['https://curb.guide/tickets', 'monthly', '0.8', 'tickets.html'],
+  ['https://curb.guide/holidays', 'monthly', '0.6', 'holidays.html'],
   ['https://curb.guide/changelog', 'weekly', '0.5', 'changelog.html'],
   ['https://curb.guide/n/', 'weekly', '0.7', 'n/index.html'],
   ['https://curb.guide/support', 'monthly', '0.5', 'support.html'],

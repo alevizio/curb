@@ -86,6 +86,10 @@
     {
       "source": "/support",
       "destination": "/support.html"
+    },
+    {
+      "source": "/holidays",
+      "destination": "/holidays.html"
     }
   ],
   "headers": [

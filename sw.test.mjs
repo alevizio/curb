@@ -78,6 +78,13 @@ describe('sw.js', () => {
     expect((await w.request('/?b=870000')).body).toBe('net /');  // a deep link offline still opens the app
   });
 
+  it('/holidays is a page like the others: the network answers while online, the cached copy only offline', async () => {
+    const w = worker({ stores: { 'curb-v5': new Map([['/holidays', res('last year\'s list')]]) } });
+    expect((await w.request('/holidays')).body).toBe('net /holidays');
+    w.online = false;
+    expect((await w.request('/holidays')).body).toBe('net /holidays');  // the copy the online visit refreshed
+  });
+
   it('data files are network first too, so a monthly data refresh reaches returning visitors', async () => {
     const w = worker({ stores: { 'curb-v5': new Map([['/data/overview.json', res('old data')]]) } });
     expect((await w.request('/data/overview.json', 'GET', 'cors')).body).toBe('net /data/overview.json');

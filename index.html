@@ -258,6 +258,8 @@
   .infobtn[aria-expanded="true"]{background:var(--ink);color:var(--paper)}
   .infomenu{position:absolute;right:0;top:calc(100% + 8px);width:272px;background:var(--paper);
     border:2.5px solid var(--ink);border-radius:17px;box-shadow:var(--shadow);padding:8px;z-index:700}
+  /* the open menu lives in .top (600): lift it over the phone layers button (620), which covered its bottom on short screens */
+  .top:has(#infoMenu:not([hidden])){z-index:630}
   .im-head{font-family:'Anton',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px 9px;display:flex;align-items:center;gap:8px}
   .im-head .imlogo{height:29px;width:auto;flex:none}
   .im-head span{color:var(--ink-soft);font-family:'Hanken Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:0;text-transform:none}
@@ -684,6 +686,10 @@
         <a class="im-item" href="/n/" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
           <span class="im-tx"><b>Neighborhoods</b><small>Street cleaning by SF neighborhood</small></span>
+        </a>
+        <a class="im-item" href="/holidays" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg></span>
+          <span class="im-tx"><b>Sweeping holidays</b><small>Days SF skips daytime sweeping</small></span>
         </a>
         <a class="im-item" href="/tickets" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V7Z"/><path d="M12 6v2M12 11v2M12 16v2"/></svg></span>
