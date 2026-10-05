@@ -180,6 +180,14 @@ const STYLE = `
     .cal{width:70px} .cal .d{font-size:34px}
     th,td{padding-left:10px;padding-right:10px}
     table{font-size:14px}
+  }
+  /* 320 px phones: the table is 274 px wide and "Mon, May 31" (82 px at 14 px) ran out of its 30% column
+     into the holiday name. Slightly smaller type and padding, and a wider date column, fit every cell. */
+  @media (max-width:359px){
+    th,td{padding-left:8px;padding-right:8px}
+    table,td.hx{font-size:13px}
+    th{font-size:10px;letter-spacing:.08em}
+    .c-d{width:34%} .c-x{width:29%}
   }`;
 
 /** The whole page, from the tables. */
@@ -202,7 +210,7 @@ export function renderHolidaysPage() {
     { '@type': 'ListItem', position: 2, name: 'Street sweeping holidays' }] });
 
   const sourceLine = (posted.length ? `The ${andList(posted.map(String))} dates are SFMTA's posted schedule. ` : '') +
-    (derived.length ? `Dates in ${andList(derived.map(String))} follow SFMTA's rule and will be re-checked when SFMTA posts them. ` : '') +
+    (derived.length ? `Dates in ${andList(derived.map(String))} follow SFMTA's rule and will be re-checked when SFMTA posts them, weekend holidays first. ` : '') +
     `Source: <a href="${SFMTA_URL}" rel="noopener">SFMTA's holiday enforcement schedule</a>.`;
 
   const tables = years.map((y) => {
@@ -286,7 +294,7 @@ ${trs}
       <div class="mean day"><h3>Daytime sweeping is off</h3>
         <p>On every date below, San Francisco does not enforce <b>daytime street sweeping</b>. The sweep isn't moved to another day: your block's next regular sweep still applies.</p></div>
       <div class="mean night"><h3>Night routes keep going</h3>
-        <p>Blocks swept overnight and the <b>7-day commercial routes</b> still sweep on most holidays. They stop only on ${andList(nightNames)}. Your block's hours on the <a href="/">map</a> show which kind it is.</p></div>
+        <p>Blocks swept between <b>12 AM and 6 AM</b> and the <b>7-day commercial routes</b> still sweep on most holidays. They stop only on ${andList(nightNames)}. Your block's hours on the <a href="/">map</a> show which kind it is.</p></div>
       <div class="mean sign"><h3>The sign wins</h3>
         <p>The posted sign is always the source of truth. If a sign on your block says something else, follow the sign.</p></div>
     </div>

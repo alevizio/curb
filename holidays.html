@@ -132,6 +132,14 @@
     th,td{padding-left:10px;padding-right:10px}
     table{font-size:14px}
   }
+  /* 320 px phones: the table is 274 px wide and "Mon, May 31" (82 px at 14 px) ran out of its 30% column
+     into the holiday name. Slightly smaller type and padding, and a wider date column, fit every cell. */
+  @media (max-width:359px){
+    th,td{padding-left:8px;padding-right:8px}
+    table,td.hx{font-size:13px}
+    th{font-size:10px;letter-spacing:.08em}
+    .c-d{width:34%} .c-x{width:29%}
+  }
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -164,7 +172,7 @@
       <div class="mean day"><h3>Daytime sweeping is off</h3>
         <p>On every date below, San Francisco does not enforce <b>daytime street sweeping</b>. The sweep isn't moved to another day: your block's next regular sweep still applies.</p></div>
       <div class="mean night"><h3>Night routes keep going</h3>
-        <p>Blocks swept overnight and the <b>7-day commercial routes</b> still sweep on most holidays. They stop only on New Year's Day, Thanksgiving and Christmas. Your block's hours on the <a href="/">map</a> show which kind it is.</p></div>
+        <p>Blocks swept between <b>12 AM and 6 AM</b> and the <b>7-day commercial routes</b> still sweep on most holidays. They stop only on New Year's Day, Thanksgiving and Christmas. Your block's hours on the <a href="/">map</a> show which kind it is.</p></div>
       <div class="mean sign"><h3>The sign wins</h3>
         <p>The posted sign is always the source of truth. If a sign on your block says something else, follow the sign.</p></div>
     </div>
@@ -173,7 +181,7 @@
   <section aria-labelledby="list">
     <div class="sec-k">Every date</div>
     <h2 id="list">The full list</h2>
-    <p class="lede">The 2026 dates are SFMTA's posted schedule. Dates in 2027 and 2028 follow SFMTA's rule and will be re-checked when SFMTA posts them. Source: <a href="https://www.sfmta.com/getting-around/drive-park/holiday-enforcement-schedule" rel="noopener">SFMTA's holiday enforcement schedule</a>.</p>
+    <p class="lede">The 2026 dates are SFMTA's posted schedule. Dates in 2027 and 2028 follow SFMTA's rule and will be re-checked when SFMTA posts them, weekend holidays first. Source: <a href="https://www.sfmta.com/getting-around/drive-park/holiday-enforcement-schedule" rel="noopener">SFMTA's holiday enforcement schedule</a>.</p>
     <div class="years">
     <div class="yr" id="y2026">
       <h3>2026</h3>

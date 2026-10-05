@@ -44,6 +44,30 @@ describe('holidays.html', () => {
     expect(visible).toContain("They stop only on New Year's Day, Thanksgiving and Christmas.");
   });
 
+  it('describes night routes the way the map classifies them (any window inside 12 AM to 6 AM, or the 7-day routes)', () => {
+    expect(visible.replace(/\s+/g, ' ')).toContain('Blocks swept between 12 AM and 6 AM and the 7-day commercial routes still sweep on most holidays.');
+    const row = (fromhour, tohour, holidays = '0') => ({ fromhour, tohour, holidays });
+    for (const [f, t] of [['0', '2'], ['2', '6'], ['0', '6'], ['5', '6']]) expect(globalThis.sweepNightRoute(row(f, t)), `${f} to ${t}`).toBe(true);
+    for (const [f, t] of [['5', '7'], ['6', '8'], ['9', '11']]) expect(globalThis.sweepNightRoute(row(f, t)), `${f} to ${t}`).toBe(false);
+    expect(globalThis.sweepNightRoute(row('6', '8', '1'))).toBe(true); // the 7-day routes DataSF flags
+  });
+
+  it('gives every column room for its longest word on a 320 px phone (dates no longer run into the name)', () => {
+    // 320 px viewport: 20 px page gutters and the 3 px table border leave a 274 px table. Text widths
+    // measured in Chrome with Hanken Grotesk at the narrow sizes (13 px cells, 10 px headers at .08em):
+    // widest date "Mon, May 31" 75.6 px, "Still swept" 61.2, "OVERNIGHT" 62.8, unbreakable "Independence" 82.8.
+    const narrow = (page.match(/@media \(max-width:359px\)\{([\s\S]*?)\n  \}/) || [])[1];
+    expect(narrow, 'a max-width:359px block').toBeTruthy();
+    expect(narrow).toContain('table,td.hx{font-size:13px}');
+    expect(narrow).toContain('th{font-size:10px;letter-spacing:.08em}');
+    const pad = Number(narrow.match(/th,td\{padding-left:(\d+)px;padding-right:\1px\}/)[1]);
+    const pct = (cls) => Number(narrow.match(new RegExp(`\\.${cls}\\{width:(\\d+)%\\}`))[1]);
+    const room = (p) => (274 * p) / 100 - 2 * pad;
+    expect(room(pct('c-d'))).toBeGreaterThanOrEqual(75.6);
+    expect(room(pct('c-x'))).toBeGreaterThanOrEqual(62.8);
+    expect(room(100 - pct('c-d') - pct('c-x'))).toBeGreaterThanOrEqual(82.8);
+  });
+
   it('prints the right weekday and date for every row', () => {
     for (const r of rows) {
       const want = new Date(r.date + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
@@ -64,7 +88,7 @@ describe('holidays.html', () => {
   it('groups the list by year and flags the years derived by SFMTA\'s rule', () => {
     const years = [...page.matchAll(/<div class="yr" id="y(\d{4})">\s*<h3>\d{4}( <span class="rule-chip">)?/g)].map((m) => [m[1], !!m[2]]);
     expect(years).toEqual([['2026', false], ['2027', true], ['2028', true], ['2029', true]]);
-    expect(visible).toContain('The 2026 dates are SFMTA\'s posted schedule. Dates in 2027 and 2028 follow SFMTA\'s rule and will be re-checked when SFMTA posts them.');
+    expect(visible).toContain('The 2026 dates are SFMTA\'s posted schedule. Dates in 2027 and 2028 follow SFMTA\'s rule and will be re-checked when SFMTA posts them, weekend holidays first.');
     expect(page).toContain(`<a href="${SFMTA_URL}" rel="noopener">SFMTA's holiday enforcement schedule</a>`);
   });
 
