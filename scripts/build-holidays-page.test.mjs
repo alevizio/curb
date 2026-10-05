@@ -54,9 +54,10 @@ describe('holidays.html', () => {
   it('tags the weekday a weekend holiday is observed on, and nothing else', () => {
     const obs = rows.filter((r) => r.observed).map((r) => r.date);
     expect(obs).toContain('2026-07-03');    // Independence Day on a Saturday → Friday
-    expect(obs).toContain('2027-12-31');    // New Year's Day 2028 on a Saturday → Friday before
-    expect(obs).toContain('2028-11-10');    // Veterans Day on a Saturday
-    for (const d of ['2026-07-04', '2027-12-25', '2026-11-27', '2027-01-18']) expect(obs).not.toContain(d);
+    expect(obs).toContain('2027-06-18');    // Juneteenth 2027 on a Saturday → Friday
+    expect(obs).toContain('2027-07-05');    // Independence Day 2027 on a Sunday → Monday
+    expect(obs).toContain('2028-11-10');    // Veterans Day on a Saturday (the date itself is listed too)
+    for (const d of ['2027-12-25', '2028-01-01', '2028-11-11', '2026-11-27', '2027-01-18']) expect(obs).not.toContain(d);
     expect(rows.filter((r) => r.observed).every((r) => ["New Year's Day", 'Juneteenth', 'Independence Day', 'Veterans Day', 'Christmas'].includes(r.name))).toBe(true);
   });
 
@@ -118,7 +119,7 @@ function runPage(nowMs) {
 describe('holidays page script', () => {
   it('mutes past dates and spells out the next holiday', () => {
     const { els, marked } = runPage(Date.UTC(2026, 9, 5, 19, 0)); // Mon Oct 5 2026, noon PDT
-    expect(marked('is-past')).toEqual(['2026-01-01', '2026-01-19', '2026-02-16', '2026-05-25', '2026-06-19', '2026-07-03', '2026-07-04', '2026-09-07']);
+    expect(marked('is-past')).toEqual(['2026-01-01', '2026-01-19', '2026-02-16', '2026-05-25', '2026-06-19', '2026-07-03', '2026-09-07']);
     expect(marked('is-next')).toEqual(['2026-10-12']);
     expect(els.next.hidden).toBe(false);
     expect([els.nxK.textContent, els.nxName.textContent, els.nxMon.textContent, els.nxDay.textContent, els.nxDow.textContent])
