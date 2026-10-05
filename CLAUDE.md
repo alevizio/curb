@@ -286,11 +286,30 @@ Files now present for the push feature:
 - `api/_store.js` — subscription store backed by Upstash Redis (hash `curb:subs`,
   field = subscription.endpoint). Accepts `KV_REST_API_*` (Vercel Upstash integration)
   or `UPSTASH_REDIS_REST_*`. Exports saveSub / loadAllSubs / deleteSub / markNotified.
+  Multi-watch (2026-10, GitHub #11 "both sides of the street"): a device keeps up to `MAX_WATCHES` = 5
+  watches, one per curb side. Watch 0 is the device's own field (so every record from before is watch 0,
+  untouched); watch n is `<endpoint>#<n>` (n 1..4) in the same hash (endpoints with a `#` are refused).
+  Each watch is a complete record (own spot, rules, `notified`, savedAt), so the cron loops, `casUpdate`
+  and the never-re-arm-a-Turn-off guarantee hold per watch unchanged; `loadAllSubs` returns `{ field, slot,
+  endpoint }` per watch (`field` for advanceSpot / markNotified, `endpoint` = the device). Fixed slots, not
+  side-named fields: a save reads the 5 known fields in ONE `HMGET` (raw strings) and `pickSlot` picks, in
+  order, the armed watch on this side (in place, no duplicate), a watch turned off on this side (`offSide`
+  remembers it, so off → on keeps its de-dupe), a pre-multi turned-off record (reused with its de-dupe, as
+  before), an empty slot, then a watch turned off on another side (fresh de-dupe); 5 armed on other sides →
+  `{ full: true }` (409 `alert limit reached`). Sides match on cnn + sideKey or cnn + blockside (auto-park
+  keys by cnnrightleft), else corridor|limits|blockside. A save writes through `claimField` (HSETNX for an
+  empty slot, else the same CAS script) and re-reads on a lost race, so two new sides tapped at once both
+  land and a cron write between a save's read and write is not dropped. `deleteSub` / `deleteIosSub` remove
+  all 5 fields (a dead device is pruned once). Storage is capped at 5 records per device.
 - `api/save-subscription.js` — persists `{ subscription, spot }` via the store, with
   input validation (https push-host allowlist, size caps, spot sanitize/clamp); like the iOS twin, only a
   brand-new endpoint is throttled (per client IP, 10 s), a re-save of a known one always lands. `DELETE
-  { subscription }` turns alerts off: proven by endpoint + a constant-time `keys.auth` match, it
-  DISARMS (`spot = null`, the cron skips it) so auto-park keeps resolving the subscription.
+  { subscription, spot? }` turns alerts off: proven by endpoint + a constant-time `keys.auth` match, it
+  DISARMS (`spot = null`, the cron skips it) so auto-park keeps resolving the subscription. `spot` names
+  the side (`sanitizeSide`, clamped like sanitizeSpot): only that watch goes off, the others are never
+  touched; no side (a page from before multi-watch) turns off every watch of the device. Auto-park
+  (`api/parked.js`) saves with `{ atBase: true }`: watch 0 follows the car, as the single watch did (a new
+  watch per park would pile up), and another armed watch on that same side is turned off (no double push).
 - `api/send-notifications.js` — the sender: loads subs, sends the touchpoint `dueAlert` says is due
   over web-push / APNs, de-dupes via `notified`, prunes on 410/404. Auth: an Upstash QStash
   `Upstash-Signature` JWT (official `Receiver`, raw body — so the schedule's body must be EMPTY — and the exact URL
@@ -316,7 +335,11 @@ Files now present for the push feature:
   monitor's `?status=1` check; optional `HC_PING_URL` (healthchecks.io) is pinged by successful QStash
   runs and `/fail` on errors. The monitor workflow can also be dispatched by QStash (`mode` input).
   A 200 run is not proof of delivery: each run counts attempted / sent / failed (by status) / pruned per
-  channel, and `judgeDelivery` keeps the last 6 devices tried per channel in `curb:cron` `delivery`. At
+  channel (`checked` = devices with any record, off included, as before; `watches` = armed watches), and
+  `judgeDelivery` keeps the last 6 devices tried per channel in `curb:cron` `delivery`. With several watches
+  on a device, a failed send skips its other watches until the next tick (one failure and one timeout per
+  device, never per watch) and a 410/404 prunes all of them once. Watch n's pushes use `<tag>-<n>` (web tag
+  and apns-collapse-id) so two sides' eve pushes at 8 PM don't collapse into one notification. At
   least 3 failed and twice the deliveries (or the APNs pass erroring 2 runs in a row, or armed iOS
   watches with no APNs config) sets `delivery.failing`: HC gets `/fail` and the monitor's alerts-sender
   check fails. Devices, not sends, so one dead subscription retried every tick can't trip it; 410/404
@@ -330,12 +353,17 @@ push alongside Web Push:
   `APNS_KEY_P8_B64` preferred / `APNS_KEY_P8`). `api/save-ios-subscription.js` stores a hex APNs
   device token + spot in the `curb:apns` Upstash hash (sibling of `curb:subs`, identical shape).
   Only brand-new tokens are throttled (per client IP); re-saves of a known token always land (a
-  per-token 60 s throttle used to drop block switches and style changes). Off: `DELETE {token}` or
-  `POST {token, spot:{off:true}}` — the shipped app's bridge can only POST the page's spot. Off DISARMS
-  (`spot = null`, like web) rather than deleting, so the de-dupe survives turning alerts back on.
+  per-token 60 s throttle used to drop block switches and style changes). Off: `DELETE {token, spot?}` or
+  `POST {token, spot:{off:true, cnn, sideKey, corridor, limits, blockside}}` — the shipped app's bridge can
+  only POST the page's spot, but it forwards that object untouched (builds 6 and 7 build the body
+  themselves around it), which is how multi-watch works on iOS with NO app update: the side rides in the
+  spot. `{off:true}` alone (an old page) turns off every watch of the token. Off DISARMS (`spot = null`,
+  like web) rather than deleting, so the de-dupe survives turning alerts back on. Watch n's iOS record has
+  no `token` property (the field names the device), so code from before multi-watch, run against it after a
+  rollback, would send to the field (refused by APNs) rather than repeat a push every tick.
 - `api/send-notifications.js` runs a SECOND loop over `loadAllIosSubs()` with the IDENTICAL
   lead-window / night-before / dedupe / forever-watch logic, delivering over APNs instead of
-  web-push; `?test=ios` (authed) sends a one-off delivery test. Env: `APNS_KEY_P8_B64`/`APNS_KEY_P8`,
+  web-push; `?test=ios` (authed) sends a one-off delivery test, one per device. Env: `APNS_KEY_P8_B64`/`APNS_KEY_P8`,
   `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_BUNDLE_ID` (see `docs/native-push-plan.md`).
 - On the native wrapper the "🔔 Sweep alerts" button is diverted to `window.__curbNativePush`
   (the `curbPush` bridge → APNs registration), NOT the PWA "Add to Home Screen" hint.
@@ -379,7 +407,10 @@ re-arm and the send-time guard. `dueAlert` returns `expiresAt` (lead/tonight: th
 are titled "Test · <which alert> (<when it really fires>)". The holiday table covers through
 2029-01-01 (2027-2028 derived by rule; a test fails 150 days before it runs out).
 
-Saved alert (index.html): localStorage `curbAlert` keyed on the curb side (cnn|sideKey), NOT the
+Saved alerts (index.html): localStorage `curbAlert` is a MAP keyed on the curb side (`cnn|sideKey` →
+{cnn, sideKey, corridor, limits, blockside, level, voice, armedAt, v}), up to `MAX_ALERTS` = 5 (= the
+server's MAX_WATCHES, a test holds them equal); the single value from before multi-watch migrates to a
+one-entry map in `savedAlerts()`. Keyed on the side, NOT the
 sweep instant — the old instant key read "off" after the first sweep while pushes kept coming. "On"
 is claimed only while the watch is alive (< MAX_WATCH_AGE, web permission granted); legacy
 `curbAlertKey` values migrate by corridor|limits|blockside; a matching sheet silently re-arms once a
@@ -387,7 +418,15 @@ day (a same-sweep re-save keeps the stored eve/morning anchors and `notified` �
 it thinks are past, and an 8:05pm refresh used to wipe that night's eve push; a save from a sheet left
 open since before the cron re-armed — same side + rules, an older sweep that has already started — keeps
 the stored spot and applies only level/voice, `staleResave` in api/_store.js). Tapping "✓ Alerts on"
-offers Turn off; other blocks show "Alerts are on for <block>". The iOS bridge comes in two shapes: build
+offers Turn off, which names its side (web DELETE `spot`, iOS `{off:true, ...sideOf(spot)}`) and forgets
+only that side. Any other side shows the normal 🔔 Sweep alerts, which ADDS a watch, with one muted line
+under the actions (`#alertNote`): "Also on for Crestline Dr, NE side · Kansas St, West side"
+(`alertLabel`: compound sides abbreviated, cross streets only to tell two blocks of a street apart). At 5
+live watches the button reads "5 of 5 alerts in use" (`.btn.full`, dashed), the line adds "Turn one of them
+off on its sheet to add this curb." and a tap toasts the limit without saving; the server's 409 reads the
+same (build 7+ passes `save-failed:409`; build 6 can't tell, so the page checks before asking). Intensity /
+Voice are global prefs: a change re-saves the open side at once and each other side on its next sheet open
+(refreshWatch sees the style differ). The iOS bridge comes in two shapes: build
 <= 6 calls `__curbNativePushResult(ok, msg)` and `__curbRequestPush(spot)` resolves a boolean; build 7+
 calls `__curbNativePushResult` with ONE object `{ok, reason, message, status}` (`reason` is a stable code:
 saved, denied, denied-settings, save-failed, registration-failed, timeout, …; `message` the server/iOS

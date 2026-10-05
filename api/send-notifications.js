@@ -79,6 +79,16 @@ export function judgeDelivery(prev, run) {
 // A notification tap opens the specific block when we know its cnn, else the map.
 const deepLink = (spot) => (spot && spot.cnn ? '/b/' + spot.cnn : '/');
 
+// A device keeps up to 5 watches (one per curb side, api/_store.js MAX_WATCHES), each its own record, so
+// both loops below run per WATCH exactly as they ran per device. What is per DEVICE: `checked` (devices
+// with any record, alerts off included, as before) next to `watches` (armed watches); the delivery window
+// (judgeDelivery folds by device id); a prune (410/404, BadDeviceToken) removes every watch of the device
+// once; and a device whose send failed this run skips its other watches until the next tick, so a dead or
+// stalled push service costs one failure and one timeout per device, never one per watch.
+// Watch n's pushes carry `<tag>-<n>` (web tag and APNs collapse id): with one shared tag, both sides' eve
+// pushes at 8 PM would collapse into one notification. Watch 0 keeps the tag it always had.
+const tagFor = (tag, slot) => (slot ? `${tag}-${slot}` : tag);
+
 // The QStash JWT's `sub` claim is the schedule's destination URL; the schedule must target exactly this
 // (no query string), so a signed request can never reach ?test / ?status.
 const SELF_URL = 'https://curb.guide/api/send-notifications';
@@ -153,7 +163,7 @@ export default async function handler(req, res) {
   if (test === 'ios') {
     if (!storeReady()) { res.status(500).json({ error: 'store not configured' }); return; }
     if (!apnsConfigured()) { res.status(400).json({ error: 'APNs not configured' }); return; }
-    const tokens = (await loadAllIosSubs()).filter((t) => t.spot);
+    const tokens = [...new Set((await loadAllIosSubs()).filter((t) => t.spot).map((t) => t.token))].map((token) => ({ token })); // one per device, however many watches
     const results = [];
     if (tokens.length) {
       let session, alt = null;
@@ -225,10 +235,11 @@ export default async function handler(req, res) {
     const webFailures = {}, iosFailures = {}, webOut = [], iosOut = [];
     const failedOn = (map, out, id, why) => { map[why] = (map[why] || 0) + 1; out.push({ id: deviceId(id), ok: false, why }); };
 
-    // ---- Web Push ----
+    // ---- Web Push ---- (one entry per watch; `field` is the watch's record, `endpoint` its device)
     const subs = await loadAllSubs();
-    for (const { endpoint, subscription, spot, notified, savedAt } of subs) {
-      if (!spot || !spot.nextSweepISO) continue;
+    const webGone = new Set(), webDown = new Set();
+    for (const { field, slot, endpoint, subscription, spot, notified, savedAt } of subs) {
+      if (!spot || !spot.nextSweepISO || webGone.has(endpoint)) continue;
       // Forever-watch re-arm: advance to the next occurrence once the window ends (its OWN pass —
       // never coupled to the lead push, which still returns the same instant at lead time). Stops
       // while stale (MAX_WATCH_AGE) so a frozen rule can't track a city schedule change. The
@@ -236,11 +247,11 @@ export default async function handler(req, res) {
       // user turned the watch off or re-saved it since the snapshot (advanceSpot re-reads it).
       if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
         const advanced = recomputeSpot(spot);
-        if (advanced) { if (await advanceSpot(endpoint, advanced, spot)) rearmed++; continue; }
+        if (advanced) { if (await advanceSpot(field, advanced, spot)) rearmed++; continue; }
       }
       const due = dueAlert(spot, notified, now);
-      if (!due) continue;
-      const payload = JSON.stringify({ title: due.title, body: due.body, url: deepLink(spot), tag: due.tag, requireInteraction: due.urgent });
+      if (!due || webDown.has(endpoint)) continue;
+      const payload = JSON.stringify({ title: due.title, body: due.body, url: deepLink(spot), tag: tagFor(due.tag, slot), requireInteraction: due.urgent });
       // Bounded TTL (web-push's default is 4 weeks: an offline phone would get "move your car" days
       // late) + high urgency for act-now pushes (Android Doze holds normal ones). No Topic header:
       // Apple's web push service rejects it, which would silently drop every Safari/iOS PWA alert.
@@ -252,8 +263,9 @@ export default async function handler(req, res) {
         await webpush.sendNotification(subscription, payload, opts);
         delivered = true; sent++; webOut.push({ id: deviceId(endpoint), ok: true });
       } catch (err) {
-        if (err.statusCode === 410 || err.statusCode === 404) { await deleteSub(endpoint); pruned++; }
+        if (err.statusCode === 410 || err.statusCode === 404) { await deleteSub(endpoint); webGone.add(endpoint); pruned++; }
         else {
+          webDown.add(endpoint);
           console.error('web push failed:', err.statusCode || 0, String(err.body || err.message || '').slice(0, 200));
           // Keyed by status only (the monitor's issues are public: no push-service text in them). No
           // status: no answer (a timeout, a network error code) or a send that never left (bad keys).
@@ -263,7 +275,7 @@ export default async function handler(req, res) {
       }
       // De-dupe write lives OUTSIDE the send try/catch: a transient store error here must not be
       // mistaken for a send failure (which would let the next 15-min tick re-push the same sweep).
-      if (delivered) await markNotified(endpoint, spot.nextSweepISO, due.key);
+      if (delivered) await markNotified(field, spot.nextSweepISO, due.key);
     }
 
     // ---- Native APNs (iOS) ---- identical windows / dedupe / re-arm, different transport. Skipped
@@ -272,6 +284,7 @@ export default async function handler(req, res) {
     // the APNs key is present) — this disambiguates "no device registered" from "key not loaded".
     const iosConfigured = apnsConfigured();
     const iosSubs = await loadAllIosSubs();
+    const iosGone = new Set(), iosDown = new Set();
     let iosError = null; // isolate APNs failures so they can't 500 the cron or block web push
     if (iosConfigured && iosSubs.length) try {
       let jwt = getProviderToken(); // throws on a malformed .p8 — caught below, not fatal
@@ -280,27 +293,28 @@ export default async function handler(req, res) {
       let altSession = null; // opened lazily only if a token mismatches the primary environment
       const isBadToken = (s, r) => s === 410 || (s === 400 && /BadDeviceToken|Unregistered/i.test(r));
       try {
-        for (const { token, spot, notified, savedAt } of iosSubs) {
-          if (!spot || !spot.nextSweepISO) continue;
+        for (const { field, slot, token, spot, notified, savedAt } of iosSubs) {
+          if (!spot || !spot.nextSweepISO || iosGone.has(token)) continue;
           if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
             const advanced = recomputeSpot(spot);
-            if (advanced) { if (await advanceIosSpot(token, advanced, spot)) iosRearmed++; continue; }
+            if (advanced) { if (await advanceIosSpot(field, advanced, spot)) iosRearmed++; continue; }
           }
           const due = dueAlert(spot, notified, now);
-          if (!due) continue;
-          const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': due.tag }, url: deepLink(spot), tag: due.tag };
+          if (!due || iosDown.has(token)) continue;
+          const tag = tagFor(due.tag, slot);
+          const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': tag }, url: deepLink(spot), tag };
           // apns-expiration = when this push stops being worth delivering (notify-core expiresAt: the
           // sweep for lead/tonight, SF midnight for the "tomorrow" eve push): a device that reconnects
           // later never shows a stale or wrong-day alert.
           const exp = Math.floor(due.expiresAt / 1000);
-          let { status, reason } = await sendOne(session, jwt, token, aps, due.tag, exp);
+          let { status, reason } = await sendOne(session, jwt, token, aps, tag, exp);
           // Cross-host retry: a device's token environment (sandbox vs production) follows the build,
           // so the primary host can reject a valid token as BadDeviceToken. Try the OTHER host once
           // before pruning — only then is the token genuinely dead.
           if (isBadToken(status, reason)) {
             try {
               if (!altSession) altSession = openSession(altHost());
-              ({ status, reason } = await sendOne(altSession, jwt, token, aps, due.tag, exp));
+              ({ status, reason } = await sendOne(altSession, jwt, token, aps, tag, exp));
             } catch { /* alt host unreachable — fall through to prune below */ }
           }
           // 403 ExpiredProviderToken => the cached ES256 JWT went stale on this warm instance (clock
@@ -310,13 +324,13 @@ export default async function handler(req, res) {
             jwtReset = true;
             resetProviderToken();
             jwt = getProviderToken();
-            ({ status, reason } = await sendOne(session, jwt, token, aps, due.tag, exp));
+            ({ status, reason } = await sendOne(session, jwt, token, aps, tag, exp));
           }
           let delivered = false;
           if (status === 200) { delivered = true; iosSent++; iosOut.push({ id: deviceId(token), ok: true }); }
-          else if (isBadToken(status, reason)) { await deleteIosSub(token); iosPruned++; }
-          else failedOn(iosFailures, iosOut, token, `${status}${reason ? ' ' + String(reason).slice(0, 40) : ''}`); // e.g. 403 InvalidProviderToken
-          if (delivered) await markIosNotified(token, spot.nextSweepISO, due.key);
+          else if (isBadToken(status, reason)) { await deleteIosSub(token); iosGone.add(token); iosPruned++; }
+          else { iosDown.add(token); failedOn(iosFailures, iosOut, token, `${status}${reason ? ' ' + String(reason).slice(0, 40) : ''}`); } // e.g. 403 InvalidProviderToken
+          if (delivered) await markIosNotified(field, spot.nextSweepISO, due.key);
         }
       } finally {
         try { session.close(); } catch { /* already closed */ }
@@ -338,7 +352,9 @@ export default async function handler(req, res) {
       const failed = Object.values(failures).reduce((n, c) => n + c, 0);
       return { attempted: ok + failed + gone, sent: ok, failed, pruned: gone, ...(failed ? { failures } : {}) };
     };
-    await finish(200, { ok: true, web: { checked: subs.length, ...tally(sent, pruned, webFailures), rearmed }, ios: { configured: iosConfigured, checked: iosSubs.length, ...tally(iosSent, iosPruned, iosFailures), rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } },
+    // checked = devices (alerts off included, as before); watches = armed watches across them
+    const count = (list, dev) => ({ checked: new Set(list.map((x) => x[dev])).size, watches: list.filter((x) => x.spot).length });
+    await finish(200, { ok: true, web: { ...count(subs, 'endpoint'), ...tally(sent, pruned, webFailures), rearmed }, ios: { configured: iosConfigured, ...count(iosSubs, 'token'), ...tally(iosSent, iosPruned, iosFailures), rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } },
       undefined, { web: webOut, ios: iosOut, iosError, iosUnconfigured: iosConfigured ? 0 : iosSubs.filter((t) => t.spot).length });
   } catch (e) {
     console.error('send-notifications failed:', e);

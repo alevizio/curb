@@ -28,7 +28,8 @@ function rawRedis() {
   return _raw;
 }
 
-// One hash, field = subscription.endpoint, value = { subscription, spot, notified, savedAt, proofHash? }.
+// One hash, field = subscription.endpoint (watch 0) or `<endpoint>#<n>` (watch n, see MAX_WATCHES below),
+// value = { subscription, spot, notified, savedAt, proofHash? (watch 0 only), offSide? }.
 const KEY = 'curb:subs';
 
 // Back-compat: older records carried two named de-dupe fields (notifiedFor / notifiedEveFor); the
@@ -69,43 +70,163 @@ function staleResave(prevSpot, spot) {
 const withStyle = (prevSpot, spot) =>
   ({ ...prevSpot, ...(spot.level ? { level: spot.level } : {}), ...(spot.voice ? { voice: spot.voice } : {}) });
 
+// What a save writes over the watch it lands on: a re-save of the same sweep keeps the stored rule and
+// anchors, a stale-sheet re-save keeps the stored spot and applies only its style (see above).
+function carryForward(prev, spot) {
+  let out = spot || null;
+  if (prev && prev.spot && spot && staleResave(prev.spot, spot)) {
+    out = withStyle(prev.spot, spot);
+  } else if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
+    // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
+    // forever-watch to one-shot). Carry the prior rule(s)/cnn/sideKey forward when absent.
+    if (out && !out.rule && prev.spot.rule) {
+      out.rule = prev.spot.rule;
+      if (prev.spot.rules) out.rules = prev.spot.rules;
+      if (prev.spot.cnn) out.cnn = prev.spot.cnn;
+      if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
+    }
+    carryAnchors(out, prev.spot);
+  }
+  return out;
+}
+
 /** True once the store env vars are present (used to fail loudly instead of silently). */
 export function storeReady() {
   return Boolean(URL_ && TOKEN);
 }
 
-/** Upsert a subscription + its saved spot, keyed by endpoint.
- *  The de-dupe map is always kept: each entry holds the sweep it fired for, so it can only ever block
- *  that same sweep. Re-tapping, turning alerts off and on, or switching blocks never re-sends a push
- *  already delivered, and never blocks a different sweep. */
-export async function saveSub(subscription, spot) {
+// ---- watches: up to MAX_WATCHES per device, one per curb side ----
+// A device (a web-push endpoint or an APNs token) keeps up to MAX_WATCHES independent watches, so one
+// phone can follow both sides of a street. Watch 0 lives in the device's own field, which makes every
+// record written before multi-watch watch 0, unchanged; watch n lives in `<device>#<n>` in the same hash.
+// Each is a complete record (its own spot, rules, `notified` de-dupe and savedAt), so the cron loops, the
+// compare-and-set writes and the never-re-arm-a-Turn-off guarantee work per watch exactly as they did per
+// device. Fixed slots rather than fields named after the side: one HMGET of the 5 known fields tells a save
+// which watch already holds its side and how many are armed, and a device can never hold more than 5
+// records (side-named fields would keep a record for every side ever armed and turned off).
+export const MAX_WATCHES = 5;
+const slotField = (base, n) => (n ? `${base}#${n}` : base);
+const SLOT_RE = new RegExp(`#([1-${MAX_WATCHES - 1}])$`);
+/** A hash field → { base: the device's endpoint / token, slot }. (Endpoints with a '#' are refused.) */
+export function splitField(field) {
+  const m = SLOT_RE.exec(field);
+  return m ? { base: field.slice(0, m.index), slot: Number(m[1]) } : { base: field, slot: 0 };
+}
+
+/** Two spots name the same curb side: the same cnn and sideKey, or the same cnn and blockside (auto-park
+ *  keys a side by cnnrightleft, 'L'/'R', where the page uses the blockside, 'North'); else the block's text
+ *  (a spot without a rule, from an old cached page, carries no cnn). */
+export function sameSide(a, b) {
+  if (!a || !b) return false;
+  if (a.cnn && b.cnn) return a.cnn === b.cnn && ((a.sideKey || '') === (b.sideKey || '') || Boolean(a.blockside && a.blockside === b.blockside));
+  return (a.corridor || '') === (b.corridor || '') && (a.limits || '') === (b.limits || '') && (a.blockside || '') === (b.blockside || '');
+}
+// A turned-off watch keeps naming its side (`offSide`), so turning that side back on finds its de-dupe.
+const sideOf = (s) => ({ cnn: s.cnn || '', sideKey: s.sideKey || '', corridor: s.corridor || '', limits: s.limits || '', blockside: s.blockside || '' });
+
+/** The device's MAX_WATCHES slots, read in one HMGET as the exact stored strings (a save's write is a
+ *  compare-and-set against them): [{ n, field, raw, rec }], rec null for an empty slot. */
+async function readWatches(key, base) {
+  const fields = Array.from({ length: MAX_WATCHES }, (_, n) => slotField(base, n));
+  const raws = await rawRedis().hmget(key, ...fields);
+  return fields.map((field, n) => {
+    const raw = Array.isArray(raws) && typeof raws[n] === 'string' ? raws[n] : null;
+    return { n, field, raw, rec: raw ? safeParse(raw) : null };
+  });
+}
+
+// Which watch a save of `spot` writes, first match wins:
+//  1. the watch already on this side, armed → updated in place (no duplicate watch);
+//  2. a watch turned off on this side → re-armed with its de-dupe, so off → on of one sweep can't repeat a push;
+//  3. a watch turned off before sides were recorded (a pre-multi record) → reused with its de-dupe, as
+//     every save did before;
+//  4. an empty slot → a fresh watch;
+//  5. a watch turned off on another side → reused with a fresh de-dupe (its entries name the other side's
+//     sweeps and could block this side's push for the same instant).
+// → { n, keep } (keep = carry that watch's de-dupe and spot forward), or null when 5 watches are armed.
+function pickSlot(slots, spot) {
+  const armed = (s) => Boolean(s.rec && s.rec.spot);
+  const off = (s) => Boolean(s.rec && !s.rec.spot);
+  const order = [
+    [(s) => armed(s) && sameSide(s.rec.spot, spot), true],
+    [(s) => off(s) && Boolean(s.rec.offSide) && sameSide(s.rec.offSide, spot), true],
+    [(s) => off(s) && !s.rec.offSide, true],
+    [(s) => !s.rec, false],
+    [off, false],
+  ];
+  for (const [test, keep] of order) { const s = slots.find(test); if (s) return { n: s.n, keep }; }
+  return null;
+}
+
+// A save lands only if its slot still holds what the save read (empty: HSETNX, else the CAS script below),
+// so two saves racing for one empty slot (two new sides tapped at once) can't overwrite each other, and a
+// cron write landing in between is never lost: the loser re-reads and decides again.
+async function claimField(key, field, raw, value) {
+  const r = rawRedis();
+  if (raw == null) return Number(await r.hsetnx(key, field, value)) === 1;
+  try { return Number(await r.eval(CAS, [key], [field, raw, value])) === 1; }
+  catch (e) {
+    console.error('compare-and-set unavailable, plain write:', String(e && e.message || e).slice(0, 120));
+    await r.hset(key, { [field]: value });
+    return true;
+  }
+}
+
+/** Save `spot` as one of the device's watches: the one on its side, else a new one (pickSlot). `atBase`
+ *  (auto-park) always writes watch 0, as the single watch was written before, and turns off any other
+ *  watch on the same side so it doesn't push twice. `record(n, spot, notified)` builds the stored value.
+ *  The de-dupe map of the watch is kept: each entry holds the sweep it fired for, so it only ever blocks
+ *  that same sweep (re-taps, off → on and re-saves never re-send a push already delivered).
+ *  → { slot } | { full: true } (MAX_WATCHES armed, none on this side). */
+async function saveWatch(key, base, spot, atBase, record) {
+  for (let i = 0; i < 3; i++) {
+    const slots = await readWatches(key, base);
+    const pick = atBase ? { n: 0, keep: true } : pickSlot(slots, spot);
+    if (!pick) return { full: true };
+    const s = slots[pick.n], prev = pick.keep ? s.rec : null;
+    const out = carryForward(prev, spot);
+    // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
+    // re-arming once a watch goes stale past MAX_WATCH_AGE (see send-notifications) so a frozen rule
+    // can't push wrong times forever after a city schedule change. advanceSpot preserves it.
+    const value = JSON.stringify(record(pick.n, out, prev ? notifiedMap(prev) : {}));
+    if (!(await claimField(key, s.field, s.raw, value))) continue;
+    if (atBase && spot) {
+      for (const t of slots) {
+        if (t.n && t.rec && t.rec.spot && sameSide(t.rec.spot, spot)) {
+          await casUpdate(key, t.field, (rec) => (rec.spot && sameSide(rec.spot, spot) ? disarmRec(rec) : null));
+        }
+      }
+    }
+    return { slot: pick.n };
+  }
+  throw new Error('watches kept changing during the save');
+}
+
+// Turned off: spot = null (the cron skips spot-less records), the de-dupe map kept, the side remembered.
+function disarmRec(rec) {
+  if (rec.spot) rec.offSide = sideOf(rec.spot);
+  rec.spot = null;
+  rec.notified = notifiedMap(rec);
+  return rec;
+}
+
+/** Turn off the device's watch on `side` (every armed watch when side is null: a Turn off from a page
+ *  that predates multi-watch meant the device). Plain write, like every user write before. */
+async function disarmWatches(key, slots, side) {
+  const out = {};
+  for (const s of slots) {
+    if (!s.rec || !s.rec.spot || (side && !sameSide(s.rec.spot, side))) continue;
+    out[s.field] = JSON.stringify(disarmRec(s.rec));
+  }
+  if (Object.keys(out).length) await redis().hset(key, out);
+}
+
+/** Upsert a subscription + one saved spot (see saveWatch). → { slot } | { full: true }. */
+export async function saveSub(subscription, spot, { atBase = false } = {}) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  let notified = {};
-  let out = spot || null;
-  try {
-    const v = await r.hget(KEY, subscription.endpoint);
-    const prev = typeof v === 'string' ? safeParse(v) : v;
-    if (prev) notified = notifiedMap(prev); // re-arming the SAME sweep must not let the cron re-push it
-    if (prev && prev.spot && spot && staleResave(prev.spot, spot)) {
-      out = withStyle(prev.spot, spot);
-    } else if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      // A re-tap that omits the recurrence rule must not DROP it (would silently revert the
-      // forever-watch to one-shot). Carry the prior rule(s)/cnn/sideKey forward when absent.
-      if (out && !out.rule && prev.spot.rule) {
-        out.rule = prev.spot.rule;
-        if (prev.spot.rules) out.rules = prev.spot.rules;
-        if (prev.spot.cnn) out.cnn = prev.spot.cnn;
-        if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
-      }
-      carryAnchors(out, prev.spot);
-    }
-  } catch { /* best effort — worst case is one duplicate push */ }
-  // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
-  // re-arming once a watch goes stale past MAX_WATCH_AGE (see send-notifications) so a frozen rule
-  // can't push wrong times forever after a city schedule change. advanceSpot preserves it.
-  const record = { subscription, spot: out, notified, savedAt: Date.now() };
-  await r.hset(KEY, { [subscription.endpoint]: JSON.stringify(record) });
+  return saveWatch(KEY, subscription.endpoint, spot, atBase,
+    (n, out, notified) => ({ subscription, spot: out, notified, savedAt: Date.now() }));
 }
 
 // The cron computes a re-arm from the spot in its start-of-run snapshot. Before writing, the record is
@@ -120,8 +241,10 @@ const sameSpot = (a, b) => Boolean(a && b) && JSON.stringify(a) === JSON.stringi
 // So each cron write is one Upstash EVAL, a compare-and-set: the field is written only if it still
 // holds the exact string the cron read; otherwise nothing is written and the cron re-reads and decides
 // again on the user's version. Chosen over moving `notified` into its own field: no migration of live
-// records, and it also covers advanceSpot, whose decision depends on the spot. The user's writes stay
-// plain HGET/HSET: they win any race, losing at worst a de-dupe entry (one repeat push), as before.
+// records, and it also covers advanceSpot, whose decision depends on the spot. A user's save goes through
+// the same script (claimField: it re-reads and decides again rather than overwrite); a Turn off stays a
+// plain HSET: it wins any race, losing at worst a de-dupe entry (one repeat push), as before.
+// Every one of these writes one watch's field (see MAX_WATCHES), so they hold per watch.
 const CAS = "if redis.call('HGET', KEYS[1], ARGV[1]) == ARGV[2] then redis.call('HSET', KEYS[1], ARGV[1], ARGV[3]) return 1 end return 0";
 
 /** Rewrite one record with `edit(rec)` (→ the new record, or null to leave it) unless it changed
@@ -150,13 +273,13 @@ async function casUpdate(key, field, edit) {
   throw new Error('record kept changing during the cron write'); // like a store error: the run fails
 }
 
-/** Advance a subscription to its next computed sweep occurrence (the cron "forever-watch"
- *  re-arm), computed from `seenSpot`. Replaces the spot only if the record still holds exactly
- *  `seenSpot` (→ true); the de-dupe map is kept (its entries name the sweep they fired for, so the
- *  next sweep is free to fire). Preserves savedAt — the re-arm is clock-driven, not a fresh client
+/** Advance one watch (its hash `field`, from loadAllSubs) to its next computed sweep occurrence (the
+ *  cron "forever-watch" re-arm), computed from `seenSpot`. Replaces the spot only if the record still
+ *  holds exactly `seenSpot` (→ true); the de-dupe map is kept (its entries name the sweep they fired for,
+ *  so the next sweep is free to fire). Preserves savedAt — the re-arm is clock-driven, not a fresh client
  *  refresh. */
-export async function advanceSpot(endpoint, newSpot, seenSpot) {
-  return casUpdate(KEY, endpoint, (rec) => {
+export async function advanceSpot(field, newSpot, seenSpot) {
+  return casUpdate(KEY, field, (rec) => {
     if (!sameSpot(rec.spot, seenSpot)) return null;
     rec.spot = newSpot;
     rec.notified = notifiedMap(rec);
@@ -165,16 +288,19 @@ export async function advanceSpot(endpoint, newSpot, seenSpot) {
   });
 }
 
-/** Load every stored record as { endpoint, subscription, spot, notifiedFor }. */
+/** Load every stored watch as { field, slot, endpoint (the device), subscription, spot, notified, savedAt }.
+ *  `field` addresses the watch's own record (advanceSpot / markNotified); `endpoint` the device. */
 export async function loadAllSubs() {
   const r = redis();
   if (!r) return [];
   const all = await r.hgetall(KEY);
   if (!all) return [];
   return Object.entries(all)
-    .map(([endpoint, v]) => {
+    .map(([field, v]) => {
       const rec = typeof v === 'string' ? safeParse(v) : v; // Upstash may auto-deserialize
-      return rec ? { endpoint, ...rec, notified: notifiedMap(rec) } : null;
+      if (!rec) return null;
+      const { base, slot } = splitField(field);
+      return { ...rec, field, slot, endpoint: base, notified: notifiedMap(rec) };
     })
     .filter(Boolean);
 }
@@ -186,35 +312,37 @@ export async function hasSub(endpoint) {
   return Boolean(await r.hexists(KEY, endpoint));
 }
 
-/** Remove an expired/invalid subscription (called on push 410/404). */
+const allSlots = (base) => Array.from({ length: MAX_WATCHES }, (_, n) => slotField(base, n));
+
+/** Remove an expired/invalid subscription with every watch on it (called on push 410/404): one HDEL. */
 export async function deleteSub(endpoint) {
   const r = redis();
-  if (r) await r.hdel(KEY, endpoint);
+  if (r) await r.hdel(KEY, ...allSlots(endpoint));
 }
 
-/** Turn a web watch OFF ("✓ Alerts on" → Turn off). Ownership = the endpoint AND its keys.auth, which
- *  only the browser holding the subscription has, compared in constant time with the stored one.
+/** Turn a web watch OFF ("✓ Alerts on" → Turn off): the one on `side` (sanitizeSide), or every watch of the
+ *  device when side is null (a page from before multi-watch). Ownership = the endpoint AND its keys.auth,
+ *  which only the browser holding the subscription has, compared in constant time with the stored one.
  *  Disarms (spot = null — the cron skips spot-less records) rather than deleting, so auto-park and
  *  its tokens still resolve the subscription, and the de-dupe survives turning it back on for the same
- *  sweep. → 'ok' | 'not-found' | 'forbidden'. */
-export async function disarmSub(endpoint, auth) {
+ *  sweep. Other watches are never touched. → 'ok' (also when no armed watch is on that side) |
+ *  'not-found' | 'forbidden'. */
+export async function disarmSub(endpoint, auth, side = null) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  const v = await r.hget(KEY, endpoint);
-  const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return 'not-found';
-  const a = Buffer.from(String(auth || '')), b = Buffer.from(String(rec.subscription?.keys?.auth || ''));
+  const slots = await readWatches(KEY, endpoint);
+  const owner = slots.find((s) => s.rec); // watch 0 first
+  if (!owner) return 'not-found';
+  const a = Buffer.from(String(auth || '')), b = Buffer.from(String(owner.rec.subscription?.keys?.auth || ''));
   if (!b.length || a.length !== b.length || !timingSafeEqual(a, b)) return 'forbidden';
-  rec.spot = null;
-  rec.notified = notifiedMap(rec);
-  await r.hset(KEY, { [endpoint]: JSON.stringify(rec) });
+  await disarmWatches(KEY, slots, side);
   return 'ok';
 }
 
-/** Record that we already pushed for a given sweep time, so the cron won't repeat.
- *  field: 'notifiedFor' (the ~30-min lead push) or 'notifiedEveFor' (night-before). */
-export async function markNotified(endpoint, nextSweepISO, key = 'lead') {
-  await casUpdate(KEY, endpoint, (rec) => {
+/** Record that we already pushed one watch (its hash `field`) for a given sweep time and touchpoint, so
+ *  the cron won't repeat it. */
+export async function markNotified(field, nextSweepISO, key = 'lead') {
+  await casUpdate(KEY, field, (rec) => {
     rec.notified = notifiedMap(rec);
     rec.notified[key] = nextSweepISO;
     delete rec.notifiedFor; delete rec.notifiedEveFor; // migrate off the legacy fields once touched
@@ -222,7 +350,7 @@ export async function markNotified(endpoint, nextSweepISO, key = 'lead') {
   });
 }
 
-/** Load a single subscription record by endpoint, or null. */
+/** Load a device's watch-0 record by endpoint (auto-park resolves the subscription with it), or null. */
 export async function getSub(endpoint) {
   const r = redis();
   if (!r) return null;
@@ -236,40 +364,24 @@ export async function getSub(endpoint) {
 // the entire forever-watch + lead-window + dedupe logic apply unchanged — only the key, the load/
 // advance/mark/delete helpers, and the delivery transport (APNs vs web-push) differ. No web-push
 // field (endpoint/p256dh/auth) ever appears here, so validSubscription() never sees a hex token.
+// Watches as in curb:subs: watch 0 at `<token>`, watch n at `<token>#<n>`. Watch n's record carries NO
+// `token` property (the field names the device): code from before multi-watch, should it ever run against
+// these records again (a rollback), reads the field as the token, which APNs refuses, instead of sending
+// with the real token and marking the de-dupe on watch 0, which would repeat that push every tick.
 const KEY_IOS = 'curb:apns';
 
-/** Upsert an APNs device token + its saved spot. Mirrors saveSub: keeps the de-dupe map, carries
- *  the recurrence rule/cnn/sideKey forward on a same-time re-arm when omitted, and applies only the
- *  style of a stale-sheet re-save. */
+/** Upsert an APNs device token + one saved spot. Mirrors saveSub (see saveWatch). → { slot } | { full }. */
 export async function saveIosSub(token, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  let notified = {};
-  let out = spot || null;
-  try {
-    const v = await r.hget(KEY_IOS, token);
-    const prev = typeof v === 'string' ? safeParse(v) : v;
-    if (prev) notified = notifiedMap(prev);
-    if (prev && prev.spot && spot && staleResave(prev.spot, spot)) {
-      out = withStyle(prev.spot, spot);
-    } else if (prev && prev.spot && spot && prev.spot.nextSweepISO === spot.nextSweepISO) {
-      if (out && !out.rule && prev.spot.rule) {
-        out.rule = prev.spot.rule;
-        if (prev.spot.rules) out.rules = prev.spot.rules;
-        if (prev.spot.cnn) out.cnn = prev.spot.cnn;
-        if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
-      }
-      carryAnchors(out, prev.spot);
-    }
-  } catch { /* best effort — worst case is one duplicate push */ }
-  const record = { token, spot: out, notified, savedAt: Date.now(), platform: 'ios' };
-  await r.hset(KEY_IOS, { [token]: JSON.stringify(record) });
+  return saveWatch(KEY_IOS, token, spot, false,
+    (n, out, notified) => ({ ...(n ? {} : { token }), spot: out, notified, savedAt: Date.now(), platform: 'ios' }));
 }
 
-/** Advance an iOS watch to its next computed occurrence (forever-watch re-arm). Like advanceSpot:
- *  only while the record still holds exactly `seenSpot` (→ true). */
-export async function advanceIosSpot(token, newSpot, seenSpot) {
-  return casUpdate(KEY_IOS, token, (rec) => {
+/** Advance one iOS watch (its hash `field`) to its next computed occurrence (forever-watch re-arm). Like
+ *  advanceSpot: only while the record still holds exactly `seenSpot` (→ true). */
+export async function advanceIosSpot(field, newSpot, seenSpot) {
+  return casUpdate(KEY_IOS, field, (rec) => {
     if (!sameSpot(rec.spot, seenSpot)) return null;
     rec.spot = newSpot;
     rec.notified = notifiedMap(rec);
@@ -278,16 +390,18 @@ export async function advanceIosSpot(token, newSpot, seenSpot) {
   });
 }
 
-/** Load every iOS record as { token, spot, notifiedFor, notifiedEveFor, savedAt }. */
+/** Load every iOS watch as { field, slot, token (the device), spot, notified, savedAt }. */
 export async function loadAllIosSubs() {
   const r = redis();
   if (!r) return [];
   const all = await r.hgetall(KEY_IOS);
   if (!all) return [];
   return Object.entries(all)
-    .map(([token, v]) => {
+    .map(([field, v]) => {
       const rec = typeof v === 'string' ? safeParse(v) : v;
-      return rec ? { token, ...rec, notified: notifiedMap(rec) } : null;
+      if (!rec) return null;
+      const { base, slot } = splitField(field);
+      return { ...rec, field, slot, token: base, notified: notifiedMap(rec) };
     })
     .filter(Boolean);
 }
@@ -299,29 +413,25 @@ export async function hasIosSub(token) {
   return Boolean(await r.hexists(KEY_IOS, token));
 }
 
-/** Remove a dead APNs token (called on 410 Unregistered / 400 BadDeviceToken). */
+/** Remove a dead APNs token with every watch on it (called on 410 Unregistered / 400 BadDeviceToken). */
 export async function deleteIosSub(token) {
   const r = redis();
-  if (r) await r.hdel(KEY_IOS, token);
+  if (r) await r.hdel(KEY_IOS, ...allSlots(token));
 }
 
-/** Turn an iOS watch OFF. Like disarmSub: spot = null (the cron skips it) and the de-dupe map is kept,
- *  so turning alerts back on for the same sweep can't re-send a push already delivered. An unknown
+/** Turn an iOS watch OFF: the one on `side`, or every watch of the token when side is null (the page's
+ *  {off:true} before multi-watch). Like disarmSub: spot = null (the cron skips it) and the de-dupe map is
+ *  kept, so turning alerts back on for the same sweep can't re-send a push already delivered. An unknown
  *  token stores nothing. */
-export async function disarmIosSub(token) {
+export async function disarmIosSub(token, side = null) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  const v = await r.hget(KEY_IOS, token);
-  const rec = typeof v === 'string' ? safeParse(v) : v;
-  if (!rec) return;
-  rec.spot = null;
-  rec.notified = notifiedMap(rec);
-  await r.hset(KEY_IOS, { [token]: JSON.stringify(rec) });
+  await disarmWatches(KEY_IOS, await readWatches(KEY_IOS, token), side);
 }
 
-/** Record that we already pushed an iOS token for a given sweep time (per-window de-dupe). */
-export async function markIosNotified(token, nextSweepISO, key = 'lead') {
-  await casUpdate(KEY_IOS, token, (rec) => {
+/** Record that we already pushed one iOS watch (its hash `field`) for a given sweep time (per-window de-dupe). */
+export async function markIosNotified(field, nextSweepISO, key = 'lead') {
+  await casUpdate(KEY_IOS, field, (rec) => {
     rec.notified = notifiedMap(rec);
     rec.notified[key] = nextSweepISO;
     delete rec.notifiedFor; delete rec.notifiedEveFor;

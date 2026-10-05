@@ -49,6 +49,9 @@ export default async function handler(req, res) {
 
     // Build + persist the watch (carries the recurring rule → forever-watch). saveSub stamps a fresh
     // savedAt (this IS live data); its de-dupe entries name the sweep they fired for, so a new sweep fires.
+    // atBase: the device's watch 0 follows the car, as the single watch did before multi-watch (a new
+    // watch per park would pile up and keep alerting for every spot the car has left); a watch the user
+    // set on that same side is turned off so it doesn't push twice. Other watches are left alone.
     const ns = spot.ns;
     const prev = new Date(Date.UTC(ns.y, ns.mo - 1, ns.da) - 864e5);
     const eve = sfWallToInstant(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate(), 20);
@@ -58,7 +61,7 @@ export default async function handler(req, res) {
       rule: spot.rule, rules: sanitizeRules(spot.rules), cnn: spot.cnn, sideKey: spot.sideKey,
       ...(+eve < +ns.start ? { eveningISO: eve.toISOString() } : {}),
     };
-    await saveSub(sub.subscription, newSpot);
+    await saveSub(sub.subscription, newSpot, { atBase: true });
 
     // Confirmation push (best-effort; prune a dead endpoint).
     if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {

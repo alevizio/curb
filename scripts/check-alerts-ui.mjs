@@ -1,12 +1,13 @@
 // Headless check of the "Sweep alerts" sheet in index.html, run against a LOCAL static server — never
 // production (all /api/save-subscription calls are intercepted and answered here; push is faked).
 // Covers: tie-break on the earliest next sweep, the spot's rules[], "✓ Alerts on" keyed on the curb
-// (not the sweep instant) + the off switch, the "alerts are on for <other block>" note, legacy-key
-// migration, the reverse-ghost guard, debounced/reverted style saves, the night-sweep copy, the off row
-// on a short phone, and the native iOS bridge in both shapes: App Store build 6 (boolean promise,
-// two-argument callback) and build 7 (the real pushScript from ContentView.swift: one
-// {ok,reason,message,status} object and __curbRequestPushDetail) — save-failed vs denied, off, and no
-// reports while notifications are off.
+// (not the sweep instant) + the off switch, multi-watch (another side ADDS a watch, the "Also on for"
+// line, Turn off names its side, the 5-watch limit and the server's 409, the pre-multi saved value
+// migrating), legacy-key migration, the reverse-ghost guard, debounced/reverted style saves, the
+// night-sweep copy, the off row on a short phone, and the native iOS bridge in both shapes: App Store
+// build 6 (boolean promise, two-argument callback) and build 7 (the real pushScript from
+// ContentView.swift: one {ok,reason,message,status} object and __curbRequestPushDetail) — save-failed vs
+// denied, off (naming its side), the limit, and no reports while notifications are off.
 //
 //   npx -y serve . -l 3210 &   node scripts/check-alerts-ui.mjs http://localhost:3210
 // Needs puppeteer-core (like scripts/monitor/browser.mjs) and Chrome (CHROME_PATH or the default).
@@ -109,6 +110,11 @@ const text = (page, sel) => page.$eval(sel, (e) => e.textContent.trim()).catch((
 const hidden = (page, sel) => page.$eval(sel, (e) => e.hidden);
 const toast = (page) => text(page, '#toast');
 const ls = (page, k) => page.evaluate((key) => localStorage.getItem(key), k);
+// The saved-alert map ('curbAlert': '<cnn>|<sideKey>' → entry), {} when unset.
+const alerts = async (page) => JSON.parse((await ls(page, 'curbAlert')) || '{}');
+// A watched side as the page stores it, armed now (fills slots for the 5-watch limit).
+const entry = (cnn, corridor, blockside) => ({ cnn, sideKey: blockside, corridor, limits: 'A St - B St', blockside, level: 'normal', voice: 'cheeky', armedAt: Date.now(), v: 2 });
+const LIMIT_TOAST = 'You can have alerts on for 5 curbs at a time. To add this one, open one of them and turn its alerts off.';
 // DOM click: the sheet opens at a 46dvh peek, so the alert controls can sit below the fold.
 const tap = (page, sel) => page.$eval(sel, (e) => e.click());
 
@@ -126,7 +132,7 @@ try {
   const arm = page.__posts.at(-1)?.body.spot || {};
   check('arming posts every rule of the side + the soonest as `rule`', arm.rules?.length === 2 && arm.rule?.weekday === days.early && arm.cnn === '7735000' && arm.sideKey === 'West', JSON.stringify({ rules: arm.rules?.map((r) => r.weekday), rule: arm.rule?.weekday }));
   check('button reads "✓ Alerts on"', (await text(page, '#alertBtn')) === '✓ Alerts on');
-  check('saved-alert key is the curb, not the sweep instant', JSON.parse(await ls(page, 'curbAlert') || '{}').cnn === '7735000' && !(await ls(page, 'curbAlertKey')));
+  check('saved alerts: a map keyed on the curb side, not the sweep instant', Object.keys(await alerts(page)).join() === '7735000|West' && (await alerts(page))['7735000|West'].cnn === '7735000' && !(await ls(page, 'curbAlertKey')));
 
   // Intensity then Voice within the debounce → ONE save carrying both.
   const n0 = page.__posts.length;
@@ -145,21 +151,60 @@ try {
   check('failed style save reverts the dial', (await ls(page, 'curbAlertLevel')) === 'intense' && await page.$eval('[data-k="curbAlertLevel"] button[data-v="intense"]', (b) => b.getAttribute('aria-pressed') === 'true'));
   check('…and tells the user + reports it', (await toast(page)).includes("Couldn't save your alert style") && (await page.evaluate(() => window.__reports.some(([k]) => k === 'push-save-failed'))));
 
-  // Another block shows where alerts are; arming it visibly moves them.
+  // Another side offers Sweep alerts (it ADDS a watch) with the sides already watched listed under it.
   await open(page, '5910000');
-  check('other block: note says alerts are on for Kansas St', !(await hidden(page, '#alertNote')) && (await text(page, '#alertNote')).includes('Alerts are on for Kansas St (West)'));
+  check('other block: Sweep alerts + "Also on for Kansas St, West side"', (await text(page, '#alertBtn')).includes('Sweep alerts') && !(await hidden(page, '#alertNote')) && (await text(page, '#alertNote')) === 'Also on for Kansas St, West side', `note="${await text(page, '#alertNote')}"`);
   await tap(page, '#alertBtn');
   await page.waitForFunction(() => document.getElementById('alertBtn').textContent.includes('Alerts on'), { timeout: 5000 }).catch(() => {});
-  check('arming it replaces the old block (toast + note gone)', (await toast(page)).includes("Kansas St won't alert anymore") && (await hidden(page, '#alertNote')));
+  check('arming it ADDS a watch: "✓ Alerts on", the note goes, nothing says the other stopped', (await text(page, '#alertBtn')) === '✓ Alerts on' && (await hidden(page, '#alertNote')) && !(await toast(page)).includes("won't alert") && (await toast(page)).startsWith('Sweep alert set for Fulton St'));
+  check('…both sides are saved', Object.keys(await alerts(page)).sort().join() === '5910000|South,7735000|West');
+  await open(page, '7735000');
+  check('…and the first side still reads "✓ Alerts on"', (await text(page, '#alertBtn')) === '✓ Alerts on' && (await hidden(page, '#alertNote')));
+  await open(page, '9130000');
+  check('a third side lists both watched sides', (await text(page, '#alertNote')) === 'Also on for Kansas St, West side · Fulton St, South side', `note="${await text(page, '#alertNote')}"`);
 
-  // "✓ Alerts on" → off switch → DELETE proven by the subscription.
+  // "✓ Alerts on" → off switch → DELETE proven by the subscription, naming this side only.
+  await open(page, '5910000');
   await tap(page, '#alertBtn');
   check('tapping "✓ Alerts on" offers turn-off', !(await hidden(page, '#alertOff')));
   await tap(page, '#alertOffYes');
   await page.waitForFunction(() => !document.getElementById('alertBtn').textContent.includes('Alerts on'), { timeout: 5000 }).catch(() => {});
   const del = page.__posts.at(-1);
   check('turn-off sends DELETE with the subscription (endpoint + keys)', del.method === 'DELETE' && del.body.subscription?.keys?.auth === 'auth-secret');
-  check('…and the sheet reads off', (await text(page, '#alertBtn')).includes('Sweep alerts') && !(await ls(page, 'curbAlert')) && (await toast(page)).includes('Alerts off for Fulton St'));
+  check('…naming this side, so the server turns off only its watch', del.body.spot?.cnn === '5910000' && del.body.spot?.sideKey === 'South' && del.body.spot?.corridor === 'Fulton St', JSON.stringify(del.body.spot));
+  check('…and the sheet reads off', (await text(page, '#alertBtn')).includes('Sweep alerts') && !(await alerts(page))['5910000|South'] && (await toast(page)).includes('Alerts off for Fulton St') && (await text(page, '#alertNote')) === 'Also on for Kansas St, West side');
+  await open(page, '7735000');
+  check('…while the other side stays on', (await text(page, '#alertBtn')) === '✓ Alerts on');
+
+  // The saved value from before multi-watch (ONE side) migrates to the map and still reads on.
+  await page.evaluate(() => localStorage.setItem('curbAlert', JSON.stringify({ cnn: '7735000', sideKey: 'West', corridor: 'Kansas St', limits: '16th St - 17th St', blockside: 'West', level: 'normal', voice: 'cheeky', armedAt: Date.now(), v: 2 })));
+  await open(page, '7735000');
+  check('pre-multi saved value migrates: "✓ Alerts on", stored as a one-side map', (await text(page, '#alertBtn')) === '✓ Alerts on' && Object.keys(await alerts(page)).join() === '7735000|West');
+
+  // Five sides watched (Kansas St among them): on any other side the button explains the limit, the note
+  // says how to free one, nothing is sent.
+  await page.evaluate((m) => localStorage.setItem('curbAlert', JSON.stringify(m)), Object.fromEntries(
+    [['101', 'Crestline Dr', 'Northeast'], ['102', 'Crestline Dr', 'Southwest'], ['103', 'Haight St', 'North'], ['104', 'Page St', 'South'], ['7735000', 'Kansas St', 'West']]
+      .map(([c, n, b]) => [`${c}|${b}`, entry(c, n, b)])));
+  const nCap = page.__posts.length;
+  await open(page, '5910000');
+  check('at 5 watches: the button says "5 of 5 alerts in use"', (await text(page, '#alertBtn')) === '5 of 5 alerts in use' && await page.$eval('#alertBtn', (b) => b.classList.contains('full') && b.getAttribute('aria-disabled') === 'true'));
+  check('…the note lists them and says how to free one', (await text(page, '#alertNote')) === 'Also on for Crestline Dr, NE side · Crestline Dr, SW side · Haight St, North side · Page St, South side · Kansas St, West side. Turn one of them off on its sheet to add this curb.', `note="${await text(page, '#alertNote')}"`);
+  await tap(page, '#alertBtn');
+  await sleep(300);
+  check('…and a tap explains the limit without saving anything', (await toast(page)) === LIMIT_TOAST && page.__posts.length === nCap);
+  await open(page, '7735000');
+  check('a watched side at the limit keeps "✓ Alerts on" and its Turn off', (await text(page, '#alertBtn')) === '✓ Alerts on' && (await hidden(page, '#alertNote')));
+  await page.evaluate(() => localStorage.removeItem('curbAlert'));
+
+  // The server holds 5 watches the page doesn't know about: its 409 reads as the limit, not an error.
+  ctl.status = 409;
+  await page.evaluate(() => { window.__reports.length = 0; });
+  await open(page, '5910000');
+  await tap(page, '#alertBtn');
+  await sleep(500);
+  ctl.status = 200;
+  check('server 409: the limit message, no report, button back to Sweep alerts', (await toast(page)) === LIMIT_TOAST && (await text(page, '#alertBtn')).includes('Sweep alerts') && await page.evaluate(() => !window.__reports.length));
 
   // A legacy key whose sweep is past the server's 120-day watch age names a dead watch: no revival.
   await page.evaluate(() => { localStorage.removeItem('curbAlert'); localStorage.setItem('curbAlertKey', 'Kansas St|16th St - 17th St|West|' + new Date(Date.now() - 200 * 864e5).toISOString()); });
@@ -177,7 +222,7 @@ try {
   check('…and a silent re-arm sends the side\'s rules', page.__posts.slice(n1).some((p) => p.method === 'POST' && p.body.spot.rules?.length === 2));
 
   // Reverse ghost: past the server's 120-day watch age the button must not claim "on".
-  await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('curbAlert')); a.armedAt = Date.now() - 121 * 864e5; localStorage.setItem('curbAlert', JSON.stringify(a)); });
+  await page.evaluate(() => { const m = JSON.parse(localStorage.getItem('curbAlert')); m['7735000|West'].armedAt = Date.now() - 121 * 864e5; localStorage.setItem('curbAlert', JSON.stringify(m)); });
   await open(page, '7735000');
   check('a lapsed watch reads off (no false "on")', (await text(page, '#alertBtn')).includes('Sweep alerts'));
 
@@ -254,7 +299,7 @@ try {
   await tap(np, '#alertBtn');
   await tap(np, '#alertOffYes');
   await sleep(400);
-  check('iOS turn-off posts {spot:{off:true}} through the shipped bridge', await np.evaluate(() => window.__nativePosts.at(-1).spot?.off === true) && (await text(np, '#alertBtn')).includes('Sweep alerts'));
+  check('iOS turn-off posts {spot:{off:true, <side>}} through the shipped bridge', await np.evaluate(() => { const s = window.__nativePosts.at(-1).spot || {}; return s.off === true && s.cnn === '7735000' && s.sideKey === 'West' && s.corridor === 'Kansas St'; }) && (await text(np, '#alertBtn')).includes('Sweep alerts'));
   // A newer app build may resolve an object instead of a boolean.
   await np.evaluate(() => { window.__curbRequestPush = async () => ({ ok: false, status: 429, message: 'save-failed:429' }); });
   await tap(np, '#alertBtn');
@@ -300,7 +345,7 @@ try {
   const posts0 = await p7.evaluate(() => window.__nativePosts.length);
   await tap(p7, '[data-k="curbAlertVoice"] button[data-v="drill"]');
   await sleep(1000);
-  await p7.evaluate(() => { const a = JSON.parse(localStorage.getItem('curbAlert')); a.armedAt = Date.now() - WATCH_REFRESH - 60000; localStorage.setItem('curbAlert', JSON.stringify(a)); });
+  await p7.evaluate(() => { const m = JSON.parse(localStorage.getItem('curbAlert')); m['7735000|West'].armedAt = Date.now() - WATCH_REFRESH - 60000; localStorage.setItem('curbAlert', JSON.stringify(m)); });
   await open(p7, '7735000');
   await sleep(300);
   await open(p7, '7735000');
@@ -316,7 +361,12 @@ try {
   await tap(p7, '#alertBtn');
   await tap(p7, '#alertOffYes');
   await sleep(400);
-  check('iOS build 7 turn-off posts {spot:{off:true}} and reads off', await p7.evaluate(() => window.__nativePosts.at(-1).spot?.off === true) && (await text(p7, '#alertBtn')).includes('Sweep alerts') && (await toast(p7)).includes('Alerts off for Kansas St'));
+  check('iOS build 7 turn-off posts {spot:{off:true, <side>}} and reads off', await p7.evaluate(() => { const s = window.__nativePosts.at(-1).spot || {}; return s.off === true && s.cnn === '7735000' && s.sideKey === 'West'; }) && (await text(p7, '#alertBtn')).includes('Sweep alerts') && (await toast(p7)).includes('Alerts off for Kansas St'));
+  // The server's 409 (5 watches on this phone already) comes back as save-failed:409: the limit message, no report.
+  await p7.evaluate(() => { window.__nativeMode = { reason: 'save-failed', status: 409, message: 'alert limit reached' }; window.__reports.length = 0; });
+  await tap(p7, '#alertBtn');
+  await sleep(400);
+  check('iOS build 7 save refused at the limit (409): the limit message, no report', (await toast(p7)) === LIMIT_TOAST && (await text(p7, '#alertBtn')).includes('Sweep alerts') && !(await reports(p7)).length, `toast="${await toast(p7)}" reports=${JSON.stringify(await reports(p7))}`);
   await p7.close();
 } catch (e) {
   check('run', false, e.stack || e.message);

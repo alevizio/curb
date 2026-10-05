@@ -510,6 +510,7 @@
   .btn:active{transform:translateY(2px);box-shadow:none}
   .btn.alt{background:var(--paper);color:var(--ink)}
   .btn.on{background:var(--green);color:var(--ink);border-color:var(--ink)}
+  .btn.full{background:var(--paper);color:var(--ink-soft);border-style:dashed;box-shadow:none}
   .btn.busy{opacity:.65;pointer-events:none}
   .note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5;text-align:center}
   .noted{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5;text-align:center}
@@ -1901,32 +1902,51 @@ function isStandalone(){
 function pushSupported(){
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 }
-// Which curb this device has alerts on — localStorage 'curbAlert' = {cnn, sideKey, corridor, limits,
-// blockside, level, voice, armedAt, v}. Keyed on the CURB SIDE, not the next sweep instant: the
+// Which curb sides this device has alerts on — localStorage 'curbAlert' = a map '<cnn>|<sideKey>' →
+// {cnn, sideKey, corridor, limits, blockside, level, voice, armedAt, v}, up to MAX_ALERTS: the server keeps
+// one watch per side, 5 per device (api/_store.js MAX_WATCHES). Before multi-watch the value was ONE such
+// entry; savedAlerts() migrates it. Keyed on the CURB SIDE, not the next sweep instant: the
 // server's forever-watch re-arms every week, so the old instant-keyed "on" flipped to "off" after the
 // first sweep while pushes kept coming (ghost alerts) and style changes stopped reaching the server.
 // "On" is only claimed while the watch is alive: younger than the server's MAX_WATCH_AGE and, on web,
 // with notification permission — a false "on" would be worse than a false "off".
-const WATCH_MAX_AGE=120*864e5, WATCH_REFRESH=864e5;
+const WATCH_MAX_AGE=120*864e5, WATCH_REFRESH=864e5, MAX_ALERTS=5;
+const ALERT_LIMIT_MSG='You can have alerts on for '+MAX_ALERTS+' curbs at a time. To add this one, open one of them and turn its alerts off.';
 function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}  // legacy 'curbAlertKey' format
 function savedAlertKey(){try{return localStorage.getItem('curbAlertKey')||'';}catch(_){return '';}}
 function getAlertLevel(){try{return localStorage.getItem('curbAlertLevel')||'normal';}catch(_){return 'normal';}}
 function getAlertVoice(){try{return localStorage.getItem('curbAlertVoice')||'cheeky';}catch(_){return 'cheeky';}}
-function savedAlert(){try{const a=JSON.parse(localStorage.getItem('curbAlert')||'null');return a&&a.cnn?a:null;}catch(_){return null;}}
+const alertId=s=>String(s.cnn)+'|'+String(s.sideKey||'');
+function savedAlerts(){try{
+  const a=JSON.parse(localStorage.getItem('curbAlert')||'null');
+  if(!a||typeof a!=='object')return {};
+  if(a.cnn){const m={[alertId(a)]:a};localStorage.setItem('curbAlert',JSON.stringify(m));return m;}  // the single pre-multi value
+  const m={};for(const k in a)if(a[k]&&a[k].cnn)m[k]=a[k];return m;
+}catch(_){return {};}}
+function savedAlert(spot){return spot&&spot.cnn?savedAlerts()[alertId(spot)]||null:null;}
 function rememberAlert(spot,v){
   const a={cnn:String(spot.cnn),sideKey:String(spot.sideKey||''),corridor:spot.corridor||'',limits:spot.limits||'',
     blockside:spot.blockside||'',level:spot.level,voice:spot.voice,armedAt:Date.now(),v:v||2};
-  try{localStorage.setItem('curbAlert',JSON.stringify(a));localStorage.removeItem('curbAlertKey');}catch(_){}
+  const m=savedAlerts(); m[alertId(a)]=a;
+  try{localStorage.setItem('curbAlert',JSON.stringify(m));localStorage.removeItem('curbAlertKey');}catch(_){}
   return a;
 }
 function markArmed(spot){if(spot.cnn)rememberAlert(spot);else try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}}
-function forgetAlert(){try{localStorage.removeItem('curbAlert');localStorage.removeItem('curbAlertKey');}catch(_){}}
+// One side (its Turn off), or every side with no spot (this browser has no push subscription: none can arrive).
+function forgetAlert(spot){try{
+  localStorage.removeItem('curbAlertKey');
+  if(!spot)return localStorage.removeItem('curbAlert');
+  const m=savedAlerts(); delete m[alertId(spot)]; localStorage.setItem('curbAlert',JSON.stringify(m));
+}catch(_){}}
 function sameCurb(a,spot){return !!(a&&spot&&spot.cnn&&a.cnn===String(spot.cnn)&&a.sideKey===String(spot.sideKey||''));}
 function alertLive(a){return !!a&&Date.now()-a.armedAt<WATCH_MAX_AGE&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
+function liveAlerts(){return Object.values(savedAlerts()).filter(alertLive);}
+// The other live sides when this one isn't on, and whether they fill every slot.
+function otherAlerts(spot){const o=liveAlerts().filter(a=>!sameCurb(a,spot));return {list:o,full:o.length>=MAX_ALERTS&&!alertSpotMatches(spot)};}
 function alertSpotMatches(spot){
   if(!spot)return false;
   if(!spot.cnn)return savedAlertKey()===spotKey(spot);  // rule-less spot: the exact-sweep key
-  let a=savedAlert();
+  let a=savedAlert(spot);
   // Migrate a legacy corridor|limits|blockside|ISO key — its first three fields name the curb. v:1 makes
   // refreshWatch re-arm right away, which also sends this side's full rules. Only while that server watch
   // can still be alive (its sweep is < MAX_WATCH_AGE old): an older key would silently revive a watch the
@@ -1934,30 +1954,38 @@ function alertSpotMatches(spot){
   if(!a){const k=savedAlertKey().split('|');
     if(k.length===4&&k.slice(0,3).join('|')===[spot.corridor,spot.limits,spot.blockside].join('|')&&Date.now()-Date.parse(k[3])<WATCH_MAX_AGE)
       a=rememberAlert({...spot,level:getAlertLevel(),voice:getAlertVoice()},1);}
-  return sameCurb(a,spot)&&alertLive(a);
+  return alertLive(a);
 }
-// Button, style summary and the "alerts are on for <other block>" note, from the saved state — so
-// arming a new block visibly replaces the old one.
+// "Crestline Dr, NE side": the curb a watch is on, for the "Also on for" line. Cross streets are added only
+// when two watches would otherwise read the same (the same side of two blocks of one street).
+const SIDE_ABBR={Northeast:'NE',Northwest:'NW',Southeast:'SE',Southwest:'SW'};
+function alertLabel(a,all){
+  const t=(a.corridor||'Another block')+(a.blockside?', '+(SIDE_ABBR[a.blockside]||a.blockside)+' side':'');
+  const twin=all.filter(b=>b.corridor===a.corridor&&b.blockside===a.blockside).length>1;
+  return twin&&a.limits?t+' ('+fmtLimits(a.limits)+')':t;
+}
+// Button, style summary and the "Also on for <other sides>" note, from the saved state. A side that isn't
+// on offers Sweep alerts, which adds a watch; at MAX_ALERTS the button says so and the note says how to free one.
 function paintAlertState(spot){
-  const on=alertSpotMatches(spot), a=savedAlert();
+  const on=alertSpotMatches(spot), {list:others,full}=otherAlerts(spot);
   const btn=document.getElementById('alertBtn');
-  if(btn&&!btn.classList.contains('busy')){btn.classList.remove('alt');btn.classList.toggle('on',on);if(on)btn.textContent='✓ Alerts on';else btn.innerHTML=ICONS.bell+' Sweep alerts';}
+  if(btn&&!btn.classList.contains('busy')){btn.classList.remove('alt');btn.classList.toggle('on',on);btn.classList.toggle('full',full);
+    if(full)btn.setAttribute('aria-disabled','true');else btn.removeAttribute('aria-disabled');
+    if(on)btn.textContent='✓ Alerts on';else if(full)btn.textContent=MAX_ALERTS+' of '+MAX_ALERTS+' alerts in use';else btn.innerHTML=ICONS.bell+' Sweep alerts';}
   const st=document.querySelector('#alertCfg .acfg-st'); if(st)st.textContent=on?'On · '+getAlertLevel():'Customize ▸';
   const off=document.getElementById('alertOff'); if(off&&!on)off.hidden=true;
   const note=document.getElementById('alertNote'); if(!note)return;
-  const other=!on&&alertLive(a)&&!sameCurb(a,spot);
-  note.hidden=!other;
-  if(other){note.innerHTML=ICONS.bell+'<span></span>';
-    note.lastChild.textContent='Alerts are on for '+(a.corridor||'another block')+(a.blockside?' ('+a.blockside+')':'')+'. Turning them on here moves them to this curb.';}
+  note.hidden=on||!others.length;
+  if(!note.hidden){note.innerHTML=ICONS.bell+'<span></span>';
+    note.lastChild.textContent='Also on for '+others.map(a=>alertLabel(a,others)).join(' · ')+(full?'. Turn one of them off on its sheet to add this curb.':'');}
 }
 // set by openSheet while its side is being swept: the alert it arms is for the sweep after this one
 let sheetArmNote='';
-function armedToast(spot,prev){
+function armedToast(spot){
   const night=alertAnchors(Date.parse(spot.nextSweepISO)).night;
   const what=night?". We'll ping you ~9 PM the night before to move it."
     :(spot.eveningISO&&spot.level!=='light'?". Heads-up the night before, plus ~30 min before the truck.":". We'll ping you ~30 min before.");
-  const moved=prev&&alertLive(prev)&&!sameCurb(prev,spot)?' '+(prev.corridor||'Your other block')+' won\'t alert anymore.':'';
-  toast('Sweep alert set for '+(spot.corridor||'this block')+sheetArmNote+what+moved);
+  toast('Sweep alert set for '+(spot.corridor||'this block')+sheetArmNote+what);
 }
 // Native bridge, two shapes. Build <= 6: __curbRequestPush resolves a boolean and Swift calls
 // __curbNativePushResult(ok, msg), so capture msg before the original resolves. Build 7+: Swift calls it
@@ -1998,7 +2026,8 @@ function hideIosHint(){document.getElementById('iosHint').classList.remove('open
 async function onAlertTap(spot, btn){
   if(!spot){toast('No upcoming sweep on this side to alert on.');return;}
   spot={...spot, level:getAlertLevel(), voice:getAlertVoice()};  // the style picked on this sheet, even before arming
-  const prev=savedAlert();
+  // Every slot taken by other sides (the server would answer 409): say how to free one, ask nothing.
+  if(otherAlerts(spot).full){toast(ALERT_LIMIT_MSG);return;}
   track('alert_intent');  // tapped Sweep alerts on a valid spot — funnel denominator for activation
   // Native iOS app (WKWebView wrapper): route to native APNs registration instead of Web Push.
   // Must precede the standalone hint, or the wrapper would wrongly show the "Add to Home Screen" tip.
@@ -2007,8 +2036,10 @@ async function onAlertTap(spot, btn){
     btn.classList.add('busy'); btn.textContent='Enabling…';
     return nativePush(spot).then(r=>{
       btn.classList.remove('busy');
-      if(r.ok){ markArmed(spot); track('alert_armed'); paintAlertState(spot); armedToast(spot,prev); }
+      if(r.ok){ markArmed(spot); track('alert_armed'); paintAlertState(spot); armedToast(spot); }
       else if(nativeDenied(r.message)){ track('alert_blocked'); btn.innerHTML=original; toast('Allow notifications for CURB in Settings to get sweep alerts.'); }
+      // build 7+ passes the save's status: 409 = the server holds 5 watches for this phone already
+      else if(/^save-failed:409\b/.test(r.message)){ btn.innerHTML=original; toast(ALERT_LIMIT_MSG); }
       else { btn.innerHTML=original; toast("Couldn't save, try again."); curbReport('push-save-failed','ios '+(r.message||'unknown')); }
     });
   }
@@ -2042,21 +2073,25 @@ async function onAlertTap(spot, btn){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({subscription:sub.toJSON(), spot})
     });
+    if(res.status===409)throw new Error('limit-409');  // the server holds 5 watches for this browser already
     if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.note||d.error||('save failed ('+res.status+')')); }
     markArmed(spot);
     track('alert_armed');  // the activation→retention metric
     btn.classList.remove('busy'); paintAlertState(spot);
-    armedToast(spot,prev);
+    armedToast(spot);
   }catch(err){
-    const on=alertSpotMatches(spot);
+    const on=alertSpotMatches(spot), why=String(err&&err.message);
     btn.classList.remove('busy'); btn.classList.toggle('on',on); btn.classList.remove('alt');
     if(on)btn.textContent='✓ Alerts on'; else btn.innerHTML=original;
-    if(!/^permission-/.test(String(err&&err.message))){ toast('Could not enable alerts: '+((err&&err.message)||'try again')+'.'); curbReport('push-save-failed','web '+((err&&err.message)||err)); }
+    if(why==='limit-409')toast(ALERT_LIMIT_MSG);
+    else if(!/^permission-/.test(why)){ toast('Could not enable alerts: '+((err&&err.message)||'try again')+'.'); curbReport('push-save-failed','web '+((err&&err.message)||err)); }
   }
 }
 
-// "✓ Alerts on" → Turn off: disarms this device's watch on the server (web: DELETE proven by the
-// subscription's own keys; iOS: the bridge posts {off:true} with the device token).
+// The curb side a Turn off names, so the server disarms that one watch and leaves the device's others on.
+const sideOf=s=>({cnn:String(s.cnn||''),sideKey:String(s.sideKey||''),corridor:s.corridor||'',limits:s.limits||'',blockside:s.blockside||''});
+// "✓ Alerts on" → Turn off: disarms this side's watch on the server (web: DELETE proven by the
+// subscription's own keys; iOS: the bridge posts {off:true, <side>} with the device token).
 async function turnOffAlerts(spot){
   const btn=document.getElementById('alertBtn');
   document.getElementById('alertOff').hidden=true;
@@ -2065,8 +2100,8 @@ async function turnOffAlerts(spot){
   const where=spot.corridor||'this block';
   const fail=why=>{settle();curbReport('push-off-failed',why);toast("Couldn't turn alerts off, try again.");};
   if(window.__curbNativePush){
-    const r=await nativePush({off:true});
-    if(r.ok){forgetAlert();settle();return toast('Alerts off for '+where+'.');}
+    const r=await nativePush({off:true,...sideOf(spot)});
+    if(r.ok){forgetAlert(spot);settle();return toast('Alerts off for '+where+'.');}
     // no token without permission, so the server watch can't be reached: say so instead of faking "off"
     if(nativeDenied(r.message)){settle();return toast('Turn notifications back on for CURB in Settings, then turn alerts off here.');}
     return fail('ios '+(r.message||'unknown'));
@@ -2074,10 +2109,10 @@ async function turnOffAlerts(spot){
   try{
     const sub=pushSupported()?await(await navigator.serviceWorker.ready).pushManager.getSubscription():null;
     if(sub){  // no subscription = nothing can be delivered here anyway
-      const res=await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON()})});
+      const res=await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),spot:sideOf(spot)})});
       if(!res.ok&&res.status!==404)throw new Error('HTTP '+res.status);
     }
-    forgetAlert();settle();toast('Alerts off for '+where+'.');
+    forgetAlert(spot);settle();toast('Alerts off for '+where+'.');
   }catch(err){fail('web '+((err&&err.message)||err));}
 }
 
@@ -2123,7 +2158,7 @@ function saveStyleSoon(spot){
     reArm(s).then(r=>{
       if(r==='ok')return markArmed(s);
       if(r==='gone'){forgetAlert();paintAlertState(spot);return toast('Alerts are off on this device. Tap Sweep alerts to turn them back on.');}
-      const a=savedAlert();
+      const a=savedAlert(spot);
       try{if(a&&a.level)localStorage.setItem('curbAlertLevel',a.level);if(a&&a.voice)localStorage.setItem('curbAlertVoice',a.voice);}catch(_){}
       applyAlertCfg(spot);paintAlertState(spot);
       toast("Couldn't save your alert style, try again.");
@@ -2136,7 +2171,7 @@ function saveStyleSoon(spot){
 // a schedule change. A same-sweep save keeps the server's de-dupe, so this can never double-push.
 function refreshWatch(spot){
   if(!alertSpotMatches(spot))return;
-  const a=savedAlert(), s={...spot, level:getAlertLevel(), voice:getAlertVoice()};
+  const a=savedAlert(spot), s={...spot, level:getAlertLevel(), voice:getAlertVoice()};
   if(!a||(a.v>=2&&Date.now()-a.armedAt<WATCH_REFRESH&&a.level===s.level&&a.voice===s.voice))return;
   reArm(s).then(r=>{
     if(r==='ok')markArmed(s);

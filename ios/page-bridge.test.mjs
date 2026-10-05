@@ -2,10 +2,26 @@
 // nativeTest, nativeDenied, reArm) run in a bare VM against BOTH app builds' pushScript: build 7's from
 // ContentView.swift (one-object callback + __curbRequestPushDetail) and App Store build 6's (two-argument
 // callback + boolean __curbRequestPush), so a future bridge change that the page misreads fails here.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { userScripts } from './user-scripts.mjs';
+
+// An in-memory Upstash for the multi-watch checks at the end (the page's Turn off through the real endpoint).
+Object.assign(process.env, { KV_REST_API_URL: 'https://fake.upstash.io', KV_REST_API_TOKEN: 'fake' });
+const mem = {};
+vi.mock('@upstash/redis', () => ({
+  Redis: class {
+    async hget(k, f) { return mem[k] && mem[k][f]; }
+    async hmget(k, ...fs) { return fs.map((f) => (mem[k] && f in mem[k] ? mem[k][f] : null)); }
+    async hset(k, obj) { (mem[k] || (mem[k] = {})); Object.assign(mem[k], obj); }
+    async hsetnx(k, f, v) { if (mem[k] && f in mem[k]) return 0; (mem[k] || (mem[k] = {}))[f] = v; return 1; }
+    async hexists(k, f) { return mem[k] && f in mem[k] ? 1 : 0; }
+    async set() { return 'OK'; }
+    async eval(script, [k], [f, expected, next]) { if (!(mem[k] && mem[k][f] === expected)) return 0; mem[k][f] = next; return 1; }
+  },
+}));
+const TOKEN = 'ab'.repeat(32);
 
 const PAGE = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const BUILD7 = userScripts(readFileSync(new URL('./CURB/ContentView.swift', import.meta.url), 'utf8')).pushScript;
@@ -129,5 +145,98 @@ describe('page ↔ push bridge, build 6 (two-argument callback, boolean promise)
     const f = await a.push({ reason: 'save-failed' });
     expect(f).toEqual({ ok: false, message: 'save-failed' });
     expect(a.denied(f.message)).toBe(false);
+  });
+});
+
+// ---- multi-watch (GitHub #11): the page's side of it, with no app update ----
+// The shipped app builds the save body itself ({ token, platform, bundleId, spot }) but forwards the
+// page's spot object untouched (ContentView.swift: pendingSpot = body["spot"], then "spot": spot), so a
+// Turn off can name its side. Each build's bridge carries the page's object; the real endpoint then
+// disarms only that side.
+const SIDE_OF = slice('const sideOf=', '});');
+describe('multi-watch through both bridges, no app update', () => {
+  const swiftSrc = readFileSync(new URL('./CURB/ContentView.swift', import.meta.url), 'utf8');
+  it('the app still forwards the page\'s spot untouched (the assumption the rest rests on)', () => {
+    expect(swiftSrc).toMatch(/pendingSpot = body\["spot"\] as\? \[String: Any\]/);
+    expect(swiftSrc).toMatch(/let payload: \[String: Any\] = \["token": hexToken, "platform": "ios", "bundleId": "guide\.curb\.ios", "spot": spot\]/);
+  });
+
+  for (const build of [6, 7]) {
+    it(`build ${build}: Turn off posts {off:true} plus the side, and the server turns off only that watch`, async () => {
+      const a = app(build);
+      a.run(SIDE_OF);
+      const north = { corridor: 'Crestline Dr', limits: 'Burnett Ave - Parkridge Dr', blockside: 'Northeast', cnn: '4242000', sideKey: 'Northeast' };
+      const south = { ...north, blockside: 'Southwest', sideKey: 'Southwest' };
+      const rule = { weekday: 'Tue', fromhour: '9', tohour: '11', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
+      a.g.spot = north;
+      expect(await a.run('nativePush({off:true,...sideOf(spot)})')).toEqual({ ok: true, message: 'saved' });
+      const posted = a.posts.at(-1);
+      expect(posted).toEqual({ spot: { off: true, cnn: '4242000', sideKey: 'Northeast', corridor: 'Crestline Dr', limits: 'Burnett Ave - Parkridge Dr', blockside: 'Northeast' } });
+
+      // …through the real endpoint, the way the app sends it (JSONSerialization round trip)
+      for (const k of Object.keys(mem)) delete mem[k];
+      const { default: save } = await import('../api/save-ios-subscription.js');
+      const send = async (spot) => { const r = { code: 0, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; } };
+        await save({ method: 'POST', headers: {}, body: JSON.parse(JSON.stringify({ token: TOKEN, platform: 'ios', bundleId: 'guide.curb.ios', spot })) }, r); return r; };
+      for (const s of [north, south]) expect((await send({ ...s, nextSweepISO: '2026-10-06T16:00:00.000Z', leadMinutes: 30, rule, rules: [rule] })).code).toBe(200);
+      expect((await send(posted.spot)).body).toEqual({ ok: true, off: true });
+      const rec = (f) => JSON.parse(mem['curb:apns'][f]);
+      expect(rec(TOKEN).spot).toBe(null);                          // Crestline Dr, NE side: off
+      expect(rec(TOKEN + '#1').spot.sideKey).toBe('Southwes');     // the SW side: still on
+    });
+  }
+});
+
+// The saved-alert map in localStorage ('curbAlert'), run against the page's own helpers.
+const ALERT_STATE = slice('const WATCH_MAX_AGE=', 'return twin&&a.limits?t+\' (\'+fmtLimits(a.limits)+\')\':t;\n}');
+function alertState(initial = {}) {
+  const store = { ...initial };
+  const g = { console };
+  g.window = g;
+  g.localStorage = { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } };
+  g.fmtLimits = (s) => String(s || '').replace(/\s+-\s+/g, ' to ');
+  vm.createContext(g);
+  vm.runInContext(ALERT_STATE, g);
+  return { g, store, run: (src) => vm.runInContext(src, g) };
+}
+describe('saved alerts: a map of watched sides', () => {
+  const side = (cnn, sideKey, corridor = 'Kansas St', blockside = sideKey) => ({ cnn, sideKey, corridor, limits: '16th St - 17th St', blockside });
+
+  it('migrates the single value from before multi-watch into a one-entry map, still "on"', () => {
+    const old = { cnn: '7735000', sideKey: 'West', corridor: 'Kansas St', limits: '16th St - 17th St', blockside: 'West', level: 'normal', voice: 'cheeky', armedAt: Date.now(), v: 2 };
+    const s = alertState({ curbAlert: JSON.stringify(old) });
+    s.g.spot = side('7735000', 'West');
+    expect(s.run('alertSpotMatches(spot)')).toBe(true);
+    expect(JSON.parse(s.store.curbAlert)).toEqual({ '7735000|West': old });
+  });
+
+  it('remembers several sides, forgets one on its Turn off, and all of them when the browser lost its subscription', () => {
+    const s = alertState();
+    s.g.a = side('1', 'North'); s.g.b = side('1', 'South'); s.g.c = side('2', 'East', 'Fulton St');
+    s.run('rememberAlert(a);rememberAlert(b);rememberAlert(c)');
+    expect(s.run('liveAlerts().length')).toBe(3);
+    s.run('forgetAlert(b)');
+    expect(Object.keys(JSON.parse(s.store.curbAlert))).toEqual(['1|North', '2|East']);
+    expect(s.run('alertSpotMatches(a)')).toBe(true);
+    s.run('forgetAlert()');
+    expect(s.store.curbAlert).toBe(undefined);
+  });
+
+  it('is full at MAX_ALERTS (= the server\'s MAX_WATCHES) other sides, never on a side already watched', async () => {
+    const { MAX_WATCHES } = await import('../api/_store.js');
+    const s = alertState();
+    expect(s.run('MAX_ALERTS')).toBe(MAX_WATCHES);
+    for (let i = 0; i < MAX_WATCHES; i++) { s.g.x = side(String(i), 'North'); s.run('rememberAlert(x)'); }
+    s.g.x = side('99', 'North'); s.g.y = side('0', 'North');
+    expect(s.run('otherAlerts(x).full')).toBe(true);
+    expect(s.run('otherAlerts(y).full')).toBe(false);          // its own sheet keeps "✓ Alerts on" + Turn off
+    s.run('forgetAlert(y)');
+    expect(s.run('otherAlerts(x).full')).toBe(false);
+  });
+
+  it('labels a watch "Crestline Dr, NE side", adding the cross streets only to tell two blocks apart', () => {
+    const s = alertState();
+    s.g.list = [side('1', 'Northeast', 'Crestline Dr'), side('2', 'West'), { ...side('3', 'West'), limits: '17th St - Mariposa St' }];
+    expect(s.run('list.map(a=>alertLabel(a,list))')).toEqual(['Crestline Dr, NE side', 'Kansas St, West side (16th St to 17th St)', 'Kansas St, West side (17th St to Mariposa St)']);
   });
 });
