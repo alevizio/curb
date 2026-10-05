@@ -1,0 +1,254 @@
+{
+  "generatedAt": "2026-10-14T15:05:00.000Z",
+  "preview": false,
+  "week": {
+    "label": "Oct 7 to 13",
+    "start": 1791356400000,
+    "end": 1791961200000,
+    "days": ["2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10", "2026-10-11", "2026-10-12", "2026-10-13"],
+    "prevDays": ["2026-09-30", "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05", "2026-10-06"]
+  },
+  "sections": {
+    "visits": {
+      "pageviews": 4210,
+      "visitors": 1940,
+      "prev": { "pageviews": 2460, "visitors": 1180 },
+      "daily": [
+        { "date": "2026-10-07", "pageviews": 1250, "visitors": 612 },
+        { "date": "2026-10-08", "pageviews": 880, "visitors": 420 },
+        { "date": "2026-10-09", "pageviews": 610, "visitors": 288 },
+        { "date": "2026-10-10", "pageviews": 402, "visitors": 190 },
+        { "date": "2026-10-11", "pageviews": 371, "visitors": 176 },
+        { "date": "2026-10-12", "pageviews": 355, "visitors": 240 },
+        { "date": "2026-10-13", "pageviews": 342, "visitors": 232 }
+      ],
+      "prevDaily": [
+        { "date": "2026-09-30", "pageviews": 330, "visitors": 160 },
+        { "date": "2026-10-01", "pageviews": 350, "visitors": 172 },
+        { "date": "2026-10-02", "pageviews": 370, "visitors": 180 },
+        { "date": "2026-10-03", "pageviews": 310, "visitors": 150 },
+        { "date": "2026-10-04", "pageviews": 280, "visitors": 138 },
+        { "date": "2026-10-05", "pageviews": 390, "visitors": 190 },
+        { "date": "2026-10-06", "pageviews": 430, "visitors": 210 }
+      ],
+      "topPages": [
+        { "path": "/", "pageviews": 2140, "visitors": 1320 },
+        { "path": "/b/*", "label": "Block pages", "pageviews": 410, "visitors": 236 },
+        { "path": "/about", "pageviews": 268, "visitors": 231 },
+        { "path": "/n/*", "label": "Neighborhood pages", "pageviews": 262, "visitors": 205 },
+        { "path": "/tickets", "pageviews": 71, "visitors": 62 },
+        { "path": "/press", "pageviews": 44, "visitors": 39 }
+      ],
+      "topHoods": [
+        { "path": "/n/mission", "visitors": 70 },
+        { "path": "/n/inner-sunset", "visitors": 44 },
+        { "path": "/n/noe-valley", "visitors": 38 },
+        { "path": "/n/lower-haight", "visitors": 31 },
+        { "path": "/n/north-beach", "visitors": 22 }
+      ],
+      "referrers": [
+        { "host": "google.com", "visitors": 612 },
+        { "host": "producthunt.com", "visitors": 388 },
+        { "host": "news.ycombinator.com", "visitors": 141 },
+        { "host": "t.co", "visitors": 52 },
+        { "host": "reddit.com", "visitors": 47 },
+        { "host": "bing.com", "visitors": 33 }
+      ],
+      "countries": [
+        { "country": "US", "visitors": 1690 },
+        { "country": "CA", "visitors": 41 },
+        { "country": "GB", "visitors": 33 },
+        { "country": "DE", "visitors": 22 }
+      ],
+      "devices": [
+        { "device": "Mobile", "visitors": 1180 },
+        { "device": "Desktop", "visitors": 731 },
+        { "device": "Tablet", "visitors": 29 }
+      ]
+    },
+    "service": {
+      "alerts": { "web": 71, "ios": 66, "lastRunAt": "2026-10-14T14:45:00.000Z", "lastOutcome": "ok, 4 sent", "failing": [], "sender": { "status": "ok", "detail": "last good QStash run 6 min ago" } },
+      "errors": {
+        "total": 214,
+        "prevTotal": 162,
+        "groups": [
+          { "message": "Load failed", "count": 96, "kind": "event:data-load", "page": "/" },
+          { "message": "TypeError: Failed to fetch", "count": 41, "kind": "rejection", "page": "/" },
+          { "message": "block never opened after 8s", "count": 22, "kind": "event:block-open-timeout", "page": "/b/8753101" },
+          { "message": "Script error.", "count": 9, "kind": "error" }
+        ],
+        "capped": false
+      }
+    },
+    "github": {
+      "shipped": [
+        { "sha": "7f3a9c1", "subject": "feat(share): neighborhood share card with this week's sweeps", "type": "feat", "date": "2026-10-12T19:20:00Z", "landedAt": "2026-10-12T19:20:00Z", "url": "https://github.com/alevizio/curb/commit/7f3a9c1" },
+        { "sha": "51e0b77", "subject": "feat(monitor): weekly email report every Wednesday", "type": "feat", "date": "2026-10-11T17:02:00Z", "landedAt": "2026-10-11T17:02:00Z", "url": "https://github.com/alevizio/curb/commit/51e0b77" },
+        { "sha": "c0d4e12", "subject": "feat(load): retry a dropped Leaflet or time core, then say CURB didn't load", "type": "feat", "date": "2026-10-08T16:41:00Z", "landedAt": "2026-10-08T16:41:00Z", "url": "https://github.com/alevizio/curb/commit/c0d4e12" },
+        { "sha": "2abd5c3", "subject": "fix(og): ship harfbuzzjs hb.wasm with the og function", "type": "fix", "date": "2026-10-07T09:14:00Z", "landedAt": "2026-10-07T09:14:00Z", "url": "https://github.com/alevizio/curb/commit/2abd5c3" },
+        { "sha": "9e18b42", "subject": "fix(sw): a failed script or icon request fails cleanly, not with the app shell", "type": "fix", "date": "2026-10-07T13:30:00Z", "landedAt": "2026-10-07T13:30:00Z", "url": "https://github.com/alevizio/curb/commit/9e18b42" },
+        { "sha": "572447f", "subject": "fix(error-log): skip reports from self-declared crawlers", "type": "fix", "date": "2026-10-08T10:05:00Z", "landedAt": "2026-10-08T10:05:00Z", "url": "https://github.com/alevizio/curb/commit/572447f" },
+        { "sha": "e767acf", "subject": "fix(data): neighborhood totals by the city's own label, rolling 24 months", "type": "fix", "date": "2026-10-09T21:48:00Z", "landedAt": "2026-10-09T21:48:00Z", "url": "https://github.com/alevizio/curb/commit/e767acf" },
+        { "sha": "a4cf383", "subject": "fix(copy): Steiner example from the 200 block, plain sourcing", "type": "fix", "date": "2026-10-10T15:12:00Z", "landedAt": "2026-10-10T15:12:00Z", "url": "https://github.com/alevizio/curb/commit/a4cf383" },
+        { "sha": "c83a9a7", "subject": "chore(ci): bump every GitHub Action to its current major in one pass", "type": "chore", "date": "2026-10-03T08:40:00Z", "landedAt": "2026-10-09T08:40:00Z", "url": "https://github.com/alevizio/curb/commit/c83a9a7" },
+        { "sha": "6dd3c66", "subject": "design(nav): keep the logo on phones, still no white pill", "type": "design", "date": "2026-10-12T11:25:00Z", "landedAt": "2026-10-12T11:25:00Z", "url": "https://github.com/alevizio/curb/commit/6dd3c66" },
+        { "sha": "427f048", "subject": "docs(multi-city): plan, city data format, Boston and Buenos Aires research", "type": "docs", "date": "2026-10-13T18:03:00Z", "landedAt": "2026-10-13T18:03:00Z", "url": "https://github.com/alevizio/curb/commit/427f048" }
+      ],
+      "shippedCount": 11,
+      "shippedByType": { "feat": 3, "fix": 5, "chore": 1, "design": 1, "docs": 1 },
+      "issues": {
+        "opened": [
+          { "number": 47, "title": "Monitor: basemap tiles", "url": "https://github.com/alevizio/curb/issues/47", "labels": ["monitor", "monitor:smoke"], "automated": true },
+          { "number": 48, "title": "Could CURB cover Oakland street sweeping?", "url": "https://github.com/alevizio/curb/issues/48", "labels": [], "automated": false }
+        ],
+        "closed": [
+          { "number": 45, "title": "Monitor: DataSF RPP answered with no rows", "url": "https://github.com/alevizio/curb/issues/45", "labels": ["monitor"], "automated": true, "closedAt": "2026-10-08T03:10:00Z" },
+          { "number": 44, "title": "App Store review watch", "url": "https://github.com/alevizio/curb/issues/44", "labels": ["monitor:reviews"], "automated": true, "closedAt": "2026-10-09T20:00:00Z" }
+        ],
+        "open": [
+          { "number": 48, "title": "Could CURB cover Oakland street sweeping?", "url": "https://github.com/alevizio/curb/issues/48", "labels": [], "createdAt": "2026-10-12T22:41:00Z" },
+          { "number": 47, "title": "Monitor: basemap tiles", "url": "https://github.com/alevizio/curb/issues/47", "labels": ["monitor"], "createdAt": "2026-10-13T09:30:00Z" },
+          { "number": 31, "title": "Boston: city data format", "url": "https://github.com/alevizio/curb/issues/31", "labels": ["multi-city"], "createdAt": "2026-10-01T18:00:00Z" }
+        ],
+        "alertsOpen": [
+          { "number": 47, "title": "Monitor: basemap tiles", "url": "https://github.com/alevizio/curb/issues/47", "label": "monitor:smoke", "createdAt": "2026-10-13T09:30:00Z" }
+        ]
+      },
+      "runs": {
+        "monitor": { "total": 336, "failed": 6 },
+        "verify": { "total": 11, "failed": 1 },
+        "dataRefresh": { "lastAt": "2026-10-01T10:12:00Z", "conclusion": "success", "url": "https://github.com/alevizio/curb/actions/runs/18123456789" }
+      },
+      "repo": { "stars": 214, "forks": 9, "starsGained": 61 }
+    },
+    "search": {
+      "google": {
+        "start": "2026-10-07",
+        "end": "2026-10-11",
+        "clicks": 312,
+        "impressions": 9840,
+        "ctr": 0.0317,
+        "position": 9.6,
+        "prev": { "clicks": 268, "impressions": 8120, "ctr": 0.033, "position": 10.4 },
+        "daily": [
+          { "date": "2026-10-07", "clicks": 71, "impressions": 2210 },
+          { "date": "2026-10-08", "clicks": 78, "impressions": 2340 },
+          { "date": "2026-10-09", "clicks": 60, "impressions": 1980 },
+          { "date": "2026-10-10", "clicks": 49, "impressions": 1610 },
+          { "date": "2026-10-11", "clicks": 54, "impressions": 1700 }
+        ],
+        "topQueries": [
+          { "query": "sf street cleaning map", "clicks": 58, "impressions": 1204, "position": 4.1 },
+          { "query": "street sweeping san francisco", "clicks": 41, "impressions": 2310, "position": 8.7 },
+          { "query": "curb guide", "clicks": 33, "impressions": 61, "position": 1.2 },
+          { "query": "sf street cleaning schedule by address", "clicks": 19, "impressions": 840, "position": 7.9 },
+          { "query": "steiner st street cleaning", "clicks": 6, "impressions": 52, "position": 3.4 }
+        ],
+        "topPages": [
+          { "page": "/", "clicks": 201, "impressions": 3900 },
+          { "page": "/n/mission", "clicks": 22, "impressions": 640 },
+          { "page": "/b/8753101", "clicks": 9, "impressions": 210 },
+          { "page": "/about", "clicks": 7, "impressions": 180 }
+        ],
+        "blockPages": { "withImpressions": 412, "total": 12253 },
+        "indexSample": { "checked": 20, "indexed": 17, "states": { "Submitted and indexed": 17, "Crawled - currently not indexed": 2, "Discovered - currently not indexed": 1 } },
+        "firstIncompleteDate": null
+      },
+      "bing": {
+        "start": "2026-10-05",
+        "end": "2026-10-11",
+        "prevStart": "2026-09-28",
+        "prevEnd": "2026-10-04",
+        "clicks": 21,
+        "impressions": 1430,
+        "prev": { "clicks": 14, "impressions": 1102 },
+        "topPages": [
+          { "page": "/", "clicks": 15, "impressions": 810 },
+          { "page": "/n/mission", "clicks": 3, "impressions": 120 }
+        ],
+        "pagesFrom": "2026-09-29",
+        "pagesTo": "2026-10-05",
+        "daysWithData": { "week": 7, "prev": 7 },
+        "lastDataDay": "2026-10-11"
+      }
+    },
+    "app": {
+      "live": { "version": "1.0.3", "releasedAt": "2026-10-03T18:20:00Z", "url": "https://apps.apple.com/us/app/curb/id6780998238" },
+      "rating": { "average": 4.8, "count": 41 },
+      "reviews": [
+        { "stars": 5, "title": "Saved me a ticket on day one", "body": "Opened it on Fell St, saw the sweeper was coming at 9 and moved the car. The alert the night before is the best part.", "territory": "USA", "date": "2026-10-08", "replied": true },
+        { "stars": 3, "title": "Wish it covered Oakland", "body": "Works great in SF. I park in Oakland half the week and would pay for that.", "territory": "USA", "date": "2026-10-11", "replied": false }
+      ],
+      "lowUnanswered": 1,
+      "downloads": {
+        "downloads": 184,
+        "redownloads": 12,
+        "updates": 96,
+        "partial": true,
+        "daysKnown": 6,
+        "prev": { "downloads": 58, "redownloads": 5, "updates": 38 },
+        "prevFull": { "downloads": 61, "redownloads": 5, "updates": 40 },
+        "daily": [
+          { "date": "2026-10-07", "downloads": 58 },
+          { "date": "2026-10-08", "downloads": 41 },
+          { "date": "2026-10-09", "downloads": 27 },
+          { "date": "2026-10-10", "downloads": 18 },
+          { "date": "2026-10-11", "downloads": 16 },
+          { "date": "2026-10-12", "downloads": 24 },
+          { "date": "2026-10-13", "downloads": null }
+        ],
+        "countries": [
+          { "country": "US", "downloads": 171 },
+          { "country": "CA", "downloads": 5 },
+          { "country": "GB", "downloads": 3 }
+        ],
+        "asOf": "2026-10-12",
+        "pending": ["2026-10-13"]
+      }
+    },
+    "appAnalytics": {
+      "impressions": 6120,
+      "pageViews": 1310,
+      "conversion": 0.081,
+      "sessions": 1640,
+      "activeDevices": 402,
+      "crashes": 1,
+      "prev": { "impressions": 2210, "pageViews": 410, "conversion": 0.072, "sessions": 720, "activeDevices": 251, "crashes": 0 },
+      "asOf": "2026-10-12",
+      "incomplete": ["sessions", "crashes"],
+      "lastDay": { "impressions": "2026-10-12", "pageViews": "2026-10-12", "sessions": "2026-10-09", "activeDevices": "2026-10-12", "crashes": "2026-10-09" }
+    },
+    "mentions": {
+      "items": [
+        { "source": "hackernews", "title": "Show HN: CURB, a free map of San Francisco street sweeping", "url": "https://news.ycombinator.com/item?id=45512345", "date": "2026-10-07", "points": 142, "comments": 61 },
+        { "source": "bluesky", "title": "Finally a street cleaning map that just tells you when to move the car", "url": "https://bsky.app/profile/example.bsky.social/post/3lxyzabc", "date": "2026-10-08", "snippet": "Set an alert for my block in ten seconds. No account." },
+        { "source": "web", "title": "A designer built the street sweeping map San Francisco never did", "url": "https://sfneighborhoodnotes.example.com/2026/10/curb-street-sweeping", "date": "2026-10-10" }
+      ],
+      "producthunt": {
+        "name": "CURB",
+        "url": "https://www.producthunt.com/products/curb",
+        "votes": 386,
+        "comments": 47,
+        "dailyRank": 4,
+        "weeklyRank": 11,
+        "featuredAt": "2026-10-07T07:01:00Z",
+        "recentComments": [
+          { "author": "Maya R.", "body": "Moved to the Sunset last month and got two tickets in a week. Installing this right now.", "date": "2026-10-07" },
+          { "author": "Dev P.", "body": "Love that it reads the actual city data. Any plans for Los Angeles?", "date": "2026-10-08" }
+        ]
+      },
+      "reddit": { "blocked": true }
+    },
+    "claude": {
+      "summary": [
+        "Launch week: Product Hunt day sent 612 visitors on Wednesday, and traffic settled near twice last week's level by Tuesday.",
+        "The Show HN reached the front page; most comments ask for Oakland and Berkeley.",
+        "Two local blogs wrote about CURB. No mainstream press yet."
+      ],
+      "mentions": [
+        { "title": "Street sweeping tickets: the apps that help", "url": "https://bayareaparkingblog.example.com/street-sweeping-apps", "source": "blog", "date": "2026-10-09", "note": "Lists CURB first and quotes the 9:12 Steiner St example." },
+        { "title": "CURB on the r/sanfrancisco weekly thread", "url": "https://www.reddit.com/r/sanfrancisco/comments/abc123/weekly_thread/", "source": "reddit", "date": "2026-10-11", "note": "A few people recommend it in replies about tickets." }
+      ]
+    }
+  }
+}
