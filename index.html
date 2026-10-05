@@ -1703,14 +1703,15 @@ function openSheet(group, activeKey){
   const _holDate=!_hol?'':(_holS?!_holSched:!_holW.night)?_holDay:_holW.when;
   // this morning's holiday sweep is over (scheduleDone, always today): regular sweeps are off and nothing is left,
   // so the card never shows that finished window as coming, nor says "No street sweeping" for a swept date
-  const _holDone=!!_hol&&!_holS&&!!_hol.scheduleDone;
+  const _holDone=!!_hol&&!_holS&&!!_hol.scheduleDone, _holNone=!!_hol&&!_holS&&!_holDone;
   const _holNote=!_hol?'':`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div>`
     +(_holS?`<div class="hh">Holiday schedule</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Regular sweeps are off; this side is swept at its posted holiday hours.</div>`
       :_holDone?`<div class="hh">Regular sweeps off</div><div class="hs"><b>${_hol.name}</b> · today. This side's holiday sweep is over. Leave your car where it is.</div>`
       :`<div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Leave your car where it is.</div>`)+`</div></div>`;
-  // the side's holiday schedule like its sign, unless the line above or the card already shows those hours
+  // the side's holiday schedule like its sign, unless the line above or the card already shows those hours, or the
+  // card says nothing sweeps that date (New Year's Day, Thanksgiving, Christmas): "on city holidays" would contradict it
   const _hr=(active.rows||[]).find(isHolidayRow);
-  const _holRow=_hr&&!(ns&&ns.holiday)&&!_holSched?`<div class="holrow">${holSign(_hr)}<span>on city holidays, when regular sweeps stop</span></div>`:'';
+  const _holRow=_hr&&!(ns&&ns.holiday)&&!_holSched&&!_holNone?`<div class="holrow">${holSign(_hr)}<span>on city holidays, when regular sweeps stop</span></div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   // Crowdsourced "Correct a Sign": opens the repo's existing wrong-data issue FORM with this block's

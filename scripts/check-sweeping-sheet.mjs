@@ -221,6 +221,14 @@ const okDone = done.card && done.card[0] === 'Regular sweeps off'
   && /^HOLIDAYS 5 TO 7AM ?on city holidays, when regular sweeps stop$/.test(done.holrow || '') && !done.errors.length;
 console.log(okDone ? '✅ holiday morning: once the holiday sweep is over, the card says regular sweeps are off, not that it is coming' : '❌ holiday morning: the card still offers a holiday sweep that has ended');
 if (!okDone) process.exitCode = 1;
+// (d) Christmas (Fri 12/25 2026, nothing sweeps, holiday schedules included), seen Wed 12/23 8 PM PST on Columbus Ave's
+// Southwest side (Fri 4 to 6 AM plus HOLIDAYS 4 TO 6AM): the "No street sweeping" card, and no "on city holidays" pill
+// above it saying the opposite.
+const xmas = await holidaySheet([37.80314, -122.41430], '4301000', 'southwest', 'sheet-christmas.png', Date.UTC(2026, 11, 24, 4, 0));
+console.log(JSON.stringify(xmas));
+const okXmas = xmas.card && xmas.card[0] === 'No street sweeping' && /^Christmas · /.test(xmas.card[1] || '') && xmas.holrow === null && !xmas.errors.length;
+console.log(okXmas ? '✅ Christmas: "No street sweeping", with no holiday-schedule pill contradicting it' : '❌ Christmas: the "on city holidays" pill sits above a "No street sweeping" card');
+if (!okXmas) process.exitCode = 1;
 
 // The day filter is a visibility lens (CLAUDE.md), and a side's holiday schedule counts on the weekday its next
 // sweep falls, within the coming week. The evening before Indigenous Peoples Day (Sun 10/11 2026, 8 PM PDT) the MON

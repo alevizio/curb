@@ -92,7 +92,8 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   Thanksgiving, Christmas) nothing sweeps. It replaced the night-route rule (window inside 12 to 6 AM or
   flagged = swept through minor holidays, `sweepNightRoute`, removed), wrong both ways. The Holiday row joins
   the side's rules everywhere: the sheet (next sweep = earliest across them; "holiday schedule" in the line
-  under the head; a `.holsign` "HOLIDAYS 4 TO 6AM" pill; the city-holiday card from `holidayNote`: "Holiday
+  under the head; a `.holsign` "HOLIDAYS 4 TO 6AM" pill, left out when the card says
+  "No street sweeping", which it would contradict; the city-holiday card from `holidayNote`: "Holiday
   schedule" for a side whose Holiday row sweeps that date and hasn't ended, "Regular sweeps off" once that
   morning's holiday sweep is over (`scheduleDone`: the finished window is never shown as coming), "No street
   sweeping" otherwise, each number once),
