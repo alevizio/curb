@@ -1692,7 +1692,7 @@ function openSheet(group, activeKey){
   const _soon=ns&&((now>=ns.start&&now<ns.end)||(ns.start-now)<864e5);
   // City holiday heads-up (lib/sweep-core.js holidayNote): regular sweeps stop on every holiday, and a side with a
   // posted holiday schedule is swept at those hours on the minor ones. A holiday before this side's next sweep says
-  // "No street sweeping" only when nothing sweeps it that day, else "Holiday schedule".
+  // "No street sweeping" only when nothing sweeps it that day, else "Holiday schedule" ("Regular sweeps off" once over).
   const _hol=typeof holidayNote==='function'?holidayNote(active.rows||[],ns):null;
   const _WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const _holS=_hol&&_hol.schedule, _holSched=_holS&&!(ns&&+_holS.start===+ns.start)?_holS:null;  // not already the line above
@@ -1701,8 +1701,12 @@ function openSheet(group, activeKey){
   const _holDay=!_hol?'':_holW.night?_holW.day:`${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da}`;
   // each number once: when the line above already gives the holiday hours, the card names the day only
   const _holDate=!_hol?'':(_holS?!_holSched:!_holW.night)?_holDay:_holW.when;
+  // this morning's holiday sweep is over (scheduleDone, always today): regular sweeps are off and nothing is left,
+  // so the card never shows that finished window as coming, nor says "No street sweeping" for a swept date
+  const _holDone=!!_hol&&!_holS&&!!_hol.scheduleDone;
   const _holNote=!_hol?'':`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div>`
     +(_holS?`<div class="hh">Holiday schedule</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Regular sweeps are off; this side is swept at its posted holiday hours.</div>`
+      :_holDone?`<div class="hh">Regular sweeps off</div><div class="hs"><b>${_hol.name}</b> · today. This side's holiday sweep is over. Leave your car where it is.</div>`
       :`<div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Leave your car where it is.</div>`)+`</div></div>`;
   // the side's holiday schedule like its sign, unless the line above or the card already shows those hours
   const _hr=(active.rows||[]).find(isHolidayRow);

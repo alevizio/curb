@@ -93,7 +93,9 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   flagged = swept through minor holidays, `sweepNightRoute`, removed), wrong both ways. The Holiday row joins
   the side's rules everywhere: the sheet (next sweep = earliest across them; "holiday schedule" in the line
   under the head; a `.holsign` "HOLIDAYS 4 TO 6AM" pill; the city-holiday card from `holidayNote`: "Holiday
-  schedule" for a side whose Holiday row sweeps that date, "No street sweeping" otherwise, each number once),
+  schedule" for a side whose Holiday row sweeps that date and hasn't ended, "Regular sweeps off" once that
+  morning's holiday sweep is over (`scheduleDone`: the finished window is never shown as coming), "No street
+  sweeping" otherwise, each number once),
   data/schedules.json + data/overview.json (dow 7), /b/ pages (a HOLIDAYS badge, a sentence, "(holiday
   schedule)" in next sweeps; titles, descriptions and the /n/ lists leave dow 7 out), alert rules (stored as
   'holiday'; the push says "(holiday hours)" and drops the tip), /holidays. Caveats: the Holiday window is close,

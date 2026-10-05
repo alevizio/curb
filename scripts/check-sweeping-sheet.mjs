@@ -155,7 +155,7 @@ if (!okTip) process.exitCode = 1;
 // Holidays (street-cleaning tickets, Oct 2025 to Sep 2026; lib/sweep-core.js sweepSuspended): the evening before
 // Indigenous Peoples Day (Sun 10/11 2026, 8 PM PDT) regular sweeps are off, and a side with a posted holiday
 // schedule (DataSF weekday 'Holiday') is swept at its hours. SHOTS_DIR=<dir> saves each sheet as a 390 px PNG.
-async function holidaySheet(center, cnn, side, shot) {
+async function holidaySheet(center, cnn, side, shot, t = Date.UTC(2026, 9, 12, 3, 0)) {
   const pg = await b.newPage();
   await pg.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   const errs = [];
@@ -165,7 +165,7 @@ async function holidaySheet(center, cnn, side, shot) {
     class F extends R { constructor(...a) { if (a.length) super(...a); else super(R.now() + off); } static now() { return R.now() + off; } }
     globalThis.Date = F;
     try { localStorage.setItem('curbFirstSheet', '1'); } catch (_) {}
-  }, Date.UTC(2026, 9, 12, 3, 0));
+  }, t);
   await pg.goto(SITE + '/', { waitUntil: 'load' });
   await pg.waitForFunction(() => { const x = document.getElementById('welcomeGo'); return x && x.offsetParent; }, { timeout: 8000 }).then(() => pg.click('#welcomeGo'), () => {});
   await pg.waitForFunction(() => typeof map !== 'undefined');
@@ -211,6 +211,16 @@ const okReg = reg.head === 'Tue night' && /^Wed 12 to 2 AM · every week · in 2
   && reg.other.length === 1 && reg.other[0][0] === 'Mon night 10/12 · tomorrow night' && reg.spotSweep === '2026-10-14T07:00:00.000Z' && !reg.errors.length;
 console.log(okReg ? '✅ no holiday schedule: tonight\'s 12 to 2 AM sweep is off, and the card says so' : '❌ no holiday schedule: a regular night sweep still shows on the holiday, or the card is wrong');
 if (!okReg) process.exitCode = 1;
+// (c) The holiday morning, once the holiday sweep is over: Mission St, Cesar Chavez to Precita (cnn 9129000), Northwest
+// side, Mon 6 to 8 AM plus HOLIDAYS 5 TO 7AM, at Mon 10/12 7:30 AM. The card must not offer the finished 5 to 7 window
+// as coming ("this side is swept at its posted holiday hours"); it says regular sweeps are off and that one is over.
+const done = await holidaySheet([37.74747, -122.41867], '9129000', 'northwest', 'sheet-holiday-done.png', Date.UTC(2026, 9, 12, 14, 30));
+console.log(JSON.stringify(done));
+const okDone = done.card && done.card[0] === 'Regular sweeps off'
+  && done.card[1] === "Indigenous Peoples Day · today. This side's holiday sweep is over. Leave your car where it is."
+  && /^HOLIDAYS 5 TO 7AM ?on city holidays, when regular sweeps stop$/.test(done.holrow || '') && !done.errors.length;
+console.log(okDone ? '✅ holiday morning: once the holiday sweep is over, the card says regular sweeps are off, not that it is coming' : '❌ holiday morning: the card still offers a holiday sweep that has ended');
+if (!okDone) process.exitCode = 1;
 
 // The day filter is a visibility lens (CLAUDE.md), and a side's holiday schedule counts on the weekday its next
 // sweep falls, within the coming week. The evening before Indigenous Peoples Day (Sun 10/11 2026, 8 PM PDT) the MON
