@@ -321,6 +321,7 @@ ${jsonld}
 <link rel="stylesheet" href="/site.css">
 <script src="/site.js" defer></script>
 <style>${CSS}</style>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>`;
 

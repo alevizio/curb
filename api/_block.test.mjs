@@ -186,6 +186,12 @@ describe('block page — status codes', () => {
     expect(res.statusCode).toBe(200);
     expect(res.headers['Cache-Control']).toBe('public, s-maxage=43200, stale-while-revalidate=3600');
   });
+
+  it('block pages load the cookieless page counter; the 404 signage page does not', async () => {
+    const counter = '<script defer src="/_vercel/insights/script.js"></script>';
+    expect((await call(makeHandler(() => DATA), '1000')).body).toContain(counter);
+    expect((await call(makeHandler(() => DATA), '424242')).body).not.toContain(counter);
+  });
 });
 
 describe('block page — every baked block (data/schedules.json)', () => {

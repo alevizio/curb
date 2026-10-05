@@ -276,7 +276,8 @@ export function renderBlock(cnn, { S, ENF, R }) {
 <script type="application/ld+json">${ld}</script>
 <link rel="icon" href="/icons/icon-192.png">
 ${HEAD_FONTS}
-<style>${STYLE}</style></head><body>
+<style>${STYLE}</style>
+<script defer src="/_vercel/insights/script.js"></script></head><body>
 <main class="card">
 <div class="top"><a class="logo" href="/">CURB<span>.</span></a>${SITE_NAV}</div>
 <nav class="crumb" aria-label="Breadcrumb"><a href="/">CURB</a> › ${hoodUrl ? `<a href="${hoodUrl}">${esc(hood[0])}</a>` : '<a href="/n/">Neighborhoods</a>'} › ${esc(street)}</nav>
