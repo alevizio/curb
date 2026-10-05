@@ -454,6 +454,11 @@ the advance, a re-save, a block switch or Turn off): each entry holds the sweep 
 it only blocks that sweep — an off → on of the same sweep can't re-send a push. A watch stops
 auto-advancing once it goes stale past `MAX_WATCH_AGE` (~120 days, api/_schedule.js) so a frozen rule can't
 track a city schedule change. In the sheet, ties between a side's rows go to the earliest next sweep.
+Watches saved before the holiday model carry no Holiday rule (the old page and server dropped it), and old pages
+still re-save without one, so every run the sender adds the side's Holiday rows from data/schedules.json
+(`withHolidayRules` in api/_schedule.js, matched by cnn + blockside, else sideKey) before `recomputeSpot` /
+`dueAlert`; they are stored only through an advance, whose CAS compares the stored spot, never the filled one.
+The file is in vercel.json includeFiles for the sender (a test holds it there).
 
 Cadence (`lib/notify-core.js`, don't regress): Light = lead, Normal = eve + lead, Intense = eve +
 morn + lead; sweeps starting before 07:00 SF get ONE "move it tonight" push from 21:00 SF the evening

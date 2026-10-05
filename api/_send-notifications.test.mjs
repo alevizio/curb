@@ -636,3 +636,85 @@ describe('two watches on one device', () => {
     expect(tokens).toEqual([tok]);
   });
 });
+
+// Watches saved before the holiday model (2026-10-05) carry no Holiday rule: the page and server of the time dropped
+// DataSF's weekday 'Holiday' row. The sender adds the side's rows from data/schedules.json before it re-arms, so such
+// a watch on Columbus Ave, Lombard to Taylor (cnn 4301000), still gets its Indigenous Peoples Day push. Southwest
+// side: Mon/Wed/Fri/Sat 4 to 6 AM plus HOLIDAYS 4 TO 6AM; Northeast side: Tue/Thu/Sun 4 to 6 AM, no holiday schedule.
+describe('a watch saved before the holiday model', () => {
+  const R = (weekday) => ({ weekday, fromhour: '4', tohour: '6', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' });
+  const base = { corridor: 'Columbus Ave', limits: 'LOMBARD ST \\ TAYLOR ST', leadMinutes: 30, level: 'normal', voice: 'deadpan', tip: '4:12am', cnn: '4301000' };
+  const sw = (nextSweepISO) => ({ ...base, blockside: 'SouthWest', sideKey: 'SouthWes', nextSweepISO, rule: R('mon'), rules: ['mon', 'wed', 'fri', 'sat'].map(R) });
+  const ne = (nextSweepISO) => ({ ...base, blockside: 'NorthEast', sideKey: 'NorthEas', nextSweepISO, rule: R('tue'), rules: ['tue', 'thu', 'sun'].map(R) });
+  const SAVED = Date.parse('2026-10-01T17:00:00Z');
+  const put = (spot) => { mem['curb:subs'] = { [EP]: JSON.stringify({ subscription: SUB, spot, notified: {}, savedAt: SAVED }) }; };
+  const stored = () => JSON.parse(mem['curb:subs'][EP]);
+  const at = (iso) => vi.setSystemTime(Date.parse(iso));
+  const pushes = () => send.mock.calls.map(([, p]) => JSON.parse(p)).map((p) => `${p.title} | ${p.body}`);
+  const SAT_7AM = '2026-10-10T14:00:00Z', SUN_905PM = '2026-10-12T04:05:00Z', MON_905PM = '2026-10-13T04:05:00Z';
+
+  it('the Southwest side re-arms onto its holiday schedule, stores it, and gets the Oct 12 push at holiday hours', async () => {
+    put(sw('2026-10-10T11:00:00.000Z'));                                   // Sat's sweep, now over
+    at(SAT_7AM);
+    expect((await run(bearer())).body.web.rearmed).toBe(1);
+    expect(stored().spot.nextSweepISO).toBe('2026-10-12T11:00:00.000Z');   // Mon 4 AM by the holiday schedule
+    expect(stored().spot.rules.map((r) => r.weekday)).toEqual(['mon', 'wed', 'fri', 'sat', 'holiday']);
+    at(SUN_905PM);
+    expect((await run(bearer())).body.web.sent).toBe(1);
+    expect(pushes()).toEqual([expect.stringContaining('4 AM (holiday hours)')]);
+    expect(pushes()[0]).not.toContain('4:12am');                           // the weekly ticket time is not the holiday's
+  });
+
+  it('a watch the old server already armed for Oct 12 keeps it (no move to Wednesday), on web and iOS', async () => {
+    put(sw('2026-10-12T11:00:00.000Z'));
+    const tok = 'ab'.repeat(32);
+    mem['curb:apns'] = { [tok]: JSON.stringify({ token: tok, spot: sw('2026-10-12T11:00:00.000Z'), notified: {}, savedAt: SAVED, platform: 'ios' }) };
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const ios = [];
+    apnsReply = (t, collapse, aps) => { ios.push(`${aps.aps.alert.title} | ${aps.aps.alert.body}`); return { status: 200 }; };
+    try {
+      at(SAT_7AM);
+      expect((await run(bearer())).body).toMatchObject({ web: { rearmed: 0 }, ios: { rearmed: 0 } });
+      for (const k of Object.keys(kv)) delete kv[k];
+      at(SUN_905PM);
+      expect((await run(bearer())).body).toMatchObject({ web: { sent: 1 }, ios: { sent: 1 } });
+      expect(pushes()).toEqual([expect.stringContaining('4 AM (holiday hours)')]);
+      expect(ios).toEqual([expect.stringContaining('4 AM (holiday hours)')]);
+      expect(stored().spot.nextSweepISO).toBe('2026-10-12T11:00:00.000Z');
+      expect(JSON.parse(mem['curb:apns'][tok]).notified).toEqual({ tonight: '2026-10-12T11:00:00.000Z' });
+    } finally { for (const k of ['APNS_KEY_P8', 'APNS_KEY_ID', 'APNS_TEAM_ID']) delete process.env[k]; }
+  });
+
+  it('the Northeast side, with no holiday schedule, is unchanged: no Holiday rule, nothing on the holiday', async () => {
+    put(ne('2026-10-11T11:00:00.000Z'));                                   // Sun's sweep
+    at('2026-10-11T14:00:00Z');                                            // Sun 7 AM, over
+    expect((await run(bearer())).body.web.rearmed).toBe(1);
+    expect(stored().spot).toEqual({ ...ne('2026-10-13T11:00:00.000Z') });  // Tue 4 AM, the same rules, no anchors (a night sweep)
+    const before = mem['curb:subs'][EP];
+    at(SUN_905PM);
+    expect((await run(bearer())).body.web).toMatchObject({ sent: 0, rearmed: 0 });
+    expect(mem['curb:subs'][EP]).toBe(before);                             // nothing written
+    at(MON_905PM);
+    expect((await run(bearer())).body.web.sent).toBe(1);
+    expect(pushes()[0]).not.toMatch(/holiday/);
+  });
+
+  it('a turned-off watch stays off: never filled, re-armed or pushed, even when the Turn off lands mid-run', async () => {
+    put(sw('2026-10-10T11:00:00.000Z'));
+    at(SAT_7AM);
+    afterSnapshot = () => disarmSub(EP, SUB.keys.auth);
+    expect((await run(bearer())).body.web.rearmed).toBe(0);
+    expect(stored().spot).toBe(null);
+    for (const t of [SUN_905PM, '2026-10-12T10:40:00Z']) {
+      at(t);
+      expect((await run(bearer())).body.web).toMatchObject({ sent: 0, rearmed: 0 });
+    }
+    expect(stored().spot).toBe(null);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('vercel.json ships data/schedules.json with the sender (the tracer does not follow its runtime read)', () => {
+    const v = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+    expect(v.functions['api/send-notifications.js'].includeFiles).toContain('data/schedules.json');
+  });
+});

@@ -18,16 +18,37 @@
 import webpush from 'web-push';
 import { Receiver } from '@upstash/qstash';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import {
   loadAllSubs, deleteSub, markNotified, advanceSpot, storeReady,
   loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot,
   saveRunStatus, loadRunStatus, loadDelivery,
 } from './_store.js';
-import { recomputeSpot, MAX_WATCH_AGE } from './_schedule.js';
+import { recomputeSpot, withHolidayRules, MAX_WATCH_AGE } from './_schedule.js';
 import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
 import { dueAlert } from '../lib/notify-core.js';
 
 const SEND_TIMEOUT_MS = 10000; // per push request (web push and APNs), well inside the 60 s function limit
+
+// Each block's posted holiday schedule (data/schedules.json rows with dow 7, ~590 blocks), for watches saved
+// before the holiday model, which carry no Holiday rule (api/_schedule.js withHolidayRules). Read on first need
+// and kept per instance as a small cnn → rows map (the 2 MB file parses in ~15 ms). vercel.json includeFiles
+// ships the file: like the og function's wasm, the tracer does not follow a runtime read. A deployment's file
+// never changes, so a failed read is kept too (logged; those watches stay as stored, as before this lookup).
+let holRows = null;
+function holidayRowsOf(cnn) {
+  if (!holRows) {
+    holRows = new Map();
+    try {
+      const S = JSON.parse(readFileSync(new URL('../data/schedules.json', import.meta.url), 'utf8'));
+      for (const [c, e] of Object.entries(S.b)) {
+        const h = e[4].filter((r) => r[1] === globalThis.HOLIDAY_DOW);
+        if (h.length) holRows.set(c, h);
+      }
+    } catch (e) { console.error('holiday schedules unavailable:', (e && e.message) || e); }
+  }
+  return holRows.get(String(cnn)) || null;
+}
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
 // live data) for MAX_WATCH_AGE (~120 days, api/_schedule.js, shared with the store) — bounds wrong-time
@@ -244,16 +265,20 @@ export default async function handler(req, res) {
     const webGone = new Set(), webDown = new Set();
     for (const { field, slot, endpoint, subscription, spot, notified, savedAt } of subs) {
       if (!spot || !spot.nextSweepISO || webGone.has(endpoint)) continue;
+      // A watch from before the holiday model gets its side's Holiday rules here, every run (an old page's
+      // re-save drops them again); they are stored only by an advance, below.
+      const watch = withHolidayRules(spot, holidayRowsOf);
       // Forever-watch re-arm: advance to the next occurrence once the window ends (its OWN pass —
       // never coupled to the lead push, which still returns the same instant at lead time). Stops
       // while stale (MAX_WATCH_AGE) so a frozen rule can't track a city schedule change. The
       // advanced occurrence is in the future, so nothing pushes this tick → continue. Skipped when the
-      // user turned the watch off or re-saved it since the snapshot (advanceSpot re-reads it).
+      // user turned the watch off or re-saved it since the snapshot (advanceSpot re-reads it and compares
+      // with the stored `spot`, never the filled `watch`).
       if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
-        const advanced = recomputeSpot(spot);
+        const advanced = recomputeSpot(watch);
         if (advanced) { if (await advanceSpot(field, advanced, spot)) rearmed++; continue; }
       }
-      const due = dueAlert(spot, notified, now);
+      const due = dueAlert(watch, notified, now);
       if (!due || webDown.has(endpoint)) continue;
       const payload = JSON.stringify({ title: due.title, body: due.body, url: deepLink(spot), tag: tagFor(due.tag, slot), requireInteraction: due.urgent });
       // Bounded TTL (web-push's default is 4 weeks: an offline phone would get "move your car" days
@@ -299,11 +324,12 @@ export default async function handler(req, res) {
       try {
         for (const { field, slot, token, spot, notified, savedAt } of iosSubs) {
           if (!spot || !spot.nextSweepISO || iosGone.has(token)) continue;
+          const watch = withHolidayRules(spot, holidayRowsOf);
           if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
-            const advanced = recomputeSpot(spot);
+            const advanced = recomputeSpot(watch);
             if (advanced) { if (await advanceIosSpot(field, advanced, spot)) iosRearmed++; continue; }
           }
-          const due = dueAlert(spot, notified, now);
+          const due = dueAlert(watch, notified, now);
           if (!due || iosDown.has(token)) continue;
           const tag = tagFor(due.tag, slot);
           const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': tag }, url: deepLink(spot), tag };
