@@ -51,6 +51,16 @@ Built by one person in San Francisco who got tired of the parking math.
 Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB stores an anonymous push token with the curb you picked.
 ```
 
+## What's New (v1.0.4)
+Build 9. DRAFT for Alejandro to edit, not final. The only change inside the app is the rating ask: the map, alerts and copy come from curb.guide and update without a release.
+```
+A small update:
+
+• When you open CURB from a sweep alert, it may ask you to rate it on the App Store. It asks at most once per version, never the first time you open the app, and Not Now closes it.
+
+The posted sign is always the final authority.
+```
+
 ## What's New (v1.0.3)
 Build 8. Paste the block below into App Store Connect as-is.
 ```

@@ -403,6 +403,11 @@ push alongside Web Push:
   `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_BUNDLE_ID` (see `docs/native-push-plan.md`).
 - On the native wrapper the "🔔 Sweep alerts" button is diverted to `window.__curbNativePush`
   (the `curbPush` bridge → APNs registration), NOT the PWA "Add to Home Screen" hint.
+- App Store rating ask (1.0.4): `ios/CURB/ReviewPolicy.swift` (pure rules) + `ReviewPrompt.swift` ask iOS for
+  the rating sheet 3 s after the page a REAL sweep alert opened has loaded (payload `tag` starts `curb-sweep`;
+  test pushes are `curb-test*`, so keep notify-core TAGS on that prefix), never on the first open (an open =
+  one stay in the foreground), once per app version, never over a sheet or system prompt.
+  `ios/CURB/ReviewPrompt.test.mjs` checks the tag contract and compiles the policy with swiftc when present.
 
 ### What's DONE vs TODO
 DONE (all of it, end-to-end):

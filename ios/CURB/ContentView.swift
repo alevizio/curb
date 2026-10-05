@@ -404,11 +404,13 @@ private struct CurbWebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
             parent.isLoading = true
             parent.loadError = nil
+            ReviewPrompt.shared.pageStarted()
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             parent.isLoading = false
             parent.loadError = nil
+            ReviewPrompt.shared.pageFinished()   // after a sweep alert tap: the rating ask, once the page settles
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
