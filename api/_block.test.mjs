@@ -109,8 +109,21 @@ describe('block page — content', () => {
     const night = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b,
       '778': ['Pierce St', 'Bush St', 'Pine St', 0, [['East', 1, 0, 2, 31, 0], ['West', 1, 9, 11, 31, 0]], '', '', '', '2026-09-27'],
       '779': ['Pierce St', 'Bush St', 'Pine St', 0, [['West', 1, 9, 11, 31, 0]], '', '', '', '2026-09-27'] } } };
-    expect(renderBlock('778', night).body).toContain('Next sweeps: <b>Mon, Oct 12</b>, <b>Mon, Oct 19</b> and <b>Mon, Oct 26</b>.');
+    // the 12 to 2 AM side sweeps through the holiday, worded by its night; the 9 to 11 AM side skips Oct 12
+    expect(renderBlock('778', night).body).toContain('Next sweeps: <b>Sun night, Oct 11</b>, <b>Sun night, Oct 18</b> and <b>Mon, Oct 19</b>.');
     expect(renderBlock('779', night).body).toContain('Next sweeps: <b>Mon, Oct 19</b>, <b>Mon, Oct 26</b> and <b>Mon, Nov 2</b>.');
+  });
+
+  it('links the holiday list right under the next sweep dates, and only when there are dates', () => {
+    const { body } = renderBlock('1000', DATA);
+    const line = '<p class="hol">These dates already skip <a href="/holidays">street sweeping holidays</a>.</p>';
+    expect(body.split(line)).toHaveLength(2);
+    expect(body.indexOf('<p class="lede">')).toBeLessThan(body.indexOf(line));
+    expect(body.indexOf(line)).toBeLessThan(body.indexOf('<div class="row">'));
+    const never = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b, '777': ['Pierce St', 'Bush St', 'Pine St', 0, [['East', 2, 9, 11, 0, 0]], '', '', '', '2026-09-27'] } } };
+    const none = renderBlock('777', never).body;
+    expect(none).not.toContain('Next sweep');
+    expect(none).not.toContain('class="hol"');
   });
 
   it('keeps today in the next dates only until its window ends', () => {
@@ -118,6 +131,25 @@ describe('block page — content', () => {
     expect(renderBlock('2000', DATA).body).toContain('Next sweeps: <b>Wed, Oct 7</b>');
     vi.setSystemTime(new Date(Date.UTC(2026, 9, 7, 21, 30))); // 2:30pm PDT — over
     expect(renderBlock('2000', DATA).body).toContain('Next sweeps: <b>Wed, Oct 14</b>');
+  });
+
+  it('lists a sweep starting 12 AM to 6 AM by the night before (owner, 2026-10-05)', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0))); // Mon 2026-10-05, noon PDT
+    // 3rd St east side: every Tuesday 2 to 6am, which people call Monday night
+    expect(renderBlock('188101', DATA).body).toContain('Next sweeps: <b>Mon night, Oct 5</b>, <b>Mon night, Oct 12</b> and <b>Mon night, Oct 19</b>.');
+    vi.setSystemTime(new Date(Date.UTC(2026, 9, 6, 10, 0)));  // Tue 3am PDT, mid-sweep: still that night
+    expect(renderBlock('188101', DATA).body).toContain('Next sweeps: <b>Mon night, Oct 5</b>,');
+    vi.setSystemTime(new Date(Date.UTC(2026, 9, 6, 14, 0)));  // Tue 7am PDT, over
+    expect(renderBlock('188101', DATA).body).toContain('Next sweeps: <b>Mon night, Oct 12</b>,');
+    // the sign's own words stay on the badge and in the schedule sentence
+    expect(renderBlock('188101', DATA).body).toContain('every Tuesday 2 to 6am');
+  });
+
+  it('a day with a night side and a day side lists both, night first, still three in all', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0))); // Mon 2026-10-05, noon PDT
+    const both = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b,
+      '3000': ['Pierce St', 'Sacramento St', 'Clay St', 0, [['East', 2, 0, 2, 31, 0], ['West', 2, 9, 11, 31, 0]], '', '', '', '2026-09-27'] } } };
+    expect(renderBlock('3000', both).body).toContain('Next sweeps: <b>Mon night, Oct 5</b>, <b>Tue, Oct 6</b> and <b>Mon night, Oct 12</b>.');
   });
 
   it('leads the H1, the first line and the description with the baked house numbers', () => {

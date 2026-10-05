@@ -1,6 +1,6 @@
 // Tests for the shared spot/rule sanitizers (api/_spot.js) — the multi-rule forever-watch shape.
 import { describe, it, expect } from 'vitest';
-import { sanitizeSpot, sanitizeRules, MAX_RULES } from './_spot.js';
+import { sanitizeSpot, sanitizeRules, sanitizeSide, MAX_RULES } from './_spot.js';
 
 const R = (o = {}) => ({ weekday: 'Tue', fromhour: '6', tohour: '8', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0', ...o });
 const SPOT = { corridor: 'Kansas St', limits: '16th St - 17th St', blockside: 'West', nextSweepISO: '2026-10-06T13:00:00.000Z', leadMinutes: 30, cnn: '7735000', sideKey: 'West' };
@@ -43,5 +43,20 @@ describe('sanitizeSpot — rules[] with rule kept for back-compat', () => {
     const s = sanitizeSpot({ ...SPOT, rules: [R({ weekday: 'Holiday' })] });
     expect(s.rule).toBe(undefined);
     expect(s.cnn).toBe(undefined);
+  });
+});
+
+describe('sanitizeSide (which watch a Turn off names)', () => {
+  it('clamps the side exactly like sanitizeSpot, so it compares equal to the stored spot', () => {
+    const stored = sanitizeSpot({ ...SPOT, sideKey: 'Southwest', rule: R() });
+    const side = sanitizeSide({ off: true, cnn: 'x7735000', sideKey: 'Southwest', corridor: SPOT.corridor, limits: SPOT.limits, blockside: SPOT.blockside });
+    expect(side).toEqual({ cnn: stored.cnn, sideKey: stored.sideKey, corridor: stored.corridor, limits: stored.limits, blockside: stored.blockside });
+    expect(side.sideKey).toBe('Southwes');                       // 8 chars, as stored
+  });
+  it('names nothing for a pre-multi-watch Turn off ({off:true}) or junk', () => {
+    expect(sanitizeSide({ off: true })).toBe(null);
+    expect(sanitizeSide({ off: true, sideKey: 'L' })).toBe(null); // a side key alone names no block
+    expect(sanitizeSide(null)).toBe(null);
+    expect(sanitizeSide('North')).toBe(null);
   });
 });

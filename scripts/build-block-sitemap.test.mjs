@@ -33,6 +33,7 @@ describe('sitemap.xml', () => {
   it('has /support, no retired pages, and a lastmod on every URL', () => {
     const locs = list.map((u) => u.loc);
     expect(locs).toContain('https://curb.guide/support');
+    expect(locs).toContain('https://curb.guide/holidays');
     expect(locs).not.toContain('https://curb.guide/n/presidio');
     expect(locs).not.toContain('https://curb.guide/n/golden-gate-park');
     expect(list.filter((u) => !DAY.test(u.lastmod || ''))).toEqual([]);

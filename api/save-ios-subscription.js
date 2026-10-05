@@ -1,12 +1,19 @@
-// POST { token, platform:'ios', bundleId, spot } — store a native APNs device token + saved spot.
+// POST { token, platform:'ios', bundleId, spot } — store a native APNs device token + one saved spot.
 // The native counterpart of save-subscription.js. The token is a hex APNs device token (NOT a
 // web-push subscription), stored in the curb:apns hash; the spot is sanitized by the SAME shared
-// sanitizeSpot as web push, so the cron sees an identical forever-watch shape.
-// Turn alerts off: DELETE { token }, or — because the shipped app's bridge can only POST whatever
-// spot the page hands it, and the page never learns the token — POST { token, spot: { off: true } }.
+// sanitizeSpot as web push, so the cron sees an identical forever-watch shape, and lands on the watch for
+// its curb side or a new one, up to MAX_WATCHES per device (409 past that).
+// The shipped app (builds 6 and 7) builds the body itself but forwards the page's spot object untouched,
+// so everything multi-watch needs rides in the spot: no app update. That includes `multi: 1`, which the
+// page puts in every save's spot: a spot without it comes from a page loaded before multi-watch (the app's
+// web view never reloads on its own) and MOVES the alerts to its curb, as that page tells the user.
+// Turn alerts off: DELETE { token, spot? }, or — because the shipped app's bridge can only POST whatever
+// spot the page hands it, and the page never learns the token — POST { token, spot: { off: true, cnn,
+// sideKey, corridor, limits, blockside } }: the watch on that side, or every watch of the token when the
+// spot names no side (a page from before multi-watch sends just { off: true }).
 // Holding the token is the same bar as saving a watch for it.
-import { saveIosSub, storeReady, claimSlot, hasIosSub, disarmIosSub } from './_store.js';
-import { sanitizeSpot } from './_spot.js';
+import { saveIosSub, storeReady, claimSlot, hasIosSub, disarmIosSub, MAX_WATCHES } from './_store.js';
+import { sanitizeSpot, sanitizeSide } from './_spot.js';
 
 // APNs device tokens are hex strings — historically 64 chars, but Apple has said they may grow, so
 // accept a generous length-bounded hex range rather than a hard 64.
@@ -34,7 +41,7 @@ export default async function handler(req, res) {
     // so turning alerts back on for the same sweep can't re-send a push already delivered.
     if (req.method === 'DELETE' || (spot && spot.off === true)) {
       if (!storeReady()) { res.status(503).json({ error: 'store not configured' }); return; }
-      await disarmIosSub(tok);
+      await disarmIosSub(tok, sanitizeSide(spot));
       res.status(200).json({ ok: true, off: true });
       return;
     }
@@ -51,7 +58,10 @@ export default async function handler(req, res) {
     if (!(await hasIosSub(tok)) && !(await claimSlot('iosnew:' + clientIp(req), NEW_TOKEN_MS))) {
       res.status(429).json({ error: 'slow down' }); return;
     }
-    await saveIosSub(tok, cleanSpot);
+    // the marker is read from the raw spot (sanitizeSpot drops it): none = a page from before multi-watch
+    const saved = await saveIosSub(tok, cleanSpot, { legacy: Number(spot.multi) !== 1 });
+    // the app hands `error` to the page as the message (save-failed, status 409)
+    if (saved.full) { res.status(409).json({ error: 'alert limit reached', max: MAX_WATCHES }); return; }
     res.status(200).json({ ok: true, stored: true });
   } catch (e) {
     console.error('save-ios-subscription failed:', e);

@@ -11,9 +11,12 @@ process.env.KV_REST_API_TOKEN = 'fake-token';
 // In-memory Redis mock: hash-aware (curb:subs / curb:tokens) + a kv space for SET NX (rate slots).
 // `eval` plays the store's one Lua script (a compare-and-set of one hash field). `onRead` runs once,
 // right after the next HGET has read its value: a user's write landing inside a cron read-modify-write.
+// `onMget` the same after the next HMGET (a save reads a device's watches with one): a write landing
+// inside a save. hmget answers like the store's raw client: the stored strings, null for a missing field.
 const mem = {};
 const kv = {};
 let onRead = null;
+let onMget = null;
 let evalFails = false;  // a store that refuses EVAL (the safety net must fall back to the plain write)
 vi.mock('@upstash/redis', () => ({
   Redis: class {
@@ -22,8 +25,14 @@ vi.mock('@upstash/redis', () => ({
       if (onRead) { const h = onRead; onRead = null; await h(); }
       return v;
     }
+    async hmget(k, ...fs) {
+      const v = fs.map((f) => (mem[k] && f in mem[k] ? mem[k][f] : null));
+      if (onMget) { const h = onMget; onMget = null; await h(); }
+      return v;
+    }
     async hset(k, obj) { (mem[k] || (mem[k] = {})); Object.assign(mem[k], obj); }
-    async hdel(k, f) { if (mem[k]) delete mem[k][f]; }
+    async hsetnx(k, f, v) { if (mem[k] && f in mem[k]) return 0; (mem[k] || (mem[k] = {}))[f] = v; return 1; }
+    async hdel(k, ...fs) { if (mem[k]) for (const f of fs) delete mem[k][f]; }
     async hgetall(k) { return mem[k] ? { ...mem[k] } : null; }
     async set(k, v, opts) { if (opts && opts.nx && (k in kv)) return null; kv[k] = v; return 'OK'; }
     async eval(script, [k], [f, expected, next]) {
@@ -37,7 +46,8 @@ vi.mock('@upstash/redis', () => ({
 const { saveSub, saveIosSub, advanceSpot, markNotified, loadAllSubs, getSub,
   saveToken, resolveToken, deleteTokensForEndpoint,
   ensureOwnerProof, verifyOwnerProof, claimSlot,
-  disarmSub, disarmIosSub, markIosNotified, loadAllIosSubs, advanceIosSpot } = await import('./_store.js');
+  disarmSub, disarmIosSub, markIosNotified, loadAllIosSubs, advanceIosSpot,
+  deleteSub, deleteIosSub, splitField, sameSide, MAX_WATCHES } = await import('./_store.js');
 const { dueAlert } = await import('../lib/notify-core.js');
 
 const SUB = { endpoint: 'https://web.push.apple.com/abc123', keys: { p256dh: 'p', auth: 'a' } };
@@ -50,6 +60,7 @@ beforeEach(() => {
   for (const k of Object.keys(mem)) delete mem[k];
   for (const k of Object.keys(kv)) delete kv[k];
   onRead = null;
+  onMget = null;
 });
 
 describe('owner proof (auto-park auth)', () => {
@@ -228,10 +239,11 @@ describe('a stale-sheet re-save (the sheet stayed open while the cron re-armed t
     expect(i.notified).toEqual({ eve: tue.nextSweepISO });
   });
 
-  it('still saves a real change as sent: another side, a changed schedule, or an earlier FUTURE sweep', async () => {
+  it('still saves a real change as sent: another side (its own watch), a changed schedule, or an earlier FUTURE sweep', async () => {
     const other = { ...mon, cnn: '556' };
     await saveSub(SUB, other);
-    expect((await rec()).spot).toEqual(other);
+    expect(JSON.parse(mem['curb:subs'][EP + '#1']).spot).toEqual(other);   // a second watch, as sent
+    expect((await rec()).spot).toEqual(tue);                                // the first one untouched
 
     await saveSub(SUB, tue);
     const newRules = { ...mon, rules: DAILY.slice(0, 5) };           // the city dropped the weekend
@@ -315,16 +327,31 @@ describe('a Turn off or block switch landing INSIDE a cron write (between its re
     expect(ios()).toMatchObject({ spot: null, notified: { lead: spotA.nextSweepISO } });
   });
 
-  it('markNotified does not switch the watch back to the old block (web + iOS)', async () => {
+  it('markNotified does not put back the spot a re-save just replaced (web + iOS)', async () => {
+    const moved = { ...spotA, nextSweepISO: spotB.nextSweepISO, level: 'intense' };   // same side, re-saved
+    await saveSub(SUB, spotA);
+    onRead = () => saveSub(SUB, moved);
+    await markNotified(EP, spotA.nextSweepISO, 'eve');
+    expect(await rec()).toMatchObject({ spot: moved, notified: { eve: spotA.nextSweepISO } });
+
+    await saveIosSub(tok, spotA);
+    onRead = () => saveIosSub(tok, moved);
+    await markIosNotified(tok, spotA.nextSweepISO, 'eve');
+    expect(ios()).toMatchObject({ spot: moved, notified: { eve: spotA.nextSweepISO } });
+  });
+
+  it('another side saved inside a cron write lands as its own watch, and the cron write still lands (web + iOS)', async () => {
     await saveSub(SUB, spotA);
     onRead = () => saveSub(SUB, other);
     await markNotified(EP, spotA.nextSweepISO, 'eve');
-    expect(await rec()).toMatchObject({ spot: other, notified: { eve: spotA.nextSweepISO } });
+    expect(await rec()).toMatchObject({ spot: spotA, notified: { eve: spotA.nextSweepISO } });
+    expect(JSON.parse(mem['curb:subs'][EP + '#1'])).toMatchObject({ spot: other, notified: {} });
 
     await saveIosSub(tok, spotA);
     onRead = () => saveIosSub(tok, other);
     await markIosNotified(tok, spotA.nextSweepISO, 'eve');
-    expect(ios()).toMatchObject({ spot: other, notified: { eve: spotA.nextSweepISO } });
+    expect(ios()).toMatchObject({ spot: spotA, notified: { eve: spotA.nextSweepISO } });
+    expect(JSON.parse(mem['curb:apns'][tok + '#1'])).toMatchObject({ spot: other, notified: {} });
   });
 
   it('a record deleted in between (a prune) is not brought back', async () => {
@@ -355,5 +382,387 @@ describe('legacy de-dupe migration (back-compat for live subscribers)', () => {
     const r = await rec();
     expect(r.notified.lead).toBe(spotA.nextSweepISO);
     expect(r.notified.eve).toBe(spotA.nextSweepISO);
+  });
+});
+
+// ---- multi-watch (GitHub #11: "I can't set notifications for both sides of the street") ----
+describe('multi-watch: up to 5 curb sides per device, each its own record', () => {
+  const tok = 'ab'.repeat(32);
+  const north = { ...spotA, sideKey: 'R' };                     // the other side of the same block, same sweep
+  const leadTime = Date.parse(spotA.nextSweepISO) - 20 * 60000;
+  const w = (n = 0) => { const v = mem['curb:subs'] && mem['curb:subs'][n ? `${EP}#${n}` : EP]; return v ? JSON.parse(v) : undefined; };
+  const iw = (n = 0) => { const v = mem['curb:apns'] && mem['curb:apns'][n ? `${tok}#${n}` : tok]; return v ? JSON.parse(v) : undefined; };
+  const sideOf = (s) => ({ cnn: s.cnn, sideKey: s.sideKey, corridor: s.corridor, limits: '', blockside: '' });
+
+  it('a record from before multi-watch is watch 0: a NEW side adds watch 1, the SAME side updates in place', async () => {
+    const legacy = { subscription: SUB, spot: spotA, notified: { lead: spotA.nextSweepISO }, savedAt: 1 };
+    mem['curb:subs'] = { [EP]: JSON.stringify(legacy) };
+    expect(await loadAllSubs()).toEqual([expect.objectContaining({ field: EP, slot: 0, endpoint: EP, spot: spotA })]);
+    expect(await saveSub(SUB, north)).toEqual({ slot: 1 });
+    expect(w(0)).toEqual(legacy);                                   // the first watch is untouched
+    expect(w(1)).toMatchObject({ subscription: SUB, spot: north, notified: {} });
+    expect(await saveSub(SUB, { ...spotA, level: 'light' })).toEqual({ slot: 0 });
+    expect(await saveSub(SUB, { ...north, voice: 'drill' })).toEqual({ slot: 1 });
+    expect(Object.keys(mem['curb:subs'])).toEqual([EP, `${EP}#1`]);  // no duplicate watch for either side
+    expect(w(0)).toMatchObject({ spot: { level: 'light' }, notified: { lead: spotA.nextSweepISO } });
+    expect(w(1).spot.voice).toBe('drill');
+    expect((await loadAllSubs()).map((x) => [x.field, x.slot, x.endpoint])).toEqual([[EP, 0, EP], [`${EP}#1`, 1, EP]]);
+  });
+
+  it('each watch has its own de-dupe: a push on one side never blocks the other side\'s push for the same sweep', async () => {
+    await saveSub(SUB, spotA);
+    await saveSub(SUB, north);
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    expect(w(0).notified).toEqual({ lead: spotA.nextSweepISO });
+    expect(w(1).notified).toEqual({});
+    const [a, b] = await loadAllSubs();
+    expect(dueAlert(a.spot, a.notified, leadTime)).toBe(null);
+    expect(dueAlert(b.spot, b.notified, leadTime)).toMatchObject({ key: 'lead' });
+  });
+
+  it('turning one side off leaves the others armed, and turning it back on finds its own de-dupe (web + iOS)', async () => {
+    await saveSub(SUB, spotA);
+    await saveSub(SUB, north);
+    await markNotified(`${EP}#1`, north.nextSweepISO, 'lead');
+    expect(await disarmSub(EP, 'a', sideOf(north))).toBe('ok');
+    expect(w(0).spot).toEqual(spotA);
+    expect(w(1)).toMatchObject({ spot: null, notified: { lead: north.nextSweepISO }, offSide: { cnn: '123', sideKey: 'R' } });
+    expect(await saveSub(SUB, { ...spotA, cnn: '900' })).toEqual({ slot: 2 }); // a new side takes an empty slot, not the off one
+    expect(await saveSub(SUB, { ...north })).toEqual({ slot: 1 });             // back on: its own record
+    expect(dueAlert(w(1).spot, w(1).notified, leadTime)).toBe(null);           // the push already sent is not repeated
+    expect(w(1).offSide).toBe(undefined);
+
+    await saveIosSub(tok, spotA);
+    await saveIosSub(tok, north);
+    await markIosNotified(`${tok}#1`, north.nextSweepISO, 'lead');
+    await disarmIosSub(tok, sideOf(north));
+    expect(iw(0).spot).toEqual(spotA);
+    expect(iw(1)).toMatchObject({ spot: null, notified: { lead: north.nextSweepISO } });
+    await saveIosSub(tok, { ...north });
+    expect(dueAlert(iw(1).spot, iw(1).notified, leadTime)).toBe(null);
+  });
+
+  it('turning off a side with no armed watch is a no-op that leaves the others alone', async () => {
+    await saveSub(SUB, spotA);
+    expect(await disarmSub(EP, 'a', sideOf(north))).toBe('ok');
+    expect(w(0).spot).toEqual(spotA);
+    expect(await disarmSub(EP, 'wrong', sideOf(spotA))).toBe('forbidden');   // still proven by keys.auth
+    expect(w(0).spot).toEqual(spotA);
+  });
+
+  it('a Turn off that names no side (a page from before multi-watch) turns off every watch of the device (web + iOS)', async () => {
+    await saveSub(SUB, spotA);
+    await saveSub(SUB, north);
+    await markNotified(EP, spotA.nextSweepISO, 'eve');
+    expect(await disarmSub(EP, 'a')).toBe('ok');
+    expect([w(0).spot, w(1).spot]).toEqual([null, null]);
+    expect(w(0).notified).toEqual({ eve: spotA.nextSweepISO });
+
+    await saveIosSub(tok, spotA);
+    await saveIosSub(tok, north);
+    await disarmIosSub(tok);
+    expect([iw(0).spot, iw(1).spot]).toEqual([null, null]);
+  });
+
+  it('the cron never re-arms a turned-off watch, per watch (web + iOS)', async () => {
+    await saveSub(SUB, spotA);
+    await saveSub(SUB, north);
+    await disarmSub(EP, 'a', sideOf(north));
+    expect(await advanceSpot(`${EP}#1`, { ...north, nextSweepISO: spotB.nextSweepISO }, north)).toBe(false);
+    expect(w(1).spot).toBe(null);
+    expect(await advanceSpot(EP, spotB, spotA)).toBe(true);                      // the armed one still advances
+    expect(w(0).spot.nextSweepISO).toBe(spotB.nextSweepISO);
+
+    await saveIosSub(tok, spotA);
+    await saveIosSub(tok, north);
+    onRead = () => disarmIosSub(tok, sideOf(north));                              // Turn off lands inside the cron write
+    expect(await advanceIosSpot(`${tok}#1`, { ...north, nextSweepISO: spotB.nextSweepISO }, north)).toBe(false);
+    expect(iw(1).spot).toBe(null);
+    expect(iw(0).spot).toEqual(spotA);
+  });
+
+  it(`at ${MAX_WATCHES} armed watches a 6th side is refused and nothing is written; a freed slot takes it with a fresh de-dupe`, async () => {
+    expect(MAX_WATCHES).toBe(5);
+    const sides = [1, 2, 3, 4, 5].map((i) => ({ ...spotA, cnn: String(100 + i) }));
+    for (const [i, sp] of sides.entries()) expect(await saveSub(SUB, sp)).toEqual({ slot: i });
+    const before = JSON.stringify(mem);
+    expect(await saveSub(SUB, { ...spotA, cnn: '999' })).toEqual({ full: true });
+    expect(JSON.stringify(mem)).toBe(before);
+    expect(await saveSub(SUB, { ...sides[2], level: 'light' })).toEqual({ slot: 2 }); // a re-save of a watched side still lands
+    await markNotified(`${EP}#3`, spotA.nextSweepISO, 'eve');
+    await disarmSub(EP, 'a', sideOf(sides[3]));
+    expect(await saveSub(SUB, { ...spotA, cnn: '999' })).toEqual({ slot: 3 });
+    expect(w(3)).toMatchObject({ spot: { cnn: '999' }, notified: {} });               // its entries named cnn 104's sweeps
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(MAX_WATCHES);                // never more than 5 records
+
+    for (const [i, sp] of sides.entries()) expect(await saveIosSub(tok, sp)).toEqual({ slot: i });
+    expect(await saveIosSub(tok, { ...spotA, cnn: '999' })).toEqual({ full: true });
+    expect(Object.keys(mem['curb:apns'])).toHaveLength(MAX_WATCHES);
+  });
+
+  it('a watch turned off before sides were recorded is reused by the next save, keeping its de-dupe as before', async () => {
+    mem['curb:subs'] = { [EP]: JSON.stringify({ subscription: SUB, spot: null, notified: { eve: spotA.nextSweepISO }, savedAt: 1 }) };
+    expect(await saveSub(SUB, spotA)).toEqual({ slot: 0 });
+    expect(w(0)).toMatchObject({ spot: spotA, notified: { eve: spotA.nextSweepISO } });
+    expect(w(1)).toBe(undefined);
+  });
+
+  it('two new sides saved at the same moment both land, each in its own watch', async () => {
+    await saveSub(SUB, spotA);
+    const b = { ...spotA, cnn: '200' }, c = { ...spotA, cnn: '300' };
+    onMget = () => saveSub(SUB, c);                     // c lands between b's read and b's write
+    expect(await saveSub(SUB, b)).toEqual({ slot: 2 });
+    expect([w(0).spot.cnn, w(1).spot.cnn, w(2).spot.cnn]).toEqual(['123', '300', '200']);
+    onMget = () => saveSub(SUB, { ...b, level: 'light' }); // the same side twice at once: still one watch
+    await saveSub(SUB, { ...b, voice: 'drill' });
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(3);
+  });
+
+  it('a re-save landing on a cron write re-reads instead of dropping the de-dupe entry the cron just wrote', async () => {
+    await saveSub(SUB, spotA);
+    onMget = () => markNotified(EP, spotA.nextSweepISO, 'eve');
+    await saveSub(SUB, { ...spotA, voice: 'drill' });
+    expect(w(0)).toMatchObject({ spot: { voice: 'drill' }, notified: { eve: spotA.nextSweepISO } });
+  });
+
+  it('a store that refuses EVAL still saves a re-save (plain write, as before)', async () => {
+    await saveSub(SUB, spotA);
+    evalFails = true;
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(await saveSub(SUB, { ...spotA, level: 'intense' })).toEqual({ slot: 0 });
+      expect(w(0).spot.level).toBe('intense');
+    } finally { evalFails = false; err.mockRestore(); }
+  });
+
+  it('iOS watch n carries no token property (the field names the device) and loads as that device', async () => {
+    await saveIosSub(tok, spotA);
+    await saveIosSub(tok, north);
+    expect(iw(0)).toMatchObject({ token: tok, platform: 'ios' });
+    expect('token' in iw(1)).toBe(false);
+    expect(iw(1).platform).toBe('ios');
+    expect((await loadAllIosSubs()).map((x) => [x.field, x.slot, x.token])).toEqual([[tok, 0, tok], [`${tok}#1`, 1, tok]]);
+  });
+
+  it('a prune removes every watch of the device and nothing of another (web + iOS)', async () => {
+    const other = { ...SUB, endpoint: 'https://web.push.apple.com/zzz' };
+    await saveSub(SUB, spotA); await saveSub(SUB, north); await saveSub(other, spotA);
+    await deleteSub(EP);
+    expect(Object.keys(mem['curb:subs'])).toEqual([other.endpoint]);
+    await saveIosSub(tok, spotA); await saveIosSub(tok, north); await saveIosSub('cd'.repeat(32), spotA);
+    await deleteIosSub(tok);
+    expect(Object.keys(mem['curb:apns'])).toEqual(['cd'.repeat(32)]);
+  });
+
+  it('auto-park (atBase) writes the car\'s own watch (car: true) and follows the car with it, never a side the user armed', async () => {
+    const far = { ...spotA, cnn: '777' };
+    await saveSub(SUB, spotA); await saveSub(SUB, far);                    // watches 0 and 1, armed on the page
+    const parked = { ...spotA, cnn: '555', sideKey: 'R' };
+    expect(await saveSub(SUB, parked, { atBase: true })).toEqual({ slot: 2 }); // a slot of its own, tagged
+    expect(w(2)).toMatchObject({ spot: { cnn: '555' }, car: true });
+    expect([w(0).spot.cnn, w(1).spot.cnn]).toEqual(['123', '777']);           // watch 0 is the user's: untouched
+    await markNotified(`${EP}#2`, parked.nextSweepISO, 'eve');
+    const parkedAgain = { ...spotA, cnn: '888', level: 'light' };
+    expect(await saveSub(SUB, parkedAgain, { atBase: true })).toEqual({ slot: 2 }); // the car moved: its watch moves
+    expect(w(2)).toMatchObject({ spot: { cnn: '888', level: 'light' }, car: true, notified: { eve: parked.nextSweepISO } });
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(3);                    // never a new watch per park
+    expect([w(0).spot.cnn, w(1).spot.cnn]).toEqual(['123', '777']);
+    // a page save on the car's side takes that watch over: no longer the car's, the next park finds another slot
+    expect(await saveSub(SUB, { ...parkedAgain, level: 'intense' })).toEqual({ slot: 2 });
+    expect(w(2).car).toBe(undefined);
+    expect(await saveSub(SUB, { ...spotA, cnn: '999' }, { atBase: true })).toEqual({ slot: 3 });
+    expect(w(3).car).toBe(true);
+  });
+
+  it('auto-park on a side another watch already covers turns that one off (no second push for one curb)', async () => {
+    const far = { ...spotA, cnn: '777' };
+    await saveSub(SUB, spotA); await saveSub(SUB, north); await saveSub(SUB, far);
+    await saveSub(SUB, { ...spotA, cnn: '555' }, { atBase: true });          // the car's watch: slot 3
+    expect(await saveSub(SUB, { ...north, level: 'light' }, { atBase: true })).toEqual({ slot: 3 });
+    expect(w(3)).toMatchObject({ spot: { sideKey: 'R', level: 'light' }, car: true });
+    expect(w(1)).toMatchObject({ spot: null, offSide: { sideKey: 'R' } });   // the page's watch on that side goes off
+    expect([w(0).spot.cnn, w(2).spot.cnn]).toEqual(['123', '777']);         // other sides untouched
+  });
+
+  it('auto-park with no car watch yet and 5 sides armed is refused like a page save (nothing overwritten)', async () => {
+    for (const c of ['1', '2', '3', '4', '5']) await saveSub(SUB, { ...spotA, cnn: c });
+    const before = JSON.stringify(mem);
+    expect(await saveSub(SUB, { ...spotA, cnn: '900' }, { atBase: true })).toEqual({ full: true });
+    expect(JSON.stringify(mem)).toBe(before);
+  });
+
+  it('a page save on the car\'s side landing during auto-park still leaves one watch on that curb', async () => {
+    await saveSub(SUB, { ...spotA, cnn: '100', sideKey: 'North', blockside: 'North' });   // watch 0, the page's
+    await saveSub(SUB, { ...spotA, cnn: '700' }, { atBase: true });                      // watch 1, the car's (elsewhere)
+    const pageSouth = { ...spotA, cnn: '100', sideKey: 'South', blockside: 'South' };
+    onMget = () => saveSub(SUB, pageSouth);       // lands (watch 2) between auto-park's read and its write
+    expect(await saveSub(SUB, { ...spotA, cnn: '100', sideKey: 'R', blockside: 'South' }, { atBase: true })).toEqual({ slot: 1 });
+    const armedOn = (bs) => Object.values(mem['curb:subs']).map((v) => JSON.parse(v)).filter((r) => r.spot && r.spot.blockside === bs).length;
+    expect(armedOn('South')).toBe(1);             // the car's; the page's, seen by the re-read, was turned off
+    expect(w(1)).toMatchObject({ car: true, spot: { sideKey: 'R' } });
+    expect(w(2)).toMatchObject({ spot: null, offSide: { sideKey: 'South' } });
+    expect(w(0).spot.sideKey).toBe('North');
+  });
+
+  it('owner proof and auto-park keep resolving the device when it has several watches', async () => {
+    await saveSub(SUB, spotA);
+    const proof = await ensureOwnerProof(EP);
+    await saveSub(SUB, north);
+    expect(await ensureOwnerProof(EP)).toBe(null);                  // watch 0 keeps the proof minted for it
+    expect(await verifyOwnerProof(EP, proof)).toBe(true);
+    expect((await getSub(EP)).subscription.endpoint).toBe(EP);
+    expect(await verifyOwnerProof(`${EP}#1`, proof)).toBe(false);   // a watch field is not a device
+  });
+
+  it('field names: a device and its watch number, never another device', () => {
+    expect(splitField(EP)).toEqual({ base: EP, slot: 0 });
+    expect(splitField(`${EP}#4`)).toEqual({ base: EP, slot: 4 });
+    expect(splitField(`${EP}#5`)).toEqual({ base: `${EP}#5`, slot: 0 });
+    expect(splitField(`${tok}#1`)).toEqual({ base: tok, slot: 1 });
+  });
+
+  it('sides match on cnn + sideKey, or on the block text when a spot carries no cnn (an old cached page)', () => {
+    expect(sameSide(spotA, { cnn: '123', sideKey: 'L' })).toBe(true);
+    expect(sameSide(spotA, north)).toBe(false);
+    expect(sameSide({ corridor: 'Haight St', limits: 'A - B', blockside: 'North' }, { corridor: 'Haight St', limits: 'A - B', blockside: 'North', cnn: '9' })).toBe(true);
+    expect(sameSide({ corridor: 'Haight St', limits: 'A - B', blockside: 'North' }, { corridor: 'Haight St', limits: 'A - B', blockside: 'South' })).toBe(false);
+    expect(sameSide(null, spotA)).toBe(false);
+    // auto-park keys a side by cnnrightleft, the page by blockside: the same curb either way
+    expect(sameSide({ cnn: '9', sideKey: 'R', blockside: 'North' }, { cnn: '9', sideKey: 'North', blockside: 'North' })).toBe(true);
+    expect(sameSide({ cnn: '9', sideKey: 'R', blockside: 'North' }, { cnn: '9', sideKey: 'South', blockside: 'South' })).toBe(false);
+  });
+
+  it('auto-park on a side the page already watches updates that watch, never a second one for the same curb', async () => {
+    const page = { ...spotA, cnn: '555', sideKey: 'North', blockside: 'North' };
+    const parked = { ...spotA, cnn: '555', sideKey: 'R', blockside: 'North', nextSweepISO: spotB.nextSweepISO };
+    await saveSub(SUB, { ...spotA, cnn: '444' });   // watch 0, elsewhere
+    await saveSub(SUB, page);                       // watch 1, the page's
+    expect(await saveSub(SUB, parked, { atBase: true })).toEqual({ slot: 1 });
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(2);   // no second watch for the same curb
+    expect(w(1)).toMatchObject({ car: true, spot: { cnn: '555', sideKey: 'R' } });
+    expect(w(0).spot).toMatchObject({ cnn: '444' });          // watch 0 (another side) is not the car's to take
+  });
+});
+
+// A page loaded before multi-watch (an open PWA tab, the iOS app's web view, a navigation the service worker
+// cached) says "Turning them on here moves them to this curb" and then "<A> won't alert anymore". Its saves
+// carry no `multi` marker (the handlers pass legacy: true): they must MOVE the alerts, not add a watch the
+// old page can neither see nor turn off.
+describe('a save from a page that predates multi-watch moves the alerts, as that page promises', () => {
+  const tok = 'ab'.repeat(32);
+  const w = (n = 0) => { const v = mem['curb:subs'] && mem['curb:subs'][n ? `${EP}#${n}` : EP]; return v ? JSON.parse(v) : undefined; };
+  const iw = (n = 0) => { const v = mem['curb:apns'] && mem['curb:apns'][n ? `${tok}#${n}` : tok]; return v ? JSON.parse(v) : undefined; };
+  const at = (cnn) => ({ ...spotA, cnn });
+  const armed = (key) => Object.entries(mem[key] || {}).filter(([, v]) => JSON.parse(v).spot).map(([f, v]) => [f, JSON.parse(v).spot.cnn]);
+
+  it('a new side lands on watch 0 with a fresh de-dupe and every other armed watch goes off, keeping its de-dupe and side', async () => {
+    await saveSub(SUB, at('1')); await saveSub(SUB, at('2')); await saveSub(SUB, at('3'));
+    await markNotified(`${EP}#1`, spotA.nextSweepISO, 'eve');
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    expect(await saveSub(SUB, at('9'), { legacy: true })).toEqual({ slot: 0 });
+    expect(armed('curb:subs')).toEqual([[EP, '9']]);                          // one watch, as that page believes
+    expect(w(0).notified).toEqual({});                                          // its entries named cnn 1's sweeps
+    expect(w(1)).toMatchObject({ spot: null, offSide: { cnn: '2' }, notified: { eve: spotA.nextSweepISO } });
+    expect(w(2)).toMatchObject({ spot: null, offSide: { cnn: '3' } });
+    // the new page turning a moved-away side back on finds its own de-dupe: no repeat of the push already sent
+    expect(await saveSub(SUB, at('2'))).toEqual({ slot: 1 });
+    expect(w(1).notified).toEqual({ eve: spotA.nextSweepISO });
+  });
+
+  it('a side it already watches is updated in place with its de-dupe, and the others go off', async () => {
+    await saveSub(SUB, at('1')); await saveSub(SUB, at('2')); await saveSub(SUB, at('3'));
+    await markNotified(`${EP}#1`, spotA.nextSweepISO, 'eve');
+    expect(await saveSub(SUB, { ...at('2'), level: 'light' }, { legacy: true })).toEqual({ slot: 1 });
+    expect(armed('curb:subs')).toEqual([[`${EP}#1`, '2']]);
+    expect(w(1)).toMatchObject({ spot: { level: 'light' }, notified: { eve: spotA.nextSweepISO } });
+    // a side turned off earlier comes back on its own watch, de-dupe included
+    expect(await saveSub(SUB, at('3'), { legacy: true })).toEqual({ slot: 2 });
+    expect(armed('curb:subs')).toEqual([[`${EP}#2`, '3']]);
+  });
+
+  it('"moves them": A then B from the old page leaves only B, and the new page can turn B off', async () => {
+    await saveSub(SUB, at('10'), { legacy: true });
+    await saveSub(SUB, at('20'), { legacy: true });
+    expect(armed('curb:subs')).toEqual([[EP, '20']]);                          // A won't alert anymore, as promised
+    expect(await disarmSub(EP, 'a', { cnn: '20', sideKey: 'L', corridor: 'Haight St', limits: '', blockside: '' })).toBe('ok');
+    expect(armed('curb:subs')).toEqual([]);
+  });
+
+  it('never full: with 5 sides armed it still lands, and the device keeps one armed watch', async () => {
+    for (const c of ['1', '2', '3', '4', '5']) await saveSub(SUB, at(c));
+    expect(await saveSub(SUB, at('6'))).toEqual({ full: true });               // a new page is refused…
+    expect(await saveSub(SUB, at('6'), { legacy: true })).toEqual({ slot: 0 }); // …an old page moves, as it always did
+    expect(armed('curb:subs')).toEqual([[EP, '6']]);
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(MAX_WATCHES);
+  });
+
+  it('a pre-multi turned-off record at watch 0 keeps its de-dupe, as every save did before', async () => {
+    mem['curb:subs'] = { [EP]: JSON.stringify({ subscription: SUB, spot: null, notified: { eve: spotA.nextSweepISO }, savedAt: 1 }) };
+    expect(await saveSub(SUB, spotA, { legacy: true })).toEqual({ slot: 0 });
+    expect(w(0)).toMatchObject({ spot: spotA, notified: { eve: spotA.nextSweepISO } });
+  });
+
+  it('a new page\'s save landing during an old page\'s move is turned off too (the re-read after the write)', async () => {
+    await saveSub(SUB, at('1'));
+    onMget = () => saveSub(SUB, at('2'));                                       // watch 1, mid-move
+    expect(await saveSub(SUB, at('9'), { legacy: true })).toEqual({ slot: 0 });
+    expect(armed('curb:subs')).toEqual([[EP, '9']]);
+  });
+
+  it('iOS: the same move, so the shipped app running an old page stops pushing for the side it left', async () => {
+    await saveIosSub(tok, at('1')); await saveIosSub(tok, at('2'));
+    expect(await saveIosSub(tok, at('9'), { legacy: true })).toEqual({ slot: 0 });
+    expect(armed('curb:apns')).toEqual([[tok, '9']]);
+    expect(iw(0)).toMatchObject({ token: tok, platform: 'ios' });
+    expect(iw(1)).toMatchObject({ spot: null, offSide: { cnn: '2' } });
+  });
+});
+
+// A watch nothing will ever push for again still held one of the device's 5 slots, so a device could get 409
+// with nothing it could free: a watch the cron stopped re-arming (savedAt past MAX_WATCH_AGE) or a one-shot
+// spot with no rule, once its sweep is over. pickSlot reuses one, with a fresh de-dupe, before saying full.
+describe('dead watches free their slot', () => {
+  const w = (n = 0) => { const v = mem['curb:subs'] && mem['curb:subs'][n ? `${EP}#${n}` : EP]; return v ? JSON.parse(v) : undefined; };
+  const DAY = 864e5;
+  const iso = (t) => new Date(t).toISOString();
+  // five armed watches on other sides, written directly: `make(i)` → { spot overrides, savedAt }
+  const fill = (make) => {
+    mem['curb:subs'] = {};
+    for (let i = 0; i < 5; i++) {
+      const { savedAt = Date.now(), ...over } = make(i) || {};
+      mem['curb:subs'][i ? `${EP}#${i}` : EP] = JSON.stringify({ subscription: SUB, spot: { ...spotA, cnn: String(100 + i), ...over }, notified: { lead: 'x' + i }, savedAt });
+    }
+  };
+  const SIX = { ...spotA, cnn: '999', nextSweepISO: iso(Date.now() + 3 * DAY) };
+
+  it('a stale watch (the cron stopped re-arming it) whose sweep is over is reused, with a fresh de-dupe', async () => {
+    fill((i) => (i === 3 ? { nextSweepISO: iso(Date.now() - 10 * DAY), savedAt: Date.now() - 130 * DAY } : {}));
+    expect(await saveSub(SUB, SIX)).toEqual({ slot: 3 });
+    expect(w(3)).toMatchObject({ spot: { cnn: '999' }, notified: {} });
+  });
+
+  it('a one-shot watch (no rule, an old cached page\'s) whose sweep has passed is reused', async () => {
+    fill((i) => (i === 1 ? { rule: undefined, rules: undefined, cnn: undefined, sideKey: undefined, corridor: 'Old St', nextSweepISO: iso(Date.now() - 2 * DAY) } : {}));
+    expect(await saveSub(SUB, SIX)).toEqual({ slot: 1 });
+  });
+
+  it('never a watch whose sweep window has not ended, however old, and never a fresh one past its sweep', async () => {
+    const r = { weekday: 'Wed', fromhour: '8', tohour: '14', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
+    fill((i) => [
+      { nextSweepISO: iso(Date.now() + 2 * DAY), savedAt: Date.now() - 130 * DAY },                 // stale, sweep ahead
+      { nextSweepISO: iso(Date.now() - 5 * 36e5), rule: r, rules: [r], savedAt: Date.now() - 130 * DAY }, // stale, 6 h window still on
+      { rule: undefined, rules: undefined, nextSweepISO: iso(Date.now() - 36e5) },                    // one-shot, swept an hour ago
+      { nextSweepISO: iso(Date.now() - 30 * DAY) },                                                   // re-armed by the cron next tick
+      {},
+    ][i]);
+    const before = JSON.stringify(mem);
+    expect(await saveSub(SUB, SIX)).toEqual({ full: true });
+    expect(JSON.stringify(mem)).toBe(before);
+  });
+
+  it('a free or turned-off slot still goes first: a dead watch is the last resort', async () => {
+    fill((i) => (i === 0 ? { nextSweepISO: iso(Date.now() - 10 * DAY), savedAt: Date.now() - 130 * DAY } : {}));
+    await disarmSub(EP, 'a', { cnn: '104', sideKey: 'L', corridor: 'Haight St', limits: '', blockside: '' });
+    expect(await saveSub(SUB, SIX)).toEqual({ slot: 4 });
   });
 });

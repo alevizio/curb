@@ -5,6 +5,35 @@
 import '../lib/sweep-core.js';
 const { nextSweep, alertAnchors } = globalThis;
 
+// A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with live data)
+// for this long, so a frozen rule can't push wrong times forever after a city schedule change. One value for
+// the sender (stops the re-arm) and the store (such a watch, once its sweep is over, frees its slot).
+export const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
+
+const rulesOf = (spot) => (Array.isArray(spot.rules) && spot.rules.length ? spot.rules : spot.rule ? [spot.rule] : []);
+// How long the stored sweep can last: the longest window among the side's rules (SF's longest is 6 h); a
+// day for a spot that carries no rule, whose window nobody knows.
+function windowMs(rules) {
+  if (!rules.length) return 864e5;
+  let h = 1;
+  for (const r of rules) {
+    const from = parseInt(r.fromhour, 10), to = parseInt(r.tohour, 10);
+    if (!Number.isNaN(from) && !Number.isNaN(to)) h = Math.max(h, to - from);
+  }
+  return h * 36e5;
+}
+
+/** True for an armed watch that can never push again and only holds one of the device's slots: one the
+ *  cron no longer re-arms (savedAt older than MAX_WATCH_AGE) or a one-shot spot with no rule (nothing
+ *  re-arms it), once its current sweep window is over. A watch whose window hasn't ended is never dead. */
+export function watchDead(rec, now = Date.now()) {
+  const spot = rec && rec.spot;
+  if (!spot) return false;
+  const rules = rulesOf(spot), start = Date.parse(spot.nextSweepISO);
+  if (Number.isFinite(start) && now < start + windowMs(rules)) return false;
+  return !rules.length || Boolean(rec.savedAt && now - rec.savedAt >= MAX_WATCH_AGE);
+}
+
 /** Given a stored spot carrying its recurring `rules` (or a legacy single `rule`), return an ADVANCED
  *  spot when the sweep has rolled to a new occurrence — the EARLIEST next sweep across the rules no
  *  longer matches spot.nextSweepISO — else null. The earliest next occurrence never moves earlier, so
@@ -17,7 +46,7 @@ const { nextSweep, alertAnchors } = globalThis;
  *  coupled to "right after the lead push fired". */
 export function recomputeSpot(spot) {
   if (!spot) return null;
-  const rules = Array.isArray(spot.rules) && spot.rules.length ? spot.rules : spot.rule ? [spot.rule] : [];
+  const rules = rulesOf(spot);
   let ns = null;
   for (const r of rules) {
     const n = nextSweep(r);

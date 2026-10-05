@@ -23,6 +23,7 @@
     "build:schedules": "node scripts/build-schedules.mjs",
     "build:blocksitemap": "node scripts/build-block-sitemap.mjs",
     "build:changelog": "node scripts/build-changelog.mjs",
+    "build:holidays": "node scripts/build-holidays-page.mjs",
     "validate:data": "node scripts/validate-data.mjs",
     "indexnow": "node scripts/indexnow.mjs",
     "test": "vitest run"

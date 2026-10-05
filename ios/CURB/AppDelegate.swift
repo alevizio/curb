@@ -8,6 +8,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         // Set early so a cold-start launch-from-notification still reaches didReceive below.
         UNUserNotificationCenter.current().delegate = self
+        // Opens, for the rating ask's "never on the very first open": this launch and every return from the
+        // background. Observers on the main queue, so assumeIsolated keeps foreground/background in order.
+        ReviewPrompt.shared.enteredForeground()
+        let center = NotificationCenter.default
+        _ = center.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { ReviewPrompt.shared.enteredForeground() }
+        }
+        _ = center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { ReviewPrompt.shared.enteredBackground() }
+        }
         return true
     }
 
@@ -29,14 +39,21 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         completionHandler([.banner, .sound])
     }
 
-    // Tap → open the block's deep link (e.g. /b/<cnn>) in the web view.
+    // Tap → open the block's deep link (e.g. /b/<cnn>) in the web view. A real sweep alert also arms the
+    // App Store rating ask for when that page has loaded (ReviewPrompt).
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter,
                                             didReceive response: UNNotificationResponse,
                                             withCompletionHandler completionHandler: @escaping () -> Void) {
-        let path = response.notification.request.content.userInfo["url"] as? String
+        let content = response.notification.request.content
+        let path = content.userInfo["url"] as? String
+        let tag = content.userInfo["tag"] as? String
+        let title = content.title
         if let path, let url = URL(string: path, relativeTo: URL(string: "https://curb.guide")) {
             let abs = url.absoluteURL
-            Task { @MainActor in PushRouter.shared.routeNotification(to: abs) }
+            Task { @MainActor in
+                ReviewPrompt.shared.notificationTapped(tag: tag, title: title)
+                PushRouter.shared.routeNotification(to: abs)
+            }
         }
         completionHandler()
     }

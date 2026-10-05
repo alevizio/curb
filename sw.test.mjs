@@ -78,6 +78,13 @@ describe('sw.js', () => {
     expect((await w.request('/?b=870000')).body).toBe('net /');  // a deep link offline still opens the app
   });
 
+  it('/holidays is a page like the others: the network answers while online, the cached copy only offline', async () => {
+    const w = worker({ stores: { 'curb-v5': new Map([['/holidays', res('last year\'s list')]]) } });
+    expect((await w.request('/holidays')).body).toBe('net /holidays');
+    w.online = false;
+    expect((await w.request('/holidays')).body).toBe('net /holidays');  // the copy the online visit refreshed
+  });
+
   it('data files are network first too, so a monthly data refresh reaches returning visitors', async () => {
     const w = worker({ stores: { 'curb-v5': new Map([['/data/overview.json', res('old data')]]) } });
     expect((await w.request('/data/overview.json', 'GET', 'cors')).body).toBe('net /data/overview.json');
@@ -115,7 +122,25 @@ describe('sw.js', () => {
     expect(r.body).toBeUndefined();
     // a page load offline still gets the cached shell, and the precached time core with it
     expect((await w.request('/', 'GET', 'navigate')).body).toBe('shell /');
-    expect((await w.request('/lib/sweep-core.js?v=4', 'GET', 'no-cors')).body).toBe('shell /lib/sweep-core.js');
+    expect((await w.request('/lib/sweep-core.js?v=6', 'GET', 'no-cors')).body).toBe('shell /lib/sweep-core.js');
+  });
+
+  it('a notification tap opens its deep link with the push_clicked marker, after a ?side= the link already has', async () => {
+    const opened = [];
+    const handlers = {};
+    const g = {
+      self: { addEventListener: (t, fn) => { handlers[t] = fn; }, skipWaiting() {}, clients: { claim: async () => {} } },
+      clients: { matchAll: async () => [], openWindow: async (u) => { opened.push(u); } },
+      caches: { open: async () => ({}) }, URL, location: { origin: ORIGIN },
+    };
+    vm.createContext(g);
+    vm.runInContext(SW, g);
+    for (const url of ['/b/8753101?side=North', '/b/8753101', undefined]) {
+      let p;
+      handlers.notificationclick({ notification: { close() {}, data: url === undefined ? {} : { url } }, waitUntil: (x) => { p = x; } });
+      await p;
+    }
+    expect(opened).toEqual(['/b/8753101?side=North&p=1', '/b/8753101?p=1', '/?p=1']);
   });
 });
 afterEach(() => { vi.useRealTimers(); });

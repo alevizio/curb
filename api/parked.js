@@ -6,7 +6,7 @@
 // rate-limit ≤1/min per token, reject coords outside the SF bbox, numbers-only Socrata query (no
 // injection), and we NEVER persist the raw lat/lng — only the resolved block (one-spot privacy).
 import webpush from 'web-push';
-import { resolveToken, claimSlot, getSub, saveSub, deleteSub, storeReady } from './_store.js';
+import { resolveToken, claimSlot, getSub, saveSub, deleteSub, storeReady, MAX_WATCHES } from './_store.js';
 import { inSfBbox, polygonAround, pickParkedSpot } from './_geo.js';
 import { sanitizeRules } from './_spot.js';
 import '../lib/sweep-core.js';
@@ -49,6 +49,10 @@ export default async function handler(req, res) {
 
     // Build + persist the watch (carries the recurring rule → forever-watch). saveSub stamps a fresh
     // savedAt (this IS live data); its de-dupe entries name the sweep they fired for, so a new sweep fires.
+    // atBase: the car's watch (tagged car:true, else the slot a page save would get) follows the car, as
+    // the single watch did before multi-watch (a new watch per park would pile up and keep alerting for
+    // every spot the car has left); a watch the user set on that same side is turned off so it doesn't push
+    // twice. Other watches are left alone, so with 5 sides already armed there is no room: say so.
     const ns = spot.ns;
     const prev = new Date(Date.UTC(ns.y, ns.mo - 1, ns.da) - 864e5);
     const eve = sfWallToInstant(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate(), 20);
@@ -58,7 +62,8 @@ export default async function handler(req, res) {
       rule: spot.rule, rules: sanitizeRules(spot.rules), cnn: spot.cnn, sideKey: spot.sideKey,
       ...(+eve < +ns.start ? { eveningISO: eve.toISOString() } : {}),
     };
-    await saveSub(sub.subscription, newSpot);
+    const saved = await saveSub(sub.subscription, newSpot, { atBase: true });
+    if (saved.full) { res.status(409).json({ ok: false, error: 'alert limit reached', max: MAX_WATCHES }); return; }
 
     // Confirmation push (best-effort; prune a dead endpoint).
     if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {

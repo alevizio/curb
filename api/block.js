@@ -10,7 +10,7 @@
 import { createRequire } from 'node:module';
 import '../lib/sweep-core.js'; // side effect: SF time core on globalThis
 const require = createRequire(import.meta.url);
-const { sfTodayParts, sfWallToInstant, sweepSuspended } = globalThis;
+const { sfTodayParts, sfWallToInstant, sweepSuspended, sweepDayWords } = globalThis;
 
 const FINE = 105; // current SF street-cleaning fine (2026), same as the /n/ pages
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -84,7 +84,9 @@ export function titleFor(e) {
 }
 
 // Next n sweep dates across all rows, SF calendar days (same rules as nextSweep: nth-weekday flags,
-// holiday suspension, today only while its window hasn't ended).
+// holiday suspension, today only while its window hasn't ended). A sweep starting before 6 AM is listed
+// by the night before ({ night: true }, lib/sweep-core.js sweepDayWords), the night people think in: a
+// Tue 12 to 2 AM sweep is "Mon night, Oct 5". A date with both kinds lists both, night first.
 function nextDates(rows, n = 3) {
   const now = new Date(), t0 = sfTodayParts(), base = Date.UTC(t0.y, t0.mo - 1, t0.da), out = [];
   for (let i = 0; i < 150 && out.length < n; i++) {
@@ -99,9 +101,12 @@ function nextDates(rows, n = 3) {
       if (+end <= +start) end = new Date(+start + 36e5);
       return now < end;
     });
-    if (hit.length) out.push({ dow, mo, da });
+    const words = hit.map(([, , from, to]) => sweepDayWords(y, mo, da, from, to));
+    const night = words.find((w) => w.night);
+    if (night) out.push({ ...night.nightOf, night: true });
+    if (words.some((w) => !w.night)) out.push({ dow, mo, da });
   }
-  return out;
+  return out.slice(0, n);
 }
 
 // "the east side every Tuesday 11am–1pm and the west side the 2nd and 4th Friday of the month …"
@@ -175,6 +180,8 @@ padding:6px 11px;border-radius:10px;text-decoration:none}.logo span{color:var(--
 h1{font-family:'Anton',sans-serif;font-size:27px;line-height:1.05;text-transform:uppercase;margin:6px 0 10px}
 .lede{font-size:14.5px;font-weight:600;line-height:1.5;color:var(--ink-soft);margin-bottom:14px}
 .lede b{color:var(--ink)}
+.hol{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:-8px 0 14px}
+.hol a{color:var(--ink);text-underline-offset:3px}
 .row{display:flex;gap:12px;align-items:center;border-top:2px solid var(--ink);padding:12px 0}
 .badge{flex:none;width:70px;text-align:center;background:var(--sign-white);color:var(--sign-red);
 border:2px solid var(--sign-red);border-radius:8px;padding:6px 2px 5px}
@@ -229,7 +236,7 @@ export function renderBlock(cnn, { S, ENF, R }) {
 
   const where = `${h1}${hood ? `, in the ${hood[0]} neighborhood of San Francisco,` : ', San Francisco,'}`;
   const lede = `${esc(where)} is swept ${esc(sweptPhrase(rows))}.` +
-    (dates.length ? ` Next sweep${dates.length > 1 ? 's' : ''}: ${andList(dates.map((d) => `<b>${DAYLBL[d.dow]}, ${MON[d.mo - 1]} ${d.da}</b>`))}.` : '');
+    (dates.length ? ` Next sweep${dates.length > 1 ? 's' : ''}: ${andList(dates.map((d) => `<b>${DAYLBL[d.dow]}${d.night ? ' night' : ''}, ${MON[d.mo - 1]} ${d.da}</b>`))}.` : '');
 
   const norm = normRows(rows);
   const rowHtml = windows(rows, false).flatMap((w) => w.dows.map((dow) => {
@@ -283,7 +290,7 @@ ${HEAD_FONTS}
 <nav class="crumb" aria-label="Breadcrumb"><a href="/">CURB</a> › ${hoodUrl ? `<a href="${hoodUrl}">${esc(hood[0])}</a>` : '<a href="/n/">Neighborhoods</a>'} › ${esc(street)}</nav>
 <h1>${esc(h1)}</h1>
 <p class="lede">${lede}</p>
-${rowHtml}
+${dates.length ? '<p class="hol">These dates already skip <a href="/holidays">street sweeping holidays</a>.</p>\n' : ''}${rowHtml}
 <div class="facts">
 ${tl ? `<div class="enf">Tickets usually land ${esc(tl.when)} · ${tl.n} tickets in 2 yrs</div>` : ''}
 <div>Street-cleaning ticket: $${FINE}${route ? ` · Swept by DPW’s <b>${esc(route)}</b> sweeper route` : ''}</div>

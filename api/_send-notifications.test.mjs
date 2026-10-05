@@ -21,8 +21,10 @@ let afterSnapshot = null; // runs right after the sender's start-of-run read of 
 vi.mock('@upstash/redis', () => ({
   Redis: class {
     async hget(k, f) { return mem[k] && mem[k][f]; }
+    async hmget(k, ...fs) { return fs.map((f) => (mem[k] && f in mem[k] ? mem[k][f] : null)); }
     async hset(k, obj) { (mem[k] || (mem[k] = {})); Object.assign(mem[k], obj); }
-    async hdel(k, f) { if (mem[k]) delete mem[k][f]; }
+    async hsetnx(k, f, v) { if (mem[k] && f in mem[k]) return 0; (mem[k] || (mem[k] = {}))[f] = v; return 1; }
+    async hdel(k, ...fs) { if (mem[k]) for (const f of fs) delete mem[k][f]; }
     async hgetall(k) {
       if (k === 'curb:subs' && failSubsLoad) throw new Error('upstash down');
       const out = mem[k] ? { ...mem[k] } : null;
@@ -40,15 +42,15 @@ vi.mock('@upstash/redis', () => ({
 }));
 const send = vi.fn(async () => ({ statusCode: 201 }));
 vi.mock('web-push', () => ({ default: { setVapidDetails: () => {}, sendNotification: (...a) => send(...a) } }));
-// APNs stays real (a malformed key really throws) unless a test sets apnsReply(token) → { status, reason }:
-// then no key and no network, every send answers with that.
+// APNs stays real (a malformed key really throws) unless a test sets apnsReply(token, collapseId, aps) →
+// { status, reason }: then no key and no network, every send answers with that.
 let apnsReply = null;
 vi.mock('./_apns.js', async (importOriginal) => {
   const real = await importOriginal();
   return { ...real,
     getProviderToken: () => (apnsReply ? 'jwt' : real.getProviderToken()),
     openSession: (h) => (apnsReply ? { close() {} } : real.openSession(h)),
-    sendOne: (...a) => (apnsReply ? Promise.resolve(apnsReply(a[2])) : real.sendOne(...a)) };
+    sendOne: (...a) => (apnsReply ? Promise.resolve(apnsReply(a[2], a[4], a[3])) : real.sendOne(...a)) };
 });
 const fetchMock = vi.fn(async () => ({ ok: true }));
 vi.stubGlobal('fetch', fetchMock);
@@ -311,6 +313,7 @@ describe('a style change from a sheet left open since before the re-arm', () => 
     const rules = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(R);
     const at = (iso) => vi.setSystemTime(Date.parse(iso));
     const stored = () => JSON.parse(mem['curb:subs'][EP]).spot;
+    delete mem['curb:subs'];   // this device's only watch is the one armed below
     // Mon 9:30 PDT, Monday's 8-10 sweep in progress: the sheet opens and arms with that sweep
     const sheet = { corridor: 'Daily St', limits: 'A - B', blockside: 'North', nextSweepISO: '2026-10-26T15:00:00.000Z',
       leadMinutes: 30, level: 'normal', voice: 'cheeky', rule: rules[0], rules, cnn: '555', sideKey: 'L' };
@@ -468,5 +471,168 @@ describe('delivery health (a run that works can still deliver nothing)', () => {
     armIos(2);
     await run(await qstash());
     expect((await statusNow()).delivery.failing).toEqual(['iOS: APNs is not configured (APNS_* env vars), so 2 armed iOS watches get no push']);
+  });
+});
+
+// ---- multi-watch: one device, several curb sides (GitHub #11) ----
+describe('two watches on one device', () => {
+  // Both sides of Steiner St, swept the same Thursday morning (9 and 10 AM PDT): both night-before pushes
+  // fall in Wednesday's 8 PM tick. (Not the 19th: Juneteenth is a city holiday, the watch would re-arm.)
+  const R = (h) => ({ weekday: 'Thu', fromhour: String(h), tohour: String(h + 2), week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' });
+  const base = { corridor: 'Steiner St', eveningISO: '2026-06-25T03:00:00.000Z', leadMinutes: 30, level: 'normal', cnn: '42' };
+  const north = { ...base, blockside: 'North', nextSweepISO: '2026-06-25T16:00:00.000Z', rule: R(9), rules: [R(9)], sideKey: 'North' };
+  const south = { ...base, blockside: 'South', nextSweepISO: '2026-06-25T17:00:00.000Z', rule: R(10), rules: [R(10)], sideKey: 'South' };
+  const rec = (field, spot, notified = {}) => JSON.stringify({ subscription: SUB, spot, notified, savedAt: NOW });
+  const arm2 = (a = north, b = south) => { mem['curb:subs'] = { [EP]: rec(EP, a), [EP + '#1']: rec(EP + '#1', b) }; };
+  const stored = (f) => JSON.parse(mem['curb:subs'][f]);
+  const EVE = Date.parse('2026-06-25T03:05:00Z');   // Wed 8:05 PM PDT
+  const sentTags = () => send.mock.calls.map(([, p]) => JSON.parse(p).tag);
+  const statusNow = async () => (await run(bearer({ query: { status: '1' } }))).body;
+  let quiet;
+  beforeEach(() => { quiet = vi.spyOn(console, 'error').mockImplementation(() => {}); });
+  afterEach(() => { quiet.mockRestore(); for (const k of ['APNS_KEY_P8', 'APNS_KEY_ID', 'APNS_TEAM_ID']) delete process.env[k]; });
+
+  it('both sides get their own push, with their own tag, and their own de-dupe: no repeats on the next tick', async () => {
+    arm2();
+    vi.setSystemTime(EVE);
+    const out = await run(bearer());
+    expect(out.body.web).toMatchObject({ checked: 1, watches: 2, attempted: 2, sent: 2 });
+    expect(sentTags()).toEqual(['curb-sweep-eve', 'curb-sweep-eve-1']);   // one tag each: no collapse into one notification
+    expect(send.mock.calls.map(([, p]) => JSON.parse(p).body)).toEqual([expect.stringContaining('(North)'), expect.stringContaining('(South)')]);
+    expect(stored(EP).notified).toEqual({ eve: north.nextSweepISO });
+    expect(stored(EP + '#1').notified).toEqual({ eve: south.nextSweepISO });
+    vi.setSystemTime(EVE + 15 * 60000);
+    expect((await run(bearer())).body.web.sent).toBe(0);
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it('a tap opens the side the push is about: /b/<cnn>?side=<blockside>, on web and iOS', async () => {
+    arm2();
+    vi.setSystemTime(EVE);
+    await run(bearer());
+    expect(send.mock.calls.map(([, p]) => JSON.parse(p).url)).toEqual(['/b/42?side=North', '/b/42?side=South']);
+    // a side name /b/ would not pass on (not letters only) and a spot without a cnn keep the old links
+    for (const k of Object.keys(kv)) delete kv[k];
+    send.mockClear();
+    arm2({ ...north, blockside: 'North East' }, { ...south, cnn: undefined, rule: undefined, rules: undefined });
+    await run(bearer());
+    expect(send.mock.calls.map(([, p]) => JSON.parse(p).url)).toEqual(['/b/42', '/']);
+
+    const tok = 'ab'.repeat(32);
+    for (const k of Object.keys(kv)) delete kv[k];
+    mem['curb:subs'] = {};
+    mem['curb:apns'] = { [tok]: JSON.stringify({ token: tok, spot: south, notified: {}, savedAt: NOW, platform: 'ios' }) };
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const urls = [];
+    apnsReply = (t, collapse, aps) => { urls.push(aps.url); return { status: 200 }; };
+    await run(bearer());
+    expect(urls).toEqual(['/b/42?side=South']);   // the app opens it relative to curb.guide (AppDelegate)
+  });
+
+  it('a turned-off watch sends nothing and is never re-armed, while the other one keeps working', async () => {
+    arm2();
+    await disarmSub(EP, SUB.keys.auth, { cnn: '42', sideKey: 'South', corridor: 'Steiner St', limits: '', blockside: 'South' });
+    vi.setSystemTime(EVE);
+    expect((await run(bearer())).body.web).toMatchObject({ checked: 1, watches: 1, sent: 1 });
+    expect(sentTags()).toEqual(['curb-sweep-eve']);
+    vi.setSystemTime(Date.parse('2026-06-25T19:30:00Z'));             // both sweeps over: the re-arm pass
+    expect((await run(bearer())).body.web.rearmed).toBe(1);
+    expect(stored(EP).spot.nextSweepISO).toBe('2026-07-02T16:00:00.000Z');
+    expect(stored(EP + '#1').spot).toBe(null);
+  });
+
+  it('each watch re-arms through its own record, even when a Turn off of the other lands mid-run', async () => {
+    arm2();
+    vi.setSystemTime(Date.parse('2026-06-25T19:30:00Z'));
+    afterSnapshot = () => disarmSub(EP, SUB.keys.auth, { cnn: '42', sideKey: 'North' });
+    expect((await run(bearer())).body.web.rearmed).toBe(1);
+    expect(stored(EP).spot).toBe(null);                                 // the Turn off held
+    expect(stored(EP + '#1').spot.nextSweepISO).toBe('2026-07-02T17:00:00.000Z');
+  });
+
+  it('a dead push service counts the DEVICE once: one send, one failure, one window entry', async () => {
+    mem['curb:subs'] = {};
+    for (let i = 0; i < 3; i++) {
+      const sub = { endpoint: EP + i, keys: { p256dh: 'p', auth: 'a' } };
+      mem['curb:subs'][sub.endpoint] = JSON.stringify({ subscription: sub, spot: north, notified: {}, savedAt: NOW });
+      mem['curb:subs'][sub.endpoint + '#1'] = JSON.stringify({ subscription: sub, spot: south, notified: {}, savedAt: NOW });
+    }
+    send.mockImplementation(async () => { throw Object.assign(new Error('nope'), { statusCode: 403 }); });
+    vi.setSystemTime(EVE);
+    const out = await run(await qstash());
+    expect(out.body.web).toMatchObject({ checked: 3, watches: 6, attempted: 3, sent: 0, failed: 3, failures: { 403: 3 } });
+    expect(send).toHaveBeenCalledTimes(3);                              // a failed device's second watch waits for the next tick
+    const s = await statusNow();
+    expect(s.delivery.web).toHaveLength(3);
+    expect(s.delivery.failing).toEqual(['web: 3 of the last 3 devices failed (403 ×3)']);
+  });
+
+  it('one dead device with two watches is no false alarm, and a 410 prunes both of its watches once', async () => {
+    arm2();
+    send.mockImplementation(async () => { throw Object.assign(new Error('gone'), { statusCode: 410 }); });
+    vi.setSystemTime(EVE);
+    expect((await run(bearer())).body.web).toMatchObject({ checked: 1, watches: 2, attempted: 1, pruned: 1, failed: 0 });
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(mem['curb:subs']).toEqual({});
+    expect((await statusNow()).delivery.failing).toBeUndefined();
+  });
+
+  it('iOS: both watches push to the REAL token with their own collapse id; a bad token prunes both', async () => {
+    const tok = 'ab'.repeat(32);
+    mem['curb:subs'] = {};
+    mem['curb:apns'] = {
+      [tok]: JSON.stringify({ token: tok, spot: north, notified: {}, savedAt: NOW, platform: 'ios' }),
+      [tok + '#1']: JSON.stringify({ spot: south, notified: {}, savedAt: NOW, platform: 'ios' }),
+    };
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const tokens = [];
+    apnsReply = (t) => { tokens.push(t); return { status: 200 }; };
+    vi.setSystemTime(EVE);
+    const out = await run(bearer());
+    expect(out.body.ios).toMatchObject({ checked: 1, watches: 2, sent: 2 });
+    expect(tokens).toEqual([tok, tok]);
+    expect(JSON.parse(mem['curb:apns'][tok]).notified).toEqual({ eve: north.nextSweepISO });
+    expect(JSON.parse(mem['curb:apns'][tok + '#1']).notified).toEqual({ eve: south.nextSweepISO });
+    expect('token' in JSON.parse(mem['curb:apns'][tok + '#1'])).toBe(false);
+
+    for (const k of Object.keys(kv)) delete kv[k];
+    mem['curb:apns'][tok] = JSON.stringify({ token: tok, spot: north, notified: {}, savedAt: NOW, platform: 'ios' });
+    mem['curb:apns'][tok + '#1'] = JSON.stringify({ spot: south, notified: {}, savedAt: NOW, platform: 'ios' });
+    const ids = [];
+    apnsReply = (t, collapse) => { ids.push(collapse); return { status: 400, reason: 'BadDeviceToken' }; };
+    const pruned = await run(bearer());
+    expect(pruned.body.ios).toMatchObject({ attempted: 1, pruned: 1, failed: 0 });
+    expect(ids).toEqual(['curb-sweep-eve', 'curb-sweep-eve']);         // primary host, then the cross-host retry
+    expect(mem['curb:apns']).toEqual({});
+  });
+
+  it('iOS: the second watch\'s push carries its own collapse id', async () => {
+    const tok = 'ab'.repeat(32);
+    mem['curb:subs'] = {};
+    mem['curb:apns'] = {
+      [tok]: JSON.stringify({ token: tok, spot: north, notified: { eve: north.nextSweepISO }, savedAt: NOW, platform: 'ios' }),
+      [tok + '#1']: JSON.stringify({ spot: south, notified: {}, savedAt: NOW, platform: 'ios' }),
+    };
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const ids = [];
+    apnsReply = (t, collapse) => { ids.push([t, collapse]); return { status: 200 }; };
+    vi.setSystemTime(EVE);
+    await run(bearer());
+    expect(ids).toEqual([[tok, 'curb-sweep-eve-1']]);
+  });
+
+  it('?test=ios sends one test per device, however many watches it has', async () => {
+    const tok = 'ab'.repeat(32), off = 'cd'.repeat(32);
+    mem['curb:apns'] = {
+      [tok]: JSON.stringify({ token: tok, spot: north, notified: {}, savedAt: NOW }),
+      [tok + '#1']: JSON.stringify({ spot: south, notified: {}, savedAt: NOW }),
+      [off]: JSON.stringify({ token: off, spot: null, notified: {}, savedAt: NOW }),
+      [off + '#1']: JSON.stringify({ spot: null, notified: {}, savedAt: NOW }),
+    };
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const tokens = [];
+    apnsReply = (t) => { tokens.push(t); return { status: 200 }; };
+    expect((await run(bearer({ query: { test: 'ios' } }))).body).toMatchObject({ ok: true, tokens: 1 });
+    expect(tokens).toEqual([tok]);
   });
 });
