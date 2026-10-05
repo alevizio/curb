@@ -217,6 +217,15 @@ describe('needsYou rules', () => {
     r.sections.github.issues.opened = [{ number: 47, title: 'Monitor: x', automated: true }, { number: 48, title: 'Oakland?', url: 'https://github.com/alevizio/curb/issues/48', automated: false }];
     expect(needsYou(r)).toEqual([{ text: 'New issue from a person: #48 Oakland?', url: 'https://github.com/alevizio/curb/issues/48' }]);
   });
+  it('a person\'s issue that was already answered and closed needs nothing (Oct 2026: #31)', () => {
+    const r = base();
+    r.sections.github.issues.opened = [{ number: 31, title: '[bug] data not loaded', automated: false }, { number: 48, title: 'Oakland?', automated: false }];
+    r.sections.github.issues.closed = [{ number: 31, title: '[bug] data not loaded', closedAt: '2026-10-01T00:05:22Z' }];
+    r.sections.github.issues.open = [{ number: 48, title: 'Oakland?' }];
+    expect(needsYou(r).map((n) => n.text)).toEqual(['New issue from a person: #48 Oakland?']);
+    r.sections.github.issues.open = [];
+    expect(needsYou(r)).toEqual([]); // closed after the week ended: it is in neither list, and no longer open
+  });
   it('monitor failure rate over 5%', () => {
     const r = base(); r.sections.github.runs.monitor = { total: 100, failed: 6 };
     expect(needsYou(r)[0].text).toBe('Monitor runs failed 6 of 100 times (6.0%)');
