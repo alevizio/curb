@@ -1205,7 +1205,8 @@ function buildOverviewLines(){
 // Resolve a block's current style (color/weight) or null when it should be hidden this view.
 function overviewStyle(b,ow){
   let rules=b.rules;
-  if(dayFilter!=null){rules=rules.filter(r=>normDay(r.weekday)===dayFilter);if(!rules.length)return null;}
+  // the day chip: weekday rows of that day, plus a holiday schedule whose next sweep falls on it this week (sweepsOnDay)
+  if(dayFilter!=null){rules=rules.filter(r=>sweepsOnDay(r,dayFilter));if(!rules.length)return null;}
   let rank=0,color=getCSS('--gray');
   rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
   const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
@@ -1477,8 +1478,9 @@ function drawSegments(rows){
     arr.forEach(s=>{
       // Day filter is a VISIBILITY lens only: it decides whether a side is drawn, but
       // status/color/sheet/alerts always come from the FULL rule set — a filtered view
-      // must never arm a reminder for the wrong sweep (multi-day blocks are common).
-      if(dayFilter!=null&&!s.rows.some(r=>normDay(r.weekday)===dayFilter))return;
+      // must never arm a reminder for the wrong sweep (multi-day blocks are common). A side's holiday schedule
+      // counts on the weekday its next sweep falls, within the coming week (lib/sweep-core.js sweepsOnDay).
+      if(dayFilter!=null&&!s.rows.some(r=>sweepsOnDay(r,dayFilter)))return;
       let best=null,bestRow=s.rows.find(r=>!isHolidayRow(r))||s.rows[0],rank=0,color=getCSS('--gray');
       // Ties go to the EARLIEST next sweep (same color): the first row in DataSF order used to win, so a
       // Tue+Fri side could say "Park until Fri" — and arm Fri — when Tue came first.

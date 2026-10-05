@@ -211,4 +211,54 @@ const okReg = reg.head === 'Tue night' && /^Wed 12 to 2 AM · every week · in 2
   && reg.other.length === 1 && reg.other[0][0] === 'Mon night 10/12 · tomorrow night' && reg.spotSweep === '2026-10-14T07:00:00.000Z' && !reg.errors.length;
 console.log(okReg ? '✅ no holiday schedule: tonight\'s 12 to 2 AM sweep is off, and the card says so' : '❌ no holiday schedule: a regular night sweep still shows on the holiday, or the card is wrong');
 if (!okReg) process.exitCode = 1;
+
+// The day filter is a visibility lens (CLAUDE.md), and a side's holiday schedule counts on the weekday its next
+// sweep falls, within the coming week. The evening before Indigenous Peoples Day (Sun 10/11 2026, 8 PM PDT) the MON
+// chip must show (a) at street level Ellis St, Hyde to Larkin (cnn 5177000) South side, Tue/Thu/Sun 6 to 8 AM plus
+// HOLIDAYS 6 TO 8AM, swept Monday morning by its holiday schedule, and (b) in the citywide overview every
+// holiday-schedule block in amber (Monday 4 to 8 AM, under 24 hours away), not green "clear" off its Monday row.
+{
+  const pg = await b.newPage();
+  await pg.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  const errs = [];
+  pg.on('pageerror', (e) => errs.push(e.message));
+  await pg.evaluateOnNewDocument((t) => {
+    const R = Date, off = t - R.now();
+    class F extends R { constructor(...a) { if (a.length) super(...a); else super(R.now() + off); } static now() { return R.now() + off; } }
+    globalThis.Date = F;
+    try { localStorage.setItem('curbFirstSheet', '1'); } catch (_) {}
+  }, Date.UTC(2026, 9, 12, 3, 0));
+  await pg.goto(SITE + '/', { waitUntil: 'load' });
+  await pg.waitForFunction(() => { const x = document.getElementById('welcomeGo'); return x && x.offsetParent; }, { timeout: 8000 }).then(() => pg.click('#welcomeGo'), () => {});
+  await pg.waitForFunction(() => typeof map !== 'undefined');
+  await pg.evaluate(() => map.setView([37.78435, -122.41690], 17, { animate: false }));
+  await pg.waitForFunction(() => typeof segCacheAll !== 'undefined' && segCacheAll.some((x) => String(x.group.cnn) === '5177000'), { timeout: 30000 });
+  const street = await pg.evaluate(() => {
+    setDayFilter(1);
+    return segCache.filter((x) => String(x.group.cnn) === '5177000').map((x) => x.side.blockside).sort();
+  });
+  // citywide: zoom out with the chip still on, then style every block that carries a holiday schedule
+  await pg.evaluate(() => map.setView([37.7599, -122.4370], 12, { animate: false }));
+  await pg.waitForFunction(() => ovMode && typeof OVR !== 'undefined' && OVR && ovrLines && ovrKey && ovrKey.startsWith('1|'), { timeout: 30000 });
+  await new Promise((r) => setTimeout(r, 1500));
+  const city = await pg.evaluate(() => {
+    const amber = getCSS('--amber'), out = { blocks: 0, hidden: 0, amber: 0, other: 0 };
+    for (const blk of OVR) {
+      if (!blk.rules.some(isHolidayRow)) continue;
+      out.blocks++;
+      const st = overviewStyle(blk, 2);
+      if (!st) out.hidden++; else if (st.color === amber) out.amber++; else out.other++;
+    }
+    out.chip = document.querySelector('.dchip.on')?.textContent;
+    return out;
+  });
+  await new Promise((r) => setTimeout(r, 4500));   // let the day chip's toast fade before the picture
+  if (process.env.SHOTS_DIR) await pg.screenshot({ path: `${process.env.SHOTS_DIR}/sheet-dayfilter-monday.png` });
+  await pg.close();
+  console.log(JSON.stringify({ street, city, errors: errs }));
+  const okDay = street.join() === 'North,South' && city.chip === 'Mon' && city.blocks >= 530 && city.hidden === 0 && city.other === 0
+    && city.amber === city.blocks && !errs.length;
+  console.log(okDay ? '✅ day filter: the MON chip on the eve of a holiday shows the holiday-schedule curbs it sweeps' : '❌ day filter: the MON chip hides or clears curbs swept Monday by their holiday schedule');
+  if (!okDay) process.exitCode = 1;
+}
 await b.close();

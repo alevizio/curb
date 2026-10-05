@@ -85,7 +85,8 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
 - Holiday model (2026-10-05, from the street-cleaning tickets on 8 minor holidays Oct 2025 to Sep 2026; the
   comment above sweepSuspended in lib/sweep-core.js has the numbers): (1) weekday rows stop on EVERY HOL_DAY
   date, whatever their hours or DataSF's holidays flag (no longer read); (2) a weekday 'Holiday' row is its own
-  rule (normDay → HOLIDAY_DOW 7, never a weekday, so DAYLBL / the day filter never match it): it sweeps only on
+  rule (normDay → HOLIDAY_DOW 7, never a weekday, so DAYLBL never matches it; the day filter counts it through
+  `sweepsOnDay`, on the weekday its next sweep falls within the coming week): it sweeps only on
   minor holidays (HOL_DAY and not HOL_NIGHT, `holidayScheduleDay`), at its own hours, even on a side with no
   row that weekday; nextSweep marks those occurrences `holiday: true`; (3) on HOL_NIGHT (New Year's Day,
   Thanksgiving, Christmas) nothing sweeps. It replaced the night-route rule (window inside 12 to 6 AM or
@@ -210,7 +211,9 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
 - **Day filter** (`.dchip` row + `dayFilter`): a VISIBILITY lens only. It decides which
   sides are drawn; `side.rows`/`side.ns`/color/sheet/alerts always come from the FULL
   rule set, so a filtered view can never arm a reminder for the wrong sweep.
-  `placeYou()` resets the filter — "where I parked" must see every curb side.
+  `placeYou()` resets the filter — "where I parked" must see every curb side. Both the street level and the
+  citywide overview match rows with `sweepsOnDay` (lib/sweep-core.js), so a side's holiday schedule shows on the
+  chip of the day it sweeps that week (MON the week of Indigenous Peoples Day), never by `normDay` alone.
 - **Locate** lives inside the search field (`.field .loc`, navigation glyph); there is
   no floating FAB anymore.
 - **Google Cal button** (`openGoogleCal`): template URL with floating wall-clock times
