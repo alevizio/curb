@@ -155,7 +155,12 @@ export function needsYou(report) {
   if (err && fin(err.total) && fin(err.prevTotal) && !err.capped && +err.total > 50 && +err.total > 2 * +err.prevTotal) {
     out.push({ text: `Browser errors jumped to ${num(err.total)} (last week ${num(err.prevTotal)})` });
   }
-  for (const i of list(gh?.issues?.opened).filter((i) => !i.automated)) out.push({ text: `New issue from a person: #${i.number} ${clip(i.title, 90)}`, url: i.url });
+  // only issues still open: one already answered and closed during the week needs nothing more
+  const closed = new Set(list(gh?.issues?.closed).map((i) => i.number));
+  const open = Array.isArray(gh?.issues?.open) ? new Set(gh.issues.open.map((i) => i.number)) : null;
+  for (const i of list(gh?.issues?.opened).filter((i) => !i.automated && !closed.has(i.number) && (!open || open.has(i.number)))) {
+    out.push({ text: `New issue from a person: #${i.number} ${clip(i.title, 90)}`, url: i.url });
+  }
   const mon = gh?.runs?.monitor;
   if (mon && +mon.total > 0 && +mon.failed / +mon.total > 0.05) {
     out.push({ text: `Monitor runs failed ${num(mon.failed)} of ${num(mon.total)} times (${pct(+mon.failed / +mon.total)})`, url: `${REPO}/actions/workflows/monitor.yml` });
