@@ -104,6 +104,15 @@ describe('block page — content', () => {
     expect(body).toContain('Next sweeps: <b>Thu, Oct 15</b>, <b>Mon, Oct 19</b> and <b>Thu, Oct 22</b>.');
   });
 
+  it('keeps an overnight sweep on a minor holiday in the next dates (SFMTA still sweeps 12 to 6 AM)', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 11, 19, 0))); // Sun Oct 11; Mon Oct 12 is Indigenous Peoples Day
+    const night = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b,
+      '778': ['Pierce St', 'Bush St', 'Pine St', 0, [['East', 1, 0, 2, 31, 0], ['West', 1, 9, 11, 31, 0]], '', '', '', '2026-09-27'],
+      '779': ['Pierce St', 'Bush St', 'Pine St', 0, [['West', 1, 9, 11, 31, 0]], '', '', '', '2026-09-27'] } } };
+    expect(renderBlock('778', night).body).toContain('Next sweeps: <b>Mon, Oct 12</b>, <b>Mon, Oct 19</b> and <b>Mon, Oct 26</b>.');
+    expect(renderBlock('779', night).body).toContain('Next sweeps: <b>Mon, Oct 19</b>, <b>Mon, Oct 26</b> and <b>Mon, Nov 2</b>.');
+  });
+
   it('keeps today in the next dates only until its window ends', () => {
     vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 7, 20, 0))); // Wed Oct 7, 1pm PDT (window 12–2pm)
     expect(renderBlock('2000', DATA).body).toContain('Next sweeps: <b>Wed, Oct 7</b>');

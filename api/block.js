@@ -92,7 +92,7 @@ function nextDates(rows, n = 3) {
     const y = d.getUTCFullYear(), mo = d.getUTCMonth() + 1, da = d.getUTCDate();
     const iso = `${y}-${String(mo).padStart(2, '0')}-${String(da).padStart(2, '0')}`;
     const hit = rows.filter(([, rd, from, to, mask, hol]) => {
-      if (rd !== dow || !((mask >> (occ - 1)) & 1) || sweepSuspended({ holidays: hol }, iso)) return false;
+      if (rd !== dow || !((mask >> (occ - 1)) & 1) || sweepSuspended({ holidays: hol, fromhour: from, tohour: to }, iso)) return false;
       if (i > 0) return true;
       const start = sfWallToInstant(y, mo, da, from);
       let end = sfWallToInstant(y, mo, da, to);

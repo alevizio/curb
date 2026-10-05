@@ -819,7 +819,7 @@
      loaded before the main script so its exports are on globalThis. Unit-tested separately.
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
-<script src="/lib/sweep-core.js?v=4"></script>
+<script src="/lib/sweep-core.js?v=5"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
