@@ -151,4 +151,64 @@ const okTip = tipNight === "That's this curb's verdict. 🔔 Sweep alerts pings 
   && tipDay === "That's this curb's verdict. 🔔 Sweep alerts pings you ~30 min before the truck.";
 console.log(okTip ? '✅ first-sheet tip: night sweeps say 9 PM the evening before, day sweeps 30 min' : '❌ first-sheet tip: wrong alert timing for this sweep');
 if (!okTip) process.exitCode = 1;
+
+// Holidays (street-cleaning tickets, Oct 2025 to Sep 2026; lib/sweep-core.js sweepSuspended): the evening before
+// Indigenous Peoples Day (Sun 10/11 2026, 8 PM PDT) regular sweeps are off, and a side with a posted holiday
+// schedule (DataSF weekday 'Holiday') is swept at its hours. SHOTS_DIR=<dir> saves each sheet as a 390 px PNG.
+async function holidaySheet(center, cnn, side, shot) {
+  const pg = await b.newPage();
+  await pg.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  const errs = [];
+  pg.on('pageerror', (e) => errs.push(e.message));
+  await pg.evaluateOnNewDocument((t) => {
+    const R = Date, off = t - R.now();
+    class F extends R { constructor(...a) { if (a.length) super(...a); else super(R.now() + off); } static now() { return R.now() + off; } }
+    globalThis.Date = F;
+    try { localStorage.setItem('curbFirstSheet', '1'); } catch (_) {}
+  }, Date.UTC(2026, 9, 12, 3, 0));
+  await pg.goto(SITE + '/', { waitUntil: 'load' });
+  await pg.waitForFunction(() => { const x = document.getElementById('welcomeGo'); return x && x.offsetParent; }, { timeout: 8000 }).then(() => pg.click('#welcomeGo'), () => {});
+  await pg.waitForFunction(() => typeof map !== 'undefined');
+  await pg.evaluate((c) => map.setView(c, 17, { animate: false }), center);
+  await pg.waitForFunction((n) => typeof segCacheAll !== 'undefined' && segCacheAll.some((x) => String(x.group.cnn) === n), { timeout: 30000 }, cnn);
+  const out = await pg.evaluate(async (n, sd) => {
+    const hit = segCacheAll.find((x) => String(x.group.cnn) === n && new RegExp('^' + sd + '$', 'i').test(x.side.blockside || ''));
+    window.onAlertTap = (spot) => { window.__spot = spot; };
+    openSheet(hit.group, hit.side.key);
+    await new Promise((r) => setTimeout(r, 400));
+    const q = (s) => document.querySelector(s), t = (s) => q(s)?.textContent.replace(/\s+/g, ' ').trim();
+    q('#alertBtn')?.click();
+    const tip = document.createElement('div'); tip.innerHTML = previewHtml(hit.group, hit.side);
+    return {
+      head: t('#sheetBody .verdict .head'), sched: t('#sheetBody .asched'), holrow: t('#sheetBody .holrow') || null,
+      card: q('#sheetBody .holcard') ? [t('#sheetBody .holcard .hh'), t('#sheetBody .holcard .hs')] : null,
+      other: [...document.querySelectorAll('#sheetBody .srow')].map((e) => [e.querySelector('.nx')?.textContent, e.querySelector('.holsign')?.textContent || null]),
+      tipSide: tip.querySelector('.tip-side')?.textContent, tipNext: tip.querySelector('.tip-next')?.textContent,
+      spotSweep: window.__spot?.nextSweepISO, spotRules: (window.__spot?.rules || []).map((r) => r.weekday + ' ' + r.fromhour + '-' + r.tohour),
+      dayFilterMon: (() => { const keep = dayFilter; dayFilter = 1; const n = hit.side.rows.filter((r) => normDay(r.weekday) === dayFilter).length; dayFilter = keep; return n; })(),
+    };
+  }, cnn, side);
+  if (shot && process.env.SHOTS_DIR) await pg.screenshot({ path: `${process.env.SHOTS_DIR}/${shot}` });
+  await pg.close();
+  return { ...out, errors: errs };
+}
+// (a) Columbus Ave, Lombard to Taylor (cnn 4301000): the Southwest side is swept Mon/Wed/Fri/Sat 4 to 6 AM and
+// posts HOLIDAYS 4 TO 6AM; the Northeast side (Tue/Thu/Sun) has no holiday schedule
+const hol = await holidaySheet([37.80314, -122.41430], '4301000', 'southwest', 'sheet-holiday-row.png');
+console.log(JSON.stringify(hol));
+const okHol = hol.head === 'Sun night' && hol.sched === 'Mon 4 to 6 AM · holiday schedule · tonight' && hol.holrow === null
+  && hol.card && hol.card[0] === 'Holiday schedule' && hol.card[1].startsWith('Indigenous Peoples Day · Sun night 10/11. Regular sweeps are off')
+  && hol.other.length === 1 && hol.other[0][0] === 'Mon night 10/12 · tomorrow night' && hol.other[0][1] === null
+  && /HOLIDAYS 4AM to 6AM/.test(hol.tipSide || '') && hol.tipNext === 'Sun night 10/11 → Mon 4 to 6 AM · tonight'
+  && hol.spotSweep === '2026-10-12T11:00:00.000Z' && hol.spotRules.includes('Holiday 4-6') && hol.dayFilterMon === 1 && !hol.errors.length;
+console.log(okHol ? '✅ holiday schedule: the eve of Indigenous Peoples Day sweeps Mon 4 to 6 AM, says so, and arms it' : '❌ holiday schedule: the side\'s Holiday row is not its next sweep, or the sheet does not say so');
+if (!okHol) process.exitCode = 1;
+// (b) 4th St, King to Berry (cnn 269000), Southwest side Mon/Wed/Fri 12 to 2 AM, no holiday schedule: tonight is off
+const reg = await holidaySheet([37.77606, -122.39370], '269000', 'southwest', 'sheet-no-holiday-row.png');
+console.log(JSON.stringify(reg));
+const okReg = reg.head === 'Tue night' && /^Wed 12 to 2 AM · every week · in 2 days$/.test(reg.sched || '') && reg.holrow === null
+  && reg.card && reg.card[0] === 'No street sweeping' && reg.card[1] === 'Indigenous Peoples Day · Sun night 10/11 → Mon 12 to 2 AM. Leave your car where it is.'
+  && reg.other.length === 1 && reg.other[0][0] === 'Mon night 10/12 · tomorrow night' && reg.spotSweep === '2026-10-14T07:00:00.000Z' && !reg.errors.length;
+console.log(okReg ? '✅ no holiday schedule: tonight\'s 12 to 2 AM sweep is off, and the card says so' : '❌ no holiday schedule: a regular night sweep still shows on the holiday, or the card is wrong');
+if (!okReg) process.exitCode = 1;
 await b.close();

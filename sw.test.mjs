@@ -122,7 +122,7 @@ describe('sw.js', () => {
     expect(r.body).toBeUndefined();
     // a page load offline still gets the cached shell, and the precached time core with it
     expect((await w.request('/', 'GET', 'navigate')).body).toBe('shell /');
-    expect((await w.request('/lib/sweep-core.js?v=6', 'GET', 'no-cors')).body).toBe('shell /lib/sweep-core.js');
+    expect((await w.request('/lib/sweep-core.js?v=7', 'GET', 'no-cors')).body).toBe('shell /lib/sweep-core.js');
   });
 
   it('a notification tap opens its deep link with the push_clicked marker, after a ?side= the link already has', async () => {

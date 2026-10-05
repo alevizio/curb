@@ -443,6 +443,11 @@
   .holcard .hh{font-family:'Anton',sans-serif;font-size:18px;line-height:1;text-transform:uppercase;color:var(--green-text);margin:1px 0 2px}
   .holcard .hs{font-size:12px;font-weight:700;color:var(--ink);line-height:1.3}
   .holcard .hs b{color:var(--green-text)}
+  /* a side's posted holiday schedule, worded like its sign ("HOLIDAYS 4 TO 6AM"): a mini street-cleaning badge */
+  .holrow{display:flex;align-items:center;flex-wrap:wrap;gap:4px 7px;margin:5px 0 2px;font-size:11.5px;font-weight:600;color:var(--ink-soft)}
+  .holsign{display:inline-block;background:var(--sign-white);color:var(--sign-red);border:1.5px solid var(--sign-red);border-radius:6px;
+    padding:1px 6px;font-size:10.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
+  .smeta .holsign{margin-top:4px}
   .signfix{font-size:11.5px;margin-top:11px;text-align:center}
   .signfix a{color:var(--ink-soft);font-weight:600;text-decoration:none}
   .signfix a b{color:var(--meter);font-weight:700}
@@ -478,6 +483,7 @@
     border:2px solid var(--sign-red);border-radius:8px;padding:5px 2px 4px}
   .badge.now{background:var(--red);border-color:var(--red);color:#fff}
   .badge .d{font-family:'Anton',sans-serif;font-size:17px;line-height:1;text-transform:uppercase}
+  .badge .d.hd{font-size:13.5px;line-height:17px}  /* HOLIDAYS, the holiday schedule's sign word, is twice a weekday's width */
   .badge .t{font-size:9px;font-weight:800;margin-top:1px}
   .badge .sc{font-size:6.5px;font-weight:800;letter-spacing:.07em;margin-top:2px;opacity:.9}
   .smeta{flex:1;min-width:0}
@@ -690,7 +696,7 @@
         </a>
         <a class="im-item" href="/holidays" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg></span>
-          <span class="im-tx"><b>Sweeping holidays</b><small>Days SF skips daytime sweeping</small></span>
+          <span class="im-tx"><b>Sweeping holidays</b><small>Days SF skips regular sweeping</small></span>
         </a>
         <a class="im-item" href="/tickets" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V7Z"/><path d="M12 6v2M12 11v2M12 16v2"/></svg></span>
@@ -826,7 +832,7 @@
      loaded before the main script so its exports are on globalThis. Unit-tested separately.
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
-<script src="/lib/sweep-core.js?v=6"></script>
+<script src="/lib/sweep-core.js?v=7"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -1182,7 +1188,7 @@ async function ensureOverview(){
   const r=await fetch('data/overview.json'); if(!r.ok)throw 0;
   const d=await r.json();
   OVR=d.b.map(b=>({a:[b[1],b[0]],z:[b[3],b[2]],rules:b[4].map(([dw,f,t,m,h])=>({
-    weekday:DAYLBL[dw],fromhour:String(f),tohour:String(t),holidays:h?'1':'0',
+    weekday:dw===HOLIDAY_DOW?'Holiday':DAYLBL[dw],fromhour:String(f),tohour:String(t),holidays:h?'1':'0',
     week1:m&1?'1':'0',week2:m&2?'1':'0',week3:m&4?'1':'0',week4:m&8?'1':'0',week5:m&16?'1':'0'}))}));
   return OVR;
 }
@@ -1432,6 +1438,10 @@ function fmtRange(cnn){const g=rangeCache[cnn];return g?(g.lo===g.hi?g.lo:g.lo+'
 function fmtLimits(s){return String(s||'').replace(/\s+-\s+/g,' to ');}
 // sign-badge window, compact enough for the 66px badge: "8 TO 10AM", "10AM TO 12PM"
 function badgeWin(f,t){const a=fmtHour(f),b=fmtHour(t);if(!a||!b)return a||b;return (a.slice(-2)===b.slice(-2)?a.slice(0,-2):a)+' TO '+b;}
+// A side's posted holiday schedule (DataSF weekday 'Holiday', lib/sweep-core.js): its own rule, swept on minor
+// holidays only, never a weekday. Badges and the pill word it like the sign: "HOLIDAYS 4 TO 6AM".
+function dayTag(r){return isHolidayRow(r)?'HOLIDAYS':(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();}
+function holSign(r){return `<span class="holsign">HOLIDAYS ${badgeWin(r.fromhour,r.tohour)}</span>`;}
 async function fillRange(cnn){
   if(!cnn)return;
   if(!rangeCache[cnn]){
@@ -1469,7 +1479,7 @@ function drawSegments(rows){
       // status/color/sheet/alerts always come from the FULL rule set — a filtered view
       // must never arm a reminder for the wrong sweep (multi-day blocks are common).
       if(dayFilter!=null&&!s.rows.some(r=>normDay(r.weekday)===dayFilter))return;
-      let best=null,bestRow=s.rows[0],rank=0,color=getCSS('--gray');
+      let best=null,bestRow=s.rows.find(r=>!isHolidayRow(r))||s.rows[0],rank=0,color=getCSS('--gray');
       // Ties go to the EARLIEST next sweep (same color): the first row in DataSF order used to win, so a
       // Tue+Fri side could say "Park until Fri" — and arm Fri — when Tue came first.
       s.rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank||(st.rank===rank&&ns&&best&&+ns.start<+best.start)){rank=st.rank;color=st.color;best=ns;bestRow=r}});
@@ -1557,7 +1567,7 @@ function previewHtml(group, side){
   const head=!ns?'Posted sign':(now>=ns.start&&now<ns.end)?'Sweeping now':sweepWords(ns,now).head;
   const rp=relPhrase(ns);
   const r=side.row||side.rows[0];  // the rule that produced ns — rows[0] can be a different weekday
-  const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
+  const day=dayTag(r);
   const rpp=nearestRpp(side.mid);
   const e=enfFor(group.cnn, normDay(r.weekday));
   return `<div class="tip-head">${head}</div>
@@ -1601,17 +1611,18 @@ function openSheet(group, activeKey){
     const allW=weeks.every(Boolean);
     const wkHtml=weeks.map((on,i)=>`<span class="wk ${on?'on':'off'}">${i+1}</span>`).join('');
     const act=s.ns&&now>=s.ns.start&&now<s.ns.end;
-    const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
+    const day=dayTag(r), hol=isHolidayRow(r), hr=hol?null:s.rows.find(isHolidayRow);
     const e=enfFor(group.cnn, normDay(r.weekday));
     const sw=swpFor(group.cnn, normDay(r.weekday));
     return `<div class="srow tap" data-side="${s.key}" role="button" tabindex="0" aria-label="Switch to the ${s.blockside||'other'} side">
-      <div class="badge ${act?'now':''}"><div class="d">${day}</div><div class="t">${badgeWin(r.fromhour,r.tohour)}</div><div class="sc">STREET CLEANING</div></div>
+      <div class="badge ${act?'now':''}"><div class="d${hol?' hd':''}">${day}</div><div class="t">${badgeWin(r.fromhour,r.tohour)}</div><div class="sc">STREET CLEANING</div></div>
       <div class="smeta">
-        <div class="nm">${s.blockside||'Curbside'}${allW?' · every week':''}</div>
+        <div class="nm">${s.blockside||'Curbside'}${hol?' · holiday schedule':allW?' · every week':''}</div>
         <div class="nx ${rp.cls}">${rp.short||rp.txt}</div>
+        ${hr?holSign(hr):''}
         ${e?`<div class="enfline">${ICONS.target} Ticketed ~${fmtMin(e.avg)} <span>· ${e.n} tickets</span></div>`:''}
         ${sw?`<div class="swpline"><svg class="ic" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 5-7 7"/><path d="M13 11 6 18a2 2 0 0 1-3-3l7-7"/><path d="m9 9 4 4"/></svg>Sweeper ~${fmtMin(sw.avg)} <span>· real, from city GPS</span></div>`:''}
-        ${allW?'':`<div class="weeks">${wkHtml}</div>`}
+        ${allW||hol?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
   const sidesBlock=others.length?`<div class="sideslbl">Other side${others.length>1?'s':''}</div><div class="sides">${sidesHtml}</div>`:'';
@@ -1673,23 +1684,33 @@ function openSheet(group, activeKey){
   const _aw=_ar?[_ar.week1,_ar.week2,_ar.week3,_ar.week4,_ar.week5].map(x=>String(x)==='1'):[true,true,true,true,true];
   const _arp=relPhrase(ns);
   // the window: "9AM to 11AM" under a "Tue 9AM" head; "Tue 12 to 2 AM" under a "Mon night" one
-  const aSched=ns?`<div class="asched ${_arp.cls}">${sweepWords(ns,now).win} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
+  // a sweep by the side's holiday schedule says so where the weekly frequency would be
+  const aSched=ns?`<div class="asched ${_arp.cls}">${sweepWords(ns,now).win} · ${ns.holiday?'holiday schedule':freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
   // The "park after the sweeper passes" rule — most useful when a sweep is active now or imminent (within 24h).
   const _soon=ns&&((now>=ns.start&&now<ns.end)||(ns.start-now)<864e5);
-  // Holiday heads-up: if this side's next scheduled sweep is cancelled for a city holiday, say so.
-  const _hrec=active.row||(active.rows&&active.rows[0]);
-  const _hol=(_hrec&&typeof holidaySkip==='function')?holidaySkip(_hrec):null;
+  // City holiday heads-up (lib/sweep-core.js holidayNote): regular sweeps stop on every holiday, and a side with a
+  // posted holiday schedule is swept at those hours on the minor ones. A holiday before this side's next sweep says
+  // "No street sweeping" only when nothing sweeps it that day, else "Holiday schedule".
+  const _hol=typeof holidayNote==='function'?holidayNote(active.rows||[],ns):null;
   const _WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  // a skipped night sweep names its night like every other line: "Sun night 10/11 → Mon 12 to 2 AM"
-  const _holW=_hol?sweepDayWords(_hol.y,_hol.mo,_hol.da,_hrec.fromhour,_hrec.tohour):null;
-  const _holDate=!_hol?'':_holW.night?_holW.when:`${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da}`;
-  const _holNote=_hol?`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div><div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Leave your car where it is.</div></div></div>`:'';
+  const _holS=_hol&&_hol.schedule, _holSched=_holS&&!(ns&&+_holS.start===+ns.start)?_holS:null;  // not already the line above
+  // a night sweep names its night like every other line: "Sun night 10/11 → Mon 12 to 2 AM"
+  const _holW=!_hol?null:_holS?sweepDayWords(_holS.y,_holS.mo,_holS.da,_holS.fromH,_holS.toH):sweepDayWords(_hol.y,_hol.mo,_hol.da,_hol.fromH,_hol.toH);
+  const _holDay=!_hol?'':_holW.night?_holW.day:`${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da}`;
+  // each number once: when the line above already gives the holiday hours, the card names the day only
+  const _holDate=!_hol?'':(_holS?!_holSched:!_holW.night)?_holDay:_holW.when;
+  const _holNote=!_hol?'':`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div>`
+    +(_holS?`<div class="hh">Holiday schedule</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Regular sweeps are off; this side is swept at its posted holiday hours.</div>`
+      :`<div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Leave your car where it is.</div>`)+`</div></div>`;
+  // the side's holiday schedule like its sign, unless the line above or the card already shows those hours
+  const _hr=(active.rows||[]).find(isHolidayRow);
+  const _holRow=_hr&&!(ns&&ns.holiday)&&!_holSched?`<div class="holrow">${holSign(_hr)}<span>on city holidays, when regular sweeps stop</span></div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   // Crowdsourced "Correct a Sign": opens the repo's existing wrong-data issue FORM with this block's
   // context pre-filled (block + what CURB shows), so the reporter just adds the sign + a photo. The
   // form auto-applies the "data" label.
-  const _repSched = ns ? `${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)} to ${fmtHour(ns.toH)}` : 'no posted street-sweeping';
+  const _repSched = ns ? `${ns.holiday?'Holidays':DAYLBL[ns.dow]} ${fmtHour(ns.fromH)} to ${fmtHour(ns.toH)}` : 'no posted street-sweeping';
   const _repBlock = (group.corridor||'')+(group.limits?' · '+fmtLimits(group.limits):'')+((active&&active.blockside)?' ('+active.blockside+' side)':'')+(group.cnn?'  ·  curb.guide/b/'+group.cnn:'');
   const _report = `https://github.com/alevizio/curb/issues/new?template=wrong-data.yml&block=${encodeURIComponent(_repBlock)}&app=${encodeURIComponent(_repSched)}`;
   document.getElementById('sheetBody').innerHTML=`
@@ -1697,6 +1718,7 @@ function openSheet(group, activeKey){
       <div class="headrow"><span class="head">${head}</span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb: pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div></div>
     <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${fmtLimits(group.limits)}</span></span></div>
     ${aSched}
+    ${_holRow}
     ${_holNote}
     ${enfHtml}
     ${rtHtml}
@@ -1785,7 +1807,7 @@ function openSheet(group, activeKey){
     const url=location.origin+'/b/'+group.cnn+(active.blockside?'?side='+encodeURIComponent(active.blockside):'');
     const r0=active.row||active.rows[0];
     const e=enfFor(group.cnn, normDay(r0.weekday));
-    const text=`${group.corridor||'This block'} (${fmtLimits(group.limits)}): sweeps ${DAYLBL[normDay(r0.weekday)]||r0.weekday} ${fmtHour(r0.fromhour)} to ${fmtHour(r0.tohour)}`
+    const text=`${group.corridor||'This block'} (${fmtLimits(group.limits)}): sweeps ${isHolidayRow(r0)?'on holidays':DAYLBL[normDay(r0.weekday)]||r0.weekday} ${fmtHour(r0.fromhour)} to ${fmtHour(r0.tohour)}`
       +(e?`, tickets usually ~${fmtMin(e.avg)}`:'');
     try{
       if(navigator.share)await navigator.share({title:'CURB',text,url});
