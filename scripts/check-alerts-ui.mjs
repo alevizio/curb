@@ -91,8 +91,12 @@ async function openPage(native, ctl, size = { width: 390, height: 844 }) {
   page.on('request', (r) => {
     const p = new URL(r.url()).pathname;
     if (p === '/api/save-subscription') {
-      page.__posts.push({ method: r.method(), body: JSON.parse(r.postData() || '{}') });
-      return r.respond({ status: ctl.status, contentType: 'application/json', body: JSON.stringify(ctl.status === 200 ? { ok: true } : { error: 'boom' }) });
+      // ctl.postDelay holds a POST's answer back (a save still in flight); at / answeredAt time the order
+      const post = { method: r.method(), body: JSON.parse(r.postData() || '{}'), at: Date.now() };
+      page.__posts.push(post);
+      const reply = () => { post.answeredAt = Date.now(); r.respond({ status: ctl.status, contentType: 'application/json', body: JSON.stringify(ctl.status === 200 ? { ok: true } : { error: 'boom' }) }); };
+      if (r.method() === 'POST' && ctl.postDelay) { setTimeout(reply, ctl.postDelay); return; }
+      return reply();
     }
     if (p.startsWith('/api/')) return r.respond({ status: 204, body: '' });
     return r.continue();
@@ -175,6 +179,21 @@ try {
   check('…and the sheet reads off', (await text(page, '#alertBtn')).includes('Sweep alerts') && !(await alerts(page))['5910000|South'] && (await toast(page)).includes('Alerts off for Fulton St') && (await text(page, '#alertNote')) === 'Also on for Kansas St, West side');
   await open(page, '7735000');
   check('…while the other side stays on', (await text(page, '#alertBtn')) === '✓ Alerts on');
+
+  // Turn off tapped while a silent re-arm (the daily refresh) is still in flight: the DELETE goes out only
+  // once the re-arm is answered, so it lands last on the server, and the re-arm doesn't mark the side on again.
+  await page.evaluate(() => { const m = JSON.parse(localStorage.getItem('curbAlert')); m['7735000|West'].armedAt = Date.now() - WATCH_REFRESH - 60000; localStorage.setItem('curbAlert', JSON.stringify(m)); });
+  ctl.postDelay = 600;
+  const nq = page.__posts.length;
+  await open(page, '7735000');            // refreshWatch: a POST answered 600 ms later
+  await sleep(80);
+  await tap(page, '#alertBtn');
+  await tap(page, '#alertOffYes');
+  await sleep(1300);
+  ctl.postDelay = 0;
+  const q = page.__posts.slice(nq);
+  check('Turn off during a silent re-arm: its DELETE goes out only after the re-arm is answered', q.map((x) => x.method).join() === 'POST,DELETE' && q[1].at >= q[0].answeredAt, JSON.stringify(q.map((x) => [x.method, x.at, x.answeredAt])));
+  check('…and the side stays off (the re-arm is not marked armed)', !(await alerts(page))['7735000|West'] && (await text(page, '#alertBtn')).includes('Sweep alerts') && (await toast(page)).includes('Alerts off for Kansas St'), `toast="${await toast(page)}"`);
 
   // The saved value from before multi-watch (ONE side) migrates to the map and still reads on.
   await page.evaluate(() => localStorage.setItem('curbAlert', JSON.stringify({ cnn: '7735000', sideKey: 'West', corridor: 'Kansas St', limits: '16th St - 17th St', blockside: 'West', level: 'normal', voice: 'cheeky', armedAt: Date.now(), v: 2 })));

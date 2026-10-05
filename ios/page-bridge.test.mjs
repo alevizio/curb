@@ -51,7 +51,7 @@ const slice = (from, to) => {
   return PAGE.slice(a, b + to.length);
 };
 const BRIDGE = slice("let _nativeMsg=''", 'const nativeDenied=m=>/^denied/.test(m);');
-const REARM = slice('function reArm(spot){', '\n}\n');
+const REARM = slice('let _webQ=Promise.resolve();', '\n}\n');   // the web queue, the Turn-off counter and reArm
 
 // A page with the app's pushScript injected at document start, then the page's own bridge code. Native
 // answers each post the way that build's Swift does: build 7 resolve(ok, reason, message ?? reason,
@@ -71,6 +71,8 @@ function app(build) {
       else g.__curbNativePushResult(ok, a.message ?? a.reason);
     }, 5);
   } } } };
+  // reArm sends only while its side is on (alertSpotMatches, from the saved-alert helpers): on unless a test says
+  g.on = true; g.alertSpotMatches = () => g.on; g.alertId = (s) => String(s.cnn) + '|' + String(s.sideKey || '');
   vm.createContext(g);
   vm.runInContext(build === 7 ? BUILD7 : BUILD6, g);
   vm.runInContext(BRIDGE + '\n' + REARM, g);
@@ -185,6 +187,63 @@ describe('multi-watch through both bridges, no app update', () => {
       expect(rec(TOKEN + '#1').spot.sideKey).toBe('Southwes');     // the SW side: still on
     });
   }
+});
+
+// ---- a silent re-arm (daily refresh, a debounced style save) must never undo a Turn off ----
+// turnOffAlerts first bumps the side's Turn-off counter, then queues its call; on success it forgets the side.
+const TURN_OFF = '_offSeq[alertId(spot)]=offSeq(spot)+1';
+const until = async (cond) => { for (let i = 0; i < 100 && !cond(); i++) await new Promise((r) => setTimeout(r, 2)); };
+describe('reArm stands down for a Turn off', () => {
+  const kansas = { cnn: '7735000', sideKey: 'West', corridor: 'Kansas St' };
+  for (const build of [6, 7]) {
+    it(`build ${build}: a re-arm queued behind a Turn off is not sent once the side is off`, async () => {
+      const a = app(build);
+      a.g.spot = kansas; a.g.answer = { reason: 'saved' };
+      a.run(TURN_OFF);
+      const off = a.run('nativePush({off:true,...spot}).then(r=>{if(r.ok)on=false;return r;})');
+      const re = a.run('reArm(spot)');               // the style save's timer firing right after the tap
+      expect((await off).ok).toBe(true);
+      expect(await re).toBe('off');
+      expect(a.posts.map((p) => Boolean(p.spot && p.spot.off))).toEqual([true]);   // only the Turn off reached the app
+    });
+
+    it(`build ${build}: a re-arm in flight when Turn off is tapped answers "off", so it is not marked armed`, async () => {
+      const a = app(build);
+      a.g.spot = kansas; a.g.answer = { reason: 'saved' };
+      const re = a.run('reArm(spot)');
+      await until(() => a.posts.length === 1);
+      a.run(TURN_OFF);
+      expect(await re).toBe('off');
+      expect(await a.run('reArm(spot)')).toBe('ok');  // no Turn off since: a plain re-arm still lands
+    });
+  }
+
+  it('web: the Turn off\'s DELETE waits for a re-arm already sent, so it lands last', async () => {
+    const calls = [], pending = [];
+    const g = { console, setTimeout, Promise };
+    g.window = g;
+    g.on = true; g.alertSpotMatches = () => g.on; g.alertId = (x) => String(x.cnn) + '|' + String(x.sideKey || '');
+    g.pushSupported = () => true;
+    g.navigator = { serviceWorker: { ready: Promise.resolve({ pushManager: { getSubscription: async () => ({ toJSON: () => ({ endpoint: 'e' }) }) } }) } };
+    g.fetch = (url, o) => { calls.push(o.method); return new Promise((res) => pending.push(() => res({ ok: true, status: 200 }))); };
+    vm.createContext(g);
+    vm.runInContext(REARM, g);
+    g.spot = kansas;
+    const re = vm.runInContext('reArm(spot)', g);
+    await until(() => calls.length === 1);
+    vm.runInContext(TURN_OFF, g);
+    const off = vm.runInContext("webQueue(()=>fetch('/api/save-subscription',{method:'DELETE'})).then(()=>{on=false;})", g);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(calls).toEqual(['POST']);                 // the DELETE has not gone out while the POST is pending
+    pending.shift()();
+    expect(await re).toBe('off');                    // overtaken by the Turn off: not marked armed
+    await until(() => calls.length === 2);
+    expect(calls).toEqual(['POST', 'DELETE']);
+    pending.shift()();
+    await off;
+    expect(await vm.runInContext('reArm(spot)', g)).toBe('off');   // and once off, a late re-arm is not sent
+    expect(calls).toEqual(['POST', 'DELETE']);
+  });
 });
 
 // The saved-alert map in localStorage ('curbAlert'), run against the page's own helpers.

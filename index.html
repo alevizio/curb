@@ -2009,8 +2009,10 @@ function nativeTest(opts){
   _nativeQ=p;
   return p;
 }
-function nativePush(spot){
+// `go` (optional) runs when the call reaches the front of the queue: false = don't send ({ok:false} 'off').
+function nativePush(spot,go){
   const p=_nativeQ.then(()=>{_nativeMsg='';
+    if(go&&!go())return {ok:false,reason:'off'};
     return Promise.race([Promise.resolve((window.__curbRequestPushDetail||window.__curbRequestPush)(spot)),new Promise(r=>setTimeout(()=>r({ok:false,message:'timeout'}),60000))]);})
     .then(r=>{const o=(r&&typeof r==='object')?r:{ok:!!r};
       const why=o.reason?o.reason+(o.status?':'+o.status:'')+(o.message&&o.message!==o.reason?' '+o.message:''):(o.message||o.status);
@@ -2094,6 +2096,7 @@ const sideOf=s=>({cnn:String(s.cnn||''),sideKey:String(s.sideKey||''),corridor:s
 // subscription's own keys; iOS: the bridge posts {off:true, <side>} with the device token).
 async function turnOffAlerts(spot){
   const btn=document.getElementById('alertBtn');
+  _offSeq[alertId(spot)]=offSeq(spot)+1;  // a re-arm of this side queued or in flight now stands down (reArm)
   document.getElementById('alertOff').hidden=true;
   if(btn){btn.classList.add('busy');btn.textContent='Turning off…';}
   const settle=()=>{if(btn)btn.classList.remove('busy');paintAlertState(spot);};
@@ -2107,11 +2110,13 @@ async function turnOffAlerts(spot){
     return fail('ios '+(r.message||'unknown'));
   }
   try{
-    const sub=pushSupported()?await(await navigator.serviceWorker.ready).pushManager.getSubscription():null;
-    if(sub){  // no subscription = nothing can be delivered here anyway
-      const res=await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),spot:sideOf(spot)})});
-      if(!res.ok&&res.status!==404)throw new Error('HTTP '+res.status);
-    }
+    await webQueue(async()=>{  // after any re-arm already sent, so the DELETE lands last
+      const sub=pushSupported()?await(await navigator.serviceWorker.ready).pushManager.getSubscription():null;
+      if(sub){  // no subscription = nothing can be delivered here anyway
+        const res=await fetch('/api/save-subscription',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),spot:sideOf(spot)})});
+        if(!res.ok&&res.status!==404)throw new Error('HTTP '+res.status);
+      }
+    });
     forgetAlert(spot);settle();toast('Alerts off for '+where+'.');
   }catch(err){fail('web '+((err&&err.message)||err));}
 }
@@ -2137,16 +2142,28 @@ function applyAlertCfg(spot){
   const tb=document.getElementById('testPushBtn');
   if(tb)tb.onclick=()=>sendTestPush({...spot, level:getAlertLevel(), voice:getAlertVoice()});
 }
+// Web re-arms and Turn offs go out one at a time, like the native calls (_nativeQ): a silent re-arm still in
+// flight when Turn off is tapped then lands before the DELETE, never after it (which re-armed the side).
+let _webQ=Promise.resolve();
+function webQueue(fn){const p=_webQ.then(fn);_webQ=p.catch(()=>{});return p;}
+// Turn offs started per side ('<cnn>|<sideKey>'), so a re-arm can tell it was overtaken by one.
+const _offSeq={}, offSeq=s=>_offSeq[alertId(s)]||0;
 // Push the updated cadence/voice (or a refresh) to the server for an already-armed spot, no re-prompt.
-// → 'ok' | 'gone' (web: this browser has no push subscription, so nothing can arrive) | 'denied' | 'fail:<why>'.
+// → 'ok' | 'off' (turned off first: not sent; or while it was in flight: don't mark it armed) |
+//   'gone' (web: this browser has no push subscription, so nothing can arrive) | 'denied' | 'fail:<why>'.
+// It waits its turn in its queue and is sent only if the side is still on then: a debounced style save or a
+// refresh queued behind a Turn off must not re-arm what the user just turned off.
 function reArm(spot){
-  if(window.__curbNativePush)return nativePush(spot).then(r=>r.ok?'ok':nativeDenied(r.message)?'denied':'fail:'+r.message);
+  let seq=-1;
+  const go=()=>{if(!alertSpotMatches(spot))return false;seq=offSeq(spot);return true;};
+  const overtaken=r=>r==='ok'&&offSeq(spot)!==seq?'off':r;
+  if(window.__curbNativePush)return nativePush(spot,go).then(r=>r.ok?'ok':r.message==='off'?'off':nativeDenied(r.message)?'denied':'fail:'+r.message).then(overtaken);
   if(!pushSupported())return Promise.resolve('gone');
-  return navigator.serviceWorker.ready
+  return webQueue(()=>!go()?'off':navigator.serviceWorker.ready
     .then(reg=>reg.pushManager.getSubscription())
     .then(sub=>sub?fetch('/api/save-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),spot})})
-      .then(r=>r.ok?'ok':'fail:HTTP '+r.status):'gone')
-    .catch(e=>'fail:'+((e&&e.message)||e));
+      .then(r=>r.ok?'ok':'fail:HTTP '+r.status):'gone'))
+    .catch(e=>'fail:'+((e&&e.message)||e)).then(overtaken);
 }
 // Intensity/Voice taps coalesce into one save (a level-then-voice pair used to race). If it doesn't
 // land, the dials snap back to what the server has, so the sheet never shows a style that isn't armed.
@@ -2157,6 +2174,7 @@ function saveStyleSoon(spot){
     const s={...spot, level:getAlertLevel(), voice:getAlertVoice()};
     reArm(s).then(r=>{
       if(r==='ok')return markArmed(s);
+      if(r==='off')return;  // turned off meanwhile: that has the last word
       if(r==='gone'){forgetAlert();paintAlertState(spot);return toast('Alerts are off on this device. Tap Sweep alerts to turn them back on.');}
       const a=savedAlert(spot);
       try{if(a&&a.level)localStorage.setItem('curbAlertLevel',a.level);if(a&&a.voice)localStorage.setItem('curbAlertVoice',a.voice);}catch(_){}
@@ -2176,7 +2194,7 @@ function refreshWatch(spot){
   reArm(s).then(r=>{
     if(r==='ok')markArmed(s);
     else if(r==='gone'){forgetAlert();paintAlertState(spot);}
-    else if(r!=='denied')curbReport('push-save-failed','refresh '+r);
+    else if(r!=='denied'&&r!=='off')curbReport('push-save-failed','refresh '+r);
   });
 }
 // Send a real test push to THIS device so you can feel the chosen cadence + voice on your lock screen.
