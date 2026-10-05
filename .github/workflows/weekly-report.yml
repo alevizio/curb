@@ -16,6 +16,10 @@ on:
         description: 'Preview (the subject starts with "Preview:" and it does not count as this week''s email)'
         type: boolean
         default: true
+      dry_run:
+        description: 'Dry run: build everything but send no email (for testing the job)'
+        type: boolean
+        default: false
 
 permissions:
   actions: read
@@ -101,7 +105,7 @@ jobs:
       - name: Send the email
         if: steps.guard.outputs.sent != 'yes'
         timeout-minutes: 10
-        run: node scripts/weekly/report.mjs send --dir "$DIR" ${{ (github.event_name == 'workflow_dispatch' && inputs.preview) && '--preview' || '' }}
+        run: node scripts/weekly/report.mjs send --dir "$DIR" ${{ (github.event_name == 'workflow_dispatch' && inputs.preview) && '--preview' || '' }} ${{ inputs.dry_run && '--dry-run' || '' }}
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}

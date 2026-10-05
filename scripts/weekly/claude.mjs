@@ -80,7 +80,12 @@ const LINKISH = /https?:\/\/|www\.|@|\b[\w-]+\.(com|net|org|io|app|guide|co|dev|
 function answer(raw) {
   let wrapper;
   try { wrapper = JSON.parse(raw); } catch { throw new Error('Claude output was not valid JSON'); }
-  if (wrapper?.is_error) throw new Error(`Claude run failed (${String(wrapper.subtype || 'error').replace(/[^\w-]/g, '').slice(0, 30)})`);
+  // An is_error result is the CLI's own error text (auth, quota, API), not the model's answer, so a short
+  // scrubbed copy is safe for the public log and says why the step failed.
+  if (wrapper?.is_error) {
+    const why = String(wrapper.result ?? '').replace(/sk-ant-[\w-]+/g, 'TOKEN').replace(/[^\w .,:;()'/-]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+    throw new Error(`Claude run failed (${String(wrapper.subtype || 'error').replace(/[^\w-]/g, '').slice(0, 30)})${why ? `: ${why}` : ''}`);
+  }
   const text = String(wrapper?.result ?? '');
   const a = text.indexOf('{'), b = text.lastIndexOf('}');
   if (a < 0 || b <= a) throw new Error('Claude answer had no JSON');

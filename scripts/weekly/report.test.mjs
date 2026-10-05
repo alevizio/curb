@@ -91,6 +91,8 @@ describe('Claude step', () => {
   });
   it('error messages are fixed strings, never Claude text', () => {
     expect(() => parseSummary(JSON.stringify({ is_error: true, subtype: 'error_max_turns' }))).toThrow('Claude run failed (error_max_turns)');
+    expect(() => parseSummary(JSON.stringify({ is_error: true, subtype: 'success', result: 'Invalid API key \u00b7 Please run /login (sk-ant-oat01-abc_DEF-123)' })))
+      .toThrow('Claude run failed (success): Invalid API key Please run /login (TOKEN)');
     expect(() => parseSummary(JSON.stringify({ result: 'I could not find anything private.' }))).toThrow('Claude answer had no JSON');
     expect(() => parseSummary(JSON.stringify({ result: '{"summary": ["private 2,100 visitors", } oops' }))).toThrow('Claude answer was not valid JSON');
     expect(() => parseSummary('raw private text')).toThrow('Claude output was not valid JSON');
