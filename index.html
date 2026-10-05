@@ -825,7 +825,7 @@
      loaded before the main script so its exports are on globalThis. Unit-tested separately.
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
-<script src="/lib/sweep-core.js?v=5"></script>
+<script src="/lib/sweep-core.js?v=6"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -1075,12 +1075,12 @@ function relPhrase(ns){
   const now=new Date();
   if(now>=ns.start&&now<ns.end){const t='Sweeping now · until '+fmtHour(ns.toH);return {txt:t,short:t,rel:'now',cls:'red'};}
   const hrs=(ns.start-now)/36e5;
-  const when=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+', '+fmtHour(ns.fromH)+' to '+fmtHour(ns.toH);
-  const rel = sweepCountdown(ns, now);  // SF calendar days, never hours/24 (lib/sweep-core.js)
+  // Words from lib/sweep-core.js (sweepWords): SF calendar days, never hours/24, and a sweep starting before
+  // 6 AM reads by its night, "Mon night 10/5 → Tue 12 to 2 AM · tonight" (day sweeps: "Tue 10/6, 9AM to 11AM")
+  const w=sweepWords(ns, now);
   const cls = hrs<3?'red':hrs<24?'amber':'green';
   // short = date + countdown only (the sign badge beside it already shows day + window)
-  const short=DAYLBL[ns.dow]+' '+ns.mo+'/'+ns.da+' · '+rel;
-  return {txt:when+' · '+rel,short,rel,cls,when:ns.start};
+  return {txt:w.when+' · '+w.rel,short:w.day+' · '+w.rel,rel:w.rel,cls,when:ns.start};
 }
 
 /* perpendicular offset of a polyline by N metres (sign = side) */
@@ -1553,7 +1553,7 @@ function verdictClass(ns){
 }
 function previewHtml(group, side){
   const ns=side.ns, now=new Date();
-  const head=!ns?'Posted sign':(now>=ns.start&&now<ns.end)?'Sweeping now':DAYLBL[ns.dow]+' '+fmtHour(ns.fromH);
+  const head=!ns?'Posted sign':(now>=ns.start&&now<ns.end)?'Sweeping now':sweepWords(ns,now).head;
   const rp=relPhrase(ns);
   const r=side.row||side.rows[0];  // the rule that produced ns — rows[0] can be a different weekday
   const day=(DAYLBL[normDay(r.weekday)]||r.weekday||'').toUpperCase();
@@ -1586,11 +1586,11 @@ function openSheet(group, activeKey){
   const sweepingNow=!!ns&&now>=ns.start&&now<ns.end;
   let armNs=ns, armRow=active.row||(active.rows&&active.rows[0]);
   if(sweepingNow){armNs=null;(active.rows||[armRow]).forEach(r=>{const n=nextSweep(r,ns.end);if(n&&(!armNs||+n.start<+armNs.start)){armNs=n;armRow=r;}});}
-  sheetArmNote=sweepingNow&&armNs?`, next sweep ${DAYLBL[armNs.dow]} ${armNs.mo}/${armNs.da}`:'';
+  sheetArmNote=sweepingNow&&armNs?`, next sweep ${sweepWords(armNs,now).day}`:'';
   let vClass=verdictClass(ns),kicker='Park until',head='';
   if(!ns){kicker='Schedule';head='Posted sign';}
   else if(now>=ns.start&&now<ns.end){kicker='Restricted';head='Sweeping now';}
-  else{head=DAYLBL[ns.dow]+' '+fmtHour(ns.fromH);}
+  else{head=sweepWords(ns,now).head;}  // "Tue 9AM", or "Mon night" for a sweep starting before 6 AM
 
   // the active side IS the verdict at the top — list only the OTHER side(s), no repeat
   const others=group.sides.filter(s=>s!==active);
@@ -1668,14 +1668,17 @@ function openSheet(group, activeKey){
   const _ar=active.row||active.rows[0];
   const _aw=_ar?[_ar.week1,_ar.week2,_ar.week3,_ar.week4,_ar.week5].map(x=>String(x)==='1'):[true,true,true,true,true];
   const _arp=relPhrase(ns);
-  const aSched=ns?`<div class="asched ${_arp.cls}">${fmtHour(ns.fromH)} to ${fmtHour(ns.toH)} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
+  // the window: "9AM to 11AM" under a "Tue 9AM" head; "Tue 12 to 2 AM" under a "Mon night" one
+  const aSched=ns?`<div class="asched ${_arp.cls}">${sweepWords(ns,now).win} · ${freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
   // The "park after the sweeper passes" rule — most useful when a sweep is active now or imminent (within 24h).
   const _soon=ns&&((now>=ns.start&&now<ns.end)||(ns.start-now)<864e5);
   // Holiday heads-up: if this side's next scheduled sweep is cancelled for a city holiday, say so.
   const _hrec=active.row||(active.rows&&active.rows[0]);
   const _hol=(_hrec&&typeof holidaySkip==='function')?holidaySkip(_hrec):null;
   const _WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const _holDate=_hol?`${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da}`:'';
+  // a skipped night sweep names its night like every other line: "Sun night 10/11 → Mon 12 to 2 AM"
+  const _holW=_hol?sweepDayWords(_hol.y,_hol.mo,_hol.da,_hrec.fromhour,_hrec.tohour):null;
+  const _holDate=!_hol?'':_holW.night?_holW.when:`${_WD[new Date(Date.UTC(_hol.y,_hol.mo-1,_hol.da)).getUTCDay()]} ${_MON[_hol.mo-1]} ${_hol.da}`;
   const _holNote=_hol?`<div class="holcard"><span class="hic" aria-hidden="true">${ICONS.cal}</span><div><div class="hk">City holiday</div><div class="hh">No street sweeping</div><div class="hs"><b>${_hol.name}</b> · ${_holDate}. Leave your car where it is.</div></div></div>`:'';
 
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
@@ -1959,9 +1962,18 @@ function paintAlertState(spot){
 // set by openSheet while its side is being swept: the alert it arms is for the sweep after this one
 let sheetArmNote='';
 function armedToast(spot,prev){
-  const night=alertAnchors(Date.parse(spot.nextSweepISO)).night;
-  const what=night?". We'll ping you ~9 PM the night before to move it."
-    :(spot.eveningISO&&spot.level!=='light'?". Heads-up the night before, plus ~30 min before the truck.":". We'll ping you ~30 min before.");
+  const start=new Date(Date.parse(spot.nextSweepISO)), a=alertAnchors(start);
+  let what=spot.eveningISO&&spot.level!=='light'?". Heads-up the night before, plus ~30 min before the truck.":". We'll ping you ~30 min before.";
+  if(a.night){
+    // The one "move it" push lands ~9 PM the evening before the sweep's date (lib/notify-core.js). A sweep
+    // worded by its night ("Wed night 10/7 → Thu 12 to 2 AM") gets it THAT night, so name it the way the sheet
+    // does; "the night before" would read one night early. Past 9 PM it is already due: the next send run.
+    const p=sfParts(start), w=sweepWords({...p,fromH:p.h,toH:p.h+1,start},new Date());
+    what=Date.now()>=+a.tonight?". We'll ping you shortly to move it."
+      :!w.night?". We'll ping you ~9 PM the night before to move it."   // 6 AM: worded by its own day
+      :sheetArmNote?". We'll ping you ~9 PM that night to move it."     // the note just named the night
+      :". We'll ping you ~9 PM "+(/night$/.test(w.rel)?w.rel:w.day)+" to move it.";  // tonight / tomorrow night / Thu night 10/8
+  }
   const moved=prev&&alertLive(prev)&&!sameCurb(prev,spot)?' '+(prev.corridor||'Your other block')+' won\'t alert anymore.':'';
   toast('Sweep alert set for '+(spot.corridor||'this block')+sheetArmNote+what+moved);
 }

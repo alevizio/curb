@@ -181,13 +181,20 @@ try {
   await open(page, '7735000');
   check('a lapsed watch reads off (no false "on")', (await text(page, '#alertBtn')).includes('Sweep alerts'));
 
-  // Night sweep: no eve/morn anchors, the toast promises the 9 PM push.
+  // Night sweep: no eve/morn anchors, the toast names the night of the 9 PM push.
   await open(page, '9130000');
   await tap(page, '#alertBtn');
   await page.waitForFunction(() => document.getElementById('alertBtn').textContent.includes('Alerts on'), { timeout: 5000 }).catch(() => {});
   const ns = page.__posts.at(-1).body.spot;
   check('night sweep: spot carries no eve/morning anchors', !ns.eveningISO && !ns.morningISO);
-  check('night sweep: toast promises the ~9 PM push', (await toast(page)).includes('~9 PM the night before'));
+  // A 2 AM sweep reads by its night ("Wed night 10/7"), so the toast names that night for the ~9 PM push, never
+  // "the night before" it (one night early). The night is the SF date before the armed sweep's.
+  const nightName = await page.evaluate((iso) => {
+    const p = sfParts(new Date(iso)), d = new Date(Date.UTC(p.y, p.mo - 1, p.da - 1));
+    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getUTCDay()] + ' night ' + (d.getUTCMonth() + 1) + '/' + d.getUTCDate();
+  }, ns.nextSweepISO);
+  const nt = await toast(page);
+  check('night sweep: toast names the night of the ~9 PM push', nt.includes(`We'll ping you ~9 PM ${nightName} to move it.`) && !nt.includes('night before'), nt);
   await page.close();
 
   // ---------------- short phone (375x667): the off row must not open below the peek ----------------
