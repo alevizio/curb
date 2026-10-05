@@ -554,17 +554,54 @@ describe('multi-watch: up to 5 curb sides per device, each its own record', () =
     expect(Object.keys(mem['curb:apns'])).toEqual(['cd'.repeat(32)]);
   });
 
-  it('auto-park (atBase) moves watch 0 to where the car is, as before, and turns off a watch on that same side', async () => {
+  it('auto-park (atBase) writes the car\'s own watch (car: true) and follows the car with it, never a side the user armed', async () => {
+    const far = { ...spotA, cnn: '777' };
+    await saveSub(SUB, spotA); await saveSub(SUB, far);                    // watches 0 and 1, armed on the page
+    const parked = { ...spotA, cnn: '555', sideKey: 'R' };
+    expect(await saveSub(SUB, parked, { atBase: true })).toEqual({ slot: 2 }); // a slot of its own, tagged
+    expect(w(2)).toMatchObject({ spot: { cnn: '555' }, car: true });
+    expect([w(0).spot.cnn, w(1).spot.cnn]).toEqual(['123', '777']);           // watch 0 is the user's: untouched
+    await markNotified(`${EP}#2`, parked.nextSweepISO, 'eve');
+    const parkedAgain = { ...spotA, cnn: '888', level: 'light' };
+    expect(await saveSub(SUB, parkedAgain, { atBase: true })).toEqual({ slot: 2 }); // the car moved: its watch moves
+    expect(w(2)).toMatchObject({ spot: { cnn: '888', level: 'light' }, car: true, notified: { eve: parked.nextSweepISO } });
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(3);                    // never a new watch per park
+    expect([w(0).spot.cnn, w(1).spot.cnn]).toEqual(['123', '777']);
+    // a page save on the car's side takes that watch over: no longer the car's, the next park finds another slot
+    expect(await saveSub(SUB, { ...parkedAgain, level: 'intense' })).toEqual({ slot: 2 });
+    expect(w(2).car).toBe(undefined);
+    expect(await saveSub(SUB, { ...spotA, cnn: '999' }, { atBase: true })).toEqual({ slot: 3 });
+    expect(w(3).car).toBe(true);
+  });
+
+  it('auto-park on a side another watch already covers turns that one off (no second push for one curb)', async () => {
     const far = { ...spotA, cnn: '777' };
     await saveSub(SUB, spotA); await saveSub(SUB, north); await saveSub(SUB, far);
-    await markNotified(EP, spotA.nextSweepISO, 'eve');
-    expect(await saveSub(SUB, { ...north, level: 'light' }, { atBase: true })).toEqual({ slot: 0 });
-    expect(w(0)).toMatchObject({ spot: { sideKey: 'R', level: 'light' }, notified: { eve: spotA.nextSweepISO } });
-    expect(w(1)).toMatchObject({ spot: null, offSide: { sideKey: 'R' } });   // no second push for that side
-    expect(w(2).spot.cnn).toBe('777');                                        // other sides untouched
-    const parkedAgain = { ...spotA, cnn: '888' };
-    expect(await saveSub(SUB, parkedAgain, { atBase: true })).toEqual({ slot: 0 }); // never a new watch per park
-    expect(Object.keys(mem['curb:subs'])).toHaveLength(3);
+    await saveSub(SUB, { ...spotA, cnn: '555' }, { atBase: true });          // the car's watch: slot 3
+    expect(await saveSub(SUB, { ...north, level: 'light' }, { atBase: true })).toEqual({ slot: 3 });
+    expect(w(3)).toMatchObject({ spot: { sideKey: 'R', level: 'light' }, car: true });
+    expect(w(1)).toMatchObject({ spot: null, offSide: { sideKey: 'R' } });   // the page's watch on that side goes off
+    expect([w(0).spot.cnn, w(2).spot.cnn]).toEqual(['123', '777']);         // other sides untouched
+  });
+
+  it('auto-park with no car watch yet and 5 sides armed is refused like a page save (nothing overwritten)', async () => {
+    for (const c of ['1', '2', '3', '4', '5']) await saveSub(SUB, { ...spotA, cnn: c });
+    const before = JSON.stringify(mem);
+    expect(await saveSub(SUB, { ...spotA, cnn: '900' }, { atBase: true })).toEqual({ full: true });
+    expect(JSON.stringify(mem)).toBe(before);
+  });
+
+  it('a page save on the car\'s side landing during auto-park still leaves one watch on that curb', async () => {
+    await saveSub(SUB, { ...spotA, cnn: '100', sideKey: 'North', blockside: 'North' });   // watch 0, the page's
+    await saveSub(SUB, { ...spotA, cnn: '700' }, { atBase: true });                      // watch 1, the car's (elsewhere)
+    const pageSouth = { ...spotA, cnn: '100', sideKey: 'South', blockside: 'South' };
+    onMget = () => saveSub(SUB, pageSouth);       // lands (watch 2) between auto-park's read and its write
+    expect(await saveSub(SUB, { ...spotA, cnn: '100', sideKey: 'R', blockside: 'South' }, { atBase: true })).toEqual({ slot: 1 });
+    const armedOn = (bs) => Object.values(mem['curb:subs']).map((v) => JSON.parse(v)).filter((r) => r.spot && r.spot.blockside === bs).length;
+    expect(armedOn('South')).toBe(1);             // the car's; the page's, seen by the re-read, was turned off
+    expect(w(1)).toMatchObject({ car: true, spot: { sideKey: 'R' } });
+    expect(w(2)).toMatchObject({ spot: null, offSide: { sideKey: 'South' } });
+    expect(w(0).spot.sideKey).toBe('North');
   });
 
   it('owner proof and auto-park keep resolving the device when it has several watches', async () => {
@@ -600,9 +637,10 @@ describe('multi-watch: up to 5 curb sides per device, each its own record', () =
     const parked = { ...spotA, cnn: '555', sideKey: 'R', blockside: 'North', nextSweepISO: spotB.nextSweepISO };
     await saveSub(SUB, { ...spotA, cnn: '444' });   // watch 0, elsewhere
     await saveSub(SUB, page);                       // watch 1, the page's
-    expect(await saveSub(SUB, parked, { atBase: true })).toEqual({ slot: 0 });
-    expect(w(1)).toMatchObject({ spot: null });      // no second push for the same curb
-    expect(w(0).spot).toMatchObject({ cnn: '555', sideKey: 'R' });
+    expect(await saveSub(SUB, parked, { atBase: true })).toEqual({ slot: 1 });
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(2);   // no second watch for the same curb
+    expect(w(1)).toMatchObject({ car: true, spot: { cnn: '555', sideKey: 'R' } });
+    expect(w(0).spot).toMatchObject({ cnn: '444' });          // watch 0 (another side) is not the car's to take
   });
 });
 

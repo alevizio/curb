@@ -30,7 +30,7 @@ function rawRedis() {
 }
 
 // One hash, field = subscription.endpoint (watch 0) or `<endpoint>#<n>` (watch n, see MAX_WATCHES below),
-// value = { subscription, spot, notified, savedAt, proofHash? (watch 0 only), offSide? }.
+// value = { subscription, spot, notified, savedAt, proofHash? (watch 0 only), offSide?, car? (auto-park's) }.
 const KEY = 'curb:subs';
 
 // Back-compat: older records carried two named de-dupe fields (notifiedFor / notifiedEveFor); the
@@ -180,29 +180,32 @@ async function claimField(key, field, raw, value) {
   }
 }
 
-/** Save `spot` as one of the device's watches: the one on its side, else a new one (pickSlot). `atBase`
- *  (auto-park) always writes watch 0, as the single watch was written before, and turns off any other
- *  watch on the same side so it doesn't push twice. `record(n, spot, notified)` builds the stored value.
+/** Save `spot` as one of the device's watches: the one on its side, else a new one (pickSlot).
+ *  `atBase` (auto-park) writes the car's watch, the one tagged `car: true`, else a slot pickSlot gives it
+ *  (then tagged), so the watch follows the car and never overwrites a side the user armed; another armed
+ *  watch on the car's side is turned off so it doesn't push twice, from a re-read of the slots after the
+ *  write, so a save landing meanwhile is seen. `record(n, spot, notified)` builds the stored value.
  *  The de-dupe map of the watch is kept: each entry holds the sweep it fired for, so it only ever blocks
  *  that same sweep (re-taps, off → on and re-saves never re-send a push already delivered).
  *  → { slot } | { full: true } (MAX_WATCHES live, none on this side). */
-async function saveWatch(key, base, spot, atBase, record) {
+async function saveWatch(key, base, spot, { atBase = false }, record) {
   for (let i = 0; i < 3; i++) {
     const slots = await readWatches(key, base);
-    const pick = atBase ? { n: 0, keep: true } : pickSlot(slots, spot);
+    const car = atBase && slots.find((s) => s.rec && s.rec.car);
+    const pick = car ? { n: car.n, keep: true } : pickSlot(slots, spot);
     if (!pick) return { full: true };
     const s = slots[pick.n], prev = pick.keep ? s.rec : null;
     const out = carryForward(prev, spot);
     // savedAt = the last time the CLIENT armed/refreshed this watch with live data. The cron stops
     // re-arming once a watch goes stale past MAX_WATCH_AGE (api/_schedule.js) so a frozen rule can't push
     // wrong times forever after a city schedule change. advanceSpot preserves it.
-    const value = JSON.stringify(record(pick.n, out, prev ? notifiedMap(prev) : {}));
+    const value = JSON.stringify({ ...record(pick.n, out, prev ? notifiedMap(prev) : {}), ...(atBase ? { car: true } : {}) });
     if (!(await claimField(key, s.field, s.raw, value))) continue;
     if (atBase && spot) {
-      for (const t of slots) {
-        if (t.n && t.rec && t.rec.spot && sameSide(t.rec.spot, spot)) {
-          await casUpdate(key, t.field, (rec) => (rec.spot && sameSide(rec.spot, spot) ? disarmRec(rec) : null));
-        }
+      // another armed watch on the car's side is turned off (no second push for one curb)
+      const goes = (rec) => Boolean(rec.spot) && sameSide(rec.spot, spot);
+      for (const t of await readWatches(key, base)) {
+        if (t.n !== pick.n && t.rec && goes(t.rec)) await casUpdate(key, t.field, (rec) => (goes(rec) ? disarmRec(rec) : null));
       }
     }
     return { slot: pick.n };
@@ -233,7 +236,7 @@ async function disarmWatches(key, slots, side) {
 export async function saveSub(subscription, spot, { atBase = false } = {}) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  return saveWatch(KEY, subscription.endpoint, spot, atBase,
+  return saveWatch(KEY, subscription.endpoint, spot, { atBase },
     (n, out, notified) => ({ subscription, spot: out, notified, savedAt: Date.now() }));
 }
 
@@ -382,7 +385,7 @@ const KEY_IOS = 'curb:apns';
 export async function saveIosSub(token, spot) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  return saveWatch(KEY_IOS, token, spot, false,
+  return saveWatch(KEY_IOS, token, spot, {},
     (n, out, notified) => ({ ...(n ? {} : { token }), spot: out, notified, savedAt: Date.now(), platform: 'ios' }));
 }
 
