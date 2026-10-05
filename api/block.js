@@ -175,6 +175,8 @@ padding:6px 11px;border-radius:10px;text-decoration:none}.logo span{color:var(--
 h1{font-family:'Anton',sans-serif;font-size:27px;line-height:1.05;text-transform:uppercase;margin:6px 0 10px}
 .lede{font-size:14.5px;font-weight:600;line-height:1.5;color:var(--ink-soft);margin-bottom:14px}
 .lede b{color:var(--ink)}
+.hol{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:-8px 0 14px}
+.hol a{color:var(--ink);text-underline-offset:3px}
 .row{display:flex;gap:12px;align-items:center;border-top:2px solid var(--ink);padding:12px 0}
 .badge{flex:none;width:70px;text-align:center;background:var(--sign-white);color:var(--sign-red);
 border:2px solid var(--sign-red);border-radius:8px;padding:6px 2px 5px}
@@ -283,7 +285,7 @@ ${HEAD_FONTS}
 <nav class="crumb" aria-label="Breadcrumb"><a href="/">CURB</a> › ${hoodUrl ? `<a href="${hoodUrl}">${esc(hood[0])}</a>` : '<a href="/n/">Neighborhoods</a>'} › ${esc(street)}</nav>
 <h1>${esc(h1)}</h1>
 <p class="lede">${lede}</p>
-${rowHtml}
+${dates.length ? '<p class="hol">These dates already skip <a href="/holidays">street sweeping holidays</a>.</p>\n' : ''}${rowHtml}
 <div class="facts">
 ${tl ? `<div class="enf">Tickets usually land ${esc(tl.when)} · ${tl.n} tickets in 2 yrs</div>` : ''}
 <div>Street-cleaning ticket: $${FINE}${route ? ` · Swept by DPW’s <b>${esc(route)}</b> sweeper route` : ''}</div>
