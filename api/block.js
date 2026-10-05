@@ -10,14 +10,19 @@
 import { createRequire } from 'node:module';
 import '../lib/sweep-core.js'; // side effect: SF time core on globalThis
 const require = createRequire(import.meta.url);
-const { sfTodayParts, sfWallToInstant, sweepSuspended, sweepDayWords } = globalThis;
+const { sfTodayParts, sfWallToInstant, sweepSuspended, sweepDayWords, HOLIDAY_DOW } = globalThis;
 
 const FINE = 105; // current SF street-cleaning fine (2026), same as the /n/ pages
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DAYLBL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const ORD = ['1st', '2nd', '3rd', '4th', '5th'];
-const monFirst = (d) => (d + 6) % 7; // the app's day chips run Mon → Sun
+const monFirst = (d) => (d === HOLIDAY_DOW ? 7 : (d + 6) % 7); // the app's day chips run Mon → Sun; the holiday schedule last
+// A baked row with dow 7 is the side's posted holiday schedule ("HOLIDAYS 4 TO 6AM", DataSF weekday 'Holiday'):
+// it sweeps on minor holidays only, while the weekday rows stop (lib/sweep-core.js sweepSuspended).
+const isHol = (r) => r[1] === HOLIDAY_DOW;
+const weekly = (rows) => rows.filter((r) => !isHol(r));
+const ruleOf = (dow) => ({ weekday: dow === HOLIDAY_DOW ? 'Holiday' : DAYLBL[dow] });
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // JSON-LD safe inside <script>: \u-escape the delimiters (same as build-hood-pages.mjs)
@@ -83,28 +88,30 @@ export function titleFor(e) {
   return `${street} (${span.slice(0, Math.max(0, 59 - street.length - 2 - end.length)).trimEnd().replace(/\s*\/$/, '')}${end}`;
 }
 
-// Next n sweep dates across all rows, SF calendar days (same rules as nextSweep: nth-weekday flags,
-// holiday suspension, today only while its window hasn't ended). A sweep starting before 6 AM is listed
-// by the night before ({ night: true }, lib/sweep-core.js sweepDayWords), the night people think in: a
-// Tue 12 to 2 AM sweep is "Mon night, Oct 5". A date with both kinds lists both, night first.
+// Next n sweep dates across all rows, SF calendar days (same rules as nextSweep: nth-weekday flags, weekday
+// rows stopped on every holiday, the holiday schedule (dow 7) only on minor holidays, today only while its
+// window hasn't ended). A sweep starting before 6 AM is listed by the night before ({ night: true },
+// lib/sweep-core.js sweepDayWords), the night people think in: a Tue 12 to 2 AM sweep is "Mon night, Oct 5".
+// A date with both kinds lists both, night first. { hol: true } = swept by the holiday schedule that date.
 function nextDates(rows, n = 3) {
   const now = new Date(), t0 = sfTodayParts(), base = Date.UTC(t0.y, t0.mo - 1, t0.da), out = [];
   for (let i = 0; i < 150 && out.length < n; i++) {
     const d = new Date(base + i * 864e5), dow = d.getUTCDay(), occ = Math.ceil(d.getUTCDate() / 7);
     const y = d.getUTCFullYear(), mo = d.getUTCMonth() + 1, da = d.getUTCDate();
     const iso = `${y}-${String(mo).padStart(2, '0')}-${String(da).padStart(2, '0')}`;
-    const hit = rows.filter(([, rd, from, to, mask, hol]) => {
-      if (rd !== dow || !((mask >> (occ - 1)) & 1) || sweepSuspended({ holidays: hol, fromhour: from, tohour: to }, iso)) return false;
+    const hit = rows.filter(([, rd, from, to, mask]) => {
+      if (rd !== HOLIDAY_DOW && (rd !== dow || !((mask >> (occ - 1)) & 1))) return false;
+      if (sweepSuspended(ruleOf(rd), iso)) return false;
       if (i > 0) return true;
       const start = sfWallToInstant(y, mo, da, from);
       let end = sfWallToInstant(y, mo, da, to);
       if (+end <= +start) end = new Date(+start + 36e5);
       return now < end;
     });
-    const words = hit.map(([, , from, to]) => sweepDayWords(y, mo, da, from, to));
-    const night = words.find((w) => w.night);
-    if (night) out.push({ ...night.nightOf, night: true });
-    if (words.some((w) => !w.night)) out.push({ dow, mo, da });
+    const words = hit.map((r) => ({ ...sweepDayWords(y, mo, da, r[2], r[3]), hol: isHol(r) }));
+    const night = words.find((w) => w.night), day = words.find((w) => !w.night);
+    if (night) out.push({ ...night.nightOf, night: true, hol: night.hol });
+    if (day) out.push({ dow, mo, da, hol: day.hol });
   }
   return out.slice(0, n);
 }
@@ -131,8 +138,24 @@ function sweptPhrase(rows) {
   }));
 }
 
-// "Mon, Thu 8–10am (1st & 3rd wks)" — every window once, for the meta description
-export const schedShort = (rows) => windows(rows, false)
+// "On city holidays the regular sweeps stop and the east side is swept 4 to 6am instead (…)." from the dow 7
+// rows; '' for a block without a posted holiday schedule.
+function holidayPhrase(rows) {
+  const by = new Map();
+  for (const w of windows(rows.filter(isHol), true)) { const k = win(w.from, w.to); (by.get(k) || by.set(k, []).get(k)).push(w.side); }
+  if (!by.size) return '';
+  const sides = new Set(rows.map((r) => r[0]));
+  const parts = [...by].map(([k, ss], i) => {
+    const named = ss.filter(Boolean).map((s) => s.toLowerCase());
+    const who = !named.length ? 'it' : named.length === 2 && sides.size === 2 ? 'both sides' : `the ${andList(named)} side${named.length > 1 ? 's' : ''}`;
+    return `${who}${i ? '' : named.length > 1 ? ' are swept' : ' is swept'} ${k}`;
+  });
+  return `On city holidays the regular sweeps stop and ${andList(parts)} instead (nothing is swept on New Year’s Day, Thanksgiving and Christmas).`;
+}
+
+// "Mon, Thu 8–10am (1st & 3rd wks)" — every weekly window once, for the meta description (the holiday
+// schedule stays out of it, so descriptions and the /n/ block lists read as before)
+export const schedShort = (rows) => windows(weekly(rows), false)
   .map((w) => `${dayRuns(w.dows, DAYLBL, ' to ').join(', ')} ${win(w.from, w.to)}${w.mask === 31 ? '' : ` (${weeksOf(w.mask).join(' & ')} wks)`}`).join('; ');
 
 // One ticket line for the whole block (enforcement.json is per cnn × weekday, not per side).
@@ -186,6 +209,7 @@ h1{font-family:'Anton',sans-serif;font-size:27px;line-height:1.05;text-transform
 .badge{flex:none;width:70px;text-align:center;background:var(--sign-white);color:var(--sign-red);
 border:2px solid var(--sign-red);border-radius:8px;padding:6px 2px 5px}
 .badge .d{font-family:'Anton',sans-serif;font-size:17px;line-height:1}
+.badge .d.hd{font-size:14px;line-height:17px}
 .badge .t{font-size:9px;font-weight:800;margin-top:1px}
 .badge .sc{font-size:6.5px;font-weight:800;letter-spacing:.06em;margin-top:2px;opacity:.9}
 .meta .nm{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
@@ -229,22 +253,25 @@ export function renderBlock(cnn, { S, ENF, R }) {
   const pageUrl = `https://curb.guide/b/${cnn}`;
   const title = titleFor(e);
   const h1 = nums(range) + label(e);
-  const tl = ticketLine(ENF[cnn], rows);
+  const tl = ticketLine(ENF[cnn], weekly(rows));
   const rnum = R.blocks && R.blocks[cnn];
   const route = rnum != null ? (R.routeNames && R.routeNames[rnum]) || `Route ${rnum}` : null;
   const dates = nextDates(rows);
 
   const where = `${h1}${hood ? `, in the ${hood[0]} neighborhood of San Francisco,` : ', San Francisco,'}`;
-  const lede = `${esc(where)} is swept ${esc(sweptPhrase(rows))}.` +
-    (dates.length ? ` Next sweep${dates.length > 1 ? 's' : ''}: ${andList(dates.map((d) => `<b>${DAYLBL[d.dow]}${d.night ? ' night' : ''}, ${MON[d.mo - 1]} ${d.da}</b>`))}.` : '');
+  const hasHol = rows.some(isHol), holSentence = holidayPhrase(rows);
+  const lede = `${esc(where)} is swept ${esc(weekly(rows).length ? sweptPhrase(weekly(rows)) : 'only on city holidays')}.` +
+    (holSentence ? ` ${esc(holSentence)}` : '') +
+    (dates.length ? ` Next sweep${dates.length > 1 ? 's' : ''}: ${andList(dates.map((d) => `<b>${DAYLBL[d.dow]}${d.night ? ' night' : ''}, ${MON[d.mo - 1]} ${d.da}</b>${d.hol ? ' (holiday schedule)' : ''}`))}.` : '');
 
   const norm = normRows(rows);
   const rowHtml = windows(rows, false).flatMap((w) => w.dows.map((dow) => {
     const sides = [...new Set(norm.filter((r) => r[1] === dow && r[2] === w.from && r[3] === w.to && r[4] === w.mask).map((r) => r[0]).filter(Boolean))];
     const who = sides.length ? `${sides.join(' & ')} side${sides.length > 1 ? 's' : ''} · ` : '';
-    const wk = w.mask === 31 ? 'every week' : `${weeksOf(w.mask).join(' & ')} weeks`;
+    // the holiday schedule reads like its posted sign, "HOLIDAYS 4 TO 6AM"
+    const wk = dow === HOLIDAY_DOW ? 'city holidays' : w.mask === 31 ? 'every week' : `${weeksOf(w.mask).join(' & ')} weeks`;
     return { dow, html: `<div class="row">
-      <div class="badge"><div class="d">${DAYLBL[dow].toUpperCase()}</div><div class="t">${win(w.from, w.to).toUpperCase()}</div><div class="sc">STREET CLEANING</div></div>
+      <div class="badge"><div class="d${dow === HOLIDAY_DOW ? ' hd' : ''}">${dow === HOLIDAY_DOW ? 'HOLIDAYS' : DAYLBL[dow].toUpperCase()}</div><div class="t">${win(w.from, w.to).toUpperCase()}</div><div class="sc">STREET CLEANING</div></div>
       <div class="meta"><div class="nm">${esc(who + wk)}</div></div>
     </div>` };
   })).sort((x, y) => monFirst(x.dow) - monFirst(y.dow)).map((x) => x.html).join('');
@@ -290,7 +317,8 @@ ${HEAD_FONTS}
 <nav class="crumb" aria-label="Breadcrumb"><a href="/">CURB</a> › ${hoodUrl ? `<a href="${hoodUrl}">${esc(hood[0])}</a>` : '<a href="/n/">Neighborhoods</a>'} › ${esc(street)}</nav>
 <h1>${esc(h1)}</h1>
 <p class="lede">${lede}</p>
-${dates.length ? '<p class="hol">These dates already skip <a href="/holidays">street sweeping holidays</a>.</p>\n' : ''}${rowHtml}
+${dates.length ? (hasHol ? '<p class="hol">These dates follow this block’s holiday schedule on <a href="/holidays">street sweeping holidays</a>.</p>\n'
+  : '<p class="hol">These dates already skip <a href="/holidays">street sweeping holidays</a>.</p>\n') : ''}${rowHtml}
 <div class="facts">
 ${tl ? `<div class="enf">Tickets usually land ${esc(tl.when)} · ${tl.n} tickets in 2 yrs</div>` : ''}
 <div>Street-cleaning ticket: $${FINE}${route ? ` · Swept by DPW’s <b>${esc(route)}</b> sweeper route` : ''}</div>

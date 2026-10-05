@@ -6,9 +6,14 @@ const R = (o = {}) => ({ weekday: 'Tue', fromhour: '6', tohour: '8', week1: '1',
 const SPOT = { corridor: 'Kansas St', limits: '16th St - 17th St', blockside: 'West', nextSweepISO: '2026-10-06T13:00:00.000Z', leadMinutes: 30, cnn: '7735000', sideKey: 'West' };
 
 describe('sanitizeRules', () => {
-  it('drops invalid rows one by one (a weekday "Holiday" row must not sink the whole list)', () => {
-    const out = sanitizeRules([R(), R({ weekday: 'Holiday' }), R({ weekday: 'Fri' }), null, 'x', R({ fromhour: 'zz' })]);
+  it('drops invalid rows one by one (a bad row must not sink the whole list)', () => {
+    const out = sanitizeRules([R(), R({ weekday: 'Someday' }), R({ weekday: 'Fri' }), null, 'x', R({ fromhour: 'zz' })]);
     expect(out.map((r) => r.weekday)).toEqual(['tue', 'fri']);
+  });
+  it('keeps the side\'s weekday "Holiday" row (its posted holiday schedule) as a canonical "holiday" rule', () => {
+    const out = sanitizeRules([R(), R({ weekday: 'Holiday', fromhour: '4', tohour: '6', holidays: '1' }), R({ weekday: 'HOLIDAY', fromhour: '4', tohour: '6', holidays: '1' })]);
+    expect(out).toEqual([R({ weekday: 'tue' }), R({ weekday: 'holiday', fromhour: '4', tohour: '6', holidays: '1' })]); // duplicates collapse
+    expect(sanitizeRules([R({ weekday: 'holiday' })])[0].weekday).toBe('holiday'); // a stored rule re-sanitizes to itself
   });
   it('collapses duplicates after canonicalizing', () => {
     expect(sanitizeRules([R(), R({ weekday: 'Tues' }), R({ week1: 1 })]).length).toBe(1);
@@ -25,7 +30,7 @@ describe('sanitizeSpot — rules[] with rule kept for back-compat', () => {
   it('keeps every valid rule of the side and the soonest row as `rule`', () => {
     const s = sanitizeSpot({ ...SPOT, rule: R(), rules: [R({ weekday: 'Fri' }), R(), R({ weekday: 'Holiday' })] });
     expect(s.rule.weekday).toBe('tue');
-    expect(s.rules.map((r) => r.weekday)).toEqual(['fri', 'tue']);
+    expect(s.rules.map((r) => r.weekday)).toEqual(['fri', 'tue', 'holiday']);
     expect(s.cnn).toBe('7735000');
     expect(s.sideKey).toBe('West');
   });
@@ -34,13 +39,18 @@ describe('sanitizeSpot — rules[] with rule kept for back-compat', () => {
     expect(s.rule.weekday).toBe('tue');
     expect('rules' in s).toBe(false);
   });
+  it('the holiday schedule can be the spot\'s `rule` (the sheet arms it the night before a minor holiday)', () => {
+    const s = sanitizeSpot({ ...SPOT, rule: R({ weekday: 'Holiday', fromhour: '4', tohour: '6' }), rules: [R({ weekday: 'Mon', fromhour: '4', tohour: '6' }), R({ weekday: 'Holiday', fromhour: '4', tohour: '6' })] });
+    expect(s.rule.weekday).toBe('holiday');
+    expect(s.rules.map((r) => r.weekday)).toEqual(['mon', 'holiday']);
+  });
   it('rules without a valid rule: rule falls back to the first rule, cnn/sideKey still kept', () => {
-    const s = sanitizeSpot({ ...SPOT, rule: R({ weekday: 'Holiday' }), rules: [R({ weekday: 'Fri' })] });
+    const s = sanitizeSpot({ ...SPOT, rule: R({ weekday: 'Someday' }), rules: [R({ weekday: 'Fri' })] });
     expect(s.rule.weekday).toBe('fri');
     expect(s.cnn).toBe('7735000');
   });
   it('no valid rule at all degrades to a one-shot (no cnn/sideKey)', () => {
-    const s = sanitizeSpot({ ...SPOT, rules: [R({ weekday: 'Holiday' })] });
+    const s = sanitizeSpot({ ...SPOT, rules: [R({ weekday: 'Someday' })] });
     expect(s.rule).toBe(undefined);
     expect(s.cnn).toBe(undefined);
   });

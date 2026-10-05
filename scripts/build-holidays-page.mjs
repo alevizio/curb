@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Generate holidays.html (/holidays): the days San Francisco does not enforce street sweeping.
-// Every date, weekday, name and night-route flag comes from the holiday tables in lib/sweep-core.js
+// Generate holidays.html (/holidays): the days San Francisco's regular street sweeping stops.
+// Every date, weekday, name and holiday-schedule flag comes from the holiday tables in lib/sweep-core.js
 // (HOL_DAY, HOL_NIGHT, HOL_NAMES): the same tables nextSweep(), the map and the /b/ pages use, so the page
-// can't say something the app doesn't do. scripts/build-holidays-page.test.mjs fails when the committed
+// can't say something the app doesn't do. The model (lib/sweep-core.js sweepSuspended): regular sweeping
+// stops on every date; blocks with a posted holiday schedule are swept at those hours, except on HOL_NIGHT. scripts/build-holidays-page.test.mjs fails when the committed
 // page differs from a fresh build. Never hand-edit holidays.html; change this file or the tables and run:
 //   npm run build:holidays
 // The next holiday and the muted past dates are worked out in the browser at view time (PAGE_JS), so a
@@ -17,6 +18,10 @@ export const SFMTA_URL = 'https://www.sfmta.com/getting-around/drive-park/holida
 // The last date SFMTA had posted when the table was checked (see the comment above HOL_DAY in
 // lib/sweep-core.js). Later dates are derived by SFMTA's rule; move this when SFMTA posts more.
 export const POSTED_THROUGH = '2027-01-01';
+// Blocks whose sign posts a holiday schedule (DataSF weekday 'Holiday' rows; 590 in data/schedules.json on
+// 2026-10-05). A rounded constant, not a live count, so a monthly data refresh doesn't make the committed page
+// stale; scripts/build-holidays-page.test.mjs fails when the data drifts more than 10% from it.
+export const HOLIDAY_SCHEDULE_BLOCKS = 590;
 // Holidays with a fixed calendar date. A table date with one of these names on another day is the
 // weekday the city observes it on (Sat → the Friday before, Sun → the Monday after).
 const FIXED = { "New Year's Day": '01-01', Juneteenth: '06-19', 'Independence Day': '07-04', 'Veterans Day': '11-11', Christmas: '12-25' };
@@ -71,8 +76,8 @@ export const PAGE_JS = `(function () {
   set('nxWhen', DAY[d.getUTCDay()] + ', ' + MONTH[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear() + ' · ' +
     (isToday ? 'today' : days === 1 ? 'tomorrow' : 'in\\u00a0' + days + '\\u00a0days'));
   set('nxNight', next.getAttribute('data-night') === '1'
-    ? 'No street sweeping at all, overnight and 7-day routes included.'
-    : 'No daytime sweeping. Overnight and 7-day routes still sweep.');
+    ? 'No street sweeping at all, holiday schedules included.'
+    : 'Regular sweeping stops. Blocks with a posted holiday schedule are swept at those hours.');
   document.getElementById('next').hidden = false;
 })();`;
 
@@ -132,7 +137,7 @@ const STYLE = `
   .mean h3{display:flex;align-items:center;gap:9px;font-family:'Anton',sans-serif;font-weight:400;font-size:19px;
     line-height:1.05;text-transform:uppercase;margin-bottom:8px}
   .mean h3::before{content:'';flex:none;width:12px;height:12px;border-radius:3px;background:var(--c,var(--ink))}
-  .mean.day{--c:var(--green)} .mean.night{--c:var(--amber)} .mean.sign{--c:var(--red)}
+  .mean.off{--c:var(--green)} .mean.hol{--c:var(--amber)} .mean.sign{--c:var(--red)}
   .mean p{font-size:14px;font-weight:600;color:var(--ink-soft);line-height:1.5}
   .mean p b{color:var(--ink)}
   .mean p a{color:var(--ink);font-weight:800}
@@ -203,7 +208,7 @@ export function renderHolidaysPage() {
   const nightNames = [...new Set(rows.filter((r) => r.night).map((r) => r.name))];
 
   const title = `SF Street Sweeping Holidays ${span} | CURB`;
-  const desc = `Every day San Francisco does not enforce daytime street sweeping, ${span}: the date, the holiday and whether overnight routes still sweep.`;
+  const desc = `Every San Francisco street sweeping holiday, ${span}: the date, the holiday and whether blocks with a posted holiday schedule are swept.`;
   const url = 'https://curb.guide/holidays';
   const ld = jsonLd({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'CURB', item: 'https://curb.guide/' },
@@ -219,12 +224,12 @@ export function renderHolidaysPage() {
     const trs = list.map((r) => `        <tr data-date="${r.iso}" data-night="${r.night ? 1 : 0}" data-name="${esc(r.name)}">` +
       `<td class="hd"><time datetime="${r.iso}">${DOW[r.dow]}, ${MON[r.mo - 1]} ${r.da}</time></td>` +
       `<td class="hn">${esc(r.name)}${r.observed ? ' <span class="obs">observed</span>' : ''}</td>` +
-      `<td class="hx ${r.night ? 'off' : 'on'}">${r.night ? 'Not swept' : 'Still swept'}</td></tr>`).join('\n');
+      `<td class="hx ${r.night ? 'off' : 'on'}">${r.night ? 'Not swept' : 'Swept'}</td></tr>`).join('\n');
     return `    <div class="yr" id="y${y}">
       <h3>${y}${byRule ? ' <span class="rule-chip">By SFMTA\'s rule</span>' : ''}</h3>
       <div class="tbl"><table>
         <caption class="sr">Street sweeping holidays in ${y}</caption><colgroup><col class="c-d"><col><col class="c-x"></colgroup>
-        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Overnight &amp; 7-day routes</th></tr></thead>
+        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Holiday schedule blocks</th></tr></thead>
         <tbody>
 ${trs}
         </tbody>
@@ -274,7 +279,7 @@ ${trs}
     <div class="hero-tx">
       <div class="kicker">San Francisco · ${span}</div>
       <h1>Street sweeping holidays<span class="dot">.</span></h1>
-      <p class="sub">The days San Francisco does not enforce <b>daytime street sweeping</b>, every date through ${esc(last.name)} ${last.y}. From SFMTA's holiday enforcement schedule.</p>
+      <p class="sub">The days San Francisco's <b>regular street sweeping stops</b>, every date through ${esc(last.name)} ${last.y}. From SFMTA's holiday enforcement schedule.</p>
     </div>
     <section class="next" id="next" aria-labelledby="nxK" hidden>
       <div class="cal" aria-hidden="true"><span class="m" id="nxMon"></span><span class="d" id="nxDay"></span><span class="w" id="nxDow"></span></div>
@@ -289,15 +294,16 @@ ${trs}
 
   <section aria-labelledby="means">
     <div class="sec-k">What it means</div>
-    <h2 id="means">Daytime off, nights mostly on</h2>
+    <h2 id="means">Regular sweeping off, holiday hours on</h2>
     <div class="means">
-      <div class="mean day"><h3>Daytime sweeping is off</h3>
-        <p>On every date below, San Francisco does not enforce <b>daytime street sweeping</b>. The sweep isn't moved to another day: your block's next regular sweep still applies.</p></div>
-      <div class="mean night"><h3>Night routes keep going</h3>
-        <p>Blocks swept between <b>12 AM and 6 AM</b> and the <b>7-day commercial routes</b> still sweep on most holidays. They stop only on ${andList(nightNames)}. Your block's hours on the <a href="/">map</a> show which kind it is.</p></div>
+      <div class="mean off"><h3>Regular sweeping stops</h3>
+        <p>On every date below, no block is swept on its <b>regular schedule</b>, overnight routes included. The sweep isn't moved to another day: your block's next regular sweep still applies.</p></div>
+      <div class="mean hol"><h3>Holiday schedules sweep</h3>
+        <p>About ${HOLIDAY_SCHEDULE_BLOCKS} blocks post a <b>holiday schedule</b> on their sign, like HOLIDAYS 4 TO 6AM. On these dates those blocks are swept at those hours, except on ${andList(nightNames)}, when nothing is swept. The <a href="/">map</a> and each block page show the blocks that have one.</p></div>
       <div class="mean sign"><h3>The sign wins</h3>
         <p>The posted sign is always the source of truth. If a sign on your block says something else, follow the sign.</p></div>
     </div>
+    <p class="note">Which blocks are swept comes from the city's street-cleaning tickets: on 8 holidays between October 2025 and September 2026, 98% of the tickets written from 12 AM to 9 AM were on blocks with a holiday schedule, during its hours, and none in those hours on ${andList(nightNames)}.</p>
   </section>
 
   <section aria-labelledby="list">
@@ -311,9 +317,9 @@ ${tables}
   </section>
 
   <div class="cta-band">
-    <h2>The map already skips them.</h2>
+    <h2>The map already knows them.</h2>
     <a class="btn" href="/">Open the map →</a>
-    <p>Each block page and the map already skip holidays when they count down to your next sweep, and sweep alerts follow the same dates. Find your block on the map, or <a href="/n/">by neighborhood</a>.</p>
+    <p>The map, each block page and sweep alerts skip regular sweeps on these dates and count a block's holiday schedule when it has one. Find your block on the map, or <a href="/n/">by neighborhood</a>.</p>
   </div>
 </main>
 

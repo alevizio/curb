@@ -10,6 +10,8 @@ const { nextSweep, alertAnchors } = globalThis;
 // the sender (stops the re-arm) and the store (such a watch, once its sweep is over, frees its slot).
 export const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
 
+// The side's rules: its weekday rows plus its posted holiday schedule ('holiday', api/_spot.js), which
+// nextSweep places only on minor holidays, when the weekday rows are stopped (lib/sweep-core.js).
 const rulesOf = (spot) => (Array.isArray(spot.rules) && spot.rules.length ? spot.rules : spot.rule ? [spot.rule] : []);
 // How long the stored sweep can last: the longest window among the side's rules (SF's longest is 6 h); a
 // day for a spot that carries no rule, whose window nobody knows.

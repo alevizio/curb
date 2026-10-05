@@ -8,7 +8,10 @@
 //     street/from/to  cleaned DataSF text ('' = no usable cross street)
 //     hoodIdx         index into hoods (-1 = outside every neighborhood polygon)
 //     rows            [[side, dow, fromH, toH, weeksMask, holidays], ...]  side '' = no blockside;
-//                     dow = JS getDay; weeksMask bit i = week i+1; holidays 1 = sweeps through most
+//                     dow = JS getDay, or 7 = the side's posted holiday schedule (DataSF weekday
+//                     'Holiday', "HOLIDAYS 4 TO 6AM": sweeps on minor holidays only, see sweepSuspended in
+//                     lib/sweep-core.js; weeksMask 31), listed after the weekdays; weeksMask bit i = week
+//                     i+1; holidays = DataSF's flag (no longer read: the holiday model doesn't use it)
 //     prev/next       adjacent swept block on the same street (shared endpoint), '' if none
 //     tag             label (side, roadway, address range…) that tells apart blocks sharing
 //                     street + cross streets ('' if unique)
@@ -29,7 +32,7 @@ const ROOT = new URL('../', import.meta.url);
 const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
 const ADDR = 'https://data.sf.gov/resource/3mea-di5p.json'; // EAS addresses, cnn keys match SWEEP
 const PAGE = 10000;
-const DAY = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+const DAY = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, hol: 7 }; // hol = the 'Holiday' rows
 const log = (...a) => console.error('[schedules]', ...a);
 
 const squash = (s) => String(s || '').replace(/\s+/g, ' ').trim();
@@ -161,7 +164,8 @@ export function buildBlocks(rows) {
   }
   for (const b of blocks) {
     [b.a, b.b] = cleanLimits(b.street, b.limits, known, ctx.get(b.street));
-    b.rows = [...b.rows.values()].sort((x, y) => ((x[1] + 6) % 7) - ((y[1] + 6) % 7) || x[2] - y[2] || x[0].localeCompare(y[0]));
+    const order = (d) => (d === 7 ? 7 : (d + 6) % 7); // Mon first, the holiday schedule last
+    b.rows = [...b.rows.values()].sort((x, y) => order(x[1]) - order(y[1]) || x[2] - y[2] || x[0].localeCompare(y[0]));
     b.sides = [...new Set(b.rows.map((r) => r[0]).filter(Boolean))].sort();
   }
   // tags: blocks that would share a title (divided roads' two halves, repeated cross streets) get
@@ -293,7 +297,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   const out = {
     _meta: { generated: new Date().toISOString(), source: 'DataSF yhqp-riqs (street sweeping schedule) + 3mea-di5p (EAS addresses, house-number ranges)', rows: rows.length, blocks: blocks.length, changed,
-      note: 'entry = [street, from, to, hoodIdx, rows[[side,dow,fromH,toH,weeksMask,holidays]], prev, next, tag, modified, range[lo,hi]]' },
+      note: 'entry = [street, from, to, hoodIdx, rows[[side,dow,fromH,toH,weeksMask,holidays]], prev, next, tag, modified, range[lo,hi]]; dow 7 = the posted holiday schedule (weekday Holiday)' },
     hoods,
     b,
   };

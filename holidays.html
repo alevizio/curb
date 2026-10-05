@@ -5,12 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SF Street Sweeping Holidays 2026 to 2028 | CURB</title>
-<meta name="description" content="Every day San Francisco does not enforce daytime street sweeping, 2026 to 2028: the date, the holiday and whether overnight routes still sweep.">
+<meta name="description" content="Every San Francisco street sweeping holiday, 2026 to 2028: the date, the holiday and whether blocks with a posted holiday schedule are swept.">
 <link rel="canonical" href="https://curb.guide/holidays">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
 <meta property="og:title" content="San Francisco street sweeping holidays, 2026 to 2028">
-<meta property="og:description" content="Every day San Francisco does not enforce daytime street sweeping, 2026 to 2028: the date, the holiday and whether overnight routes still sweep.">
+<meta property="og:description" content="Every San Francisco street sweeping holiday, 2026 to 2028: the date, the holiday and whether blocks with a posted holiday schedule are swept.">
 <meta property="og:url" content="https://curb.guide/holidays">
 <meta property="og:image" content="https://curb.guide/og.png?v=3">
 <meta property="og:image:width" content="1200">
@@ -83,7 +83,7 @@
   .mean h3{display:flex;align-items:center;gap:9px;font-family:'Anton',sans-serif;font-weight:400;font-size:19px;
     line-height:1.05;text-transform:uppercase;margin-bottom:8px}
   .mean h3::before{content:'';flex:none;width:12px;height:12px;border-radius:3px;background:var(--c,var(--ink))}
-  .mean.day{--c:var(--green)} .mean.night{--c:var(--amber)} .mean.sign{--c:var(--red)}
+  .mean.off{--c:var(--green)} .mean.hol{--c:var(--amber)} .mean.sign{--c:var(--red)}
   .mean p{font-size:14px;font-weight:600;color:var(--ink-soft);line-height:1.5}
   .mean p b{color:var(--ink)}
   .mean p a{color:var(--ink);font-weight:800}
@@ -152,7 +152,7 @@
     <div class="hero-tx">
       <div class="kicker">San Francisco · 2026 to 2028</div>
       <h1>Street sweeping holidays<span class="dot">.</span></h1>
-      <p class="sub">The days San Francisco does not enforce <b>daytime street sweeping</b>, every date through New Year's Day 2029. From SFMTA's holiday enforcement schedule.</p>
+      <p class="sub">The days San Francisco's <b>regular street sweeping stops</b>, every date through New Year's Day 2029. From SFMTA's holiday enforcement schedule.</p>
     </div>
     <section class="next" id="next" aria-labelledby="nxK" hidden>
       <div class="cal" aria-hidden="true"><span class="m" id="nxMon"></span><span class="d" id="nxDay"></span><span class="w" id="nxDow"></span></div>
@@ -167,15 +167,16 @@
 
   <section aria-labelledby="means">
     <div class="sec-k">What it means</div>
-    <h2 id="means">Daytime off, nights mostly on</h2>
+    <h2 id="means">Regular sweeping off, holiday hours on</h2>
     <div class="means">
-      <div class="mean day"><h3>Daytime sweeping is off</h3>
-        <p>On every date below, San Francisco does not enforce <b>daytime street sweeping</b>. The sweep isn't moved to another day: your block's next regular sweep still applies.</p></div>
-      <div class="mean night"><h3>Night routes keep going</h3>
-        <p>Blocks swept between <b>12 AM and 6 AM</b> and the <b>7-day commercial routes</b> still sweep on most holidays. They stop only on New Year's Day, Thanksgiving and Christmas. Your block's hours on the <a href="/">map</a> show which kind it is.</p></div>
+      <div class="mean off"><h3>Regular sweeping stops</h3>
+        <p>On every date below, no block is swept on its <b>regular schedule</b>, overnight routes included. The sweep isn't moved to another day: your block's next regular sweep still applies.</p></div>
+      <div class="mean hol"><h3>Holiday schedules sweep</h3>
+        <p>About 590 blocks post a <b>holiday schedule</b> on their sign, like HOLIDAYS 4 TO 6AM. On these dates those blocks are swept at those hours, except on New Year's Day, Thanksgiving and Christmas, when nothing is swept. The <a href="/">map</a> and each block page show the blocks that have one.</p></div>
       <div class="mean sign"><h3>The sign wins</h3>
         <p>The posted sign is always the source of truth. If a sign on your block says something else, follow the sign.</p></div>
     </div>
+    <p class="note">Which blocks are swept comes from the city's street-cleaning tickets: on 8 holidays between October 2025 and September 2026, 98% of the tickets written from 12 AM to 9 AM were on blocks with a holiday schedule, during its hours, and none in those hours on New Year's Day, Thanksgiving and Christmas.</p>
   </section>
 
   <section aria-labelledby="list">
@@ -187,19 +188,19 @@
       <h3>2026</h3>
       <div class="tbl"><table>
         <caption class="sr">Street sweeping holidays in 2026</caption><colgroup><col class="c-d"><col><col class="c-x"></colgroup>
-        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Overnight &amp; 7-day routes</th></tr></thead>
+        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Holiday schedule blocks</th></tr></thead>
         <tbody>
         <tr data-date="2026-01-01" data-night="1" data-name="New Year's Day"><td class="hd"><time datetime="2026-01-01">Thu, Jan 1</time></td><td class="hn">New Year's Day</td><td class="hx off">Not swept</td></tr>
-        <tr data-date="2026-01-19" data-night="0" data-name="MLK Jr. Day"><td class="hd"><time datetime="2026-01-19">Mon, Jan 19</time></td><td class="hn">MLK Jr. Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2026-02-16" data-night="0" data-name="Presidents' Day"><td class="hd"><time datetime="2026-02-16">Mon, Feb 16</time></td><td class="hn">Presidents' Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2026-05-25" data-night="0" data-name="Memorial Day"><td class="hd"><time datetime="2026-05-25">Mon, May 25</time></td><td class="hn">Memorial Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2026-06-19" data-night="0" data-name="Juneteenth"><td class="hd"><time datetime="2026-06-19">Fri, Jun 19</time></td><td class="hn">Juneteenth</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2026-07-03" data-night="0" data-name="Independence Day"><td class="hd"><time datetime="2026-07-03">Fri, Jul 3</time></td><td class="hn">Independence Day <span class="obs">observed</span></td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2026-09-07" data-night="0" data-name="Labor Day"><td class="hd"><time datetime="2026-09-07">Mon, Sep 7</time></td><td class="hn">Labor Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2026-10-12" data-night="0" data-name="Indigenous Peoples Day"><td class="hd"><time datetime="2026-10-12">Mon, Oct 12</time></td><td class="hn">Indigenous Peoples Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2026-11-11" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2026-11-11">Wed, Nov 11</time></td><td class="hn">Veterans Day</td><td class="hx on">Still swept</td></tr>
+        <tr data-date="2026-01-19" data-night="0" data-name="MLK Jr. Day"><td class="hd"><time datetime="2026-01-19">Mon, Jan 19</time></td><td class="hn">MLK Jr. Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2026-02-16" data-night="0" data-name="Presidents' Day"><td class="hd"><time datetime="2026-02-16">Mon, Feb 16</time></td><td class="hn">Presidents' Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2026-05-25" data-night="0" data-name="Memorial Day"><td class="hd"><time datetime="2026-05-25">Mon, May 25</time></td><td class="hn">Memorial Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2026-06-19" data-night="0" data-name="Juneteenth"><td class="hd"><time datetime="2026-06-19">Fri, Jun 19</time></td><td class="hn">Juneteenth</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2026-07-03" data-night="0" data-name="Independence Day"><td class="hd"><time datetime="2026-07-03">Fri, Jul 3</time></td><td class="hn">Independence Day <span class="obs">observed</span></td><td class="hx on">Swept</td></tr>
+        <tr data-date="2026-09-07" data-night="0" data-name="Labor Day"><td class="hd"><time datetime="2026-09-07">Mon, Sep 7</time></td><td class="hn">Labor Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2026-10-12" data-night="0" data-name="Indigenous Peoples Day"><td class="hd"><time datetime="2026-10-12">Mon, Oct 12</time></td><td class="hn">Indigenous Peoples Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2026-11-11" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2026-11-11">Wed, Nov 11</time></td><td class="hn">Veterans Day</td><td class="hx on">Swept</td></tr>
         <tr data-date="2026-11-26" data-night="1" data-name="Thanksgiving"><td class="hd"><time datetime="2026-11-26">Thu, Nov 26</time></td><td class="hn">Thanksgiving</td><td class="hx off">Not swept</td></tr>
-        <tr data-date="2026-11-27" data-night="0" data-name="Day after Thanksgiving"><td class="hd"><time datetime="2026-11-27">Fri, Nov 27</time></td><td class="hn">Day after Thanksgiving</td><td class="hx on">Still swept</td></tr>
+        <tr data-date="2026-11-27" data-night="0" data-name="Day after Thanksgiving"><td class="hd"><time datetime="2026-11-27">Fri, Nov 27</time></td><td class="hn">Day after Thanksgiving</td><td class="hx on">Swept</td></tr>
         <tr data-date="2026-12-25" data-night="1" data-name="Christmas"><td class="hd"><time datetime="2026-12-25">Fri, Dec 25</time></td><td class="hn">Christmas</td><td class="hx off">Not swept</td></tr>
         </tbody>
       </table></div>
@@ -208,19 +209,19 @@
       <h3>2027 <span class="rule-chip">By SFMTA's rule</span></h3>
       <div class="tbl"><table>
         <caption class="sr">Street sweeping holidays in 2027</caption><colgroup><col class="c-d"><col><col class="c-x"></colgroup>
-        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Overnight &amp; 7-day routes</th></tr></thead>
+        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Holiday schedule blocks</th></tr></thead>
         <tbody>
         <tr data-date="2027-01-01" data-night="1" data-name="New Year's Day"><td class="hd"><time datetime="2027-01-01">Fri, Jan 1</time></td><td class="hn">New Year's Day</td><td class="hx off">Not swept</td></tr>
-        <tr data-date="2027-01-18" data-night="0" data-name="MLK Jr. Day"><td class="hd"><time datetime="2027-01-18">Mon, Jan 18</time></td><td class="hn">MLK Jr. Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2027-02-15" data-night="0" data-name="Presidents' Day"><td class="hd"><time datetime="2027-02-15">Mon, Feb 15</time></td><td class="hn">Presidents' Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2027-05-31" data-night="0" data-name="Memorial Day"><td class="hd"><time datetime="2027-05-31">Mon, May 31</time></td><td class="hn">Memorial Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2027-06-18" data-night="0" data-name="Juneteenth"><td class="hd"><time datetime="2027-06-18">Fri, Jun 18</time></td><td class="hn">Juneteenth <span class="obs">observed</span></td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2027-07-05" data-night="0" data-name="Independence Day"><td class="hd"><time datetime="2027-07-05">Mon, Jul 5</time></td><td class="hn">Independence Day <span class="obs">observed</span></td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2027-09-06" data-night="0" data-name="Labor Day"><td class="hd"><time datetime="2027-09-06">Mon, Sep 6</time></td><td class="hn">Labor Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2027-10-11" data-night="0" data-name="Indigenous Peoples Day"><td class="hd"><time datetime="2027-10-11">Mon, Oct 11</time></td><td class="hn">Indigenous Peoples Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2027-11-11" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2027-11-11">Thu, Nov 11</time></td><td class="hn">Veterans Day</td><td class="hx on">Still swept</td></tr>
+        <tr data-date="2027-01-18" data-night="0" data-name="MLK Jr. Day"><td class="hd"><time datetime="2027-01-18">Mon, Jan 18</time></td><td class="hn">MLK Jr. Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2027-02-15" data-night="0" data-name="Presidents' Day"><td class="hd"><time datetime="2027-02-15">Mon, Feb 15</time></td><td class="hn">Presidents' Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2027-05-31" data-night="0" data-name="Memorial Day"><td class="hd"><time datetime="2027-05-31">Mon, May 31</time></td><td class="hn">Memorial Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2027-06-18" data-night="0" data-name="Juneteenth"><td class="hd"><time datetime="2027-06-18">Fri, Jun 18</time></td><td class="hn">Juneteenth <span class="obs">observed</span></td><td class="hx on">Swept</td></tr>
+        <tr data-date="2027-07-05" data-night="0" data-name="Independence Day"><td class="hd"><time datetime="2027-07-05">Mon, Jul 5</time></td><td class="hn">Independence Day <span class="obs">observed</span></td><td class="hx on">Swept</td></tr>
+        <tr data-date="2027-09-06" data-night="0" data-name="Labor Day"><td class="hd"><time datetime="2027-09-06">Mon, Sep 6</time></td><td class="hn">Labor Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2027-10-11" data-night="0" data-name="Indigenous Peoples Day"><td class="hd"><time datetime="2027-10-11">Mon, Oct 11</time></td><td class="hn">Indigenous Peoples Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2027-11-11" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2027-11-11">Thu, Nov 11</time></td><td class="hn">Veterans Day</td><td class="hx on">Swept</td></tr>
         <tr data-date="2027-11-25" data-night="1" data-name="Thanksgiving"><td class="hd"><time datetime="2027-11-25">Thu, Nov 25</time></td><td class="hn">Thanksgiving</td><td class="hx off">Not swept</td></tr>
-        <tr data-date="2027-11-26" data-night="0" data-name="Day after Thanksgiving"><td class="hd"><time datetime="2027-11-26">Fri, Nov 26</time></td><td class="hn">Day after Thanksgiving</td><td class="hx on">Still swept</td></tr>
+        <tr data-date="2027-11-26" data-night="0" data-name="Day after Thanksgiving"><td class="hd"><time datetime="2027-11-26">Fri, Nov 26</time></td><td class="hn">Day after Thanksgiving</td><td class="hx on">Swept</td></tr>
         <tr data-date="2027-12-25" data-night="1" data-name="Christmas"><td class="hd"><time datetime="2027-12-25">Sat, Dec 25</time></td><td class="hn">Christmas</td><td class="hx off">Not swept</td></tr>
         </tbody>
       </table></div>
@@ -229,20 +230,20 @@
       <h3>2028 <span class="rule-chip">By SFMTA's rule</span></h3>
       <div class="tbl"><table>
         <caption class="sr">Street sweeping holidays in 2028</caption><colgroup><col class="c-d"><col><col class="c-x"></colgroup>
-        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Overnight &amp; 7-day routes</th></tr></thead>
+        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Holiday schedule blocks</th></tr></thead>
         <tbody>
         <tr data-date="2028-01-01" data-night="1" data-name="New Year's Day"><td class="hd"><time datetime="2028-01-01">Sat, Jan 1</time></td><td class="hn">New Year's Day</td><td class="hx off">Not swept</td></tr>
-        <tr data-date="2028-01-17" data-night="0" data-name="MLK Jr. Day"><td class="hd"><time datetime="2028-01-17">Mon, Jan 17</time></td><td class="hn">MLK Jr. Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-02-21" data-night="0" data-name="Presidents' Day"><td class="hd"><time datetime="2028-02-21">Mon, Feb 21</time></td><td class="hn">Presidents' Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-05-29" data-night="0" data-name="Memorial Day"><td class="hd"><time datetime="2028-05-29">Mon, May 29</time></td><td class="hn">Memorial Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-06-19" data-night="0" data-name="Juneteenth"><td class="hd"><time datetime="2028-06-19">Mon, Jun 19</time></td><td class="hn">Juneteenth</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-07-04" data-night="0" data-name="Independence Day"><td class="hd"><time datetime="2028-07-04">Tue, Jul 4</time></td><td class="hn">Independence Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-09-04" data-night="0" data-name="Labor Day"><td class="hd"><time datetime="2028-09-04">Mon, Sep 4</time></td><td class="hn">Labor Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-10-09" data-night="0" data-name="Indigenous Peoples Day"><td class="hd"><time datetime="2028-10-09">Mon, Oct 9</time></td><td class="hn">Indigenous Peoples Day</td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-11-10" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2028-11-10">Fri, Nov 10</time></td><td class="hn">Veterans Day <span class="obs">observed</span></td><td class="hx on">Still swept</td></tr>
-        <tr data-date="2028-11-11" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2028-11-11">Sat, Nov 11</time></td><td class="hn">Veterans Day</td><td class="hx on">Still swept</td></tr>
+        <tr data-date="2028-01-17" data-night="0" data-name="MLK Jr. Day"><td class="hd"><time datetime="2028-01-17">Mon, Jan 17</time></td><td class="hn">MLK Jr. Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-02-21" data-night="0" data-name="Presidents' Day"><td class="hd"><time datetime="2028-02-21">Mon, Feb 21</time></td><td class="hn">Presidents' Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-05-29" data-night="0" data-name="Memorial Day"><td class="hd"><time datetime="2028-05-29">Mon, May 29</time></td><td class="hn">Memorial Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-06-19" data-night="0" data-name="Juneteenth"><td class="hd"><time datetime="2028-06-19">Mon, Jun 19</time></td><td class="hn">Juneteenth</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-07-04" data-night="0" data-name="Independence Day"><td class="hd"><time datetime="2028-07-04">Tue, Jul 4</time></td><td class="hn">Independence Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-09-04" data-night="0" data-name="Labor Day"><td class="hd"><time datetime="2028-09-04">Mon, Sep 4</time></td><td class="hn">Labor Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-10-09" data-night="0" data-name="Indigenous Peoples Day"><td class="hd"><time datetime="2028-10-09">Mon, Oct 9</time></td><td class="hn">Indigenous Peoples Day</td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-11-10" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2028-11-10">Fri, Nov 10</time></td><td class="hn">Veterans Day <span class="obs">observed</span></td><td class="hx on">Swept</td></tr>
+        <tr data-date="2028-11-11" data-night="0" data-name="Veterans Day"><td class="hd"><time datetime="2028-11-11">Sat, Nov 11</time></td><td class="hn">Veterans Day</td><td class="hx on">Swept</td></tr>
         <tr data-date="2028-11-23" data-night="1" data-name="Thanksgiving"><td class="hd"><time datetime="2028-11-23">Thu, Nov 23</time></td><td class="hn">Thanksgiving</td><td class="hx off">Not swept</td></tr>
-        <tr data-date="2028-11-24" data-night="0" data-name="Day after Thanksgiving"><td class="hd"><time datetime="2028-11-24">Fri, Nov 24</time></td><td class="hn">Day after Thanksgiving</td><td class="hx on">Still swept</td></tr>
+        <tr data-date="2028-11-24" data-night="0" data-name="Day after Thanksgiving"><td class="hd"><time datetime="2028-11-24">Fri, Nov 24</time></td><td class="hn">Day after Thanksgiving</td><td class="hx on">Swept</td></tr>
         <tr data-date="2028-12-25" data-night="1" data-name="Christmas"><td class="hd"><time datetime="2028-12-25">Mon, Dec 25</time></td><td class="hn">Christmas</td><td class="hx off">Not swept</td></tr>
         </tbody>
       </table></div>
@@ -251,7 +252,7 @@
       <h3>2029 <span class="rule-chip">By SFMTA's rule</span></h3>
       <div class="tbl"><table>
         <caption class="sr">Street sweeping holidays in 2029</caption><colgroup><col class="c-d"><col><col class="c-x"></colgroup>
-        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Overnight &amp; 7-day routes</th></tr></thead>
+        <thead><tr><th scope="col">Date</th><th scope="col">Holiday</th><th scope="col">Holiday schedule blocks</th></tr></thead>
         <tbody>
         <tr data-date="2029-01-01" data-night="1" data-name="New Year's Day"><td class="hd"><time datetime="2029-01-01">Mon, Jan 1</time></td><td class="hn">New Year's Day</td><td class="hx off">Not swept</td></tr>
         </tbody>
@@ -262,9 +263,9 @@
   </section>
 
   <div class="cta-band">
-    <h2>The map already skips them.</h2>
+    <h2>The map already knows them.</h2>
     <a class="btn" href="/">Open the map →</a>
-    <p>Each block page and the map already skip holidays when they count down to your next sweep, and sweep alerts follow the same dates. Find your block on the map, or <a href="/n/">by neighborhood</a>.</p>
+    <p>The map, each block page and sweep alerts skip regular sweeps on these dates and count a block's holiday schedule when it has one. Find your block on the map, or <a href="/n/">by neighborhood</a>.</p>
   </div>
 </main>
 
@@ -299,8 +300,8 @@
   set('nxWhen', DAY[d.getUTCDay()] + ', ' + MONTH[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear() + ' · ' +
     (isToday ? 'today' : days === 1 ? 'tomorrow' : 'in\u00a0' + days + '\u00a0days'));
   set('nxNight', next.getAttribute('data-night') === '1'
-    ? 'No street sweeping at all, overnight and 7-day routes included.'
-    : 'No daytime sweeping. Overnight and 7-day routes still sweep.');
+    ? 'No street sweeping at all, holiday schedules included.'
+    : 'Regular sweeping stops. Blocks with a posted holiday schedule are swept at those hours.');
   document.getElementById('next').hidden = false;
 })();
 </script>

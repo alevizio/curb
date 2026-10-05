@@ -5,7 +5,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import '../lib/sweep-core.js';
-import { renderHolidaysPage, holidayRows, PAGE_JS, SFMTA_URL } from './build-holidays-page.mjs';
+import { renderHolidaysPage, holidayRows, PAGE_JS, SFMTA_URL, HOLIDAY_SCHEDULE_BLOCKS } from './build-holidays-page.mjs';
 
 const { HOL_DAY, HOL_NIGHT, HOL_NAMES } = globalThis;
 const ROOT = new URL('../', import.meta.url);
@@ -34,28 +34,33 @@ describe('holidays.html', () => {
     }
   });
 
-  it('says which days overnight and 7-day routes still sweep, straight from HOL_NIGHT', () => {
+  it('says on which days blocks with a holiday schedule are swept, straight from the model (every date but HOL_NIGHT)', () => {
+    const hol = { weekday: 'Holiday', fromhour: '4', tohour: '6' };
     for (const r of rows) {
       const night = HOL_NIGHT.has(r.date);
-      expect([r.night, r.cls, r.routes], r.date).toEqual(night ? ['1', 'off', 'Not swept'] : ['0', 'on', 'Still swept']);
+      expect([r.night, r.cls, r.routes], r.date).toEqual(night ? ['1', 'off', 'Not swept'] : ['0', 'on', 'Swept']);
+      expect(globalThis.sweepSuspended(hol, r.date), r.date).toBe(night);             // what the map and alerts do
+      expect(globalThis.sweepSuspended({ weekday: 'Mon' }, r.date), r.date).toBe(true); // regular sweeping stops
     }
     expect(rows.filter((r) => r.night === '1').map((r) => r.date)).toEqual([...HOL_NIGHT].sort());
-    // the explainer names the holidays the night routes stop for, from the same table
-    expect(visible).toContain("They stop only on New Year's Day, Thanksgiving and Christmas.");
+    expect(page).toContain('<th scope="col">Holiday schedule blocks</th>');
   });
 
-  it('describes night routes the way the map classifies them (any window inside 12 AM to 6 AM, or the 7-day routes)', () => {
-    expect(visible.replace(/\s+/g, ' ')).toContain('Blocks swept between 12 AM and 6 AM and the 7-day commercial routes still sweep on most holidays.');
-    const row = (fromhour, tohour, holidays = '0') => ({ fromhour, tohour, holidays });
-    for (const [f, t] of [['0', '2'], ['2', '6'], ['0', '6'], ['5', '6']]) expect(globalThis.sweepNightRoute(row(f, t)), `${f} to ${t}`).toBe(true);
-    for (const [f, t] of [['5', '7'], ['6', '8'], ['9', '11']]) expect(globalThis.sweepNightRoute(row(f, t)), `${f} to ${t}`).toBe(false);
-    expect(globalThis.sweepNightRoute(row('6', '8', '1'))).toBe(true); // the 7-day routes DataSF flags
+  it('tells the evidence: regular sweeping stops, holiday schedules sweep except on the three big holidays', () => {
+    const v = visible.replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1'); // tags leave a space before punctuation
+    expect(v).toContain('On every date below, no block is swept on its regular schedule, overnight routes included.');
+    expect(v).toContain(`About ${HOLIDAY_SCHEDULE_BLOCKS} blocks post a holiday schedule on their sign, like HOLIDAYS 4 TO 6AM. On these dates those blocks are swept at those hours, except on New Year's Day, Thanksgiving and Christmas, when nothing is swept.`);
+    expect(v).toContain("98% of the tickets written from 12 AM to 9 AM were on blocks with a holiday schedule, during its hours, and none in those hours on New Year's Day, Thanksgiving and Christmas.");
+    expect(v).not.toMatch(/\bnight routes|7-day|still sweep/i);
+    // the count stays within 10% of the blocks the /b/ pages show with a holiday schedule (dow 7 rows)
+    const n = Object.values(JSON.parse(read('data/schedules.json')).b).filter((e) => e[4].some((r) => r[1] === 7)).length;
+    expect(Math.abs(n - HOLIDAY_SCHEDULE_BLOCKS) / HOLIDAY_SCHEDULE_BLOCKS, `${n} blocks have a holiday schedule; update HOLIDAY_SCHEDULE_BLOCKS`).toBeLessThan(0.1);
   });
 
   it('gives every column room for its longest word on a 320 px phone (dates no longer run into the name)', () => {
     // 320 px viewport: 20 px page gutters and the 3 px table border leave a 274 px table. Text widths
     // measured in Chrome with Hanken Grotesk at the narrow sizes (13 px cells, 10 px headers at .08em):
-    // widest date "Mon, May 31" 75.6 px, "Still swept" 61.2, "OVERNIGHT" 62.8, unbreakable "Independence" 82.8.
+    // widest date "Mon, May 31" 75.6 px, "Not swept" 59.8 (nowrap), "SCHEDULE" 56.2, unbreakable "Independence" 82.8.
     const narrow = (page.match(/@media \(max-width:359px\)\{([\s\S]*?)\n  \}/) || [])[1];
     expect(narrow, 'a max-width:359px block').toBeTruthy();
     expect(narrow).toContain('table,td.hx{font-size:13px}');
@@ -64,7 +69,7 @@ describe('holidays.html', () => {
     const pct = (cls) => Number(narrow.match(new RegExp(`\\.${cls}\\{width:(\\d+)%\\}`))[1]);
     const room = (p) => (274 * p) / 100 - 2 * pad;
     expect(room(pct('c-d'))).toBeGreaterThanOrEqual(75.6);
-    expect(room(pct('c-x'))).toBeGreaterThanOrEqual(62.8);
+    expect(room(pct('c-x'))).toBeGreaterThanOrEqual(59.8);
     expect(room(100 - pct('c-d') - pct('c-x'))).toBeGreaterThanOrEqual(82.8);
   });
 
@@ -149,7 +154,7 @@ describe('holidays page script', () => {
     expect([els.nxK.textContent, els.nxName.textContent, els.nxMon.textContent, els.nxDay.textContent, els.nxDow.textContent])
       .toEqual(['Next sweeping holiday', 'Indigenous Peoples Day', 'Oct', '12', 'Mon']);
     expect(els.nxWhen.textContent).toBe('Monday, October 12, 2026 · in 7 days');
-    expect(els.nxNight.textContent).toBe('No daytime sweeping. Overnight and 7-day routes still sweep.');
+    expect(els.nxNight.textContent).toBe('Regular sweeping stops. Blocks with a posted holiday schedule are swept at those hours.');
   });
 
   it('uses the San Francisco date, not the device\'s UTC date', () => {
@@ -159,14 +164,14 @@ describe('holidays page script', () => {
     expect(els.nxWhen.textContent).toBe('Thursday, November 26, 2026 · tomorrow');
   });
 
-  it('on the holiday itself says Today, and when night routes stop too', () => {
+  it('on the holiday itself says Today, and when holiday schedules stop too', () => {
     const { els, marked, trs } = runPage(Date.UTC(2026, 10, 26, 20, 0)); // Thanksgiving, noon PST
     expect(marked('is-today')).toEqual(['2026-11-26']);
     expect(marked('is-past')).not.toContain('2026-11-26');
     expect(trs.find((t) => t.attrs['data-date'] === '2026-11-26').attrs['aria-current']).toBe('date');
     expect(els.nxK.textContent).toBe('Today');
     expect(els.nxWhen.textContent).toBe('Thursday, November 26, 2026 · today');
-    expect(els.nxNight.textContent).toBe('No street sweeping at all, overnight and 7-day routes included.');
+    expect(els.nxNight.textContent).toBe('No street sweeping at all, holiday schedules included.');
   });
 
   it('after the last listed date the card stays hidden and every row is muted', () => {
