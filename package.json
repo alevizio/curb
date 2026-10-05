@@ -31,7 +31,7 @@
     "@resvg/resvg-wasm": "^2.6.2",
     "@upstash/qstash": "^2.11.3",
     "@upstash/redis": "^1.39.0",
-    "satori": "^0.33.5",
+    "satori": "^0.34.1",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
