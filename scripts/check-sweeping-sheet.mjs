@@ -1,6 +1,7 @@
 // Regression check (owner report 2026-09-30), run by .github/workflows/verify.yml. Real browser, clock frozen at Wed 2026-09-30 8:49 AM PDT (Delmar St West side is being swept, 8 to 10 AM):
 // open the block and check the alert + calendar buttons exist and arm NEXT Wednesday's sweep. Then a midnight block
-// (4th St, Tue 12 to 2 AM) the evening before, mid-sweep and at 12:30 AM: the sheet, tooltip and toast word it by the night.
+// (4th St, Tue 12 to 2 AM) the evening before, after 9 PM, mid-sweep and at 12:30 AM: the sheet, tooltip and toast
+// word it by the night, and the toast names the night its 9 PM push lands on.
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 const puppeteer = createRequire(import.meta.url)('puppeteer-core');
@@ -68,40 +69,53 @@ async function nightSheet(target, ne) {
     const q = (s) => document.querySelector(s);
     q('#alertBtn')?.click();
     const tip = document.createElement('div'); tip.innerHTML = previewHtml(hit.group, hit.side);
+    if (window.__spot) armedToast(window.__spot, null);   // the toast a real arm shows (the subscribe is skipped)
     return {
       head: q('#sheetBody .verdict .head')?.textContent, sched: q('#sheetBody .asched')?.textContent,
       other: [...document.querySelectorAll('#sheetBody .srow .nx')].map((e) => e.textContent),
       tipHead: tip.querySelector('.tip-head')?.textContent, tipNext: tip.querySelector('.tip-next')?.textContent,
-      note: sheetArmNote, spotSweep: window.__spot?.nextSweepISO,
+      note: sheetArmNote, spotSweep: window.__spot?.nextSweepISO, toast: q('#toast')?.textContent,
     };
   }, ne ? 'northeast' : 'southwest');
   await pg.close();
   return { ...out, errors: errs };
 }
+// the toast names the block by DataSF's corridor ("04th St" today): compare the rest
+const blockless = (t) => String(t || '').replace(/^Sweep alert set for [^,.]+/, 'Sweep alert set for <block>');
 // Mon 10/5 8 PM PDT, NorthEast side: tonight's sweep is Tue 12 AM; the other side's is Wed 12 AM (tomorrow night)
 const eve = await nightSheet(Date.UTC(2026, 9, 6, 3, 0), true);
 console.log(JSON.stringify(eve));
 const okEve = eve.head === 'Mon night' && /^Tue 12 to 2 AM · .* · tonight$/.test(eve.sched || '')
   && eve.other.length === 1 && eve.other[0] === 'Tue night 10/6 · tomorrow night'
   && eve.tipHead === 'Mon night' && eve.tipNext === 'Mon night 10/5 → Tue 12 to 2 AM · tonight'
-  && eve.spotSweep === '2026-10-06T07:00:00.000Z' && !eve.errors.length;
+  && eve.spotSweep === '2026-10-06T07:00:00.000Z' && blockless(eve.toast) === "Sweep alert set for <block>. We'll ping you ~9 PM tonight to move it."
+  && !eve.errors.length;
 console.log(okEve ? '✅ midnight sweep: reads "Mon night 10/5 → Tue 12 to 2 AM · tonight"' : '❌ midnight sweep: worded by the calendar day, not the night');
 if (!okEve) process.exitCode = 1;
 // Tue 10/6 1 AM PDT, NorthEast side mid-sweep: the alert arms Thu 12 AM, which the toast calls Wed night
 const mid = await nightSheet(Date.UTC(2026, 9, 6, 8, 0), true);
 console.log(JSON.stringify(mid));
+// The 9 PM push for Thu 12 AM goes out Wed 10/7 at 9 PM, the night the note just named, not "the night before" it.
 // At 1 AM people are still in Monday night, so the other side's Wed 12 AM sweep (Tuesday night) is tomorrow night.
 const okMid = mid.head === 'Sweeping now' && mid.note === ', next sweep Wed night 10/7' && mid.spotSweep === '2026-10-08T07:00:00.000Z'
+  && blockless(mid.toast) === "Sweep alert set for <block>, next sweep Wed night 10/7. We'll ping you ~9 PM that night to move it."
   && mid.other.length === 1 && mid.other[0] === 'Tue night 10/6 · tomorrow night' && !mid.errors.length;
-console.log(okMid ? '✅ midnight sweep in progress: the alert toast names the next night' : '❌ midnight sweep in progress: wrong next-sweep note');
+console.log(okMid ? '✅ midnight sweep in progress: the alert toast names the next night and its 9 PM push' : '❌ midnight sweep in progress: wrong next-sweep note or push night');
 if (!okMid) process.exitCode = 1;
+// Mon 10/5 10 PM PDT: tonight's 9 PM push is already due, so the next send run delivers it (not "~9 PM")
+const late = await nightSheet(Date.UTC(2026, 9, 6, 5, 0), true);
+console.log(JSON.stringify(late));
+const okLate = late.head === 'Mon night' && late.spotSweep === '2026-10-06T07:00:00.000Z'
+  && blockless(late.toast) === "Sweep alert set for <block>. We'll ping you shortly to move it." && !late.errors.length;
+console.log(okLate ? '✅ armed after 9 PM: the toast says the push comes shortly' : '❌ armed after 9 PM: the toast promises a 9 PM push that has passed');
+if (!okLate) process.exitCode = 1;
 // Mon 10/5 12:30 AM PDT: people are still in Sunday night, so the Tue 12 AM sweep (Monday night) is tomorrow
-// night; the other side is being swept (Mon 12 to 2 AM).
+// night and so is its 9 PM push; the other side is being swept (Mon 12 to 2 AM).
 const early = await nightSheet(Date.UTC(2026, 9, 5, 7, 30), true);
 console.log(JSON.stringify(early));
 const okEarly = early.head === 'Mon night' && /^Tue 12 to 2 AM · .* · tomorrow night$/.test(early.sched || '')
   && early.tipNext === 'Mon night 10/5 → Tue 12 to 2 AM · tomorrow night' && early.other[0] === 'Sweeping now · until 2AM'
-  && !early.errors.length;
+  && blockless(early.toast) === "Sweep alert set for <block>. We'll ping you ~9 PM tomorrow night to move it." && !early.errors.length;
 console.log(okEarly ? '✅ 12:30 AM: Monday night reads "tomorrow night"' : '❌ 12:30 AM: Monday night counted from the new date ("tonight")');
 if (!okEarly) process.exitCode = 1;
 await b.close();

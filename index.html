@@ -1956,9 +1956,18 @@ function paintAlertState(spot){
 // set by openSheet while its side is being swept: the alert it arms is for the sweep after this one
 let sheetArmNote='';
 function armedToast(spot,prev){
-  const night=alertAnchors(Date.parse(spot.nextSweepISO)).night;
-  const what=night?". We'll ping you ~9 PM the night before to move it."
-    :(spot.eveningISO&&spot.level!=='light'?". Heads-up the night before, plus ~30 min before the truck.":". We'll ping you ~30 min before.");
+  const start=new Date(Date.parse(spot.nextSweepISO)), a=alertAnchors(start);
+  let what=spot.eveningISO&&spot.level!=='light'?". Heads-up the night before, plus ~30 min before the truck.":". We'll ping you ~30 min before.";
+  if(a.night){
+    // The one "move it" push lands ~9 PM the evening before the sweep's date (lib/notify-core.js). A sweep
+    // worded by its night ("Wed night 10/7 → Thu 12 to 2 AM") gets it THAT night, so name it the way the sheet
+    // does; "the night before" would read one night early. Past 9 PM it is already due: the next send run.
+    const p=sfParts(start), w=sweepWords({...p,fromH:p.h,toH:p.h+1,start},new Date());
+    what=Date.now()>=+a.tonight?". We'll ping you shortly to move it."
+      :!w.night?". We'll ping you ~9 PM the night before to move it."   // 6 AM: worded by its own day
+      :sheetArmNote?". We'll ping you ~9 PM that night to move it."     // the note just named the night
+      :". We'll ping you ~9 PM "+(/night$/.test(w.rel)?w.rel:w.day)+" to move it.";  // tonight / tomorrow night / Thu night 10/8
+  }
   const moved=prev&&alertLive(prev)&&!sameCurb(prev,spot)?' '+(prev.corridor||'Your other block')+' won\'t alert anymore.':'';
   toast('Sweep alert set for '+(spot.corridor||'this block')+sheetArmNote+what+moved);
 }
