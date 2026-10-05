@@ -60,6 +60,25 @@ describe('neighborhood pages', () => {
     }
   });
 
+  // The holiday model (lib/sweep-core.js sweepSuspended, told on /holidays): regular sweeps stop on every listed holiday,
+  // overnight routes included; blocks with a posted holiday schedule are swept at those hours, except on New Year's
+  // Day, Thanksgiving and Christmas. The FAQ (visible and in the FAQPage JSON-LD) must say the same.
+  it('the holidays FAQ tells the holiday model, in the page and its JSON-LD', () => {
+    for (const f of pages) {
+      const html = read(`n/${f}`);
+      const faq = html.match(/<summary>Is street cleaning enforced on holidays\?<\/summary><p>(.*?)<\/p>/)[1];
+      const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1])['@graph'][0].mainEntity
+        .find((q) => /holidays\?$/.test(q.name)).acceptedAnswer.text;
+      for (const t of [faq.replace(/<\/?b>/g, '').replace(/&#39;|&apos;/g, "'"), ld]) {
+        expect(t, f).toMatch(/^Regular street sweeping stops on every city holiday SFMTA lists/);
+        expect(t, f).toContain('overnight routes included');
+        expect(t, f).toMatch(/About \d{3} blocks post a holiday schedule on their sign, like HOLIDAYS 4 TO 6AM/);
+        expect(t, f).toContain("except on New Year's Day, Thanksgiving and Christmas, when nothing is swept");
+        expect(t, f).not.toMatch(/routes still run|—/);
+      }
+    }
+  });
+
   it('retired pages (Presidio, Golden Gate Park) are deleted and 301 to /n/', () => {
     const v = JSON.parse(read('vercel.json'));
     for (const s of ['presidio', 'golden-gate-park']) {

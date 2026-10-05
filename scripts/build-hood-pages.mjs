@@ -17,6 +17,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 
 import { slug, pagedHoods } from '../lib/hoods.js';   // MIN_TICKETS floor lives there (shared with /b/ links)
 import { schedShort } from '../api/block.js';         // same schedule wording as the /b/ pages
 import { gitDate, today } from './lastmod.mjs';
+import { HOLIDAY_SCHEDULE_BLOCKS } from './build-holidays-page.mjs'; // the /holidays page's count, so the FAQ agrees
 
 const ROOT = new URL('../', import.meta.url);
 const stats = JSON.parse(readFileSync(new URL('data/stats.json', ROOT), 'utf8'));
@@ -465,7 +466,8 @@ function renderHood(h, idx) {
     },
     {
       q: `Is street cleaning enforced on holidays?`,
-      a: `Residential street sweeping is suspended on roughly a dozen observed city holidays (for example New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving and Christmas); many overnight commercial routes still run. Temporary signs and the posted schedule always override. When in doubt, *read the sign on your block.*`,
+      // the holiday model (lib/sweep-core.js sweepSuspended), as /holidays tells it
+      a: `Regular street sweeping stops on every city holiday SFMTA lists, about a dozen a year (for example Memorial Day, Labor Day, Thanksgiving and Christmas), overnight routes included. About ${HOLIDAY_SCHEDULE_BLOCKS} blocks post a *holiday schedule* on their sign, like HOLIDAYS 4 TO 6AM, and are swept at those hours on those days, except on New Year's Day, Thanksgiving and Christmas, when nothing is swept. Temporary signs and the posted schedule always override. When in doubt, *read the sign on your block.*`,
     },
     {
       q: `What if my car was towed for street cleaning in ${name}?`,
