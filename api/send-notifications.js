@@ -76,8 +76,12 @@ export function judgeDelivery(prev, run) {
 // transports here AND the /api/test-notification preview endpoint, so they can never diverge.
 // dueAlert(spot, notifiedMap, now) -> { key, tag, title, body } | null.
 
-// A notification tap opens the specific block when we know its cnn, else the map.
-const deepLink = (spot) => (spot && spot.cnn ? '/b/' + spot.cnn : '/');
+// A notification tap opens the specific block when we know its cnn, else the map. It names the curb side
+// (?side=North; /b/ passes it on to the live map link, like a shared link): with both sides of a block
+// watched, a tap on one side's push must not open the other side's sheet. Letters only, as /b/ accepts.
+const deepLink = (spot) => (spot && spot.cnn
+  ? '/b/' + spot.cnn + (/^[A-Za-z]{1,12}$/.test(spot.blockside || '') ? '?side=' + spot.blockside : '')
+  : '/');
 
 // A device keeps up to 5 watches (one per curb side, api/_store.js MAX_WATCHES), each its own record, so
 // both loops below run per WATCH exactly as they ran per device. What is per DEVICE: `checked` (devices

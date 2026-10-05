@@ -117,5 +117,23 @@ describe('sw.js', () => {
     expect((await w.request('/', 'GET', 'navigate')).body).toBe('shell /');
     expect((await w.request('/lib/sweep-core.js?v=4', 'GET', 'no-cors')).body).toBe('shell /lib/sweep-core.js');
   });
+
+  it('a notification tap opens its deep link with the push_clicked marker, after a ?side= the link already has', async () => {
+    const opened = [];
+    const handlers = {};
+    const g = {
+      self: { addEventListener: (t, fn) => { handlers[t] = fn; }, skipWaiting() {}, clients: { claim: async () => {} } },
+      clients: { matchAll: async () => [], openWindow: async (u) => { opened.push(u); } },
+      caches: { open: async () => ({}) }, URL, location: { origin: ORIGIN },
+    };
+    vm.createContext(g);
+    vm.runInContext(SW, g);
+    for (const url of ['/b/8753101?side=North', '/b/8753101', undefined]) {
+      let p;
+      handlers.notificationclick({ notification: { close() {}, data: url === undefined ? {} : { url } }, waitUntil: (x) => { p = x; } });
+      await p;
+    }
+    expect(opened).toEqual(['/b/8753101?side=North&p=1', '/b/8753101?p=1', '/?p=1']);
+  });
 });
 afterEach(() => { vi.useRealTimers(); });

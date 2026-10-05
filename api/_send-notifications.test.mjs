@@ -42,7 +42,7 @@ vi.mock('@upstash/redis', () => ({
 }));
 const send = vi.fn(async () => ({ statusCode: 201 }));
 vi.mock('web-push', () => ({ default: { setVapidDetails: () => {}, sendNotification: (...a) => send(...a) } }));
-// APNs stays real (a malformed key really throws) unless a test sets apnsReply(token, collapseId) →
+// APNs stays real (a malformed key really throws) unless a test sets apnsReply(token, collapseId, aps) →
 // { status, reason }: then no key and no network, every send answers with that.
 let apnsReply = null;
 vi.mock('./_apns.js', async (importOriginal) => {
@@ -50,7 +50,7 @@ vi.mock('./_apns.js', async (importOriginal) => {
   return { ...real,
     getProviderToken: () => (apnsReply ? 'jwt' : real.getProviderToken()),
     openSession: (h) => (apnsReply ? { close() {} } : real.openSession(h)),
-    sendOne: (...a) => (apnsReply ? Promise.resolve(apnsReply(a[2], a[4])) : real.sendOne(...a)) };
+    sendOne: (...a) => (apnsReply ? Promise.resolve(apnsReply(a[2], a[4], a[3])) : real.sendOne(...a)) };
 });
 const fetchMock = vi.fn(async () => ({ ok: true }));
 vi.stubGlobal('fetch', fetchMock);
@@ -504,6 +504,29 @@ describe('two watches on one device', () => {
     vi.setSystemTime(EVE + 15 * 60000);
     expect((await run(bearer())).body.web.sent).toBe(0);
     expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it('a tap opens the side the push is about: /b/<cnn>?side=<blockside>, on web and iOS', async () => {
+    arm2();
+    vi.setSystemTime(EVE);
+    await run(bearer());
+    expect(send.mock.calls.map(([, p]) => JSON.parse(p).url)).toEqual(['/b/42?side=North', '/b/42?side=South']);
+    // a side name /b/ would not pass on (not letters only) and a spot without a cnn keep the old links
+    for (const k of Object.keys(kv)) delete kv[k];
+    send.mockClear();
+    arm2({ ...north, blockside: 'North East' }, { ...south, cnn: undefined, rule: undefined, rules: undefined });
+    await run(bearer());
+    expect(send.mock.calls.map(([, p]) => JSON.parse(p).url)).toEqual(['/b/42', '/']);
+
+    const tok = 'ab'.repeat(32);
+    for (const k of Object.keys(kv)) delete kv[k];
+    mem['curb:subs'] = {};
+    mem['curb:apns'] = { [tok]: JSON.stringify({ token: tok, spot: south, notified: {}, savedAt: NOW, platform: 'ios' }) };
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    const urls = [];
+    apnsReply = (t, collapse, aps) => { urls.push(aps.url); return { status: 200 }; };
+    await run(bearer());
+    expect(urls).toEqual(['/b/42?side=South']);   // the app opens it relative to curb.guide (AppDelegate)
   });
 
   it('a turned-off watch sends nothing and is never re-armed, while the other one keeps working', async () => {
