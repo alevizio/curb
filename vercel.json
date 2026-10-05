@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/og.js": {
-      "includeFiles": "{og/fonts/**,node_modules/@resvg/resvg-wasm/index_bg.wasm}"
+      "includeFiles": "{og/fonts/**,node_modules/@resvg/resvg-wasm/index_bg.wasm,node_modules/harfbuzzjs/hb.wasm}"
     },
     "api/block.js": {
       "includeFiles": "data/{schedules,enforcement,routes}.json"
