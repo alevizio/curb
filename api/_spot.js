@@ -50,6 +50,23 @@ export function sanitizeRules(rules) {
   return out;
 }
 
+// The curb side a Turn off names ({ off:true, cnn, sideKey, corridor, limits, blockside } from the iOS
+// bridge, or the web DELETE's `spot`), clamped exactly like sanitizeSpot so it compares equal to the
+// stored spot of that side. null when it names nothing: a page from before multi-watch, whose Turn off
+// means every watch on the device.
+export function sanitizeSide(spot) {
+  if (!spot || typeof spot !== 'object') return null;
+  const t = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
+  const side = {
+    cnn: String(spot.cnn || '').replace(/[^0-9]/g, '').slice(0, 12),
+    sideKey: t(spot.sideKey, 8),
+    corridor: t(spot.corridor, 120),
+    limits: t(spot.limits, 120),
+    blockside: t(spot.blockside, 60),
+  };
+  return side.cnn || side.corridor || side.limits || side.blockside ? side : null;
+}
+
 // Coerce/clamp the untrusted spot into the exact shape the cron expects, or null if unusable.
 export function sanitizeSpot(spot) {
   if (!spot || typeof spot !== 'object') return null;

@@ -1,6 +1,6 @@
 // Tests for the forever-watch re-arm (api/_schedule.js) under frozen clocks.
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { recomputeSpot } from './_schedule.js';
+import { recomputeSpot, watchDead, MAX_WATCH_AGE } from './_schedule.js';
 
 afterEach(() => { vi.useRealTimers(); });
 
@@ -102,5 +102,32 @@ describe('recomputeSpot — anchors follow the shared SF-hour rule', () => {
       expect('eveningISO' in out, `${h}`).toBe(false);
       expect('morningISO' in out, `${h}`).toBe(false);
     }
+  });
+});
+
+describe('watchDead — a watch that can never push again (it may give up its slot)', () => {
+  const end = THIS_WED + 2 * 36e5;          // the 8-10am window
+  const spot = { nextSweepISO: new Date(THIS_WED).toISOString(), rule: RULE, rules: [RULE], leadMinutes: 30 };
+  const stale = end - MAX_WATCH_AGE - 864e5, fresh = end - 864e5;
+  it('stale (past MAX_WATCH_AGE, the cron no longer re-arms it): dead only once its window is over', () => {
+    expect(MAX_WATCH_AGE).toBe(120 * 864e5);
+    expect(watchDead({ spot, savedAt: stale }, end - 60000)).toBe(false);   // mid-sweep: never
+    expect(watchDead({ spot, savedAt: stale }, end)).toBe(true);
+  });
+  it('fresh: never dead (the cron re-arms it on its next tick), and neither is a turned-off watch', () => {
+    expect(watchDead({ spot, savedAt: fresh }, end + 30 * 864e5)).toBe(false);
+    expect(watchDead({ spot, savedAt: undefined }, end + 30 * 864e5)).toBe(false); // no savedAt = not stale, as the cron reads it
+    expect(watchDead({ spot: null, savedAt: stale }, end + 864e5)).toBe(false);
+  });
+  it('a one-shot spot (no rule): dead a day after its sweep started, however fresh', () => {
+    const one = { nextSweepISO: spot.nextSweepISO, leadMinutes: 30 };
+    expect(watchDead({ spot: one, savedAt: fresh }, THIS_WED + 864e5 - 60000)).toBe(false);
+    expect(watchDead({ spot: one, savedAt: fresh }, THIS_WED + 864e5)).toBe(true);
+  });
+  it('the longest window among the side\'s rules counts', () => {
+    const long = { ...RULE, weekday: 'Wed', fromhour: '8', tohour: '14' };
+    const both = { ...spot, rules: [RULE, long] };
+    expect(watchDead({ spot: both, savedAt: stale }, end + 36e5)).toBe(false);
+    expect(watchDead({ spot: both, savedAt: stale }, THIS_WED + 6 * 36e5)).toBe(true);
   });
 });
