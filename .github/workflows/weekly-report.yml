@@ -1,0 +1,108 @@
+name: weekly-report
+run-name: ${{ (github.event_name == 'workflow_dispatch' && inputs.preview) && 'preview report' || 'weekly report' }}
+
+# CURB's weekly email to the owner (scripts/weekly/): visits, search, the iPhone app, alerts and
+# errors, what shipped, issues and mentions, every Wednesday at 8 AM San Francisco time.
+# GitHub's scheduler can skip runs, so Wednesday morning has five tries: the first that succeeds
+# sends, the rest see it went out and stop. A manual run sends a preview unless told otherwise.
+# The repo is public and so are these logs: the scripts print which sections loaded, never numbers.
+on:
+  schedule:
+    - cron: '7 8-12 * * 3'
+      timezone: 'America/Los_Angeles'
+  workflow_dispatch:
+    inputs:
+      preview:
+        description: 'Preview (the subject starts with "Preview:" and it does not count as this week''s email)'
+        type: boolean
+        default: true
+
+permissions:
+  actions: read
+  contents: read
+  issues: read
+
+concurrency:
+  group: weekly-report
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DIR: ${{ github.workspace }}/../weekly
+      HAS_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+    steps:
+      - name: Stop if this week's email already went out today
+        id: guard
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          start=$(date -u -d 'TZ="America/Los_Angeles" 00:00' +%Y-%m-%dT%H:%M:%SZ)
+          sent=$(gh run list -R "$GITHUB_REPOSITORY" --workflow weekly-report.yml --status success \
+            --created ">=$start" --json displayTitle \
+            --jq '[.[] | select(.displayTitle == "weekly report")] | length')
+          echo "already sent today: $sent"
+          echo "sent=$([ "$sent" = "0" ] && echo no || echo yes)" >> "$GITHUB_OUTPUT"
+
+      - if: steps.guard.outputs.sent != 'yes'
+        uses: actions/checkout@v7
+      - if: steps.guard.outputs.sent != 'yes'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - if: steps.guard.outputs.sent != 'yes'
+        run: npm ci
+
+      - name: Collect the week
+        if: steps.guard.outputs.sent != 'yes'
+        timeout-minutes: 8
+        run: node scripts/weekly/report.mjs collect --dir "$DIR"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM: ${{ secrets.VERCEL_TEAM }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GSC_CLIENT_ID: ${{ secrets.GSC_CLIENT_ID }}
+          GSC_CLIENT_SECRET: ${{ secrets.GSC_CLIENT_SECRET }}
+          GSC_REFRESH_TOKEN: ${{ secrets.GSC_REFRESH_TOKEN }}
+          BING_API_KEY: ${{ secrets.BING_API_KEY }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_SALES_ISSUER_ID: ${{ secrets.ASC_SALES_ISSUER_ID }}
+          ASC_SALES_KEY_ID: ${{ secrets.ASC_SALES_KEY_ID }}
+          ASC_SALES_KEY_P8: ${{ secrets.ASC_SALES_KEY_P8 }}
+          ASC_VENDOR_NUMBER: ${{ secrets.ASC_VENDOR_NUMBER }}
+          PH_TOKEN: ${{ secrets.PH_TOKEN }}
+
+      # Optional, two separate Claude runs (claude.mjs): a web search for mentions that never sees the
+      # numbers, then a summary from the numbers with no tools at all. Without the token, or if either
+      # fails or runs long, the email goes out without that part. Output goes to files, not the log.
+      - name: Look for mentions with Claude
+        if: steps.guard.outputs.sent != 'yes' && env.HAS_CLAUDE == 'true'
+        continue-on-error: true
+        timeout-minutes: 15
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          touch "$DIR/claude.started"
+          npm install -g @anthropic-ai/claude-code > /dev/null
+          node scripts/weekly/claude.mjs prompt search --dir "$DIR" \
+            | claude -p --tools WebSearch WebFetch --max-turns 40 --output-format json \
+              --no-session-persistence --strict-mcp-config > "$DIR/claude-search.json" 2> /dev/null \
+            || echo "mention search did not finish"
+          node scripts/weekly/claude.mjs prompt summary --dir "$DIR" \
+            | claude -p --tools "" --max-turns 3 --output-format json \
+              --no-session-persistence --strict-mcp-config > "$DIR/claude-summary.json" 2> /dev/null \
+            || echo "summary did not finish"
+
+      - name: Send the email
+        if: steps.guard.outputs.sent != 'yes'
+        timeout-minutes: 10
+        run: node scripts/weekly/report.mjs send --dir "$DIR" ${{ (github.event_name == 'workflow_dispatch' && inputs.preview) && '--preview' || '' }}
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          WEEKLY_TO: ${{ secrets.WEEKLY_TO }}
