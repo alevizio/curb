@@ -165,15 +165,15 @@ changes, and the full format above only becomes necessary when a city has rules 
 | `limits` | "19th St - Cunningham Pl" | `from` + `to` |
 | `blockside` | Side label | side `label` |
 | `cnnrightleft` | `L` or `R` | side `side` |
-| `weekday` | One weekday per row | one row per entry of `days_of_week` |
+| `weekday` | One weekday per row, or `Holiday`: the side's posted holiday schedule, which sweeps on minor holidays only (SF, `makeTimeCore`'s `holidaySchedule`) | one row per entry of `days_of_week` |
 | `fromhour`, `tohour` | Whole hours | `time_of_day_start`, `time_of_day_end` |
 | `week1` … `week5` | `"1"` or `"0"` | `weeks_of_month` |
-| `holidays` | `"1"` means the rule applies on most holidays | `holidays: "applies"` |
+| `holidays` | DataSF's flag. SF no longer reads it: its street-cleaning tickets show every weekday row stops on holidays (2026-10-05) | `holidays: "applies"` |
 | `months` | New and optional. A list of months in season | `months` |
 | `line` | GeoJSON LineString | `line` |
 
 Where the row is read: `index.html` (viewport fetch, `drawSegments`, `openSheet`), `lib/sweep-core.js`
-(`nextSweep`, `holidaySkip`), `api/_spot.js` (`sanitizeRule`), `api/_schedule.js`, `api/_geo.js`,
+(`nextSweep`, `holidaySkip`, `holidayNote`), `api/_spot.js` (`sanitizeRule`), `api/_schedule.js`, `api/_geo.js`,
 `api/block.js`, `scripts/build-schedules.mjs`, `scripts/build-overview.mjs`.
 
 ## What the row cannot say yet
