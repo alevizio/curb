@@ -1,6 +1,6 @@
 // Regression check (owner report 2026-09-30), run by .github/workflows/verify.yml. Real browser, clock frozen at Wed 2026-09-30 8:49 AM PDT (Delmar St West side is being swept, 8 to 10 AM):
 // open the block and check the alert + calendar buttons exist and arm NEXT Wednesday's sweep. Then a midnight block
-// (4th St, Tue 12 to 2 AM) the evening before and mid-sweep: the sheet, tooltip and toast word it by the night.
+// (4th St, Tue 12 to 2 AM) the evening before, mid-sweep and at 12:30 AM: the sheet, tooltip and toast word it by the night.
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 const puppeteer = createRequire(import.meta.url)('puppeteer-core');
@@ -90,7 +90,18 @@ if (!okEve) process.exitCode = 1;
 // Tue 10/6 1 AM PDT, NorthEast side mid-sweep: the alert arms Thu 12 AM, which the toast calls Wed night
 const mid = await nightSheet(Date.UTC(2026, 9, 6, 8, 0), true);
 console.log(JSON.stringify(mid));
-const okMid = mid.head === 'Sweeping now' && mid.note === ', next sweep Wed night 10/7' && mid.spotSweep === '2026-10-08T07:00:00.000Z' && !mid.errors.length;
+// At 1 AM people are still in Monday night, so the other side's Wed 12 AM sweep (Tuesday night) is tomorrow night.
+const okMid = mid.head === 'Sweeping now' && mid.note === ', next sweep Wed night 10/7' && mid.spotSweep === '2026-10-08T07:00:00.000Z'
+  && mid.other.length === 1 && mid.other[0] === 'Tue night 10/6 · tomorrow night' && !mid.errors.length;
 console.log(okMid ? '✅ midnight sweep in progress: the alert toast names the next night' : '❌ midnight sweep in progress: wrong next-sweep note');
 if (!okMid) process.exitCode = 1;
+// Mon 10/5 12:30 AM PDT: people are still in Sunday night, so the Tue 12 AM sweep (Monday night) is tomorrow
+// night; the other side is being swept (Mon 12 to 2 AM).
+const early = await nightSheet(Date.UTC(2026, 9, 5, 7, 30), true);
+console.log(JSON.stringify(early));
+const okEarly = early.head === 'Mon night' && /^Tue 12 to 2 AM · .* · tomorrow night$/.test(early.sched || '')
+  && early.tipNext === 'Mon night 10/5 → Tue 12 to 2 AM · tomorrow night' && early.other[0] === 'Sweeping now · until 2AM'
+  && !early.errors.length;
+console.log(okEarly ? '✅ 12:30 AM: Monday night reads "tomorrow night"' : '❌ 12:30 AM: Monday night counted from the new date ("tonight")');
+if (!okEarly) process.exitCode = 1;
 await b.close();
