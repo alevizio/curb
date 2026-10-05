@@ -295,23 +295,44 @@ Files now present for the push feature:
   side-named fields: a save reads the 5 known fields in ONE `HMGET` (raw strings) and `pickSlot` picks, in
   order, the armed watch on this side (in place, no duplicate), a watch turned off on this side (`offSide`
   remembers it, so off → on keeps its de-dupe), a pre-multi turned-off record (reused with its de-dupe, as
-  before), an empty slot, then a watch turned off on another side (fresh de-dupe); 5 armed on other sides →
-  `{ full: true }` (409 `alert limit reached`). Sides match on cnn + sideKey or cnn + blockside (auto-park
+  before), an empty slot, a watch turned off on another side (fresh de-dupe), then a DEAD watch (`watchDead`
+  in api/_schedule.js: savedAt past `MAX_WATCH_AGE`, or a one-shot spot with no rule, once its sweep window is
+  over; never one whose window hasn't ended), fresh de-dupe, so dead watches can't hold slots forever; 5 live
+  on other sides → `{ full: true }` (409 `alert limit reached`). Sides match on cnn + sideKey or cnn + blockside (auto-park
   keys by cnnrightleft), else corridor|limits|blockside. A save writes through `claimField` (HSETNX for an
   empty slot, else the same CAS script) and re-reads on a lost race, so two new sides tapped at once both
   land and a cron write between a save's read and write is not dropped. `deleteSub` / `deleteIosSub` remove
   all 5 fields (a dead device is pruned once). Storage is capped at 5 records per device.
+  THE MULTI MARKER (don't drop it): the page puts `multi: 1` in every save's spot (arm, daily refresh, style
+  save; web body and both iOS bridges, which forward the spot untouched). Both save endpoints read it from the
+  raw spot before `sanitizeSpot` drops it. A save WITHOUT it comes from a page loaded before multi-watch (an
+  open PWA tab, the iOS app's web view, which never reloads, an SW-cached navigation), which tells the user
+  "Turning them on here moves them to this curb" / "<A> won't alert anymore" and can't see or turn off other
+  watches. So it keeps the single-watch meaning (`legacy`, `pickLegacy`): it lands on this side's watch (armed
+  or off on this side, de-dupe kept), else watch 0, never 409s, and turns off every other armed watch of the
+  device (de-dupe and `offSide` kept), re-reading the slots after its write so a save landing meanwhile goes
+  off too. Then the old page writes ONE side to `curbAlert`, which the new page reads as the whole truth.
+  THE CAR SLOT: auto-park (`atBase`, `api/parked.js`; latent, nothing calls enable-auto-park today) tags its
+  watch `car: true` and writes the slot already holding `car: true`, else the slot `pickSlot` gives it (409
+  when 5 sides are live: parked.js says so, no "Alerts armed" push), so it follows the car and never
+  overwrites a side the user armed. After its write it re-reads the slots and turns off another armed watch
+  on the car's side (skipping the slot just written). A page save on the car's slot takes it over (drops the
+  tag). `MAX_WATCH_AGE` (~120 days) lives in api/_schedule.js, imported by the store and the sender (and the
+  page's `WATCH_MAX_AGE` is held equal by a test).
 - `api/save-subscription.js` — persists `{ subscription, spot }` via the store, with
   input validation (https push-host allowlist, size caps, spot sanitize/clamp); like the iOS twin, only a
   brand-new endpoint is throttled (per client IP, 10 s), a re-save of a known one always lands. `DELETE
   { subscription, spot? }` turns alerts off: proven by endpoint + a constant-time `keys.auth` match, it
   DISARMS (`spot = null`, the cron skips it) so auto-park keeps resolving the subscription. `spot` names
   the side (`sanitizeSide`, clamped like sanitizeSpot): only that watch goes off, the others are never
-  touched; no side (a page from before multi-watch) turns off every watch of the device. Auto-park
-  (`api/parked.js`) saves with `{ atBase: true }`: watch 0 follows the car, as the single watch did (a new
-  watch per park would pile up), and another armed watch on that same side is turned off (no double push).
+  touched; no side (a page from before multi-watch) turns off every watch of the device. A POST without the
+  multi marker moves the alerts (see THE MULTI MARKER above). Auto-park (`api/parked.js`) saves with
+  `{ atBase: true }`: the car slot follows the car (see THE CAR SLOT), and another armed watch on that same
+  side is turned off (no double push).
 - `api/send-notifications.js` — the sender: loads subs, sends the touchpoint `dueAlert` says is due
-  over web-push / APNs, de-dupes via `notified`, prunes on 410/404. Auth: an Upstash QStash
+  over web-push / APNs, de-dupes via `notified`, prunes on 410/404. A push's deep link names its side,
+  `/b/<cnn>?side=<blockside>` (letters only, which /b/ passes on to the live map link), so with both sides
+  of a block watched a tap opens the side the push is about (sw.js appends `&p=1` after a `?`). Auth: an Upstash QStash
   `Upstash-Signature` JWT (official `Receiver`, raw body — so the schedule's body must be EMPTY — and the exact URL
   `https://curb.guide/api/send-notifications`) OR `Bearer CRON_SECRET`; refuses anything else.
   `?test=ios` and `GET ?status=1` (last run time/outcome/trigger, no sends) are Bearer-only.
@@ -357,7 +378,8 @@ push alongside Web Push:
   `POST {token, spot:{off:true, cnn, sideKey, corridor, limits, blockside}}` — the shipped app's bridge can
   only POST the page's spot, but it forwards that object untouched (builds 6 and 7 build the body
   themselves around it), which is how multi-watch works on iOS with NO app update: the side rides in the
-  spot. `{off:true}` alone (an old page) turns off every watch of the token. Off DISARMS (`spot = null`,
+  spot, and so does the `multi: 1` marker (no marker = a page from before, whose save moves the alerts).
+  `{off:true}` alone (an old page) turns off every watch of the token. Off DISARMS (`spot = null`,
   like web) rather than deleting, so the de-dupe survives turning alerts back on. Watch n's iOS record has
   no `token` property (the field names the device), so code from before multi-watch, run against it after a
   rollback, would send to the field (refused by APNs) rather than repeat a push every tick.
@@ -392,8 +414,8 @@ overwritten either; don't turn them back into a plain HGET + HSET.
 The `notified` de-dupe map is NEVER reset (not by
 the advance, a re-save, a block switch or Turn off): each entry holds the sweep instant it fired for, so
 it only blocks that sweep — an off → on of the same sweep can't re-send a push. A watch stops
-auto-advancing once it goes stale past `MAX_WATCH_AGE` (~120 days) so a frozen rule can't track a city
-schedule change. In the sheet, ties between a side's rows go to the earliest next sweep.
+auto-advancing once it goes stale past `MAX_WATCH_AGE` (~120 days, api/_schedule.js) so a frozen rule can't
+track a city schedule change. In the sheet, ties between a side's rows go to the earliest next sweep.
 
 Cadence (`lib/notify-core.js`, don't regress): Light = lead, Normal = eve + lead, Intense = eve +
 morn + lead; sweeps starting before 07:00 SF get ONE "move it tonight" push from 21:00 SF the evening
@@ -409,8 +431,11 @@ are titled "Test · <which alert> (<when it really fires>)". The holiday table c
 
 Saved alerts (index.html): localStorage `curbAlert` is a MAP keyed on the curb side (`cnn|sideKey` →
 {cnn, sideKey, corridor, limits, blockside, level, voice, armedAt, v}), up to `MAX_ALERTS` = 5 (= the
-server's MAX_WATCHES, a test holds them equal); the single value from before multi-watch migrates to a
-one-entry map in `savedAlerts()`. Keyed on the side, NOT the
+server's MAX_WATCHES, a test holds them equal); a single value (from before multi-watch, or written since by
+a page loaded before it, over the map) becomes a one-entry map in `savedAlerts()` and REPLACES the map, never
+merges: that page's save carried no marker, so the server turned every other watch off, and merging would show
+sides as on that the server dropped (ios/page-bridge.test.mjs runs main's writer against the real endpoint).
+Keyed on the side, NOT the
 sweep instant — the old instant key read "off" after the first sweep while pushes kept coming. "On"
 is claimed only while the watch is alive (< MAX_WATCH_AGE, web permission granted); legacy
 `curbAlertKey` values migrate by corridor|limits|blockside; a matching sheet silently re-arms once a
@@ -426,7 +451,11 @@ live watches the button reads "5 of 5 alerts in use" (`.btn.full`, dashed), the 
 off on its sheet to add this curb." and a tap toasts the limit without saving; the server's 409 reads the
 same (build 7+ passes `save-failed:409`; build 6 can't tell, so the page checks before asking). Intensity /
 Voice are global prefs: a change re-saves the open side at once and each other side on its next sheet open
-(refreshWatch sees the style differ). The iOS bridge comes in two shapes: build
+(refreshWatch sees the style differ). A silent re-arm (`reArm`: refresh, style save) never undoes a Turn off:
+web re-arms and Turn off DELETEs go through one queue (`webQueue`, like `_nativeQ`), so a re-arm in flight
+lands before the DELETE; a re-arm reaching the front of its queue after a Turn off of its side is not sent
+(it is sent only while `alertSpotMatches`), and one that a Turn off overtook in flight (`_offSeq`, bumped by
+`turnOffAlerts`) answers 'off', so it is not marked armed. The iOS bridge comes in two shapes: build
 <= 6 calls `__curbNativePushResult(ok, msg)` and `__curbRequestPush(spot)` resolves a boolean; build 7+
 calls `__curbNativePushResult` with ONE object `{ok, reason, message, status}` (`reason` is a stable code:
 saved, denied, denied-settings, save-failed, registration-failed, timeout, …; `message` the server/iOS
