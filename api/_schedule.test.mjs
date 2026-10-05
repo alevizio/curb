@@ -33,6 +33,13 @@ describe('recomputeSpot — forever-watch re-arm', () => {
     expect(out.eveningISO).toBe(new Date(Date.UTC(2026, 5, 24, 3, 0)).toISOString());
   });
 
+  it('re-arms an overnight watch onto a minor holiday: night routes keep sweeping (Mon Oct 12 2026)', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0))); // Mon Oct 5, after the 12-2 AM window
+    const NIGHT = { ...RULE, weekday: 'Mon', fromhour: '0', tohour: '2' };
+    const out = recomputeSpot({ nextSweepISO: '2026-10-05T07:00:00.000Z', rule: NIGHT, rules: [NIGHT], leadMinutes: 30 });
+    expect(out.nextSweepISO).toBe('2026-10-12T07:00:00.000Z'); // not Oct 19
+  });
+
   it('returns null for a spot without a rule (legacy one-shot, never auto-advances)', () => {
     vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 5, 17, 18, 0)));
     expect(recomputeSpot({ nextSweepISO: new Date(THIS_WED).toISOString() })).toBe(null);
