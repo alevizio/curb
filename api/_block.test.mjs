@@ -111,6 +111,25 @@ describe('block page — content', () => {
     expect(renderBlock('2000', DATA).body).toContain('Next sweeps: <b>Wed, Oct 14</b>');
   });
 
+  it('lists a sweep starting 12 AM to 6 AM by the night before (owner, 2026-10-05)', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0))); // Mon 2026-10-05, noon PDT
+    // 3rd St east side: every Tuesday 2 to 6am, which people call Monday night
+    expect(renderBlock('188101', DATA).body).toContain('Next sweeps: <b>Mon night, Oct 5</b>, <b>Mon night, Oct 12</b> and <b>Mon night, Oct 19</b>.');
+    vi.setSystemTime(new Date(Date.UTC(2026, 9, 6, 10, 0)));  // Tue 3am PDT, mid-sweep: still that night
+    expect(renderBlock('188101', DATA).body).toContain('Next sweeps: <b>Mon night, Oct 5</b>,');
+    vi.setSystemTime(new Date(Date.UTC(2026, 9, 6, 14, 0)));  // Tue 7am PDT, over
+    expect(renderBlock('188101', DATA).body).toContain('Next sweeps: <b>Mon night, Oct 12</b>,');
+    // the sign's own words stay on the badge and in the schedule sentence
+    expect(renderBlock('188101', DATA).body).toContain('every Tuesday 2 to 6am');
+  });
+
+  it('a day with a night side and a day side lists both, night first, still three in all', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0))); // Mon 2026-10-05, noon PDT
+    const both = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b,
+      '3000': ['Pierce St', 'Sacramento St', 'Clay St', 0, [['East', 2, 0, 2, 31, 0], ['West', 2, 9, 11, 31, 0]], '', '', '', '2026-09-27'] } } };
+    expect(renderBlock('3000', both).body).toContain('Next sweeps: <b>Mon night, Oct 5</b>, <b>Tue, Oct 6</b> and <b>Mon night, Oct 12</b>.');
+  });
+
   it('leads the H1, the first line and the description with the baked house numbers', () => {
     const e = DATA.S.b['999'], at = (r) => ({ ...DATA, S: { ...DATA.S, b: { ...DATA.S.b, '999': [...e, r] } } });
     const { body } = renderBlock('999', at([2100, 2199]));

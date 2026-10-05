@@ -81,6 +81,12 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   uses a local equirectangular projection. Single-side blocks draw one centered line.
 - "Next sweep" math = nextSweep(): iterates up to 70 days, matches weekday +
   Nth-occurrence-of-month flag, skips today's window if already past.
+- Night wording (owner, 2026-10-05; `sweepDayWords` / `sweepWords` in lib/sweep-core.js): a sweep STARTING
+  12 AM to before 6 AM reads by the night before, "Mon night 10/5 → Tue 12 to 2 AM · tonight", counting to that
+  night (tonight / tomorrow night / in N days; hours once its midnight has passed). Sheet head "Mon night", side
+  rows + tooltip + alert toast + /b/ "next sweeps" ("Mon night, Oct 5") all come from it. Sign badges, the share
+  text, the report-a-fix prefill and the /b/ schedule sentence keep the sign's own words. Cutoff 6, not the
+  push rule's 7: the reason is in the sweep-core comment.
 - Geolocation: navigator.geolocation is attempted but is often BLOCKED inside
   sandboxed preview iframes. Fallbacks: tap-the-map to drop "parked here", or search
   a street. Real GPS works once deployed / opened in a normal browser tab.
