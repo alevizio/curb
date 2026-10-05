@@ -166,6 +166,16 @@ function pickSlot(slots, spot, now = Date.now()) {
   return null;
 }
 
+// A save from a page loaded before multi-watch (an open PWA tab, the iOS app's web view, which never
+// reloads, a navigation the service worker cached) carries no `multi` marker in its spot, and means what it
+// meant then: "move my alerts to this curb" (that page says so, and then has no way to turn the old side
+// off). So it lands on the watch already on this side, else watch 0, and saveWatch turns off every other
+// armed watch of the device. De-dupe as in pickSlot: kept on this side's watch or a pre-multi off record.
+function pickLegacy(slots, spot) {
+  const s = slots.find(onSide(spot)) || slots.find(offOnSide(spot));
+  return s ? { n: s.n, keep: true } : { n: 0, keep: preMultiOff(slots[0]) };
+}
+
 // A save lands only if its slot still holds what the save read (empty: HSETNX, else the CAS script below),
 // so two saves racing for one empty slot (two new sides tapped at once) can't overwrite each other, and a
 // cron write landing in between is never lost: the loser re-reads and decides again.
@@ -181,18 +191,20 @@ async function claimField(key, field, raw, value) {
 }
 
 /** Save `spot` as one of the device's watches: the one on its side, else a new one (pickSlot).
+ *  `legacy` (a save from a page that predates multi-watch, see pickLegacy) lands on this side's watch or
+ *  watch 0 and turns off every other armed watch: alerts MOVE here, as that page promises.
  *  `atBase` (auto-park) writes the car's watch, the one tagged `car: true`, else a slot pickSlot gives it
  *  (then tagged), so the watch follows the car and never overwrites a side the user armed; another armed
- *  watch on the car's side is turned off so it doesn't push twice, from a re-read of the slots after the
- *  write, so a save landing meanwhile is seen. `record(n, spot, notified)` builds the stored value.
+ *  watch on the car's side is turned off so it doesn't push twice. Both re-read the slots after their write,
+ *  so a save landing meanwhile is seen. `record(n, spot, notified)` builds the stored value.
  *  The de-dupe map of the watch is kept: each entry holds the sweep it fired for, so it only ever blocks
  *  that same sweep (re-taps, off → on and re-saves never re-send a push already delivered).
  *  → { slot } | { full: true } (MAX_WATCHES live, none on this side). */
-async function saveWatch(key, base, spot, { atBase = false }, record) {
+async function saveWatch(key, base, spot, { atBase = false, legacy = false }, record) {
   for (let i = 0; i < 3; i++) {
     const slots = await readWatches(key, base);
     const car = atBase && slots.find((s) => s.rec && s.rec.car);
-    const pick = car ? { n: car.n, keep: true } : pickSlot(slots, spot);
+    const pick = car ? { n: car.n, keep: true } : legacy ? pickLegacy(slots, spot) : pickSlot(slots, spot);
     if (!pick) return { full: true };
     const s = slots[pick.n], prev = pick.keep ? s.rec : null;
     const out = carryForward(prev, spot);
@@ -201,9 +213,9 @@ async function saveWatch(key, base, spot, { atBase = false }, record) {
     // wrong times forever after a city schedule change. advanceSpot preserves it.
     const value = JSON.stringify({ ...record(pick.n, out, prev ? notifiedMap(prev) : {}), ...(atBase ? { car: true } : {}) });
     if (!(await claimField(key, s.field, s.raw, value))) continue;
-    if (atBase && spot) {
-      // another armed watch on the car's side is turned off (no second push for one curb)
-      const goes = (rec) => Boolean(rec.spot) && sameSide(rec.spot, spot);
+    if ((atBase || legacy) && spot) {
+      // turned off: legacy → every other armed watch; atBase → another armed watch on the car's side
+      const goes = (rec) => Boolean(rec.spot) && (legacy || sameSide(rec.spot, spot));
       for (const t of await readWatches(key, base)) {
         if (t.n !== pick.n && t.rec && goes(t.rec)) await casUpdate(key, t.field, (rec) => (goes(rec) ? disarmRec(rec) : null));
       }
@@ -232,11 +244,12 @@ async function disarmWatches(key, slots, side) {
   if (Object.keys(out).length) await redis().hset(key, out);
 }
 
-/** Upsert a subscription + one saved spot (see saveWatch). → { slot } | { full: true }. */
-export async function saveSub(subscription, spot, { atBase = false } = {}) {
+/** Upsert a subscription + one saved spot (see saveWatch: `atBase` auto-park, `legacy` a pre-multi page).
+ *  → { slot } | { full: true }. */
+export async function saveSub(subscription, spot, { atBase = false, legacy = false } = {}) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  return saveWatch(KEY, subscription.endpoint, spot, { atBase },
+  return saveWatch(KEY, subscription.endpoint, spot, { atBase, legacy },
     (n, out, notified) => ({ subscription, spot: out, notified, savedAt: Date.now() }));
 }
 
@@ -381,11 +394,12 @@ export async function getSub(endpoint) {
 // with the real token and marking the de-dupe on watch 0, which would repeat that push every tick.
 const KEY_IOS = 'curb:apns';
 
-/** Upsert an APNs device token + one saved spot. Mirrors saveSub (see saveWatch). → { slot } | { full }. */
-export async function saveIosSub(token, spot) {
+/** Upsert an APNs device token + one saved spot. Mirrors saveSub (see saveWatch; `legacy` = a page from
+ *  before multi-watch, in the app's web view). → { slot } | { full }. */
+export async function saveIosSub(token, spot, { legacy = false } = {}) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  return saveWatch(KEY_IOS, token, spot, {},
+  return saveWatch(KEY_IOS, token, spot, { legacy },
     (n, out, notified) => ({ ...(n ? {} : { token }), spot: out, notified, savedAt: Date.now(), platform: 'ios' }));
 }
 

@@ -644,6 +644,80 @@ describe('multi-watch: up to 5 curb sides per device, each its own record', () =
   });
 });
 
+// A page loaded before multi-watch (an open PWA tab, the iOS app's web view, a navigation the service worker
+// cached) says "Turning them on here moves them to this curb" and then "<A> won't alert anymore". Its saves
+// carry no `multi` marker (the handlers pass legacy: true): they must MOVE the alerts, not add a watch the
+// old page can neither see nor turn off.
+describe('a save from a page that predates multi-watch moves the alerts, as that page promises', () => {
+  const tok = 'ab'.repeat(32);
+  const w = (n = 0) => { const v = mem['curb:subs'] && mem['curb:subs'][n ? `${EP}#${n}` : EP]; return v ? JSON.parse(v) : undefined; };
+  const iw = (n = 0) => { const v = mem['curb:apns'] && mem['curb:apns'][n ? `${tok}#${n}` : tok]; return v ? JSON.parse(v) : undefined; };
+  const at = (cnn) => ({ ...spotA, cnn });
+  const armed = (key) => Object.entries(mem[key] || {}).filter(([, v]) => JSON.parse(v).spot).map(([f, v]) => [f, JSON.parse(v).spot.cnn]);
+
+  it('a new side lands on watch 0 with a fresh de-dupe and every other armed watch goes off, keeping its de-dupe and side', async () => {
+    await saveSub(SUB, at('1')); await saveSub(SUB, at('2')); await saveSub(SUB, at('3'));
+    await markNotified(`${EP}#1`, spotA.nextSweepISO, 'eve');
+    await markNotified(EP, spotA.nextSweepISO, 'lead');
+    expect(await saveSub(SUB, at('9'), { legacy: true })).toEqual({ slot: 0 });
+    expect(armed('curb:subs')).toEqual([[EP, '9']]);                          // one watch, as that page believes
+    expect(w(0).notified).toEqual({});                                          // its entries named cnn 1's sweeps
+    expect(w(1)).toMatchObject({ spot: null, offSide: { cnn: '2' }, notified: { eve: spotA.nextSweepISO } });
+    expect(w(2)).toMatchObject({ spot: null, offSide: { cnn: '3' } });
+    // the new page turning a moved-away side back on finds its own de-dupe: no repeat of the push already sent
+    expect(await saveSub(SUB, at('2'))).toEqual({ slot: 1 });
+    expect(w(1).notified).toEqual({ eve: spotA.nextSweepISO });
+  });
+
+  it('a side it already watches is updated in place with its de-dupe, and the others go off', async () => {
+    await saveSub(SUB, at('1')); await saveSub(SUB, at('2')); await saveSub(SUB, at('3'));
+    await markNotified(`${EP}#1`, spotA.nextSweepISO, 'eve');
+    expect(await saveSub(SUB, { ...at('2'), level: 'light' }, { legacy: true })).toEqual({ slot: 1 });
+    expect(armed('curb:subs')).toEqual([[`${EP}#1`, '2']]);
+    expect(w(1)).toMatchObject({ spot: { level: 'light' }, notified: { eve: spotA.nextSweepISO } });
+    // a side turned off earlier comes back on its own watch, de-dupe included
+    expect(await saveSub(SUB, at('3'), { legacy: true })).toEqual({ slot: 2 });
+    expect(armed('curb:subs')).toEqual([[`${EP}#2`, '3']]);
+  });
+
+  it('"moves them": A then B from the old page leaves only B, and the new page can turn B off', async () => {
+    await saveSub(SUB, at('10'), { legacy: true });
+    await saveSub(SUB, at('20'), { legacy: true });
+    expect(armed('curb:subs')).toEqual([[EP, '20']]);                          // A won't alert anymore, as promised
+    expect(await disarmSub(EP, 'a', { cnn: '20', sideKey: 'L', corridor: 'Haight St', limits: '', blockside: '' })).toBe('ok');
+    expect(armed('curb:subs')).toEqual([]);
+  });
+
+  it('never full: with 5 sides armed it still lands, and the device keeps one armed watch', async () => {
+    for (const c of ['1', '2', '3', '4', '5']) await saveSub(SUB, at(c));
+    expect(await saveSub(SUB, at('6'))).toEqual({ full: true });               // a new page is refused…
+    expect(await saveSub(SUB, at('6'), { legacy: true })).toEqual({ slot: 0 }); // …an old page moves, as it always did
+    expect(armed('curb:subs')).toEqual([[EP, '6']]);
+    expect(Object.keys(mem['curb:subs'])).toHaveLength(MAX_WATCHES);
+  });
+
+  it('a pre-multi turned-off record at watch 0 keeps its de-dupe, as every save did before', async () => {
+    mem['curb:subs'] = { [EP]: JSON.stringify({ subscription: SUB, spot: null, notified: { eve: spotA.nextSweepISO }, savedAt: 1 }) };
+    expect(await saveSub(SUB, spotA, { legacy: true })).toEqual({ slot: 0 });
+    expect(w(0)).toMatchObject({ spot: spotA, notified: { eve: spotA.nextSweepISO } });
+  });
+
+  it('a new page\'s save landing during an old page\'s move is turned off too (the re-read after the write)', async () => {
+    await saveSub(SUB, at('1'));
+    onMget = () => saveSub(SUB, at('2'));                                       // watch 1, mid-move
+    expect(await saveSub(SUB, at('9'), { legacy: true })).toEqual({ slot: 0 });
+    expect(armed('curb:subs')).toEqual([[EP, '9']]);
+  });
+
+  it('iOS: the same move, so the shipped app running an old page stops pushing for the side it left', async () => {
+    await saveIosSub(tok, at('1')); await saveIosSub(tok, at('2'));
+    expect(await saveIosSub(tok, at('9'), { legacy: true })).toEqual({ slot: 0 });
+    expect(armed('curb:apns')).toEqual([[tok, '9']]);
+    expect(iw(0)).toMatchObject({ token: tok, platform: 'ios' });
+    expect(iw(1)).toMatchObject({ spot: null, offSide: { cnn: '2' } });
+  });
+});
+
 // A watch nothing will ever push for again still held one of the device's 5 slots, so a device could get 409
 // with nothing it could free: a watch the cron stopped re-arming (savedAt past MAX_WATCH_AGE) or a one-shot
 // spot with no rule, once its sweep is over. pickSlot reuses one, with a fresh de-dupe, before saying full.

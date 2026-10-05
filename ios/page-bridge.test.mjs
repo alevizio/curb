@@ -180,7 +180,13 @@ describe('multi-watch through both bridges, no app update', () => {
       const { default: save } = await import('../api/save-ios-subscription.js');
       const send = async (spot) => { const r = { code: 0, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; } };
         await save({ method: 'POST', headers: {}, body: JSON.parse(JSON.stringify({ token: TOKEN, platform: 'ios', bundleId: 'guide.curb.ios', spot })) }, r); return r; };
-      for (const s of [north, south]) expect((await send({ ...s, nextSweepISO: '2026-10-06T16:00:00.000Z', leadMinutes: 30, rule, rules: [rule] })).code).toBe(200);
+      // the page's saves carry multi:1 (each side ADDS a watch); it crosses this build's bridge untouched
+      for (const s of [north, south]) {
+        a.g.spot = { ...s, nextSweepISO: '2026-10-06T16:00:00.000Z', leadMinutes: 30, rule, rules: [rule], multi: 1 };
+        await a.run('nativePush(spot)');
+        expect(a.posts.at(-1).spot.multi).toBe(1);
+        expect((await send(a.posts.at(-1).spot)).code).toBe(200);
+      }
       expect((await send(posted.spot)).body).toEqual({ ok: true, off: true });
       const rec = (f) => JSON.parse(mem['curb:apns'][f]);
       expect(rec(TOKEN).spot).toBe(null);                          // Crestline Dr, NE side: off
@@ -303,4 +309,49 @@ describe('saved alerts: a map of watched sides', () => {
     s.g.list = [side('1', 'Northeast', 'Crestline Dr'), side('2', 'West'), { ...side('3', 'West'), limits: '17th St - Mariposa St' }];
     expect(s.run('list.map(a=>alertLabel(a,list))')).toEqual(['Crestline Dr, NE side', 'Kansas St, West side (16th St to 17th St)', 'Kansas St, West side (17th St to Mariposa St)']);
   });
+});
+
+// A page loaded before multi-watch on the same device (an open PWA tab, the iOS app's web view, which never
+// reloads) shares the push subscription / token and the localStorage. Its save carries no multi marker and,
+// as it tells the user, moves the alerts; afterwards it writes ONE side over the map. The page must then
+// show "on" for exactly the sides the server has armed.
+// The last pre-multi page's saved-alert writer, verbatim (main at 74a8a66, index.html).
+const OLD_PAGE = `function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}
+function savedAlert(){try{const a=JSON.parse(localStorage.getItem('curbAlert')||'null');return a&&a.cnn?a:null;}catch(_){return null;}}
+function rememberAlert(spot,v){
+  const a={cnn:String(spot.cnn),sideKey:String(spot.sideKey||''),corridor:spot.corridor||'',limits:spot.limits||'',
+    blockside:spot.blockside||'',level:spot.level,voice:spot.voice,armedAt:Date.now(),v:v||2};
+  try{localStorage.setItem('curbAlert',JSON.stringify(a));localStorage.removeItem('curbAlertKey');}catch(_){}
+  return a;
+}
+function markArmed(spot){if(spot.cnn)rememberAlert(spot);else try{localStorage.setItem('curbAlertKey',spotKey(spot));}catch(_){}}`;
+describe('a page from before multi-watch on the same device', () => {
+  const rule = { weekday: 'Tue', fromhour: '9', tohour: '11', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
+  const SUB = { endpoint: 'https://fcm.googleapis.com/fcm/send/same-device', keys: { p256dh: 'p', auth: 'a' } };
+  const side = (cnn, sideKey, corridor) => ({ cnn, sideKey, corridor, limits: 'A St - B St', blockside: sideKey, nextSweepISO: '2026-10-06T16:00:00.000Z', leadMinutes: 30, rule, rules: [rule], level: 'normal', voice: 'cheeky' });
+  const sides = [side('1', 'North', 'Kansas St'), side('1', 'South', 'Kansas St'), side('2', 'East', 'Fulton St')];
+  const serverOn = () => Object.values(mem['curb:subs'] || {}).map((v) => JSON.parse(v).spot).filter(Boolean).map((sp) => sp.cnn + '|' + sp.sideKey).sort();
+
+  const fresh = side('3', 'West', 'Page St');                           // a side nobody watches yet
+  for (const [label, tapped] of [['a side already on', sides[1]], ['a new side', fresh]]) {
+    it(`its save moves the alerts and its one side replaces the map: "on" matches the server (${label})`, async () => {
+      for (const k of Object.keys(mem)) delete mem[k];
+      const { default: save } = await import('../api/save-subscription.js');
+      const post = async (spot) => { const r = { code: 0, status(c) { this.code = c; return this; }, json() { return this; } };
+        await save({ method: 'POST', headers: { 'x-forwarded-for': '9.9.9.9' }, body: { subscription: SUB, spot } }, r); return r.code; };
+      const s = alertState();
+      for (const sp of sides) { expect(await post({ ...sp, multi: 1 })).toBe(200); s.g.x = sp; s.run('rememberAlert(x)'); }
+      expect(serverOn()).toHaveLength(3);
+      // the old page, same storage: the user taps Sweep alerts there ("Turning them on here moves them to this curb")
+      const old = { console, localStorage: s.g.localStorage };
+      vm.createContext(old);
+      vm.runInContext(OLD_PAGE, old);
+      expect(await post(tapped)).toBe(200);                              // its body: no marker
+      old.x = tapped; vm.runInContext('markArmed(x)', old);
+      // the new page again
+      const shownOn = [...sides, fresh].filter((sp) => { s.g.x = sp; return s.run('alertSpotMatches(x)'); }).map((sp) => sp.cnn + '|' + sp.sideKey);
+      expect(shownOn).toEqual([tapped.cnn + '|' + tapped.sideKey]);
+      expect(serverOn()).toEqual(shownOn);
+    });
+  }
 });

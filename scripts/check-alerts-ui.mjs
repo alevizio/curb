@@ -3,7 +3,8 @@
 // Covers: tie-break on the earliest next sweep, the spot's rules[], "✓ Alerts on" keyed on the curb
 // (not the sweep instant) + the off switch, multi-watch (another side ADDS a watch, the "Also on for"
 // line, Turn off names its side, the 5-watch limit and the server's 409, the pre-multi saved value
-// migrating), legacy-key migration, the reverse-ghost guard, debounced/reverted style saves, the
+// migrating, the multi marker in every save, a Turn off during a silent re-arm landing last),
+// legacy-key migration, the reverse-ghost guard, debounced/reverted style saves, the
 // night-sweep copy, the off row on a short phone, and the native iOS bridge in both shapes: App Store
 // build 6 (boolean promise, two-argument callback) and build 7 (the real pushScript from
 // ContentView.swift: one {ok,reason,message,status} object and __curbRequestPushDetail) — save-failed vs
@@ -135,6 +136,7 @@ try {
   await page.waitForFunction(() => document.getElementById('alertBtn').textContent.includes('Alerts on'), { timeout: 5000 }).catch(() => {});
   const arm = page.__posts.at(-1)?.body.spot || {};
   check('arming posts every rule of the side + the soonest as `rule`', arm.rules?.length === 2 && arm.rule?.weekday === days.early && arm.cnn === '7735000' && arm.sideKey === 'West', JSON.stringify({ rules: arm.rules?.map((r) => r.weekday), rule: arm.rule?.weekday }));
+  check('…with the multi marker (a save without it is a pre-multi page\'s, which moves the alerts)', arm.multi === 1, JSON.stringify(arm.multi));
   check('button reads "✓ Alerts on"', (await text(page, '#alertBtn')) === '✓ Alerts on');
   check('saved alerts: a map keyed on the curb side, not the sweep instant', Object.keys(await alerts(page)).join() === '7735000|West' && (await alerts(page))['7735000|West'].cnn === '7735000' && !(await ls(page, 'curbAlertKey')));
 
@@ -145,7 +147,7 @@ try {
   await tap(page, '[data-k="curbAlertVoice"] button[data-v="drill"]');
   await sleep(1100);
   const saves = page.__posts.slice(n0);
-  check('style taps coalesce into one save with both dials', saves.length === 1 && saves[0].body.spot.level === 'intense' && saves[0].body.spot.voice === 'drill', `${saves.length} saves`);
+  check('style taps coalesce into one save with both dials (and the multi marker)', saves.length === 1 && saves[0].body.spot.level === 'intense' && saves[0].body.spot.voice === 'drill' && saves[0].body.spot.multi === 1, `${saves.length} saves`);
 
   // A save that fails snaps the dials back and says so.
   ctl.status = 500;
@@ -192,7 +194,7 @@ try {
   await sleep(1300);
   ctl.postDelay = 0;
   const q = page.__posts.slice(nq);
-  check('Turn off during a silent re-arm: its DELETE goes out only after the re-arm is answered', q.map((x) => x.method).join() === 'POST,DELETE' && q[1].at >= q[0].answeredAt, JSON.stringify(q.map((x) => [x.method, x.at, x.answeredAt])));
+  check('Turn off during a silent re-arm: its DELETE goes out only after the re-arm is answered', q.map((x) => x.method).join() === 'POST,DELETE' && q[0].body.spot?.multi === 1 && q[1].at >= q[0].answeredAt, JSON.stringify(q.map((x) => [x.method, x.at, x.answeredAt])));
   check('…and the side stays off (the re-arm is not marked armed)', !(await alerts(page))['7735000|West'] && (await text(page, '#alertBtn')).includes('Sweep alerts') && (await toast(page)).includes('Alerts off for Kansas St'), `toast="${await toast(page)}"`);
 
   // The saved value from before multi-watch (ONE side) migrates to the map and still reads on.
@@ -238,7 +240,7 @@ try {
   await open(page, '7735000');
   await sleep(400);
   check('legacy key migrates: button stays "✓ Alerts on"', (await text(page, '#alertBtn')) === '✓ Alerts on');
-  check('…and a silent re-arm sends the side\'s rules', page.__posts.slice(n1).some((p) => p.method === 'POST' && p.body.spot.rules?.length === 2));
+  check('…and a silent re-arm sends the side\'s rules and the multi marker', page.__posts.slice(n1).some((p) => p.method === 'POST' && p.body.spot.rules?.length === 2 && p.body.spot.multi === 1));
 
   // Reverse ghost: past the server's 120-day watch age the button must not claim "on".
   await page.evaluate(() => { const m = JSON.parse(localStorage.getItem('curbAlert')); m['7735000|West'].armedAt = Date.now() - 121 * 864e5; localStorage.setItem('curbAlert', JSON.stringify(m)); });
@@ -304,7 +306,7 @@ try {
   await np.evaluate(() => { window.__nativeMode = 'saved'; });
   await tap(np, '#alertBtn');
   await sleep(400);
-  check('iOS saved: "✓ Alerts on" + rules posted through the bridge', (await text(np, '#alertBtn')) === '✓ Alerts on' && (await np.evaluate(() => window.__nativePosts.at(-1).spot.rules.length)) === 2);
+  check('iOS saved: "✓ Alerts on" + rules and the multi marker posted through the bridge', (await text(np, '#alertBtn')) === '✓ Alerts on' && (await np.evaluate(() => window.__nativePosts.at(-1).spot.rules.length)) === 2 && (await np.evaluate(() => window.__nativePosts.at(-1).spot.multi)) === 1);
   // "Send me a test" right after a style change: the app tracks ONE pending call, so a test posted while
   // the style save is in flight would answer it "test-sent" and drop it. The test must wait its turn.
   await np.evaluate(() => { window.__nativeDelay = 300; window.__nativeLog.length = 0; });
@@ -314,6 +316,7 @@ try {
   await sleep(1000);
   const nlog = await np.evaluate(() => window.__nativeLog.join(' '));
   check('iOS: a test tapped mid-save waits for the save\'s answer', nlog === 'post:save answer:saved post:test answer:test-sent' && (await ls(np, 'curbAlertVoice')) === 'deadpan', nlog);
+  check('…and the style save carries the multi marker through build 6\'s bridge', await np.evaluate(() => window.__nativePosts.filter((m) => !m.test).at(-1).spot.multi === 1));
   await np.evaluate(() => { window.__nativeDelay = 30; });
   await tap(np, '#alertBtn');
   await tap(np, '#alertOffYes');
@@ -357,7 +360,7 @@ try {
   await p7.evaluate(() => { window.__nativeMode = 'saved'; });
   await tap(p7, '#alertBtn');
   await sleep(400);
-  check('iOS build 7 saved: "✓ Alerts on" + rules posted through the bridge', (await text(p7, '#alertBtn')) === '✓ Alerts on' && (await p7.evaluate(() => window.__nativePosts.at(-1).spot.rules.length)) === 2);
+  check('iOS build 7 saved: "✓ Alerts on" + rules and the multi marker posted through the bridge', (await text(p7, '#alertBtn')) === '✓ Alerts on' && (await p7.evaluate(() => window.__nativePosts.at(-1).spot.rules.length)) === 2 && (await p7.evaluate(() => window.__nativePosts.at(-1).spot.multi)) === 1);
   // Notifications turned off in Settings after arming: style saves and the daily refresh fail as 'denied'
   // and must not report — refreshWatch never marks the watch refreshed, so it retries on every sheet open.
   await p7.evaluate(() => { window.__nativeMode = 'denied-settings'; window.__reports.length = 0; });

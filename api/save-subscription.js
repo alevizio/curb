@@ -1,6 +1,8 @@
 // POST { subscription, spot } — store a Web Push subscription + one saved spot: the watch on that curb side
 // (updated in place) or a new one, up to MAX_WATCHES per device (409 past that).
-// spot = { corridor, limits, blockside, nextSweepISO, leadMinutes, eveningISO?, rule?, rules?, cnn?, sideKey? }
+// spot = { corridor, limits, blockside, nextSweepISO, leadMinutes, eveningISO?, rule?, rules?, cnn?, sideKey?, multi? }
+// `multi: 1` = a page that knows about multi-watch. A spot without it comes from a page loaded before (an
+// open tab, a cached navigation) and MOVES the alerts to its curb, as that page tells the user (saveSub legacy).
 // DELETE { subscription, spot? } — turn alerts off (proven by its endpoint + keys.auth): the watch on the
 // side `spot` names, or every watch of the subscription when it names none (a page from before multi-watch).
 import { saveSub, ensureOwnerProof, storeReady, disarmSub, claimSlot, hasSub, MAX_WATCHES } from './_store.js';
@@ -61,7 +63,8 @@ export default async function handler(req, res) {
     if (!(await hasSub(subscription.endpoint)) && !(await claimSlot('webnew:' + clientIp(req), NEW_SUB_MS))) {
       res.status(429).json({ error: 'slow down' }); return;
     }
-    const saved = await saveSub(subscription, cleanSpot);
+    // the marker is read from the raw spot (sanitizeSpot drops it): none = a page from before multi-watch
+    const saved = await saveSub(subscription, cleanSpot, { legacy: Number(spot.multi) !== 1 });
     // MAX_WATCHES armed on other sides: the page says how to free one (it normally knows before asking)
     if (saved.full) { res.status(409).json({ error: 'alert limit reached', max: MAX_WATCHES }); return; }
     // Mint the auto-park ownership proof on first save; return the plaintext exactly once so the

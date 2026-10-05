@@ -1627,9 +1627,12 @@ function openSheet(group, activeKey){
     const r0=armRow;
     // the block's avg ticket time flavors the copy
     const _et=enfFor(group.cnn, r0&&normDay(r0.weekday));
+    // multi:1 rides in every save (arm, refresh, style; web body and both iOS bridges, which forward the
+    // spot untouched): it tells the server this page ADDS a side. A save without it comes from a page
+    // loaded before multi-watch, whose save moves the alerts (api/_store.js pickLegacy).
     return {
       corridor: group.corridor||'', limits: group.limits||'', blockside: active.blockside||'',
-      nextSweepISO: armNs.start.toISOString(), leadMinutes: 30,
+      nextSweepISO: armNs.start.toISOString(), leadMinutes: 30, multi: 1,
       level: getAlertLevel(), voice: getAlertVoice(),
       ...(_et?{tip:fmtMin(_et.avg)}:{}),
       ...(r0?{rule:ruleOf(r0), rules:(active.rows||[r0]).map(ruleOf), cnn:String(group.cnn||''), sideKey:String(active.key||'')}:{}),
@@ -1920,7 +1923,11 @@ const alertId=s=>String(s.cnn)+'|'+String(s.sideKey||'');
 function savedAlerts(){try{
   const a=JSON.parse(localStorage.getItem('curbAlert')||'null');
   if(!a||typeof a!=='object')return {};
-  if(a.cnn){const m={[alertId(a)]:a};localStorage.setItem('curbAlert',JSON.stringify(m));return m;}  // the single pre-multi value
+  // ONE side: the value from before multi-watch, or one a page loaded before it (an open tab, the app's web
+  // view) wrote since, over this map, after its save. That save moved the alerts: the server turns off every
+  // other watch on a save without the multi marker. So that side is all the server has armed and it replaces
+  // the map; merging would show sides as on that the server just turned off.
+  if(a.cnn){const m={[alertId(a)]:a};localStorage.setItem('curbAlert',JSON.stringify(m));return m;}
   const m={};for(const k in a)if(a[k]&&a[k].cnn)m[k]=a[k];return m;
 }catch(_){return {};}}
 function savedAlert(spot){return spot&&spot.cnn?savedAlerts()[alertId(spot)]||null:null;}

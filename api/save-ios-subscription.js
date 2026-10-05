@@ -4,7 +4,9 @@
 // sanitizeSpot as web push, so the cron sees an identical forever-watch shape, and lands on the watch for
 // its curb side or a new one, up to MAX_WATCHES per device (409 past that).
 // The shipped app (builds 6 and 7) builds the body itself but forwards the page's spot object untouched,
-// so everything multi-watch needs rides in the spot: no app update.
+// so everything multi-watch needs rides in the spot: no app update. That includes `multi: 1`, which the
+// page puts in every save's spot: a spot without it comes from a page loaded before multi-watch (the app's
+// web view never reloads on its own) and MOVES the alerts to its curb, as that page tells the user.
 // Turn alerts off: DELETE { token, spot? }, or — because the shipped app's bridge can only POST whatever
 // spot the page hands it, and the page never learns the token — POST { token, spot: { off: true, cnn,
 // sideKey, corridor, limits, blockside } }: the watch on that side, or every watch of the token when the
@@ -56,7 +58,8 @@ export default async function handler(req, res) {
     if (!(await hasIosSub(tok)) && !(await claimSlot('iosnew:' + clientIp(req), NEW_TOKEN_MS))) {
       res.status(429).json({ error: 'slow down' }); return;
     }
-    const saved = await saveIosSub(tok, cleanSpot);
+    // the marker is read from the raw spot (sanitizeSpot drops it): none = a page from before multi-watch
+    const saved = await saveIosSub(tok, cleanSpot, { legacy: Number(spot.multi) !== 1 });
     // the app hands `error` to the page as the message (save-failed, status 409)
     if (saved.full) { res.status(409).json({ error: 'alert limit reached', max: MAX_WATCHES }); return; }
     res.status(200).json({ ok: true, stored: true });

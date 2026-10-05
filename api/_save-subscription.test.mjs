@@ -27,7 +27,8 @@ const { default: ios } = await import('./save-ios-subscription.js');
 const res = () => ({ code: 0, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; } });
 const call = async (h, method, body, ip = '1.2.3.4') => { const r = res(); await h({ method, body, headers: { 'x-forwarded-for': ip } }, r); return r; };
 const SUB = { endpoint: 'https://fcm.googleapis.com/fcm/send/xyz', keys: { p256dh: 'p'.repeat(20), auth: 'auth-secret' } };
-const SPOT = { corridor: 'Haight St', nextSweepISO: '2026-10-06T16:00:00.000Z', leadMinutes: 30,
+// what the current page sends: `multi: 1` in every save's spot (a page from before multi-watch sends none)
+const SPOT = { corridor: 'Haight St', nextSweepISO: '2026-10-06T16:00:00.000Z', leadMinutes: 30, multi: 1,
   rule: { weekday: 'Tue', fromhour: '9', tohour: '11', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' }, cnn: '123', sideKey: 'North' };
 const TOKEN = 'ab'.repeat(32);
 const webRec = (n = 0) => JSON.parse(mem['curb:subs'][SUB.endpoint + (n ? '#' + n : '')]);
@@ -196,5 +197,44 @@ describe('multi-watch: one device, up to 5 curb sides (GitHub #11)', () => {
     expect(full.body.error).toBe('alert limit reached');                   // the app hands `error` to the page
     expect((await call(ios, 'DELETE', { token: TOKEN, spot: side({ ...SPOT, cnn: '300' }) })).code).toBe(200);
     expect(Object.values(mem['curb:apns']).map((v) => JSON.parse(v).spot && JSON.parse(v).spot.cnn).filter(Boolean).sort()).toEqual(['301', '302', '303', '304']);
+  });
+});
+
+// The pre-multi page (an open tab, the app's web view that never reloads) sends the same spot minus the
+// marker, and tells the user "Turning them on here moves them to this curb" / "<A> won't alert anymore".
+describe('a save with no multi marker (a page from before multi-watch) moves the alerts', () => {
+  const { multi, ...OLD } = SPOT;                                        // the old page's spot
+  const at = (s, cnn, sideKey = s.sideKey) => ({ ...s, cnn, sideKey });
+  // [watch number, cnn] of every armed watch
+  const armed = (key) => Object.entries(mem[key] || {}).filter(([, v]) => JSON.parse(v).spot).map(([f, v]) => [Number(f.split('#')[1] || 0), JSON.parse(v).spot.cnn]);
+  const app = (spot) => call(ios, 'POST', JSON.parse(JSON.stringify({ token: TOKEN, platform: 'ios', bundleId: 'guide.curb.ios', spot })));
+
+  it('web: the old page arming B after A leaves only B armed, and nothing is stored about the marker', async () => {
+    expect((await call(web, 'POST', { subscription: SUB, spot: at(SPOT, '1') })).code).toBe(200);   // new page: A
+    expect((await call(web, 'POST', { subscription: SUB, spot: at(SPOT, '2') })).code).toBe(200);   // new page: C
+    expect(armed('curb:subs')).toHaveLength(2);
+    expect((await call(web, 'POST', { subscription: SUB, spot: at(OLD, '3') })).code).toBe(200);    // old page: B
+    expect(armed('curb:subs')).toEqual([[0, '3']]);
+    expect(webRec(1)).toMatchObject({ spot: null, offSide: { cnn: '2' } });
+    expect(JSON.stringify(mem)).not.toContain('multi');
+  });
+
+  it('web: the marker as true or "1" counts too; anything else is an old page', async () => {
+    await call(web, 'POST', { subscription: SUB, spot: at(SPOT, '1') });
+    await call(web, 'POST', { subscription: SUB, spot: { ...at(OLD, '2'), multi: true } });
+    await call(web, 'POST', { subscription: SUB, spot: { ...at(OLD, '3'), multi: '1' } });
+    expect(armed('curb:subs')).toHaveLength(3);
+    await call(web, 'POST', { subscription: SUB, spot: { ...at(OLD, '4'), multi: 2 } });
+    expect(armed('curb:subs')).toEqual([[0, '4']]);
+  });
+
+  it('iOS, through the shipped app\'s body: the marker survives the bridge; without it the move happens', async () => {
+    expect((await app(at(SPOT, '1'))).code).toBe(200);
+    expect((await app(at(SPOT, '2'))).code).toBe(200);
+    expect(armed('curb:apns')).toHaveLength(2);                          // the current page adds
+    expect((await app(at(OLD, '3'))).code).toBe(200);                    // a cached page in the app's web view moves
+    expect(armed('curb:apns')).toEqual([[0, '3']]);
+    expect((await app({ ...at(OLD, '3'), level: 'light' })).code).toBe(200); // its daily refresh: in place, still one
+    expect(armed('curb:apns')).toHaveLength(1);
   });
 });
