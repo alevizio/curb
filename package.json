@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
-    "@upstash/qstash": "^2.11.3",
+    "@upstash/qstash": "^2.12.0",
     "@upstash/redis": "^1.39.0",
     "satori": "^0.33.5",
     "web-push": "^3.6.7"
