@@ -3,14 +3,46 @@
 //
 // Side-effect import: the SF time core attaches nextSweep/alertAnchors to globalThis.
 import '../lib/sweep-core.js';
-const { nextSweep, alertAnchors } = globalThis;
+import { sanitizeRule, sanitizeRules } from './_spot.js';
+const { nextSweep, alertAnchors, isHolidayRow } = globalThis;
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with live data)
 // for this long, so a frozen rule can't push wrong times forever after a city schedule change. One value for
 // the sender (stops the re-arm) and the store (such a watch, once its sweep is over, frees its slot).
 export const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
 
+// The side's rules: its weekday rows plus its posted holiday schedule ('holiday', api/_spot.js), which
+// nextSweep places only on minor holidays, when the weekday rows are stopped (lib/sweep-core.js).
 const rulesOf = (spot) => (Array.isArray(spot.rules) && spot.rules.length ? spot.rules : spot.rule ? [spot.rule] : []);
+
+/** A watch saved before the holiday model (2026-10-05) has no Holiday rule even on a side that posts one: the
+ *  page and server of the time dropped DataSF's weekday 'Holiday' row. Without it the re-arm skips the minor
+ *  holiday and that side loses its holiday push. Returns the spot with its side's Holiday rules added, from
+ *  `holidayRows(cnn)` (data/schedules.json rows [side, 7, fromH, toH, weeksMask, holidays]), or the same spot
+ *  when it already has one, names no block, or its side posts no holiday schedule. The side is the stored
+ *  blockside, case-insensitive (baked 'Northeast', DataSF 'NorthEast'); without one, the sideKey ('Northeas',
+ *  clamped to 8 by sanitizeSpot) as the start of a baked side name, and a cnnrightleft key ('L', 'R', 'C')
+ *  matches the rows DataSF gave no blockside. Pure; the cron persists the result only through an advance. */
+export function withHolidayRules(spot, holidayRows) {
+  if (!spot || !spot.cnn) return spot;
+  const rules = rulesOf(spot);
+  if (!rules.length || rules.some(isHolidayRow)) return spot;
+  const rows = holidayRows(spot.cnn);
+  if (!rows || !rows.length) return spot;
+  const b = String(spot.blockside || '').toLowerCase(), k = String(spot.sideKey || '').toLowerCase();
+  // Only a named side (blockside, or a compass sideKey) can be matched. The bake merges DataSF's side-less
+  // rows (no blockside) across both directions, and on 12 such blocks only ONE direction posts a holiday
+  // schedule, so an L/R/C key could hand a holiday sweep to the side that has none: no fill there.
+  if (!b && k.length <= 1) return spot;
+  const onSide = (side) => {
+    const s = String(side || '').toLowerCase();
+    return b ? s === b : s.startsWith(k);
+  };
+  const bit = (mask, i) => ((mask >> i) & 1 ? '1' : '0');
+  const add = rows.filter((r) => onSide(r[0])).map(([, , from, to, mask, hol]) => sanitizeRule({ weekday: 'Holiday', fromhour: from, tohour: to,
+    week1: bit(mask, 0), week2: bit(mask, 1), week3: bit(mask, 2), week4: bit(mask, 3), week5: bit(mask, 4), holidays: hol ? '1' : '0' })).filter(Boolean);
+  return add.length ? { ...spot, rules: sanitizeRules([...rules, ...add]) } : spot;
+}
 // How long the stored sweep can last: the longest window among the side's rules (SF's longest is 6 h); a
 // day for a spot that carries no rule, whose window nobody knows.
 function windowMs(rules) {

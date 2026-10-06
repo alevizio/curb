@@ -13,16 +13,19 @@ const normDay = globalThis.normDay;
 // A recurring sweep rule the cron can recompute the next occurrence from (the "forever-watch").
 // Validated with nextSweep's own guards (weekday must normalize, fromhour must parse) — anything
 // off returns null and the sub degrades to a pure one-shot. latlng is NEVER accepted (privacy:
-// precise coords stay client-only in localStorage).
+// precise coords stay client-only in localStorage). A side's weekday 'Holiday' row (its posted holiday
+// schedule, sweeping on minor holidays only) is a rule like any other, stored as 'holiday'.
+const LABEL = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'holiday']; // index = normDay (7 = Holiday)
 export function sanitizeRule(rule) {
   if (!rule || typeof rule !== 'object') return null;
-  if (normDay(rule.weekday) === null) return null;
+  const dow = normDay(rule.weekday);
+  if (dow === null || !LABEL[dow]) return null;
   const fromH = parseInt(rule.fromhour, 10);
   if (Number.isNaN(fromH)) return null;
   const bit = (v) => (String(v) === '1' ? '1' : '0');
   return {
-    // store a canonical 3-char label (never arbitrary client text); guard above ensures a valid index
-    weekday: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][normDay(rule.weekday)],
+    // store a canonical label (never arbitrary client text); guard above ensures a valid index
+    weekday: LABEL[dow],
     fromhour: String(fromH),
     tohour: String(parseInt(rule.tohour, 10) || fromH + 1),
     week1: bit(rule.week1), week2: bit(rule.week2), week3: bit(rule.week3),
@@ -33,8 +36,9 @@ export function sanitizeRule(rule) {
 
 // Every rule of the curb side: a quarter of SF sides are swept on several days (or on one weekday split
 // across week bits), and a single `rule` alerted on only one of them. The cron re-arms to the EARLIEST
-// next sweep across all of them. Invalid rows (e.g. weekday "Holiday", 824 real rows) are dropped one
-// by one, duplicates collapse, and the list is capped — 30 real sides have 12 distinct rules.
+// next sweep across all of them, the side's holiday schedule (weekday 'Holiday', ~590 blocks) included.
+// Invalid rows are dropped one by one, duplicates collapse, and the list is capped — 30 real sides have
+// 12 distinct weekly rules, 13 with a holiday schedule.
 export const MAX_RULES = 16;
 export function sanitizeRules(rules) {
   if (!Array.isArray(rules)) return [];

@@ -66,6 +66,9 @@ try {
   check('schedules.json', 'entries with a neighborhood', Object.values(sch.b || {}).filter((e) => e[3] >= 0).length, 8000, 20000);
   check('schedules.json', 'neighborhoods with a page', (sch.hoods || []).filter((h) => h[2]).length, 25, 60);
   check('schedules.json', 'entries with a house-number range', Object.values(sch.b || {}).filter((e) => e[9] && e[9].length).length, 8000, 20000);
+  // the posted holiday schedules (DataSF weekday 'Holiday', baked as dow 7; 590 blocks on 2026-10-05): without
+  // them the map, /b/ pages and alerts would call every holiday-schedule block unswept on minor holidays
+  check('schedules.json', 'entries with a holiday schedule', Object.values(sch.b || {}).filter((e) => (e[4] || []).some((r) => r[1] === 7)).length, 300, 1200);
 
   // sweeps.json — sweeper-GPS pass times keyed by cnn (#26-5451), counts live in _meta
   const sw = load('sweeps.json');

@@ -60,11 +60,17 @@ describe('street text cleanup', () => {
 
 describe('buildBlocks', () => {
   it('groups rows per cnn, week flags as a mask, rows sorted Monday-first', () => {
-    const [b] = buildBlocks([row({ weekday: 'Sun' }), row({ weekday: 'Tues', blockside: 'West' }), row({ weekday: 'Holiday' })]);
+    const [b] = buildBlocks([row({ weekday: 'Sun' }), row({ weekday: 'Tues', blockside: 'West' })]);
     expect(b.street).toBe('Pierce St');
     expect([b.a, b.b]).toEqual(['Pine St', 'California St']);
-    expect(b.rows).toEqual([['West', 2, 8, 10, 5, 0], ['East', 0, 8, 10, 5, 0]]); // "Holiday" rows have no weekday
+    expect(b.rows).toEqual([['West', 2, 8, 10, 5, 0], ['East', 0, 8, 10, 5, 0]]);
     expect(b.tag).toBe('');
+  });
+  it('keeps a side\'s weekday "Holiday" row as dow 7, after the weekdays (its own schedule, posted "HOLIDAYS 4 TO 6AM")', () => {
+    const hol = { weekday: 'Holiday', fromhour: '4', tohour: '6', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1' };
+    const [b] = buildBlocks([row(hol), row({ weekday: 'Sun' }), row({ weekday: 'Tues', blockside: 'West' }), row({ ...hol, blockside: 'West', fromhour: '2' })]);
+    expect(b.rows).toEqual([['West', 2, 8, 10, 5, 0], ['East', 0, 8, 10, 5, 0], ['West', 7, 2, 6, 31, 0], ['East', 7, 4, 6, 31, 0]]);
+    expect(b.sides).toEqual(['East', 'West']); // a Holiday row never adds a side of its own
   });
   it('drops rows whose cnn is not a plain number (the /b/ handler would 404 it; it lands in hrefs)', () => {
     const bs = buildBlocks([row({ cnn: '1"><script>x</script>' }), row({ cnn: '' }), row({ cnn: '2000.0' })]);

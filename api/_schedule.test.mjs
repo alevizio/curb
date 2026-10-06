@@ -1,6 +1,7 @@
 // Tests for the forever-watch re-arm (api/_schedule.js) under frozen clocks.
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { recomputeSpot, watchDead, MAX_WATCH_AGE } from './_schedule.js';
+import { recomputeSpot, watchDead, withHolidayRules, MAX_WATCH_AGE } from './_schedule.js';
+import { sanitizeSpot } from './_spot.js';
 
 afterEach(() => { vi.useRealTimers(); });
 
@@ -33,11 +34,25 @@ describe('recomputeSpot — forever-watch re-arm', () => {
     expect(out.eveningISO).toBe(new Date(Date.UTC(2026, 5, 24, 3, 0)).toISOString());
   });
 
-  it('re-arms an overnight watch onto a minor holiday: night routes keep sweeping (Mon Oct 12 2026)', () => {
+  it('skips a minor holiday for an overnight watch without a holiday schedule (Mon Oct 12 2026)', () => {
     vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0))); // Mon Oct 5, after the 12-2 AM window
-    const NIGHT = { ...RULE, weekday: 'Mon', fromhour: '0', tohour: '2' };
+    const NIGHT = { ...RULE, weekday: 'Mon', fromhour: '0', tohour: '2', holidays: '1' };
     const out = recomputeSpot({ nextSweepISO: '2026-10-05T07:00:00.000Z', rule: NIGHT, rules: [NIGHT], leadMinutes: 30 });
-    expect(out.nextSweepISO).toBe('2026-10-12T07:00:00.000Z'); // not Oct 19
+    expect(out.nextSweepISO).toBe('2026-10-19T07:00:00.000Z');
+  });
+
+  it('advances through the side\'s holiday schedule: onto the minor holiday at its own hours, then back to the weekly rule', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0))); // Mon Oct 5, after the 2-6 AM window
+    const MON = { ...RULE, weekday: 'mon', fromhour: '2', tohour: '6' }, HOL = { ...RULE, weekday: 'holiday', fromhour: '4', tohour: '6', holidays: '1' };
+    const out = recomputeSpot({ nextSweepISO: '2026-10-05T09:00:00.000Z', rule: MON, rules: [MON, HOL], leadMinutes: 30 });
+    expect(out.nextSweepISO).toBe('2026-10-12T11:00:00.000Z'); // Mon Oct 12 4 AM PDT, the holiday hours
+    expect(out.eveningISO).toBe(undefined);                   // a night sweep: the 9 PM "move it tonight" push
+    vi.setSystemTime(new Date(Date.UTC(2026, 9, 12, 13, 30))); // Mon Oct 12 6:30 AM, its window over
+    expect(recomputeSpot(out).nextSweepISO).toBe('2026-10-19T09:00:00.000Z');
+    // Thanksgiving sweeps nothing; the day after does, by the holiday schedule
+    vi.setSystemTime(new Date(Date.UTC(2026, 10, 24, 20, 0))); // Tue Nov 24
+    const THU = { ...MON, weekday: 'thu' };
+    expect(recomputeSpot({ nextSweepISO: '2026-11-19T10:00:00.000Z', rule: THU, rules: [THU, HOL] }).nextSweepISO).toBe('2026-11-27T12:00:00.000Z');
   });
 
   it('returns null for a spot without a rule (legacy one-shot, never auto-advances)', () => {
@@ -77,6 +92,68 @@ describe('recomputeSpot — multi-rule sides', () => {
     const A = { ...RULE, weekday: 'Mon', fromhour: '7', tohour: '8' }, B = { ...RULE, weekday: 'Mon', fromhour: '8', tohour: '10' };
     const out = recomputeSpot({ nextSweepISO: '2026-10-05T14:00:00.000Z', rules: [A, B], rule: A });
     expect(out.nextSweepISO).toBe('2026-10-05T15:00:00.000Z');
+  });
+});
+
+describe('a side\'s holiday schedule, end to end: page rules → saved spot → cron re-arm', () => {
+  it('round-trips the DataSF Holiday row and re-arms onto the minor holiday, then off it', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 9, 19, 0))); // Fri Oct 9 noon PDT
+    // the rows as the page holds them (DataSF yhqp-riqs), through its ruleOf (index.html openSheet)
+    const row = (weekday, f, t, h = '0') => ({ weekday, fromhour: f, tohour: t, week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: h });
+    const rows = [row('Mon', '4', '6'), row('Fri', '4', '6'), row('Holiday', '4', '6')];
+    const spot = sanitizeSpot({ corridor: 'Columbus Ave', blockside: 'SouthWest', nextSweepISO: '2026-10-16T11:00:00.000Z', leadMinutes: 30,
+      rule: rows[1], rules: rows, cnn: '4301000', sideKey: 'SouthWest' });
+    expect(spot.rules.map((r) => r.weekday)).toEqual(['mon', 'fri', 'holiday']);
+    expect(sanitizeSpot(spot).rules).toEqual(spot.rules); // the stored shape re-sanitizes to itself
+    // the cron corrects it to the earliest sweep: Mon Oct 12 4 AM by the holiday schedule (the Mon row is off)
+    const out = recomputeSpot(spot);
+    expect(out.nextSweepISO).toBe('2026-10-12T11:00:00.000Z');
+    vi.setSystemTime(new Date(Date.UTC(2026, 9, 12, 13, 5)));                       // Mon 6:05 AM, over
+    expect(recomputeSpot(out).nextSweepISO).toBe('2026-10-16T11:00:00.000Z');       // Fri Oct 16 4 AM
+  });
+});
+
+// A watch saved before 2026-10-05 has no Holiday rule (the page and server of the time dropped it); the cron adds its
+// side's rows from data/schedules.json (here: Columbus Ave, Lombard to Taylor, as baked) before it re-arms.
+describe('withHolidayRules — an old watch gets its side\'s posted holiday schedule', () => {
+  const row = (weekday, f = '4', t = '6') => ({ weekday, fromhour: f, tohour: t, week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' });
+  const BAKED = { 4301000: [['Southwest', 7, 4, 6, 31, 0]], 227102: [['', 7, 2, 6, 31, 1]] };
+  const rowsOf = (cnn) => BAKED[cnn] || null;
+  const old = (o = {}) => sanitizeSpot({ corridor: 'Columbus Ave', blockside: 'SouthWest', nextSweepISO: '2026-10-12T11:00:00.000Z', leadMinutes: 30,
+    rule: row('Mon'), rules: ['Mon', 'Wed', 'Fri', 'Sat'].map((d) => row(d)), cnn: '4301000', sideKey: 'SouthWest', ...o });
+  const HOL = { weekday: 'holiday', fromhour: '4', tohour: '6', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
+
+  it('adds the side\'s Holiday rule (blockside, any case), in the shape a new page saves', () => {
+    const out = withHolidayRules(old(), rowsOf);
+    expect(out.rules.map((r) => r.weekday)).toEqual(['mon', 'wed', 'fri', 'sat', 'holiday']);
+    expect(out.rules[4]).toEqual(HOL);
+    expect(out.rules[4]).toEqual(sanitizeSpot({ ...old(), rules: [row('Holiday')] }).rules[0]);
+    expect(out.rule).toEqual(old().rule);                                  // the back-compat rule stays
+    expect(withHolidayRules(old({ blockside: 'southwest' }), rowsOf).rules).toEqual(out.rules);
+    // no blockside: the sideKey, clamped to 8 ('Southwes'), names the side
+    expect(withHolidayRules(old({ blockside: '' }), rowsOf).rules).toEqual(out.rules);
+    // a side-less block keyed only by L/R/C is never filled: the bake merges both directions, and on 12 such
+    // blocks (e.g. The Embarcadero 12553102, Market St 8746102) only one direction posts a holiday schedule
+    const lr = old({ cnn: '227102', blockside: '', sideKey: 'R' });
+    expect(withHolidayRules(lr, rowsOf)).toBe(lr);
+    const emb = old({ cnn: '12553102', blockside: '', sideKey: 'R' });
+    expect(withHolidayRules(emb, () => [['', 7, 1, 6, 31, 1]])).toBe(emb);
+    // a legacy record with only `rule`
+    expect(withHolidayRules({ ...old(), rules: undefined }, rowsOf).rules.map((r) => r.weekday)).toEqual(['mon', 'holiday']);
+  });
+
+  it('and re-arms it onto Indigenous Peoples Day at its holiday hours, where the old rules skip the holiday', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 10, 14, 0))); // Sat Oct 10 7 AM PDT, Sat's sweep over
+    const spot = old({ nextSweepISO: '2026-10-10T11:00:00.000Z' });
+    expect(recomputeSpot(spot).nextSweepISO).toBe('2026-10-14T11:00:00.000Z');   // without it: Wed, the holiday skipped
+    expect(recomputeSpot(withHolidayRules(spot, rowsOf)).nextSweepISO).toBe('2026-10-12T11:00:00.000Z');
+  });
+
+  it('leaves every other watch exactly as stored (the same object)', () => {
+    const ne = old({ blockside: 'Northeast', sideKey: 'Northeas', rules: ['Tue', 'Thu', 'Sun'].map((d) => row(d)), rule: row('Tue') });
+    const has = old({ rules: [row('Mon'), row('Holiday')] });
+    const oneShot = sanitizeSpot({ corridor: 'Columbus Ave', blockside: 'Southwest', nextSweepISO: '2026-10-12T11:00:00.000Z' });
+    for (const s of [ne, has, oneShot, old({ cnn: '999' }), old({ blockside: 'North' }), null]) expect(withHolidayRules(s, rowsOf)).toBe(s);
   });
 });
 

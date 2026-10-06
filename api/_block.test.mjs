@@ -104,14 +104,48 @@ describe('block page — content', () => {
     expect(body).toContain('Next sweeps: <b>Thu, Oct 15</b>, <b>Mon, Oct 19</b> and <b>Thu, Oct 22</b>.');
   });
 
-  it('keeps an overnight sweep on a minor holiday in the next dates (SFMTA still sweeps 12 to 6 AM)', () => {
+  it('skips a minor holiday for every weekday row, overnight and flagged ones too (street-cleaning tickets, Oct 2025 to Sep 2026)', () => {
     vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 11, 19, 0))); // Sun Oct 11; Mon Oct 12 is Indigenous Peoples Day
     const night = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b,
-      '778': ['Pierce St', 'Bush St', 'Pine St', 0, [['East', 1, 0, 2, 31, 0], ['West', 1, 9, 11, 31, 0]], '', '', '', '2026-09-27'],
+      '778': ['Pierce St', 'Bush St', 'Pine St', 0, [['East', 1, 0, 2, 31, 1], ['West', 1, 9, 11, 31, 0]], '', '', '', '2026-09-27'],
       '779': ['Pierce St', 'Bush St', 'Pine St', 0, [['West', 1, 9, 11, 31, 0]], '', '', '', '2026-09-27'] } } };
-    // the 12 to 2 AM side sweeps through the holiday, worded by its night; the 9 to 11 AM side skips Oct 12
-    expect(renderBlock('778', night).body).toContain('Next sweeps: <b>Sun night, Oct 11</b>, <b>Sun night, Oct 18</b> and <b>Mon, Oct 19</b>.');
+    expect(renderBlock('778', night).body).toContain('Next sweeps: <b>Sun night, Oct 18</b>, <b>Mon, Oct 19</b> and <b>Sun night, Oct 25</b>.');
     expect(renderBlock('779', night).body).toContain('Next sweeps: <b>Mon, Oct 19</b>, <b>Mon, Oct 26</b> and <b>Mon, Nov 2</b>.');
+  });
+
+  // A side's DataSF weekday 'Holiday' row, baked as dow 7: the posted "HOLIDAYS 4 TO 6AM" schedule
+  const HOL = { ...DATA, S: { ...DATA.S, b: { ...DATA.S.b,
+    // Columbus Ave shape: the southwest side Mon 4 to 6 AM + its holiday schedule, the northeast side Tue
+    '4301000': ['Columbus Ave', 'Lombard St', 'Taylor St', 0, [['Southwest', 1, 4, 6, 31, 0], ['Northeast', 2, 4, 6, 31, 0], ['Southwest', 7, 4, 6, 31, 0]], '', '', '', '2026-09-27'],
+    '4301001': ['Columbus Ave', 'Lombard St', 'Taylor St', 0, [['Southwest', 1, 4, 6, 31, 0], ['Northeast', 2, 4, 6, 31, 0]], '', '', '', '2026-09-27'],
+    // a holiday schedule on a side with no Monday row: it is its own schedule
+    '4302000': ['Columbus Ave', 'Taylor St', 'Jones St', 0, [['East', 3, 9, 11, 31, 0], ['East', 7, 2, 6, 31, 0]], '', '', '', '2026-09-27'] } } };
+
+  it('lists a minor holiday swept by the holiday schedule in the next sweeps, worded by its night', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 11, 19, 0))); // Sun Oct 11, noon PDT
+    expect(renderBlock('4301000', HOL).body).toContain('Next sweeps: <b>Sun night, Oct 11</b> (holiday schedule), <b>Mon night, Oct 12</b> and <b>Sun night, Oct 18</b>.');
+    // with no Monday row at all, the 2 to 6 AM holiday schedule still sweeps Oct 12
+    expect(renderBlock('4302000', HOL).body).toContain('Next sweeps: <b>Sun night, Oct 11</b> (holiday schedule), <b>Wed, Oct 14</b> and <b>Wed, Oct 21</b>.');
+    // New Year's Day, Thanksgiving and Christmas: nothing sweeps; the day after Thanksgiving uses the holiday schedule
+    vi.setSystemTime(new Date(Date.UTC(2026, 10, 25, 20, 0))); // Wed Nov 25, noon PST
+    expect(renderBlock('4302000', HOL).body).toContain('Next sweeps: <b>Thu night, Nov 26</b> (holiday schedule), <b>Wed, Dec 2</b> and <b>Wed, Dec 9</b>.');
+    vi.setSystemTime(new Date(Date.UTC(2026, 11, 21, 20, 0))); // Mon Dec 21: Fri Dec 25 and Fri Jan 1 sweep nothing
+    expect(renderBlock('4302000', HOL).body).toContain('Next sweeps: <b>Wed, Dec 23</b>, <b>Wed, Dec 30</b> and <b>Wed, Jan 6</b>.');
+  });
+
+  it('shows the holiday schedule like its sign, and says what happens on holidays, without touching the title or description', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date(Date.UTC(2026, 9, 5, 19, 0)));
+    const { body } = renderBlock('4301000', HOL), plain = renderBlock('4301001', HOL).body;
+    const badges = [...body.matchAll(/<div class="d(?: hd)?">(\w+)<\/div><div class="t">([^<]+)<\/div>/g)].map((m) => m[1] + ' ' + m[2]);
+    expect(badges).toEqual(['MON 4 TO 6AM', 'TUE 4 TO 6AM', 'HOLIDAYS 4 TO 6AM']); // the holiday schedule last
+    expect(body).toContain('Southwest side · city holidays');
+    expect(body).toContain('On city holidays the regular sweeps stop and the southwest side is swept 4 to 6am instead (nothing is swept on New Year’s Day, Thanksgiving and Christmas).');
+    expect(body).toContain('<p class="hol">These dates follow this block’s holiday schedule on <a href="/holidays">street sweeping holidays</a>.</p>');
+    expect(plain).not.toContain('city holidays');
+    // SEO: the description and the schedule summary ignore the holiday row; the title never read the rows
+    expect(desc(body)).toBe(desc(plain));
+    expect(desc(body)).toContain('SF: Mon, Tue 4 to 6am.');
+    expect(title(body)).toBe('Columbus Ave Street Cleaning (Lombard/Taylor), SF | CURB');
   });
 
   it('links the holiday list right under the next sweep dates, and only when there are dates', () => {

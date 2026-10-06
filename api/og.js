@@ -28,7 +28,8 @@ export default async function handler(req, res) {
     if (!r.ok) return fallback();
     const rows = await r.json();
     if (!rows || !rows.length) return fallback();
-    const r0 = rows[0];
+    // a weekly row: the side's holiday schedule (weekday 'Holiday') only runs on minor holidays
+    const r0 = rows.find((x) => !/^hol/i.test(String(x.weekday || '').trim())) || rows[0];
     const dow = DAYIDX[(r0.weekday || '').trim().toLowerCase().slice(0, 3)];
     const e = ENF[cnn] && dow != null ? ENF[cnn][dow] : null;
     const png = await renderCard({
