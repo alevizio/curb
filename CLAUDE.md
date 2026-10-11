@@ -429,6 +429,13 @@ push alongside Web Push:
   `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_BUNDLE_ID` (see `docs/native-push-plan.md`).
 - On the native wrapper the "🔔 Sweep alerts" button is diverted to `window.__curbNativePush`
   (the `curbPush` bridge → APNs registration), NOT the PWA "Add to Home Screen" hint.
+- Time Sensitive + Open Settings (1.0.5): the app has the `com.apple.developer.usernotifications.time-sensitive`
+  entitlement and the sender marks the act-now APNs pushes (notify-core `urgent`: the 30 min lead, a night sweep's
+  "move it tonight") `interruption-level: time-sensitive`, so a Focus that allows Time Sensitive notifications (Sleep
+  at 9 PM) lets them through; the night-before and morning pushes stay active. Builds without the entitlement get
+  them as active, as before. The pushScript adds `__curbOpenSettings()` (posts `{settings:true}` on curbPush; the
+  PushBridge opens `UIApplication.openNotificationSettingsURLString` before touching any pending save or test), and
+  the Sweep alerts panel's "Notifications are off for CURB" card shows an Open Settings button only when it exists.
 - App Store rating ask (1.0.4): `ios/CURB/ReviewPolicy.swift` (pure rules) + `ReviewPrompt.swift` ask iOS for
   the rating sheet 3 s after the page a REAL sweep alert opened has loaded (payload `tag` starts `curb-sweep`;
   test pushes are `curb-test*`, so keep notify-core TAGS on that prefix), never on the first open (an open =
