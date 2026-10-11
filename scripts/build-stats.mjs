@@ -8,6 +8,9 @@
 // Server-side SoQL group-bys where possible; the neighborhood breakdown streams 24 months of
 // street-cleaning rows by their analysis_neighborhood (only the surge chart joins addresses → EAS).
 // Run: npm run build:stats   (Node 18+, no deps; ~6-8 min, mostly the stream)
+// Hours: the feed shows every 12 AM ticket at a wrong hour; fixHour (midnight-hour.mjs) puts them back.
+
+import { sweepIndex, fixHour } from './midnight-hour.mjs';
 
 const CITES = 'https://data.sf.gov/resource/ab4h-6ztd.json';
 const ADDR = 'https://data.sf.gov/resource/3mea-di5p.json';
@@ -50,11 +53,43 @@ const byViolation = (await soda(CITES, {
   '$where': "citation_issued_datetime >= '2021-01-01'", '$group': 'v', '$order': 'n DESC', '$limit': 14,
 })).map(r => ({ v: r.v || 'Other', n: +r.n, rev: Math.round(+r.rev || 0) }));
 
+log('sweep blocks + posted windows (for the 12 AM hour fix)…');
+const sweeps = sweepIndex(await soda('https://data.sf.gov/resource/yhqp-riqs.json', {
+  '$select': 'cnn,weekday,fromhour,tohour,line', '$limit': 45000,
+}));
+// citation_issued_datetime is SF local wall time (no offset): read the fields straight off the string.
+const clock = (t) => {
+  const m = String(t || '').match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/);
+  return m ? { hh: +m[4], mi: +m[5], dow: new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay() } : null;
+};
+
 log('sweep hour/dow histograms (since 2024)…');
-const sweepHour = (await soda(CITES, {
+const hourCount = new Map((await soda(CITES, {
   '$select': 'date_extract_hh(citation_issued_datetime) as h, count(*) as n',
   '$where': `${SWEEP_WHERE} AND citation_issued_datetime >= '2024-01-01'`, '$group': 'h', '$order': 'h',
-})).map(r => ({ h: +r.h, n: +r.n }));
+})).map(r => [+r.h, +r.n]));
+{ // move the misdated 12 AM tickets back: fetch only the lookalike times (hour = first digit of the minute)
+  const HH = 'date_extract_hh(citation_issued_datetime)', MM = 'date_extract_mm(citation_issued_datetime)';
+  const LOOKALIKE = `((${HH} between 1 and 5 AND ${MM} between ${HH}*10 and ${HH}*10+9) OR (${HH} between 1 and 9 AND ${MM} = ${HH}))`;
+  let cur = '', moved = 0;
+  for (;;) {
+    const rows = await soda(CITES, {
+      '$select': ':id,citation_issued_datetime,latitude,longitude',
+      '$where': `${SWEEP_WHERE} AND citation_issued_datetime >= '2024-01-01' AND ${LOOKALIKE}` + (cur ? ` AND :id > '${cur}'` : ''),
+      '$order': ':id', '$limit': 50000,
+    });
+    if (!rows.length) break;
+    for (const r of rows) {
+      const c = clock(r.citation_issued_datetime);
+      if (!c || fixHour(sweeps, c.hh, c.mi, r.latitude, r.longitude, c.dow) !== 0) continue;
+      hourCount.set(c.hh, hourCount.get(c.hh) - 1); hourCount.set(0, (hourCount.get(0) || 0) + 1); moved++;
+    }
+    cur = rows[rows.length - 1][':id'];
+    if (rows.length < 50000) break;
+  }
+  log(`  ${moved} tickets moved back to 12 AM`);
+}
+const sweepHour = [...hourCount].filter(([, n]) => n > 0).sort((a, b) => a[0] - b[0]).map(([h, n]) => ({ h, n }));
 const sweepDow = (await soda(CITES, {
   '$select': 'date_extract_dow(citation_issued_datetime) as d, count(*) as n',
   '$where': `${SWEEP_WHERE} AND citation_issued_datetime >= '2024-01-01'`, '$group': 'd', '$order': 'd',
@@ -93,7 +128,7 @@ const newDetail = () => ({ n: 0, rev: 0, minSum: 0, minN: 0, hours: Array(24).fi
 let cursor = '', seen = 0, latest = '';
 for (;;) {
   const rows = await soda(CITES, {
-    '$select': ':id,citation_location,fine_amount,citation_issued_datetime,analysis_neighborhood',
+    '$select': ':id,citation_location,fine_amount,citation_issued_datetime,analysis_neighborhood,latitude,longitude',
     '$where': `${SWEEP_WHERE} AND citation_issued_datetime > '${SINCE}'` + (cursor ? ` AND :id > '${cursor}'` : ''),
     '$order': ':id', '$limit': 50000,
   });
@@ -104,14 +139,14 @@ for (;;) {
     const fine = +r.fine_amount || 0;
     const hood = r.analysis_neighborhood || null;
     if (r.citation_issued_datetime > latest) latest = r.citation_issued_datetime;
-    // citation_issued_datetime is SF local wall time (no offset) — parse the fields directly.
-    const m = String(r.citation_issued_datetime || '').match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/);
-    const hh = m ? +m[4] : null, mi = m ? +m[5] : null;
-    const dow = m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay() : null;
+    const c = clock(r.citation_issued_datetime);
     if (hood) {
       const h = hoods.get(hood) || { n: 0, rev: 0 }; h.n++; h.rev += fine; hoods.set(hood, h);
       const d = hoodDetail.get(hood) || newDetail(); d.n++; d.rev += fine;
-      if (hh !== null) { d.hours[hh]++; d.dows[dow]++; d.minSum += hh * 60 + mi; d.minN++; }
+      if (c) {
+        const hh = fixHour(sweeps, c.hh, c.mi, r.latitude, r.longitude, c.dow);
+        d.hours[hh]++; d.dows[c.dow]++; d.minSum += hh * 60 + c.mi; d.minN++;
+      }
       if (p) d.streets.set(p.name, (d.streets.get(p.name) || 0) + 1);
       hoodDetail.set(hood, d);
     }
