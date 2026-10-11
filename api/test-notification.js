@@ -65,7 +65,7 @@ export default async function handler(req, res) {
       const mins = tp === 'lead' ? 30 : tp === 'morn' ? 120 : undefined;
       const r = renderOne(spot, tp, { level, voice, mins });
       const when = `${sfDay(fireAt[r.key])} ${sfHour(new Date(fireAt[r.key]).toISOString())}`;
-      return { key: r.key, tag: testTag(r.key), title: `Test · ${LABEL[r.key]} (${when})`, body: `${r.title}. ${r.body}` };
+      return { key: r.key, tag: testTag(r.key), title: `Test · ${LABEL[r.key]} (${when})`, body: `${r.title}. ${r.body}`, urgent: r.urgent };
     });
 
     if (dryRun) { res.status(200).json({ ok: true, dryRun: true, level, voice, which, plan }); return; }
@@ -116,7 +116,8 @@ async function sendApns(token, plan) {
   const exp = Math.floor(Date.now() / 1000) + 300;
   try {
     for (const p of plan) {
-      const aps = { aps: { alert: { title: p.title, body: p.body }, sound: 'default', 'thread-id': p.tag }, url: '/', tag: p.tag };
+      // like the real sender: the act-now pushes are Time Sensitive (app 1.0.5+), so a test shows what a Focus lets through
+      const aps = { aps: { alert: { title: p.title, body: p.body }, sound: 'default', 'thread-id': p.tag, ...(p.urgent ? { 'interruption-level': 'time-sensitive' } : {}) }, url: '/', tag: p.tag };
       let { status, reason } = await sendOne(session, jwt, token, aps, p.tag, exp);
       if (status === 410 || (status === 400 && /BadDeviceToken|Unregistered/i.test(reason))) {
         if (!alt) alt = openSession(altHost());
