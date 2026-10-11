@@ -332,7 +332,10 @@ export default async function handler(req, res) {
           const due = dueAlert(watch, notified, now);
           if (!due || iosDown.has(token)) continue;
           const tag = tagFor(due.tag, slot);
-          const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': tag }, url: deepLink(spot), tag };
+          // The act-now pushes (30 min before, "move it tonight": notify-core `urgent`) are Time Sensitive: in the app
+          // from 1.0.5 (its entitlement) they can get through a Focus, like Sleep at 9 PM, that allows Time Sensitive
+          // notifications. Older builds have no entitlement, so iOS shows them as before (active).
+          const aps = { aps: { alert: { title: due.title, body: due.body }, sound: 'default', 'thread-id': tag, ...(due.urgent ? { 'interruption-level': 'time-sensitive' } : {}) }, url: deepLink(spot), tag };
           // apns-expiration = when this push stops being worth delivering (notify-core expiresAt: the
           // sweep for lead/tonight, SF midnight for the "tomorrow" eve push): a device that reconnects
           // later never shows a stale or wrong-day alert.

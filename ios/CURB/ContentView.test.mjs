@@ -148,6 +148,27 @@ describe('push bridge (pushScript)', () => {
     g.__curbNativePushResult();
     expect(await r).toMatchObject({ ok: false });
   });
+
+  it('__curbOpenSettings (1.0.5) posts {settings:true} and leaves a pending save alone', async () => {
+    const { g, posted, run } = page();
+    run(JS.pushScript);
+    const save = g.__curbRequestPushDetail({ corridor: 'Valencia St' });
+    g.__curbOpenSettings();
+    expect(posted.curbPush).toEqual([{ spot: { corridor: 'Valencia St' } }, { settings: true }]);
+    g.__curbNativePushResult({ ok: true, status: 200, message: 'saved', reason: 'saved' });
+    expect(await save).toMatchObject({ ok: true, reason: 'saved' });   // the save still gets its own answer
+    // native handles it first, before any permission prompt or pending call, and opens CURB's notification settings
+    expect(SWIFT).toMatch(/body\["settings"\] as\? Bool\) == true \{\s*if let url = URL\(string: UIApplication\.openNotificationSettingsURLString\)/);
+    expect(SWIFT.indexOf('body["settings"]')).toBeLessThan(SWIFT.indexOf('body["test"]'));
+  });
+});
+
+describe('entitlements', () => {
+  it('Time Sensitive notifications (1.0.5): the server marks the act-now pushes time-sensitive', () => {
+    const ent = readFileSync(new URL('./CURB.entitlements', import.meta.url), 'utf8');
+    expect(ent).toMatch(/<key>com\.apple\.developer\.usernotifications\.time-sensitive<\/key>\s*<true\/>/);
+    expect(ent).toMatch(/<key>aps-environment<\/key>/);
+  });
 });
 
 describe('Info.plist', () => {

@@ -262,6 +262,11 @@ try {
   check('app, denied in Settings: the card says no alert can reach this iPhone', (await text(app, '.ap-warn b.h')) === 'Notifications are off for CURB' && (await text(app, '.ap-warn p')).startsWith('No alert can reach this iPhone.'), await text(app, '.ap-warn'));
   check('…no reports', await app.evaluate(() => !window.__reports.length));
   await shot(app, '5-app-denied');
+  await tap(app, '#apSettings');
+  check('…the app (1.0.5) opens CURB\'s notification settings: {settings:true}, outside the save queue', await app.evaluate(() => JSON.stringify(window.__nativePosts.at(-1)) === '{"settings":true}'));
+  await app.evaluate(() => { const f = window.__curbOpenSettings; delete window.__curbOpenSettings; renderAlertsPanel(); window.__keep = f; });
+  check('…an app before 1.0.5 has no Open Settings button, only where to go', !(await app.$('#apSettings')) && (await text(app, '.ap-warn p')).includes('Settings → Notifications → CURB'));
+  await app.evaluate(() => { window.__curbOpenSettings = window.__keep; });
   await closePanel(app);
   await tap(app, '#infoBtn');
   check('…and the menu line says "Off in iPhone Settings" in red', (await text(app, '#imAlertsSub')) === 'Off in iPhone Settings' && await app.$eval('#imAlertsSub', (e) => e.classList.contains('bad')));

@@ -718,3 +718,43 @@ describe('a watch saved before the holiday model', () => {
     expect(v.functions['api/send-notifications.js'].includeFiles).toContain('data/schedules.json');
   });
 });
+
+describe('APNs interruption level', () => {
+  // The act-now pushes (30 min before, a night sweep's "move it tonight") are Time Sensitive: the app has the
+  // entitlement from 1.0.5, so a Focus that allows Time Sensitive notifications lets them through. The calm
+  // night-before push stays active. Builds without the entitlement show every push as active, as before.
+  const tok = 'cd'.repeat(32);
+  const armIos = (spot) => { mem['curb:subs'] = {}; mem['curb:apns'] = { [tok]: JSON.stringify({ token: tok, spot, notified: {}, savedAt: NOW, platform: 'ios' }) }; };
+  let quiet, got;
+  beforeEach(() => {
+    quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
+    Object.assign(process.env, { APNS_KEY_P8: 'k', APNS_KEY_ID: 'KEYID', APNS_TEAM_ID: 'TEAMID' });
+    got = []; apnsReply = (t, collapse, aps) => { got.push(aps.aps); return { status: 200 }; };
+  });
+  afterEach(() => { quiet.mockRestore(); for (const k of ['APNS_KEY_P8', 'APNS_KEY_ID', 'APNS_TEAM_ID']) delete process.env[k]; });
+
+  it('the 30 min "move the car" push is Time Sensitive', async () => {
+    armIos(SPOT);   // NOW is 20 min before its 9 AM sweep
+    await run(bearer());
+    expect(got).toHaveLength(1);
+    expect(got[0]).toMatchObject({ 'interruption-level': 'time-sensitive', sound: 'default' });
+  });
+
+  it('the night-before push stays active (no interruption level)', async () => {
+    armIos(SPOT);
+    vi.setSystemTime(Date.parse('2026-06-19T03:05:00Z'));   // 8:05 PM PDT the evening before
+    await run(bearer());
+    expect(got).toHaveLength(1);
+    expect(got[0].alert.title).toBe('🧹 Sweep day tomorrow');
+    expect(got[0]['interruption-level']).toBeUndefined();
+  });
+
+  it('a night sweep\'s "move it tonight" push is Time Sensitive', async () => {
+    armIos({ corridor: 'Steiner St', blockside: 'North', nextSweepISO: '2026-06-24T09:00:00.000Z', leadMinutes: 30, level: 'normal' });  // Wed 2 AM PDT
+    vi.setSystemTime(Date.parse('2026-06-24T04:05:00Z'));   // Tue 9:05 PM PDT
+    await run(bearer());
+    expect(got).toHaveLength(1);
+    expect(got[0].alert.title).toBe('🌙 Move it tonight');
+    expect(got[0]['interruption-level']).toBe('time-sensitive');
+  });
+});

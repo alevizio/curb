@@ -374,6 +374,11 @@ private struct CurbWebView: UIViewRepresentable {
           window.__curbTestPush = function (opts) {
             window.webkit.messageHandlers.curbPush.postMessage({ test: true, opts: opts || {} });
           };
+          // Open CURB's own notification settings (1.0.5+): the page's "Open Settings" when they are off.
+          // Fire-and-forget, never part of the one-pending-call queue: no permission prompt, no answer.
+          window.__curbOpenSettings = function () {
+            window.webkit.messageHandlers.curbPush.postMessage({ settings: true });
+          };
         })();
         """,
         injectionTime: .atDocumentStart,
@@ -917,6 +922,12 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "curbPush", let body = message.body as? [String: Any] else { return }
+        // "Open Settings": straight to CURB's notification settings. Handled before anything else, so it never
+        // touches a pending save or test (the page's queue can't see it) and never asks for permission.
+        if (body["settings"] as? Bool) == true {
+            if let url = URL(string: UIApplication.openNotificationSettingsURLString) { UIApplication.shared.open(url) }
+            return
+        }
         if (body["test"] as? Bool) == true {
             pendingTest = (body["opts"] as? [String: Any]) ?? [:]
             pendingSpot = nil

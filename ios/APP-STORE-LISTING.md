@@ -51,6 +51,20 @@ Built by one person in San Francisco who got tired of the parking math.
 Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB stores an anonymous push token with the curb you picked.
 ```
 
+## What's New (v1.0.5)
+Build 10. DRAFT for Alejandro to edit, not final. Inside the app: the move-your-car alerts are Time Sensitive (the
+entitlement; the server marks the 30 min and "move it tonight" pushes) and the Sweep alerts screen can open CURB's
+notification settings. The Sweep alerts screen itself comes from curb.guide and is already live for every version.
+```
+Alerts you can count on:
+
+• The alerts that tell you to move your car are now Time Sensitive, so they can get through a Focus like Sleep or Do Not Disturb.
+• The new Sweep alerts screen in the ⓘ menu shows every curb you watch and when each alert comes, and turns them off in one tap.
+• If notifications are off for CURB, the screen tells you and opens Settings for you.
+
+The posted sign is always the final authority.
+```
+
 ## What's New (v1.0.4)
 Build 9. DRAFT for Alejandro to edit, not final. The only change inside the app is the rating ask: the map, alerts and copy come from curb.guide and update without a release.
 ```

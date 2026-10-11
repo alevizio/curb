@@ -2429,7 +2429,9 @@ function apStatus(app,n){
     if(!pushSupported())return `<div class="ap-stat"><i></i>This browser can't show alerts. Use Calendar on a curb instead.</div>`;
     if(Notification.permission==='denied')return `<div class="ap-warn"><b class="h">Notifications are blocked</b><p>Allow notifications for curb.guide in this browser's site settings to get alerts.</p></div>`;
   }
-  if(app&&pushState==='denied')return `<div class="ap-warn"><b class="h">Notifications are off for CURB</b><p>No alert can reach this iPhone. Turn them on in <b>Settings → Notifications → CURB</b>.</p></div>`;
+  // the app from 1.0.5 opens CURB's notification settings itself (__curbOpenSettings); older builds only say where
+  if(app&&pushState==='denied')return `<div class="ap-warn"><b class="h">Notifications are off for CURB</b><p>No alert can reach this iPhone. Turn them on in <b>Settings → Notifications → CURB</b>.</p>`
+    +(typeof window.__curbOpenSettings==='function'?'<button class="btn ios-get" id="apSettings" type="button">Open Settings</button>':'')+'</div>';
   if(AP.check==='gone')return `<div class="ap-stat"><i></i>Alerts are off in this browser. Turn them on again from a curb.</div>`;
   if(!n)return '';
   if(AP.check==='checking')return `<div class="ap-stat"><i></i>Checking notifications…</div>`;
@@ -2513,7 +2515,9 @@ function renderAlertsPanel(){
   const all=document.getElementById('apAllOff'); if(all)all.onclick=()=>{AP.confirmAll=true;renderAlertsPanel();document.getElementById('apAllNo').focus();};
   const yes=document.getElementById('apAllYes'); if(yes)yes.onclick=turnOffAllAlerts;
   const no=document.getElementById('apAllNo'); if(no)no.onclick=()=>{AP.confirmAll=false;renderAlertsPanel();const b=document.getElementById('apAllOff');if(b)b.focus();};
-  const get=body.querySelector('.ios-get'); if(get)get.onclick=()=>track('ios_app_offer_tap');
+  const get=body.querySelector('a.ios-get'); if(get)get.onclick=()=>track('ios_app_offer_tap');
+  // back from Settings, visibilitychange re-checks and this card turns into "Notifications are on"
+  const set=document.getElementById('apSettings'); if(set)set.onclick=()=>{track('alerts_open_settings');window.__curbOpenSettings();};
 }
 async function loadAlertsPanel(){
   const gen=++AP.gen, list=liveAlerts();
