@@ -65,6 +65,12 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
    Precomputed offline into `data/enforcement.json` — see
    `scripts/build-enforcement-records.py` and `docs/sweeper-data-research.md`. Powers the
    "🎯 Ticketed ~9:11a" lines.
+   Feed gotchas (checked 2026-10-11 against the records file, ticket by ticket): (1) every ticket written
+   12:00-12:59 AM shows a WRONG hour, the first digit of the minute (00:24 → 02:24); anything that reads
+   hours from the feed must go through `fixHour` (scripts/midnight-hour.mjs, used by build-stats). (2) The
+   feed's latitude/longitude (added mid-2026) geocode the typed ADDRESS, not the officer's GPS: same ticket,
+   different block ~1 in 4 times, so keep the records file for block times. (3) The feed is missing most of
+   Nov-Dec 2024; the records file is missing mid-Aug 2025 to mid-Mar 2026 (Excel row limit).
 
 ### Spatial queries (verified working)
 - Segments in viewport: `?$where=intersects(line,'POLYGON((lng lat, ...))')&$limit=2500`
