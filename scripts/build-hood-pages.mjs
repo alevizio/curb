@@ -25,6 +25,9 @@ const stats = JSON.parse(readFileSync(new URL('data/stats.json', ROOT), 'utf8'))
 const FINE = 105;           // current SF street-cleaning fine (2026)
 const DOW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DOW_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+// The app's night wording (sweepDayWords in lib/sweep-core.js): a time from 12 AM to before 6 AM reads
+// by the night before, so a Thursday 12am peak is "Wednesday nights", not "Thursdays".
+const dayWords = (dowIdx, hour) => (hour < 6 ? `${DOW[(dowIdx + 6) % 7]} nights` : `${DOW[dowIdx]}s`);
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // Safe to embed in <script type="application/ld+json">: \u-escape the HTML/script delimiters so a
@@ -96,11 +99,11 @@ const mapEmbed = (name) => {
 
 // Evergreen "how enforcement works" explainer — the SpotAngels-style rules section that adds dwell
 // time + real value, with one hood-specific line (the modal time/day) so it isn't a boilerplate clone.
-const enforcementSection = (name, typical, dowIdx) => `
+const enforcementSection = (name, typical, days) => `
   <section>
     <div class="sec-k">How enforcement works</div>
     <h2>The 2-hour sign, the <b>20-minute</b> reality</h2>
-    <p class="lede">San Francisco posts a street-cleaning window, often two hours, but the ticket doesn't wait. Across about a million GPS-located citations (~815,000 matched to blocks), the typical SF block gets <b>most of its tickets inside the same ~20 minutes</b>, usually right after the window opens. In ${esc(name)}, that cluster lands around <b>${typical}</b> on <b>${DOW[dowIdx]}s</b>.</p>
+    <p class="lede">San Francisco posts a street-cleaning window, often two hours, but the ticket doesn't wait. Across about a million GPS-located citations (~815,000 matched to blocks), the typical SF block gets <b>most of its tickets inside the same ~20 minutes</b>, usually right after the window opens. In ${esc(name)}, that cluster lands around <b>${typical}</b> on <b>${days}</b>.</p>
     <div class="panel">
       <p class="lede"><b>Once the sweeper has physically passed your side of the street</b>, SFMTA's own rules let you re-park there, even before the posted hours end. But don't park early assuming it's done, and being even a minute off is still ticketable.</p>
       <p class="lede" style="margin-top:10px">Good to know: a residential parking permit (RPP) runs <b>$224/yr</b>; meters are free on <b>Sundays</b> and three holidays; and a car can't sit in one spot more than <b>72 hours</b>, even with a permit. The posted sign is always the final word.</p>
@@ -409,6 +412,7 @@ function renderHood(h, idx) {
   // "Typical time" = the MODAL hour (most tickets), not the mean: street cleaning is bimodal in
   // commercial hoods (overnight) vs residential (morning), and a mean lands misleadingly between.
   const typical = fmtHour(peakHour.i);
+  const days = dayWords(peakDow.i, peakHour.i);
   const isHoodTiming = !!hoursArr;
 
   // top streets in this hood (per-hood only; omit the section in fallback)
@@ -438,7 +442,7 @@ function renderHood(h, idx) {
   // shortened to "SF" (then the brand dropped) when a long name would push past the limit.
   const titles = [`Street cleaning in ${name}, San Francisco | CURB`, `Street cleaning in ${name}, SF | CURB`, `Street cleaning in ${name}, SF`];
   const title = titles.find((t) => t.length < 60) || titles[2];
-  const descs = ['San Francisco', 'SF'].map((g) => `When is street cleaning in ${name}, ${g}? Per-block schedules on a live map, plus when tickets actually hit (~${typical} on ${DOW[peakDow.i]}s) and the $${FINE} fine.`);
+  const descs = ['San Francisco', 'SF'].map((g) => `When is street cleaning in ${name}, ${g}? Per-block schedules on a live map, plus when tickets actually hit (~${typical} on ${days}) and the $${FINE} fine.`);
   const desc = descs.find((d) => d.length <= 165) || descs[1].replace(' on a live map', ''); // long names: drop the least useful phrase
   // "Open the map" lands on this neighborhood (the app's /?bbox= deep link), not the default center
   const m = HOOD_MAPS[sl];
@@ -450,7 +454,7 @@ function renderHood(h, idx) {
   const faqs = [
     {
       q: `When is street cleaning in ${name}?`,
-      a: `Street-cleaning schedules in ${name} are set block by block: each side of each street has its own day and time, so there's no single neighborhood-wide schedule. *Open ${name} on the CURB map* to see the exact posted schedule and next sweep for any block. In practice, most ${name} street-cleaning tickets are written on *${DOW[peakDow.i]}s*, clustered around *${typical}*.`,
+      a: `Street-cleaning schedules in ${name} are set block by block: each side of each street has its own day and time, so there's no single neighborhood-wide schedule. *Open ${name} on the CURB map* to see the exact posted schedule and next sweep for any block. In practice, most ${name} street-cleaning tickets are written on *${days}*, clustered around *${typical}*.`,
     },
     {
       q: `How much is a street-cleaning ticket in San Francisco?`,
@@ -458,11 +462,11 @@ function renderHood(h, idx) {
     },
     {
       q: `How do I avoid a street-cleaning ticket in ${name}?`,
-      a: `Move your car before the posted window: most tickets here are written around ${typical} on ${DOW[peakDow.i]}s. CURB lets you tap your block, see the next sweep, and *set a free reminder (calendar or push)* ~30 minutes before, plus the night before. The posted sign always wins if it differs.`,
+      a: `Move your car before the posted window: most tickets here are written around ${typical} on ${days}. CURB lets you tap your block, see the next sweep, and *set a free reminder (calendar or push)* ~30 minutes before, plus the night before. The posted sign always wins if it differs.`,
     },
     {
       q: `Can I park after the street sweeper passes in ${name}?`,
-      a: `Yes. Under SFMTA's rules, once the sweeper has physically swept your side of the street you can re-park there, *even if the posted hours haven't ended*. But you can't park during the posted window just because it looks done early, and being even a minute off is ticketable. On most ${name} blocks the sweep clusters around *${typical}* on *${DOW[peakDow.i]}s*. Check your exact block on the map.`,
+      a: `Yes. Under SFMTA's rules, once the sweeper has physically swept your side of the street you can re-park there, *even if the posted hours haven't ended*. But you can't park during the posted window just because it looks done early, and being even a minute off is ticketable. On most ${name} blocks the sweep clusters around *${typical}* on *${days}*. Check your exact block on the map.`,
     },
     {
       q: `Is street cleaning enforced on holidays?`,
@@ -551,7 +555,7 @@ function renderHood(h, idx) {
       <div class="stat"><div class="v">#${h.rank}</div><div class="l">of ${hoods.length} hoods by volume</div></div>
       ${surgeStat}
     </div>
-    <p class="lede" style="margin-top:16px">The street-cleaning fine is <b>$${FINE}</b> (2026). ${isHoodTiming ? `In ${esc(name)}, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b>.` : `Citywide, most tickets are written on <b>${DOW[peakDow.i]}s</b> around <b>${typical}</b>. ${esc(name)} follows the same pattern.`}</p>
+    <p class="lede" style="margin-top:16px">The street-cleaning fine is <b>$${FINE}</b> (2026). ${isHoodTiming ? `In ${esc(name)}, most tickets are written on <b>${days}</b> around <b>${typical}</b>.` : `Citywide, most tickets are written on <b>${days}</b> around <b>${typical}</b>. ${esc(name)} follows the same pattern.`}</p>
   </section>
 
   ${parkingSection(name, ENRICH[sl])}
@@ -572,7 +576,7 @@ ${blocksSection(name, sl)}
     </div>
   </section>
 ${streetsSection}
-  ${enforcementSection(name, typical, peakDow.i)}
+  ${enforcementSection(name, typical, days)}
   <section>
     <div class="sec-k">FAQ</div>
     <h2>Street cleaning in ${esc(name)}, <b>answered</b></h2>
