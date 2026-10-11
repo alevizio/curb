@@ -52,7 +52,7 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ```
 
 ## What's New (v1.0.5)
-Build 10. DRAFT for Alejandro to edit, not final. Inside the app: the move-your-car alerts are Time Sensitive (the
+Build 10 (Xcode Cloud 61). Submitted to App Review word for word on 11 Oct 2026, automatic release. Inside the app: the move-your-car alerts are Time Sensitive (the
 entitlement; the server marks the 30 min and "move it tonight" pushes) and the Sweep alerts screen can open CURB's
 notification settings. The Sweep alerts screen itself comes from curb.guide and is already live for every version.
 ```
@@ -151,6 +151,9 @@ Location is used only when the user taps the locate button, to center the map an
 
 DISCLAIMER
 CURB surfaces patterns in public data as guidance only. The app clearly states that the posted physical street sign is always the final authority.
+
+TIME SENSITIVE (new in 1.0.5)
+Only the reminders that ask the user to move the car now are marked Time Sensitive: the one 30 minutes before the sweep, and the evening one before an early-morning sweep. The night-before and morning reminders stay at the normal level. Users can turn Time Sensitive off for CURB in iOS Settings, as for any app.
 ```
 
 ## App Privacy (questionnaire answers)
