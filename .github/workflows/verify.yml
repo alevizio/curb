@@ -46,6 +46,10 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/check-sweeping-sheet.mjs http://localhost:3077
+      - name: Sweep alerts panel (every curb's alerts, style, test, turn off)
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/check-alerts-panel.mjs http://localhost:3077
       - name: A dropped Leaflet or time core request retries, then says CURB didn't load
         env:
           CHROME_PATH: /usr/bin/google-chrome

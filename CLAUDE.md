@@ -223,7 +223,9 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   pinned via `&ctz=America/Los_Angeles`. It cannot set a notification — the sheet note
   reflects that; only .ics and push promise the 30-min lead.
 - **Info menu** (`#infoBtn` ⓘ at the right of the search field → `#infoMenu`): the single
-  hub for the other pages — How CURB works (opens the welcome explainer), Neighborhoods (`/n/`),
+  hub for the other pages — Sweep alerts first (`#imAlerts`, opens the Sweep alerts panel, see "Sweep alerts
+  panel" under Saved alerts below; its line says "2 on · Normal", "None on yet" or, in red, "Off in iPhone
+  Settings"), How CURB works (opens the welcome explainer), Neighborhoods (`/n/`),
   Sweeping holidays (`/holidays`), Parking tickets (`/tickets`), About (`/about`). The old buried `lp-link` to /tickets in the Layers panel
   was removed; don't re-add scattered page links. Opens/closes like the Layers panel
   (outside-click + Esc, mirrored via `closeInfoMenu`).
@@ -515,6 +517,24 @@ down`). Every native call, test pushes included, goes through ONE queue (the app
 failures report `push-save-failed` / `push-off-failed` via `curbReport`. Headless check:
 `scripts/check-alerts-ui.mjs` (runs build 6's bridge and build 7's real pushScript);
 `ios/page-bridge.test.mjs` runs the page's bridge code against both in vitest.
+
+Sweep alerts panel (2026-10-11, owner ask: "a notifications setting separated in the menu, turn them off"):
+ⓘ → Sweep alerts opens `#alertsPanel` (the iOS hint's bottom card, `.apanel`). It lists `liveAlerts()`, soonest
+sweep first: each side's name + cross streets, "Next sweep …" (relPhrase) and "Pings you tomorrow 8 PM and Tue
+8:30 AM" (`pingLine`: the server's anchors from alertAnchors + the spot's eve/morning ISOs + 30 min before; one
+~9 PM push for a night sweep), with Show on map (`openCurb`, shared with the /?b= deep link) and Turn off
+(`turnOffAlerts`, which now repaints the sheet only when it shows that side: `sheetSpot`). From 2 curbs a Turn off
+all (confirm first) sends ONE off naming no side (iOS `{off:true}`, web DELETE without `spot`): the server turns
+off every watch of the device. The rows come from one DataSF query (`cnn in(...)`, `alertSides`) through the
+sheet's own `sideNext` / `armFor` / `alertSpotFor` (extracted from drawSegments / openSheet, so the panel can
+never disagree with a sheet), and those spots let the panel's Intensity / Voice re-save EVERY curb at once (one
+queued reArm each; a failure snaps the dials back, like saveStyleSoon). Opening it re-saves the soonest curb (a
+same-sweep save, as a sheet's daily refresh) and refreshWatch()es the rest: in the app that save's answer is the
+ONLY way the page can learn that notifications are off for CURB in iPhone Settings (`denied-settings`, no
+prompt): it sets `pushState` ('ok' | 'denied', set by every native call), which drives the red "Notifications
+are off for CURB" card and the menu line, and it also re-registers a push token iOS rotated. "Send me a test"
+(sheet and panel) now waits for the app's answer: off in Settings says so instead of a silent "Sending a test".
+Headless check: `scripts/check-alerts-panel.mjs` (in verify.yml; hermetic: answers DataSF and /api itself).
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
 VAPID_SUBJECT, CRON_SECRET, QSTASH_{CURRENT,NEXT}_SIGNING_KEY, HC_PING_URL (optional),
