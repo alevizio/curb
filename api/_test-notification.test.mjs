@@ -6,6 +6,11 @@ import vm from 'node:vm';
 
 const send = vi.fn(async () => ({ statusCode: 201 }));
 vi.mock('web-push', () => ({ default: { setVapidDetails: () => {}, sendNotification: (...a) => send(...a) } }));
+// APNs without a key or network: every send is recorded and answers 200
+const apnsSent = [];
+vi.mock('./_apns.js', async (importOriginal) => ({ ...(await importOriginal()),
+  apnsConfigured: () => true, getProviderToken: () => 'jwt', openSession: () => ({ close() {} }),
+  sendOne: async (session, jwt, token, payload) => { apnsSent.push(payload); return { status: 200, reason: '' }; } }));
 const { default: handler } = await import('./test-notification.js');
 
 const res = () => ({ code: 0, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; } });
@@ -39,6 +44,16 @@ describe('test push', () => {
   it('with no future sweep, previews a demo sweep tomorrow at 9 AM (round, real-looking times)', async () => {
     const { plan } = await call({ which: 'lead', spot: { nextSweepISO: '2020-01-01T00:00:00Z' } });
     expect(plan[0].title).toBe('Test · 30 min before (Sun 8:30 AM)');
+  });
+
+  it('on iPhone, the act-now test push is Time Sensitive like the real one (the night-before test stays active)', async () => {
+    apnsSent.length = 0;
+    const out = await call({ which: 'all', level: 'normal', token: 'ef'.repeat(32), spot: { corridor: 'Haight St', nextSweepISO: TUE9 } }, {});
+    expect(out).toMatchObject({ ok: true, transport: 'apns' });
+    expect(apnsSent.map((p) => [p.aps.alert.title, p.aps['interruption-level'] ?? 'active'])).toEqual([
+      ['Test · Night before (Mon 8 PM)', 'active'], ['Test · 30 min before (Tue 8:30 AM)', 'time-sensitive']]);
+    const { plan } = await call({ which: 'all', spot: { corridor: 'Mission St', nextSweepISO: '2026-10-06T07:00:00.000Z' } });
+    expect(plan.map((p) => [p.key, p.urgent])).toEqual([['tonight', true]]);   // a night sweep's one push is act-now too
   });
 
   it('web delivery expires after 5 min instead of the 4-week default', async () => {
