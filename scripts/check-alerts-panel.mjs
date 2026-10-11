@@ -27,12 +27,12 @@ const check = (name, cond, detail = '') => { if (!cond) failures++; console.log(
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const APP7 = userScripts(readFileSync(new URL('../ios/CURB/ContentView.swift', import.meta.url), 'utf8'));
 
-// Sweep days relative to today in SF, so the soonest-first order is known: Fulton (in 2 days) before Kansas
-// West (in 3). Kansas East sweeps too but is never saved: it must not show. Mission is a 2 AM night sweep.
+// Sweep days relative to today in SF. Which sweep comes first is read from the page's own nextSweep (AP.sides),
+// never assumed: a holiday that week pushes a sweep a week out. Kansas East sweeps too but is never saved: it must
+// not show. Mission is a 2 AM night sweep.
 const D = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const sfDow = D.indexOf(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short' }).format(new Date()));
-// a sweep day k days out, stepping past Mondays: a Monday holiday (Oct 12) would push that sweep a week out
-const day = (k) => { let d = (sfDow + k) % 7; if (d === 1) d = 2; return D[d]; };
+const day = (k) => D[(sfDow + k) % 7];
 const wk = { week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
 const ln = (lng) => ({ type: 'LineString', coordinates: [[lng, 37.7652], [lng, 37.7641]] });
 const ROWS = [
@@ -126,6 +126,10 @@ async function openPanel(page) {
 const closePanel = (page) => page.evaluate(() => closeAlertsPanel());
 const shot = async (page, name) => { if (SHOTS) await page.screenshot({ path: `${SHOTS}/${name}.png` }); };
 const rowOff = (page, cnn, side) => tap(page, `.ap-row[data-id="${cnn}|${side}"] [data-act="off"]`);
+const rowText = (page, id, sel) => text(page, `.ap-row[data-id="${id}"] ${sel}`);
+// the saved sides in the order the page says they sweep (soonest first), from its own nextSweep
+const soonest = (page) => page.evaluate(() => liveAlerts().map((a) => alertId(a)).filter((id) => AP.sides[id] && AP.sides[id].armNs)
+  .sort((a, b) => +AP.sides[a].armNs.start - +AP.sides[b].armNs.start));
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox'] });
 try {
@@ -138,11 +142,23 @@ try {
   await tap(page, '#imAlerts');
   await sleep(300);
   check('panel opens, the menu closes', (await isOpen(page)) && await page.$eval('#infoMenu', (e) => e.hidden));
+  check('…and the focus is inside it, on Close (a modal: Tab must not reach the map behind)', await page.evaluate(() => document.activeElement && document.activeElement.id === 'apClose'), await page.evaluate(() => document.activeElement && (document.activeElement.id || document.activeElement.tagName)));
   check('empty state: how to add one, 0 of 5, no Turn off all, no save sent', (await text(page, '.ap-empty')).startsWith('No alerts on yet.') && (await text(page, '.ap-sec span:last-child')) === '0 of 5' && !(await page.$('#apAllOff')) && page.__posts.length === 0);
   check('style dials show the saved style (Normal, Cheeky) with what each means', await page.$eval('#alertsPanel [data-k="curbAlertLevel"] [data-v="normal"]', (b) => b.getAttribute('aria-pressed') === 'true') && (await texts(page, '.ap-blurb')).join('|') === 'Night before + 30 min before|Warm, funny, on your side');
   await shot(page, '1-web-empty');
   await page.keyboard.press('Escape');
-  check('Esc closes it', !(await isOpen(page)));
+  check('Esc closes it and gives the focus back to ⓘ', !(await isOpen(page)) && await page.evaluate(() => document.activeElement && document.activeElement.id === 'infoBtn'));
+
+  // when each push lands, worded with the date from two days out (a sweep on some weeks only can be 10 days away)
+  const far = await page.evaluate(() => {
+    const p = sfParts(new Date(Date.now() + 10 * 864e5)), start = sfWallToInstant(p.y, p.mo, p.da, 9), a = alertAnchors(start);
+    const spot = { nextSweepISO: start.toISOString(), eveningISO: a.eve.toISOString(), morningISO: a.morn && a.morn.toISOString() };
+    return { normal: pingLine(spot, 'normal'), intense: pingLine(spot, 'intense'), light: pingLine(spot, 'light') };
+  });
+  const dd = '(Sun|Mon|Tue|Wed|Thu|Fri|Sat) \\d{1,2}/\\d{1,2}';
+  check('pings 10 days out carry their date: "Tue 10/20 8 PM and Wed 10/21 8:30 AM"', new RegExp(`^Pings you ${dd} 8 PM and ${dd} 8:30 AM$`).test(far.normal), far.normal);
+  check('…a day is named once: "…, Wed 10/21 7 AM and 8:30 AM" (Intense)', new RegExp(`^Pings you ${dd} 8 PM, ${dd} 7 AM and 8:30 AM$`).test(far.intense), far.intense);
+  check('…Light: just the 30 min heads-up', new RegExp(`^Pings you ${dd} 8:30 AM$`).test(far.light), far.light);
 
   // two saved curb sides: soonest first, each with its next sweep and when it pings
   await seed(page, row('7735000', 'West'), row('5910000', 'South'));
@@ -151,15 +167,16 @@ try {
   await page.evaluate(() => closeInfoMenu());
   const p0 = page.__posts.length;
   await openPanel(page);
-  const names = await texts(page, '.ap-row .ap-nm');
-  check('one row per saved side, the soonest sweep first (Kansas East, not saved, is not listed)', names.join('|') === 'Fulton St, South side|Kansas St, West side', names.join('|'));
+  const order = await soonest(page);
+  const ids = await page.$$eval('.ap-row', (rs) => rs.map((r) => r.dataset.id));
+  check('one row per saved side, the soonest sweep first (Kansas East, not saved, is not listed)', ids.length === 2 && ids.join() === order.join() && !ids.includes('7735000|East'), `${ids} vs ${order}`);
   check('…"2 of 5"', (await text(page, '.ap-sec span:last-child')) === '2 of 5');
   const want = await page.evaluate(() => { const x = AP.sides['5910000|South']; return 'Next sweep ' + relPhrase(x.armNs).txt; });
-  check('…its next sweep, worded like its sheet', (await texts(page, '.ap-row .ap-next'))[0] === want, `${(await texts(page, '.ap-row .ap-next'))[0]} vs ${want}`);
-  const pings = await texts(page, '.ap-row .ap-ping');
-  check('…and when it pings (Normal: the night before + 30 min before)', /^Pings you .+ 8 PM and .+ 9:30 AM$/.test(pings[0]), pings[0]);
-  const chk = page.__posts.slice(p0);
-  check('opening re-saves ONE curb (the first) as a check, with its rules and the multi marker', chk.length === 1 && chk[0].method === 'POST' && chk[0].body.spot.cnn === '5910000' && chk[0].body.spot.sideKey === 'South' && chk[0].body.spot.multi === 1 && chk[0].body.spot.rules?.length === 1, JSON.stringify(chk.map((p) => [p.method, p.body.spot?.cnn])));
+  check('…its next sweep, worded like its sheet', (await rowText(page, '5910000|South', '.ap-next')) === want, `${await rowText(page, '5910000|South', '.ap-next')} vs ${want}`);
+  const ping = await rowText(page, '5910000|South', '.ap-ping');
+  check('…and when it pings (Normal: the night before + 30 min before)', /^Pings you .+ 8 PM and .+ 9:30 AM$/.test(ping), ping);
+  const chk = page.__posts.slice(p0), [first] = order;
+  check('opening re-saves ONE curb (the soonest) as a check, with its rules and the multi marker', chk.length === 1 && chk[0].method === 'POST' && `${chk[0].body.spot.cnn}|${chk[0].body.spot.sideKey}` === first && chk[0].body.spot.multi === 1 && chk[0].body.spot.rules?.length === 1, JSON.stringify(chk.map((p) => [p.method, p.body.spot?.cnn])) + ' want ' + first);
   check('…and says notifications are on', (await text(page, '.ap-stat')) === 'Notifications are on in this browser');
   check('Turn off all is offered from two curbs on', (await text(page, '#apAllOff')) === 'Turn off all alerts');
   await shot(page, '2-web-two-curbs');
@@ -171,6 +188,8 @@ try {
   const del = page.__posts.at(-1);
   check('Turn off in the panel: DELETE naming that side', del.method === 'DELETE' && del.body.spot?.cnn === '7735000' && del.body.spot?.sideKey === 'West', JSON.stringify(del));
   check('…its row goes, the toast says so, the saved map keeps the other', (await texts(page, '.ap-row .ap-nm')).join('|') === 'Fulton St, South side' && (await toast(page)) === 'Alerts off for Kansas St.' && Object.keys(await saved(page)).join() === '5910000|South');
+  check('…and the toast shows OVER the panel (its layer is above the 800 cards)', await page.evaluate(() => +getComputedStyle(document.getElementById('toast')).zIndex > +getComputedStyle(document.getElementById('alertsPanel')).zIndex && document.getElementById('toast').classList.contains('show')));
+  check('…the focus stays in the panel (its row and button are gone)', await page.evaluate(() => document.getElementById('alertsPanel').contains(document.activeElement)), await page.evaluate(() => document.activeElement && (document.activeElement.id || document.activeElement.tagName)));
   check('…and the sheet open on Fulton St still reads "✓ Alerts on"', (await text(page, '#alertBtn')) === '✓ Alerts on');
   check('…one curb left: no Turn off all (its row has its own)', !(await page.$('#apAllOff')));
   await closePanel(page);
@@ -207,14 +226,16 @@ try {
   check('…and the open sheet reads off', (await text(page, '#alertBtn')).includes('Sweep alerts'));
   await closePanel(page);
 
-  // Show on map: the panel closes, the map flies to that block and opens that side's sheet
+  // Show on map: the panel closes, the map flies to that block and opens that side's sheet, even with the day chip
+  // on the OTHER side's day and green hidden in the legend (those filters hide the saved side from the map)
   await seed(page, row('7735000', 'West'));
-  await page.evaluate(() => document.getElementById('sheetClose').click());
+  await page.evaluate((east) => { document.getElementById('sheetClose').click(); setDayFilter(normDay(east)); }, row('7735000', 'East').weekday);
+  await tap(page, '.legend2 .lst[data-st="green"]');
   await openPanel(page);
   await tap(page, '.ap-row [data-act="show"]');
   await page.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 8000 }).catch(() => {});
   check('Show on map: the panel closes and the block\'s line is fetched', !(await isOpen(page)) && page.__lines.includes('7735000'));
-  check('…and its sheet opens on the saved side', await page.evaluate(() => !!sheetSpot && sheetSpot.cnn === '7735000' && sheetSpot.sideKey === 'West') && (await text(page, '#alertBtn')) === '✓ Alerts on', await page.evaluate(() => JSON.stringify(sheetSpot && [sheetSpot.cnn, sheetSpot.sideKey])));
+  check('…and its sheet opens on the saved side (day chip and legend filters cleared)', await page.evaluate(() => !!sheetSpot && sheetSpot.cnn === '7735000' && sheetSpot.sideKey === 'West' && dayFilter === null && statusOn.green) && (await text(page, '#alertBtn')) === '✓ Alerts on', await page.evaluate(() => JSON.stringify([sheetSpot && sheetSpot.cnn, sheetSpot && sheetSpot.sideKey, dayFilter, statusOn])));
 
   // The schedules can't load: the rows say so, nothing is re-saved
   ctl.dataFail = true;
@@ -230,8 +251,8 @@ try {
   await openPanel(app);
   check('app: "On this iPhone", the check goes through the bridge with the multi marker', (await text(app, '#apKicker')) === 'On this iPhone' && await app.evaluate(() => { const s = window.__nativePosts.at(-1).spot || {}; return s.cnn === '5910000' && s.multi === 1; }));
   check('…"Notifications are on for CURB"', (await text(app, '.ap-stat')) === 'Notifications are on for CURB');
-  const night = (await texts(app, '.ap-row .ap-ping'))[1] || '';
-  check('a night sweep pings once, at 9 PM the evening before', /^Pings you \S+ 9 PM$/.test(night), night);
+  const night = await rowText(app, '9130000|East', '.ap-ping');
+  check('a night sweep pings once, at 9 PM the evening before', /^Pings you (tonight|tomorrow|(Sun|Mon|Tue|Wed|Thu|Fri|Sat) \d{1,2}\/\d{1,2}) 9 PM$/.test(night), night);
   await shot(app, '4-app-on');
   await closePanel(app);
 
@@ -274,6 +295,7 @@ try {
   const ios = await openPage(false, ctl, { ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1' });
   await openPanel(ios);
   check('iPhone Safari: alerts need the app, with the App Store link', (await text(ios, '.ap-warn b')).startsWith('Alerts need the app') && (await ios.$eval('.ap-warn a.ios-get', (a) => a.href)).includes('apps.apple.com/app/id6780998238'));
+  check('…and no test button (it could only open the install hint, under the panel)', !(await ios.$('#apTest')));
   await ios.close();
 } catch (e) {
   check('run', false, e.stack || e.message);

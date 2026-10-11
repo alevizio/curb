@@ -534,7 +534,15 @@ ONLY way the page can learn that notifications are off for CURB in iPhone Settin
 prompt): it sets `pushState` ('ok' | 'denied', set by every native call), which drives the red "Notifications
 are off for CURB" card and the menu line, and it also re-registers a push token iOS rotated. "Send me a test"
 (sheet and panel) now waits for the app's answer: off in Settings says so instead of a silent "Sending a test".
-Headless check: `scripts/check-alerts-panel.mjs` (in verify.yml; hermetic: answers DataSF and /api itself).
+Coming back to the page (visibilitychange, often from iPhone Settings) forgets a 'denied' and re-checks if the panel
+is open. Gotchas the review caught: the panel is an 800 layer, so `.toast` sits at 900 (every panel action
+toasts); Show on map calls `showEveryCurb()` (placeYou's day-chip + legend reset: a filtered map opened the other
+side, or the next block) and names the side by its KEY (tryPendingOpen matches key or blockside: ~255 blocks have
+no blockside); pings from two days out carry the date ("Tue 10/20 8 PM"), a sweep on some weeks only can be 10 days
+away; focus goes to Close on open (inert is cleared first: the MutationObserver sync runs after the task) and to
+Close again when a redraw removes the focused button.
+Headless check: `scripts/check-alerts-panel.mjs` (in verify.yml; hermetic: answers DataSF and /api itself; which
+curb sweeps first is read from the page's nextSweep, so holiday weeks can't reorder its fixture).
 
 Setup to run live: see README "Push notifications". Env: VAPID_{PUBLIC,PRIVATE}_KEY,
 VAPID_SUBJECT, CRON_SECRET, QSTASH_{CURRENT,NEXT}_SIGNING_KEY, HC_PING_URL (optional),

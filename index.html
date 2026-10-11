@@ -340,7 +340,7 @@
   .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0 12px calc(28px + env(safe-area-inset-bottom)) 0}
 
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));
-    z-index:700;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 15px;border-radius:13px;
+    z-index:900;  /* over the 800 cards too (Sweep alerts panel, iOS hint): their own actions toast */background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 15px;border-radius:13px;
     max-width:88vw;text-align:center;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
   .toast.show{opacity:1}
 
@@ -2348,7 +2348,7 @@ async function sendTestPush(spot, tb){
     else if(why==='timeout'||why==='registration-failed') toast("Couldn't reach Apple's push service. Check your connection, then test again.");
     return;
   }
-  if(isIOS()&&!isStandalone()){ showIosHint(); return; }
+  if(isIOS()&&!isStandalone()){ closeAlertsPanel(); showIosHint(); return; }  // the hint shares the panel's layer
   if(!pushSupported()){ toast('This browser can\'t do push. Use the Calendar button instead.'); return; }
   if(Notification.permission==='denied'){ toast('Notifications are blocked. Re-enable them to test.'); return; }
   const orig=tb?tb.innerHTML:'';
@@ -2375,7 +2375,7 @@ async function sendTestPush(spot, tb){
 // re-saves the first curb, a same-sweep save like a sheet's daily refresh: in the app, its answer is the only
 // way to learn that iOS blocks CURB's notifications (denied-settings: no prompt, nothing arrives), and a push
 // token iOS rotated reaches the server again. The other curbs get a sheet's daily refresh (refreshWatch).
-const AP={gen:0,sides:{},loaded:false,err:false,check:'',confirmAll:false,busyAll:false};
+const AP={gen:0,sides:{},loaded:false,err:false,check:'',confirmAll:false,busyAll:false,offing:new Set()};
 const AP_LEVELS={light:['Light','Just the heads-up 30 min before'],normal:['Normal','Night before + 30 min before'],intense:['Intense','Night before, morning of + 30 min before']};
 const AP_VOICES={cheeky:['Cheeky','Warm, funny, on your side'],drill:['Drill','Loud. Urgent. MOVE THE CAR.'],deadpan:['Deadpan','Dry. The receipts do the talking']};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2387,12 +2387,13 @@ function paintAlertsMenu(){
   sub.classList.toggle('bad',bad);
   sub.textContent=bad?(app?'Off in iPhone Settings':'Blocked in this browser'):n?n+' on · '+(AP_LEVELS[getAlertLevel()]||AP_LEVELS.normal)[0]:'None on yet';
 }
-// "tonight 8 PM", "tomorrow 8:30 AM", "Tue 7 AM": when one push lands, in SF time.
-function pingWords(t){
+// The SF day one push lands on: "tonight", "today", "tomorrow", then "Tue 10/20" (with the date: a side swept on
+// some weeks only can be 10 days out, and a bare "Tue" read as this week's), and its time: "8 PM", "8:30 AM".
+function pingDay(t){
   const p=sfParts(new Date(t)), d=sfDaysUntil(p.y,p.mo,p.da);
-  const day=d<=0?(p.h>=17?'tonight':'today'):d===1?'tomorrow':DAYLBL[new Date(Date.UTC(p.y,p.mo-1,p.da)).getUTCDay()];
-  return day+' '+((p.h%12)||12)+(p.mi?':'+String(p.mi).padStart(2,'0'):'')+(p.h<12?' AM':' PM');
+  return d<=0?(p.h>=17?'tonight':'today'):d===1?'tomorrow':DAYLBL[new Date(Date.UTC(p.y,p.mo-1,p.da)).getUTCDay()]+' '+p.mo+'/'+p.da;
 }
+function pingTime(t){const p=sfParts(new Date(t));return ((p.h%12)||12)+(p.mi?':'+String(p.mi).padStart(2,'0'):'')+(p.h<12?' AM':' PM');}
 // When a curb's pushes land for the sweep it is armed for, at the anchors the server sends at (lib/notify-core.js):
 // a sweep before 7 AM gets one ~9 PM push the evening before at every level; any other, 8 PM the night before
 // (Normal, Intense), 2 h before (Intense, only from 6 AM) and 30 min before. Past ones are left out.
@@ -2400,7 +2401,8 @@ function pingLine(spot,level){
   const start=Date.parse(spot.nextSweepISO), a=alertAnchors(start), now=Date.now();
   const at=(a.night?[+a.tonight]:[level!=='light'&&Date.parse(spot.eveningISO),level==='intense'&&Date.parse(spot.morningISO),start-18e5]).filter(t=>t>now);
   if(!at.length)return 'No more pings before this sweep';
-  const w=at.map(pingWords);
+  let prev='';  // a day is named once: "Wed 10/21 7 AM and 8:30 AM"
+  const w=at.map(t=>{const d=pingDay(t),s=(d===prev?'':d+' ')+pingTime(t);prev=d;return s;});
   return 'Pings you '+(w.length>1?w.slice(0,-1).join(', ')+' and '+w[w.length-1]:w[0]);
 }
 // The saved sides' rows from DataSF in one request → per side the sweep it is armed for and the spot a save sends.
@@ -2444,7 +2446,9 @@ function apRow(a,level){
   else when=`<div class="ap-next">${!AP.loaded?'Loading the schedule…':AP.err?"Couldn't load the schedule. Its alerts still work.":'No sweep coming up here.'}</div>`;
   return `<div class="ap-row" data-id="${esc(alertId(a))}"><div class="ap-nm">${esc(alertLabel(a,[a]))}</div>`
     +(a.limits?`<div class="ap-lim">${esc(fmtLimits(a.limits))}</div>`:'')+when
-    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">Show on map</button><button class="btn alt ap-x" type="button" data-act="off">Turn off</button></div></div>`;
+    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">Show on map</button>`
+    +(AP.offing.has(alertId(a))?`<button class="btn alt ap-x busy" type="button" data-act="off" aria-busy="true">Turning off…</button>`
+      :`<button class="btn alt ap-x" type="button" data-act="off">Turn off</button>`)+`</div></div>`;
 }
 function apHelp(app){
   return `<details class="ap-help"><summary>Not getting alerts? ▸</summary><ul>`
@@ -2470,37 +2474,45 @@ function renderAlertsPanel(){
     +`<div class="ap-sec"><span>Alert style${list.length>1?' · all curbs':''}</span></div><div class="ap-style">`
     +seg('curbAlertLevel',level,AP_LEVELS,'Intensity')+`<div class="ap-blurb">${(AP_LEVELS[level]||AP_LEVELS.normal)[1]}</div>`
     +seg('curbAlertVoice',voice,AP_VOICES,'Voice')+`<div class="ap-blurb">${(AP_VOICES[voice]||AP_VOICES.cheeky)[1]}</div></div>`
-    +`<button class="btn alt ap-test" id="apTest" type="button">${ICONS.bell} Send me a test</button>`;
+    // iPhone Safari can't get a push (the card above says so; the test would only open the install hint)
+    +(!app&&isIOS()&&!isStandalone()?'':`<button class="btn alt ap-test" id="apTest" type="button">${ICONS.bell} Send me a test</button>`);
   // one curb has its own Turn off; from two on, one tap (and a confirm) turns them all off
   if(list.length>1)h+=AP.confirmAll
     ?`<div class="ap-confirm"><button class="btn alt ap-x" id="apAllYes" type="button">Turn off all ${list.length}</button><button class="btn alt" id="apAllNo" type="button">Keep them</button></div>`
     :`<button class="ap-alloff" id="apAllOff" type="button"${AP.busyAll?' disabled':''}>${AP.busyAll?'Turning off…':'Turn off all alerts'}</button>`;
   h+=apHelp(app);
-  // a redraw keeps the help open and the focus where it was (by id, a row's action, or a dial)
+  // A redraw keeps the help open and the focus where it was (by id, a row's action, a dial, the help), else on
+  // Close: a turned-off row or a Turn off all that is gone must not drop the focus out of the dialog.
   const body=document.getElementById('apBody'), f=document.activeElement, help=body.querySelector('.ap-help');
-  const fsel=!f||!body.contains(f)?'':f.id?'#'+f.id:f.dataset.act?`.ap-row[data-id="${CSS.escape(f.closest('.ap-row').dataset.id)}"] [data-act="${f.dataset.act}"]`
-    :f.dataset.v?`[data-k="${f.closest('[data-k]').dataset.k}"] [data-v="${f.dataset.v}"]`:'';
+  const had=!!f&&body.contains(f);
+  const fsel=!had?'':f.id?'#'+f.id:f.dataset.act?`.ap-row[data-id="${CSS.escape(f.closest('.ap-row').dataset.id)}"] [data-act="${f.dataset.act}"]`
+    :f.dataset.v?`[data-k="${f.closest('[data-k]').dataset.k}"] [data-v="${f.dataset.v}"]`:f.tagName==='SUMMARY'?'.ap-help summary':'';
   const helpOpen=!!(help&&help.open);
   body.innerHTML=h;
   if(helpOpen)body.querySelector('.ap-help').open=true;
-  if(fsel){const g=body.querySelector(fsel);if(g)g.focus();}
+  if(had)((fsel&&body.querySelector(fsel))||document.getElementById('apClose')).focus();
   body.querySelectorAll('.ap-row').forEach(row=>{
-    const a=savedAlerts()[row.dataset.id]; if(!a)return;
+    const id=row.dataset.id, a=savedAlerts()[id]; if(!a)return;
     row.querySelector('[data-act="show"]').onclick=()=>{
       closeAlertsPanel();
-      if(/^\d{1,12}$/.test(a.cnn)){userPicked();openCurb(a.cnn,a.blockside||'');}
+      if(!/^\d{1,12}$/.test(a.cnn))return;
+      userPicked(); showEveryCurb();  // a day chip or a hidden curb color would open another side, or block
+      openCurb(a.cnn,a.sideKey||a.blockside||'');
     };
     const off=row.querySelector('[data-act="off"]');
-    off.onclick=()=>{off.classList.add('busy');off.textContent='Turning off…';turnOffAlerts(a);};
+    // busy until it answers, through any redraw meanwhile (a second tap would send a second off)
+    off.onclick=async()=>{if(AP.offing.has(id))return;AP.offing.add(id);renderAlertsPanel();
+      try{await turnOffAlerts(a);}finally{AP.offing.delete(id);renderAlertsPanel();}};
   });
   body.querySelectorAll('.ap-style .acfg-row').forEach(row=>row.querySelectorAll('.seg button').forEach(b=>{b.onclick=()=>apSetStyle(row.dataset.k,b.dataset.v);}));
-  document.getElementById('apTest').onclick=e=>{
+  const test=document.getElementById('apTest');
+  if(test)test.onclick=e=>{
     const x=liveAlerts().map(a=>AP.sides[alertId(a)]).find(x=>x&&x.spot);
     sendTestPush({...(x?x.spot:{}),level:getAlertLevel(),voice:getAlertVoice()},e.currentTarget);
   };
   const all=document.getElementById('apAllOff'); if(all)all.onclick=()=>{AP.confirmAll=true;renderAlertsPanel();document.getElementById('apAllNo').focus();};
   const yes=document.getElementById('apAllYes'); if(yes)yes.onclick=turnOffAllAlerts;
-  const no=document.getElementById('apAllNo'); if(no)no.onclick=()=>{AP.confirmAll=false;renderAlertsPanel();};
+  const no=document.getElementById('apAllNo'); if(no)no.onclick=()=>{AP.confirmAll=false;renderAlertsPanel();const b=document.getElementById('apAllOff');if(b)b.focus();};
   const get=body.querySelector('.ios-get'); if(get)get.onclick=()=>track('ios_app_offer_tap');
 }
 async function loadAlertsPanel(){
@@ -2540,8 +2552,8 @@ function apSetStyle(k,v){
     if(!todo.length){if(liveAlerts().length)toast("Saved. Each curb's alerts switch to it when you next open that curb.");return;}
     const rs=await Promise.all(todo.map(reArm));  // sent one after another (webQueue / _nativeQ)
     rs.forEach((r,i)=>{if(r==='ok')markArmed(todo[i]);});
-    const bad=rs.filter(r=>r!=='ok'&&r!=='off');
-    if(!bad.length)toast('Alert style saved'+(todo.length>1?' for all '+todo.length+' curbs.':'.'));
+    const bad=rs.filter(r=>r!=='ok'&&r!=='off'), ok=rs.filter(r=>r==='ok').length;  // 'off': turned off meanwhile
+    if(!bad.length)toast('Alert style saved'+(ok>1?' for all '+ok+' curbs.':'.'));
     else if(bad.includes('gone')){forgetAlert();toast('Alerts are off on this device. Tap Sweep alerts on a curb to turn them back on.');}
     else{
       try{localStorage.setItem('curbAlertLevel',was.level);localStorage.setItem('curbAlertVoice',was.voice);}catch(_){}
@@ -2577,7 +2589,8 @@ async function turnOffAllAlerts(){
 function openAlertsPanel(){
   closeInfoMenu();
   Object.assign(AP,{sides:{},loaded:false,err:false,check:'',confirmAll:false});
-  document.getElementById('alertsPanel').classList.add('open');
+  const el=document.getElementById('alertsPanel');
+  el.classList.add('open'); el.inert=false;  // the inert sync (a MutationObserver) runs after this task: focus() would do nothing
   renderAlertsPanel();
   document.getElementById('apClose').focus();
   track('alerts_panel_open');
@@ -2589,6 +2602,13 @@ function closeAlertsPanel(){
   el.classList.remove('open'); AP.gen++;  // a load or check still running stops drawing into it
   if(back)document.getElementById('infoBtn').focus();
 }
+// Back from the background (often from iPhone Settings) a "notifications are off" may be stale: forget it, and with
+// the panel open ask again, so turning them on in Settings shows here at once.
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible'||pushState!=='denied')return;
+  pushState='';
+  if(document.getElementById('alertsPanel').classList.contains('open'))loadAlertsPanel();
+});
 document.getElementById('imAlerts').onclick=openAlertsPanel;
 document.getElementById('apClose').onclick=closeAlertsPanel;
 document.getElementById('alertsPanel').addEventListener('click',e=>{ if(e.target.id==='alertsPanel')closeAlertsPanel(); });
@@ -2690,15 +2710,18 @@ function placeFix(p,quiet){
   curbReport('locate-coarse',(p.curbReduced?'reduced ':'')+'±'+(acc>=1000?Math.round(acc/1000)+'km':Math.round(acc/50)*50+'m'));
 }
 // quiet=true: center + dot only (launch auto-position) — no sheet, the user may not be at their car.
-function placeYou(lat,lng,fly,cnnHint,quiet){
-  // "Where I parked" must see every curb side — a day or status filter could otherwise
-  // snap the pin to the wrong (still-visible) side of the street.
-  if(!quiet&&dayFilter!=null)setDayFilter(null);
-  if(!quiet&&(!statusOn.green||!statusOn.amber||!statusOn.red)){
+// "Where I parked" (a locate or search, Show on map for a saved curb) must see every curb side — a day or status
+// filter could otherwise snap the pin, or the sheet, to the wrong (still-visible) side of the street or block.
+function showEveryCurb(){
+  if(dayFilter!=null)setDayFilter(null);
+  if(!statusOn.green||!statusOn.amber||!statusOn.red){
     statusOn={green:true,amber:true,red:true};
     document.querySelectorAll('.lst').forEach(b=>{b.classList.add('on');b.setAttribute('aria-pressed','true');});
     refreshLayerBadges(); drawSegments(lastRows);
   }
+}
+function placeYou(lat,lng,fly,cnnHint,quiet){
+  if(!quiet)showEveryCurb();
   if(youMarker)map.removeLayer(youMarker);
   if(accRing){map.removeLayer(accRing);accRing=null;}
   youMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="you-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
@@ -2717,8 +2740,9 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
   map.fitBounds([[s,w],[n,e]],{padding:[18,18]});
 })();
 
-/* Fly to block `cnn` (digits) and open its sheet on curb side `side` (DataSF's blockside, '' = the nearest):
-   a shared /?b= link, or Show on map in the Sweep alerts panel. */
+/* Fly to block `cnn` (digits) and open its sheet on curb side `side` ('' = the nearest): a shared /?b= link (DataSF's
+   blockside, "West"), or Show on map in the Sweep alerts panel (the saved side's key: its blockside, or L / R on a
+   block that has none). */
 async function openCurb(cnn,side){
   try{
     const r=await fetch(SWEEP+`?$select=line&$where=cnn='${cnn}'&$limit=1`);
@@ -2772,8 +2796,10 @@ function openWhenLoaded(lat,lng,cnnHint,delay,sideHint){
 }
 function tryPendingOpen(){
   const po=pendingOpen; if(!po)return;
-  // a shared link names its side: open exactly that one (blockside as DataSF spells it, e.g. "West")
-  const sided=po.cnnHint&&po.sideHint&&segCache.find(o=>String(o.group.cnn)===String(po.cnnHint)&&String(o.side.blockside||'').toLowerCase()===po.sideHint.toLowerCase());
+  // a shared link or a saved alert names its side: open exactly that one (a link: blockside as DataSF spells it,
+  // e.g. "West"; an alert: the side's key, which is its blockside, or L / R on the ~255 blocks without one)
+  const hint=po.sideHint, sided=po.cnnHint&&hint&&segCache.find(o=>String(o.group.cnn)===String(po.cnnHint)
+    &&(String(o.side.key)===hint||String(o.side.blockside||'').toLowerCase()===hint.toLowerCase()));
   if(sided)return openPending({group:sided.group,side:sided.side});
   const hit=po.cnnHint&&nearestSeg(po.lat,po.lng,po.cnnHint);  // the block's own cnn can't be stale
   if(hit)return openPending(hit);
