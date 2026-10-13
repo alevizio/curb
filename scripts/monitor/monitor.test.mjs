@@ -476,6 +476,22 @@ describe('App Store review watch', async () => {
     expect(seen.auth).toMatch(/^Bearer [\w-]+\.[\w-]+\.[\w-]+$/);
     expect(r).toEqual([{ name: 'App Store reviews', status: 'fail', detail: expect.stringContaining('HTTP 403') }]);
   });
+  it('retries one timeout, network error or 5xx before failing, and never retries an auth error', async () => {
+    const page = { data: [rev('a', 5, 0)] };
+    const seq = (...steps) => { let n = 0; const f = async () => { const s = steps[n++]; if (s instanceof Error) throw s; return s; }; f.calls = () => n; return f; };
+    const good = { ok: true, status: 200, json: async () => page };
+    for (const first of [new Error('This operation was aborted'), { ok: false, status: 503 }, { ok: false, status: 429 }]) {
+      const f = seq(first, good);
+      expect((await checkReviews(f, ENV, NOW, { retryMs: 0 }))[0].status).toBe('ok');
+      expect(f.calls()).toBe(2);
+    }
+    const twice = seq({ ok: false, status: 502 }, { ok: false, status: 502 });
+    expect(await checkReviews(twice, ENV, NOW, { retryMs: 0 })).toEqual([{ name: 'App Store reviews', status: 'fail', detail: expect.stringContaining('HTTP 502') }]);
+    await expect(checkReviews(seq(new Error('down'), new Error('still down')), ENV, NOW, { retryMs: 0 })).rejects.toThrow('still down');
+    const auth = seq({ ok: false, status: 401 }, good);
+    expect((await checkReviews(auth, ENV, NOW, { retryMs: 0 }))[0].detail).toContain('HTTP 401');
+    expect(auth.calls()).toBe(1);
+  });
   it('feeds the alert state machine: opens on a new low review, closes once it is answered', async () => {
     const f = (page) => async () => ({ ok: true, status: 200, json: async () => page });
     const opts = { title: 'App Store review needs a reply', mention: 'alevizio', runUrl: '' };
