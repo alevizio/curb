@@ -65,22 +65,34 @@ export function judgeReviews(page, now = Date.now()) {
   });
 }
 
-export async function checkReviews(f = fetch, env = process.env, now = Date.now()) {
+async function getOnce(f, url, auth) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 20000);
+  try { return await f(url, { headers: { authorization: auth }, signal: ctrl.signal }); } finally { clearTimeout(t); }
+}
+
+/** One slow or failed answer from Apple (a timeout, a network error, a 5xx or 429) is retried once after
+ *  retryMs before it fails the check: a single blip used to open a "review needs a reply" issue. */
+export async function checkReviews(f = fetch, env = process.env, now = Date.now(), { retryMs = 10000 } = {}) {
   const { ASC_ISSUER_ID: issuer, ASC_KEY_ID: keyId, ASC_KEY_P8: p8 } = env;
   if (!issuer || !keyId || !p8) return [skip(NAME, 'no App Store Connect API key (ASC_ISSUER_ID, ASC_KEY_ID, ASC_KEY_P8)')];
   const url = `${API}/apps/${APP_ID}/customerReviews?sort=-createdDate&limit=100&include=response` +
     '&fields[customerReviews]=rating,createdDate,territory,response';
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 20000);
+  const auth = `Bearer ${apiToken({ issuer, keyId, p8 })}`;
+  let r;
   try {
-    const r = await f(url, { headers: { authorization: `Bearer ${apiToken({ issuer, keyId, p8 })}` }, signal: ctrl.signal });
-    if (!r.ok) {
-      const hint = r.status === 401 ? ' (key id, issuer id or .p8 wrong, or the key was revoked)'
-        : r.status === 403 ? ' (the key\'s role cannot read reviews: give it Customer Support or App Manager)' : '';
-      return [fail(NAME, `App Store Connect API HTTP ${r.status}${hint}`)];
-    }
-    return judgeReviews(await r.json(), now);
-  } finally { clearTimeout(t); }
+    r = await getOnce(f, url, auth);
+    if (r.status >= 500 || r.status === 429) throw new Error(`HTTP ${r.status}`);
+  } catch {
+    await new Promise((res) => setTimeout(res, retryMs));
+    r = await getOnce(f, url, auth);
+  }
+  if (!r.ok) {
+    const hint = r.status === 401 ? ' (key id, issuer id or .p8 wrong, or the key was revoked)'
+      : r.status === 403 ? ' (the key\'s role cannot read reviews: give it Customer Support or App Manager)' : '';
+    return [fail(NAME, `App Store Connect API HTTP ${r.status}${hint}`)];
+  }
+  return judgeReviews(await r.json(), now);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
