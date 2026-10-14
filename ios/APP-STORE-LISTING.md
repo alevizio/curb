@@ -6,7 +6,7 @@
 **Support URL:** https://curb.guide
 
 **Promotional text** (≤170, editable anytime without review):
-`About 815,000 SF tickets mapped: on a typical block the posted 2-hour street-cleaning window is really about 20 minutes. See your block's real ticket time. Free.`
+`Over a million SF tickets mapped: on a typical block the posted 2-hour street-cleaning window is really about 20 minutes. See your block's real ticket time. Free.`
 
 **Keywords** (≤100 chars):
 ```
@@ -14,13 +14,13 @@ street cleaning,sweeping,parking,SF,tickets,RPP,meters,reminder,alert,curb,SFMTA
 ```
 
 ## Description
-Version 1.0.3 (corrected numbers, 3 Oct 2026). Paste as-is.
+Updated 13 Oct 2026 with the full records file (both tabs). 1.0.5 went to review with the 3 Oct text, so paste this with the next version.
 ```
 Your street-cleaning sign says 9 to 11am. The tickets say 9:12am.
 
 CURB is a free map of San Francisco street-parking rules, and the only one that shows you WHEN tickets actually get written, not just when the sign says you're at risk.
 
-I obtained about a million GPS-located SFMTA street-cleaning citations through a public records request and matched about 815,000 of them to the blocks where they were issued (2024 to mid 2026). The finding: that posted 2-hour window is mostly a 20-minute reality. On a typical block, most tickets land within about 20 minutes of each other. Citywide, about 77% are written in the first 45 minutes of the posted window and about 90% in the first hour.
+I obtained about 1.35 million GPS-located SFMTA street-cleaning citations through a public records request and matched over a million of them to the blocks where they were issued (2024 to mid 2026). The finding: that posted 2-hour window is mostly a 20-minute reality. On a typical block, most tickets land within about 20 minutes of each other. Citywide, about 77% are written in the first 45 minutes of the posted window and about 90% in the first hour.
 
 Take the 200 block of Steiner St. Posted window: 9 to 11am. From 2024 to mid 2026: 278 tickets, the earliest at 9:00am, the median at 9:12am, and 90% written by 9:21am. The "2 hours" was never real.
 
