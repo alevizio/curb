@@ -58,8 +58,8 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
    only; paint-only curbs aren't published. Loaded once on toggle, rendered per-viewport.
 5. Parking citations — `ab4h-6ztd` (23.8M rows, daily, ~2-5 day lag)
    STR CLEAN (TRC7.2.22) + ST CLEANIN (T37C) = street-cleaning tickets, minute-resolution.
-   A 2024 records request (#26-5453) restored GPS lat/long on the citations: ~815k of
-   ~1M street-cleaning tickets now match to a CNN by NEAREST CNN SEGMENT (<=40m), the
+   A 2024 records request (#26-5453) restored GPS lat/long on the citations: ~1.05M of
+   ~1.35M street-cleaning tickets now match to a CNN by NEAREST CNN SEGMENT (<=40m), the
    primary pipeline. The old address→CNN join via EAS (3mea-di5p, keyed by
    stripZeros(number)|street_name) is demoted to a pre-2024 fallback for rows without GPS.
    Precomputed offline into `data/enforcement.json` — see
@@ -70,7 +70,10 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
    hours from the feed must go through `fixHour` (scripts/midnight-hour.mjs, used by build-stats). (2) The
    feed's latitude/longitude (added mid-2026) geocode the typed ADDRESS, not the officer's GPS: same ticket,
    different block ~1 in 4 times, so keep the records file for block times. (3) The feed is missing most of
-   Nov-Dec 2024; the records file is missing mid-Aug 2025 to mid-Mar 2026 (Excel row limit).
+   Nov-Dec 2024. The records file is complete (1,351,709 tickets, Jan 2024 to Jun 2026), but in two tabs:
+   'Report 1' stops at Excel's row limit and 'Report 1(1)' holds the other 303k (mostly Aug 2025 to Mar 2026),
+   starting in column B with no header row. Read every tab from its first used column (until 2026-10-13
+   the build skipped that tab without a word, so the map used 815k matched tickets instead of 1.05M).
 
 ### Spatial queries (verified working)
 - Segments in viewport: `?$where=intersects(line,'POLYGON((lng lat, ...))')&$limit=2500`

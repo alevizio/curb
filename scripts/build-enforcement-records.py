@@ -58,10 +58,14 @@ for sh in wb.sheetnames:
     it = wb[sh].iter_rows(values_only=True)
     first = next(it, None)
     if first is None: continue
-    seq = it if (first and str(first[0]).strip().lower() == 'ticket number') else itertools.chain([first], it)
+    # A tab can start past column A: 'Report 1(1)' (the 303k rows past Excel's row limit, mostly
+    # Aug 2025 to Mar 2026) starts in column B with no header, so read every row from the first used column.
+    off = next((i for i, v in enumerate(first) if v is not None), 0)
+    seq = it if str(first[off]).strip().lower() == 'ticket number' else itertools.chain([first], it)
+    n0 = len(xs)
     for r in seq:
-        if not r or r[0] is None: continue
-        lat, lon, d, t = r[6], r[7], r[1], r[2]
+        if not r or r[off] is None: continue
+        lat, lon, d, t = r[off + 6], r[off + 7], r[off + 1], r[off + 2]
         if lat is None or lon is None or d is None or t is None: continue
         try: lat, lon = float(lat), float(lon)
         except (TypeError, ValueError): continue
@@ -71,6 +75,7 @@ for sh in wb.sheetnames:
         xs.append(x); ys.append(y)
         mins.append(t.hour * 60 + t.minute)
         dows.append((d.weekday() + 1) % 7)   # python Mon0..Sun6 -> JS getDay Sun0..Sat6
+    print(f"  {sh}: {len(xs) - n0} citations", file=sys.stderr)
 xs = np.asarray(xs); ys = np.asarray(ys)
 mins = np.asarray(mins, dtype=np.int32); dows = np.asarray(dows, dtype=np.int8)
 print(f"  {len(xs)} citations with coords+time in SF", file=sys.stderr)
