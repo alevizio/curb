@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>About CURB — SF Street Sweeping & Real Ticket Times</title>
-<meta name="description" content="How CURB works: SF street sweeping schedules block by block, permit areas, and ticket times rebuilt from about 815,000 real citations. Free — open the live map.">
+<meta name="description" content="How CURB works: SF street sweeping schedules block by block, permit areas, and ticket times rebuilt from over a million real citations. Free — open the live map.">
 <link rel="canonical" href="https://curb.guide/about">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"CURB",
@@ -18,7 +18,7 @@
  {"@type":"Question","name":"When does street sweeping happen in San Francisco?",
   "acceptedAnswer":{"@type":"Answer","text":"Most residential blocks are swept weekly or twice a month in a fixed weekday window (for example, Tuesday 9–11am); many commercial corridors are swept overnight. Every block has its own schedule — CURB shows the exact rule for any curb when you tap it on the map."}},
  {"@type":"Question","name":"When do street-cleaning parking tickets actually get written?",
-  "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from about a million GPS-located street-cleaning citations (a public records request, 2024 to mid 2026). On a typical 9–11am block, the median ticket lands around 9:30am. The posted sign is always the source of truth."}},
+  "acceptedAnswer":{"@type":"Answer","text":"Usually in the first 30–40 minutes of the posted window, not spread across it. CURB reconstructs each block's real ticket times from about 1.35 million GPS-located street-cleaning citations (a public records request, 2024 to mid 2026). On a typical 9–11am block, the median ticket lands around 9:30am. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"Can I park after the street sweeper passes?",
   "acceptedAnswer":{"@type":"Answer","text":"Yes — it's SFMTA's own rule: once the street sweeper has physically swept the curbside, you may park there, even if the posted sweeping hours haven't expired. The flip side: during the posted hours you may not park until the street has actually been swept — so if you're parked before the sweeper arrives, you can still be ticketed. The posted sign is always the source of truth."}},
  {"@type":"Question","name":"What are the dashed truck routes on the map?",
@@ -431,7 +431,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
       <div class="qa">
         <h3>When do street-cleaning parking tickets actually get written?</h3>
         <p>Usually in the <b>first 30–40 minutes</b> of the posted window, not spread across it. CURB
-          reconstructs each block's real ticket times from about a million GPS-located street-cleaning citations
+          reconstructs each block's real ticket times from about 1.35 million GPS-located street-cleaning citations
           (a public records request, 2024 to mid 2026). On a typical 9–11am block, the median ticket lands around 9:30am. The posted sign is always the source of truth.</p>
       </div>
       <div class="qa">
@@ -488,7 +488,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
 
     <div class="srcs">
       <div class="src"><div class="sh">Sweep schedule</div><p>The posted day &amp; window for every block. <a href="https://data.sf.gov/d/yhqp-riqs" rel="noopener">DataSF · <code>yhqp-riqs</code></a></p></div>
-      <div class="src"><div class="sh">Parking citations</div><p>~1M street-cleaning tickets (2024–mid-2026), stamped to the minute and <b>GPS-located</b>, from SF public-records request #26-5453. The open feed places tickets only by the typed address. <a href="https://data.sf.gov/d/ab4h-6ztd" rel="noopener">DataSF · <code>ab4h-6ztd</code></a></p></div>
+      <div class="src"><div class="sh">Parking citations</div><p>~1.35M street-cleaning tickets (2024–mid-2026), stamped to the minute and <b>GPS-located</b>, from SF public-records request #26-5453. The open feed places tickets only by the typed address. <a href="https://data.sf.gov/d/ab4h-6ztd" rel="noopener">DataSF · <code>ab4h-6ztd</code></a></p></div>
       <div class="src"><div class="sh">Address index</div><p>The city's addressing system (EAS) — pins older, address-only citations to a block (the 2024+ pull is GPS-located). <a href="https://data.sf.gov/d/3mea-di5p" rel="noopener">DataSF · <code>3mea-di5p</code></a></p></div>
       <div class="src"><div class="sh">Permit areas</div><p>The ~30 lettered residential permit (RPP) zones. <a href="https://data.sf.gov/d/hi6h-neyh" rel="noopener">DataSF · <code>hi6h-neyh</code></a> <span>(2017 set)</span></p></div>
       <div class="src"><div class="sh">Meters &amp; color curb</div><p>Metered streets and their commercial / passenger / red loading rules. <a href="https://data.sf.gov/d/6cqg-dxku" rel="noopener">DataSF · <code>6cqg-dxku</code></a></p></div>
@@ -501,7 +501,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
       <h3>From a million tickets to one minute</h3>
       <p>SFMTA logs every citation with a timestamp, but the public feed <b>places it only by the officer-typed
         address</b>, a string like <code>0121 STEINER ST</code>. So I filed a
-        public-records request (#26-5453) and got <b>about a million tickets back with GPS</b>:
+        public-records request (#26-5453) and got <b>about 1.35 million tickets back with GPS</b>:
         street-cleaning tickets, 2024 to mid-2026, each one located. From there it's direct:</p>
       <ol>
         <li>Snap each ticket's GPS to the <b>nearest street segment</b> (within ~40m), then

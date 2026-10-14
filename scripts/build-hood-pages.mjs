@@ -103,7 +103,7 @@ const enforcementSection = (name, typical, days) => `
   <section>
     <div class="sec-k">How enforcement works</div>
     <h2>The 2-hour sign, the <b>20-minute</b> reality</h2>
-    <p class="lede">San Francisco posts a street-cleaning window, often two hours, but the ticket doesn't wait. Across about a million GPS-located citations (~815,000 matched to blocks), the typical SF block gets <b>most of its tickets inside the same ~20 minutes</b>, usually right after the window opens. In ${esc(name)}, that cluster lands around <b>${typical}</b> on <b>${days}</b>.</p>
+    <p class="lede">San Francisco posts a street-cleaning window, often two hours, but the ticket doesn't wait. Across about 1.35 million GPS-located citations (over a million matched to blocks), the typical SF block gets <b>most of its tickets inside the same ~20 minutes</b>, usually right after the window opens. In ${esc(name)}, that cluster lands around <b>${typical}</b> on <b>${days}</b>.</p>
     <div class="panel">
       <p class="lede"><b>Once the sweeper has physically passed your side of the street</b>, SFMTA's own rules let you re-park there, even before the posted hours end. But don't park early assuming it's done, and being even a minute off is still ticketable.</p>
       <p class="lede" style="margin-top:10px">Good to know: a residential parking permit (RPP) runs <b>$224/yr</b>; meters are free on <b>Sundays</b> and three holidays; and a car can't sit in one spot more than <b>72 hours</b>, even with a permit. The posted sign is always the final word.</p>

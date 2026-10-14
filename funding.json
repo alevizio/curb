@@ -13,7 +13,7 @@
     {
       "guid": "curb-guide",
       "name": "CURB",
-      "description": "A free, open-source, no-ads, no-signup map of San Francisco street-parking and street-sweeping rules at curb.guide, built on public DataSF open data. Featured by SFGate in June 2026, which noted SFMTA has not objected to the app's use of public data and that CURB has drawn 2,500+ visitors. By matching about 815,000 GPS-located street-cleaning citations (from a public records request) to their blocks, CURB surfaced that SF's posted 2-hour sweep window is really about 20 minutes of real risk. Funding covers running costs (Vercel, Redis, domain) and ongoing maintenance while keeping the project free and ad-free forever.",
+      "description": "A free, open-source, no-ads, no-signup map of San Francisco street-parking and street-sweeping rules at curb.guide, built on public DataSF open data. Featured by SFGate in June 2026, which noted SFMTA has not objected to the app's use of public data and that CURB has drawn 2,500+ visitors. By matching over a million GPS-located street-cleaning citations (from a public records request) to their blocks, CURB surfaced that SF's posted 2-hour sweep window is really about 20 minutes of real risk. Funding covers running costs (Vercel, Redis, domain) and ongoing maintenance while keeping the project free and ad-free forever.",
       "webpageUrl": { "url": "https://curb.guide" },
       "repositoryUrl": {
         "url": "https://github.com/alevizio/curb",

@@ -8,8 +8,8 @@
 
 ![CURB — every SF curb colored by its next street sweep, with the times tickets actually land on each block](docs/curb-screenshot.png)
 
-San Francisco posts a 2-hour street-cleaning window. We pulled **about a million real
-citations** (~815,000 matched to their exact blocks): on the median block, most of the tickets land inside a
+San Francisco posts a 2-hour street-cleaning window. We pulled **about 1.35 million real
+citations** (over a million matched to their exact blocks): on the median block, most of the tickets land inside a
 **~20-minute span**. CURB puts that on a map — every curb in SF colored by its next
 sweep, with the posted schedule AND the times tickets are actually written there,
 plus permit (RPP) areas, meters, loading zones (including the unmetered white school
@@ -120,12 +120,12 @@ The headline finding — *"the median block is ticketed within ~20 minutes"* —
 `scripts/build-enforcement-records.py` + `scripts/build-stats.mjs`:
 
 1. **Pull the citations.** The 2024–2026 street-cleaning citations came via SFMTA public-records request
-   **#26-5453** — about a million rows, **with GPS coordinates** from the handheld (the public DataSF feed
+   **#26-5453** — about 1.35 million rows, **with GPS coordinates** from the handheld (the public DataSF feed
    `ab4h-6ztd` places each ticket only by its typed address). The older address-only path — normalize to
    `stripZeros(number)|UPPERCASE(street)` and join to a block (CNN) via the Enterprise Addressing System
    `3mea-di5p`, in `scripts/build-enforcement.mjs` — survives only as a pre-2024 fallback.
 2. **Match by GPS, not address strings.** Each citation's GPS point is matched to the nearest street
-   segment (CNN) within ≤40 m (`yhqp-riqs` geometry), recovering **~815,000 of ~1,000,000** tickets — far
+   segment (CNN) within ≤40 m (`yhqp-riqs` geometry), recovering **~1,050,000 of ~1,350,000** tickets — far
    more, and more accurately, than the lossy address join.
 3. **Reduce to a per-block-side distribution.** `data/enforcement.json` stores, per block side,
    `[count, mean-minute-of-day, earliest, latest]`. The window is really **~20 minutes** — the median
