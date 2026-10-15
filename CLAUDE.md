@@ -67,7 +67,10 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
    "🎯 Ticketed ~9:11a" lines.
    Feed gotchas (checked 2026-10-11 against the records file, ticket by ticket): (1) every ticket written
    12:00-12:59 AM shows a WRONG hour, the first digit of the minute (00:24 → 02:24); anything that reads
-   hours from the feed must go through `fixHour` (scripts/midnight-hour.mjs, used by build-stats). (2) The
+   hours from the feed must go through `fixHour` (scripts/midnight-hour.mjs, used by build-stats). Reported
+   to DataSF 2026-10-11; they replied 2026-10-15 that they are investigating. The bug never leaves a ticket
+   at 00:01-00:59, so build-stats treats any day that has one as fixed and leaves its hours alone (logged as
+   "feed already right on N days"): the workaround switches itself off as their fix lands. (2) The
    feed's latitude/longitude (added mid-2026) geocode the typed ADDRESS, not the officer's GPS: same ticket,
    different block ~1 in 4 times, so keep the records file for block times. (3) The feed is missing most of
    Nov-Dec 2024. The records file is complete (1,351,709 tickets, Jan 2024 to Jun 2026), but in two tabs:

@@ -42,6 +42,11 @@ describe('fixHour', () => {
     expect(fixHour(block('8', '10'), 8, 15, LAT, LON, TUE)).toBe(8);
     expect(fixHour(block('0', '2'), 0, 24, LAT, LON, TUE)).toBe(0);
   });
+  it('leaves a day alone once the feed has it right (DataSF fixing the bug)', () => {
+    const idx = block('0', '2'); idx.fixedDays = new Set(['2026-11-03']);
+    expect(fixHour(idx, 1, 13, LAT, LON, TUE, '2026-11-03')).toBe(1);   // a real 1:13 AM ticket
+    expect(fixHour(idx, 1, 13, LAT, LON, TUE, '2026-10-27')).toBe(0);   // a day still from the old feed
+  });
   it('reads the feed\'s string coordinates and DataSF\'s holiday rows without breaking', () => {
     const idx = sweepIndex([
       { cnn: '100', weekday: 'Holiday', fromhour: '0', tohour: '2' },

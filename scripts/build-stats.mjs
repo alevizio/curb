@@ -8,7 +8,8 @@
 // Server-side SoQL group-bys where possible; the neighborhood breakdown streams 24 months of
 // street-cleaning rows by their analysis_neighborhood (only the surge chart joins addresses → EAS).
 // Run: npm run build:stats   (Node 18+, no deps; ~6-8 min, mostly the stream)
-// Hours: the feed shows every 12 AM ticket at a wrong hour; fixHour (midnight-hour.mjs) puts them back.
+// Hours: the feed shows every 12 AM ticket at a wrong hour; fixHour (midnight-hour.mjs) puts them back,
+// except on days the feed already has right (DataSF said on 15 Oct 2026 they are looking into it).
 
 import { sweepIndex, fixHour } from './midnight-hour.mjs';
 
@@ -57,10 +58,18 @@ log('sweep blocks + posted windows (for the 12 AM hour fix)…');
 const sweeps = sweepIndex(await soda('https://data.sf.gov/resource/yhqp-riqs.json', {
   '$select': 'cnn,weekday,fromhour,tohour,line', '$limit': 45000,
 }));
+// DataSF said on 15 Oct 2026 they are looking into the bug. It never leaves a ticket at 00:01 to 00:59 (only
+// 00:00 keeps hour 0), so a day that has one comes from a fixed feed, and fixHour leaves that day alone.
+sweeps.fixedDays = new Set((await soda(CITES, {
+  '$select': 'date_trunc_ymd(citation_issued_datetime) as d', '$group': 'd', '$limit': 50000,
+  '$where': `${SWEEP_WHERE} AND citation_issued_datetime >= '2024-01-01' AND `
+    + 'date_extract_hh(citation_issued_datetime) = 0 AND date_extract_mm(citation_issued_datetime) > 0',
+})).map(r => r.d.slice(0, 10)));
+log(`  feed already right on ${sweeps.fixedDays.size} days (their hours stay as they are)`);
 // citation_issued_datetime is SF local wall time (no offset): read the fields straight off the string.
 const clock = (t) => {
   const m = String(t || '').match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/);
-  return m ? { hh: +m[4], mi: +m[5], dow: new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay() } : null;
+  return m ? { hh: +m[4], mi: +m[5], dow: new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay(), day: `${m[1]}-${m[2]}-${m[3]}` } : null;
 };
 
 log('sweep hour/dow histograms (since 2024)…');
@@ -81,7 +90,7 @@ const hourCount = new Map((await soda(CITES, {
     if (!rows.length) break;
     for (const r of rows) {
       const c = clock(r.citation_issued_datetime);
-      if (!c || fixHour(sweeps, c.hh, c.mi, r.latitude, r.longitude, c.dow) !== 0) continue;
+      if (!c || fixHour(sweeps, c.hh, c.mi, r.latitude, r.longitude, c.dow, c.day) !== 0) continue;
       hourCount.set(c.hh, hourCount.get(c.hh) - 1); hourCount.set(0, (hourCount.get(0) || 0) + 1); moved++;
     }
     cur = rows[rows.length - 1][':id'];
@@ -144,7 +153,7 @@ for (;;) {
       const h = hoods.get(hood) || { n: 0, rev: 0 }; h.n++; h.rev += fine; hoods.set(hood, h);
       const d = hoodDetail.get(hood) || newDetail(); d.n++; d.rev += fine;
       if (c) {
-        const hh = fixHour(sweeps, c.hh, c.mi, r.latitude, r.longitude, c.dow);
+        const hh = fixHour(sweeps, c.hh, c.mi, r.latitude, r.longitude, c.dow, c.day);
         d.hours[hh]++; d.dows[c.dow]++; d.minSum += hh * 60 + c.mi; d.minN++;
       }
       if (p) d.streets.set(p.name, (d.streets.get(p.name) || 0) + 1);

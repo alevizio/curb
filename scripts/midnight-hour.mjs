@@ -58,9 +58,10 @@ function nearestCnn(grid, lon, lat) {
   return best;
 }
 
-// The hour to count for a feed ticket at hh:mi on jsDow: 0 for a misdated midnight ticket, else hh.
-export function fixHour(index, hh, mi, lat, lon, dow) {
-  if (!looksMisdated(hh, mi)) return hh;
+// The hour to count for a feed ticket at hh:mi on jsDow and day (YYYY-MM-DD): 0 for a misdated midnight
+// ticket, else hh. Days in index.fixedDays (set by build-stats) come from a fixed feed and keep their hours.
+export function fixHour(index, hh, mi, lat, lon, dow, day) {
+  if (!looksMisdated(hh, mi) || index.fixedDays?.has(day)) return hh;
   const la = parseFloat(lat), lo = parseFloat(lon);
   if (!Number.isFinite(la) || !Number.isFinite(lo)) return hh;
   const cnn = nearestCnn(index.grid, lo, la);
