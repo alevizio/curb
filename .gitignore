@@ -10,6 +10,10 @@ xcuserdata/
 # Never commit the APNs auth key
 AuthKey_*.p8
 
+# Local-only CURB data that must never be published: the SFMTA records file (#26-5453, not
+# redistributable) lives in private/. If it's missing, download it again from the request on NextRequest.
+/private/
+
 # Local-only: social/marketing asset stash + temp capture scripts (never publish to the repo)
 assets/
 _capture.mjs

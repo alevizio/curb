@@ -14,7 +14,7 @@ import numpy as np
 from shapely import STRtree, points as shp_points
 from shapely.geometry import shape
 
-XLSX  = os.environ.get("CURB_CITATIONS_XLSX", "/Users/alevizio/Downloads/TRC7.2.22_1.1.2024_06.24.2026.xlsx")  # records #26-5453 (not redistributable)
+XLSX  = os.environ.get("CURB_CITATIONS_XLSX", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "private", "TRC7.2.22_1.1.2024_06.24.2026.xlsx"))  # records #26-5453 (not redistributable, gitignored private/)
 STATS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "stats.json")
 FINE  = 105  # flat SF street-cleaning fine (assessed, not collected), 2024-2026
 

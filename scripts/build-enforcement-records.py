@@ -7,7 +7,7 @@ import urllib.request, urllib.parse
 import numpy as np
 from shapely import STRtree, points, LineString
 
-XLSX = os.environ.get("CURB_CITATIONS_XLSX", "/Users/alevizio/Downloads/TRC7.2.22_1.1.2024_06.24.2026.xlsx")  # SFMTA records #26-5453 (not redistributable); set CURB_CITATIONS_XLSX to override
+XLSX = os.environ.get("CURB_CITATIONS_XLSX", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "private", "TRC7.2.22_1.1.2024_06.24.2026.xlsx"))  # SFMTA records #26-5453 (not redistributable, gitignored private/); set CURB_CITATIONS_XLSX to override
 OUT  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "enforcement.json")
 TOL_M = 40.0          # max citation->segment distance (meters)
 MIN_N = 5

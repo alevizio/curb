@@ -77,6 +77,9 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
    'Report 1' stops at Excel's row limit and 'Report 1(1)' holds the other 303k (mostly Aug 2025 to Mar 2026),
    starting in column B with no header row. Read every tab from its first used column (until 2026-10-13
    the build skipped that tab without a word, so the map used 815k matched tickets instead of 1.05M).
+   The file lives in the gitignored `private/` folder (`private/TRC7.2.22_1.1.2024_06.24.2026.xlsx`, 90 MB,
+   the build's default path; never commit or serve it). On another Mac, download it again from request
+   26-5453 on sanfrancisco.nextrequest.com.
 
 ### Spatial queries (verified working)
 - Segments in viewport: `?$where=intersects(line,'POLYGON((lng lat, ...))')&$limit=2500`

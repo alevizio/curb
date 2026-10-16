@@ -10,6 +10,7 @@ og/template-home.html
 og/template-tickets.html
 og/render.sh
 launch-kit.md
+private/
 CLAUDE.md
 AGENTS.md
 .github/

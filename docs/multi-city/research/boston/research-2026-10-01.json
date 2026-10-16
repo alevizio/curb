@@ -1,0 +1,620 @@
+{
+  "summary": "How hard is CURB for Boston: research Boston parking open data (then verify every dataset claim) and audit how SF-specific the CURB code is",
+  "agentCount": 3,
+  "logs": [],
+  "result": {
+    "data": {
+      "datasets": [
+        {
+          "need": "Sweeping schedule (core feature: curb sides colored by next sweep, block sheets, alerts)",
+          "name": "Street Sweeping Schedules (Analyze Boston, Public Works)",
+          "url": "https://data.boston.gov/dataset/street-sweeping-schedules",
+          "api": "CKAN datastore: GET https://data.boston.gov/api/3/action/datastore_search?resource_id=9fdbdcad-67c8-4b23-b6ec-861e77d56227 (also datastore_search_sql; limited SQL, coalesce/FILTER are blocked). CSV: /dataset/00c015a1-.../resource/9fdbdcad-.../download/tmp19a1alyf.csv returns 302 to a signed S3 URL that expires in 24h. CORS: access-control-allow-origin: * on the datastore API, the 302 and the S3 object; preflight OK. No spatial filtering is possible because rows have no geometry.",
+          "fields": "main_id, st_name, dist, dist_name, start_time, end_time, side, from, to, miles, section, one_way, week_1..week_5, sunday..saturday, every_day, year_round, north_end_pilot, timestamp, parent, losta, hista (all text). Sample: main_id 536, st_name 'Arch St', dist '1F' 'Downtown', 00:01-07:00, side null, from 'Milk St', to 'Summer St', miles 0.1801, weeks 1-5 t, every day t, year_round t, north_end_pilot f, timestamp 2012-02-29, parent 'ARCH 1', losta 0, hista 951. A typical residential row: Archdale Rd, South St to Washington St, side Odd, 12:00-16:00, weeks 1 and 3, Thursday; the Even side runs weeks 2 and 4.",
+          "geometry": "None. No segment ID either. losta/hista are stationing in feet along a PWD 'parent' route (hista minus losta equals miles x 5280 in 3,676 of 3,758 rows). The parent route geometry is not published. Arch St parent 0-951 ft lines up with SAM ROUTE_ID 163.01 at 953.9 ft, but parent codes (BEACO1, BEACO5) do not map cleanly to SAM ROUTE_IDs (332.01, ...), so treat any such key as unverified. The workable join is st_name + from/to cross streets against the SAM segments and SAM intersections layers below. I tested it: 79% of rows matched on a first pass; with 'Dead End'/town-line handling and Saint/Mount spellings, 3,422 of 3,758 (91%) matched, and 3,220 (86%) of those agree with the 'miles' field within 25%. Odd/Even sides map to L/R through the SAM address ranges. Script: /private/tmp/claude-501/-Users-alevizio/a6671fb0-a56b-4a27-8d89-29245b7ea378/scratchpad/match2.py",
+          "format": "CSV / CKAN datastore JSON",
+          "freshness": "Re-exported daily (accrual R/P1D, last_modified 2026-10-01). Row timestamps run from 2012 to 2026-09-02, so rows are still being edited. The City labels it a 'legacy dataset'.",
+          "license": "ODC PDDL (public domain)",
+          "notes": "3,758 rows; 1,602 distinct parent routes; 25 district codes. side: Odd 1,754, Even 1,730, null 198, plus a few Median/Inbound/Outbound/Both values. Times: 08:00-12:00 and 12:00-16:00 dominate the day program; 00:01-07:00, 00:00, 02:00-07:00 and 05:00/06:00 starts are the night program. Week patterns: 2&4 (1,606 rows), 1&3 (1,524), every week (466), 1&3&5 (113). Missing from the rows: season dates (only a year_round flag), tow/no-tow, a holiday flag. No data dictionary (is_data_dict_populated false). north_end_pilot=t covers South End 192, North End 67, Beacon Hill 61 rows, which matches the three neighborhoods on the March 1 to Dec 31 season. I infer that is what the flag means; not verified. 82 rows have stationing that disagrees with miles."
+        },
+        {
+          "need": "Sweeping geometry already joined by the City (would replace the build-time join)",
+          "name": "Notify Boston Street Alerts backend (undocumented internal API)",
+          "url": "https://notify.boston.gov/street-alerts/",
+          "api": "GET https://notify.boston.gov/street-alerts/api/streets/search?q=Arch%20St ; /streets/suggest?q= ; /streets/segments?ids= ; /streets/segments/geometry?block=<blockId>. No auth for search or geometry. CORS: access-control-allow-origin: https://notify.boston.gov only, so a browser on another origin cannot call it; a build script could, but the API is undocumented and has no terms, so ask before relying on it.",
+          "fields": "Search returns segments[]: id (block), streetName, fromStreet, toStreet, district{code,name}, miles, hasGeometry, occupancyBlockId, variants[]: id (equals CKAN main_id, e.g. 536), blockId, side, schedule{startTime, endTime, everyDay, yearRound, weeks{w1..w5}, days{monday..sunday}}. Geometry for block 158 returns {data:{mapped:true, bridged:false, paths:[[[lat,lng],...]]}} (lat/lng order). Arch St = block 303 / variant 536.",
+          "geometry": "Yes. Centerline paths per block (both sides share one block; sides are variants). Keyed by blockId; variant id equals the CKAN main_id.",
+          "format": "JSON",
+          "freshness": "Live. This is the City's current lookup and alert tool; cityofboston.gov/publicworks/sweeping now redirects here.",
+          "license": "None stated",
+          "notes": "Shows the City already holds sweeping-to-geometry. occupancyBlockId links blocks to temporary no-parking (street occupancy) alerts. Not an open-data endpoint; I made two GET requests to confirm its shape and stopped there."
+        },
+        {
+          "need": "Street centerline geometry and join key for sweeping, meters, snow routes",
+          "name": "Boston Street Segments (SAM System)",
+          "url": "https://data.boston.gov/dataset/boston-street-segments-sam-system",
+          "api": "ArcGIS FeatureServer: https://gisportal.boston.gov/arcgis/rest/services/SAM/Live_SAM_Address/FeatureServer/3/query?where=...&outFields=*&outSR=4326&f=geojson (maxRecordCount 2000; JSON, geoJSON, PBF; envelope spatial queries work). Also CKAN GeoJSON/CSV/SHP/KML. CORS: the ArcGIS server echoes the request Origin with Allow-Credentials true; preflight OK.",
+          "fields": "OBJECTID, SEGMENT_ID, L_F_ADD, L_T_ADD, R_F_ADD, R_T_ADD, STREET_ID, PRE_DIR, ST_NAME, ST_TYPE, SUF_DIR, ALTERNATE_NAME, CFCC, SPEEDLIMIT, ONEWAY, F_ZLEV, T_ZLEV, FT_COST, TF_COST, FT_DIR, TF_DIR, SHIELD, HWY_NUM, MUN_L/R, NBHD_L/R, STATE00_L/R, COUNTY00_L/R, MCD00_L/R, ZIP_L/R, ownership, ROUTE_ID, Shape__Length. Sample: SEGMENT_ID 66, ST_NAME 'Arch', ST_TYPE 'ST', L 39-1, R 48-2, STREET_ID 163, ONEWAY 'FT', ROUTE_ID '163.01', ownership 'Boston Public Works Department', length 306.6 ft.",
+          "geometry": "Yes, polylines. Native SR is EPSG:2249 (MA State Plane, US feet); outSR=4326 works. Keys: SEGMENT_ID, STREET_ID, ROUTE_ID. L/R address ranges let you put Odd/Even sweeping sides on the correct side.",
+          "format": "ArcGIS JSON/GeoJSON/PBF; CSV/SHP/KML on CKAN",
+          "freshness": "'Updated nightly' (CKAN metadata_modified 2026-10-01)",
+          "license": "ODC PDDL",
+          "notes": "19,440 segments. The Snow Emergency Routes segment layer and DO_NOT_PARK reuse SEGMENT_ID, so they join directly. Downloaded copy: scratchpad/sam_segments.geojson (11 MB)."
+        },
+        {
+          "need": "Cross-street matching for sweeping from/to (join helper)",
+          "name": "SAM Live Intersections (deduplicated)",
+          "url": "https://gisportal.boston.gov/arcgis/rest/services/SAM/Live_SAM_Address/FeatureServer/8",
+          "api": "ArcGIS FeatureServer query, f=geojson. CORS: Origin echoed, as above.",
+          "fields": "OBJECTID, F_ZLEV, T_ZLEV, F_ZLEV2, T_ZLEV2, SEGMENT_ID, STREET_ID, FULL_STREET_NAME, SEGMENT_ID2, STREET_ID2, FULL_STREET_NAME2, INTERSECTION_NAME, INTERSECTION_NAME_REVERSE. Sample: 'A St & Gold St', SEGMENT_ID 1 / SEGMENT_ID2 3516.",
+          "geometry": "Yes, points; keyed to SEGMENT_ID pairs",
+          "format": "ArcGIS JSON/GeoJSON",
+          "freshness": "Live service",
+          "license": "Not stated on the layer (unverified)",
+          "notes": "11,324 intersections. Street aliases are in tables 5, 6 and 7 (Master Street Names, Street Aliases, Suffix Crosswalk), which would close most of the remaining 9% of unmatched sweeping rows."
+        },
+        {
+          "need": "Meters (locations, hours, time limits, rates)",
+          "name": "Parking Meters",
+          "url": "https://data.boston.gov/dataset/parking-meters",
+          "api": "CKAN datastore resource df6dac6b-e484-470d-8757-6ecae4e04f2a (CORS *), GeoJSON download, or ArcGIS https://gisportal.boston.gov/arcgis/rest/services/Infrastructure/OpenData/MapServer/9/query (envelope query tested: 187 meters in a Back Bay bbox; CORS echoes Origin).",
+          "fields": "METER_ID, VENDOR, PAY_POLICY, PRE_PAY, PARK_NO_PAY, GREEN_DOME, TOW_AWAY, STREET_CLEANING, DIR, BLK_NO, STREET, LOCK_, LONGITUDE, LATITUDE, TRAVEL_DIRECTION, FROM_INTERSECTION, TO_INTERSECTION, SPACE_NUMBER, NUMBEROFSPACES, METER_TYPE, HAS_SENSOR, G_DISTRICT, G_PASSPORT_ZONES, G_PM_ZONE, G_SUBZONE, G_ZONE, BASE_RATE, ... INSTALLED_ON, METER_STATE, SPACE_STATE. Sample: 450001, Parkeon, PAY_POLICY '08:00AM-08:00PM MON-SAT $0.25 120', PARK_NO_PAY 'SUN, before 8AM, after 8PM', STREET 'NEWBURY ST A-B', DIR N, G_ZONE 'MS', BASE_RATE 0.25, INSTALLED_ON 1/1/2017.",
+          "geometry": "Points (lat/lon). No segment key; snap to SAM segments.",
+          "format": "CSV, GeoJSON, SHP, KML, ArcGIS",
+          "freshness": "Re-exported 2026-09-29, but the content looks frozen around 2017: max INSTALLED_ON is 2017-04-01, BASE_RATE is $0.25 everywhere, STREET_CLEANING is null in all 6,955 rows, TOW_AWAY is set in only 54 rows.",
+          "license": "ODC PDDL",
+          "notes": "PAY_POLICY gives hours and max minutes (120/240) but not the current rate. boston.gov (updated 5/6/26) lists $3.75/hr Back Bay and Seaport, $2.50 Fenway/Kenmore and Bulfinch, $2.00 most other areas, meters free Sundays and City holidays. Rates would have to be applied by area from that page until the City provides a zone/rate table."
+        },
+        {
+          "need": "Curb regulations generally: time limits, resident permit, loading, no stopping, and sign-derived sweeping",
+          "name": "Boston Curb Lab prototype CDS Curbs API (smart-curb-api)",
+          "url": "https://github.com/OETBoston/curb-atlas-update/blob/HEAD/src/constants.js",
+          "api": "GET https://smart-curb-api-726931983438.us-east4.run.app/curbs/zones?min_lng=&min_lat=&max_lng=&max_lat= (or ?lng=&lat=&radius=), then /curbs/policies?ids=<comma list>. CORS: echoes Origin with credentials, so browser calls work. The endpoint is hard-coded in the City's public curb-atlas repos. It is not announced as an official API.",
+          "fields": "Envelope: version '1.0', time_zone 'US/Eastern', last_updated, currency 'USD', author 'City of Boston', limit 10000. Zone: curb_zone_id, geometry (LineString), curb_policy_ids[], published_date, last_updated_date, plus CDS fields that are null in practice: street_name, street_side, cross_street_start_name, num_spaces, etc. Policy: curb_policy_id, description (e.g. '* No Parking 8:00 AM-12:00 PM', '* 2-Hour Parking Residents Only 8:00 AM - 6:00 PM', '* 30-Minute Loading Commercial Vehicle 7:00 AM - 4:00 PM'), priority, rates, rules[{activity, max_stay, max_stay_unit, user_classes}], time_spans[{days_of_week, weeks_of_month, months, time_of_day_start/end}]. Sweeping-style sample: no parking, thu, weeks [2,4], 12:00-16:00, months 3-12.",
+          "geometry": "Yes, LineString per curb zone, offset to the curb. No street_side or segment key populated.",
+          "format": "JSON (Curb Data Specification 1.0 Curbs API)",
+          "freshness": "Zones published 2026-05-07 (last_updated_date 1778150913069). Coverage found in all 12 neighborhoods I sampled (245-679 zones per small bbox).",
+          "license": "None stated. The OET repos are open source, but the data's terms are unknown.",
+          "notes": "Built from AI reading of sign photos (smart-prototype, cds_translator repos), and the output is noisy: 'unusable image' policies, and descriptions like '15-Hour Parking 8:00 AM-8:00 PM (Metered)' that look like misreads. Sweeping appears as generic 'No Parking' with weeks_of_month and is never labeled street cleaning. Treat it as a preview of the official CDS feed the City says is coming to Analyze Boston ('in the coming months', boston.gov Curb Lab page)."
+        },
+        {
+          "need": "Curb regulations from the sign inventory (permit zones, loading, tow, sweeping signs, time limits)",
+          "name": "Signs (Cartegraph)",
+          "url": "https://data.boston.gov/dataset/signs-cartegraph",
+          "api": "CKAN datastore resource 82e683a0-b2bb-4caf-b34c-7a6cbeadba0e (CORS *). A live view is at https://gis.boston.gov/arcgis/rest/services/BTD/Cartegraph_BTD_readonly/MapServer/26/query (CORS echoes Origin; groupBy statistics work). Photos at cartegraphattachments.blob.core.windows.net have no CORS header, which is fine for <img> but not for fetch.",
+          "fields": "CKAN: oid, cartegraph_id, locator_address_number_field, locator_street_field, street_field, neighborhood_field, mutcd_code_field, directionof_sign_arrow_field, sign_direction_field, sign_orientation_field, cg_last_modified_field, entry_date_field, replaced_field, retired_field, support_field, asset_status_field, special_sign_description_field, notes_field, attachment_public_url, attachment_from_cyclomedia, latitude, longitude, geom_point_4326. Sample: code 'S-#' on Northampton St, special_sign_description 'S-38C STREET CLEANING 1ST, 3RD & 5TH THURSDAY 8AM-12NOON MARCH 1 TO DECEMBER 31', with a photo URL.",
+          "geometry": "Points (sign posts) with arrow direction. Applying a sign to a curb span takes Rules Art. IV Sec. 20 arrow logic plus snapping.",
+          "format": "CSV / datastore JSON; ArcGIS",
+          "freshness": "Weekly export (R/P1W), last 2026-09-27. 216,408 distinct signs, 253,139 rows, 199,805 photo links. The ArcGIS layer has 179,019 records.",
+          "license": "ODC PDDL",
+          "notes": "Codes are mostly Boston-specific (S-# 21.6k, T-23 9.4k, R-1 8.2k, T-1 8.1k, T-4 5.0k, PB-26G, P-6A, MPBZ ...) and there is no public code-to-legend catalog. Free text is sparse: only about 150 rows mention 'clean' and 137 'resident'. Usable as raw material, not as a ready regulation layer."
+        },
+        {
+          "need": "Snow emergency routes (tow on declared emergencies)",
+          "name": "Snow Emergency Routes",
+          "url": "https://data.boston.gov/dataset/snow-emergency-routes",
+          "api": "CKAN datastore a7a4ca31-f0fe-451d-be73-89fcc52ea0d2 (CORS *), GeoJSON, or AGOL https://services.arcgis.com/sFnw0xNflSi8J0uh/arcgis/rest/services/Ownership/FeatureServer/0 (CORS *). A segment-level copy is at https://gisportal.boston.gov/arcgis/rest/services/Infrastructure/OpenData/MapServer/7.",
+          "fields": "CKAN: _id, FULL_NAME, Responsibility, Shape_Length, shape_wkt. Sample: 'C St', 'City', MULTILINESTRING. The segment layer (8,422 features) carries SEGMENT_ID, STREET_ID, FULL_NAME, L/R address ranges, PWD_DISTRICT, RESP, UpdateTime.",
+          "geometry": "Yes. CKAN copy is dissolved by name (736 features). The segment copy joins to SAM SEGMENT_ID.",
+          "format": "CSV/GeoJSON/SHP/KML; ArcGIS",
+          "freshness": "CKAN re-exported 2026-09-29, but the segment layer's max UpdateTime is 2011-06-24. Content currency is unverified.",
+          "license": "ODC PDDL",
+          "notes": "There is no machine-readable feed for when an emergency is declared or lifted; the City announces through news and alerts. DO_NOT_PARK on AGOL (8,459 segments, last edit 2015) looks like a related older restriction layer."
+        },
+        {
+          "need": "Ticket timing ('when tickets usually land')",
+          "name": "Parking tickets: not published. Past public-records release Jan 2018 to Aug 19 2020 (third-party mirror)",
+          "url": "https://www.wokewindows.org/data_sources/parking_tickets",
+          "api": "Static file: https://wokewindows-data.s3.amazonaws.com/parking_tickets.csv.gz (82.7 MB, 3,200,977 rows). Original BTD response R000465-080320.zip. Build-time only.",
+          "fields": "Ticket Number, Ticket Issue Date, Issue Time, Violation Code, Violation Desc Long, Route, Location, Badge # (Issuing Officer), Body Style, Vehicle Color Desc, Make, Plate Type, Rp Plate, Rp Plate State, Fine Amount, Street No, Street Direction, Street Name, Street Suffix, Disposition Code, Disposition Desc. Sample: 01/01/2018 00:30, code 314 CROSSWALK, route GC01, 'PUTNAM ST / LEXINGTON ST', $85.",
+          "geometry": "No lat/long. Location is an address or intersection string; geocode with SAM addresses/intersections.",
+          "format": "CSV (gz)",
+          "freshness": "Frozen at Aug 2020 and predates the June 2025 ticket-system change.",
+          "license": "Public record. Contains plate numbers and officer badge numbers: strip them, do not republish.",
+          "notes": "Shows the request path works and that BTD can export issue date and time. A new request through JustFOIA (https://boston.justfoia.com/publicportal/home/newrequest, publicrecords@boston.gov, 617-635-4037) should ask for street-cleaning codes with plates and badges excluded. The only ticket dataset on Analyze Boston is 'Parking Tickets Portal Web Statistics' (2014 pageviews), which is not useful."
+        },
+        {
+          "need": "Ticket and enforcement proxy (weak substitute for citations)",
+          "name": "311 Service Requests: 'Parking Enforcement' cases",
+          "url": "https://data.boston.gov/dataset/311-service-requests",
+          "api": "CKAN datastore resource 1a0b420d-99f1-4887-9851-990b2a5a6e17 ('311 Service Requests - 2026', legacy schema); datastore_search_sql with WHERE type='Parking Enforcement'. CORS *.",
+          "fields": "case_enquiry_id, open_dt, sla_target_dt, closed_dt, on_time, case_status, closure_reason, case_title, subject, reason, type, queue, department, location, ward, precinct, location_street_name, location_zipcode, latitude, longitude, geom_4326, source. Sample: 2026-09-29T22:49, 'Parking Enforcement', '33 Old Harbor St South Boston MA 02127', 42.3337, -71.0476.",
+          "geometry": "Points (lat/long)",
+          "format": "CSV / datastore JSON",
+          "freshness": "Daily. 49,459 Parking Enforcement cases from 2026-01-01 to 2026-09-29; 60,632 in 2025.",
+          "license": "ODC PDDL",
+          "notes": "These are residents asking for enforcement, not tickets written. The new-system resource (254adca6, BCS- ids) has no parking-enforcement types."
+        },
+        {
+          "need": "Temporary no-parking (moving trucks, street occupancy)",
+          "name": "Moving Truck Permits",
+          "url": "https://data.boston.gov/dataset/moving-truck-permits",
+          "api": "CKAN datastore resource fde6709d-62a7-4523-a8eb-76eac2004f4b (CORS *).",
+          "fields": "permit_number, work_type, permit_type_descr, description, comments, application_method, applicant_city/state/zip, is_contractor, total_fees, issued_date, expiration_date, status, occupancy_type, city, state, zip, lat, long. Sample: OCCU-1905153, 'STAND MOVING TRUCK AT CURB// ALL WORK 7AM-5PM', issued 2026-09-29, expires 2026-10-05, 42.35039, -71.08871.",
+          "geometry": "Points. Some rows are not geocoded (lat/long null).",
+          "format": "CSV",
+          "freshness": "Daily (issued_date through 2026-09-29)",
+          "license": "ODC PDDL",
+          "notes": "225,470 rows. No curb extent or side, and hours sit in free text."
+        },
+        {
+          "need": "Resident permit zones",
+          "name": "Active RPP Permits as of June 28 2022 (AGOL CSV, BostonGIS)",
+          "url": "https://www.arcgis.com/home/item.html?id=91a18afdf0c742d4bd552cbd7ed80518",
+          "api": "https://www.arcgis.com/sharing/rest/content/items/91a18afdf0c742d4bd552cbd7ed80518/data (8.2 MB CSV)",
+          "fields": "Rpp_Street_NBR, Rpp_Street_Prefix, Rpp_Street_Name, Rpp_Street_Suffix, Permit_District, Rpp_Zip_Code, Rpp_Apt_Number, permits_per_hh, units, X, Y (EPSG:2249), n_zips. Sample: 0 DEVENS ST, 'Charlestown (C)', 02129.",
+          "geometry": "Points in state-plane feet (permit-holder addresses)",
+          "format": "CSV",
+          "freshness": "Snapshot, June 2022",
+          "license": "Not stated",
+          "notes": "Shows which permit district an address belongs to, not which curbs require a permit. Restricted blocks would have to come from signs (PB-xx codes), the CDS prototype (user_classes resident_permit), or the City. Only other public source found: a 2017 PDF map (boston.gov/sites/default/files/file/document_files/2017/09/resident_permit.pdf)."
+        },
+        {
+          "need": "Curb line geometry (drawing curb sides)",
+          "name": "Curbs (Infrastructure/OpenData layer 6)",
+          "url": "https://gisportal.boston.gov/arcgis/rest/services/Infrastructure/OpenData/MapServer/6",
+          "api": "ArcGIS MapServer query, f=geojson; CORS echoes Origin.",
+          "fields": "OBJECTID, TYPE (all 'CURB'), Shape.STLength()",
+          "geometry": "Polylines, 66,030 features. No street or segment attributes.",
+          "format": "ArcGIS JSON/GeoJSON",
+          "freshness": "Unknown (no description or edit date)",
+          "license": "Not stated",
+          "notes": "Optional. Offsetting SAM centerlines by side is simpler and is what CURB does in SF."
+        },
+        {
+          "need": "Curb-use inventory reference (format precedent)",
+          "name": "Cambridge Street Curb Use Inventory (Beacon Hill, as of July 1 2021)",
+          "url": "https://services.arcgis.com/sFnw0xNflSi8J0uh/arcgis/rest/services/Cambridge_Street_Curb_Use_Inventory_WFL1/FeatureServer/0",
+          "api": "AGOL FeatureServer query (CORS *)",
+          "fields": "OBJECTID, Id, Object_ID, Location, Regulation, Restriction, Spaces, Stall_length, Notes, Reg1..Reg4. Sample: 'Cambridge St S: Lindall Pl - Grove St', Meter, '(Zone 079)', 4 spaces, 'Metered 8am - 8pm 2 hour limit Monday - Saturday'.",
+          "geometry": "Polylines",
+          "format": "ArcGIS JSON",
+          "freshness": "2021 snapshot",
+          "license": "Not stated",
+          "notes": "98 features. A pilot only; shows the City has inventoried curbs block by block before."
+        },
+        {
+          "need": "Holidays (daytime sweeping suspension)",
+          "name": "City of Boston Holidays page",
+          "url": "https://www.boston.gov/departments/311/city-boston-holidays",
+          "api": "HTML only (no feed). Scrape at build time or hand-maintain a table.",
+          "fields": "Per holiday: date, name, meters free (yes/no), 'Daytime street cleaning is canceled, but overnight street cleaning is on a normal schedule' or 'normal schedule'.",
+          "geometry": "n/a",
+          "format": "HTML",
+          "freshness": "Last updated 7/3/26; covers Nov 2025 to Dec 2026",
+          "license": "n/a",
+          "notes": "Daytime sweeping is canceled on: Thanksgiving, Christmas, New Year's, MLK, Presidents, Patriots, Memorial, Juneteenth, July 3 2026 (observed), Labor, Indigenous Peoples, Veterans Day. Sweeping runs normally (meters free) on Evacuation Day (Mar 17) and Bunker Hill Day (Jun 17)."
+        }
+      ],
+      "rules": "SEASON. Daytime sweeping runs April 1 to November 30 in most neighborhoods. In the North End, South End and Beacon Hill it runs March 1 to December 31. Night sweeping runs all year on main roads, arterials and commercial streets. A posted sign with no months means the restriction is year-round. Source: boston.gov/departments/public-works/street-cleaning-boston (last updated 9/28/26).\n\nThe CSV has no per-row season dates, only year_round (361 rows). The March to December group appears to be the north_end_pilot=t rows: South End 192, North End 67, Beacon Hill 61. Two things support this: South End signs read 'MARCH 1 TO DECEMBER 31', and the CDS prototype encodes months 3-12. The flag's meaning itself is not documented, so this is my inference.\n\nDAY VS NIGHT. There are no separate night 'districts'. Night rows sit inside the 25 PWD district codes (1F Downtown, 1T Chinatown, M Multiple, etc.) and are recognizable by their times: 00:01-07:00, 02:00-07:00, 00:00 starts, 05:00/06:00 starts. Day rows are almost all 08:00-12:00 or 12:00-16:00.\n\nODD/EVEN AND WEEKS. side is Odd or Even (address parity). The two sides usually share a weekday and alternate weeks, for example Odd weeks 1 and 3, Even weeks 2 and 4, Thursday 12-4. 'Week n' means the nth occurrence of that weekday in the month, the same convention as CDS weeks_of_month. The City page says weekly streets are also swept in week 5 and every-other-week streets are not enforced in week 5. However, 113 rows and some signs say '1ST, 3RD & 5TH', so use the row flags, not the page's generalization.\n\nHOLIDAYS AND WEATHER. On listed City holidays, daytime sweeping is canceled and overnight sweeping runs as normal. Evacuation Day and Bunker Hill Day are normal sweeping days (source: boston.gov/departments/311/city-boston-holidays). Rain does not automatically cancel sweeping; check 311. Weekend nights are swept on some streets.\n\nTICKET VS TOW. Traffic Rules and Regulations (March 1, 2025, boston.gov PDF), Art. IV Sec. 1 part 16, prohibits parking where at least one official sign is posted for street cleaning; there is a passenger pick-up/drop-off exception. Under Art. IV Sec. 20(4), street cleaning and snow emergency signs apply to the whole block, even over valid meters. Towing applies only where a sign carries the 'Tow Zone' legend (Art. IV, 'Specific Prohibitions-Tow Zones').\n\nFines (Parking Clerk fines page, updated 9/14/26, and the Rules):\n- Street Cleaning: $40, $13 late penalty. This is the towable daytime case.\n- Overnight Street Cleaning (no tow): $90, $30 late penalty.\n- Street Cleaning (Charlestown): $90. Charlestown stopped towing for sweeping in a 2015 pilot that was made permanent.\n- Overnight sweeping stopped towing with the 2018 Ticket-No-Tow change (City Council transcript, boston.gov/sites/default/files/file/document_files/2018/06/gop_2018-6-1_0566.pdf).\n\nSigns can say 'NO TOW ZONE' (seen in Charlestown in the sign inventory). Towing costs $132 plus $35/day storage plus a fuel surcharge (street-cleaning page). BTD writes the tickets, and private contractors working for BTD do the towing. The posted sign wins over the website or email.\n\nSNOW EMERGENCIES. The Commissioner of Transportation declares a weather emergency (Rules Art. IV Sec. 19). Cars on posted snow emergency arteries are ticketed and towed (boston.gov 'What to do with your car when it snows', updated 2/22/26). The Weather Emergency fine is $45. During declared emergencies, parking is banned on both sides of posted routes. Garage discounts start 2 hours before the declaration and end 2 hours after it lifts. Space savers are allowed until 48 hours after the emergency ends, but never in the South End or Bay Village. Sec. 19 still contains an alternating odd/even one-side prohibition (Nov 15 to Mar 31). City messaging says there is no odd/even side parking during emergencies, so the gap between the legal text and practice is unresolved.\n\nALERTS TODAY. The City's own reminders moved to Notify Boston (notify.boston.gov/street-alerts, emails from notify@boston.gov). It also sends temporary no-parking alerts for moving trucks, events and construction, so a Boston version of CURB's alerts would overlap with it.",
+      "gaps": [
+        "No published sweeping geometry or segment key. The CSV is linear-referenced (parent route + losta/hista feet) to a PWD route layer that is not public. The City has the joined geometry inside Notify Boston, but that API is undocumented and CORS-locked to notify.boston.gov.",
+        "Build-time join is feasible but imperfect. My test matched 91% of rows (3,422/3,758) on street name + cross streets against SAM segments and intersections, and 86% also agree on length within 25%. The remaining ~340 rows need alias tables or hand fixes. Side placement relies on SAM L/R address parity. Unverified: whether this reproduces the City's own block geometry.",
+        "Sweeping rows lack season dates, tow vs no-tow, and any holiday flag. These have to be inferred: neighborhood rules for the season, the $90 no-tow cases (Charlestown and overnight), and the HTML holiday page. The CSV has no data dictionary, and the north_end_pilot meaning is my inference.",
+        "Same-day cancellations (rain, snow, special events) have no feed.",
+        "Parking citations are not published. The newest bulk data I found is a 2018 to Aug 2020 public-records release with issue date and time but no coordinates, plus plates and badges that must be stripped. Boston changed ticket systems in June 2025, so the export format for a new request is unknown.",
+        "Meter data looks frozen around 2017: BASE_RATE $0.25 everywhere, no current hourly rates, STREET_CLEANING empty, TOW_AWAY on 54 rows. There are no ParkBoston zone polygons.",
+        "No published layer says which blocks are resident-permit-only, loading zones, time-limited or no-stopping. Today that is only available from the raw sign inventory (Boston-specific codes, no public code catalog) or the unofficial, AI-derived CDS prototype API (noisy, no street name or side, last published 2026-05-07).",
+        "Snow emergency route geometry is published (segment layer last edited 2011), but there is no declaration-status feed.",
+        "The 311 'Parking Enforcement' requests (about 49k in 2026) are complaints, not tickets. At best they are a weak proxy for where enforcement is requested.",
+        "License terms are not stated on the ArcGIS layers, the Notify API or the CDS prototype. Only the CKAN datasets are explicitly ODC PDDL.",
+        "The CORS difference from SF matters for architecture. CKAN datastore and AGOL send '*', and gisportal/gis.boston.gov echo the Origin, so browser queries work. But the core sweeping data has no geometry to filter spatially, so Boston needs a build step that joins and serves pre-built tiles or GeoJSON instead of querying the City API live with spatial filters."
+      ],
+      "contactAsks": [
+        "Publish the sweeping block geometry behind Notify Boston (blockId to paths, variant id = CKAN main_id) as GeoJSON on Analyze Boston. Alternatively, document the /street-alerts/api/streets/* endpoints and allow other origins. This one item removes most of the work.",
+        "Provide the PWD sweeping 'parent' route layer and confirm what losta/hista mean (feet along the route, measured from which end). Also say whether parent codes map to SAM ROUTE_IDs.",
+        "Provide a data dictionary for the Street Sweeping Schedules CSV: what north_end_pilot means, what null side means (198 rows), per-row season start/end dates, and a tow vs no-tow (Tow Zone) flag per row.",
+        "Provide a machine-readable sweeping holiday calendar and any same-day cancellation signal (rain or event suspensions), even as a simple JSON or CSV.",
+        "Provide parking citation data from the new (June 2025) ticket system: ticket-level issue date and time, violation code and description, and location (address or intersection, ideally lat/long). Exclude plates and badge numbers. At minimum, give street-cleaning codes for the last 2-3 seasons; ideally, a recurring Analyze Boston feed. Also confirm whether the request should go to the Parking Clerk or BTD through JustFOIA.",
+        "Give the timeline and terms for the official Curb Lab CDS Curbs API on Analyze Boston. Ask whether CURB may use the current smart-curb-api prototype in the meantime, how far its AI-read policies have been QA'd, and whether street_side and street_name will be populated.",
+        "Ask whether the Curb Lab curb zone layer will take its sweeping data from the PWD schedule or from signs, and whether zones will carry the sweeping main_id so the two sources can be reconciled.",
+        "Provide the BTD sign code catalog: Boston code to legend text and meaning, e.g. S-#, S-31D, S-38C, T-23, T-1, T-4, R-1, P-6A, PB-26G, MPBZ, AC-#.",
+        "Provide current meter rates by zone, ParkBoston zone numbers and polygons, and a refreshed meter inventory (the Analyze Boston file appears to be circa 2017).",
+        "Provide the resident-permit-only blocks (which curbs, which permit district, hours) and permit district polygons.",
+        "Provide a snow emergency declaration feed (start/end timestamps) and confirm the snow emergency route layer is current (segment edits date to 2011).",
+        "Ask whether street occupancy and temporary no-parking permits can be exposed with curb extent and hours, matching what Notify Boston already alerts on (occupancyBlockId).",
+        "Ask about coordination with Notify Boston: whether the City is open to CURB linking to it, or reusing its block IDs, so residents don't get conflicting reminders."
+      ]
+    },
+    "coupling": {
+      "couplings": [
+        {
+          "area": "Boston geometry (new work, biggest risk)",
+          "files": "none yet; would be scripts/cities/boston.mjs → data/boston/segments.json",
+          "what": "Every SF render path assumes schedule rows arrive with a GeoJSON `line` from yhqp-riqs (index.html:1129, api/_geo.js:51, scripts/build-overview.mjs:44). Boston's sweeping schedule (Analyze Boston CKAN resource 9fdbdcad…, 3,758 rows, CORS *) has NO geometry: only st_name, from, to, side, and losta/hista. I checked losta/hista: they are linear-reference distances in feet along a route (Arch St 0–951 ft = 0.18 mi), not house numbers.",
+          "change": "Do a build-time join to Boston's SAM street segments (ArcGIS gisportal.boston.gov …/Live_SAM_Address/FeatureServer/3, 19,440 polylines with L_F_ADD/L_T_ADD/R_F_ADD/R_T_ADD). Match on street name, find the segment chain between the from/to cross-street intersections on the segment graph, then bake the result. Start with a 1-day spike that measures the match rate before committing to the rest.",
+          "effort": "L"
+        },
+        {
+          "area": "Curb-side model",
+          "files": "index.html:1414-1440, api/_geo.js:47-76",
+          "what": "drawSegments groups rows by cnn and keys sides on blockside||cnnrightleft. The offset sign is R=+1 / L=-1 relative to the direction the line was drawn (index.html:1426-1429). Boston sides are house-number parity: 1,754 Odd + 1,730 Even rows, plus ~70 'Median'/'Inbound'/'Both' oddities.",
+          "change": "The adapter converts parity to L/R per segment by checking which of L_F_ADD/R_F_ADD is even, and keeps 'Odd'/'Even' as the blockside label. With that, the client code stays as it is. Map the odd labels by hand or drop them.",
+          "effort": "S"
+        },
+        {
+          "area": "Runtime data provider",
+          "files": "index.html:79, 817-821, 1118 (count(*) probe), 1129 (intersects viewport), 2275 (deep-link line lookup), 2725 + 2822 (corridor search)",
+          "what": "Every map load runs live Socrata SoQL against data.sf.gov: $where=intersects(line,'POLYGON(...)'), $select of the yhqp-riqs columns, and an over-cap count probe. CKAN has no spatial query, so none of this can be pointed at Boston.",
+          "change": "Put a provider interface in front of these calls: viewport(bbox), byId(id), corridors(). SocrataLive keeps today's SF code. A new Static provider loads data/<city>/segments.json once and filters in memory. Both return rows in the yhqp-riqs shape.",
+          "effort": "M"
+        },
+        {
+          "area": "Rule schema: hours, days, season",
+          "files": "lib/sweep-core.js:109-131 (nextSweep), 112-113; api/_spot.js:17-31 (sanitizeRule); scripts/build-overview.mjs:36-51; api/block.js:25-28",
+          "what": "Rules are one row per weekday with integer hours (parseInt fromhour) and have no season. Boston rows carry 7 day flags plus every_day, use HH:MM times (301 rows start at '00:01', 5 rows read '12:00'→'04:00' and look like data errors), and have year_round=f on 3,397 rows.",
+          "change": "The adapter splits each multi-day row into one row per weekday and floors 00:01 to hour 0 (earlier is the safe direction). Add an optional rule.season 'MMDD-MMDD' and carry it through sanitizeRule, the overview packing and nextDates. sanitizeRule currently drops unknown fields, so it would silently strip season from stored spots unless updated.",
+          "effort": "M"
+        },
+        {
+          "area": "Season vs scan horizon and watch age",
+          "files": "lib/sweep-core.js:116, 139; api/block.js:90; api/send-notifications.js:33",
+          "what": "nextSweep/holidaySkip/nextDates scan only 150 days ahead. From Dec 1 to a 4th-week sweep in late April is ~148 days, and week_5-only rows land later, so the code returns null ('see posted sign') all winter. MAX_WATCH_AGE is 120 days, but the Dec 1 → Apr 1 off-season is 121 days, so every watch armed in November goes stale just before the season starts.",
+          "change": "Raise the scan horizon for seasonal cities (about 370 days, or stop at the first hit). Either exclude off-season days from the watch age or make MAX_WATCH_AGE per city. Add a seasonSkip() so the sheet can say 'no sweeping until Apr 1'.",
+          "effort": "S"
+        },
+        {
+          "area": "Time zone",
+          "files": "lib/sweep-core.js:35-61 (SF_TZ, sfDTF, sfParts, sfWallToInstant, todaySF, sfDaysUntil); lib/notify-core.js:98-103 (sfHour hardcodes America/Los_Angeles), 138; api/test-notification.js:35, 47-52; api/block.js:155-160; index.html:1854 (&ctz=America/Los_Angeles), 2428",
+          "what": "The tz is a module-level constant, and every instant, display string and calendar day is computed in SF time. Boston is America/New_York.",
+          "change": "Turn sweep-core into makeTimeCore({tz, holidays, season}). The browser binds the current city's core to the existing sf* global names, so index.html barely changes. Node code (cron, /b/ pages, auto-park) calls coreFor(city). The ctz value comes from the city config.",
+          "effort": "M"
+        },
+        {
+          "area": "Holiday tables",
+          "files": "lib/sweep-core.js:71-104 (HOL_DAY/HOL_NIGHT/HOL_NAMES through 2029-01-01, sweepSuspended:104), lib/sweep-core.test.mjs",
+          "what": "These are SFMTA's lists, with 2027-28 derived by an SF rule. Boston cancels daytime sweeping on city holidays such as Patriots' Day but runs overnight sweeping as normal (boston.gov). That fits the existing day/night two-table model.",
+          "change": "Move the tables into lib/holidays/{sf,boston}.js, each with its own derivation rule and an expiry test. The Boston adapter sets holidays='1' on overnight/year-round rows. Verify Boston's table against boston.gov's City of Boston Holidays page.",
+          "effort": "M"
+        },
+        {
+          "area": "Alert anchors and push copy",
+          "files": "lib/sweep-core.js:160-177; lib/notify-core.js:74 ('$105 ticket'), 90 ('~77% of tickets land in the first 45 min')",
+          "what": "The anchor rules (night sweep <07:00, eve 20:00, tonight 21:00, morning 06–22) work for any city but are bound to SF time. The copy hardcodes SF's fine and an SF citation statistic. Boston has 226 every-day 00:01–07:00 downtown rows, so an alert there would send a 'move it tonight' push every night.",
+          "change": "Pass the core and the city's fine/stats copy in. Decide whether to offer alerts on nightly every-day rows at all.",
+          "effort": "S"
+        },
+        {
+          "area": "Stored spot and push pipeline",
+          "files": "api/_spot.js:54-93 (sanitizeSpot; :90 cnn digits only), api/send-notifications.js:80 (deepLink '/b/'+cnn), 91-127 and 144-180 (recomputeSpot/dueAlert with the SF core), api/_schedule.js:5-38, api/_store.js:32/239",
+          "what": "Spots carry no city. A segment id is only unique within one city (a cnn '536' could exist in both). The cron re-arms and judges every spot in SF time, and notification deep links assume /b/ at the root.",
+          "change": "Add spot.city, whitelisted against CITIES and defaulting to 'sf' when absent so every stored watch keeps working. The cron uses coreFor(spot.city), and deepLink becomes `${city.path}/b/${id}`. The Redis hashes, QStash schedule, Vercel cron and GitHub backup stay shared because they don't depend on the city.",
+          "effort": "M"
+        },
+        {
+          "area": "Auto-park Shortcut",
+          "files": "api/_geo.js:6-12 (SF bbox), api/parked.js:15, 33, 36-37 (live DataSF intersects), 53-54 (re-implements the 8pm SF eve anchor)",
+          "what": "The endpoint rejects anything outside SF and resolves the block through live Socrata.",
+          "change": "Pick the city from config bboxes. Resolve Boston from its baked segments, and replace the hand-rolled eve anchor with the core's alertAnchors.",
+          "effort": "M"
+        },
+        {
+          "area": "Saved-alert key",
+          "files": "index.html:1878-1897 (localStorage 'curbAlert' {cnn, sideKey…})",
+          "what": "The key is the curb side alone, so ids can collide across cities.",
+          "change": "Prefix the key with the city and migrate keys without a city as 'sf'.",
+          "effort": "S"
+        },
+        {
+          "area": "Map defaults",
+          "files": "index.html:870 (setView [37.7749,-122.4194]), 907 (basemap bounds), 2448 (Open-Meteo SF coords)",
+          "what": "The default center, tile bounds and weather location are SF literals.",
+          "change": "Read them from the city config.",
+          "effort": "S"
+        },
+        {
+          "area": "Basemap",
+          "files": "basemap/parchment (104 MB, ~9.3k tiles: z8-13 Bay, z14-17 SF), scripts/build-basemap.sh:16-18, 30-31, scripts/render-basemap.mjs:22-25, index.html:842, 907",
+          "what": "The self-hosted tiles are baked only for the SF and Bay bboxes. Outside them, Leaflet requests nothing and the map is blank.",
+          "change": "Bake per-city bbox jobs into basemap/<city>/. A second city roughly doubles repo and deploy size, so move tiles to Cloudflare Pages/R2 as docs/self-host-basemap-plan.md already proposes.",
+          "effort": "M"
+        },
+        {
+          "area": "SF-only overlays and baked data",
+          "files": "index.html:818-821, 980-1022 (enforcement/sweeps/routes), 1304-1370 (loading, white zones), 1487 + 2378-2410 + 2486-2700 (RPP, AREA_COLORS), 2421 (meter chip), 2713 (truck routes); scripts/build-zones.mjs:12-13, build-white-zones.mjs:9-11 (SFMTA ArcGIS), build-enforcement-records.py:10-15, build-sweeps.py:21-34, build-routes.py (SF records requests #26-5453/#26-5451)",
+          "what": "RPP, meters, color curbs, white zones, the ticket-time callout, sweeper passes and DPW routes all come from SF datasets or SF records requests. A quick Analyze Boston search found no parking-citation dataset (only 2019 portal web stats) and no RPP geometry. It did find Parking Meters and BPDA Neighborhood Boundaries.",
+          "change": "Add per-city capability flags that hide the Layers tiles, legend rows and sheet lines a city doesn't have. Boston ticket times would need a public records request to the Boston Transportation Department.",
+          "effort": "M"
+        },
+        {
+          "area": "Search and address ranges",
+          "files": "index.html:820 (EAS 3mea-di5p), 1389-1411 (loadRanges), 2722-2728 (corridors via $group), 2741 ('No matching SF street… 214 Steiner St'), 2762, 2809",
+          "what": "Street names come from Socrata and house numbers and addresses from SF's address database (EAS).",
+          "change": "Read corridors from the baked city file. Boston's house-number ranges come baked from the SAM L/R ranges, and Boston address search would use SAM addresses (ArcGIS).",
+          "effort": "M"
+        },
+        {
+          "area": "Citywide overview",
+          "files": "index.html:1118, 1146-1160 (data/overview.json), scripts/build-overview.mjs:11",
+          "what": "There is one overview file, built from SWEEP, and an SF row-count probe that decides when to fall back to the overview.",
+          "change": "Write data/<city>/overview.json. The Static provider can skip the count probe because Boston (~3.7k schedule rows) fits in memory.",
+          "effort": "S"
+        },
+        {
+          "area": "Relative asset URLs",
+          "files": "index.html:38 (manifest.json), 986, 1000, 1014, 1149, 1311, 1346 (fetch('data/…')); sw.js:7 SHELL",
+          "what": "Under /boston/ with a trailing slash, these relative paths resolve to /boston/data/…",
+          "change": "Make them root-absolute and per city. Add per-city shells to the service worker's SHELL list, and give Boston a manifest whose start_url is /boston.",
+          "effort": "S"
+        },
+        {
+          "area": "App shell SEO and UI copy",
+          "files": "index.html:6-35 (title, description, JSON-LD, og, canonical), 654-655, 686-703, 765-776 (welcome + hoods:start/end), 1135 + 2330 ('CURB covers San Francisco'), 1369, 1664 (SFMTA re-park rule), 1699, 1741, 2346-2356 (DAY_BLOCKS SF counts + 'SF blocks' toasts), 2522 (share text); manifest.json; site.js:69-86; og/template.html:57, 64 + og.png",
+          "what": "Roughly 70 SF strings sit in the single static file, and the head is static.",
+          "change": "Add a per-city copy object in the config. A build step generates boston/index.html from index.html, swapping the head and copy between markers the same way build-hood-pages already rewrites hoods:start/end.",
+          "effort": "M"
+        },
+        {
+          "area": "/b/ block pages",
+          "files": "api/block.js:15 (FINE=105), 70-84 (', SF | CURB' titles), 147-153 (single data/schedules.json), 214, 222/256/271/275 (curb.guide/b/), 230/252 ('San Francisco'), 288 (DPW route), 293 (SFMTA); vercel.json rewrites + includeFiles; scripts/build-schedules.mjs:29-30, 269",
+          "what": "One city, one data file, SF copy, and URLs at the root.",
+          "change": "Rewrite /boston/b/:id to api/block?city=boston&id=. Use per-city data directories and copy, and per-row fines for Boston ($40, or $90 in Charlestown and for overnight sweeps).",
+          "effort": "M"
+        },
+        {
+          "area": "/n/ neighborhood pages",
+          "files": "lib/hoods.js:4-9 (MIN_TICKETS=1500), scripts/build-hood-pages.mjs:24, 102-104, 435-475 (FAQs: AutoReturn, (415) 865-8200, SFMTA 21-day protest), 493-499, 532, 628, 688-696; data/neighborhoods.geojson (build-hood-maps.mjs:22-23); build-stats.mjs:12-13, build-hood-stats.py",
+          "what": "Whether a neighborhood gets a page depends on SF citation counts, which Boston doesn't have. The FAQs, polygons, stats and the root sitemap are all SF.",
+          "change": "Make the page gate per city (a block-count floor for Boston). Use BPDA Neighborhood Boundaries for Boston polygons, write per-city FAQ copy, and output to boston/n/.",
+          "effort": "L"
+        },
+        {
+          "area": "Sitemaps and OG cards",
+          "files": "scripts/build-block-sitemap.mjs:18, build-hood-pages.mjs:688-696, robots.txt, api/og.js:10, 27 (live DataSF per cnn), api/_ogcard.js:31",
+          "what": "There is a single sitemap set, and the OG card queries DataSF live and is labeled 'San Francisco · street cleaning'.",
+          "change": "Generate per-city sitemaps behind a sitemap index. The OG card reads the baked per-city schedules and the city label.",
+          "effort": "S"
+        },
+        {
+          "area": "Data refresh and validation",
+          "files": ".github/workflows/data-refresh.yml (SF build list, `git add data/*.json n/ index.html sitemap*.xml`), scripts/validate-data.mjs (bounds like 8000-20000 blocks)",
+          "what": "The monthly job and its shape checks are calibrated to SF.",
+          "change": "Run the builds as a per-city matrix with per-city bounds.",
+          "effort": "S"
+        },
+        {
+          "area": "Monitor",
+          "files": "scripts/monitor/smoke.mjs:15-21 (BLOCK_CNN 8753101, SF polygon, Mission tile), 71-75 (scrapes `const SWEEP=\"…\"` from index.html), 88-96, 129-136 (/n/mission); scripts/monitor/browser.mjs:19-20, 43, 56-89; .github/workflows/monitor.yml",
+          "what": "Every check uses SF datasets and SF sample block, tile and coordinates.",
+          "change": "Loop over CITIES, with each city's sample block, tile, coordinates and dataset list coming from config instead of scraping index.html.",
+          "effort": "M"
+        },
+        {
+          "area": "Domain and URL scheme",
+          "files": "vercel.json rewrites (/b/:cnn, /n/:slug, …), api/client-error.js:24",
+          "what": "Everything is SF at the root of curb.guide.",
+          "change": "Keep SF at the root and add /boston, /boston/b/:id and /boston/n/:slug rewrites. The host checks are by domain, so they already work.",
+          "effort": "S"
+        },
+        {
+          "area": "iOS app",
+          "files": "ios/CURB/ContentView.swift:7 (loads https://curb.guide), 510, 962, 975-976; AppDelegate.swift:37; Info.plist:37 ('nearest San Francisco curb rules'); ios/APP-STORE-LISTING.md:4, 9, 13, 20-128",
+          "what": "The wrapper loads the root, and its location prompt and App Store listing say SF. Deep links are relative to curb.guide, so they work once they carry the city path.",
+          "change": "No Swift logic change if the root page picks the city (last city used, else geolocation). Update the Info.plist string and the listing in a normal app update. Per my notes this Mac has no Xcode.app, so the build can't be checked locally.",
+          "effort": "S"
+        },
+        {
+          "area": "Tests",
+          "files": "lib/sweep-core.test.mjs (PDT/PST matrix, SF holiday re-derivation), lib/notify-core.test.mjs:10-24, api/_block.test.mjs (renders all of schedules.json, SF titles), api/_geo.test.mjs, scripts/build-schedules.test.mjs, scripts/check-locate.mjs:26-32, 121, 376, scripts/check-alerts-ui.mjs:74-77, scripts/monitor/monitor.test.mjs",
+          "what": "All suites assume SF time, SF holidays, SF rows and data.sf.gov mocks.",
+          "change": "Keep the SF suites as the default city. Add Boston fixtures: an Eastern-time DST matrix, season edges (Mar 31/Apr 1, Nov 30/Dec 1), the holiday table, the parity-to-side join, and a Boston block render.",
+          "effort": "M"
+        },
+        {
+          "area": "Static pages",
+          "files": "about.html (69 SF mentions), tickets.html (28, SF citation story), press.html, changelog.html, llms.txt, README.md",
+          "what": "These pages tell an SF story.",
+          "change": "Keep /tickets SF-only. Add a multi-city line to about, press and llms.txt.",
+          "effort": "S"
+        }
+      ],
+      "architecture": "Short answer: the map engine, curb-line drawing, sheet, alert cadence and push delivery don't depend on the city. The SF ties sit in five places: the data source, the time core (time zone, holidays, no seasons), the copy, the baked SF files, and the basemap. Boston's hard part is data: its sweeping schedule has no geometry, so it has to be joined to the city's street segments when the data is built.\n\n1. City config: lib/cities.js, loaded both ways like sweep-core.js (classic script on globalThis plus a Node side-effect import), so there is still no build step. Per city: id, name, short, path ('' for SF, '/boston'), tz ('America/Los_Angeles' / 'America/New_York'), center, zoom, bbox, basemap {url, bounds}, holidays id, season (null for SF; Boston defaults to 04-01..11-30, with North End, South End and Beacon Hill running 03-01..12-31, and year_round rows always on), runtime ('socrata-live' | 'static'), datasets, caps {rpp, meters, loading, whiteZones, enforcement, sweeperPasses, routes, tickets, addressSearch, hoodPages}, fine (SF 105; Boston 40, 90 in Charlestown and overnight), agency names, links (open-data site, re-park rule, report-a-fix), copy strings, and the SEO title templates. Helpers: cityFromPath(), cityFromLatLng().\n\n2. One row shape: keep today's yhqp-riqs row as the shape every city produces ({cnn, corridor, limits, blockside, cnnrightleft, weekday, fromhour, tohour, week1..5, holidays, line} plus an optional season). Then drawSegments, openSheet, nextSweep, sanitizeRule and the /b/ renderer don't change. Ids stay numeric but are only unique per city, so the key everywhere is (city, id).\n\n3. Adapters, split by when they run:\n   - Build time: scripts/adapters/{socrata,ckan,arcgis}.mjs are paged fetchers (Socrata with the :id cursor; CKAN datastore_search/_sql with offset; ArcGIS FeatureServer with resultOffset and maxRecordCount 2000). scripts/cities/<id>.mjs combines them into a normalize step that writes data/<id>/{segments,overview,schedules}.json. Boston = CKAN schedule + ArcGIS SAM segments + BPDA neighborhoods. SF's existing scripts keep working and get wrapped later.\n   - Runtime: a provider object in index.html with viewport(bbox), byId(id), corridors() and address(q). SocrataLive is SF's current code. Static loads data/<city>/segments.json once and filters in memory. Both return the shared row shape. Long term SF could go static too, which is the direction schedules.json already took.\n\n4. Time core: makeTimeCore({tz, holidays, season}) in lib/sweep-core.js returns parts, wallToInstant, todayParts, today, daysUntil, nextSweep, holidaySkip, seasonSkip, alertAnchors and mornAllowed. The page binds its city's core to the existing sf* globals, which keeps the index.html diff small. Node code calls coreFor(city). Holiday tables move to lib/holidays/{sf,boston}.js, each with its derivation rule and the existing 'fails before it runs out' test. The season check happens inside the scan loop, the horizon becomes about 370 days for seasonal cities, and the watch age skips off-season days.\n\n5. URLs: one origin, path per city. SF stays at the root permanently, because about 12k indexed /b/ pages, the /n/ pages and the App Store links all point there. Boston lives at curb.guide/boston, /boston/b/<id> and /boston/n/<slug>. vercel.json rewrites /boston to a generated static boston/index.html (index.html with the head and copy swapped between markers, like hoods:start/end) and /boston/b/:id to api/block?city=boston. Why paths and not boston.curb.guide: a single origin means one service worker, one web-push subscription and one localStorage per device; the iOS host allowlist already covers it; and SEO authority stays on one domain. Add a city switcher to the info menu. On '/', if geolocation lands in Boston, show a toast linking to /boston.\n\n6. Alerts: sanitizeSpot adds spot.city (whitelisted; missing means 'sf', so every stored watch keeps working). The cron loops stay as they are and call coreFor(spot.city). dueAlert, plannedTimeline and the copy take the city's core, fine and stats. deepLink becomes `${city.path}/b/${id}`. The Redis hashes, the one QStash 15-minute schedule, the Vercel cron and the GitHub backup are shared, since none of them depend on time zone. The saved-alert localStorage key becomes city|cnn|side. It stays one spot per device.\n\n7. SEO pages: per-city schedules.json, sitemap-<city>-blocks.xml and sitemap-<city>.xml behind a sitemap index in robots.txt. The rule for which neighborhoods get pages (lib/hoods.js) becomes per city: SF keeps its citation floor, Boston uses a block-count floor. FAQ copy (fines, towing, appeals) moves into the city config.\n\n8. Basemap: build-basemap.sh and render-basemap.mjs read their bbox jobs from the city config and write to basemap/<city>/. Move the tiles to Cloudflare Pages or R2 when Boston lands; the self-host plan already names that step.\n\n9. iOS: keep one app (guide.curb.ios) and let the web page choose the city. The only native changes are a city-neutral location prompt string and the App Store listing. A separate Boston app would double review work, push setup and listing upkeep for nothing.\n\n10. Operations: the monitor and data-refresh loop over CITIES, with a sample block, tile, coordinates and dataset list per city, and validate-data gets per-city bounds.\n\nSources: Boston sweeping season, holidays and fines from https://www.boston.gov/departments/public-works/street-sweeping-city and https://www.boston.gov/departments/311/city-boston-holidays. Data from https://data.boston.gov/dataset/street-sweeping-schedules and https://data.boston.gov/dataset/boston-street-segments-sam-system.",
+      "mvpCut": "Smallest Boston that works: the sweeping map plus sweep alerts at curb.guide/boston, with SF left exactly as it is.\n\nStep 0, a 1-day spike that decides everything else: join Boston's 3,758 schedule rows to the SAM street segments (street name plus the from/to cross-street intersections) and resolve Odd/Even to L/R from the segments' address ranges. Then measure how many rows land on geometry. If 90% or more do, the MVP below is about 2 weeks of focused work. If the join is messy, add about a week of manual fixes. This is a rough estimate.\n\nThe MVP includes:\n1. lib/cities.js with sf and boston.\n2. scripts/cities/boston.mjs (CKAN + ArcGIS → data/boston/segments.json + overview.json), splitting multi-day rows into weekdays, flooring 00:01 to 0, and tagging season and overnight holiday rows.\n3. The Static provider in index.html, plus root-absolute asset URLs and capability flags that hide the RPP, meters, loading, white-zone, ticket-time, sweeper and route UI.\n4. The makeTimeCore refactor: Eastern time, a Boston holiday table, the season field, the longer scan horizon and the watch-age fix.\n5. spot.city through sanitizeSpot, the cron, deepLink and the saved-alert key, defaulting to 'sf'.\n6. A generated boston/index.html with Boston head and copy, the /boston rewrite, a Boston manifest and service-worker shell entry.\n7. A Boston basemap bake.\n8. Tests: Eastern-time DST matrix, season edges, holiday table, join fixtures. SF suites stay unchanged and green.\n9. One Boston smoke check in the monitor.\n\nLeft out at first:\n- /boston/b/ and /boston/n/ SEO pages and sitemaps (phase 2, the long-tail growth engine)\n- per-block OG cards\n- the 'Ticketed ~9:11a' ticket times, sweeper passes and truck routes. Boston publishes no parking-citation data; this needs a records request to the Boston Transportation Department.\n- RPP, meters (Boston has a meters dataset, phase 2), color curbs and white zones\n- address search (MVP is street-name search, locate and tap)\n- the tickets page\n- the iOS location string and listing update (the web page already works inside the app)\n- about and press copy\n- moving tiles off Vercel, unless the deploy size forces it now.\n\nProduct risk: Boston already offers its own sweeping reminders (https://notify.boston.gov/street-alerts), and CURB's SF hook (when tickets actually land) has no Boston data yet. Until a records request comes through, the Boston pitch is the block-by-block map plus better alerts."
+    },
+    "verdict": {
+      "checks": [
+        {
+          "name": "Street Sweeping Schedules (Analyze Boston, Public Works)",
+          "exists": true,
+          "cors": "Yes. access-control-allow-origin: * on datastore_search, datastore_search_sql, the 302 CSV redirect and the S3 object (X-Amz-Expires=86400 confirmed). Preflight OPTIONS returns 200 with ACAO *.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Mostly correct. 3,758 rows, 1,602 parents, 25 district codes, Odd 1,754 / Even 1,730 / blank 198, week patterns (2&4 1,606; 1&3 1,524; all 466; 1&3&5 113), year_round t 361, stationing agrees in 3,676 and disagrees in 82, timestamps 2012-02-14 to 2026-09-02, PDDL, R/P1D, 'legacy dataset', is_data_dict_populated false: all reproduced. Archdale Rd example reproduced. Fixes: (1) north_end_pilot=t is 333 rows, not 320: South End 192, North End 67, Beacon Hill 61, plus Roxbury 5, blank district 5, Back Bay 2, Charlestown 1, so it does not map cleanly onto the 3 neighborhoods. (2) Day times are not 'almost all' 08-12/12-16: 09:00-13:00 (144) and 13:00-17:00 (117) are also common; 5 rows say 12:00-04:00 (probably a 16:00 typo). (3) 41 rows run a single week (wk1 19, wk2 15, wk3 7) and 6 rows have no week flagged; side also has uppercase 'EVEN'/'ODD' plus Ramp, Park, MFA and other one-offs. (4) Re-ran match2.py: 3,422 of 3,758 matched, 3,220 within 25% (exact). Caveats: for Dead End/town-line rows the script picks the endpoint closest to 'miles', so the length agreement is partly circular for those rows; the Odd/Even to L/R mapping through SAM address ranges was never tested by the script."
+        },
+        {
+          "name": "Notify Boston Street Alerts backend (undocumented internal API)",
+          "exists": true,
+          "cors": "Restricted. access-control-allow-origin: https://notify.boston.gov on GET; preflight returns 204 with the same single origin. A curb.guide browser cannot call it; server or build-time only.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed. search?q=Arch%20St returns block 303 / variant 536 with the claimed shape (district, miles, hasGeometry, occupancyBlockId, schedule.weeks w1..w5, days). Archdale Rd is block 158 with variants 196 (Odd) and 498 (Even), and both ids equal CKAN main_id. geometry?block=158 returns {data:{mapped:true,bridged:false,paths:[[[lat,lng]...]]}} in lat,lng order. cityofboston.gov/publicworks/sweeping/ returns a 302 to notify.boston.gov/street-alerts. No terms or license found on the page. I made 3 GETs plus 1 OPTIONS."
+        },
+        {
+          "name": "Boston Street Segments (SAM System)",
+          "exists": true,
+          "cors": "Yes. ArcGIS echoes Origin (Access-Control-Allow-Origin: https://curb.guide, Allow-Credentials true); preflight 200 with GET,HEAD,POST,OPTIONS.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: FeatureServer/3 'SAM_Boston_Segments_tbl', polyline, wkid 102686/2249, maxRecordCount 2000, JSON/geoJSON/PBF (PBF tested), 19,440 features, envelope query works (58 segments in a small South End bbox). Field list and Arch St sample (SEGMENT_ID 66, STREET_ID 163, ROUTE_ID 163.01, ONEWAY FT, 306.63 ft) match exactly. CKAN has GeoJSON/CSV/SHP/KML, PDDL, 'Updated nightly', metadata_modified 2026-10-01. One wrong statement: the Snow Emergency Routes segment layer does NOT join on SEGMENT_ID (see that entry); DO_NOT_PARK uses the same 2011-era schema and should be assumed broken the same way until tested."
+        },
+        {
+          "name": "SAM Live Intersections (deduplicated)",
+          "exists": true,
+          "cors": "Yes. Origin echoed with credentials, same server as SAM segments.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: layer 8 'SAM_Live_Intersections_deduplicated_tbl', point, 11,324 features, exact field list, OBJECTID 1 = 'A St & Gold St', SEGMENT_ID 1 / SEGMENT_ID2 3516. Tables 5 (Master Street Names), 6 (Street Aliases, includes ACTIVE_TO_DATE) and 7 (Suffix Crosswalk) exist. The layer has no description, license or copyright text. The claim that the alias tables would close most of the 9% gap is untested."
+        },
+        {
+          "name": "Parking Meters",
+          "exists": true,
+          "cors": "Yes. CKAN datastore ACAO *; ArcGIS MapServer/9 echoes Origin with credentials.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Mostly correct (6,955 rows, PDDL, re-exported 2026-09-29, INSTALLED_ON 2017-01-01 to 2017-04-01, STREET_CLEANING null in all rows, TOW_AWAY set in 54). Fixes: (1) BASE_RATE is $0.25 in 6,947 of 6,955 rows, not everywhere (0.26 x2, 2.00 x1, 0.50 x1, blank x3); PAY_POLICY shows $1.50 or $1.25 on 5 meters. (2) Max minutes also include 720 (39) and 30 (8). (3) PARK_NO_PAY's real text is '00:00AM-24:00AM SUN, 00:00AM-08:00AM MON-SAT, 08:00PM-24:00AM MON-SAT'; the claim paraphrased it. (4) All 54 TOW_AWAY values are '04:00PM-06:00PM MON-FRI' (rush-hour tow). (5) The rates source is boston.gov/departments/parking-clerk/how-do-parking-meters-work (updated 5/6/26): Back Bay $3.75; South Boston Waterfront $3.75 except D St $2.50; Bulfinch Triangle and Fenway/Kenmore $2.50; all other metered areas $2; plus $0.50/15 min (30-min max) pockets in Back Bay/Beacon Hill, Boylston south side Arlington to Clarendon $1/15 min, motorcycle $0.50/hr. Free Sundays and City holidays confirmed. The bbox count (187) depends on the bbox; my Back Bay bbox returned 1,224."
+        },
+        {
+          "name": "Boston Curb Lab prototype CDS Curbs API (smart-curb-api)",
+          "exists": true,
+          "cors": "Yes. Echoes Origin (access-control-allow-origin: https://curb.guide) with allow-credentials true.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: constants.js line 4 hard-codes curbApiUrl. /curbs/zones bbox returned 143 LineString zones, all published 2026-05-07 (1778150913069); street_name, street_side, cross_street_start_name, num_spaces and length are null in all 143. /curbs/policies works, and the noise is real ('* Unusable Image', multi-sign descriptions joined with newlines). Additions: (1) envelope last_updated is 1767565837844 (2026-01-04), older than the zones. (2) Sweeping encoding is inconsistent: months [4..11] on some policies and [3..12] on others, and some sweeping-looking policies have no weeks or months at all (e.g. 'No Parking 8:00 AM-12:00 PM', fri only). (3) user_classes is filled only sometimes (resident_permit, commercial_vehicle), not on every 'Resident Only' policy. Repos: curb-atlas-update and cds_translator are MIT, smart-prototype has no license and was pushed 2026-09-23. The Curb Lab page (last updated 2/11/26) promises data 'via public API on the Analyze Boston Open data portal, in the coming months'. As of 2026-10-01, Analyze Boston has no curb or CDS dataset: a package_search for 'curb' returns only street-sweeping-schedules."
+        },
+        {
+          "name": "Signs (Cartegraph)",
+          "exists": true,
+          "cors": "Yes. CKAN ACAO *; gis.boston.gov MapServer/26 echoes Origin with credentials; blob photos return no ACAO header (fine for <img>, not for fetch).",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Counts confirmed: 253,139 rows, 216,408 distinct oid, 199,805 photo URLs, R/P1W, last export 2026-09-27, ArcGIS layer 179,019, S-38C Northampton St sample, 'clean' 149 rows. Distinct-sign code counts match (S-# 21,619, T-23 9,384, R-1 8,240, T-1 8,062, T-4 5,047). Fixes: (1) Codes are not 'mostly Boston-specific': standard MUTCD D3-1 street-name signs (20,084) and 'NA' (19,497) are #2 and #3, and R5-1 has 7,996. (2) 'resident' appears in 185 special-description rows (189 counting notes), not 137. (3) The dataset's PDF resource is a column data dictionary, not a code-to-legend catalog, so 'no public legend catalog' still holds. (4) Important for use: asset_status is null on 188,957 signs, with 4,935 Removed, 3,317 Proposed and 136 Missing, so filter on status. (5) 49 rows mention 'no tow'."
+        },
+        {
+          "name": "Snow Emergency Routes",
+          "exists": true,
+          "cors": "Yes. CKAN ACAO *; AGOL Ownership FeatureServer ACAO * (with credentials); gisportal MapServer/7 echoes Origin.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": false,
+          "correction": "CKAN (736 rows: FULL_NAME, Responsibility, Shape_Length, shape_wkt; 'C St' MULTILINESTRING), AGOL Ownership/0 (736) and MapServer/7 (8,422, max UpdateTime 2011-06-24) all confirmed. WRONG: the segment copy does NOT join to current SAM SEGMENT_ID. Of 399 sampled rows, 389 IDs exist in SAM but only 7 have the same street name. Example: snow SEGMENT_ID 798-803 'Baker St' vs SAM 799/800 'Border St' and 803 'Boston St'; in SAM, Baker St is 513-524. The 2011 IDs come from an older network, so match spatially or by name instead. Currency: AGOL Ownership lastEditDate is 2026-01-25, so the dissolved copy was edited this year, but the segment copy is stale. DO_NOT_PARK confirmed (8,459, last edit 2015-02-09); it has the same 2011-era schema and its SEGMENT_IDs are likely stale too."
+        },
+        {
+          "name": "Parking tickets: past public-records release (wokewindows mirror)",
+          "exists": true,
+          "cors": "No ACAO header on the S3 file (with Origin sent). Build-time only, as claimed.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: page live and links R000465-080320.zip; parking_tickets.csv.gz is 82,719,484 bytes (Last-Modified 2020-09-18), 3,200,977 rows, 2018-01-01 to 2020-08-19, header and first row exactly as claimed. Useful additions: street-cleaning codes are 76 'STREET CLEANING' $40 (239,750), 340 'OVR NIGHT ST CLEANIN' $90 (69,475), 376 'STREET CLEANING' $90 (14,762, matches the Charlestown fine). Analyze Boston still has only 'parking-tickets-portal-web-statistics' (2019). The AGOL layer Snow_Tickets_Jan2026 (2,637) is sidewalk snow-clearing code enforcement, not parking tickets, so it does not fill the gap."
+        },
+        {
+          "name": "311 Service Requests: Parking Enforcement cases",
+          "exists": true,
+          "cors": "Yes. ACAO * on datastore_search and datastore_search_sql.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: resource 1a0b420d ('311 Service Requests - 2026') has 49,459 Parking Enforcement cases from 2026-01-01T00:48 to 2026-09-29T22:49; the 2025 resource (9d7c2214) has 60,632. The field list also includes fire_district, pwd_district, city_council_district, police_district, neighborhood, submitted_photo and closed_photo. The new-system resource 254adca6 (2025-08-01 onward, 62,891 rows) has no parking-enforcement service; the closest is 'Illegal Yard Parking' (65)."
+        },
+        {
+          "name": "Moving Truck Permits",
+          "exists": true,
+          "cors": "Yes. CKAN datastore ACAO *.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: 225,470 rows, PDDL, R/P1D, latest OCCU-1905153 issued 2026-09-29 and expiring 2026-10-05, at 42.35039,-71.08871. Additions: 31,234 rows (13.9%) have no lat/long, and there is no street address field at all, only city/state/zip. A better source for temporary no-parking is the public AGOL layer Analytics_Street_Access_Awareness_Active_Permits (ACAO *, edited 2026-09-30): 1,228 current permits (594 Street Occupancy, 630 Excavation), each with permit_start_date/permit_end_date, length_estimated, sam_id and sam_full_address."
+        },
+        {
+          "name": "Active RPP Permits as of June 28 2022 (AGOL CSV)",
+          "exists": true,
+          "cors": "Yes. arcgis.com /data echoes Origin with credentials.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: public item owned by BostonGIS, 8,244,258 bytes, 80,116 data rows, exact columns, first row 0 DEVENS ST, Charlestown (C), 02129, X/Y in state-plane feet; no license stated. Addition: it includes Rpp_Apt_Number, so it is address and apartment-level permit-holder data. Use it for district lookup only and do not republish raw rows."
+        },
+        {
+          "name": "Curbs (Infrastructure/OpenData layer 6)",
+          "exists": true,
+          "cors": "Yes. Origin echoed with credentials.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: polyline, 66,030 features, fields OBJECTID/TYPE/Shape.STLength(), TYPE='CURB' for all 66,030, no description or editingInfo. Layer 13 in the same MapServer is a duplicate 'Curbs' layer (same fields, same 66,030 count)."
+        },
+        {
+          "name": "Cambridge Street Curb Use Inventory (Beacon Hill, 2021)",
+          "exists": true,
+          "cors": "Yes. ACAO *.",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: layer name 'curbuse2', polyline, 98 features, exact field list, lastEditDate 2021-07-29. Sample row 2 is 'W Cedar St E: Phillips St - Cambridge St', Resident Parking, 'Beacon Hill Resident Permit Parking Only'."
+        },
+        {
+          "name": "City of Boston Holidays page",
+          "exists": true,
+          "cors": "n/a (HTML)",
+          "fieldsMatch": true,
+          "geometryAsClaimed": true,
+          "correction": "Confirmed: last updated 7/3/26, covers 2025-11-27 to 2026-12-25. Daytime sweeping is canceled on exactly the listed holidays, and Evacuation Day and Bunker Hill Day are normal sweeping days with free meters. One nuance: on July 3 2026 (observed) daytime sweeping is canceled but meters are NOT free; meters are free on Saturday July 4 instead, so the meters-free flag and the sweeping flag differ on that date."
+        }
+      ],
+      "summary": "I opened all 15 sources plus their APIs and sent CORS checks with Origin: https://curb.guide. All 15 exist and the core picture holds. Three findings matter:\n\n1. **Snow route join is wrong.** The 2011 snow-route segment layer (MapServer/7) does not join to current SAM SEGMENT_IDs. In 399 sampled rows, only 7 had the same street name in SAM. Match those segments spatially or by name. DO_NOT_PARK uses the same 2011 schema and is probably stale the same way.\n2. **north_end_pilot is not clean.** It covers 333 rows, not 320, so it does not map cleanly onto the North End, South End and Beacon Hill March to December season.\n3. **Better source for temporary no-parking.** Moving Truck Permits has no address field and 13.9% of rows have no coordinates. The AGOL layer Analytics_Street_Access_Awareness_Active_Permits is a better source: it has start and end dates, an estimated length and a SAM address (CORS *).\n\nSmaller fixes:\n- **Meters:** BASE_RATE is $0.25 in 6,947 of 6,955 rows, not every row. The rates page is the Parking Clerk's 'How do Parking Meters Work?' (updated 5/6/26), and its default rate of $2 for other areas is confirmed.\n- **Signs:** the top codes include standard MUTCD D3-1 and 'NA', so 'mostly Boston-specific' overstates it. 'resident' appears in 185 rows, not 137. asset_status needs filtering because of 4,935 Removed and 3,317 Proposed signs.\n- **Curb API:** the CDS prototype encodes sweeping months inconsistently (4-11 vs 3-12, sometimes none). Analyze Boston still has no CDS dataset, even though the Curb Lab page (updated 2/11/26) promised one 'in the coming months'.\n- **Sweeping match:** I re-ran match2.py and got the same result (3,422 matched, 3,220 within 25%). Two caveats: for dead-end rows the length check is partly circular, and the Odd/Even to L/R side mapping was never tested.\n\nCORS:\n- curb.guide can call these directly: the CKAN datastore (*), the S3 CSV (*), the gisportal and gis.boston.gov ArcGIS servers (echo Origin with credentials), AGOL (*), arcgis.com item data (echo) and smart-curb-api (echo).\n- Server or build-time only: Notify Boston (allows only notify.boston.gov, preflight included) and the wokewindows S3 file (no header). Cartegraph photos send no header, so they work in <img> but not with fetch.\n\nRules I checked against the sources:\n- **Street-cleaning page (updated 9/28/26):** confirms the Apr 1 to Nov 30 season and Mar 1 to Dec 31 for North End, South End and Beacon Hill. It also confirms year-round night sweeping, the week-5 rule, rain, $132 tow plus $35/day, BTD tickets with private towing, 'posted sign wins' and the Notify Boston migration.\n- **Fines page (updated 9/14/26):** confirms $40/$13 Street Cleaning, $90/$30 Overnight (no tow), $90/$30 Charlestown and $45 Weather Emergency. The 2018-2020 tickets back this up: code 76 at $40, 340 at $90, 376 at $90.\n- **Traffic Rules PDF (Mar 1 2025):** confirms Art IV Sec 1 item 16 with the passenger exception, Sec 20(4) whole-block signs even over meters, 'Tow Zone' legend only, and the Sec 19 alternating odd/even one-side rule (Nov 15 to Mar 31, alternating by year, outside the CBD).\n- **Snow pages (updated 2/22/26 and 3/10/26):** confirm ticket-and-tow on posted arteries, garage discounts from 2 hours before to 2 hours after, and space savers for 48 hours, banned in the South End and Bay Village. I did not find the 'both sides' or 'no odd/even during emergencies' wording on either page, so that remains unverified.\n- **Not checked:** the 2015 Charlestown and 2018 ticket-no-tow history.\n\nFiles are in /private/tmp/claude-501/-Users-alevizio/a6671fb0-a56b-4a27-8d89-29245b7ea378/scratchpad/verify/."
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Research"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Verify"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "research:boston-data",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "afa5b583672739f37",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790873900517,
+      "queuedAt": 1790873900498,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "SEASON. Daytime sweeping runs April 1 to November 30 in mos…",
+      "promptPreview": "Research question: could CURB (curb.guide, a free San Francisco street-parking map: every curb side colored by its next street sweep, block sheets with the schedule, sweep alerts, \"when tickets usually land\" from citation data, permit zones, meters, loading zones) be built for BOSTON? Find what Boston actually publishes. Work from primary sources and open every dataset you cite.\n\nLook for, on Anal…",
+      "promptFramed": true,
+      "lastProgressAt": 1790875108960,
+      "tokens": 260579,
+      "toolCalls": 92,
+      "durationMs": 1208441,
+      "resultPreview": "{\"datasets\":[{\"need\":\"Sweeping schedule (core feature: curb sides colored by next sweep, block sheets, alerts)\",\"name\":\"Street Sweeping Schedules (Analyze Boston, Public Works)\",\"url\":\"https://data.boston.gov/dataset/street-sweeping-schedules\",\"api\":\"CKAN datastore: GET https://data.boston.gov/api/3/action/datastore_search?resource_id=9fdbdcad-67c8-4b23-b6ec-861e77d56227 (also datastore_search_sql…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "research:curb-coupling",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a318fdcd5debef96d",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790873900519,
+      "queuedAt": 1790873900499,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Short answer: the map engine, curb-line drawing, sheet, ale…",
+      "promptPreview": "Audit how San Francisco specific the CURB codebase is, to estimate a multi-city version (Boston first). Repo: ~/curb (read ~/curb/CLAUDE.md first). Read-only: do not edit, commit or push anything.\n\nFind every SF assumption with file:line, for example: DataSF dataset ids and Socrata SoQL queries in index.html (spatial intersects, $where, cnn keys, blockside / cnnrightleft curb-side offsets, week1..…",
+      "promptFramed": true,
+      "lastProgressAt": 1790874490190,
+      "tokens": 245729,
+      "toolCalls": 57,
+      "durationMs": 589670,
+      "resultPreview": "{\"couplings\":[{\"area\":\"Boston geometry (new work, biggest risk)\",\"files\":\"none yet; would be scripts/cities/boston.mjs → data/boston/segments.json\",\"what\":\"Every SF render path assumes schedule rows arrive with a GeoJSON `line` from yhqp-riqs (index.html:1129, api/_geo.js:51, scripts/build-overview.mjs:44). Boston's sweeping schedule (Analyze Boston CKAN resource 9fdbdcad…, 3,758 rows, CORS *) has…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "verify:boston-data",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "aa36db87f50182df8",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790875116061,
+      "queuedAt": 1790875116035,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I opened all 15 sources plus their APIs and sent CORS check…",
+      "promptPreview": "You are a skeptic checking another agent's research on Boston parking open data. For EACH dataset below, open the URL and the API endpoint yourself: does it exist, do the fields match what was claimed, does it carry geometry (or the claimed join key) as claimed, and does the API send CORS headers (curl -sI with -H 'Origin: https://curb.guide')? Correct anything wrong. Default to exists=false when …",
+      "promptFramed": true,
+      "lastProgressAt": 1790875808118,
+      "tokens": 165526,
+      "toolCalls": 60,
+      "durationMs": 692054,
+      "resultPreview": "{\"checks\":[{\"name\":\"Street Sweeping Schedules (Analyze Boston, Public Works)\",\"exists\":true,\"cors\":\"Yes. access-control-allow-origin: * on datastore_search, datastore_search_sql, the 302 CSV redirect and the S3 object (X-Amz-Expires=86400 confirmed). Preflight OPTIONS returns 200 with ACAO *.\",\"fieldsMatch\":true,\"geometryAsClaimed\":true,\"correction\":\"Mostly correct. 3,758 rows, 1,602 parents, 25 d…"
+    }
+  ],
+  "totalTokens": 671834,
+  "totalToolCalls": 209
+}
