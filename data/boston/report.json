@@ -1,0 +1,1143 @@
+{
+ "generated": "2026-10-16T19:37:17.758Z",
+ "schedule": {
+  "rows": 3758,
+  "matched": 3599,
+  "exactBothEnds": 3092,
+  "sideUnknown": 72,
+  "unmatched": 159,
+  "blocks": 7410,
+  "blockSides": 14303
+ },
+ "curbLab": {
+  "zones": 54185,
+  "unreadableOnly": 14309,
+  "noPolicy": 11426,
+  "paid": 2578,
+  "permit": 1510,
+  "accessible": 56,
+  "loading": 834,
+  "sweepingSignSides": 2416,
+  "signAgreesWithSchedule": 1771,
+  "signDiffers": 358,
+  "signWhereScheduleHasNone": 287,
+  "scheduleSidesWithASign": 2129,
+  "signWeeksAgree": 1541,
+  "signWeeksOnlyOtherSide": 227
+ },
+ "unmatchedRows": [
+  {
+   "id": "3300",
+   "st": "Willow Pond Rd",
+   "from": null,
+   "to": null,
+   "why": "length 200 m vs 0 m"
+  },
+  {
+   "id": "49",
+   "st": "Charles St",
+   "from": "Boylston St",
+   "to": "Nashua St",
+   "why": "length 487 m vs 1752 m"
+  },
+  {
+   "id": "72",
+   "st": "Brighton St",
+   "from": "Dead End",
+   "to": "Caldwell St",
+   "why": "length 373 m vs 61 m"
+  },
+  {
+   "id": "73",
+   "st": "Columbus Ave",
+   "from": "Tremont St",
+   "to": "Boylston St",
+   "why": "length 158 m vs 306 m"
+  },
+  {
+   "id": "82",
+   "st": "Brook Marshall Rd",
+   "from": "Raynor Cir",
+   "to": "Sojourner Truth Ct",
+   "why": "length 66 m vs 151 m"
+  },
+  {
+   "id": "93",
+   "st": "Charles Street South",
+   "from": "Tremont St",
+   "to": "Boylston St",
+   "why": "street name"
+  },
+  {
+   "id": "98",
+   "st": "Brainerd Rd",
+   "from": "Harvard Ave",
+   "to": "Harvard Ave",
+   "why": "no walk"
+  },
+  {
+   "id": "141",
+   "st": "Austin St",
+   "from": "Main St",
+   "to": "Rutherford Ave",
+   "why": "length 117 m vs 202 m"
+  },
+  {
+   "id": "142",
+   "st": "Austin St",
+   "from": "Main St",
+   "to": "Rutherford Ave",
+   "why": "length 117 m vs 202 m"
+  },
+  {
+   "id": "192",
+   "st": "Brook Marshall Rd",
+   "from": "Raynor Cir",
+   "to": "Sojourner Truth Ct",
+   "why": "length 66 m vs 151 m"
+  },
+  {
+   "id": "276",
+   "st": "Brighton St",
+   "from": "Dead End",
+   "to": "Caldwell St",
+   "why": "length 373 m vs 61 m"
+  },
+  {
+   "id": "302",
+   "st": "Brooks St",
+   "from": "Princeton St",
+   "to": "White St",
+   "why": "length 304 m vs 535 m"
+  },
+  {
+   "id": "305",
+   "st": "Brookway Rd",
+   "from": "Washington St",
+   "to": "Archdale Rd",
+   "why": "length 246 m vs 420 m"
+  },
+  {
+   "id": "315",
+   "st": "Canal St",
+   "from": "New Chardon St",
+   "to": "Market St",
+   "why": "length 275 m vs 33 m"
+  },
+  {
+   "id": "331",
+   "st": "Charles Street South",
+   "from": "Tremont St",
+   "to": "Boylston St",
+   "why": "street name"
+  },
+  {
+   "id": "413",
+   "st": "Brooks St",
+   "from": "Princeton St",
+   "to": "White St",
+   "why": "length 304 m vs 535 m"
+  },
+  {
+   "id": "415",
+   "st": "Brookway Rd",
+   "from": "Washington St",
+   "to": "Archdale Rd",
+   "why": "length 246 m vs 420 m"
+  },
+  {
+   "id": "459",
+   "st": "Arlington St",
+   "from": "South Hobbart St",
+   "to": "Faneuil St",
+   "why": "length 689 m vs 165 m"
+  },
+  {
+   "id": "509",
+   "st": "Beach St",
+   "from": "Washington St",
+   "to": "Atlantic Ave",
+   "why": "no walk"
+  },
+  {
+   "id": "515",
+   "st": "Arlington St",
+   "from": "South Hobbart St",
+   "to": "Faneuil St",
+   "why": "length 689 m vs 165 m"
+  },
+  {
+   "id": "526",
+   "st": "Alford St",
+   "from": "Cambridge St",
+   "to": "EVERETT TOWN LINE",
+   "why": "length 126 m vs 1255 m"
+  },
+  {
+   "id": "543",
+   "st": "Columbia Rd",
+   "from": "Upham's Ct",
+   "to": "Dorchester Ave",
+   "why": "schedule"
+  },
+  {
+   "id": "551",
+   "st": "Commonwealth Ave Underpass",
+   "from": "Commonwealth Ave",
+   "to": "Commonwealth Ave",
+   "why": "street name"
+  },
+  {
+   "id": "586",
+   "st": "Congress St",
+   "from": "Dorchester Ave",
+   "to": "East Service Road",
+   "why": "length 1398 m vs 664 m"
+  },
+  {
+   "id": "609",
+   "st": "Corwin St",
+   "from": "Arcadia St",
+   "to": "Westville St",
+   "why": "length 77 m vs 179 m"
+  },
+  {
+   "id": "610",
+   "st": "Corwin St",
+   "from": "Arcadia St",
+   "to": "Westville St",
+   "why": "length 77 m vs 179 m"
+  },
+  {
+   "id": "614",
+   "st": "Cotting St",
+   "from": "Lomasney Way",
+   "to": "Nashua St",
+   "why": "length 23 m vs 121 m"
+  },
+  {
+   "id": "694",
+   "st": "Dartmouth St",
+   "from": "SW Corridor Path",
+   "to": "Huntington Ave",
+   "why": "length 134 m vs 262 m"
+  },
+  {
+   "id": "744",
+   "st": "Desmond Rd",
+   "from": "River St",
+   "to": "Bradford Rd",
+   "why": "length 114 m vs 253 m"
+  },
+  {
+   "id": "745",
+   "st": "Desmond Rd",
+   "from": "River St",
+   "to": "Bradford Rd",
+   "why": "length 114 m vs 253 m"
+  },
+  {
+   "id": "762",
+   "st": "Dewitt Dr",
+   "from": "Shawmut Ave",
+   "to": "Shawmut Ave",
+   "why": "length 534 m vs 106 m"
+  },
+  {
+   "id": "763",
+   "st": "Dewitt Dr",
+   "from": "Shawmut Ave",
+   "to": "Shawmut Ave",
+   "why": "length 534 m vs 106 m"
+  },
+  {
+   "id": "821",
+   "st": "East Fourth St",
+   "from": "G St",
+   "to": "K St",
+   "why": "no walk"
+  },
+  {
+   "id": "942",
+   "st": "Elm Hill Park",
+   "from": "Warren St",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "943",
+   "st": "Elm Hill Park",
+   "from": "Warren St",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "1003",
+   "st": "East Fourth St",
+   "from": "G St",
+   "to": "K St",
+   "why": "no walk"
+  },
+  {
+   "id": "1271",
+   "st": "Traveler St",
+   "from": "East Berkeley St",
+   "to": "East Brookline St",
+   "why": "length 288 m vs 907 m"
+  },
+  {
+   "id": "1277",
+   "st": "Harvard Sq",
+   "from": "Harvard St",
+   "to": "Harvard St",
+   "why": "no walk"
+  },
+  {
+   "id": "1278",
+   "st": "Harvard Sq",
+   "from": "Harvard St",
+   "to": "Harvard St",
+   "why": "no walk"
+  },
+  {
+   "id": "1296",
+   "st": "Hillside St",
+   "from": "Parker St",
+   "to": "Parker Hill Ave",
+   "why": "length 939 m vs 566 m"
+  },
+  {
+   "id": "1307",
+   "st": "Hawley Pl",
+   "from": "Arch St",
+   "to": "Hawley St",
+   "why": "street name"
+  },
+  {
+   "id": "1388",
+   "st": "Hudson St",
+   "from": "Beach St",
+   "to": "Kneeland St",
+   "why": "length 108 m vs 576 m"
+  },
+  {
+   "id": "1454",
+   "st": "London St",
+   "from": "George R. Visconti Rd",
+   "to": "Bennington St",
+   "why": "length 848 m vs 265 m"
+  },
+  {
+   "id": "1472",
+   "st": "Jamaicaway",
+   "from": "Huntington Ave",
+   "to": "Arborway",
+   "why": "no walk"
+  },
+  {
+   "id": "1570",
+   "st": "London St",
+   "from": "George R. Visconti Rd",
+   "to": "Bennington St",
+   "why": "length 848 m vs 265 m"
+  },
+  {
+   "id": "1667",
+   "st": "Manchester St",
+   "from": "Temple St",
+   "to": "Dead End",
+   "why": "length 561 m vs 320 m"
+  },
+  {
+   "id": "1668",
+   "st": "Manchester St",
+   "from": "Temple St",
+   "to": "Dead End",
+   "why": "length 561 m vs 320 m"
+  },
+  {
+   "id": "1720",
+   "st": "Neponset Ave",
+   "from": "Parkman St",
+   "to": "Freeport St",
+   "why": "length 1915 m vs 1052 m"
+  },
+  {
+   "id": "1721",
+   "st": "Neponset Ave",
+   "from": "Parkman St",
+   "to": "Freeport St",
+   "why": "length 1915 m vs 1052 m"
+  },
+  {
+   "id": "1853",
+   "st": "Morton St",
+   "from": "South St",
+   "to": "American Legion Hwy",
+   "why": "length 105 m vs 2120 m"
+  },
+  {
+   "id": "1959",
+   "st": "Chester Park",
+   "from": "Tremont St",
+   "to": "Shawmut Ave",
+   "why": "length 42 m vs 289 m"
+  },
+  {
+   "id": "1990",
+   "st": "Oakland St",
+   "from": "Washington St",
+   "to": "South Hobbart St",
+   "why": "length 99 m vs 205 m"
+  },
+  {
+   "id": "1991",
+   "st": "Oakland St",
+   "from": "Washington St",
+   "to": "South Hobbart St",
+   "why": "length 99 m vs 205 m"
+  },
+  {
+   "id": "1999",
+   "st": "Old Colony Ave",
+   "from": "Dorchester Ave",
+   "to": "Columbia Rd",
+   "why": "no walk"
+  },
+  {
+   "id": "2047",
+   "st": "Puritan Ave",
+   "from": "Richfield St",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "2092",
+   "st": "Paris St",
+   "from": "Sumner St",
+   "to": "Meridian St",
+   "why": "length 254 m vs 574 m"
+  },
+  {
+   "id": "2093",
+   "st": "Paris St",
+   "from": "Sumner St",
+   "to": "Meridian St",
+   "why": "length 254 m vs 574 m"
+  },
+  {
+   "id": "2096",
+   "st": "Parish St",
+   "from": "Winter St",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "2097",
+   "st": "Puritan Ave",
+   "from": "Richfield St",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "2103",
+   "st": "Parish St",
+   "from": "Winter St",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "2273",
+   "st": "Saratoga St",
+   "from": "Bennington St",
+   "to": "Shelby St",
+   "why": "length 1862 m vs 1088 m"
+  },
+  {
+   "id": "2274",
+   "st": "Saratoga St",
+   "from": "Bennington St",
+   "to": "Shelby St",
+   "why": "length 1862 m vs 1088 m"
+  },
+  {
+   "id": "2301",
+   "st": "Walford Way",
+   "from": "Decatur St",
+   "to": "Polk St",
+   "why": "no walk"
+  },
+  {
+   "id": "2302",
+   "st": "Walford Way",
+   "from": "Decatur St",
+   "to": "Polk St",
+   "why": "no walk"
+  },
+  {
+   "id": "2307",
+   "st": "Seaport Blvd",
+   "from": "Atlantic Ave",
+   "to": "Northern Ave",
+   "why": "length 1162 m vs 749 m"
+  },
+  {
+   "id": "2308",
+   "st": "Seaport Blvd",
+   "from": "Atlantic Ave",
+   "to": "Northern Ave",
+   "why": "length 1162 m vs 749 m"
+  },
+  {
+   "id": "2309",
+   "st": "Seaver St",
+   "from": "Columbus Ave",
+   "to": "Blue Hill Ave",
+   "why": "length 1233 m vs 834 m"
+  },
+  {
+   "id": "2369",
+   "st": "South Bay Ave",
+   "from": "Atkinson St",
+   "to": "Dead End",
+   "why": "length 252 m vs 156 m"
+  },
+  {
+   "id": "2463",
+   "st": "Stuart St",
+   "from": "Charles Street South",
+   "to": "Columbus Ave",
+   "why": "length 92 m vs 266 m"
+  },
+  {
+   "id": "2464",
+   "st": "Stuart St",
+   "from": "Washington St",
+   "to": "Charles Street South",
+   "why": "length 567 m vs 324 m"
+  },
+  {
+   "id": "2517",
+   "st": "St Cecelia St",
+   "from": "Boylston St",
+   "to": "Belvidere St",
+   "why": "street name"
+  },
+  {
+   "id": "2521",
+   "st": "Vining St",
+   "from": "Francis St",
+   "to": "Dead End",
+   "why": "length 284 m vs 144 m"
+  },
+  {
+   "id": "2522",
+   "st": "Vining St",
+   "from": "Francis St",
+   "to": "Dead End",
+   "why": "length 284 m vs 144 m"
+  },
+  {
+   "id": "2576",
+   "st": "St Martin St",
+   "from": "Bunker Hill St",
+   "to": "Medford St",
+   "why": "no walk"
+  },
+  {
+   "id": "2591",
+   "st": "Temple St",
+   "from": "River St",
+   "to": "Manchester St",
+   "why": "length 332 m vs 575 m"
+  },
+  {
+   "id": "2592",
+   "st": "Temple St",
+   "from": "River St",
+   "to": "Manchester St",
+   "why": "length 332 m vs 575 m"
+  },
+  {
+   "id": "2640",
+   "st": "St Martin St",
+   "from": "Bunker Hill St",
+   "to": "Medford St",
+   "why": "no walk"
+  },
+  {
+   "id": "2645",
+   "st": "Putnam St",
+   "from": "White St",
+   "to": "Princeton St",
+   "why": "length 204 m vs 434 m"
+  },
+  {
+   "id": "2647",
+   "st": "Putnam St",
+   "from": "White St",
+   "to": "Princeton St",
+   "why": "length 204 m vs 434 m"
+  },
+  {
+   "id": "2696",
+   "st": "Washington St",
+   "from": "Foster St",
+   "to": "Bigelow St",
+   "why": "length 334 m vs 908 m"
+  },
+  {
+   "id": "2697",
+   "st": "Washington St",
+   "from": "Foster St",
+   "to": "Bigelow St",
+   "why": "length 334 m vs 908 m"
+  },
+  {
+   "id": "2742",
+   "st": "West Newton St",
+   "from": "SW Corridor Path",
+   "to": "Columbus Ave",
+   "why": "length 362 m vs 205 m"
+  },
+  {
+   "id": "2744",
+   "st": "West Newton St",
+   "from": "SW Corridor Path",
+   "to": "Columbus Ave",
+   "why": "length 362 m vs 205 m"
+  },
+  {
+   "id": "2802",
+   "st": "Westview St",
+   "from": "Stratton St",
+   "to": "Blue Hill Ave",
+   "why": "length 33 m vs 522 m"
+  },
+  {
+   "id": "2803",
+   "st": "Westview St",
+   "from": "Stratton St",
+   "to": "Blue Hill Ave",
+   "why": "length 33 m vs 522 m"
+  },
+  {
+   "id": "2852",
+   "st": "Wilson Park",
+   "from": "Commonwealth Ave",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "2853",
+   "st": "Wilson Park",
+   "from": "Commonwealth Ave",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "2935",
+   "st": "Faneuil St",
+   "from": "Market St",
+   "to": "South Hobbart St",
+   "why": "length 1716 m vs 758 m"
+  },
+  {
+   "id": "2936",
+   "st": "Faneuil St",
+   "from": "Market St",
+   "to": "South Hobbart St",
+   "why": "length 1716 m vs 758 m"
+  },
+  {
+   "id": "2941",
+   "st": "Chester Park",
+   "from": "Tremont St",
+   "to": "Shawmut Ave",
+   "why": "length 42 m vs 289 m"
+  },
+  {
+   "id": "2942",
+   "st": "Chester Park",
+   "from": "Tremont St",
+   "to": "Shawmut Ave",
+   "why": "length 42 m vs 289 m"
+  },
+  {
+   "id": "2943",
+   "st": "Chester Park",
+   "from": "Tremont St",
+   "to": "Shawmut Ave",
+   "why": "length 42 m vs 289 m"
+  },
+  {
+   "id": "2947",
+   "st": "New Rutherford Ave",
+   "from": "Rutherford Ave",
+   "to": "Sullivan Square",
+   "why": "length 938 m vs 1585 m"
+  },
+  {
+   "id": "2948",
+   "st": "New Rutherford Ave",
+   "from": "Rutherford Ave",
+   "to": "Sullivan Square",
+   "why": "length 938 m vs 1585 m"
+  },
+  {
+   "id": "2949",
+   "st": "New Rutherford Ave",
+   "from": "Rutherford Ave",
+   "to": "Sullivan Square",
+   "why": "length 938 m vs 1585 m"
+  },
+  {
+   "id": "2950",
+   "st": "New Rutherford Ave",
+   "from": "Rutherford Ave",
+   "to": "Sullivan Square",
+   "why": "length 938 m vs 1585 m"
+  },
+  {
+   "id": "2994",
+   "st": "Columbia Rd",
+   "from": "Dorchester Ave",
+   "to": "William J. Day Blvd",
+   "why": "schedule"
+  },
+  {
+   "id": "2996",
+   "st": "Columbia Rd",
+   "from": "Blue Hill Ave",
+   "to": "Washington St",
+   "why": "schedule"
+  },
+  {
+   "id": "2998",
+   "st": "Columbia Rd",
+   "from": "Blue Hill Ave",
+   "to": "William J. Day Blvd",
+   "why": "schedule"
+  },
+  {
+   "id": "2999",
+   "st": "Columbia Rd",
+   "from": "Quincy St",
+   "to": "Upham's Ct",
+   "why": "schedule"
+  },
+  {
+   "id": "3003",
+   "st": "Morton St",
+   "from": "South St",
+   "to": "American Legion Hwy",
+   "why": "length 105 m vs 2120 m"
+  },
+  {
+   "id": "3006",
+   "st": "Morton St",
+   "from": "American Legion Hwy",
+   "to": "Blue Hill Ave",
+   "why": "length 2151 m vs 954 m"
+  },
+  {
+   "id": "3050",
+   "st": "Washington St",
+   "from": "Brookley Rd",
+   "to": "Cummins Hwy",
+   "why": "no walk"
+  },
+  {
+   "id": "3067",
+   "st": "West Newton St",
+   "from": "Huntington Ave",
+   "to": "SW Corridor Path",
+   "why": "length 12 m vs 162 m"
+  },
+  {
+   "id": "3068",
+   "st": "West Newton St",
+   "from": "Huntington Ave",
+   "to": "SW Corridor Path",
+   "why": "length 12 m vs 162 m"
+  },
+  {
+   "id": "3185",
+   "st": "Alford St",
+   "from": "Cambridge St",
+   "to": "EVERETT TOWN LINE",
+   "why": "length 126 m vs 1255 m"
+  },
+  {
+   "id": "3193",
+   "st": "Dartmouth St",
+   "from": "SW Corridor Path",
+   "to": "Columbus Ave",
+   "why": "length 306 m vs -145 m"
+  },
+  {
+   "id": "3224",
+   "st": "Eighth St",
+   "from": "First Ave",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "3225",
+   "st": "Eighth St",
+   "from": "First Ave",
+   "to": "Dead End",
+   "why": "no walk"
+  },
+  {
+   "id": "3249",
+   "st": "West Newton St",
+   "from": "Washington St",
+   "to": "Shawmut Ave",
+   "why": "length 113 m vs 1175 m"
+  },
+  {
+   "id": "3269",
+   "st": "Hancock St",
+   "from": "Cambridge St",
+   "to": "Mount Vernon St",
+   "why": "length 304 m vs 196 m"
+  },
+  {
+   "id": "3270",
+   "st": "Hancock St",
+   "from": "Cambridge St",
+   "to": "Mount Vernon St",
+   "why": "length 304 m vs 105 m"
+  },
+  {
+   "id": "3277",
+   "st": "Cross St",
+   "from": "N. Washington",
+   "to": "Atlantic",
+   "why": "length 48 m vs 0 m"
+  },
+  {
+   "id": "3278",
+   "st": "Cross St",
+   "from": "North Washington",
+   "to": "Atlantic",
+   "why": "length 48 m vs 0 m"
+  },
+  {
+   "id": "3279",
+   "st": "Garden Court St",
+   "from": "North Square",
+   "to": "Fleet",
+   "why": "length 72 m vs 0 m"
+  },
+  {
+   "id": "3280",
+   "st": "Garden Court St",
+   "from": "North Square",
+   "to": "Fleet",
+   "why": "length 72 m vs 0 m"
+  },
+  {
+   "id": "3281",
+   "st": "Moon St",
+   "from": "North Square",
+   "to": "Fleet",
+   "why": "length 77 m vs 0 m"
+  },
+  {
+   "id": "3282",
+   "st": "Moon St",
+   "from": "North Square",
+   "to": "Fleet",
+   "why": "length 77 m vs 0 m"
+  },
+  {
+   "id": "3283",
+   "st": "Stillman St",
+   "from": "Salem",
+   "to": "End of Street",
+   "why": "length 156 m vs 0 m"
+  },
+  {
+   "id": "3284",
+   "st": "Stillman St",
+   "from": "Salem",
+   "to": "End of Street",
+   "why": "length 156 m vs 0 m"
+  },
+  {
+   "id": "3287",
+   "st": "Mt Vernon",
+   "from": "Hancock St",
+   "to": "Joy St",
+   "why": "street name"
+  },
+  {
+   "id": "3290",
+   "st": "Johnny Ct",
+   "from": "Maple Place",
+   "to": "Harrrison Ave",
+   "why": "length 61 m vs 0 m"
+  },
+  {
+   "id": "3297",
+   "st": "River St",
+   "from": "Mt Vernon St",
+   "to": "Public Alley 301",
+   "why": "length 56 m vs 0 m"
+  },
+  {
+   "id": "3301",
+   "st": "Francis Parkman Dr",
+   "from": null,
+   "to": null,
+   "why": "length 96 m vs 0 m"
+  },
+  {
+   "id": "3303",
+   "st": "Agassiz Rd",
+   "from": null,
+   "to": null,
+   "why": "length 270 m vs 0 m"
+  },
+  {
+   "id": "3322",
+   "st": "Arion St",
+   "from": "Columbia Road",
+   "to": "Davern Street",
+   "why": "length 67 m vs 0 m"
+  },
+  {
+   "id": "3323",
+   "st": "Arion St'",
+   "from": "Columbia Road",
+   "to": "Davern Street",
+   "why": "length 67 m vs 0 m"
+  },
+  {
+   "id": "3326",
+   "st": "Copenger St",
+   "from": "Parker Hill Avenue",
+   "to": "Dead End",
+   "why": "length 63 m vs 0 m"
+  },
+  {
+   "id": "3327",
+   "st": "Copenger St",
+   "from": "Parker Hill Avenue",
+   "to": "Dead End",
+   "why": "length 63 m vs 0 m"
+  },
+  {
+   "id": "3342",
+   "st": "Westville St",
+   "from": "Bowdoin Avenue",
+   "to": "Geneva Avenue",
+   "why": "length 419 m vs 0 m"
+  },
+  {
+   "id": "3343",
+   "st": "Westville St",
+   "from": "Bowdoin Avenue",
+   "to": "Geneva Avenue",
+   "why": "length 419 m vs 0 m"
+  },
+  {
+   "id": "3352",
+   "st": "Brookford St",
+   "from": "Blue Hill Avenue",
+   "to": "Howard Street",
+   "why": "length 307 m vs 0 m"
+  },
+  {
+   "id": "3353",
+   "st": "Brookford St",
+   "from": "Blue Hill Avenue",
+   "to": "Howard Street",
+   "why": "length 307 m vs 0 m"
+  },
+  {
+   "id": "3354",
+   "st": "Rand St",
+   "from": "Julian Street",
+   "to": "Boxford Street",
+   "why": "length 111 m vs 0 m"
+  },
+  {
+   "id": "3355",
+   "st": "Rand St",
+   "from": "Julian Street",
+   "to": "Boxford Street",
+   "why": "length 111 m vs 0 m"
+  },
+  {
+   "id": "3363",
+   "st": "Julian St",
+   "from": "Blue Hill Avenue",
+   "to": "Howard Street",
+   "why": "length 357 m vs 0 m"
+  },
+  {
+   "id": "3364",
+   "st": "Julian St",
+   "from": "Blue Hill Avenue",
+   "to": "Howard Street",
+   "why": "length 357 m vs 0 m"
+  },
+  {
+   "id": "3374",
+   "st": "Humphreys St",
+   "from": "Dudley Street",
+   "to": "East Cottage",
+   "why": "length 414 m vs 0 m"
+  },
+  {
+   "id": "3380",
+   "st": "Georgia St",
+   "from": "Blue Hill Avenue",
+   "to": "Elm Hill Street",
+   "why": "length 13 m vs 0 m"
+  },
+  {
+   "id": "3381",
+   "st": "Georgia St",
+   "from": "Blue Hill Avenue",
+   "to": "Elm Hill Street",
+   "why": "length 13 m vs 0 m"
+  },
+  {
+   "id": "3384",
+   "st": "Schulyer St",
+   "from": "Blue Hill Avenue",
+   "to": "Elm Hill Street",
+   "why": "length 368 m vs 0 m"
+  },
+  {
+   "id": "3385",
+   "st": "Schulyer St",
+   "from": "Blue Hill Avenue",
+   "to": "Elm Hill Street",
+   "why": "length 368 m vs 0 m"
+  },
+  {
+   "id": "3390",
+   "st": "Sonoma St",
+   "from": "Maple Street",
+   "to": "Elm Hill Street",
+   "why": "length 166 m vs 0 m"
+  },
+  {
+   "id": "3391",
+   "st": "Sonoma St",
+   "from": "Maple Street",
+   "to": "Elm Hill Street",
+   "why": "length 166 m vs 0 m"
+  },
+  {
+   "id": "3392",
+   "st": "Cheney St",
+   "from": "Elm Hill Street",
+   "to": "Blue Hill Avenue",
+   "why": "length 362 m vs 0 m"
+  },
+  {
+   "id": "3402",
+   "st": "Commonwealth Ave",
+   "from": "Chestnut Hill Ave",
+   "to": "Colburne Street",
+   "why": "length 771 m vs 0 m"
+  },
+  {
+   "id": "3403",
+   "st": "Cresthill Rd",
+   "from": "Parsons St",
+   "to": "Parson St",
+   "why": "length 129 m vs 0 m"
+  },
+  {
+   "id": "3407",
+   "st": "Naples St",
+   "from": "Commonwealth Ave",
+   "to": "Brookline line",
+   "why": "street name"
+  },
+  {
+   "id": "3408",
+   "st": "Naples St",
+   "from": "Commonwealth Ave",
+   "to": "Brookline line",
+   "why": "street name"
+  },
+  {
+   "id": "3413",
+   "st": "Hyde Park Ave",
+   "from": "Washington St",
+   "to": "Dead End",
+   "why": "length 7262 m vs 0 m"
+  },
+  {
+   "id": "3414",
+   "st": "Hyde Park Ave",
+   "from": "Washington St",
+   "to": "Dead end",
+   "why": "length 7262 m vs 0 m"
+  },
+  {
+   "id": "3433",
+   "st": "Oakley St",
+   "from": "Geneva Ave",
+   "to": "Bowdoin St",
+   "why": "length 269 m vs 119 m"
+  },
+  {
+   "id": "3434",
+   "st": "Oakley St",
+   "from": "Geneva Ave",
+   "to": "Bowdoin St",
+   "why": "length 269 m vs 119 m"
+  },
+  {
+   "id": "3528",
+   "st": "Wayland St",
+   "from": "Dacia St",
+   "to": "Magnolia St",
+   "why": "no walk"
+  },
+  {
+   "id": "3529",
+   "st": "Wayland St",
+   "from": "Dacia St",
+   "to": "Magnolia St",
+   "why": "no walk"
+  },
+  {
+   "id": "3589",
+   "st": "Homes Ave",
+   "from": "Gevena Ave",
+   "to": "Topliff St",
+   "why": "length 291 m vs 173 m"
+  },
+  {
+   "id": "3775",
+   "st": "Public Alley 705",
+   "from": "Tremont St",
+   "to": "Shawmut Ave",
+   "why": "street name"
+  },
+  {
+   "id": "3776",
+   "st": "Public Alley 705",
+   "from": "Tremont St",
+   "to": "Shawmut Ave",
+   "why": "street name"
+  },
+  {
+   "id": "3797",
+   "st": "Rosewood St",
+   "from": "Cummins Hwy",
+   "to": "Rector Rd",
+   "why": "schedule"
+  }
+ ]
+}
