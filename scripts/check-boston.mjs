@@ -1,6 +1,7 @@
 // Headless check of the Boston preview (boston.html, built by scripts/cities/boston-page.mjs) on a phone screen:
 // the page loads with no errors, the citywide overview draws, street zoom draws curb sides from data/boston/,
 // a block opens its sheet with Boston's season line, and an address search opens the right side of the street.
+// Views change with animate:false: Leaflet drops a setView issued during another zoom animation.
 // Usage: node scripts/check-boston.mjs [site] [--shots dir]   (default site http://localhost:3077, `npm run dev`)
 import { createRequire } from 'node:module';
 import { existsSync, mkdirSync } from 'node:fs';
@@ -26,13 +27,13 @@ try {
 
   await p.goto(SITE + '/boston', { waitUntil: 'load' });
   check(await p.evaluate(() => !!window.BOS && sfParts(new Date(Date.UTC(2026, 9, 16, 16))).h === 12), 'Boston time core: 16:00 UTC is noon in Boston');
-  await p.evaluate(() => map.setView(BOS.CENTER, 13));
+  await p.evaluate(() => map.setView(BOS.CENTER, 13, { animate: false }));
   await p.waitForFunction(() => typeof OVR !== 'undefined' && OVR && OVR.length > 5000 && map.hasLayer(overviewLayer), { timeout: 30000, polling: 250 }).catch(() => {});
   check(await p.evaluate(() => typeof OVR !== 'undefined' && !!OVR && OVR.length > 5000 && map.hasLayer(overviewLayer)), 'citywide overview drawn from data/boston/segments.json');
   if (SHOTS) await p.screenshot({ path: SHOTS + '/1-overview.png' });
 
   // street zoom on the South End: curb sides drawn from the static file
-  await p.evaluate(() => map.setView([42.3416, -71.0742], 17));
+  await p.evaluate(() => map.setView([42.3416, -71.0742], 17, { animate: false }));
   await p.waitForFunction(() => !ovMode && segCache.length > 20, { timeout: 30000, polling: 250 }).catch(() => {});
   const n = await p.evaluate(() => segCache.length);
   check(n > 20, `street zoom draws curb sides (${n})`);
@@ -59,7 +60,7 @@ try {
   if (SHOTS) await p.screenshot({ path: SHOTS + '/4-address.png' });
 
   // layers from the Curb Lab
-  await p.evaluate(() => { document.getElementById('sheetClose').click(); map.setView([42.3503, -71.0810], 17); });
+  await p.evaluate(() => { document.getElementById('sheetClose').click(); map.setView([42.3503, -71.0810], 17, { animate: false }); });
   await new Promise((r) => setTimeout(r, 1500));
   await p.evaluate(() => { document.getElementById('meterToggle').click(); document.getElementById('rppToggle').click(); });
   await new Promise((r) => setTimeout(r, 2500));
