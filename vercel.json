@@ -61,6 +61,10 @@
       "destination": "/about.html"
     },
     {
+      "source": "/boston",
+      "destination": "/boston.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },
