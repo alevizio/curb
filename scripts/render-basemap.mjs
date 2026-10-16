@@ -14,12 +14,17 @@ import puppeteer from 'puppeteer-core';
 import sharp from 'sharp';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = path.join(ROOT, 'basemap/parchment');
+const CITY = process.env.CURB_BASEMAP_CITY || 'sf';
+const OUT = path.join(ROOT, CITY === 'boston' ? 'basemap/boston' : 'basemap/parchment');
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const N = 6, B = 1; // metatile = 6×6 kept tiles + 1-tile buffer = 4096px canvas (headless WebGL cap)
 
 // Same boxes as build-basemap.sh (keep in sync): SF at street zooms, Bay Area for the zoomed-out view.
-const JOBS = [
+// Boston (the /boston preview) stops at z16, which the page overzooms: a third of SF's file count.
+const JOBS = CITY === 'boston' ? [
+  { src: 'boston-region.pmtiles', bbox: [-71.55, 41.95, -70.60, 42.65], minz: 8, maxz: 13 },
+  { src: 'boston.pmtiles', bbox: [-71.20, 42.22, -70.98, 42.40], minz: 14, maxz: 16 },
+] : [
   { src: 'bay.pmtiles', bbox: [-123.10, 37.20, -121.60, 38.30], minz: 8, maxz: 13 },
   { src: 'sf.pmtiles', bbox: [-122.56, 37.685, -122.34, 37.84], minz: 14, maxz: 17 },
 ];

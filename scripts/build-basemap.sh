@@ -5,6 +5,7 @@
 #
 # Pipeline: extract SF + Bay Area vector tiles -> parchment style -> render PNGs in headless Chrome.
 # Run from the repo root:  bash scripts/build-basemap.sh
+# Boston (the /boston preview, z8-16 → basemap/boston/):  CITY=boston bash scripts/build-basemap.sh
 #
 # Requires: curl, unzip, node + npm, Google Chrome (headless renderer). macOS arm64 assumed.
 set -euo pipefail
@@ -13,7 +14,9 @@ mkdir -p basemap
 
 # --- knobs ---------------------------------------------------------------------------------------
 # Daily planet builds; pick a current one from https://build-metadata.protomaps.dev/builds.json
-PLANET="https://build.protomaps.com/20260926.pmtiles"
+# A build is kept for a few weeks only; override with PLANET=… when this one is gone.
+PLANET="${PLANET:-https://build.protomaps.com/20260926.pmtiles}"
+CITY="${CITY:-sf}"
 SF_BBOX="-122.56,37.685,-122.34,37.84"        # street zooms z14-17 (keep in sync with render-basemap.mjs)
 BAY_BBOX="-123.10,37.20,-121.60,38.30"        # zoomed-out view z8-13 (keep in sync with index.html bounds)
 
@@ -26,17 +29,24 @@ if [ ! -x ./pmtiles ]; then
 fi
 
 # --- 2) extract vector tiles (streams byte-ranges; never downloads the ~130GB planet) ------------
-echo "› extracting SF + Bay Area from planet…"
-./pmtiles extract "$PLANET" basemap/sf.pmtiles --bbox="$SF_BBOX" --maxzoom=15
-./pmtiles extract "$PLANET" basemap/bay.pmtiles --bbox="$BAY_BBOX" --maxzoom=13
+if [ "$CITY" = boston ]; then   # keep in sync with render-basemap.mjs and lib/city-boston.js TILE_BOUNDS
+  echo "› extracting Boston + its region from planet…"
+  ./pmtiles extract "$PLANET" basemap/boston.pmtiles --bbox="-71.20,42.22,-70.98,42.40" --maxzoom=15
+  ./pmtiles extract "$PLANET" basemap/boston-region.pmtiles --bbox="-71.55,41.95,-70.60,42.65" --maxzoom=13
+else
+  echo "› extracting SF + Bay Area from planet…"
+  ./pmtiles extract "$PLANET" basemap/sf.pmtiles --bbox="$SF_BBOX" --maxzoom=15
+  ./pmtiles extract "$PLANET" basemap/bay.pmtiles --bbox="$BAY_BBOX" --maxzoom=13
+fi
 
 # --- 3) parchment MapLibre style from the Flavor + render deps -----------------------------------
 npm i --no-save @protomaps/basemaps maplibre-gl pmtiles puppeteer-core sharp
 node basemap/parchment-flavor.mjs > basemap/parchment-style.json
 
 # --- 4) render 512px (@2x) PNG tiles with headless Chrome + MapLibre GL JS -----------------------
-rm -rf basemap/parchment
-node scripts/render-basemap.mjs
+OUTDIR=basemap/parchment; [ "$CITY" = boston ] && OUTDIR=basemap/boston
+rm -rf "$OUTDIR"
+CURB_BASEMAP_CITY="$CITY" node scripts/render-basemap.mjs
 
-du -sh basemap/parchment
-echo "✅ Next: check it with npm run dev → http://localhost:3077, then commit basemap/parchment."
+du -sh "$OUTDIR"
+echo "✅ Next: check it with npm run dev → http://localhost:3077, then commit $OUTDIR."
