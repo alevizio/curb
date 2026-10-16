@@ -57,6 +57,10 @@ try {
   await p.waitForFunction(() => document.getElementById('sheet').classList.contains('open'), { timeout: 30000, polling: 250 }).catch(() => {});
   const where = await p.evaluate(() => document.querySelector('#sheetBody .where')?.innerText || '');
   check(/Marlborough St/.test(where), `address search opens Marlborough St (${where.replace(/\s+/g, ' ').trim()})`);
+  const pin = await p.evaluate(async () => { const g = BOS.findAddress(await BOS.load(), 120, 'Marlborough St').block.g;
+    const away = ([lo, la]) => map.distance(youMarker.getLatLng(), [la, lo]);
+    return Math.round(Math.min(away(g[0]), away(g[g.length - 1]))); });
+  check(pin > 60, `the address pin sits mid-block, ${pin} m from the nearer end`);
   if (SHOTS) await p.screenshot({ path: SHOTS + '/4-address.png' });
 
   // layers from the Curb Lab

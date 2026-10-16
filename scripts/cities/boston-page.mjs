@@ -57,7 +57,7 @@ const edits = [
   ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
     '<p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston\'s open data</a>. The posted sign always wins.</p>'],
   // ---- scripts: Boston's time core and data --------------------------------------------------------
-  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=1"></script>'],
+  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=2"></script>'],
   ['retry it like the time core', "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');}",
     "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');\nif(window.nextSweep&&!window.BOS)again('script[src^=\"/lib/city-boston.js\"]');}"],
   ['fail without it', 'if(!window.L||!window.nextSweep){', 'if(!window.L||!window.nextSweep||!window.BOS){'],
@@ -253,7 +253,7 @@ async function loadRppBlock(latlngs,mid,cnn){
   await ensureCorridors();
   const items=[], m=v.match(/^(\\d{1,5})\\s+(.+)$/);
   if(m){ try{ const hit=BOS.findAddress(await BOS.load(),m[1],m[2]);
-    if(hit){ const g=hit.block.g, mid=g[Math.floor(g.length/2)];
+    if(hit){ const mid=hit.at;
       items.push({t:m[1]+' '+hit.block.s,kind:'addr',d:{latitude:mid[1],longitude:mid[0],cnn:hit.block.c,side:hit.side}}); } }catch(_){} }
   if(v===document.getElementById('q').value.trim()){  // drop stale async results
     const q=(m?m[2]:v).toUpperCase();
@@ -272,7 +272,7 @@ async function loadRppBlock(latlngs,mid,cnn){
   let blocks; try{ blocks=await BOS.load(); }catch(e){ toast('Search failed. Try again.'); return; }
   const m=v.match(/^(\\d{1,5})\\s+(.+)$/);
   if(m){ const hit=BOS.findAddress(blocks,m[1],m[2]);
-    if(hit){ const g=hit.block.g, mid=g[Math.floor(g.length/2)];
+    if(hit){ const mid=hit.at;
       document.getElementById('q').value=m[1]+' '+hit.block.s;
       placeYou(mid[1],mid[0],true,hit.block.c); if(hit.side&&pendingOpen)pendingOpen.sideHint=hit.side; return; } }
   const q=(m?m[2]:v).toUpperCase(), exact=blocks.filter(b=>b.s.toUpperCase()===q);

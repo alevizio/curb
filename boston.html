@@ -863,7 +863,7 @@
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=7"></script>
-<script src="/lib/city-boston.js?v=1"></script>
+<script src="/lib/city-boston.js?v=2"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -3114,7 +3114,7 @@ async function updateSug(){
   await ensureCorridors();
   const items=[], m=v.match(/^(\d{1,5})\s+(.+)$/);
   if(m){ try{ const hit=BOS.findAddress(await BOS.load(),m[1],m[2]);
-    if(hit){ const g=hit.block.g, mid=g[Math.floor(g.length/2)];
+    if(hit){ const mid=hit.at;
       items.push({t:m[1]+' '+hit.block.s,kind:'addr',d:{latitude:mid[1],longitude:mid[0],cnn:hit.block.c,side:hit.side}}); } }catch(_){} }
   if(v===document.getElementById('q').value.trim()){  // drop stale async results
     const q=(m?m[2]:v).toUpperCase();
@@ -3156,7 +3156,7 @@ async function doSearch(){
   let blocks; try{ blocks=await BOS.load(); }catch(e){ toast('Search failed. Try again.'); return; }
   const m=v.match(/^(\d{1,5})\s+(.+)$/);
   if(m){ const hit=BOS.findAddress(blocks,m[1],m[2]);
-    if(hit){ const g=hit.block.g, mid=g[Math.floor(g.length/2)];
+    if(hit){ const mid=hit.at;
       document.getElementById('q').value=m[1]+' '+hit.block.s;
       placeYou(mid[1],mid[0],true,hit.block.c); if(hit.side&&pendingOpen)pendingOpen.sideHint=hit.side; return; } }
   const q=(m?m[2]:v).toUpperCase(), exact=blocks.filter(b=>b.s.toUpperCase()===q);
