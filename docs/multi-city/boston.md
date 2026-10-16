@@ -3,6 +3,61 @@
 Researched 2026-10-01. Every source below was opened and re-checked by a second pass, with cross origin
 checks sent as `Origin: https://curb.guide`.
 
+## Prototype (2026-10-16)
+
+A working preview of CURB for Boston: `boston.html`, served at `curb.guide/boston` (noindex, not linked
+from the San Francisco site). Same map, colors and block sheet as San Francisco.
+
+How it is built:
+
+| Piece | File | What it does |
+|---|---|---|
+| Data | `scripts/cities/boston.mjs` → `data/boston/` | Fetches the three sources below, attaches each schedule row to street blocks, writes `segments.json` (swept blocks and rules), `curbs.json` (Curb Lab layers) and `report.json` (match and coverage numbers). Inputs are cached in `private/cache/boston/`; `--refresh` fetches again |
+| Time and data helpers | `lib/city-boston.js` | Boston's `makeTimeCore` (Eastern time, City holidays, seasons), attached under the names the page already calls; expands `segments.json` into the row shape the page reads from DataSF in SF |
+| Page | `scripts/cities/boston-page.mjs` → `boston.html` | Generates the Boston page from `index.html` with a list of checked edits, so SF fixes reach Boston when it is rebuilt. Never edit `boston.html` by hand |
+| Basemap | `CITY=boston bash scripts/build-basemap.sh` → `basemap/boston/` | Parchment tiles z8 to 16 (3,238 files, 85 MB), overzoomed past 16 |
+| Check | `scripts/check-boston.mjs` | Headless walk of the page: overview, street zoom, sheet, calendar time zone, address search, layers, no SF requests |
+
+Sources: the Street Sweeping Schedules (Public Works), the SAM street segments, and the Curb Lab's Curbs
+API. The API's own address (`cds-curb-api.boston.gov`) has had an expired certificate since 2026-07-28, so the
+build reads the Cloud Run address the City's beta map uses (`OETBoston/curb-atlas`). The API answers bulk pages
+fast (10,000 zones in about 2 s) but small area queries slowly (about 20 s), which is why the page reads a
+snapshot, as everywhere in CURB.
+
+What the numbers say (`data/boston/report.json`, 2026-10-16):
+
+- **Schedule to blocks: 3,599 of 3,758 rows (96%)**, 3,092 of them at both cross streets. 7,410 blocks,
+  14,303 block sides. Odd and even go on the side of the line that holds those house numbers (SAM address
+  ranges). 159 rows did not match: 118 on length (streets split by a square or a rotary), 25 with no walk
+  between the cross streets (loops, dead ends), 10 street names, 6 without days or hours.
+- **The Curb Lab data has sweeping signs on 2,416 block sides, 15% of the schedule's.** 14,309 of 54,185
+  curb zones have only "unusable image" policies and 11,426 have none. Sweeping signs carry no street
+  cleaning label: they read as "no parking" with `weeks_of_month` and a season.
+- **Where both exist (2,129 block sides), 1,771 agree on day and hour** and 1,541 on the weeks too. On 227
+  the sign's weeks are those of the other side of the street: odd and even swapped in the schedule, in the
+  sign reading, or in where the curb zone was drawn.
+- Curb Lab layers on the map: 2,578 paid zones (with rates), 1,510 resident permit, 834 loading, 56
+  accessible.
+
+Not in the preview: sweep alerts (the push sender runs on SF time and saved spots have no city yet, phase 1
+item 4 in the README), ticket times (no citation data), block and neighborhood pages, the iPhone app. The
+calendar reminder works, in Eastern time.
+
+Questions for the City, from building it:
+
+1. Which address should apps use for the Curbs API, and will the `cds-curb-api.boston.gov` certificate be
+   renewed?
+2. The public API's policies were last published 2026-05-07. Is it refreshed from the nightly sign system?
+3. Could curb zones carry `street_name` and `street_side` (empty today), and sweeping policies a street
+   cleaning purpose?
+4. The 227 block sides where the sign data and the schedule disagree on odd and even: which is right?
+5. Could the sweeping block geometry behind Notify Boston be published? It would replace the join.
+6. What are the terms for the Curbs API data? None are stated.
+7. A bulk export (one file per refresh) would suit apps better than area queries.
+8. A machine-readable holiday and season calendar, and any same day cancellation signal.
+9. Street cleaning citations (date, time, location) for "when tickets usually land".
+10. Are the Curb Lab's meter rates current, and are the cleaned neighborhoods public?
+
 ## Short version
 
 - Boston can reach level 2 (map, block sheet, alerts) from public data.

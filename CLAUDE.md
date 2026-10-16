@@ -196,6 +196,11 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   Groundwork already in the code: `lib/sweep-core.js` is `makeTimeCore({ tz, suspended, holidayName })`,
   one instance per city; SF's instance is attached under the same global names as before (sfParts,
   nextSweep, alertAnchors, …), so SF callers are unchanged. A rule may carry `months` (a season).
+- boston.html — the Boston preview at /boston, GENERATED from index.html by scripts/cities/boston-page.mjs (a list of
+  checked edits; it fails when an edit no longer matches). Never hand-edit it: change index.html or the edit list, then
+  rerun the generator. Data: scripts/cities/boston.mjs → data/boston/; time + data helpers: lib/city-boston.js; check:
+  scripts/check-boston.mjs; basemap: `CITY=boston bash scripts/build-basemap.sh` → basemap/boston/. See
+  docs/multi-city/boston.md.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy

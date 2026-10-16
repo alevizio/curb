@@ -16,7 +16,7 @@ city we are looking at. Read this file first.
 | City | Status | Who | What is in the way |
 |---|---|---|---|
 | San Francisco | Live at curb.guide and in the App Store | Ale | Nothing |
-| Boston | Researched. Waiting on data | Ale | The public sweeping schedule has no street geometry. See [boston.md](boston.md) |
+| Boston | Prototype at curb.guide/boston (2026-10-16): map, sheet, calendar, Curb Lab layers | Ale | Alerts need a city on saved spots (phase 1). Sign data covers 15% of swept curbs. See [boston.md](boston.md) |
 | Buenos Aires | Researched. A volunteer wants to run it | A local maintainer | The City publishes the rule for every curb side, but under a license that forbids commercial use. It is not a street sweeping city, so the map has to draw other rule types, and it needs Spanish. See [buenos-aires.md](buenos-aires.md) |
 
 ## Principles
