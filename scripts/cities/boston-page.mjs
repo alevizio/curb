@@ -241,11 +241,9 @@ async function loadRppBlock(latlngs,mid,cnn){
 }
 `],
   ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", "'No street-sweeping schedule here. This preview covers Boston.'"],
-  // location allowed on curb.guide (for the SF map) carries over to /boston: a fix outside Boston must not fly to an empty map
-  ['a fix outside Boston stays put', 'function placeFix(p,quiet){\n  const c=p.coords, acc=c.accuracy;\n', `function placeFix(p,quiet){
-  const c=p.coords, acc=c.accuracy;
-  if(!L.latLngBounds(BOS.BOUNDS).contains([c.latitude,c.longitude])){ if(!quiet)toast("You're outside Boston, and this preview only covers Boston. Search a street or tap a curb."); return; }
-`],
+  // location allowed on curb.guide (for the SF map) carries over to /boston: a fix outside Boston stays put
+  ['the city is Boston', 'L.latLngBounds([[37.685,-122.56],[37.84,-122.34]])', 'L.latLngBounds(BOS.BOUNDS)'],
+  ['outside Boston words', "You're outside San Francisco, and this map only covers San Francisco.", "You're outside Boston, and this preview only covers Boston."],
   ['street list from the file', /async function ensureCorridors\(\)\{[\s\S]*?\n\}\n/, `async function ensureCorridors(){
   if(corridors)return;
   try{ corridors=BOS.streets(await BOS.load()); }catch(_){corridors=null;}

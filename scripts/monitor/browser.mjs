@@ -1,7 +1,8 @@
 // Nightly real-browser check of curb.guide (headless Chrome, phone-sized), run by monitor.yml.
 // Walks the core user path and returns { name, status, detail } results like smoke.mjs:
 //   map loads → basemap tiles render → curb lines draw at street zoom → ONE tap on "use my location"
-//   finds you → tapping a block opens its sheet → street search finds a street → no script errors along the way.
+//   finds you → tapping a block opens its sheet → street search finds a street → a location outside SF keeps the
+//   map on SF → no script errors along the way.
 // It never taps "Sweep alerts" (that would create a real push subscription in production).
 //
 //   node scripts/monitor/browser.mjs [--out results.json] [--shots dir]
@@ -90,6 +91,20 @@ try {
     ? ok('browser: street search finds Valencia St')
     : fail('browser: street search finds Valencia St', `the map did not move to Valencia St within 15s (toast: ${await page.evaluate(() => document.getElementById('toast')?.textContent || 'none')})`);
   await shot('4-search');
+
+  // Location allowed on curb.guide by someone outside SF (Boston folks who used /boston, say): flying to them
+  // showed an empty map. A launch stays on SF, and the locate button says why. Reload first: a locate reuses a fix
+  // under 30 s old, and the walk's last one was in the Mission.
+  const inSF = () => page.evaluate(() => { const c = map.getCenter(); return c.lat > 37.6 && c.lat < 37.9 && c.lng > -122.6 && c.lng < -122.3; });
+  await page.setGeolocation({ latitude: 42.3601, longitude: -71.0589, accuracy: 20 });   // Boston City Hall
+  await page.reload({ waitUntil: 'load', timeout: 45000 });
+  await new Promise((r) => setTimeout(r, 4000));
+  (await inSF()) ? ok('browser: opening from outside SF stays on SF') : fail('browser: opening from outside SF stays on SF', 'the launch flew the map to the visitor, off SF');
+  await page.click('#locate');
+  const said = await waitFor(() => /outside San Francisco/.test(document.getElementById('toast')?.textContent || ''), 15000);
+  (said && await inSF())
+    ? ok('browser: locate from outside SF keeps the map on SF')
+    : fail('browser: locate from outside SF keeps the map on SF', `toast: ${await page.evaluate(() => document.getElementById('toast')?.textContent || 'none')}; map on SF: ${await inSF()}`);
 } catch (e) {
   fail('browser: run', `crashed: ${e.message}`);
 } finally {

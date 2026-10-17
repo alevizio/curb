@@ -2695,8 +2695,12 @@ function locateFailed(code,detail){
 // Beyond this a fix can't pick a block (SF blocks are ~100–130 m long): show where, not a verdict.
 const ACC_MAX=100;
 let accRing=null;
+// A fix outside the city (location allowed on curb.guide elsewhere, or for /boston) leaves the map where it is: flying
+// there showed an empty map. Bounds: the street level basemap (SF_BBOX in scripts/build-basemap.sh; BOS.BOUNDS on /boston).
+function outsideCity(lat,lng){return !L.latLngBounds([[37.685,-122.56],[37.84,-122.34]]).contains([lat,lng]);}
 function placeFix(p,quiet){
   const c=p.coords, acc=c.accuracy;
+  if(outsideCity(c.latitude,c.longitude)){ if(!quiet)toast("You're outside San Francisco, and this map only covers San Francisco. Search a street or tap a curb."); return; }
   if(!(acc>ACC_MAX)){  // unknown (null/0/NaN) is trusted, as before
     placeYou(c.latitude,c.longitude,true,null,quiet);
     if(pendingOpen&&!quiet){pendingOpen.loc=true;locBusy(true);}  // stay busy until the block opens
