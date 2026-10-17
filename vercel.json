@@ -73,6 +73,10 @@
       "destination": "/boston/fixes.html"
     },
     {
+      "source": "/boston/notes",
+      "destination": "/boston/notes.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },

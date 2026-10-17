@@ -202,7 +202,7 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   fixes: wrong street names, and blocks left off when the basemap has a pedestrian street or no street under them, all
   recorded in data/boston/fixes.json) → data/boston/; time + data helpers: lib/city-boston.js; alerts: lib/cities.js (a
   spot's city: time core, watch age, block link); pages: scripts/cities/boston-pages.mjs → boston/about.html (/boston/about)
-  + boston/fixes.html (/boston/fixes), GENERATED like boston.html, with Boston's nav from site.js; share card:
+  + boston/fixes.html (/boston/fixes) + boston/notes.html (/boston/notes, the page to share; pictures in boston/img/), GENERATED like boston.html, with Boston's nav from site.js; share card:
   og/template-boston.html → og-boston.png (`npm run og:boston`); check: scripts/check-boston.mjs; basemap:
   `CITY=boston bash scripts/build-basemap.sh` → basemap/boston/. See docs/multi-city/boston.md.
 - README.md — human-facing run/deploy notes.

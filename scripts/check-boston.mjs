@@ -288,6 +288,16 @@ try {
   await new Promise((r) => setTimeout(r, 1500));
   const minis = await pg.evaluate(() => ({ all: document.querySelectorAll('.mini[data-lines]').length, drawn: document.querySelectorAll('.mini.leaflet-container').length }));
   check(minis.all >= 15 && minis.drawn === minis.all, `every fix on /boston/fixes draws its map (${minis.drawn} of ${minis.all})`);
+  // the page to share: the City's questions answered, with the fixes before and after (pictures in boston/img/)
+  const notes = await pg.goto(SITE + '/boston/notes', { waitUntil: 'networkidle0' });
+  const pics = await pg.evaluate(async () => {
+    for (const i of document.images) i.loading = 'eager';
+    await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; }))));
+    return { all: document.images.length, shown: [...document.images].filter((i) => i.naturalWidth > 0).length, asks: document.querySelectorAll('.ask').length,
+      logo: document.querySelector('.sn-logo')?.getAttribute('href') };
+  });
+  check(notes.status() === 200 && pics.logo === '/boston' && pics.asks >= 8 && pics.all >= 10 && pics.shown === pics.all,
+    `/boston/notes loads with Boston's nav, ${pics.asks} answers and every picture (${pics.shown} of ${pics.all})`);
 
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));
   check(!bad.length, 'no failed or SF requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));
