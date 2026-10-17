@@ -2738,7 +2738,7 @@ function nearestSeg(lat,lng,cnnHint){
   pool.forEach(o=>{const d=distSqToLineMeters(lat,lng,o.side.latlngs); if(d<bd){bd=d;best=o}});
   return best&&{group:best.group,side:best.side,d:Math.sqrt(bd)};
 }
-map.on('click',e=>{ userPicked(); if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});
+map.on('click',e=>{ userPicked(); placeYou(e.latlng.lat,e.latlng.lng,ovMode);});
 
 /* ---------- day filter + today's date ---------- */
 let dayChips=[];

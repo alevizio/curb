@@ -244,6 +244,9 @@ async function loadRppBlock(latlngs,mid,cnn){
   // location allowed on curb.guide (for the SF map) carries over to /boston: a fix outside Boston stays put
   ['the city is Boston', 'L.latLngBounds([[37.685,-122.56],[37.84,-122.34]])', 'L.latLngBounds(BOS.BOUNDS)'],
   ['outside Boston words', "You're outside San Francisco, and this map only covers San Francisco.", "You're outside Boston, and this preview only covers Boston."],
+  // the preview opens on the zoomed out overview (the demo view): one tap on a street zooms in AND opens its block
+  ['one tap opens a block', "map.on('click',e=>{ userPicked(); if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});",
+    "map.on('click',e=>{ userPicked(); placeYou(e.latlng.lat,e.latlng.lng,ovMode);});"],
   ['street list from the file', /async function ensureCorridors\(\)\{[\s\S]*?\n\}\n/, `async function ensureCorridors(){
   if(corridors)return;
   try{ corridors=BOS.streets(await BOS.load()); }catch(_){corridors=null;}

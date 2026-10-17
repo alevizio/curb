@@ -31,6 +31,16 @@ try {
 
   await p.goto(SITE + '/boston', { waitUntil: 'load' });
   check(await p.evaluate(() => !!window.BOS && sfParts(new Date(Date.UTC(2026, 9, 16, 16))).h === 12), 'Boston time core: 16:00 UTC is noon in Boston');
+
+  // one real tap on a street at the opening view (the zoomed out overview) zooms in AND opens that block
+  const tapAt = async (ll) => { const pt = await p.evaluate((ll) => { const q = map.latLngToContainerPoint(ll), r = document.getElementById('map').getBoundingClientRect(); return { x: r.left + q.x, y: r.top + q.y }; }, ll); await p.mouse.click(pt.x, pt.y); };
+  const marlborough = await p.evaluate(async () => { const m = BOS.midpoint(BOS.findAddress(await BOS.load(), 120, 'Marlborough St').block.g); return [m[1], m[0]]; });
+  check(await p.evaluate(() => ovMode), 'opens on the citywide overview');
+  await tapAt(marlborough);
+  await p.waitForFunction(() => document.getElementById('sheet').classList.contains('open'), { timeout: 15000, polling: 250 }).catch(() => {});
+  const tapped = await p.evaluate(() => document.querySelector('#sheetBody .where')?.innerText || '');
+  check(/Marlborough St/.test(tapped), `one tap on Marlborough St from the opening view opens it (${tapped.replace(/\s+/g, ' ').trim() || 'no sheet'})`);
+  await p.evaluate(() => document.getElementById('sheetClose').click());
   await p.evaluate(() => map.setView(BOS.CENTER, 13, { animate: false }));
   await p.waitForFunction(() => typeof OVR !== 'undefined' && OVR && OVR.length > 5000 && map.hasLayer(overviewLayer), { timeout: 30000, polling: 250 }).catch(() => {});
   check(await p.evaluate(() => typeof OVR !== 'undefined' && !!OVR && OVR.length > 5000 && map.hasLayer(overviewLayer)), 'citywide overview drawn from data/boston/segments.json');
