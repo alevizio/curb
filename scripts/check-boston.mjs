@@ -41,6 +41,15 @@ try {
   const tapped = await p.evaluate(() => document.querySelector('#sheetBody .where')?.innerText || '');
   check(/Marlborough St/.test(tapped), `one tap on Marlborough St from the opening view opens it (${tapped.replace(/\s+/g, ' ').trim() || 'no sheet'})`);
   await p.evaluate(() => document.getElementById('sheetClose').click());
+
+  // the welcome card lists Boston's neighborhoods, like SF's, and a link frames the map in place
+  const hoodCount = await p.evaluate(() => { showWelcome(); return document.querySelectorAll('.whoods a[data-bbox]').length; });
+  const bbox = await p.evaluate(() => { const a = [...document.querySelectorAll('.whoods a[data-bbox]')].find((x) => x.textContent === 'Back Bay');
+    a.click(); return a.dataset.bbox.split(',').map(Number); });
+  await new Promise((r) => setTimeout(r, 1500));
+  const framed = await p.evaluate(([w, s, e, n]) => { const c = map.getCenter();
+    return !document.getElementById('welcome').classList.contains('open') && c.lng > w && c.lng < e && c.lat > s && c.lat < n; }, bbox);
+  check(hoodCount >= 15 && framed, `the welcome card lists ${hoodCount} neighborhoods, and Back Bay frames the map`);
   await p.evaluate(() => map.setView(BOS.CENTER, 13, { animate: false }));
   await p.waitForFunction(() => typeof OVR !== 'undefined' && OVR && OVR.length > 5000 && map.hasLayer(overviewLayer), { timeout: 30000, polling: 250 }).catch(() => {});
   check(await p.evaluate(() => typeof OVR !== 'undefined' && !!OVR && OVR.length > 5000 && map.hasLayer(overviewLayer)), 'citywide overview drawn from data/boston/segments.json');

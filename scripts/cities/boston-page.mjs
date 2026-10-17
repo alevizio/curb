@@ -19,6 +19,17 @@ const data = JSON.parse(fs.readFileSync(ROOT + 'data/boston/segments.json', 'utf
 
 // Blocks swept per weekday, for the day-chip heads-up (index.html DAY_BLOCKS is SF's).
 const perDay = [0, 1, 2, 3, 4, 5, 6].map((d) => data.b.filter((b) => b.d.some(([, , rules]) => rules.some((r) => r[0] === d))).length);
+// The welcome card's neighborhood list, like SF's: each link frames the neighborhood's blocks (2nd to 98th percentile,
+// so one stray block can't stretch it). "Multiple", "DCR" (state roads) and two one-off labels aren't neighborhoods.
+const NOT_HOODS = new Set(['Multiple', 'DCR', 'Boston', 'Dorchester']);
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const hoods = Object.entries(data.b.reduce((m, b) => { if (b.h && !NOT_HOODS.has(b.h)) (m[b.h] ||= []).push(...b.g); return m; }, {}))
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([name, pts]) => {
+    const sorted = (k) => pts.map((p) => p[k]).sort((a, b) => a - b), at = (v, q) => v[Math.floor(q * (v.length - 1))];
+    const lo = sorted(0), la = sorted(1);
+    return { name, bbox: [at(lo, 0.02), at(la, 0.02), at(lo, 0.98), at(la, 0.98)].map((v) => v.toFixed(4)).join(',') };
+  });
 
 const edits = [
   // ---- head --------------------------------------------------------------------------------------
@@ -53,7 +64,17 @@ const edits = [
   ['no permit areas', '<div class="lp-sec">Permit areas</div>\n    <div class="arearow">', '<div class="lp-sec" style="display:none">Permit areas</div>\n    <div class="arearow" style="display:none">'],
   ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/,
     '<p>Every swept curb in Boston, colored by its <b>next street sweep</b>. Tap where you parked for the rules. <b>A preview</b>, built on the City\'s open data.</p>'],
-  ['no SF neighborhoods', /\s*<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, ''],
+  ['Boston neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, '<nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul>'
+    + hoods.map((h) => `<li><a href="/boston?bbox=${h.bbox}" data-bbox="${h.bbox}">${esc(h.name)}</a></li>`).join('') + '</ul></nav>'],
+  // SF's neighborhood links open /n/ pages; Boston's frame the map in place (the href is the fallback)
+  ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())showWelcome();\n})();\n", `  if(!EMBED&&!onboarded())showWelcome();
+})();
+document.querySelector('.whoods')?.addEventListener('click',e=>{
+  const a=e.target.closest('a[data-bbox]'); if(!a)return;
+  e.preventDefault(); markOnboarded(); userPicked();
+  const [w,s,ea,n]=a.dataset.bbox.split(',').map(Number); map.fitBounds([[s,w],[n,ea]],{padding:[18,18]});
+});
+`],
   ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
     '<p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston\'s open data</a>. The posted sign always wins.</p>'],
   // ---- scripts: Boston's time core and data --------------------------------------------------------

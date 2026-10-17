@@ -807,6 +807,7 @@
   </div>
   <button class="btn-go" id="welcomeGo">Show me the map</button>
   <a class="wabout" href="/about">How it works →</a>
+  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/boston?bbox=-71.1681,42.3339,-71.0902,42.3559" data-bbox="-71.1681,42.3339,-71.0902,42.3559">Allston/Brighton</a></li><li><a href="/boston?bbox=-71.0916,42.3432,-71.0659,42.3550" data-bbox="-71.0916,42.3432,-71.0659,42.3550">Back Bay</a></li><li><a href="/boston?bbox=-71.0723,42.3557,-71.0615,42.3624" data-bbox="-71.0723,42.3557,-71.0615,42.3624">Beacon Hill</a></li><li><a href="/boston?bbox=-71.0786,42.3655,-71.0535,42.3842" data-bbox="-71.0786,42.3655,-71.0535,42.3842">Charlestown</a></li><li><a href="/boston?bbox=-71.1205,42.2536,-71.0513,42.3620" data-bbox="-71.1205,42.2536,-71.0513,42.3620">Chinatown</a></li><li><a href="/boston?bbox=-71.0679,42.3523,-71.0515,42.3625" data-bbox="-71.0679,42.3523,-71.0515,42.3625">Downtown</a></li><li><a href="/boston?bbox=-71.0418,42.3648,-71.0004,42.3887" data-bbox="-71.0418,42.3648,-71.0004,42.3887">East Boston</a></li><li><a href="/boston?bbox=-71.1060,42.3402,-71.0866,42.3500" data-bbox="-71.1060,42.3402,-71.0866,42.3500">Fenway/Kenmore</a></li><li><a href="/boston?bbox=-71.1433,42.2431,-71.0943,42.2675" data-bbox="-71.1433,42.2431,-71.0943,42.2675">Hyde Park</a></li><li><a href="/boston?bbox=-71.1256,42.2864,-71.0978,42.3252" data-bbox="-71.1256,42.2864,-71.0978,42.3252">Jamaica Plain</a></li><li><a href="/boston?bbox=-71.1102,42.3261,-71.0806,42.3462" data-bbox="-71.1102,42.3261,-71.0806,42.3462">Mission Hill</a></li><li><a href="/boston?bbox=-71.0845,42.2940,-71.0513,42.3281" data-bbox="-71.0845,42.2940,-71.0513,42.3281">North Dorchester</a></li><li><a href="/boston?bbox=-71.0578,42.3620,-71.0512,42.3682" data-bbox="-71.0578,42.3620,-71.0512,42.3682">North End</a></li><li><a href="/boston?bbox=-71.1158,42.2770,-71.0752,42.3363" data-bbox="-71.1158,42.2770,-71.0752,42.3363">Roxbury</a></li><li><a href="/boston?bbox=-71.0568,42.3293,-71.0260,42.3496" data-bbox="-71.0568,42.3293,-71.0260,42.3496">South Boston</a></li><li><a href="/boston?bbox=-71.0973,42.2703,-71.0489,42.3003" data-bbox="-71.0973,42.2703,-71.0489,42.3003">South Dorchester</a></li><li><a href="/boston?bbox=-71.0820,42.3306,-71.0626,42.3467" data-bbox="-71.0820,42.3306,-71.0626,42.3467">South End</a></li><li><a href="/boston?bbox=-71.0686,42.3613,-71.0589,42.3676" data-bbox="-71.0686,42.3613,-71.0589,42.3676">West End</a></li><li><a href="/boston?bbox=-71.1538,42.2694,-71.1287,42.3492" data-bbox="-71.1538,42.2694,-71.1287,42.3492">West Roxbury</a></li></ul></nav>
   <p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston's open data</a>. The posted sign always wins.</p>
 </div>
 
@@ -3205,6 +3206,11 @@ function showWelcome(){
   });
   if(!EMBED&&!onboarded())showWelcome();
 })();
+document.querySelector('.whoods')?.addEventListener('click',e=>{
+  const a=e.target.closest('a[data-bbox]'); if(!a)return;
+  e.preventDefault(); markOnboarded(); userPicked();
+  const [w,s,ea,n]=a.dataset.bbox.split(',').map(Number); map.fitBounds([[s,w],[n,ea]],{padding:[18,18]});
+});
 
 /* iOS install hint: close on × or backdrop tap; auto-show once for un-installed iOS Safari. */
 document.getElementById('iosClose').onclick=hideIosHint;
