@@ -186,6 +186,32 @@ try {
   check(rows.length === 2 && rows.some((t) => /Marlborough St/.test(t) && /Next sweep/.test(t)) && rows.some((t) => /Kansas St/.test(t) && /In San Francisco/.test(t) && /Open the San Francisco map/.test(t)),
     `the alerts panel shows the Boston curb's next sweep and sends the SF one to its map (${rows.join(' | ')})`);
 
+  // desktop: a line on the opening view (the overview) shows the curb tooltip on hover, and a paid parking dot opens
+  // its popup (not the block under it)
+  const d = await b.newPage();
+  await d.setViewport({ width: 1440, height: 900 });
+  watch(d);
+  await d.evaluateOnNewDocument(() => { try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbFirstSheet', '1'); } catch (_) {} });
+  await d.goto(SITE + '/boston', { waitUntil: 'load' });
+  await d.waitForFunction(() => typeof OVR !== 'undefined' && OVR && OVR.length > 5000 && ovMode, { timeout: 30000, polling: 250 }).catch(() => {});
+  const ovAt = await d.evaluate(() => { const o = OVR.find((x) => map.getBounds().pad(-0.2).contains(x.a) && map.getBounds().pad(-0.2).contains(x.z));
+    const q = map.latLngToContainerPoint([(o.a[0] + o.z[0]) / 2, (o.a[1] + o.z[1]) / 2]), r = document.getElementById('map').getBoundingClientRect(); return { x: r.left + q.x, y: r.top + q.y }; });
+  await d.mouse.move(ovAt.x - 20, ovAt.y - 20); await d.mouse.move(ovAt.x, ovAt.y, { steps: 6 });
+  await d.waitForFunction(() => document.querySelector('.leaflet-tooltip.curbtip'), { timeout: 5000, polling: 100 }).catch(() => {});
+  const hover = await d.evaluate(() => document.querySelector('.leaflet-tooltip.curbtip')?.innerText.replace(/\s+/g, ' ').trim() || '');
+  check(/sweeps/i.test(hover), `hovering a line on the opening view shows its curb tooltip (${hover.slice(0, 70) || 'none'})`);
+  await d.evaluate(() => map.setView([42.3497, -71.0760], 17, { animate: false }));
+  await new Promise((r) => setTimeout(r, 2500));
+  await d.evaluate(() => document.getElementById('meterToggle').click());
+  await new Promise((r) => setTimeout(r, 2500));
+  const dotAt = await d.evaluate(() => { const r = document.getElementById('map').getBoundingClientRect(), l = meterLayer.getLayers().find((x) => map.getBounds().pad(-0.15).contains(x.getLatLng()));
+    if (!l) return null; const q = map.latLngToContainerPoint(l.getLatLng()); return { x: r.left + q.x, y: r.top + q.y }; });
+  if (dotAt) await d.mouse.click(dotAt.x, dotAt.y);
+  await new Promise((r) => setTimeout(r, 1000));
+  const pop = await d.evaluate(() => document.querySelector('.leaflet-popup-content')?.innerText.replace(/\s+/g, ' ').trim() || '');
+  check(/paid parking/i.test(pop) && !(await d.evaluate(() => document.getElementById('sheet').classList.contains('open'))),
+    `a click on a paid parking dot opens its popup, not the block (${pop.slice(0, 70) || 'none'})`);
+
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));
   check(!bad.length, 'no failed or SF requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));
 } finally { await b.close(); }

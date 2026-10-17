@@ -1369,7 +1369,7 @@ async function drawMeters(){
   const c=await bosRedraw(meterLayer,'Paid parking data'); if(!c)return;
   const z=map.getZoom(), mr=z>=18?4:z>=17?3.5:z>=16?3:2.5;
   bosIn(c.paid,map.getBounds()).forEach(p=>{ const m=BOS.midpoint(p.g);
-    L.circleMarker([m[1],m[0]],{renderer:meterRenderer,radius:mr,color:'#17150F',weight:1,fillColor:getCSS('--gray'),fillOpacity:.85})
+    L.circleMarker([m[1],m[0]],{radius:mr,color:'#17150F',weight:1,fillColor:getCSS('--gray'),fillOpacity:.85})
       .bindPopup(bosPopup('paid',p),{className:'loadpop',maxWidth:240}).addTo(meterLayer);
   });
 }
@@ -1444,7 +1444,7 @@ async function drawLimits(){
   const c=await bosRedraw(limitLayer,'Time limits'); if(!c)return;
   const z=map.getZoom(), mr=z>=18?4.5:z>=17?4:3.5;
   bosIn(c.limit,map.getBounds()).forEach(p=>{ const m=BOS.midpoint(p.g);
-    L.circleMarker([m[1],m[0]],{renderer:meterRenderer,radius:mr,color:'#17150F',weight:1.5,fillColor:'#FFFDF6',fillOpacity:1})
+    L.circleMarker([m[1],m[0]],{radius:mr,color:'#17150F',weight:1.5,fillColor:'#FFFDF6',fillOpacity:1})
       .bindPopup(bosPopup('limit',p),{className:'loadpop',maxWidth:240}).addTo(limitLayer);
   });
 }
@@ -2823,6 +2823,28 @@ function nearestSeg(lat,lng,cnnHint){
   return best&&{group:best.group,side:best.side,d:Math.sqrt(bd)};
 }
 map.on('click',e=>{ userPicked(); placeYou(e.latlng.lat,e.latlng.lng,ovMode);});
+const ovSide=o=>{ const by={}; let side=null; (o.rules||[]).forEach(r=>{(by[sideKeyOf(r)]=by[sideKeyOf(r)]||[]).push(r);});
+  for(const k in by){ const {best,bestRow}=sideNext(by[k]); if(best&&(!side||+best.start<+side.ns.start))side={key:k,blockside:by[k][0].blockside,rows:by[k],row:bestRow,ns:best,mid:o.a}; }
+  return side; };
+if(CAN_HOVER){
+  let ovTip=null, ovOn=null, ovT=0;
+  const hideOvTip=()=>{ if(ovTip){map.removeLayer(ovTip);ovTip=null;ovOn=null;} };
+  map.on('mousemove',e=>{
+    if(!ovMode||!OVR){hideOvTip();return;}
+    const t=Date.now(); if(t-ovT<40)return; ovT=t;
+    const p=e.containerPoint, b=map.getBounds().pad(0.05); let best=null, bd=64;   // within 8 px
+    for(const o of OVR){ if(!b.contains(o.a)&&!b.contains(o.z))continue;
+      const a=map.latLngToContainerPoint(o.a), z=map.latLngToContainerPoint(o.z), dx=z.x-a.x, dy=z.y-a.y, l2=dx*dx+dy*dy;
+      const u=l2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2)):0, d=(p.x-a.x-u*dx)**2+(p.y-a.y-u*dy)**2;
+      if(d<bd){bd=d;best=o;} }
+    const side=best&&ovSide(best); if(!side){hideOvTip();return;}
+    if(!ovTip)ovTip=L.tooltip({direction:'top',offset:[0,-12],opacity:1,className:'curbtip'}).setLatLng(e.latlng).addTo(map);
+    ovTip.setLatLng(e.latlng);
+    if(ovOn!==best){ ovOn=best; const r0=best.rules[0]; ovTip.setContent(previewHtml({cnn:r0.cnn,corridor:r0.corridor,limits:r0.limits},side));
+      const el=ovTip.getElement(); if(el){el.classList.remove('now','soon','ok');el.classList.add(verdictClass(side.ns));} }
+  });
+  map.on('mouseout movestart zoomstart',hideOvTip);
+}
 
 /* ---------- day filter + today's date ---------- */
 let dayChips=[];
