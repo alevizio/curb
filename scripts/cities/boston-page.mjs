@@ -61,6 +61,27 @@ const edits = [
     '<span class="prev"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#2F6FB5"></b></span><span class="tl">Loading &amp; accessible</span>'],
   ['meter tile', '<span class="tl">Meters</span>', '<span class="tl">Paid parking</span>'],
   ['no truck routes', '<button class="ltile" id="routeToggle" aria-pressed="false">', '<button class="ltile" id="routeToggle" aria-pressed="false" style="display:none">'],
+  // three more Curb Lab layers fill the grid to 3 × 2 (SF's truck routes tile stays, hidden: its handler is SF code)
+  ['Boston tiles: time limits, snow emergency, no stopping', '<span class="tl">Truck routes</span></button>', `<span class="tl">Truck routes</span></button>
+      <button class="ltile" id="limitToggle" aria-pressed="false"><span class="prev"><b class="ldot"></b></span><span class="tl">Time limits</span></button>
+      <button class="ltile" id="snowToggle" aria-pressed="false"><span class="prev"><i class="band snow"></i></span><span class="tl">Snow emergency</span></button>
+      <button class="ltile" id="stopToggle" aria-pressed="false"><span class="prev"><svg width="30" height="12" viewBox="0 0 28 12" aria-hidden="true"><line x1="1" y1="6" x2="27" y2="6" stroke="#A4277C" stroke-width="3.2" stroke-dasharray="6 3"/></svg></span><span class="tl">No stopping</span></button>`],
+  ['Boston layer and posted rule styles', '  .chip.rpp .rppgo{', `  .ltile .prev b.ldot{background:#FFFDF6}
+  .lst i.ldot{width:9px;height:9px;border-radius:50%;background:#FFFDF6;border:1.5px solid var(--ink);margin:0 5px}
+  .ltile .band.snow{background:#4FA9C4}
+  .crules{display:grid;gap:5px;margin-top:10px}
+  .crule{display:flex;align-items:baseline;gap:8px;font-size:12.5px;line-height:1.35;color:var(--ink)}
+  .crule i{flex:none;width:16px;height:6px;border-radius:4px;border:1px solid rgba(23,21,15,.35);transform:translateY(-1px)}
+  .crule b{font-weight:800}
+  .crsrc{font-size:11px;color:var(--ink-soft);margin-top:2px}
+  .chip.rpp .rppgo{`],
+  ['Boston layer state', 'let routeOn=false;\n', `let routeOn=false;
+// Boston's other Curb Lab layers: free parking with a time limit, snow emergency curbs, no stopping and no parking
+const limitLayer=L.layerGroup().addTo(map), snowLayer=L.layerGroup().addTo(map), stopLayer=L.layerGroup().addTo(map);
+let limitOn=false, snowOn=false, stopOn=false;
+`],
+  ['the overview clears them too', 'segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();',
+    'segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();limitLayer.clearLayers();snowLayer.clearLayers();stopLayer.clearLayers();'],
   ['no permit areas', '<div class="lp-sec">Permit areas</div>\n    <div class="arearow">', '<div class="lp-sec" style="display:none">Permit areas</div>\n    <div class="arearow" style="display:none">'],
   ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/,
     '<p>Every swept curb in Boston, colored by its <b>next street sweep</b>. Tap where you parked for the rules. <b>A preview</b>, built on the City\'s open data.</p>'],
@@ -78,7 +99,7 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
   ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
     '<p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston\'s open data</a>. The posted sign always wins.</p>'],
   // ---- scripts: Boston's time core and data --------------------------------------------------------
-  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=5"></script>'],
+  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=6"></script>'],
   ['retry it like the time core', "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');}",
     "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');\nif(window.nextSweep&&!window.BOS)again('script[src^=\"/lib/city-boston.js\"]');}"],
   ['fail without it', 'if(!window.L||!window.nextSweep){', 'if(!window.L||!window.nextSweep||!window.BOS){'],
@@ -116,6 +137,9 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
   if(rppOn) loadRpp(null, my); else {rppLayer.clearLayers();rppCache=[];}
   if(loadOn) drawLoadZones(); else loadLayer.clearLayers();
   if(meterOn) drawMeters(); else meterLayer.clearLayers();
+  if(limitOn) drawLimits(); else limitLayer.clearLayers();
+  if(snowOn) drawSnow(); else snowLayer.clearLayers();
+  if(stopOn) drawStops(); else stopLayer.clearLayers();
 }
 let bosRanges=false;
 `],
@@ -136,109 +160,179 @@ let BCURBS=null;
 async function bosCurbs(){
   if(BCURBS)return BCURBS;
   const c=await BOS.curbs();
-  for(const k of ['paid','permit','accessible','loading'])c[k].forEach(z=>{
+  for(const k of ['paid','permit','accessible','loading','limit','snow','nostop'])c[k].forEach(z=>{
     let w=180,s=90,e=-180,n=-90; z.g.forEach(([lo,la])=>{if(lo<w)w=lo;if(lo>e)e=lo;if(la<s)s=la;if(la>n)n=la;});
     z.bb=[w,s,e,n]; z.ll=z.g.map(([lo,la])=>[la,lo]);
   });
   return BCURBS=c;
 }
 function bosIn(list,b){const w=b.getWest(),s=b.getSouth(),e=b.getEast(),n=b.getNorth();return list.filter(z=>z.bb[2]>=w&&z.bb[0]<=e&&z.bb[3]>=s&&z.bb[1]<=n);}
-// the zone of a layer nearest to a curb side's midpoint, within m meters (zones sit on their own side of the street)
-function bosNear(list,mid,m){
-  let best=null,bd=m*m; const pad=0.0005;
-  list.forEach(z=>{ if(mid[1]<z.bb[0]-pad||mid[1]>z.bb[2]+pad||mid[0]<z.bb[1]-pad||mid[0]>z.bb[3]+pad)return;
-    const d=distSqToLineMeters(mid[0],mid[1],z.ll); if(d<bd){bd=d;best=z;} });
-  return best;
-}
 const fmtMax=m=>m?(m%60?m+' min':(m/60)+' hr')+' max':'';
+// One posted rule in words, {color, head, sub, when}: the map's popups and the sheet's list say it the same way.
+const BOS_LOAD={commercial:['#E0A21E','Commercial loading'],passenger:['#FFFDF6','Passenger pick-up and drop-off'],rideshare:['#FFFDF6','Rideshare pick-up and drop-off'],
+  valet:['#FFFDF6','Valet'],bus:['#E2731E','Bus loading'],short:['#1F9E5A','Short-term parking']};
+const BOS_EXCEPT={bus:'buses',bicycle:'bicycles',commercial_vehicle:'commercial vehicles',truck:'trucks',car:'cars',motorcycle:'motorcycles',electric:'electric vehicles',rideshare:'rideshare'};
+function bosRule(k,f){
+  const max=fmtMax(f.max);
+  if(f.when==='Every day, all day')f={...f,when:'any time'};
+  if(k==='paid')return {color:getCSS('--gray'),head:'Paid parking',sub:[f.rate?'$'+(+f.rate).toFixed(2)+' an hour':'Metered',max,f.zone?'ParkBoston zone '+f.zone:''].filter(Boolean).join(' · '),when:f.when};
+  if(k==='permit')return {color:getCSS('--meter'),head:'Resident permit',sub:f.only?'residents only':f.max?'others '+max.replace(' max',''):'',when:f.when};
+  if(k==='accessible')return {color:'#2F6FB5',head:'Accessible parking',sub:'disability placard or plate',when:f.when};
+  if(k==='loading'){const [color,head]=BOS_LOAD[f.who]||BOS_LOAD.passenger; return {color,head,sub:max,when:f.when};}
+  if(k==='limit')return {color:'#FFFDF6',head:'Time limit',sub:max,when:f.when};
+  if(k==='snow')return {color:'#4FA9C4',head:'Snow emergency',sub:'no parking when the City declares one',when:''};
+  return {color:'#A4277C',head:f.stop?'No stopping':'No parking',when:f.when||'any time',
+    sub:[f.why||'',f.except?'except '+f.except.split(',').map(u=>BOS_EXCEPT[u]||u).join(' and '):''].filter(Boolean).join(' · ')};
+}
+const bosPopup=(k,f)=>{const t=bosRule(k,f);return \`<div class="lp-h">\${t.head}</div>\${t.sub?\`<div class="lp-m">\${t.sub}</div>\`:''}<div class="lp-s">\${t.when||''}</div><div class="lp-s" style="margin-top:5px">City Curb Lab data (beta), read from sign photos. The posted sign is the source of truth.</div>\`;};
 async function loadRpp(poly, my){
   try{
     const c=await bosCurbs(); if(my!==fetchTok)return;
     rppLayer.clearLayers(); rppCache=[];
     bosIn(c.permit,map.getBounds().pad(0.15)).forEach(z=>{
       L.polyline(z.ll,{color:getCSS('--meter'),weight:rppWeight(),opacity:.14,lineCap:'round',interactive:false}).addTo(rppLayer);
-      rppCache.push({latlngs:z.ll, area:'', hrlimit:z.max?Math.round(z.max/60):null, when:z.when});
+      rppCache.push({latlngs:z.ll, area:'', hrlimit:z.max?Math.round(z.max/60):null, only:z.only, when:z.when});
     });
   }catch(e){}
 }
 `],
   ['permit hover line', "${rpp?`<div class=\"tip-rpp\">Permit Zone ${rpp.area}${rpp.hrlimit?' · '+rpp.hrlimit+'hr limit':''} · holders exempt</div>`:''}",
-    "${rpp?`<div class=\"tip-rpp\">Resident permit${rpp.hrlimit?' · others '+rpp.hrlimit+' hr':''}</div>`:''}"],
+    "${rpp?`<div class=\"tip-rpp\">Resident permit${rpp.only?' · residents only':rpp.hrlimit?' · others '+rpp.hrlimit+' hr':''}</div>`:''}"],
   ['permit toggle words', "if(rppOn)toast('Permit zones (RPP) shaded blue. Tap a block for area & hours.');",
     "if(rppOn)toast('Resident permit curbs shaded blue, from the City\\'s Curb Lab (beta, read from sign photos). Tap a block for the hours.');"],
   ['Boston permit chip', /function renderRpp\(rp\)\{[\s\S]*?\n\}\nasync function loadRppBlock\(latlngs,mid,cnn\)\{[\s\S]*?\n\}\n(?=async function loadMeterBlock)/, `function renderRpp(rp){
   const slot=document.getElementById('rppSlot'); if(!slot)return;
   if(!rp){slot.style.display='none';return;}
+  const t=bosRule('permit',rp);
   slot.style.display='inline-flex';
-  slot.innerHTML=\`<span class="adisc" style="background:var(--meter)">P</span><span class="rpptxt"><b>Resident permit</b>\${rp.hrlimit?' · others '+rp.hrlimit+' hr':''}\${rp.when?' · '+rp.when:''}</span>\`;
+  slot.innerHTML=\`<span class="adisc" style="background:var(--meter)">P</span><span class="rpptxt"><b>Resident permit</b>\${t.sub?' · '+t.sub:''}\${t.when?' · '+t.when:''}</span>\`;
   slot.title="Resident permit parking, from the City's Curb Lab (beta)";
   slot.removeAttribute('role'); slot.removeAttribute('tabindex'); slot.onclick=null; slot.onkeydown=null;
 }
-async function loadRppBlock(latlngs,mid,cnn){
-  const key=cnn+'|'+(mid?mid.join(','):'');
-  if(key in rppBlockCache){renderRpp(rppBlockCache[key]);return;}
-  try{
-    const z=mid&&bosNear((await bosCurbs()).permit,mid,9);
-    const rp=z?{area:'',hrlimit:z.max?Math.round(z.max/60):null,when:z.when}:null;
-    rppBlockCache[key]=rp; renderRpp(rp);
-  }catch(e){renderRpp(null);}
+`],
+  // the sheet reads the rules posted on its block side from data/boston/rules.json (matched to sides by
+  // scripts/cities/boston.mjs): the meter badge, the permit chip, then one line per other rule
+  ['Boston posted rules', /async function loadMeterBlock\(latlngs,cnn\)\{[\s\S]*?\n\}\n(?=function refreshToday)/, `async function loadCurbRules(cnn,side){
+  const meter=document.getElementById('headMeter'), list=document.getElementById('curbRules');
+  renderRpp(null); if(meter)meter.style.display='none'; if(list){list.hidden=true;list.innerHTML='';}
+  const lr=side&&side.rows&&side.rows[0]&&side.rows[0].cnnrightleft; if(!cnn||!lr)return;
+  let rules; try{ rules=BOS.sideRules(await BOS.rules(),cnn,lr); }catch(e){ return; }
+  if(list&&document.getElementById('curbRules')!==list)return;  // another sheet opened meanwhile
+  const paid=rules.find(([k])=>k==='paid'), permit=rules.find(([k])=>k==='permit');
+  if(paid&&meter){
+    const f=paid[1];
+    meter.innerHTML=METER_ICON+(f.rate?'$'+(+f.rate).toFixed(2).replace(/\\.00$/,'')+'/hr':'Metered');
+    meter.title=bosRule('paid',f).sub+(f.when?' · '+f.when:'')+". From the City's Curb Lab (beta).";
+    meter.style.display='inline-flex';
+  }
+  if(permit)renderRpp(permit[1]);
+  const rest=rules.filter(([k])=>k!=='paid'&&k!=='permit');
+  if(!list||!rest.length)return;
+  list.innerHTML=rest.map(([k,f])=>{const t=bosRule(k,f);
+    return \`<div class="crule"><i style="background:\${t.color}"></i><span><b>\${t.head}</b>\${t.sub?' · '+t.sub:''}\${t.when?' · '+t.when:''}</span></div>\`;}).join('')
+    +'<div class="crsrc">Posted signs, read from photos by the City\\'s Curb Lab (beta). The sign on the street wins.</div>';
+  list.hidden=false;
 }
 `],
-  ['Boston meter badge', /async function loadMeterBlock\(latlngs,cnn\)\{[\s\S]*?\n\}\n(?=function refreshToday)/, `async function loadMeterBlock(latlngs,cnn){
-  const slot=document.getElementById('headMeter'); if(!slot)return;
-  slot.style.display='none';
-  if(!latlngs||!latlngs.length)return;
-  try{
-    const z=bosNear((await bosCurbs()).paid,latlngs[Math.floor(latlngs.length/2)],9);
-    if(!z)return;
-    slot.innerHTML=METER_ICON+(z.rate?'$'+(+z.rate).toFixed(2).replace(/\\.00$/,'')+'/hr':'Metered');
-    slot.title='Paid parking'+(z.max?' · '+fmtMax(z.max):'')+(z.when?' · '+z.when:'')+". From the City's Curb Lab (beta).";
-    slot.style.display='inline-flex';
-  }catch(e){}
-}
-`],
+  ['the sheet has a posted rules list', '<div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>',
+    '<div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>\n    <div class="crules" id="curbRules" hidden></div>'],
+  ['the sheet reads them', '  loadMeterBlock(active.latlngs, group.cnn);\n  loadRppBlock(active.latlngs, active.mid, group.cnn);\n', '  loadCurbRules(group.cnn, active);\n'],
   ['Boston paid parking dots', /async function drawMeters\(\)\{[\s\S]*?\n\}\n/, `async function drawMeters(){
-  let c; try{ c=await bosCurbs(); }catch(e){ toast('Paid parking data unavailable right now.'); return; }
-  meterLayer.clearLayers();
-  if(ovMode||map.getZoom()<MIN_ZOOM_DATA)return;
+  const c=await bosRedraw(meterLayer,'Paid parking data'); if(!c)return;
   const z=map.getZoom(), mr=z>=18?4:z>=17?3.5:z>=16?3:2.5;
-  bosIn(c.paid,map.getBounds()).forEach(p=>{
-    L.circleMarker(p.ll[Math.floor(p.ll.length/2)],{renderer:meterRenderer,radius:mr,color:'#17150F',weight:1,fillColor:getCSS('--gray'),fillOpacity:.85})
-      .bindPopup(\`<div class="lp-h">Paid parking</div><div class="lp-m">\${p.rate?'$'+(+p.rate).toFixed(2)+' an hour':'Metered'}\${p.max?' · '+fmtMax(p.max):''}</div><div class="lp-s">\${p.when||''}</div><div class="lp-s">City Curb Lab data (beta). The posted sign is the source of truth.</div>\`,{className:'loadpop',maxWidth:240})
-      .addTo(meterLayer);
+  bosIn(c.paid,map.getBounds()).forEach(p=>{ const m=BOS.midpoint(p.g);
+    L.circleMarker([m[1],m[0]],{renderer:meterRenderer,radius:mr,color:'#17150F',weight:1,fillColor:getCSS('--gray'),fillOpacity:.85})
+      .bindPopup(bosPopup('paid',p),{className:'loadpop',maxWidth:240}).addTo(meterLayer);
   });
 }
 `],
-  ['Boston loading and accessible curbs', /async function drawLoadZones\(\)\{[\s\S]*?\n\}\n/, `async function drawLoadZones(){
-  let c; try{ c=await bosCurbs(); }catch(e){ toast('Loading zones unavailable right now.'); return; }
-  loadLayer.clearLayers();
-  if(ovMode||map.getZoom()<MIN_ZOOM_DATA)return;
-  const b=map.getBounds(), ww=map.getZoom()>=17?4:3;
-  const draw=(z,fill,head,sub)=>{
-    L.polyline(z.ll,{color:'#17150F',weight:ww+3,opacity:.85,lineCap:'round',interactive:false}).addTo(loadLayer);
-    L.polyline(z.ll,{color:fill,weight:ww,opacity:1,lineCap:'round'})
-      .bindPopup(\`<div class="lp-h">\${head}</div><div class="lp-m">\${sub}</div><div class="lp-s">\${z.when||''}</div><div class="lp-s" style="margin-top:5px">City Curb Lab data (beta). The posted sign is the source of truth.</div>\`,{className:'loadpop',maxWidth:250})
-      .addTo(loadLayer);
-  };
-  bosIn(c.loading,b).forEach(z=>draw(z,z.who==='commercial'?'#E0A21E':'#FFFDF6','Loading zone',z.who==='commercial'?'Commercial vehicles':'Passenger pick-up and drop-off'));
-  bosIn(c.accessible,b).forEach(z=>draw(z,'#2F6FB5','Accessible parking','Disability placard or plate'));
+  ['Boston loading, accessible and the other curb layers', /async function drawLoadZones\(\)\{[\s\S]*?\n\}\n/, `async function drawLoadZones(){
+  const c=await bosRedraw(loadLayer,'Loading zones'); if(!c)return;
+  const b=map.getBounds();
+  bosIn(c.loading,b).forEach(z=>bosLine(loadLayer,z,'loading'));
+  bosIn(c.accessible,b).forEach(z=>bosLine(loadLayer,z,'accessible'));
+}
+// a curb zone as a line in its rule's color, its rule as the popup: color curbs cased in ink; no stopping lighter, uncased,
+// dashed when only at the posted hours
+function bosLine(layer,z,k,dash){
+  const ww=map.getZoom()>=17?4:3, t=bosRule(k,z), light=k==='nostop';
+  if(!light)L.polyline(z.ll,{color:'#17150F',weight:ww+3,opacity:.85,lineCap:'round',interactive:false}).addTo(layer);
+  L.polyline(z.ll,{color:t.color,weight:light?ww-1:ww,opacity:light?.9:1,lineCap:'round',dashArray:dash}).bindPopup(bosPopup(k,z),{className:'loadpop',maxWidth:250}).addTo(layer);
+}
+// a layer redraw's data: the curbs file, with the layer cleared; null when it failed (said in a toast) or zoomed out
+async function bosRedraw(layer,what){
+  let c; try{ c=await bosCurbs(); }catch(e){ toast(what+' unavailable right now.'); return null; }
+  layer.clearLayers();
+  return ovMode||map.getZoom()<MIN_ZOOM_DATA?null:c;
+}
+async function drawLimits(){
+  const c=await bosRedraw(limitLayer,'Time limits'); if(!c)return;
+  const z=map.getZoom(), mr=z>=18?4.5:z>=17?4:3.5;
+  bosIn(c.limit,map.getBounds()).forEach(p=>{ const m=BOS.midpoint(p.g);
+    L.circleMarker([m[1],m[0]],{renderer:meterRenderer,radius:mr,color:'#17150F',weight:1.5,fillColor:'#FFFDF6',fillOpacity:1})
+      .bindPopup(bosPopup('limit',p),{className:'loadpop',maxWidth:240}).addTo(limitLayer);
+  });
+}
+async function drawSnow(){
+  const c=await bosRedraw(snowLayer,'Snow emergency curbs'); if(!c)return;
+  bosIn(c.snow,map.getBounds().pad(0.15)).forEach(z=>
+    L.polyline(z.ll,{color:'#4FA9C4',weight:rppWeight(),opacity:.3,lineCap:'round',interactive:false}).addTo(snowLayer));
+}
+async function drawStops(){
+  const c=await bosRedraw(stopLayer,'No stopping curbs'); if(!c)return;
+  bosIn(c.nostop,map.getBounds()).forEach(z=>bosLine(stopLayer,z,'nostop',z.when?'6 5':null));
 }
 `],
   ['loading toggle words', "toast('Loading zones: dots = metered curbs (🟡 commercial · ⚪ passenger · 🔴 truck · 🟢 short-term · 🟠 bus). White curb lines = passenger loading, school zones included. Tap anything for hours.');",
-    "toast('Loading and accessible curbs from the City\\'s Curb Lab (beta): yellow = commercial loading, white = passenger, blue = accessible. Tap one for hours.');"],
+    "toast('Loading and accessible curbs from the City\\'s Curb Lab (beta): yellow commercial, white passenger and valet, orange bus, green short-term parking, blue accessible. Tap one for hours.');"],
   ['meter toggle words', "toast('Metered curbs shown as grey dots. Check the meter for hours & rates.');",
-    "toast('Paid parking shown as grey dots, from the City\\'s Curb Lab (beta). Tap one for the rate and hours.');"],
+    "toast('Paid parking shown as grey dots, from the City\\'s Curb Lab (beta). Tap one for the rate, the hours and the ParkBoston zone.');"],
   ['Boston legend rows', /function renderOvlLegend\(\)\{[\s\S]*?\n\}\n(?=\(function initLayersPanel)/, `function renderOvlLegend(){
   const el=document.getElementById('ovlLeg');
+  const row=(id,what,sw,label)=>\`<div class="lov"><button class="lst on" data-ovl="\${id}" data-tip="Tap to hide \${what}">\${sw}\${label}</button></div>\`;
   let h='';
-  if(rppOn)h+=\`<div class="lov"><button class="lst on" data-ovl="rpp" data-tip="Tap to hide resident permit curbs"><i style="background:var(--meter);height:8px"></i>Resident permit</button></div>\`;
-  if(loadOn)h+=\`<div class="lov"><button class="lst on" data-ovl="load" data-tip="Tap to hide loading and accessible curbs"><i class="dots"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#2F6FB5"></b></i>Loading &amp; accessible</button></div>\`;
-  if(meterOn)h+=\`<div class="lov"><button class="lst on" data-ovl="meter" data-tip="Tap to hide paid parking"><i class="mdot"></i>Paid parking</button></div>\`;
+  if(rppOn)h+=row('rpp','resident permit curbs','<i style="background:var(--meter);height:8px"></i>','Resident permit');
+  if(loadOn)h+=row('load','loading and accessible curbs','<i class="dots"><b style="background:#E0A21E"></b><b style="background:#FFFDF6"></b><b style="background:#E2731E"></b><b style="background:#1F9E5A"></b><b style="background:#2F6FB5"></b></i>','Loading &amp; accessible');
+  if(meterOn)h+=row('meter','paid parking','<i class="mdot"></i>','Paid parking');
+  if(limitOn)h+=row('limit','time limits','<i class="ldot"></i>','Time limits');
+  if(snowOn)h+=row('snow','snow emergency curbs','<i style="background:#4FA9C4;height:8px"></i>','Snow emergency');
+  if(stopOn)h+=row('stop','no stopping curbs','<i style="background:#A4277C"></i>','No stopping');
   el.innerHTML=h;
   el.querySelectorAll('[data-ovl]').forEach(b=>{b.onclick=()=>
-    document.getElementById({rpp:'rppToggle',load:'loadToggle',meter:'meterToggle'}[b.dataset.ovl]).click();});
+    document.getElementById({rpp:'rppToggle',load:'loadToggle',meter:'meterToggle',limit:'limitToggle',snow:'snowToggle',stop:'stopToggle'}[b.dataset.ovl]).click();});
 }
 `],
+  ['Boston layer badges', /function refreshLayerBadges\(\)\{[\s\S]*?\n\}\n/, `function refreshLayerBadges(){
+  let h='';
+  if(rppOn)h+='<i class="lbdot" style="background:var(--meter)"></i>';
+  if(loadOn)h+='<i class="lbdot" style="background:var(--amber)"></i>';
+  if(meterOn)h+='<i class="lbdot" style="background:var(--gray)"></i>';
+  if(limitOn)h+='<i class="lbdot" style="background:#FFFDF6"></i>';
+  if(snowOn)h+='<i class="lbdot" style="background:#4FA9C4"></i>';
+  if(stopOn)h+='<i class="lbdot" style="background:#A4277C"></i>';
+  if(!statusOn.green||!statusOn.amber||!statusOn.red)
+    h+='<i class="lbdot" style="background:transparent;border-style:dashed"></i>';
+  document.getElementById('layerBadges').innerHTML=h;
+}
+`],
+  // the three new tiles; then, as every layer draws at street zoom, switching one on from the zoomed out overview
+  // (where the preview opens) zooms in to show it
+  ['Boston layer toggles', "document.getElementById('routeToggle').onclick=function(){", `function bosToggle(id,set,layer,draw,msg){
+  document.getElementById(id).onclick=function(){
+    const on=!this.classList.contains('on'); this.classList.toggle('on',on); this.setAttribute('aria-pressed',on);
+    set(on);
+    refreshLayerBadges(); renderOvlLegend();
+    if(on){ this.classList.add('busy'); draw().finally(()=>this.classList.remove('busy')); toast(msg); } else layer.clearLayers();
+  };
+}
+bosToggle('limitToggle',v=>limitOn=v,limitLayer,drawLimits,'Free parking with a time limit shown as white dots, from the City\\'s Curb Lab (beta). Tap one for the limit and hours.');
+bosToggle('snowToggle',v=>snowOn=v,snowLayer,drawSnow,'Snow emergency curbs shaded teal: no parking there once the City declares a snow emergency. From the City\\'s Curb Lab (beta).');
+bosToggle('stopToggle',v=>stopOn=v,stopLayer,drawStops,'No stopping and no parking curbs in magenta: solid any time, dashed at the posted hours. Tap one for details. From the City\\'s Curb Lab (beta).');
+['rppToggle','loadToggle','meterToggle','limitToggle','snowToggle','stopToggle'].forEach(id=>{
+  const b=document.getElementById(id), f=b.onclick;
+  b.onclick=function(e){ const was=this.classList.contains('on'); f.call(this,e); if(!was&&ovMode)map.setView(map.getCenter(),MIN_ZOOM_DATA+1); };
+});
+document.getElementById('routeToggle').onclick=function(){`],
   ['no SF permit-area list', "buildAreaDrop(document.getElementById('areaDropPanel'),'Browse an area…');", ''],
   ['no SF permit-area fetch', /  \(async\(\)=>\{\n    try\{\n      const r=await fetch\(RPP\+`\?\$select=rpparea1,count\(\*\) as n[\s\S]*?\}\)\(\);\n/, ''],
   // ---- the block sheet ----------------------------------------------------------------------------

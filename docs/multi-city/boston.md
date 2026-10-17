@@ -12,7 +12,7 @@ How it is built:
 
 | Piece | File | What it does |
 |---|---|---|
-| Data | `scripts/cities/boston.mjs` → `data/boston/` | Fetches the three sources below, attaches each schedule row to street blocks, writes `segments.json` (swept blocks and rules), `curbs.json` (Curb Lab layers) and `report.json` (match and coverage numbers). Inputs are cached in `private/cache/boston/`; `--refresh` fetches again |
+| Data | `scripts/cities/boston.mjs` → `data/boston/` | Fetches the three sources below, attaches each schedule row to street blocks, writes `segments.json` (swept blocks and rules), `curbs.json` (Curb Lab layers, sorted by `scripts/cities/boston-curbs.mjs`), `rules.json` (each block side's posted rules, for the sheet: 30 KB compressed) and `report.json` (match and coverage numbers). Inputs are cached in `private/cache/boston/`; `--refresh` fetches again |
 | Time and data helpers | `lib/city-boston.js` | Boston's `makeTimeCore` (Eastern time, City holidays, seasons), attached under the names the page already calls; expands `segments.json` into the row shape the page reads from DataSF in SF |
 | Page | `scripts/cities/boston-page.mjs` → `boston.html` | Generates the Boston page from `index.html` with a list of checked edits, so SF fixes reach Boston when it is rebuilt. Never edit `boston.html` by hand |
 | Basemap | `CITY=boston bash scripts/build-basemap.sh` → `basemap/boston/` | Parchment tiles z8 to 16 citywide, overzoomed past 16, plus z17 for the center of town (`CORE_BOUNDS`, a second tile layer): 4,700 files, 111 MB. Add one zoom with `CURB_BASEMAP_CITY=boston CURB_BASEMAP_ZOOMS=17 node scripts/render-basemap.mjs` |
@@ -36,8 +36,12 @@ What the numbers say (`data/boston/report.json`, 2026-10-16):
 - **Where both exist (2,129 block sides), 1,771 agree on day and hour** and 1,541 on the weeks too. On 227
   the sign's weeks are those of the other side of the street: odd and even swapped in the schedule, in the
   sign reading, or in where the curb zone was drawn.
-- Curb Lab layers on the map: 2,578 paid zones (with rates), 1,510 resident permit, 834 loading, 56
-  accessible.
+- Curb Lab layers on the map (six tiles): 4,834 resident permit (residents only, or everyone else's time limit),
+  1,568 accessible, 2,660 loading (commercial, passenger, bus, rideshare, valet, short term), 2,578 paid (rate and
+  ParkBoston zone), 1,294 free time limits, 4,244 snow emergency, 15,061 no stopping or no parking (bus stops, rush
+  hour, school and game days). Many signs are coded as exceptions ("no parking except resident permit"), which the
+  first build missed: it had 1,510 permit and 56 accessible. Hydrant stubs are left out. A tapped curb lists the
+  rules matched to its side (5,071 of 14,303 swept sides have some).
 
 Not in the preview: sweep alerts (the push sender runs on SF time and saved spots have no city yet, phase 1
 item 4 in the README), ticket times (no citation data), block and neighborhood pages, the iPhone app. The

@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16T19:37:17.758Z",
+ "generated": "2026-10-17T07:07:25.920Z",
  "schedule": {
   "rows": 3758,
   "matched": 3599,
@@ -14,9 +14,12 @@
   "unreadableOnly": 14309,
   "noPolicy": 11426,
   "paid": 2578,
-  "permit": 1510,
-  "accessible": 56,
-  "loading": 834,
+  "permit": 4834,
+  "accessible": 1568,
+  "loading": 2660,
+  "limit": 1294,
+  "snow": 4244,
+  "nostop": 15061,
   "sweepingSignSides": 2416,
   "signAgreesWithSchedule": 1771,
   "signDiffers": 358,

@@ -95,6 +95,29 @@ try {
   check(lay.meters > 0, `paid parking dots drawn (${lay.meters})`);
   if (SHOTS) await p.screenshot({ path: SHOTS + '/5-layers.png' });
 
+  // the other Curb Lab layers: time limits, snow emergency, no stopping, loading and accessible, all in the legend
+  await p.evaluate(() => map.setView([42.3500, -71.0790], 16, { animate: false }));
+  await new Promise((r) => setTimeout(r, 1500));
+  await p.evaluate(() => ['limitToggle', 'snowToggle', 'stopToggle', 'loadToggle'].forEach((id) => document.getElementById(id).click()));
+  await new Promise((r) => setTimeout(r, 3000));
+  const more = await p.evaluate(() => ({ limit: limitLayer.getLayers().length, snow: snowLayer.getLayers().length, stop: stopLayer.getLayers().length,
+    load: loadLayer.getLayers().length, permit: rppLayer.getLayers().length, legend: document.querySelectorAll('#ovlLeg [data-ovl]').length }));
+  check(Object.values(more).every((n) => n > 0) && more.legend === 6, `all six curb layers draw, with a legend row each (${JSON.stringify(more)})`);
+  if (SHOTS) await p.screenshot({ path: SHOTS + '/6-all-layers.png' });
+
+  // a side with posted rules lists them in its sheet (data/boston/rules.json)
+  const posted = await p.evaluate(async () => {
+    const R = await BOS.rules(), has = (k, layer) => R.s[k].some((i) => R.t[i][0] === layer);
+    const key = Object.keys(R.s).find((k) => has(k, 'nostop') && has(k, 'snow')), [cnn, lr] = key.split('|');
+    const b = (await BOS.load()).find((x) => String(x.c) === cnn);
+    document.getElementById('sheetClose').click(); openCurb(cnn, b.d.find((d) => d[0] === lr)[1]);
+    return key;
+  });
+  await p.waitForFunction(() => { const l = document.getElementById('curbRules'); return l && !l.hidden; }, { timeout: 15000, polling: 250 }).catch(() => {});
+  const lines = await p.evaluate(() => [...document.querySelectorAll('#curbRules .crule')].map((x) => x.innerText.replace(/\s+/g, ' ').trim()));
+  check(lines.some((t) => /^No (stopping|parking)/.test(t)) && lines.some((t) => /^Snow emergency/.test(t)), `a side's sheet lists its posted rules (${posted}: ${lines.join(' | ')})`);
+  if (SHOTS) await p.screenshot({ path: SHOTS + '/7-posted-rules.png' });
+
   // location already allowed on curb.guide (from the SF map, say) by someone in San Francisco: Boston stays on Boston
   const cnn = await p.evaluate(async () => BOS.findAddress(await BOS.load(), 120, 'Marlborough St').block.c);
   await b.defaultBrowserContext().overridePermissions(SITE, ['geolocation']);

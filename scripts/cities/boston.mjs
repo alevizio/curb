@@ -19,6 +19,7 @@
 
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { clean, DOW3, isSweepSign, classifyPolicy } from './boston-curbs.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const OUT = ROOT + 'data/boston/';
@@ -281,30 +282,8 @@ out.sort((x, y) => x.c.localeCompare(y.c, 'en', { numeric: true }));
 // ---------- 4. the Curb Lab layers and its sweeping signs -----------------------------------------
 
 const pol = new Map(cdsPolicies.map((p) => [p.curb_policy_id, p]));
-const clean = (a) => (Array.isArray(a) ? a.map((v) => String(v).replace(/^"|"$/g, '')) : []);
-const DOW3 = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-const SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const maxMinutes = (r) => (r.max_stay ? (r.max_stay_unit === 'hour' ? r.max_stay * 60 : r.max_stay) : null);
-function clock(t) {
-  const m = /^(\d{1,2}):(\d{2})/.exec(String(t || '')); if (!m) return '';
-  const h = +m[1] % 24, mi = +m[2];
-  return (h % 12 || 12) + (mi ? ':' + String(mi).padStart(2, '0') : '') + (h < 12 ? ' AM' : ' PM');
-}
-function daysText(list) {
-  const d = clean(list).filter((x) => DOW3.includes(x)).map((x) => DOW3.indexOf(x)).sort();
-  if (!d.length || d.length === 7) return 'Every day';
-  const run = d.every((v, i) => !i || v === d[i - 1] + 1);
-  return run && d.length > 2 ? `${SHORT[d[0]]} to ${SHORT[d[d.length - 1]]}` : d.map((v) => SHORT[v]).join(', ');
-}
-const spanText = (spans) => (spans || []).filter(Boolean).map((t) => {
-  const st = t.time_of_day_start, en = t.time_of_day_end;
-  const hours = st && en && st !== en ? `${clock(st)} to ${clock(en)}` : 'all day';
-  return `${daysText(t.days_of_week)}, ${hours}`;
-}).join('; ');
-const isSweepSign = (p) => (p.rules || []).some((r) => r.activity === 'no parking' || r.activity === 'no stopping')
-  && (p.time_spans || []).some((t) => t && (t.weeks_of_month || t.months));
 
-const layers = { paid: [], permit: [], accessible: [], loading: [] };
+const layers = { paid: [], permit: [], accessible: [], loading: [], limit: [], snow: [], nostop: [] };
 const signSweep = [];       // {c: zone line, spans} of every sweeping sign, for the check below
 let unreadable = 0, noPolicy = 0;
 for (const z of cdsZones) {
@@ -313,19 +292,7 @@ for (const z of cdsZones) {
   if (ps.every((p) => (p.rules || []).every((r) => r.activity === 'unusable image'))) { unreadable++; continue; }
   if (!z.geometry || z.geometry.type !== 'LineString') continue;
   const g = z.geometry.coordinates.map(([lo, la]) => [r5(lo), r5(la)]);
-  for (const p of ps) for (const r of p.rules || []) {
-    const users = clean(r.user_classes), what = spanText(p.time_spans);
-    if (r.activity === 'parking' && Array.isArray(p.rates) && p.rates.length) {
-      const rt = p.rates[0], perHour = rt.rate_unit === 'hour' ? rt.rate / 100 : null;
-      layers.paid.push({ g, rate: perHour, max: maxMinutes(r), when: what });
-    } else if (r.activity === 'parking' && users.includes('resident_permit')) {
-      layers.permit.push({ g, max: maxMinutes(r), when: what });
-    } else if (r.activity === 'parking' && users.includes('accessible')) {
-      layers.accessible.push({ g, when: what });
-    } else if (r.activity === 'loading') {
-      layers.loading.push({ g, who: users.includes('commercial_vehicle') || users.includes('truck') ? 'commercial' : 'passenger', when: what });
-    }
-  }
+  for (const p of ps) for (const [k, fields] of classifyPolicy(p)) layers[k].push({ g, ...fields });
   const sw = ps.filter(isSweepSign);
   if (sw.length) signSweep.push({ c: z.geometry.coordinates, spans: sw.flatMap((p) => p.time_spans || []).filter(Boolean) });
 }
@@ -379,6 +346,17 @@ for (const z of signSweep) {
 }
 const schedSides = out.reduce((n, b) => n + b.d.length, 0);
 
+// Every curb zone → the swept block side it sits on, so a tapped curb lists its posted rules without loading the
+// zones' geometry (curbs.json, for the map layers). rules.json: t = each distinct [layer, fields] once, s = side → t indexes.
+const ruleAt = new Map(), ruleList = [], sideRules = {};
+for (const [k, list] of Object.entries(layers)) for (const { g, ...fields } of list) {
+  const hit = nearestSide(g); if (!hit || !blocks.get(hit.s.id)?.sides.has(hit.side)) continue;
+  const id = JSON.stringify([k, fields]);
+  if (!ruleAt.has(id)) { ruleAt.set(id, ruleList.length); ruleList.push([k, fields]); }
+  const at = (sideRules[hit.s.id + '|' + hit.side] ||= []);
+  if (!at.includes(ruleAt.get(id))) at.push(ruleAt.get(id));
+}
+
 // ---------- 5. write -------------------------------------------------------------------------------
 
 const today = new Date().toISOString().slice(0, 10);
@@ -396,20 +374,27 @@ fs.writeFileSync(OUT + 'segments.json', JSON.stringify({
   b: out }));
 fs.writeFileSync(OUT + 'curbs.json', JSON.stringify({
   _meta: { generated: new Date().toISOString(), source: sources[2], zones: cdsZones.length, unreadable, noPolicy,
-    note: 'Curb zones read from sign photos by the Curb Lab (beta). paid = parking with a rate, permit = resident permit parking, accessible, loading.' },
+    note: 'Curb zones read from sign photos by the Curb Lab (beta), sorted by scripts/cities/boston-curbs.mjs. paid = parking with a rate (zone = ParkBoston zone), '
+      + 'permit = resident permit (only = residents only, max = everyone else\'s limit), accessible, loading (who = commercial|passenger|bus|rideshare|valet|short), '
+      + 'limit = free parking with a time limit over 30 min, snow = no parking in a declared snow emergency, nostop = no stopping (stop) or no parking, anytime when "when" is empty.' },
   ...layers }));
+fs.writeFileSync(OUT + 'rules.json', JSON.stringify({
+  _meta: { generated: new Date().toISOString(), source: sources[2], sides: Object.keys(sideRules).length,
+    format: 't = [[layer, fields]] (fields as in curbs.json, without g); s = {"<block c>|<side L|R>": [indexes into t]}' },
+  t: ruleList, s: sideRules }));
 const rep = {
   generated: new Date().toISOString(),
   schedule: { rows: report.rows, matched: report.matched, exactBothEnds: report.exactBothEnds, sideUnknown: report.sideUnknown,
     unmatched: report.unmatched.length, blocks: out.length, blockSides: schedSides },
   curbLab: { zones: cdsZones.length, unreadableOnly: unreadable, noPolicy, paid: layers.paid.length, permit: layers.permit.length,
-    accessible: layers.accessible.length, loading: layers.loading.length, sweepingSignSides: check.signSides,
+    accessible: layers.accessible.length, loading: layers.loading.length, limit: layers.limit.length, snow: layers.snow.length,
+    nostop: layers.nostop.length, sweepingSignSides: check.signSides,
     signAgreesWithSchedule: check.agree, signDiffers: check.differ, signWhereScheduleHasNone: check.signOnly,
     scheduleSidesWithASign: check.agree + check.differ, signWeeksAgree: check.weeksAgree, signWeeksOnlyOtherSide: check.weeksOtherSide },
   unmatchedRows: report.unmatched,
 };
 fs.writeFileSync(OUT + 'report.json', JSON.stringify(rep, null, 1));
 log(`schedule: ${report.matched}/${report.rows} rows matched (${report.exactBothEnds} at both cross streets), ${out.length} blocks, ${schedSides} block sides, side unknown on ${report.sideUnknown} rows`);
-log(`curb lab: ${cdsZones.length} zones (${unreadable} unreadable only, ${noPolicy} without policy); paid ${layers.paid.length}, permit ${layers.permit.length}, accessible ${layers.accessible.length}, loading ${layers.loading.length}`);
+log(`curb lab: ${cdsZones.length} zones (${unreadable} unreadable only, ${noPolicy} without policy); ${Object.entries(layers).map(([k, v]) => `${k} ${v.length}`).join(', ')}`);
 log(`sweeping signs on ${check.signSides} block sides: ${check.agree} agree with the schedule, ${check.differ} differ, ${check.signOnly} where the schedule has none; weeks agree on ${check.weeksAgree}, match only the other side on ${check.weeksOtherSide}`);
-for (const f of ['segments.json', 'curbs.json', 'report.json']) log(`wrote data/boston/${f} (${Math.round(fs.statSync(OUT + f).size / 1024)} KB)`);
+for (const f of ['segments.json', 'curbs.json', 'rules.json', 'report.json']) log(`wrote data/boston/${f} (${Math.round(fs.statSync(OUT + f).size / 1024)} KB)`);
