@@ -45,14 +45,35 @@ const edits = [
   ['card description (X)', '<meta name="twitter:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts.">',
     '<meta name="twitter:description" content="Boston street parking rules block by block: sweeping schedules, paid and permit curbs.">'],
   ['card url', '<meta property="og:url" content="https://curb.guide/">', '<meta property="og:url" content="https://curb.guide/boston">'],
+  // Boston's own card (og-boston.png, npm run og:boston from og/template-boston.html), not SF's
+  ['card image', '<meta property="og:image" content="https://curb.guide/og.png?v=3">', '<meta property="og:image" content="https://curb.guide/og-boston.png?v=1">'],
+  ['card image words', '<meta property="og:image:alt" content="CURB: SF street parking map with green, amber and red curb lines showing sweeping status">',
+    '<meta property="og:image:alt" content="CURB Boston: a Boston street cleaning sign and the words Know where to park in Boston">'],
+  ['card image (X)', '<meta name="twitter:image" content="https://curb.guide/og.png?v=3">', '<meta name="twitter:image" content="https://curb.guide/og-boston.png?v=1">'],
+  ['card image words (X)', '<meta name="twitter:image:alt" content="CURB: SF street parking map with colored curb lines">',
+    '<meta name="twitter:image:alt" content="CURB Boston: Know where to park in Boston">'],
+  ['info button words', 'data-tip="Alerts, guide, tickets &amp; about"', 'data-tip="Alerts, guide, holidays &amp; about"'],
   // ---- body: words and menus ---------------------------------------------------------------------
   ['h1', /<h1 class="srh">[^<]*<\/h1>/, '<h1 class="srh">Boston street cleaning map: sweeping schedules by block (a CURB preview)</h1>'],
   ['map label', '<main id="map" aria-label="San Francisco parking map">', '<main id="map" aria-label="Boston parking map">'],
   ['SF pages → Boston data sources', /<a class="im-item" href="\/n\/" role="menuitem">[\s\S]*?<a class="im-item" href="\/tickets" role="menuitem">[\s\S]*?<\/a>/,
-    `<a class="im-item" href="https://github.com/alevizio/curb/blob/main/docs/multi-city/boston.md" target="_blank" rel="noopener" role="menuitem">
-          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14"/><path d="M4 19h16M8 7h8M8 11h8M8 15h5"/></svg></span>
-          <span class="im-tx"><b>Boston data</b><small>Where this preview's rules come from</small></span>
+    // SF's three pages, Boston's way: the neighborhood list (in the welcome card), the holidays and the map fixes
+    // (boston/about.html, boston/fixes.html: scripts/cities/boston-pages.mjs)
+    `<button class="im-item" id="imHoods" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+          <span class="im-tx"><b>Neighborhoods</b><small>Street cleaning by Boston neighborhood</small></span>
+        </button>
+        <a class="im-item" href="/boston/about#holidays" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg></span>
+          <span class="im-tx"><b>Sweeping holidays</b><small>Days Boston skips daytime sweeping</small></span>
+        </a>
+        <a class="im-item" href="/boston/fixes" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.7 6.3 3 3M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/></svg></span>
+          <span class="im-tx"><b>Map fixes</b><small>What we corrected in the City's data</small></span>
         </a>`],
+  ['About: Boston\'s page', '<a class="im-item" href="/about" role="menuitem">', '<a class="im-item" href="/boston/about" role="menuitem">'],
+  ['About: Boston\'s words', '<b>About CURB</b><small>What it does &amp; data sources</small>', '<b>About CURB</b><small>Boston\'s rules &amp; data sources</small>'],
+  ['welcome: Boston\'s how it works', '<a class="wabout" href="/about">How it works →</a>', '<a class="wabout" href="/boston/about">How it works →</a>'],
   ['menu footer link', '<a href="https://datasf.org" target="_blank" rel="noopener">SF open data</a>', '<a href="https://data.boston.gov" target="_blank" rel="noopener">Boston open data</a>'],
   ['menu footer', 'Built on SF open data (DataSF). The posted sign is always the final word.', 'Built on Boston open data and the City\'s Curb Lab. The posted sign is always the final word.'],
   ['permit tile', '<span class="tl">Permit zones</span>', '<span class="tl">Resident permit</span>'],
@@ -89,6 +110,8 @@ let limitOn=false, snowOn=false, stopOn=false;
   // SF's neighborhood links open /n/ pages; Boston's frame the map in place (the href is the fallback)
   ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())showWelcome();\n})();\n", `  if(!EMBED&&!onboarded())showWelcome();
 })();
+// the menu's Neighborhoods opens the welcome card at its neighborhood list
+document.getElementById('imHoods').onclick=()=>{ closeInfoMenu(); showWelcome(); document.querySelector('.whoods')?.scrollIntoView({block:'nearest'}); };
 document.querySelector('.whoods')?.addEventListener('click',e=>{
   const a=e.target.closest('a[data-bbox]'); if(!a)return;
   e.preventDefault(); markOnboarded(); userPicked();
@@ -98,7 +121,7 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
   ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
     '<p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston\'s open data</a>. The posted sign always wins.</p>'],
   // ---- scripts: Boston's time core and data --------------------------------------------------------
-  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=6"></script>'],
+  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=7"></script>'],
   ['retry it like the time core', "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');}",
     "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');\nif(window.nextSweep&&!window.BOS)again('script[src^=\"/lib/city-boston.js\"]');}"],
   ['fail without it', 'if(!window.L||!window.nextSweep){', 'if(!window.L||!window.nextSweep||!window.BOS){'],
@@ -147,6 +170,8 @@ let bosRanges=false;
   OVR=BOS.overview(await BOS.load());
   return OVR;
 }`],
+  // each block's real line, not a straight one between its ends (a curving Boston block strays off the street)
+  ['overview draws real lines', 'L.polyline([b.a,b.z],{renderer:overviewRenderer,', 'L.polyline(b.g,{renderer:overviewRenderer,'],
   ['house numbers from the file', /async function fillRange\(cnn\)\{[\s\S]*?\n\}\n/, `async function fillRange(cnn){
   const el=document.getElementById('rangeSlot');
   if(el&&cnn&&rangeCache[cnn])el.textContent=fmtRange(cnn);
@@ -386,11 +411,13 @@ if(CAN_HOVER){
   map.on('mousemove',e=>{
     if(!ovMode||!OVR){hideOvTip();return;}
     const t=Date.now(); if(t-ovT<40)return; ovT=t;
-    const p=e.containerPoint, b=map.getBounds().pad(0.05); let best=null, bd=64;   // within 8 px
-    for(const o of OVR){ if(!b.contains(o.a)&&!b.contains(o.z))continue;
-      const a=map.latLngToContainerPoint(o.a), z=map.latLngToContainerPoint(o.z), dx=z.x-a.x, dy=z.y-a.y, l2=dx*dx+dy*dy;
-      const u=l2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2)):0, d=(p.x-a.x-u*dx)**2+(p.y-a.y-u*dy)**2;
-      if(d<bd){bd=d;best=o;} }
+    // the nearest line within 8 px: only blocks whose box reaches the cursor, then each piece of their line
+    const p=e.containerPoint, sw=map.containerPointToLatLng([p.x-8,p.y+8]), ne=map.containerPointToLatLng([p.x+8,p.y-8]);
+    let best=null, bd=64;
+    for(const o of OVR){ const q=o.bb; if(q[2]<sw.lng||q[0]>ne.lng||q[3]<sw.lat||q[1]>ne.lat)continue;
+      for(let i=1;i<o.g.length;i++){ const a=map.latLngToContainerPoint(o.g[i-1]), z=map.latLngToContainerPoint(o.g[i]), dx=z.x-a.x, dy=z.y-a.y, l2=dx*dx+dy*dy;
+        const u=l2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2)):0, d=(p.x-a.x-u*dx)**2+(p.y-a.y-u*dy)**2;
+        if(d<bd){bd=d;best=o;} } }
     const side=best&&ovSide(best); if(!side){hideOvTip();return;}
     if(!ovTip)ovTip=L.tooltip({direction:'top',offset:[0,-12],opacity:1,className:'curbtip'}).setLatLng(e.latlng).addTo(map);
     ovTip.setLatLng(e.latlng);

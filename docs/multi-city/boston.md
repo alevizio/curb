@@ -12,11 +12,14 @@ How it is built:
 
 | Piece | File | What it does |
 |---|---|---|
-| Data | `scripts/cities/boston.mjs` → `data/boston/` | Fetches the three sources below, attaches each schedule row to street blocks, writes `segments.json` (swept blocks and rules), `curbs.json` (Curb Lab layers, sorted by `scripts/cities/boston-curbs.mjs`), `rules.json` (each block side's posted rules, for the sheet: 30 KB compressed) and `report.json` (match and coverage numbers). Inputs are cached in `private/cache/boston/`; `--refresh` fetches again |
+| Data | `scripts/cities/boston.mjs` → `data/boston/` | Fetches the three sources below, attaches each schedule row to street blocks, writes `segments.json` (swept blocks and rules), `curbs.json` (Curb Lab layers, sorted by `scripts/cities/boston-curbs.mjs`), `rules.json` (each block side's posted rules, for the sheet: 30 KB compressed), `report.json` (match and coverage numbers) and `fixes.json` (every fix below). Inputs are cached in `private/cache/boston/`; `--refresh` fetches again |
+| Fixes | `scripts/cities/boston-fixes.mjs` (+ `boston-basemap-streets.mjs`) | The rules for the map fixes (below): wrong street names, cross street capitals, and each block line checked against the basemap's streets, which `boston-basemap-streets.mjs` reads out of `basemap/boston.pmtiles` once (cached as `private/cache/boston/basemap-streets.json`; needs the basemap toolchain) |
+| Pages | `scripts/cities/boston-pages.mjs` → `boston/about.html`, `boston/fixes.html` | `/boston/about` (how it works, Boston's rules, its sweeping holidays, the data sources) and `/boston/fixes` (every fix, each with a small map), in the About page's styles; `site.js` gives pages under `/boston` Boston's nav and footer. Run after the data build |
+| Share card | `og/template-boston.html` → `og-boston.png` | `npm run og:boston`. The Boston page and its pages use it, not SF's `og.png` |
 | Time and data helpers | `lib/city-boston.js` | Boston's `makeTimeCore` (Eastern time, City holidays, seasons), attached under the names the page already calls; expands `segments.json` into the row shape the page reads from DataSF in SF |
 | Page | `scripts/cities/boston-page.mjs` → `boston.html` | Generates the Boston page from `index.html` with a list of checked edits, so SF fixes reach Boston when it is rebuilt. Never edit `boston.html` by hand |
 | Basemap | `CITY=boston bash scripts/build-basemap.sh` → `basemap/boston/` | Parchment tiles z8 to 16 citywide, overzoomed past 16, plus z17 for the center of town (`CORE_BOUNDS`, a second tile layer): 4,700 files, 111 MB. Add one zoom with `CURB_BASEMAP_CITY=boston CURB_BASEMAP_ZOOMS=17 node scripts/render-basemap.mjs` |
-| Check | `scripts/check-boston.mjs` | Headless walk of the page: overview, street zoom, sheet, calendar time zone, address search, layers, no SF requests |
+| Check | `scripts/check-boston.mjs` | Headless walk of the page: overview (real lines), the fixes, menu and card, street zoom, sheet, calendar time zone, address search, layers, alerts, the two pages, no SF requests |
 
 Sources: the Street Sweeping Schedules (Public Works), the SAM street segments, and the Curb Lab's Curbs
 API. The API's own address (`cds-curb-api.boston.gov`) has had an expired certificate since 2026-07-28, so the
@@ -49,7 +52,35 @@ in the copy and no SF ticket statistics, a 165 day watch age to bridge the Decem
 open `/boston?b=`). On iPhone they need the page added to the Home Screen (`manifest-boston.json`, which opens
 /boston); the CURB app is San Francisco only. One device's saved alerts hold both cities; each page's panel
 resolves its own and sends the other city's curbs to their map. Not in the preview: ticket times (no citation
-data), block and neighborhood pages, the iPhone app. The calendar reminder works, in Eastern time.
+data), block pages, the iPhone app. The calendar reminder works, in Eastern time.
+
+Like San Francisco's (2026-10-17): the menu has Neighborhoods (the welcome card's list), Sweeping holidays and Map
+fixes, and How it works and About open `/boston/about` instead of SF's `/about`; shared links show `og-boston.png`.
+
+### Map fixes (2026-10-17)
+
+Every block line was checked against the streets the basemap is drawn from (OpenStreetMap), and every street name
+against SAM. The fixes are made by the data build and written down one by one in `data/boston/fixes.json`, shown at
+`/boston/fixes`:
+
+- **The zoomed out view drew each block as a straight line between its ends** (SF's `data/overview.json` shape),
+  fine for SF's short straight blocks but not Boston's: 407 lines strayed 10 m or more from their street, 41 over
+  50 m, up to 168 m (Dunstable St, a loop). `BOS.overview` now carries each block's whole line and the page draws
+  it, so the opening view follows the streets. The hover tooltip measures against the same line.
+- **Block lines and the basemap agree**: 7,140 of 7,410 lines (96%) stay within 4 m of a street for cars. 13 blocks
+  are left off the map: 10 on pedestrian streets (Downtown Crossing: Winter St, Washington St, Franklin St and
+  Bromfield St; Faneuil Hall Marketplace: three "Commercial St" pieces), swept but with no curb to park at (where the
+  Curb Lab read signs, they say no stopping), and 3 where the basemap has no street under most of the line (a Doone
+  Ave stub past the end of the street, Eliot Pl, Haymarket Sq). A block the Curb Lab posts parking rules on would
+  stay; none did. Rules in `boston-fixes.mjs`: on a street within 7 m (10 m for a major road, 15 m for one with the
+  block's own name), sampled every 3 m; pedestrian when 60% of the line is on a pedestrian way, off the map when
+  under 50% is on a street.
+- **10 street names are wrong in the schedule** and show as SAM has them (22 blocks): four typos (Thonrdike,
+  Merill, Patson, Wenoah), Yawkey Way (renamed Jersey St in 2018), REV R A BURKE ST, Martin Luther King Blvd
+  (no Jr), Harborview St, La Grange St and Newcroft Cr. The schedule's other spellings stay (it writes "East Eighth
+  St" where SAM has "E Eighth St").
+- **Cross street names** come from SAM in capitals; 23 needed care when written for people: an apostrophe s is not a
+  capital S (Allen's Aly), and Mc names keep their second capital (McLellan St).
 
 Questions for the City, from building it:
 
@@ -65,6 +96,8 @@ Questions for the City, from building it:
 8. A machine-readable holiday and season calendar, and any same day cancellation signal.
 9. Street cleaning citations (date, time, location) for "when tickets usually land".
 10. Are the Curb Lab's meter rates current, and are the cleaned neighborhoods public?
+11. The schedule spells 10 street names differently from SAM (typos, Yawkey Way for Jersey St) and lists 10
+    pedestrian street blocks (Downtown Crossing, Faneuil Hall Marketplace): fix them at the source? (`/boston/fixes`)
 
 ## Short version
 

@@ -1,13 +1,13 @@
 {
- "generated": "2026-10-17T07:07:25.920Z",
+ "generated": "2026-10-17T17:34:50.803Z",
  "schedule": {
   "rows": 3758,
   "matched": 3599,
   "exactBothEnds": 3092,
   "sideUnknown": 72,
   "unmatched": 159,
-  "blocks": 7410,
-  "blockSides": 14303
+  "blocks": 7397,
+  "blockSides": 14277
  },
  "curbLab": {
   "zones": 54185,
@@ -27,6 +27,23 @@
   "scheduleSidesWithASign": 2129,
   "signWeeksAgree": 1541,
   "signWeeksOnlyOtherSide": 227
+ },
+ "fixes": {
+  "blocks": 7410,
+  "shown": 7397,
+  "nearStreets": 7140,
+  "hidden": 13,
+  "pedestrian": 10,
+  "offMap": 3,
+  "kept": 0,
+  "renamed": 10,
+  "renamedBlocks": 22,
+  "crossNames": 23,
+  "shortcuts": {
+   "over10m": 407,
+   "over50m": 41,
+   "max": 167.6
+  }
  },
  "unmatchedRows": [
   {

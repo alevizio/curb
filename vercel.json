@@ -65,6 +65,14 @@
       "destination": "/boston.html"
     },
     {
+      "source": "/boston/about",
+      "destination": "/boston/about.html"
+    },
+    {
+      "source": "/boston/fixes",
+      "destination": "/boston/fixes.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },

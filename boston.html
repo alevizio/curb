@@ -14,16 +14,16 @@
 <meta property="og:title" content="CURB: Know where to park in Boston">
 <meta property="og:description" content="Street parking rules block by block: sweeping schedules, paid and permit curbs. From Boston open data.">
 <meta property="og:url" content="https://curb.guide/boston">
-<meta property="og:image" content="https://curb.guide/og.png?v=3">
+<meta property="og:image" content="https://curb.guide/og-boston.png?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png">
-<meta property="og:image:alt" content="CURB: SF street parking map with green, amber and red curb lines showing sweeping status">
+<meta property="og:image:alt" content="CURB Boston: a Boston street cleaning sign and the words Know where to park in Boston">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="CURB: Know where to park in Boston">
 <meta name="twitter:description" content="Boston street parking rules block by block: sweeping schedules, paid and permit curbs.">
-<meta name="twitter:image" content="https://curb.guide/og.png?v=3">
-<meta name="twitter:image:alt" content="CURB: SF street parking map with colored curb lines">
+<meta name="twitter:image" content="https://curb.guide/og-boston.png?v=1">
+<meta name="twitter:image:alt" content="CURB Boston: Know where to park in Boston">
 <link rel="preconnect" href="https://tile.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
 <link rel="manifest" href="manifest-boston.json">
@@ -714,7 +714,7 @@
     <div class="sug" id="sug" hidden role="listbox" aria-label="Search suggestions"></div>
     </div>
     <div class="infowrap">
-      <button class="infobtn" id="infoBtn" aria-label="Sweep alerts, info and other pages" aria-haspopup="true" aria-expanded="false" data-tip="Alerts, guide, tickets &amp; about" data-tip-pos="b">
+      <button class="infobtn" id="infoBtn" aria-label="Sweep alerts, info and other pages" aria-haspopup="true" aria-expanded="false" data-tip="Alerts, guide, holidays &amp; about" data-tip-pos="b">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.3" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="7.8" r="1.35" fill="currentColor"/><path d="M12 11.1v5.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
       <div class="infomenu" id="infoMenu" hidden role="menu" aria-label="Info and pages">
@@ -730,13 +730,21 @@
           <span class="im-ic" aria-hidden="true" style="display:flex;gap:3px"><i class="d" style="background:var(--green)"></i><i class="d" style="background:var(--amber)"></i><i class="d" style="background:var(--red)"></i></span>
           <span class="im-tx"><b>How CURB works</b><small>Curb colors, sweeping &amp; alerts</small></span>
         </button>
-        <a class="im-item" href="https://github.com/alevizio/curb/blob/main/docs/multi-city/boston.md" target="_blank" rel="noopener" role="menuitem">
-          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14"/><path d="M4 19h16M8 7h8M8 11h8M8 15h5"/></svg></span>
-          <span class="im-tx"><b>Boston data</b><small>Where this preview's rules come from</small></span>
+        <button class="im-item" id="imHoods" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+          <span class="im-tx"><b>Neighborhoods</b><small>Street cleaning by Boston neighborhood</small></span>
+        </button>
+        <a class="im-item" href="/boston/about#holidays" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg></span>
+          <span class="im-tx"><b>Sweeping holidays</b><small>Days Boston skips daytime sweeping</small></span>
         </a>
-        <a class="im-item" href="/about" role="menuitem">
+        <a class="im-item" href="/boston/fixes" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.7 6.3 3 3M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/></svg></span>
+          <span class="im-tx"><b>Map fixes</b><small>What we corrected in the City's data</small></span>
+        </a>
+        <a class="im-item" href="/boston/about" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
-          <span class="im-tx"><b>About CURB</b><small>What it does &amp; data sources</small></span>
+          <span class="im-tx"><b>About CURB</b><small>Boston's rules &amp; data sources</small></span>
         </a>
         <div class="im-mini" role="group" aria-label="More actions">
           <button class="im-m" id="imShare" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg><span>Share</span></button>
@@ -817,8 +825,8 @@
     <span class="k"><i style="background:var(--red)"></i>move it now</span>
   </div>
   <button class="btn-go" id="welcomeGo">Show me the map</button>
-  <a class="wabout" href="/about">How it works →</a>
-  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/boston?bbox=-71.1681,42.3339,-71.0902,42.3559" data-bbox="-71.1681,42.3339,-71.0902,42.3559">Allston/Brighton</a></li><li><a href="/boston?bbox=-71.0916,42.3432,-71.0659,42.3550" data-bbox="-71.0916,42.3432,-71.0659,42.3550">Back Bay</a></li><li><a href="/boston?bbox=-71.0723,42.3557,-71.0615,42.3624" data-bbox="-71.0723,42.3557,-71.0615,42.3624">Beacon Hill</a></li><li><a href="/boston?bbox=-71.0786,42.3655,-71.0535,42.3842" data-bbox="-71.0786,42.3655,-71.0535,42.3842">Charlestown</a></li><li><a href="/boston?bbox=-71.1205,42.2536,-71.0513,42.3620" data-bbox="-71.1205,42.2536,-71.0513,42.3620">Chinatown</a></li><li><a href="/boston?bbox=-71.0679,42.3523,-71.0515,42.3625" data-bbox="-71.0679,42.3523,-71.0515,42.3625">Downtown</a></li><li><a href="/boston?bbox=-71.0418,42.3648,-71.0004,42.3887" data-bbox="-71.0418,42.3648,-71.0004,42.3887">East Boston</a></li><li><a href="/boston?bbox=-71.1060,42.3402,-71.0866,42.3500" data-bbox="-71.1060,42.3402,-71.0866,42.3500">Fenway/Kenmore</a></li><li><a href="/boston?bbox=-71.1433,42.2431,-71.0943,42.2675" data-bbox="-71.1433,42.2431,-71.0943,42.2675">Hyde Park</a></li><li><a href="/boston?bbox=-71.1256,42.2864,-71.0978,42.3252" data-bbox="-71.1256,42.2864,-71.0978,42.3252">Jamaica Plain</a></li><li><a href="/boston?bbox=-71.1102,42.3261,-71.0806,42.3462" data-bbox="-71.1102,42.3261,-71.0806,42.3462">Mission Hill</a></li><li><a href="/boston?bbox=-71.0845,42.2940,-71.0513,42.3281" data-bbox="-71.0845,42.2940,-71.0513,42.3281">North Dorchester</a></li><li><a href="/boston?bbox=-71.0578,42.3620,-71.0512,42.3682" data-bbox="-71.0578,42.3620,-71.0512,42.3682">North End</a></li><li><a href="/boston?bbox=-71.1158,42.2770,-71.0752,42.3363" data-bbox="-71.1158,42.2770,-71.0752,42.3363">Roxbury</a></li><li><a href="/boston?bbox=-71.0568,42.3293,-71.0260,42.3496" data-bbox="-71.0568,42.3293,-71.0260,42.3496">South Boston</a></li><li><a href="/boston?bbox=-71.0973,42.2703,-71.0489,42.3003" data-bbox="-71.0973,42.2703,-71.0489,42.3003">South Dorchester</a></li><li><a href="/boston?bbox=-71.0820,42.3306,-71.0626,42.3467" data-bbox="-71.0820,42.3306,-71.0626,42.3467">South End</a></li><li><a href="/boston?bbox=-71.0686,42.3613,-71.0589,42.3676" data-bbox="-71.0686,42.3613,-71.0589,42.3676">West End</a></li><li><a href="/boston?bbox=-71.1538,42.2694,-71.1287,42.3492" data-bbox="-71.1538,42.2694,-71.1287,42.3492">West Roxbury</a></li></ul></nav>
+  <a class="wabout" href="/boston/about">How it works →</a>
+  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/boston?bbox=-71.1681,42.3339,-71.0902,42.3559" data-bbox="-71.1681,42.3339,-71.0902,42.3559">Allston/Brighton</a></li><li><a href="/boston?bbox=-71.0916,42.3432,-71.0659,42.3550" data-bbox="-71.0916,42.3432,-71.0659,42.3550">Back Bay</a></li><li><a href="/boston?bbox=-71.0723,42.3557,-71.0615,42.3624" data-bbox="-71.0723,42.3557,-71.0615,42.3624">Beacon Hill</a></li><li><a href="/boston?bbox=-71.0786,42.3655,-71.0535,42.3842" data-bbox="-71.0786,42.3655,-71.0535,42.3842">Charlestown</a></li><li><a href="/boston?bbox=-71.1205,42.2536,-71.0513,42.3620" data-bbox="-71.1205,42.2536,-71.0513,42.3620">Chinatown</a></li><li><a href="/boston?bbox=-71.0679,42.3523,-71.0515,42.3623" data-bbox="-71.0679,42.3523,-71.0515,42.3623">Downtown</a></li><li><a href="/boston?bbox=-71.0418,42.3648,-71.0004,42.3887" data-bbox="-71.0418,42.3648,-71.0004,42.3887">East Boston</a></li><li><a href="/boston?bbox=-71.1060,42.3402,-71.0866,42.3500" data-bbox="-71.1060,42.3402,-71.0866,42.3500">Fenway/Kenmore</a></li><li><a href="/boston?bbox=-71.1433,42.2431,-71.0943,42.2675" data-bbox="-71.1433,42.2431,-71.0943,42.2675">Hyde Park</a></li><li><a href="/boston?bbox=-71.1256,42.2864,-71.0978,42.3252" data-bbox="-71.1256,42.2864,-71.0978,42.3252">Jamaica Plain</a></li><li><a href="/boston?bbox=-71.1102,42.3261,-71.0806,42.3462" data-bbox="-71.1102,42.3261,-71.0806,42.3462">Mission Hill</a></li><li><a href="/boston?bbox=-71.0845,42.2940,-71.0513,42.3281" data-bbox="-71.0845,42.2940,-71.0513,42.3281">North Dorchester</a></li><li><a href="/boston?bbox=-71.0578,42.3620,-71.0512,42.3682" data-bbox="-71.0578,42.3620,-71.0512,42.3682">North End</a></li><li><a href="/boston?bbox=-71.1158,42.2770,-71.0752,42.3363" data-bbox="-71.1158,42.2770,-71.0752,42.3363">Roxbury</a></li><li><a href="/boston?bbox=-71.0568,42.3293,-71.0260,42.3496" data-bbox="-71.0568,42.3293,-71.0260,42.3496">South Boston</a></li><li><a href="/boston?bbox=-71.0973,42.2703,-71.0489,42.3003" data-bbox="-71.0973,42.2703,-71.0489,42.3003">South Dorchester</a></li><li><a href="/boston?bbox=-71.0820,42.3306,-71.0626,42.3467" data-bbox="-71.0820,42.3306,-71.0626,42.3467">South End</a></li><li><a href="/boston?bbox=-71.0686,42.3613,-71.0589,42.3676" data-bbox="-71.0686,42.3613,-71.0589,42.3676">West End</a></li><li><a href="/boston?bbox=-71.1538,42.2694,-71.1287,42.3492" data-bbox="-71.1538,42.2694,-71.1287,42.3492">West Roxbury</a></li></ul></nav>
   <p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston's open data</a>. The posted sign always wins.</p>
 </div>
 
@@ -874,7 +882,7 @@
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=7"></script>
-<script src="/lib/city-boston.js?v=6"></script>
+<script src="/lib/city-boston.js?v=7"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -1236,7 +1244,7 @@ let ovrDrawTok=0, ovrLines=null;
 // blocks get opacity 0 (no add/remove churn), so the object set is allocated exactly once.
 function buildOverviewLines(){
   if(ovrLines)return;
-  ovrLines=OVR.map(b=>({b, ln:L.polyline([b.a,b.z],{renderer:overviewRenderer,weight:2,opacity:0,interactive:false})}));
+  ovrLines=OVR.map(b=>({b, ln:L.polyline(b.g,{renderer:overviewRenderer,weight:2,opacity:0,interactive:false})}));
   ovrLines.forEach(e=>e.ln.addTo(overviewLayer));
 }
 // Resolve a block's current style (color/weight) or null when it should be hidden this view.
@@ -2832,11 +2840,13 @@ if(CAN_HOVER){
   map.on('mousemove',e=>{
     if(!ovMode||!OVR){hideOvTip();return;}
     const t=Date.now(); if(t-ovT<40)return; ovT=t;
-    const p=e.containerPoint, b=map.getBounds().pad(0.05); let best=null, bd=64;   // within 8 px
-    for(const o of OVR){ if(!b.contains(o.a)&&!b.contains(o.z))continue;
-      const a=map.latLngToContainerPoint(o.a), z=map.latLngToContainerPoint(o.z), dx=z.x-a.x, dy=z.y-a.y, l2=dx*dx+dy*dy;
-      const u=l2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2)):0, d=(p.x-a.x-u*dx)**2+(p.y-a.y-u*dy)**2;
-      if(d<bd){bd=d;best=o;} }
+    // the nearest line within 8 px: only blocks whose box reaches the cursor, then each piece of their line
+    const p=e.containerPoint, sw=map.containerPointToLatLng([p.x-8,p.y+8]), ne=map.containerPointToLatLng([p.x+8,p.y-8]);
+    let best=null, bd=64;
+    for(const o of OVR){ const q=o.bb; if(q[2]<sw.lng||q[0]>ne.lng||q[3]<sw.lat||q[1]>ne.lat)continue;
+      for(let i=1;i<o.g.length;i++){ const a=map.latLngToContainerPoint(o.g[i-1]), z=map.latLngToContainerPoint(o.g[i]), dx=z.x-a.x, dy=z.y-a.y, l2=dx*dx+dy*dy;
+        const u=l2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2)):0, d=(p.x-a.x-u*dx)**2+(p.y-a.y-u*dy)**2;
+        if(d<bd){bd=d;best=o;} } }
     const side=best&&ovSide(best); if(!side){hideOvTip();return;}
     if(!ovTip)ovTip=L.tooltip({direction:'top',offset:[0,-12],opacity:1,className:'curbtip'}).setLatLng(e.latlng).addTo(map);
     ovTip.setLatLng(e.latlng);
@@ -2850,7 +2860,7 @@ if(CAN_HOVER){
 let dayChips=[];
 // Approx citywide blocks swept per weekday (distinct cnn, yhqp-riqs, 2026-06-13).
 // Refresh if the sweep dataset changes materially; kept rounded so drift doesn't matter.
-const DAY_BLOCKS=[872,1915,2301,2815,2629,2364,873];  // Sun..Sat, JS getDay order
+const DAY_BLOCKS=[860,1903,2289,2803,2616,2352,861];  // Sun..Sat, JS getDay order
 const FULLDAY=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 function dayHeadsUp(v){
   const n=DAY_BLOCKS[v]; if(n==null)return;
@@ -3328,6 +3338,8 @@ function showWelcome(){
   });
   if(!EMBED&&!onboarded())showWelcome();
 })();
+// the menu's Neighborhoods opens the welcome card at its neighborhood list
+document.getElementById('imHoods').onclick=()=>{ closeInfoMenu(); showWelcome(); document.querySelector('.whoods')?.scrollIntoView({block:'nearest'}); };
 document.querySelector('.whoods')?.addEventListener('click',e=>{
   const a=e.target.closest('a[data-bbox]'); if(!a)return;
   e.preventDefault(); markOnboarded(); userPicked();

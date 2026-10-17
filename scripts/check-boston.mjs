@@ -1,7 +1,8 @@
 // Headless check of the Boston preview (boston.html, built by scripts/cities/boston-page.mjs) on a phone screen:
-// the page loads with no errors, the citywide overview draws, street zoom draws curb sides from data/boston/,
-// a block opens its sheet with Boston's season line, an address search opens the right side of the street, and a
-// location outside Boston (allowed on curb.guide for the SF map) never flies the map off Boston.
+// the page loads with no errors, the citywide overview draws each block's real line, the data comes with its fixes
+// (data/boston/fixes.json), street zoom draws curb sides from data/boston/, a block opens its sheet with Boston's season
+// line, an address search opens the right side of the street, a location outside Boston (allowed on curb.guide for the
+// SF map) never flies the map off Boston, and the pages next to the map (/boston/about, /boston/fixes) load.
 // Views change with animate:false: Leaflet drops a setView issued during another zoom animation.
 // Usage: node scripts/check-boston.mjs [site] [--shots dir]   (default site http://localhost:3077, `npm run dev`)
 import { createRequire } from 'node:module';
@@ -53,6 +54,29 @@ try {
   await p.evaluate(() => map.setView(BOS.CENTER, 13, { animate: false }));
   await p.waitForFunction(() => typeof OVR !== 'undefined' && OVR && OVR.length > 5000 && map.hasLayer(overviewLayer), { timeout: 30000, polling: 250 }).catch(() => {});
   check(await p.evaluate(() => typeof OVR !== 'undefined' && !!OVR && OVR.length > 5000 && map.hasLayer(overviewLayer)), 'citywide overview drawn from data/boston/segments.json');
+  // ...with each block's real line, not a straight one between its ends (a curving block strayed up to ~170 m)
+  const curvy = await p.evaluate(() => { const e = ovrLines.find((x) => x.b.g.length > 10); return e ? e.ln.getLatLngs().length : 0; });
+  check(curvy > 10, `the opening view draws each block's real line (${curvy} points on a curving block)`);
+
+  // the fixes to the City's data (scripts/cities/boston-fixes.mjs, data/boston/fixes.json): blocks on pedestrian streets
+  // or with no street under them are left off, and wrong street names come fixed
+  const fx = await p.evaluate(async () => { const B = await BOS.load(), F = await (await fetch('/data/boston/fixes.json')).json();
+    const ids = new Set(B.map((x) => String(x.c)));
+    return { gone: F.hidden.every((h) => !ids.has(String(h.c))), hidden: F.hidden.length, ped: F.hidden.filter((h) => h.kind === 'pedestrian').map((h) => h.s),
+      jersey: B.some((x) => x.s === 'Jersey St'), yawkey: B.some((x) => x.s === 'Yawkey Way'), names: F.names.length }; });
+  check(fx.gone && fx.hidden >= 10 && fx.ped.includes('Winter St'), `the ${fx.hidden} blocks the fixes leave off (pedestrian streets like Winter St) are not on the map`);
+  check(fx.jersey && !fx.yawkey && fx.names >= 10, `street names come fixed: Yawkey Way shows as Jersey St (${fx.names} names)`);
+
+  // like SF's: the welcome's How it works and the menu open Boston's own pages, and shared links show Boston's card
+  const links = await p.evaluate(() => ({ about: document.querySelector('.wabout')?.getAttribute('href'),
+    menu: [...document.querySelectorAll('#infoMenu a.im-item')].map((a) => a.getAttribute('href')).filter(Boolean), card: document.querySelector('meta[property="og:image"]')?.content }));
+  check(links.about === '/boston/about' && ['/boston/about#holidays', '/boston/fixes', '/boston/about'].every((h) => links.menu.includes(h))
+    && !links.menu.some((h) => /^\/(about|holidays|tickets|n\/)$/.test(h)), `the welcome and the menu open Boston's pages (${links.menu.join(', ')})`);
+  check(/og-boston\.png/.test(links.card || ''), 'shared links show the Boston card');
+  await p.evaluate(() => { document.getElementById('infoBtn').click(); document.getElementById('imHoods').click(); });
+  check(await p.evaluate(() => document.getElementById('welcome').classList.contains('open') && !!document.querySelector('.whoods a[data-bbox]')),
+    'the menu\'s Neighborhoods opens the neighborhood list');
+  await p.evaluate(() => markOnboarded());
   if (SHOTS) await p.screenshot({ path: SHOTS + '/1-overview.png' });
 
   // street zoom on the South End: curb sides drawn from the static file
@@ -194,7 +218,8 @@ try {
   await d.evaluateOnNewDocument(() => { try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbFirstSheet', '1'); } catch (_) {} });
   await d.goto(SITE + '/boston', { waitUntil: 'load' });
   await d.waitForFunction(() => typeof OVR !== 'undefined' && OVR && OVR.length > 5000 && ovMode, { timeout: 30000, polling: 250 }).catch(() => {});
-  const ovAt = await d.evaluate(() => { const o = OVR.find((x) => map.getBounds().pad(-0.2).contains(x.a) && map.getBounds().pad(-0.2).contains(x.z));
+  // a straight block, so the middle of its two ends is on its line
+  const ovAt = await d.evaluate(() => { const o = OVR.find((x) => x.g.length === 2 && map.getBounds().pad(-0.2).contains(x.a) && map.getBounds().pad(-0.2).contains(x.z));
     const q = map.latLngToContainerPoint([(o.a[0] + o.z[0]) / 2, (o.a[1] + o.z[1]) / 2]), r = document.getElementById('map').getBoundingClientRect(); return { x: r.left + q.x, y: r.top + q.y }; });
   await d.mouse.move(ovAt.x - 20, ovAt.y - 20); await d.mouse.move(ovAt.x, ovAt.y, { steps: 6 });
   await d.waitForFunction(() => document.querySelector('.leaflet-tooltip.curbtip'), { timeout: 5000, polling: 100 }).catch(() => {});
@@ -211,6 +236,19 @@ try {
   const pop = await d.evaluate(() => document.querySelector('.leaflet-popup-content')?.innerText.replace(/\s+/g, ' ').trim() || '');
   check(/paid parking/i.test(pop) && !(await d.evaluate(() => document.getElementById('sheet').classList.contains('open'))),
     `a click on a paid parking dot opens its popup, not the block (${pop.slice(0, 70) || 'none'})`);
+
+  // the pages next to the map: How it works (with the holidays) and Map fixes, with Boston's nav and every small map drawn
+  const pg = await b.newPage();
+  watch(pg);
+  for (const [path, want] of [['/boston/about', /Days the sweepers skip/i], ['/boston/fixes', /Map fixes/i]]) {
+    const res = await pg.goto(SITE + path, { waitUntil: 'networkidle0' });
+    const info = await pg.evaluate(() => ({ text: document.body.innerText, logo: document.querySelector('.sn-logo')?.getAttribute('href'), ios: !!document.querySelector('.sn-cta.sn-ghost') }));
+    check(res.status() === 200 && want.test(info.text) && info.logo === '/boston' && !info.ios, `${path} loads, with Boston's nav`);
+  }
+  await pg.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 60)); } });
+  await new Promise((r) => setTimeout(r, 1500));
+  const minis = await pg.evaluate(() => ({ all: document.querySelectorAll('.mini[data-lines]').length, drawn: document.querySelectorAll('.mini.leaflet-container').length }));
+  check(minis.all >= 15 && minis.drawn === minis.all, `every fix on /boston/fixes draws its map (${minis.drawn} of ${minis.all})`);
 
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));
   check(!bad.length, 'no failed or SF requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));

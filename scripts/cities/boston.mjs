@@ -13,13 +13,17 @@
 //      its own sweeping signs against the schedule (report.json).
 //
 // Writes data/boston/segments.json (swept blocks + rules: the map, the sheet), data/boston/curbs.json (the
-// Curb Lab layers) and data/boston/report.json (match and coverage numbers).
+// Curb Lab layers), data/boston/report.json (match and coverage numbers) and data/boston/fixes.json (every fix made to
+// the City's data on the way: street names, and blocks left off the map because the basemap has a pedestrian street or
+// no street there; scripts/cities/boston-fixes.mjs, shown at /boston/fixes).
 //
-// Run: node scripts/cities/boston.mjs [--refresh]   (Node 18+, no deps; inputs cached in private/cache/boston/)
+// Run: node scripts/cities/boston.mjs [--refresh]   (Node 18+; inputs cached in private/cache/boston/. The basemap's
+// streets come from basemap/boston.pmtiles the first time, which needs the basemap toolchain: scripts/build-basemap.sh)
 
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { clean, DOW3, isSweepSign, classifyPolicy } from './boston-curbs.mjs';
+import { RENAME, titleCase as title, streetIndex, streetFit, classify, PARKING_LAYERS, shortcut } from './boston-fixes.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const OUT = ROOT + 'data/boston/';
@@ -125,7 +129,6 @@ function streetKey(s) {
   return ALIAS[k] || k;
 }
 const samKey = (p) => streetKey([p.PRE_DIR, p.ST_NAME, p.ST_TYPE, p.SUF_DIR].filter(Boolean).join(' '));
-const title = (s) => String(s || '').toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase()).replace(/\b(\d+)(St|Nd|Rd|Th)\b/g, (m, n, x) => n + x.toLowerCase());
 const samName = (p) => title([p.PRE_DIR, p.ST_NAME, p.ST_TYPE, p.SUF_DIR].filter(Boolean).join(' '));
 
 const nodeId = ([lon, lat]) => lon.toFixed(5) + ',' + lat.toFixed(5);
@@ -213,6 +216,7 @@ const yes = (v) => String(v).toLowerCase() === 't' || v === true;
 const hourOf = (s) => { const m = /^(\d{1,2}):(\d{2})/.exec(String(s || '')); return m ? +m[1] : null; };
 
 const blocks = new Map();   // segment id → { s: segment, street, hood, sides: Map(side → Map(ruleKey → rule)) }
+const renamed = new Map();  // schedule name → ids of the blocks shown under the right one (RENAME)
 const report = { rows: schedule.length, matched: 0, exactBothEnds: 0, unmatched: [], sideUnknown: 0 };
 for (const row of schedule) {
   const key = streetKey(row.st_name);
@@ -248,7 +252,11 @@ for (const row of schedule) {
   const walkSide = which === 'both' || !oddWalk ? null : which === 'odd' ? oddWalk : flip(oddWalk);   // the row's side, along the walk
   for (const { s, fwd } of w.path) {
     const sides = walkSide ? [fwd ? walkSide : flip(walkSide)] : ['L', 'R'];
-    if (!blocks.has(s.id)) blocks.set(s.id, { s, street: row.st_name, hood: row.dist_name, sides: new Map() });
+    if (!blocks.has(s.id)) {
+      const fix = RENAME[row.st_name];
+      if (fix) { if (!renamed.has(row.st_name)) renamed.set(row.st_name, []); renamed.get(row.st_name).push(s.id); }
+      blocks.set(s.id, { s, street: fix ? fix[0] : row.st_name, hood: row.dist_name, sides: new Map() });
+    }
     const blk = blocks.get(s.id);
     for (const side of sides) {
       if (!blk.sides.has(side)) blk.sides.set(side, new Map());
@@ -344,7 +352,6 @@ for (const z of signSweep) {
   if (matches(z.spans, rules, true)) check.weeksAgree++;
   else if (matches(z.spans, sides.get(flip(hit.side)), true)) check.weeksOtherSide++;
 }
-const schedSides = out.reduce((n, b) => n + b.d.length, 0);
 
 // Every curb zone → the swept block side it sits on, so a tapped curb lists its posted rules without loading the
 // zones' geometry (curbs.json, for the map layers). rules.json: t = each distinct [layer, fields] once, s = side → t indexes.
@@ -356,6 +363,42 @@ for (const [k, list] of Object.entries(layers)) for (const { g, ...fields } of l
   const at = (sideRules[hit.s.id + '|' + hit.side] ||= []);
   if (!at.includes(ruleAt.get(id))) at.push(ruleAt.get(id));
 }
+
+// ---------- 4b. the basemap's streets under each block line ----------------------------------------
+
+// Each block's line against the streets the basemap is drawn from (OpenStreetMap, boston-fixes.mjs): a block along a
+// pedestrian street (Downtown Crossing) or mostly where the basemap has no street is left off the map, unless the Curb
+// Lab posts parking rules on it, which keeps it. Every decision goes to fixes.json.
+const streets = await cached('basemap-streets.json', async () => {
+  log('reading the basemap\'s streets from basemap/boston.pmtiles…');
+  return (await import('./boston-basemap-streets.mjs')).basemapStreets(ROOT + 'basemap/boston.pmtiles');
+});
+const streetGrid = streetIndex(streets), blocksBefore = out.length, hidden = [], kept = [];
+let nearStreets = 0;
+const layersOn = (c) => [...new Set(['L', 'R'].flatMap((lr) => (sideRules[c + '|' + lr] || []).map((i) => ruleList[i][0])))];
+for (let i = out.length - 1; i >= 0; i--) {
+  const b = out[i], fit = streetFit(b.g, streetGrid, b.s), kind = classify(fit);
+  if (fit.worst <= 4) nearStreets++;
+  if (!kind) continue;
+  const parking = layersOn(b.c).filter((k) => PARKING_LAYERS.includes(k));
+  const entry = { c: b.c, s: b.s, l: b.l, h: b.h, kind, fit, g: b.g };
+  if (parking.length) { kept.push({ ...entry, parking }); continue; }
+  hidden.push({ ...entry, sides: b.d.map(([, label]) => label) });
+  out.splice(i, 1);
+  delete sideRules[b.c + '|L']; delete sideRules[b.c + '|R'];
+}
+const byStreetName = (x, y) => x.kind.localeCompare(y.kind) || x.s.localeCompare(y.s) || x.l.localeCompare(y.l);
+hidden.sort(byStreetName); kept.sort(byStreetName);
+const shown = new Set(out.map((b) => b.c));
+const names = [...renamed].map(([from, ids]) => ({ from, to: RENAME[from][0], why: RENAME[from][1], blocks: ids.filter((c) => shown.has(c)) }))
+  .filter((n) => n.blocks.length);
+// cross streets come from SAM's capitals: titleCase writes "Allen's Aly" and "McLellan St" (the old title case wrote "Allen'S Aly")
+const crossNames = [...new Set(out.flatMap((b) => b.l.split(' - ')).filter((n) => /\w's\b|\bMc[A-Z]/.test(n)))].sort()
+  .map((to) => ({ was: to.replace(/(\w)'s\b/g, "$1'S").replace(/\bMc([A-Z])/g, (m, c) => 'Mc' + c.toLowerCase()), to }));
+// the zoomed out view used to draw each block as a straight line between its ends (lib/city-boston.js overview)
+const cuts = out.map((b) => ({ b, off: shortcut(b.g) })).sort((x, y) => y.off - x.off);
+const cutOver = (m) => cuts.filter((x) => x.off >= m).length;
+const schedSides = out.reduce((n, b) => n + b.d.length, 0);
 
 // ---------- 5. write -------------------------------------------------------------------------------
 
@@ -378,6 +421,22 @@ fs.writeFileSync(OUT + 'curbs.json', JSON.stringify({
       + 'permit = resident permit (only = residents only, max = everyone else\'s limit), accessible, loading (who = commercial|passenger|bus|rideshare|valet|short), '
       + 'limit = free parking with a time limit over 30 min, snow = no parking in a declared snow emergency, nostop = no stopping (stop) or no parking, anytime when "when" is empty.' },
   ...layers }));
+const fixSummary = { blocks: blocksBefore, shown: out.length, nearStreets, hidden: hidden.length,
+  pedestrian: hidden.filter((x) => x.kind === 'pedestrian').length, offMap: hidden.filter((x) => x.kind === 'off-map').length,
+  kept: kept.length, renamed: names.length, renamedBlocks: names.reduce((n, x) => n + x.blocks.length, 0), crossNames: crossNames.length,
+  shortcuts: { over10m: cutOver(10), over50m: cutOver(50), max: cuts[0].off } };
+fs.writeFileSync(OUT + 'fixes.json', JSON.stringify({
+  _meta: { generated: new Date().toISOString(), page: '/boston/fixes',
+    about: 'Every fix made to the City\'s data on the way to the Boston map (scripts/cities/boston-fixes.mjs).',
+    method: 'Each block line (a SAM centerline) is sampled every 3 m against the streets the basemap is drawn from (OpenStreetMap, '
+      + 'the Protomaps roads layer in basemap/boston.pmtiles). fit.car = share of the line within 7 m of a street for cars (10 m for a '
+      + 'major road; 15 m for one with the block\'s own name), fit.walk = share on a pedestrian street only, fit.worst = farthest point from '
+      + 'a street for cars, in meters. A block with fit.walk >= 0.6 is "pedestrian", one with fit.car < 0.5 "off-map": left off the map '
+      + 'unless the Curb Lab posts parking rules on it (kept). overview = the blocks whose straight end to end line strayed farthest '
+      + 'from their real line (off, meters), which the zoomed out view drew before it drew real lines.' },
+  summary: fixSummary,
+  overview: cuts.slice(0, 8).map(({ b, off }) => ({ c: b.c, s: b.s, l: b.l, h: b.h, off, g: b.g })),
+  hidden, kept, names, crossNames }));
 fs.writeFileSync(OUT + 'rules.json', JSON.stringify({
   _meta: { generated: new Date().toISOString(), source: sources[2], sides: Object.keys(sideRules).length,
     format: 't = [[layer, fields]] (fields as in curbs.json, without g); s = {"<block c>|<side L|R>": [indexes into t]}' },
@@ -391,10 +450,12 @@ const rep = {
     nostop: layers.nostop.length, sweepingSignSides: check.signSides,
     signAgreesWithSchedule: check.agree, signDiffers: check.differ, signWhereScheduleHasNone: check.signOnly,
     scheduleSidesWithASign: check.agree + check.differ, signWeeksAgree: check.weeksAgree, signWeeksOnlyOtherSide: check.weeksOtherSide },
+  fixes: fixSummary,
   unmatchedRows: report.unmatched,
 };
 fs.writeFileSync(OUT + 'report.json', JSON.stringify(rep, null, 1));
 log(`schedule: ${report.matched}/${report.rows} rows matched (${report.exactBothEnds} at both cross streets), ${out.length} blocks, ${schedSides} block sides, side unknown on ${report.sideUnknown} rows`);
 log(`curb lab: ${cdsZones.length} zones (${unreadable} unreadable only, ${noPolicy} without policy); ${Object.entries(layers).map(([k, v]) => `${k} ${v.length}`).join(', ')}`);
 log(`sweeping signs on ${check.signSides} block sides: ${check.agree} agree with the schedule, ${check.differ} differ, ${check.signOnly} where the schedule has none; weeks agree on ${check.weeksAgree}, match only the other side on ${check.weeksOtherSide}`);
-for (const f of ['segments.json', 'curbs.json', 'rules.json', 'report.json']) log(`wrote data/boston/${f} (${Math.round(fs.statSync(OUT + f).size / 1024)} KB)`);
+log(`fixes: ${nearStreets}/${blocksBefore} block lines within 4 m of the basemap's streets; left off the map ${hidden.length} (${fixSummary.pedestrian} pedestrian streets, ${fixSummary.offMap} with no street under them), kept ${kept.length} with posted parking; ${names.length} street names (${fixSummary.renamedBlocks} blocks), ${crossNames.length} cross street spellings; ${fixSummary.shortcuts.over10m} straight end to end lines strayed 10 m or more (max ${fixSummary.shortcuts.max} m)`);
+for (const f of ['segments.json', 'curbs.json', 'rules.json', 'report.json', 'fixes.json']) log(`wrote data/boston/${f} (${Math.round(fs.statSync(OUT + f).size / 1024)} KB)`);

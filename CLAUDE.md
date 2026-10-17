@@ -198,9 +198,13 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   nextSweep, alertAnchors, …), so SF callers are unchanged. A rule may carry `months` (a season).
 - boston.html — the Boston preview at /boston, GENERATED from index.html by scripts/cities/boston-page.mjs (a list of
   checked edits; it fails when an edit no longer matches). Never hand-edit it: change index.html or the edit list, then
-  rerun the generator. Data: scripts/cities/boston.mjs (+ boston-curbs.mjs, the Curb Lab sorter) → data/boston/; time + data helpers: lib/city-boston.js; alerts: lib/cities.js (a spot's city: time core, watch age, block link); check:
-  scripts/check-boston.mjs; basemap: `CITY=boston bash scripts/build-basemap.sh` → basemap/boston/. See
-  docs/multi-city/boston.md.
+  rerun the generator. Data: scripts/cities/boston.mjs (+ boston-curbs.mjs, the Curb Lab sorter; boston-fixes.mjs, the map
+  fixes: wrong street names, and blocks left off when the basemap has a pedestrian street or no street under them, all
+  recorded in data/boston/fixes.json) → data/boston/; time + data helpers: lib/city-boston.js; alerts: lib/cities.js (a
+  spot's city: time core, watch age, block link); pages: scripts/cities/boston-pages.mjs → boston/about.html (/boston/about)
+  + boston/fixes.html (/boston/fixes), GENERATED like boston.html, with Boston's nav from site.js; share card:
+  og/template-boston.html → og-boston.png (`npm run og:boston`); check: scripts/check-boston.mjs; basemap:
+  `CITY=boston bash scripts/build-basemap.sh` → basemap/boston/. See docs/multi-city/boston.md.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy
