@@ -1064,6 +1064,9 @@ let routeOn=false;
 // Boston's other Curb Lab layers: free parking with a time limit, snow emergency curbs, no stopping and no parking
 const limitLayer=L.layerGroup().addTo(map), snowLayer=L.layerGroup().addTo(map), stopLayer=L.layerGroup().addTo(map);
 let limitOn=false, snowOn=false, stopOn=false;
+// Every curb layer draws in its own pane, over the sweep lines: in a shared pane, a status or day chip redrew the sweep
+// lines on top of the curbs' dots and lines, and a tap on one opened the block instead.
+map.createPane('curbs').style.zIndex=450;
 const overviewLayer=L.layerGroup();         // citywide endpoints layer for zoom < 15
 const overviewRenderer=L.canvas({padding:.3}).addTo(map);  // pinned (see meterRenderer note)
 let OVR=null, ovrKey='';                    // data/overview.json blocks + render cache key
@@ -1214,7 +1217,7 @@ async function loadViewport(){
   if(my!==fetchTok)return;
   if(!bosRanges){ bosRanges=true; blocks.forEach(x=>{ if(x.n)rangeCache[x.c]={lo:x.n[0],hi:x.n[1]}; }); }
   const data=BOS.rowsIn(blocks,b.getWest(),b.getSouth(),b.getEast(),b.getNorth());
-  if(data.length>SEG_CAP){enterOverviewMode(false);return;}  // same cap as SF: a wide z15 window stays on the overview
+  if(bosSides(data)>SEG_CAP){enterOverviewMode(false);return;}  // SF's cap, in curb sides: a wide z15 window stays on the overview
   ovMode=false;
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}
   hint.style.opacity='0';hint.style.visibility='hidden';
@@ -1230,6 +1233,9 @@ async function loadViewport(){
   if(stopOn) drawStops(); else stopLayer.clearLayers();
 }
 let bosRanges=false;
+// SF's cap counts rows, about one per curb side there. Downtown Boston is swept every weeknight, about five rows a side,
+// so in rows it stayed on the zoomed out view, every curb layer with it, until z18 on a laptop: Boston counts sides.
+const bosSides=rows=>new Set(rows.map(r=>r.cnn+r.cnnrightleft)).size;
 
 /* ---------- citywide overview (zoom < 15): block endpoints + rules, colored live ---------- */
 async function ensureOverview(){
@@ -1374,10 +1380,10 @@ function drawRoutes(){
 
 /* ---------- metered parking layer (grey dots; canvas for volume) ---------- */
 async function drawMeters(){
-  const c=await bosRedraw(meterLayer,'Paid parking data'); if(!c)return;
+  const c=await bosRedraw(meterLayer,'Paid parking data',()=>meterOn); if(!c)return;
   const z=map.getZoom(), mr=z>=18?4:z>=17?3.5:z>=16?3:2.5;
   bosIn(c.paid,map.getBounds()).forEach(p=>{ const m=BOS.midpoint(p.g);
-    L.circleMarker([m[1],m[0]],{radius:mr,color:'#17150F',weight:1,fillColor:getCSS('--gray'),fillOpacity:.85})
+    L.circleMarker([m[1],m[0]],{pane:'curbs',radius:mr,color:'#17150F',weight:1,fillColor:getCSS('--gray'),fillOpacity:.85})
       .bindPopup(bosPopup('paid',p),{className:'loadpop',maxWidth:240}).addTo(meterLayer);
   });
 }
@@ -1430,7 +1436,7 @@ async function ensureWhiteCache(){
   return whiteCache;
 }
 async function drawLoadZones(){
-  const c=await bosRedraw(loadLayer,'Loading zones'); if(!c)return;
+  const c=await bosRedraw(loadLayer,'Loading zones',()=>loadOn); if(!c)return;
   const b=map.getBounds();
   bosIn(c.loading,b).forEach(z=>bosLine(loadLayer,z,'loading'));
   bosIn(c.accessible,b).forEach(z=>bosLine(loadLayer,z,'accessible'));
@@ -1439,30 +1445,34 @@ async function drawLoadZones(){
 // dashed when only at the posted hours
 function bosLine(layer,z,k,dash){
   const ww=map.getZoom()>=17?4:3, t=bosRule(k,z), light=k==='nostop';
-  if(!light)L.polyline(z.ll,{color:'#17150F',weight:ww+3,opacity:.85,lineCap:'round',interactive:false}).addTo(layer);
-  L.polyline(z.ll,{color:t.color,weight:light?ww-1:ww,opacity:light?.9:1,lineCap:'round',dashArray:dash}).bindPopup(bosPopup(k,z),{className:'loadpop',maxWidth:250}).addTo(layer);
+  if(!light)L.polyline(z.ll,{pane:'curbs',color:'#17150F',weight:ww+3,opacity:.85,lineCap:'round',interactive:false}).addTo(layer);
+  L.polyline(z.ll,{pane:'curbs',color:t.color,weight:light?ww-1:ww,opacity:light?.9:1,lineCap:'round',dashArray:dash}).bindPopup(bosPopup(k,z),{className:'loadpop',maxWidth:250}).addTo(layer);
 }
-// a layer redraw's data: the curbs file, with the layer cleared; null when it failed (said in a toast) or zoomed out
-async function bosRedraw(layer,what){
-  let c; try{ c=await bosCurbs(); }catch(e){ toast(what+' unavailable right now.'); return null; }
+// a layer redraw's data: the curbs file, with the layer cleared; null when it failed (said in a toast), when zoomed out,
+// or when the layer was switched off (on() false) or redrawn again while the file loaded: 4.4 MB the first time, long
+// enough on a phone for a layer switched off meanwhile to draw anyway, or twice
+async function bosRedraw(layer,what,on){
+  const my=layer.bosTok=(layer.bosTok||0)+1;
+  let c; try{ c=await bosCurbs(); }catch(e){ if(my===layer.bosTok&&on())toast(what+' unavailable right now.'); return null; }
+  if(my!==layer.bosTok||!on())return null;
   layer.clearLayers();
   return ovMode||map.getZoom()<MIN_ZOOM_DATA?null:c;
 }
 async function drawLimits(){
-  const c=await bosRedraw(limitLayer,'Time limits'); if(!c)return;
+  const c=await bosRedraw(limitLayer,'Time limits',()=>limitOn); if(!c)return;
   const z=map.getZoom(), mr=z>=18?4.5:z>=17?4:3.5;
   bosIn(c.limit,map.getBounds()).forEach(p=>{ const m=BOS.midpoint(p.g);
-    L.circleMarker([m[1],m[0]],{radius:mr,color:'#17150F',weight:1.5,fillColor:'#FFFDF6',fillOpacity:1})
+    L.circleMarker([m[1],m[0]],{pane:'curbs',radius:mr,color:'#17150F',weight:1.5,fillColor:'#FFFDF6',fillOpacity:1})
       .bindPopup(bosPopup('limit',p),{className:'loadpop',maxWidth:240}).addTo(limitLayer);
   });
 }
 async function drawSnow(){
-  const c=await bosRedraw(snowLayer,'Snow emergency curbs'); if(!c)return;
+  const c=await bosRedraw(snowLayer,'Snow emergency curbs',()=>snowOn); if(!c)return;
   bosIn(c.snow,map.getBounds().pad(0.15)).forEach(z=>
-    L.polyline(z.ll,{color:'#4FA9C4',weight:rppWeight(),opacity:.3,lineCap:'round',interactive:false}).addTo(snowLayer));
+    L.polyline(z.ll,{pane:'curbs',color:'#4FA9C4',weight:rppWeight(),opacity:.3,lineCap:'round',interactive:false}).addTo(snowLayer));
 }
 async function drawStops(){
-  const c=await bosRedraw(stopLayer,'No stopping curbs'); if(!c)return;
+  const c=await bosRedraw(stopLayer,'No stopping curbs',()=>stopOn); if(!c)return;
   bosIn(c.nostop,map.getBounds()).forEach(z=>bosLine(stopLayer,z,'nostop',z.when?'6 5':null));
 }
 
@@ -1599,10 +1609,11 @@ function bosRule(k,f){
 const bosPopup=(k,f)=>{const t=bosRule(k,f);return `<div class="lp-h">${t.head}</div>${t.sub?`<div class="lp-m">${t.sub}</div>`:''}<div class="lp-s">${t.when||''}</div><div class="lp-s" style="margin-top:5px">City Curb Lab data (beta), read from sign photos. The posted sign is the source of truth.</div>`;};
 async function loadRpp(poly, my){
   try{
-    const c=await bosCurbs(); if(my!==fetchTok)return;
+    // also switched off, or zoomed out, while the file loaded (4.4 MB the first time): neither one bumps fetchTok
+    const c=await bosCurbs(); if(my!==fetchTok||!rppOn||ovMode)return;
     rppLayer.clearLayers(); rppCache=[];
     bosIn(c.permit,map.getBounds().pad(0.15)).forEach(z=>{
-      L.polyline(z.ll,{color:getCSS('--meter'),weight:rppWeight(),opacity:.14,lineCap:'round',interactive:false}).addTo(rppLayer);
+      L.polyline(z.ll,{pane:'curbs',color:getCSS('--meter'),weight:rppWeight(),opacity:.14,lineCap:'round',interactive:false}).addTo(rppLayer);
       rppCache.push({latlngs:z.ll, area:'', hrlimit:z.max?Math.round(z.max/60):null, only:z.only, when:z.when});
     });
   }catch(e){}
@@ -2838,12 +2849,13 @@ if(CAN_HOVER){
   let ovTip=null, ovOn=null, ovT=0;
   const hideOvTip=()=>{ if(ovTip){map.removeLayer(ovTip);ovTip=null;ovOn=null;} };
   map.on('mousemove',e=>{
-    if(!ovMode||!OVR){hideOvTip();return;}
+    if(!ovMode||!ovrLines){hideOvTip();return;}
     const t=Date.now(); if(t-ovT<40)return; ovT=t;
-    // the nearest line within 8 px: only blocks whose box reaches the cursor, then each piece of their line
+    // the nearest line within 8 px: only blocks whose box reaches the cursor, then each piece of their line; a line
+    // the legend or a day chip hides (opacity 0, buildOverviewLines) has no tooltip
     const p=e.containerPoint, sw=map.containerPointToLatLng([p.x-8,p.y+8]), ne=map.containerPointToLatLng([p.x+8,p.y-8]);
     let best=null, bd=64;
-    for(const o of OVR){ const q=o.bb; if(q[2]<sw.lng||q[0]>ne.lng||q[3]<sw.lat||q[1]>ne.lat)continue;
+    for(const {b:o,ln} of ovrLines){ const q=o.bb; if(!ln.options.opacity||q[2]<sw.lng||q[0]>ne.lng||q[3]<sw.lat||q[1]>ne.lat)continue;
       for(let i=1;i<o.g.length;i++){ const a=map.latLngToContainerPoint(o.g[i-1]), z=map.latLngToContainerPoint(o.g[i]), dx=z.x-a.x, dy=z.y-a.y, l2=dx*dx+dy*dy;
         const u=l2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2)):0, d=(p.x-a.x-u*dx)**2+(p.y-a.y-u*dy)**2;
         if(d<bd){bd=d;best=o;} } }
@@ -3197,8 +3209,18 @@ bosToggle('snowToggle',v=>snowOn=v,snowLayer,drawSnow,'Snow emergency curbs shad
 bosToggle('stopToggle',v=>stopOn=v,stopLayer,drawStops,'No stopping and no parking curbs in magenta: solid any time, dashed at the posted hours. Tap one for details. From the City\'s Curb Lab (beta).');
 ['rppToggle','loadToggle','meterToggle','limitToggle','snowToggle','stopToggle'].forEach(id=>{
   const b=document.getElementById(id), f=b.onclick;
-  b.onclick=function(e){ const was=this.classList.contains('on'); f.call(this,e); if(!was&&ovMode)map.setView(map.getCenter(),MIN_ZOOM_DATA+1); };
+  b.onclick=function(e){ const was=this.classList.contains('on'); f.call(this,e); if(!was&&ovMode)bosStreetZoom().then(z=>map.setView(map.getCenter(),z)); };
 });
+// the first zoom from z16 at which the view around the map's center is within the cap (loadViewport's view: padded 15%)
+async function bosStreetZoom(){
+  let blocks; try{ blocks=await BOS.load(); }catch(e){ return MIN_ZOOM_DATA+1; }
+  const c=map.getCenter(), h=map.getSize().multiplyBy(.65);
+  for(let z=MIN_ZOOM_DATA+1;z<18;z++){
+    const p=map.project(c,z), sw=map.unproject(p.add([-h.x,h.y]),z), ne=map.unproject(p.add([h.x,-h.y]),z);
+    if(bosSides(BOS.rowsIn(blocks,sw.lng,sw.lat,ne.lng,ne.lat))<=SEG_CAP)return z;
+  }
+  return 18;
+}
 document.getElementById('routeToggle').onclick=function(){
   routeOn=!routeOn; this.classList.toggle('on',routeOn); this.setAttribute('aria-pressed',routeOn);
   refreshLayerBadges(); updateRouteDay();

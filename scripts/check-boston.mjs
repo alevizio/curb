@@ -113,6 +113,21 @@ try {
   // layers from the Curb Lab
   await p.evaluate(() => { document.getElementById('sheetClose').click(); map.setView([42.3503, -71.0810], 17, { animate: false }); });
   await new Promise((r) => setTimeout(r, 1500));
+  // while the curb file loads (4.4 MB the first time, held here until all the taps are in), a layer switched off stays
+  // off, and one switched on, off and on again draws once
+  const race = await p.evaluate(async () => {
+    if (BCURBS) return null;
+    const real = BOS.curbs; let go; const gate = new Promise((r) => { go = r; });
+    BOS.curbs = () => gate.then(real);
+    const paid = document.getElementById('meterToggle'), stop = document.getElementById('stopToggle');
+    paid.click(); paid.click(); stop.click(); stop.click(); stop.click();
+    go(); await bosCurbs(); await new Promise((r) => setTimeout(r, 300));
+    BOS.curbs = real;
+    const out = { paid: meterLayer.getLayers().length, stop: stopLayer.getLayers().length, zones: bosIn(BCURBS.nostop, map.getBounds()).length };
+    stop.click();
+    return out;
+  });
+  check(race && race.paid === 0 && race.zones > 0 && race.stop === race.zones, `layer taps while the curb file loads: off stays off, on draws once (${JSON.stringify(race)})`);
   await p.evaluate(() => { document.getElementById('meterToggle').click(); document.getElementById('rppToggle').click(); });
   await new Promise((r) => setTimeout(r, 2500));
   const lay = await p.evaluate(() => ({ meters: meterLayer.getLayers().length, rpp: rppLayer.getLayers().length }));
@@ -225,17 +240,41 @@ try {
   await d.waitForFunction(() => document.querySelector('.leaflet-tooltip.curbtip'), { timeout: 5000, polling: 100 }).catch(() => {});
   const hover = await d.evaluate(() => document.querySelector('.leaflet-tooltip.curbtip')?.innerText.replace(/\s+/g, ' ').trim() || '');
   check(/sweeps/i.test(hover), `hovering a line on the opening view shows its curb tooltip (${hover.slice(0, 70) || 'none'})`);
+  // ...and a line the legend hides shows none: Clear, Soon and Now off leave only the gray lines
+  const legend = (on) => d.evaluate((on) => ['green', 'amber', 'red'].forEach((k) => { const c = document.querySelector(`.legend2 .lst[data-st="${k}"]`); if (c.classList.contains('on') !== on) c.click(); }), on);
+  await legend(false);
+  await new Promise((r) => setTimeout(r, 1500));
+  const hidAt = await d.evaluate(() => {
+    const r = document.getElementById('map').getBoundingClientRect(), inner = map.getBounds().pad(-0.2), shown = ovrLines.filter((e) => e.ln.options.opacity > 0);
+    const near = (pt) => shown.some(({ b }) => b.g.some((ll, i) => { if (!i) return false; const a = map.latLngToContainerPoint(b.g[i - 1]), z = map.latLngToContainerPoint(ll), dx = z.x - a.x, dy = z.y - a.y, l2 = dx * dx + dy * dy;
+      const u = l2 ? Math.max(0, Math.min(1, ((pt.x - a.x) * dx + (pt.y - a.y) * dy) / l2)) : 0; return Math.hypot(pt.x - a.x - u * dx, pt.y - a.y - u * dy) < 12; }));
+    for (const { b: o, ln } of ovrLines) { if (ln.options.opacity || o.g.length !== 2 || !inner.contains(o.a) || !inner.contains(o.z)) continue;
+      const q = map.latLngToContainerPoint([(o.a[0] + o.z[0]) / 2, (o.a[1] + o.z[1]) / 2]); if (!near(q)) return { x: r.left + q.x, y: r.top + q.y }; }
+    return null; });
+  if (hidAt) { await d.mouse.move(hidAt.x - 20, hidAt.y - 20); await d.mouse.move(hidAt.x, hidAt.y, { steps: 6 }); await new Promise((r) => setTimeout(r, 120)); await d.mouse.move(hidAt.x + 1, hidAt.y); }
+  await new Promise((r) => setTimeout(r, 500));
+  const hidTip = await d.evaluate(() => document.querySelector('.leaflet-tooltip.curbtip')?.innerText.replace(/\s+/g, ' ').trim() || '');
+  check(hidAt && !hidTip, `a line the legend hides shows no tooltip (${hidAt ? hidTip.slice(0, 60) || 'none' : 'no hidden line found'})`);
+  await legend(true);
+  await d.mouse.move(5, 450);
+  // switched on from the opening view, a layer zooms in to the street view and draws (downtown on a laptop, z16 used to
+  // keep the zoomed out view, and the layer drew nothing)
+  await d.evaluate(() => document.getElementById('meterToggle').click());
+  await d.waitForFunction(() => !ovMode && meterLayer.getLayers().length > 0, { timeout: 15000, polling: 250 }).catch(() => {});
+  const fromOpen = await d.evaluate(() => ({ zoom: map.getZoom(), street: !ovMode, dots: meterLayer.getLayers().length }));
+  check(fromOpen.street && fromOpen.dots > 0, `paid parking switched on from the opening view zooms in and draws (${JSON.stringify(fromOpen)})`);
   await d.evaluate(() => map.setView([42.3497, -71.0760], 17, { animate: false }));
   await new Promise((r) => setTimeout(r, 2500));
-  await d.evaluate(() => document.getElementById('meterToggle').click());
-  await new Promise((r) => setTimeout(r, 2500));
+  // a status chip redraws the sweep lines; the dots stay over them, so a click still reaches the dot
+  await d.evaluate(() => { const c = document.querySelector('.legend2 .lst[data-st="green"]'); c.click(); c.click(); });
+  await new Promise((r) => setTimeout(r, 800));
   const dotAt = await d.evaluate(() => { const r = document.getElementById('map').getBoundingClientRect(), l = meterLayer.getLayers().find((x) => map.getBounds().pad(-0.15).contains(x.getLatLng()));
     if (!l) return null; const q = map.latLngToContainerPoint(l.getLatLng()); return { x: r.left + q.x, y: r.top + q.y }; });
   if (dotAt) await d.mouse.click(dotAt.x, dotAt.y);
   await new Promise((r) => setTimeout(r, 1000));
   const pop = await d.evaluate(() => document.querySelector('.leaflet-popup-content')?.innerText.replace(/\s+/g, ' ').trim() || '');
   check(/paid parking/i.test(pop) && !(await d.evaluate(() => document.getElementById('sheet').classList.contains('open'))),
-    `a click on a paid parking dot opens its popup, not the block (${pop.slice(0, 70) || 'none'})`);
+    `after a status chip, a click on a paid parking dot opens its popup, not the block (${pop.slice(0, 70) || 'none'})`);
 
   // the pages next to the map: How it works (with the holidays) and Map fixes, with Boston's nav and every small map drawn
   const pg = await b.newPage();

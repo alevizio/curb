@@ -45,6 +45,12 @@ What the numbers say (`data/boston/report.json`, 2026-10-16):
   hour, school and game days). Many signs are coded as exceptions ("no parking except resident permit"), which the
   first build missed: it had 1,510 permit and 56 accessible. Hydrant stubs are left out. A tapped curb lists the
   rules matched to its side (5,071 of 14,303 swept sides have some).
+- The layers draw at street view, which starts when the view holds at most 2,500 curb sides (2026-10-17). SF's cap
+  counts rows, about one a side there; downtown Boston is swept every weeknight, about five rows a side, and in rows
+  stayed on the zoomed out view until z18 on a laptop, so a layer switched on there drew nothing. A layer switched on
+  from the zoomed out view zooms in as far as street view needs. The layers sit in their own pane over the sweep
+  lines (a status or day chip used to bury them), and a redraw that finds its layer switched off, or a newer redraw,
+  once the 4.4 MB curbs file arrives draws nothing.
 
 Sweep alerts work for Boston (2026-10-17): a saved spot carries `city: 'boston'` and its rules' `months`, and the
 one shared sender times it on Boston's core (`lib/cities.js`: Eastern time, City holidays, the season, a $40 fine
