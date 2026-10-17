@@ -15,7 +15,7 @@ How it is built:
 | Data | `scripts/cities/boston.mjs` → `data/boston/` | Fetches the three sources below, attaches each schedule row to street blocks, writes `segments.json` (swept blocks and rules), `curbs.json` (Curb Lab layers) and `report.json` (match and coverage numbers). Inputs are cached in `private/cache/boston/`; `--refresh` fetches again |
 | Time and data helpers | `lib/city-boston.js` | Boston's `makeTimeCore` (Eastern time, City holidays, seasons), attached under the names the page already calls; expands `segments.json` into the row shape the page reads from DataSF in SF |
 | Page | `scripts/cities/boston-page.mjs` → `boston.html` | Generates the Boston page from `index.html` with a list of checked edits, so SF fixes reach Boston when it is rebuilt. Never edit `boston.html` by hand |
-| Basemap | `CITY=boston bash scripts/build-basemap.sh` → `basemap/boston/` | Parchment tiles z8 to 16 (3,238 files, 85 MB), overzoomed past 16 |
+| Basemap | `CITY=boston bash scripts/build-basemap.sh` → `basemap/boston/` | Parchment tiles z8 to 16 citywide, overzoomed past 16, plus z17 for the center of town (`CORE_BOUNDS`, a second tile layer): 4,700 files, 111 MB. Add one zoom with `CURB_BASEMAP_CITY=boston CURB_BASEMAP_ZOOMS=17 node scripts/render-basemap.mjs` |
 | Check | `scripts/check-boston.mjs` | Headless walk of the page: overview, street zoom, sheet, calendar time zone, address search, layers, no SF requests |
 
 Sources: the Street Sweeping Schedules (Public Works), the SAM street segments, and the Curb Lab's Curbs

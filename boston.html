@@ -863,7 +863,7 @@
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=7"></script>
-<script src="/lib/city-boston.js?v=4"></script>
+<script src="/lib/city-boston.js?v=5"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -975,8 +975,12 @@ const GLOGO='<img class="gmlogo" alt="Google" src="https://www.google.com/images
 // Self-hosted parchment raster. Baked z8-13 (Bay Area) + z14-17 (SF): minNativeZoom 8 scales z8 up
 // for world-level zooms, maxNativeZoom 17 overzooms 18-20, bounds skips requests for tiles never baked.
 function addSelfBasemap(){
-  return L.tileLayer(SELF_BASEMAP,{minNativeZoom:8,maxNativeZoom:16,maxZoom:20,bounds:BOS.TILE_BOUNDS,
+  const city=L.tileLayer(SELF_BASEMAP,{minNativeZoom:8,maxNativeZoom:16,maxZoom:20,bounds:BOS.TILE_BOUNDS,
     attribution:'&copy; OpenStreetMap &copy; Protomaps'}).addTo(map);
+  // z17 for the center of town (BOS.CORE_BOUNDS), over the citywide tiles, which stop at z16 and stretch past it.
+  // Added second: while a layer is the map's only one, its minZoom is the map's (the page would open at z17).
+  L.tileLayer(SELF_BASEMAP,{minZoom:17,minNativeZoom:17,maxNativeZoom:17,maxZoom:20,bounds:BOS.CORE_BOUNDS,zIndex:2}).addTo(map);
+  return city;
 }
 (async function initBasemap(){
   if(SELF_BASEMAP){ addSelfBasemap(); return; } // self-hosted parchment raster ($0)

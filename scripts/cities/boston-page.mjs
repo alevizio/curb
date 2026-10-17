@@ -57,13 +57,21 @@ const edits = [
   ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
     '<p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston\'s open data</a>. The posted sign always wins.</p>'],
   // ---- scripts: Boston's time core and data --------------------------------------------------------
-  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=4"></script>'],
+  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=5"></script>'],
   ['retry it like the time core', "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');}",
     "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');\nif(window.nextSweep&&!window.BOS)again('script[src^=\"/lib/city-boston.js\"]');}"],
   ['fail without it', 'if(!window.L||!window.nextSweep){', 'if(!window.L||!window.nextSweep||!window.BOS){'],
   ['basemap tiles', "const SELF_BASEMAP='/basemap/parchment/{z}/{x}/{y}.png';", "const SELF_BASEMAP='/basemap/boston/{z}/{x}/{y}.png';"],
   ['start in Boston', '.setView([37.7749,-122.4194],15);', '.setView(BOS.CENTER,BOS.ZOOM);'],
-  ['basemap: Boston tiles stop at z16', 'maxNativeZoom:17,maxZoom:20,bounds:[[37.20,-123.10],[38.30,-121.60]],', 'maxNativeZoom:16,maxZoom:20,bounds:BOS.TILE_BOUNDS,'],
+  ['basemap: Boston tiles', /function addSelfBasemap\(\)\{[\s\S]*?\n\}\n/, `function addSelfBasemap(){
+  const city=L.tileLayer(SELF_BASEMAP,{minNativeZoom:8,maxNativeZoom:16,maxZoom:20,bounds:BOS.TILE_BOUNDS,
+    attribution:'&copy; OpenStreetMap &copy; Protomaps'}).addTo(map);
+  // z17 for the center of town (BOS.CORE_BOUNDS), over the citywide tiles, which stop at z16 and stretch past it.
+  // Added second: while a layer is the map's only one, its minZoom is the map's (the page would open at z17).
+  L.tileLayer(SELF_BASEMAP,{minZoom:17,minNativeZoom:17,maxNativeZoom:17,maxZoom:20,bounds:BOS.CORE_BOUNDS,zIndex:2}).addTo(map);
+  return city;
+}
+`],
   ['blocks from the static file', /async function loadViewport\(\)\{[\s\S]*?\n\}\n(?=\n\/\* ---------- citywide overview)/, `async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
   if(z<MIN_ZOOM_DATA){enterOverviewMode(true);return;}

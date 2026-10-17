@@ -5,7 +5,7 @@
 #
 # Pipeline: extract SF + Bay Area vector tiles -> parchment style -> render PNGs in headless Chrome.
 # Run from the repo root:  bash scripts/build-basemap.sh
-# Boston (the /boston preview, z8-16 → basemap/boston/):  CITY=boston bash scripts/build-basemap.sh
+# Boston (the /boston preview, z8-16 plus z17 downtown → basemap/boston/):  CITY=boston bash scripts/build-basemap.sh
 #
 # Requires: curl, unzip, node + npm, Google Chrome (headless renderer). macOS arm64 assumed.
 set -euo pipefail

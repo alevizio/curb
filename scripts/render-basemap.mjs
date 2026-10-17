@@ -20,14 +20,18 @@ const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/M
 const N = 6, B = 1; // metatile = 6×6 kept tiles + 1-tile buffer = 4096px canvas (headless WebGL cap)
 
 // Same boxes as build-basemap.sh (keep in sync): SF at street zooms, Bay Area for the zoomed-out view.
-// Boston (the /boston preview) stops at z16, which the page overzooms: a third of SF's file count.
+// Boston (the /boston preview) stops at z16 citywide, which the page overzooms, plus z17 for the center of town
+// (lib/city-boston.js CORE_BOUNDS, a second tile layer on the page): about half of SF's file count.
 const JOBS = CITY === 'boston' ? [
   { src: 'boston-region.pmtiles', bbox: [-71.55, 41.95, -70.60, 42.65], minz: 8, maxz: 13 },
   { src: 'boston.pmtiles', bbox: [-71.20, 42.22, -70.98, 42.40], minz: 14, maxz: 16 },
+  { src: 'boston.pmtiles', bbox: [-71.11, 42.30, -71.02, 42.385], minz: 17, maxz: 17 },
 ] : [
   { src: 'bay.pmtiles', bbox: [-123.10, 37.20, -121.60, 38.30], minz: 8, maxz: 13 },
   { src: 'sf.pmtiles', bbox: [-122.56, 37.685, -122.34, 37.84], minz: 14, maxz: 17 },
 ];
+// CURB_BASEMAP_ZOOMS=17 renders only those zooms (adding a zoom without re-rendering, and re-committing, the rest).
+const ZOOMS = process.env.CURB_BASEMAP_ZOOMS ? new Set(process.env.CURB_BASEMAP_ZOOMS.split(',').map(Number)) : null;
 
 const lon2x = (lon, z) => Math.floor(((lon + 180) / 360) * 2 ** z);
 const lat2y = (lat, z) => { const r = (lat * Math.PI) / 180; return Math.floor(((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * 2 ** z); };
@@ -75,13 +79,16 @@ const px = (N + 2 * B) * 256; // CSS px; ×2 pixelRatio → 512px per tile
 let written = 0;
 try {
   for (const job of JOBS) {
+    const zooms = [];
+    for (let z = job.minz; z <= job.maxz; z++) if (!ZOOMS || ZOOMS.has(z)) zooms.push(z);
+    if (!zooms.length) continue;
     const page = await browser.newPage();
     page.on('console', (m) => { if (m.type() === 'error') console.error('  page:', m.text()); });
     await page.setViewport({ width: px, height: px });
     await page.goto(base); await page.waitForFunction('window.ready');
     await page.evaluate((s, p) => window.setup(s, p), job.src, px);
     const [w, s, e, n] = job.bbox;
-    for (let z = job.minz; z <= job.maxz; z++) {
+    for (const z of zooms) {
       const X0 = lon2x(w, z), X1 = lon2x(e, z), Y0 = lat2y(n, z), Y1 = lat2y(s, z);
       for (let mx = X0; mx <= X1; mx += N) for (let my = Y0; my <= Y1; my += N) {
         const cx = mx + N / 2, cy = my + N / 2; // block center (buffer is symmetric)
