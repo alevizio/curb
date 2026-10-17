@@ -68,7 +68,7 @@ try {
   const sheet = await p.evaluate(() => document.getElementById('sheetBody').innerText);
   check(!!opened && /Swept (April to November|March to December|all year)/.test(sheet), `sheet for ${opened} shows the season line`);
   check(!/SFMTA|DataSF|Ticketed/.test(sheet), 'sheet never mentions SF data');
-  check(!(await p.$('#alertBtn')), 'no sweep alerts button (alerts are SF only)');
+  check(!!(await p.$('#alertBtn')), 'the sheet offers Sweep alerts');
   if (SHOTS) await p.screenshot({ path: SHOTS + '/3-sheet.png' });
 
   // calendar link carries Boston's time zone
@@ -145,6 +145,46 @@ try {
     const away = ([lo, la]) => map.getCenter().distanceTo([la, lo]);
     return Math.round(Math.min(away(l[0]), away(l[l.length - 1]))); }, cnn);
   check(linked > 60, `a shared block link centers mid-block, ${linked} m from the nearer end`);
+
+  // Sweep alerts on a Boston curb (web push faked, the save intercepted): the saved spot names the city, carries the
+  // season and is timed in Boston; the panel resolves it from the Boston data and sends an SF curb to its own map
+  const al = await b.newPage();
+  await al.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  watch(al);
+  const posts = [];
+  await al.setRequestInterception(true);
+  al.on('request', (r) => {
+    const u = new URL(r.url()), mine = u.origin === new URL(SITE).origin;
+    if (mine && u.pathname === '/api/save-subscription') { posts.push({ method: r.method(), body: JSON.parse(r.postData() || '{}') }); return r.respond({ status: 200, contentType: 'application/json', body: '{"ok":true}' }); }
+    if (mine && u.pathname.startsWith('/api/')) return r.respond({ status: 204, body: '' });
+    return r.continue();
+  });
+  await al.evaluateOnNewDocument(() => {
+    const sub = { endpoint: 'https://fcm.googleapis.com/fcm/send/boston-check', options: {}, toJSON() { return { endpoint: this.endpoint, keys: { p256dh: 'p', auth: 'a' } }; } };
+    Object.defineProperty(Notification, 'permission', { get: () => 'granted' });
+    Notification.requestPermission = async () => 'granted';
+    const reg = { pushManager: { getSubscription: async () => sub, subscribe: async () => sub } };
+    Object.defineProperty(navigator, 'serviceWorker', { value: { ready: Promise.resolve(reg), register: async () => reg } });
+    try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbFirstSheet', '1'); } catch (_) {}
+  });
+  await al.goto(SITE + '/boston', { waitUntil: 'load' });
+  await al.evaluate(() => { document.getElementById('q').value = '120 Marlborough St'; doSearch(); });
+  await al.waitForFunction(() => document.getElementById('alertBtn'), { timeout: 30000, polling: 250 }).catch(() => {});
+  await al.evaluate(() => document.getElementById('alertBtn').click());
+  await al.waitForFunction(() => /Alerts on/.test(document.getElementById('alertBtn')?.textContent || ''), { timeout: 15000, polling: 250 }).catch(() => {});
+  const saved = posts.find((x) => x.method === 'POST'), mine = await al.evaluate(() => sheetSpot && sheetSpot.nextSweepISO);
+  const sp = saved && saved.body.spot;
+  check(!!sp && sp.city === 'boston' && sp.multi === 1 && sp.rules.length > 0 && sp.rules.every((r) => Array.isArray(r.months)) && sp.nextSweepISO === mine,
+    `arming alerts saves a Boston spot with its season, timed by the page (${sp ? sp.corridor + ' ' + sp.nextSweepISO + ' months ' + JSON.stringify(sp.rules[0].months) : 'no save'})`);
+  check(await al.evaluate(() => /Alerts on/.test(document.getElementById('alertBtn').textContent)), 'the sheet then says alerts are on');
+  // an SF curb saved on this device shows in the Boston panel as "In San Francisco", sent to its own map
+  await al.evaluate(() => { const m = JSON.parse(localStorage.getItem('curbAlert') || '{}');
+    m['7735000|West'] = { cnn: '7735000', sideKey: 'West', corridor: 'Kansas St', limits: '16th St - 17th St', blockside: 'West', level: 'normal', voice: 'cheeky', armedAt: Date.now(), v: 2 };
+    localStorage.setItem('curbAlert', JSON.stringify(m)); openAlertsPanel(); });
+  await al.waitForFunction(() => [...document.querySelectorAll('.ap-row .ap-next')].some((x) => /Next sweep/.test(x.textContent)), { timeout: 15000, polling: 250 }).catch(() => {});
+  const rows = await al.evaluate(() => [...document.querySelectorAll('.ap-row')].map((x) => x.innerText.replace(/\s+/g, ' ').trim()));
+  check(rows.length === 2 && rows.some((t) => /Marlborough St/.test(t) && /Next sweep/.test(t)) && rows.some((t) => /Kansas St/.test(t) && /In San Francisco/.test(t) && /Open the San Francisco map/.test(t)),
+    `the alerts panel shows the Boston curb's next sweep and sends the SF one to its map (${rows.join(' | ')})`);
 
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));
   check(!bad.length, 'no failed or SF requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));

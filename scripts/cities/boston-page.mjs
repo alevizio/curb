@@ -5,8 +5,8 @@
 // (docs/multi-city/README.md, "Tied to San Francisco"). Boston's data: scripts/cities/boston.mjs. Its time and
 // data helpers: lib/city-boston.js.
 //
-// Not on the Boston page yet: sweep alerts (the push sender runs on SF time; a saved spot needs a city first),
-// ticket times, sweeper GPS, truck routes, block and neighborhood pages, permit-area browsing.
+// Not on the Boston page yet: ticket times, sweeper GPS, truck routes, block and neighborhood pages, permit-area
+// browsing. Sweep alerts run on the shared sender: each spot carries its city (lib/cities.js).
 //
 // Run after index.html or data/boston/ changes: node scripts/cities/boston-page.mjs
 
@@ -48,7 +48,6 @@ const edits = [
   // ---- body: words and menus ---------------------------------------------------------------------
   ['h1', /<h1 class="srh">[^<]*<\/h1>/, '<h1 class="srh">Boston street cleaning map: sweeping schedules by block (a CURB preview)</h1>'],
   ['map label', '<main id="map" aria-label="San Francisco parking map">', '<main id="map" aria-label="Boston parking map">'],
-  ['no alerts in the menu', '<button class="im-item" id="imAlerts" role="menuitem">', '<button class="im-item" id="imAlerts" role="menuitem" style="display:none">'],
   ['SF pages → Boston data sources', /<a class="im-item" href="\/n\/" role="menuitem">[\s\S]*?<a class="im-item" href="\/tickets" role="menuitem">[\s\S]*?<\/a>/,
     `<a class="im-item" href="https://github.com/alevizio/curb/blob/main/docs/multi-city/boston.md" target="_blank" rel="noopener" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14"/><path d="M4 19h16M8 7h8M8 11h8M8 15h5"/></svg></span>
@@ -339,13 +338,19 @@ document.getElementById('routeToggle').onclick=function(){`],
   ['season and fine instead of the SF re-park rule',
     "${_soon?`<div class=\"afterpass\">Once the sweeper has passed, you can re-park here, even before the posted window ends. <a href=\"https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets\" target=\"_blank\" rel=\"noopener\">SFMTA rule ↗</a></div>`:''}",
     "<div class=\"afterpass\">${BOS.seasonText(_ar&&_ar.months)?'Swept '+BOS.seasonText(_ar.months)+'. ':'Swept all year. '}${_ar&&_ar.tow==='1'?'Usually a $40 ticket, and your car can be towed.':_ar&&BOS.overnight(_ar)?'Overnight sweeping: usually a $90 ticket.':'Usually a $90 ticket.'}</div>"],
-  ['no alert button', "${canRemind?`<button class=\"btn ${alertOn?'on':''}\" id=\"alertBtn\">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}", ''],
-  ['no alert off switch', /\s*<div class="calchoice" id="alertOff" hidden>[\s\S]*?<div class="alertnote" id="alertNote" hidden><\/div>/, ''],
-  ['no alert style', /\$\{canRemind\?`<details class="alertcfg" id="alertCfg">[\s\S]*?<\/details>`:''\}/, ''],
-  ['no alert handlers', /    \/\/ "✓ Alerts on" offers the off switch[\s\S]*?    refreshWatch\(spot\);\n/, ''],
-  ['first-sheet tip', /const tip="That's this curb's verdict\.[^\n]*\n/, 'const tip="That\'s this curb\'s verdict. Calendar adds its next sweep to your phone.";\n'],
   ['data notes', /<p>\$\{ae\?'"Ticketed" times[\s\S]*?Schedules live from DataSF\.<\/p>/,
-    "<p>Sweeping schedules come from Boston Public Works' street sweeping schedule (Analyze Boston), placed on each block by CURB from the street names, cross streets and odd or even side. The season, the holidays (daytime sweeping stops on City holidays, overnight sweeping keeps going) and the fines follow the City's published rules. Paid, resident permit, loading and accessible curbs come from the City's Curb Lab, read from sign photos, and are still a beta. Calendar reminders fire about 30 min before. Sweep alerts are not on for Boston yet.</p>"],
+    "<p>Sweeping schedules come from Boston Public Works' street sweeping schedule (Analyze Boston), placed on each block by CURB from the street names, cross streets and odd or even side. The season, the holidays (daytime sweeping stops on City holidays, overnight sweeping keeps going) and the fines follow the City's published rules. Paid, resident permit, loading and accessible curbs come from the City's Curb Lab, read from sign photos, and are still a beta. Sweep alerts and calendar reminders run on Boston time: an overnight sweep gets one alert around 9 PM the evening before.</p>"],
+  // ---- sweep alerts: the shared sender, each spot with its city (lib/cities.js) --------------------------------
+  ['this page is Boston', "const CITY='sf',", "const CITY='boston',"],
+  ['alert curbs from the file', /  const where=`cnn in\(\$\{cnns\.map[\s\S]*?const rows=await r\.json\(\), now=new Date\(\), out=\{\};/,
+    '  const rows=(await BOS.load()).filter(b=>cnns.includes(String(b.c))).flatMap(BOS.rowsOf), now=new Date(), out={};'],
+  ['no SF ticket file for the alerts panel', "    await loadEnforcement();  // the ticket-time tip rides in each spot, as from a sheet\n", ''],
+  // iPhone: alerts come from a Home Screen web app (the CURB app is San Francisco only)
+  ['iPhone: Home Screen alerts', '<p style="font-size:13.5px;color:var(--ink-soft);line-height:1.45">The free CURB app for iPhone turns on alerts with one tap.</p>\n    <a class="btn ios-get" id="iosGet" href="https://apps.apple.com/app/id6780998238" target="_blank" rel="noopener">Get the free iPhone app</a>\n    <p class="ios-or">Or add this site to your Home Screen:</p>',
+    '<a class="btn ios-get" id="iosGet" href="https://apps.apple.com/app/id6780998238" hidden>Get the free iPhone app</a>\n    <p class="ios-or">Add this map to your Home Screen to get alerts on iPhone:</p>'],
+  ['iPhone panel card: Home Screen', "Alerts need the app</b><p>Safari on iPhone can't show CURB's alerts. Get the free app, or add this site to your Home Screen.</p><a class=\"btn ios-get\" href=\"https://apps.apple.com/app/id6780998238\" target=\"_blank\" rel=\"noopener\">Get the free iPhone app</a></div>`;",
+    "Add CURB to your Home Screen</b><p>Safari on iPhone shows alerts only from a Home Screen web app: tap Share, then Add to Home Screen, and turn alerts on from there.</p></div>`;"],
+  ['Boston web app', '<link rel="manifest" href="manifest.json">', '<link rel="manifest" href="manifest-boston.json">'],
   ['report: Boston link', "(group.cnn?'  ·  curb.guide/b/'+group.cnn:'')", "(group.cnn?'  ·  curb.guide/boston?b='+group.cnn:'')"],
   ['report: say Boston', "const _repBlock = (group.corridor||'')", "const _repBlock = 'Boston: '+(group.corridor||'')"],
   ['calendar place name', "group.corridor||'SF'", "group.corridor||'Boston'", 2],

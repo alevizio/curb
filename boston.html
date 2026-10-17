@@ -26,7 +26,7 @@
 <meta name="twitter:image:alt" content="CURB: SF street parking map with colored curb lines">
 <link rel="preconnect" href="https://tile.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest-boston.json">
 <meta name="theme-color" content="#C1121F">
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
@@ -718,7 +718,7 @@
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.3" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="7.8" r="1.35" fill="currentColor"/><path d="M12 11.1v5.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
       <div class="infomenu" id="infoMenu" hidden role="menu" aria-label="Info and pages">
-        <button class="im-item" id="imAlerts" role="menuitem" style="display:none">
+        <button class="im-item" id="imAlerts" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
           <span class="im-tx"><b>Sweep alerts</b><small id="imAlertsSub">None on yet</small></span>
         </button>
@@ -846,9 +846,8 @@
     <button class="sheet-close" id="iosClose" aria-label="Close">×</button>
     <span class="kicker">iPhone</span>
     <div class="ios-head" id="iosHintHead">Get sweep alerts</div>
-    <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.45">The free CURB app for iPhone turns on alerts with one tap.</p>
-    <a class="btn ios-get" id="iosGet" href="https://apps.apple.com/app/id6780998238" target="_blank" rel="noopener">Get the free iPhone app</a>
-    <p class="ios-or">Or add this site to your Home Screen:</p>
+    <a class="btn ios-get" id="iosGet" href="https://apps.apple.com/app/id6780998238" hidden>Get the free iPhone app</a>
+    <p class="ios-or">Add this map to your Home Screen to get alerts on iPhone:</p>
     <ol class="ios-steps">
       <li><span class="n">1</span><span>Tap the <b>Share</b> button
         <span class="shareglyph"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m8 7 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></span>
@@ -1662,7 +1661,7 @@ function alertSpotFor(group, side, armNs, armRow){
   // earliest next sweep across them each tick (the "forever-watch"). `rule` = the row that produced
   // `ns`, kept for back-compat; cnn+sideKey identify this curb (also the saved-alert key).
   const ruleOf=r=>({weekday:r.weekday,fromhour:r.fromhour,tohour:r.tohour,
-    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0'});
+    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{})});
   const r0=armRow;
   // the block's avg ticket time flavors the copy
   const _et=enfFor(group.cnn, r0&&normDay(r0.weekday));
@@ -1671,7 +1670,7 @@ function alertSpotFor(group, side, armNs, armRow){
   // loaded before multi-watch, whose save moves the alerts (api/_store.js pickLegacy).
   return {
     corridor: group.corridor||'', limits: group.limits||'', blockside: side.blockside||'',
-    nextSweepISO: armNs.start.toISOString(), leadMinutes: 30, multi: 1,
+    nextSweepISO: armNs.start.toISOString(), leadMinutes: 30, multi: 1, ...(CITY!=='sf'?{city:CITY}:{}),
     level: getAlertLevel(), voice: getAlertVoice(),
     ...(_et?{tip:fmtMin(_et.avg)}:{}),
     ...(r0?{rule:ruleOf(r0), rules:(side.rows||[r0]).map(ruleOf), cnn:String(group.cnn||''), sideKey:String(side.key||'')}:{}),
@@ -1795,18 +1794,38 @@ function openSheet(group, activeKey){
     <div class="crules" id="curbRules" hidden></div>
     ${canRemind?'<hr class="shdiv">':''}
     <div class="actions">
-      
+      ${canRemind?`<button class="btn ${alertOn?'on':''}" id="alertBtn">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}
       ${canRemind?`<button class="btn alt" id="calBtn">${ICONS.cal} Calendar${calPref?'<span class="vsep" id="calMore" title="Change calendar type">▾</span>':''}</button>`:''}
       ${canRemind?`<div class="calchoice" id="calChoice" hidden>
         <button class="btn alt" id="calGoogle">Google Calendar</button>
         <button class="btn alt" id="calICS">Apple / .ics</button>
-      </div>`:''}
+      </div>
+      <div class="calchoice" id="alertOff" hidden>
+        <button class="btn alt" id="alertOffYes">Turn off alerts</button>
+        <button class="btn alt" id="alertOffNo">Keep them on</button>
+      </div>
+      <div class="alertnote" id="alertNote" hidden></div>`:''}
     </div>
-    
+    ${canRemind?`<details class="alertcfg" id="alertCfg">
+      <summary><span>Alert style</span><b class="acfg-st">${alertOn?'On · '+getAlertLevel():'Customize ▸'}</b></summary>
+      <div class="acfg-row" data-k="curbAlertLevel" data-def="normal">
+        <span class="acfg-lbl">Intensity</span>
+        <div class="seg" role="group" aria-label="Alert intensity">
+          <button type="button" data-v="light">Light</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="intense">Intense</button>
+        </div>
+      </div>
+      <div class="acfg-row" data-k="curbAlertVoice" data-def="cheeky">
+        <span class="acfg-lbl">Voice</span>
+        <div class="seg" role="group" aria-label="Alert voice">
+          <button type="button" data-v="cheeky">Cheeky</button><button type="button" data-v="drill">Drill</button><button type="button" data-v="deadpan">Deadpan</button>
+        </div>
+      </div>
+      <button class="btn alt acfg-test" id="testPushBtn" type="button">${ICONS.bell} Send me a test</button>
+    </details>`:''}
     ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins. Temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>Sweeping schedules come from Boston Public Works' street sweeping schedule (Analyze Boston), placed on each block by CURB from the street names, cross streets and odd or even side. The season, the holidays (daytime sweeping stops on City holidays, overnight sweeping keeps going) and the fines follow the City's published rules. Paid, resident permit, loading and accessible curbs come from the City's Curb Lab, read from sign photos, and are still a beta. Calendar reminders fire about 30 min before. Sweep alerts are not on for Boston yet.</p>
+      <p>Sweeping schedules come from Boston Public Works' street sweeping schedule (Analyze Boston), placed on each block by CURB from the street names, cross streets and odd or even side. The season, the holidays (daytime sweeping stops on City holidays, overnight sweeping keeps going) and the fines follow the City's published rules. Paid, resident permit, loading and accessible curbs come from the City's Curb Lab, read from sign photos, and are still a beta. Sweep alerts and calendar reminders run on Boston time: an overnight sweep gets one alert around 9 PM the evening before.</p>
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
 
@@ -1830,6 +1849,16 @@ function openSheet(group, activeKey){
     if(more)more.onclick=e=>{e.stopPropagation();openCalChoice();};
     document.getElementById('calGoogle').onclick=()=>doCal('google');
     document.getElementById('calICS').onclick=()=>doCal('ics');
+    // "✓ Alerts on" offers the off switch instead of silently re-arming (and extending) the watch.
+    document.getElementById('alertBtn').onclick=e=>{
+      if(alertSpotMatches(spot)){const o=document.getElementById('alertOff');o.hidden=false;reveal(o);return;}
+      onAlertTap(spot,e.currentTarget);
+    };
+    document.getElementById('alertOffNo').onclick=()=>{document.getElementById('alertOff').hidden=true;};
+    document.getElementById('alertOffYes').onclick=()=>turnOffAlerts(spot);
+    applyAlertCfg(spot);
+    paintAlertState(spot);
+    refreshWatch(spot);
   }
   document.getElementById('centerBtn').onclick=()=>{
     document.getElementById('sheet').classList.remove('tall');  // collapse so the block isn't hidden behind a tall sheet
@@ -1881,7 +1910,7 @@ function openSheet(group, activeKey){
       // a sweep starting before 7 AM gets one push around 9 PM the evening before, not a 30 min heads-up
       // (alertAnchors / lib/notify-core.js); and the tip never covers a toast that arrived in the meantime
       const night=!!(active.ns&&alertAnchors(active.ns.start).night), shown=document.getElementById('toast').textContent;
-      const tip="That's this curb's verdict. Calendar adds its next sweep to your phone.";
+      const tip="That's this curb's verdict. 🔔 Sweep alerts pings you "+(night?"around 9 PM the evening before it starts.":"~30 min before the truck.");
       setTimeout(()=>{ if(document.getElementById('toast').textContent===shown) toast(tip); },800);
     }
   }catch(_){}
@@ -1989,12 +2018,16 @@ function pushSupported(){
 // "On" is only claimed while the watch is alive: younger than the server's MAX_WATCH_AGE and, on web,
 // with notification permission — a false "on" would be worse than a false "off".
 const WATCH_MAX_AGE=120*864e5, WATCH_REFRESH=864e5, MAX_ALERTS=5;
+// This page's city (boston.html is built with 'boston'). Alerts carry their city, and one device's map holds both:
+// each page's panel resolves its own city's curbs and sends the others to their page. A Boston watch keeps
+// re-arming 165 days, through its December to March break (lib/cities.js).
+const CITY='boston', WATCH_AGES={boston:165*864e5}, CITY_NAME={sf:'San Francisco',boston:'Boston'}, CITY_PAGE={sf:'/',boston:'/boston'};
 const ALERT_LIMIT_MSG='You can have alerts on for '+MAX_ALERTS+' curbs at a time. To add this one, open one of them and turn its alerts off.';
 function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}  // legacy 'curbAlertKey' format
 function savedAlertKey(){try{return localStorage.getItem('curbAlertKey')||'';}catch(_){return '';}}
 function getAlertLevel(){try{return localStorage.getItem('curbAlertLevel')||'normal';}catch(_){return 'normal';}}
 function getAlertVoice(){try{return localStorage.getItem('curbAlertVoice')||'cheeky';}catch(_){return 'cheeky';}}
-const alertId=s=>String(s.cnn)+'|'+String(s.sideKey||'');
+const alertId=s=>(s.city?s.city+':':'')+String(s.cnn)+'|'+String(s.sideKey||'');
 function savedAlerts(){try{
   const a=JSON.parse(localStorage.getItem('curbAlert')||'null');
   if(!a||typeof a!=='object')return {};
@@ -2008,7 +2041,7 @@ function savedAlerts(){try{
 function savedAlert(spot){return spot&&spot.cnn?savedAlerts()[alertId(spot)]||null:null;}
 function rememberAlert(spot,v){
   const a={cnn:String(spot.cnn),sideKey:String(spot.sideKey||''),corridor:spot.corridor||'',limits:spot.limits||'',
-    blockside:spot.blockside||'',level:spot.level,voice:spot.voice,armedAt:Date.now(),v:v||2};
+    blockside:spot.blockside||'',level:spot.level,voice:spot.voice,armedAt:Date.now(),v:v||2,...(spot.city?{city:spot.city}:{})};
   const m=savedAlerts(); m[alertId(a)]=a;
   try{localStorage.setItem('curbAlert',JSON.stringify(m));localStorage.removeItem('curbAlertKey');}catch(_){}
   return a;
@@ -2020,8 +2053,8 @@ function forgetAlert(spot){try{
   if(!spot)return localStorage.removeItem('curbAlert');
   const m=savedAlerts(); delete m[alertId(spot)]; localStorage.setItem('curbAlert',JSON.stringify(m));
 }catch(_){}}
-function sameCurb(a,spot){return !!(a&&spot&&spot.cnn&&a.cnn===String(spot.cnn)&&a.sideKey===String(spot.sideKey||''));}
-function alertLive(a){return !!a&&Date.now()-a.armedAt<WATCH_MAX_AGE&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
+function sameCurb(a,spot){return !!(a&&spot&&spot.cnn&&a.cnn===String(spot.cnn)&&a.sideKey===String(spot.sideKey||'')&&(a.city||'')===(spot.city||''));}
+function alertLive(a){return !!a&&Date.now()-a.armedAt<(WATCH_AGES[a.city]||WATCH_MAX_AGE)&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
 function liveAlerts(){return Object.values(savedAlerts()).filter(alertLive);}
 // The other live sides when this one isn't on, and whether they fill every slot.
 function otherAlerts(spot){const o=liveAlerts().filter(a=>!sameCurb(a,spot));return {list:o,full:o.length>=MAX_ALERTS&&!alertSpotMatches(spot)};}
@@ -2191,7 +2224,7 @@ async function onAlertTap(spot, btn){
 }
 
 // The curb side a Turn off names, so the server disarms that one watch and leaves the device's others on.
-const sideOf=s=>({cnn:String(s.cnn||''),sideKey:String(s.sideKey||''),corridor:s.corridor||'',limits:s.limits||'',blockside:s.blockside||''});
+const sideOf=s=>({cnn:String(s.cnn||''),sideKey:String(s.sideKey||''),corridor:s.corridor||'',limits:s.limits||'',blockside:s.blockside||'',...(s.city?{city:s.city}:{})});
 // "✓ Alerts on" → Turn off: disarms this side's watch on the server (web: DELETE proven by the
 // subscription's own keys; iOS: the bridge posts {off:true, <side>} with the device token).
 // From the sheet, or from the Sweep alerts panel for any side: the sheet's controls change only when it shows
@@ -2371,12 +2404,10 @@ function pingLine(spot,level){
 }
 // The saved sides' rows from DataSF in one request → per side the sweep it is armed for and the spot a save sends.
 async function alertSides(list){
+  list=list.filter(a=>(a.city||'sf')===CITY);  // another city's curbs are resolved on their own page
   const cnns=[...new Set(list.map(a=>a.cnn).filter(c=>/^\d{1,12}$/.test(c)))];
   if(!cnns.length)return {};
-  const where=`cnn in(${cnns.map(c=>`'${c}'`).join(',')})`;
-  const r=await fetchRetry(SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays&$where=${encodeURIComponent(where)}&$limit=500`);
-  if(!r.ok)throw new Error('HTTP '+r.status);
-  const rows=await r.json(), now=new Date(), out={};
+  const rows=(await BOS.load()).filter(b=>cnns.includes(String(b.c))).flatMap(BOS.rowsOf), now=new Date(), out={};
   for(const a of list){
     const block=rows.filter(x=>String(x.cnn)===a.cnn), mine=block.filter(x=>sideKeyOf(x)===a.sideKey);
     if(!mine.length)continue;  // the city no longer lists this side: the row shows no schedule
@@ -2389,7 +2420,7 @@ async function alertSides(list){
 }
 function apStatus(app,n){
   if(!app){
-    if(isIOS()&&!isStandalone())return `<div class="ap-warn"><b class="h">Alerts need the app</b><p>Safari on iPhone can't show CURB's alerts. Get the free app, or add this site to your Home Screen.</p><a class="btn ios-get" href="https://apps.apple.com/app/id6780998238" target="_blank" rel="noopener">Get the free iPhone app</a></div>`;
+    if(isIOS()&&!isStandalone())return `<div class="ap-warn"><b class="h">Add CURB to your Home Screen</b><p>Safari on iPhone shows alerts only from a Home Screen web app: tap Share, then Add to Home Screen, and turn alerts on from there.</p></div>`;
     if(!pushSupported())return `<div class="ap-stat"><i></i>This browser can't show alerts. Use Calendar on a curb instead.</div>`;
     if(Notification.permission==='denied')return `<div class="ap-warn"><b class="h">Notifications are blocked</b><p>Allow notifications for curb.guide in this browser's site settings to get alerts.</p></div>`;
   }
@@ -2405,14 +2436,15 @@ function apStatus(app,n){
 }
 function apRow(a,level){
   const x=AP.sides[alertId(a)];
-  let when;
-  if(x&&x.armNs){const rp=relPhrase(x.armNs);
+  let when; const ac=a.city||'sf', away=ac!==CITY;
+  if(away)when=`<div class="ap-next">In ${CITY_NAME[ac]}. Its next sweep shows on that map.</div>`;
+  else if(x&&x.armNs){const rp=relPhrase(x.armNs);
     when=`<div class="ap-next ${rp.cls}">Next sweep ${esc(rp.txt)}${x.armNs.holiday?' · holiday schedule':''}</div>`
       +`<div class="ap-ping">${ICONS.bell}<span>${esc(pingLine(x.spot,level))}</span></div>`;}
   else when=`<div class="ap-next">${!AP.loaded?'Loading the schedule…':AP.err?"Couldn't load the schedule. Its alerts still work.":'No sweep coming up here.'}</div>`;
   return `<div class="ap-row" data-id="${esc(alertId(a))}"><div class="ap-nm">${esc(alertLabel(a,[a]))}</div>`
     +(a.limits?`<div class="ap-lim">${esc(fmtLimits(a.limits))}</div>`:'')+when
-    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">Show on map</button>`
+    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">${away?'Open the '+CITY_NAME[ac]+' map':'Show on map'}</button>`
     +(AP.offing.has(alertId(a))?`<button class="btn alt ap-x busy" type="button" data-act="off" aria-busy="true">Turning off…</button>`
       :`<button class="btn alt ap-x" type="button" data-act="off">Turn off</button>`)+`</div></div>`;
 }
@@ -2461,6 +2493,8 @@ function renderAlertsPanel(){
     const id=row.dataset.id, a=savedAlerts()[id]; if(!a)return;
     row.querySelector('[data-act="show"]').onclick=()=>{
       closeAlertsPanel();
+      const ac=a.city||'sf';
+      if(ac!==CITY){location.href=CITY_PAGE[ac]+'?b='+encodeURIComponent(a.cnn)+'&side='+encodeURIComponent(a.sideKey||a.blockside||'');return;}
       if(!/^\d{1,12}$/.test(a.cnn))return;
       userPicked(); showEveryCurb();  // a day chip or a hidden curb color would open another side, or block
       openCurb(a.cnn,a.sideKey||a.blockside||'');
@@ -2486,7 +2520,6 @@ function renderAlertsPanel(){
 async function loadAlertsPanel(){
   const gen=++AP.gen, list=liveAlerts();
   if(list.length){
-    await loadEnforcement();  // the ticket-time tip rides in each spot, as from a sheet
     try{const s=await alertSides(list);if(gen===AP.gen)AP.sides=s;}catch(_){if(gen===AP.gen)AP.err=true;}
   }
   if(gen!==AP.gen)return;

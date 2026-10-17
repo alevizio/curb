@@ -16,7 +16,7 @@ city we are looking at. Read this file first.
 | City | Status | Who | What is in the way |
 |---|---|---|---|
 | San Francisco | Live at curb.guide and in the App Store | Ale | Nothing |
-| Boston | Prototype at curb.guide/boston (2026-10-16): map, sheet, calendar, Curb Lab layers | Ale | Alerts need a city on saved spots (phase 1). Sign data covers 15% of swept curbs. See [boston.md](boston.md) |
+| Boston | Prototype at curb.guide/boston (2026-10-16): map, sheet, calendar, sweep alerts, six Curb Lab layers | Ale | Sign data covers 15% of swept curbs and was last published 2026-05-07. See [boston.md](boston.md) |
 | Buenos Aires | Researched. A volunteer wants to run it | A local maintainer | The City publishes the rule for every curb side, but under a license that forbids commercial use. It is not a street sweeping city, so the map has to draw other rule types, and it needs Spanish. See [buenos-aires.md](buenos-aires.md) |
 
 ## Principles
@@ -64,7 +64,7 @@ monitor, and since 2026-10-01 the time and schedule logic (see "Done so far").
 | SF-only layers and baked files (permits, meters, loading, ticket times, sweeper passes) | index.html, scripts/build-*.mjs, data/*.json | Large |
 | Words on screen ("San Francisco", SFMTA, the $105 fine, about 70 strings) | index.html, api/block.js, lib/notify-core.js, site.js, manifest.json | Medium |
 | Basemap tiles, baked only for SF and the Bay | basemap/parchment, scripts/build-basemap.sh | Medium |
-| Saved alerts carry no city (a block id is only unique inside one city) | api/_spot.js, api/send-notifications.js, index.html localStorage | Medium |
+| Saved alerts carry no city (a block id is only unique inside one city). Fixed 2026-10-17 (lib/cities.js) | api/_spot.js, api/send-notifications.js, index.html localStorage | Done |
 | Block and neighborhood pages, sitemaps, share cards | api/block.js, scripts/build-hood-pages.mjs, scripts/build-block-sitemap.mjs | Medium |
 | Map defaults (center, bounds, weather) and "CURB covers San Francisco" messages | index.html | Small |
 | Address search (SF's address database) | index.html | Medium |
@@ -116,7 +116,9 @@ monitor, and since 2026-10-01 the time and schedule logic (see "Done so far").
 1. `lib/cities.js` with SF and the new city.
 2. `scripts/cities/<id>.mjs` writing `data/<id>/segments.json` and `overview.json`.
 3. The static provider in index.html, root absolute asset paths, and switches that hide SF-only layers.
-4. `city` on saved spots, through the sender, the deep link and the saved alert key.
+4. `city` on saved spots, through the sender, the deep link and the saved alert key. Done for Boston (2026-10-17):
+   `lib/cities.js` is the server's registry (time core, watch age, block link, copy facts); a spot without a city
+   is San Francisco.
 5. The city's page at `curb.guide/<id>`, its manifest, its basemap bake, its holiday table.
 6. Tests for the city's time zone, season, holidays and data; one monitor check.
 

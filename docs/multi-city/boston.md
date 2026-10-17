@@ -43,9 +43,13 @@ What the numbers say (`data/boston/report.json`, 2026-10-16):
   first build missed: it had 1,510 permit and 56 accessible. Hydrant stubs are left out. A tapped curb lists the
   rules matched to its side (5,071 of 14,303 swept sides have some).
 
-Not in the preview: sweep alerts (the push sender runs on SF time and saved spots have no city yet, phase 1
-item 4 in the README), ticket times (no citation data), block and neighborhood pages, the iPhone app. The
-calendar reminder works, in Eastern time.
+Sweep alerts work for Boston (2026-10-17): a saved spot carries `city: 'boston'` and its rules' `months`, and the
+one shared sender times it on Boston's core (`lib/cities.js`: Eastern time, City holidays, the season, a $40 fine
+in the copy and no SF ticket statistics, a 165 day watch age to bridge the December to March break, pushes that
+open `/boston?b=`). On iPhone they need the page added to the Home Screen (`manifest-boston.json`, which opens
+/boston); the CURB app is San Francisco only. One device's saved alerts hold both cities; each page's panel
+resolves its own and sends the other city's curbs to their map. Not in the preview: ticket times (no citation
+data), block and neighborhood pages, the iPhone app. The calendar reminder works, in Eastern time.
 
 Questions for the City, from building it:
 
