@@ -758,3 +758,32 @@ describe('APNs interruption level', () => {
     expect(got[0]['interruption-level']).toBe('time-sensitive');
   });
 });
+
+describe('Boston watches (city: boston)', () => {
+  // A St, Southeast side, swept 9 AM EST Tue Nov 3 2026 (weeks 1 and 3, April to November)
+  const R = { weekday: 'tue', fromhour: '9', tohour: '13', week1: '1', week2: '0', week3: '1', week4: '0', week5: '0', holidays: '0', months: [4, 5, 6, 7, 8, 9, 10, 11] };
+  const bos = { corridor: 'A St', blockside: 'Southeast', city: 'boston', cnn: '8', sideKey: 'Southeas', rule: R, rules: [R],
+    nextSweepISO: '2026-11-03T14:00:00.000Z', eveningISO: '2026-11-03T01:00:00.000Z', leadMinutes: 30, level: 'normal' };
+  const rec = (spot) => JSON.stringify({ subscription: SUB, spot, notified: {}, savedAt: NOW });
+  it('pushes at Boston times and opens the Boston map on the block', async () => {
+    mem['curb:subs'] = { [EP]: rec(bos) };
+    vi.setSystemTime(Date.parse('2026-11-03T01:05:00Z'));    // 8:05 PM in Boston, the evening before
+    const out = await run(bearer());
+    expect(out.body.web.sent).toBe(1);
+    const p = JSON.parse(send.mock.calls[0][1]);
+    expect(p.url).toBe('/boston?b=8&side=Southeast');
+    expect(p.body).toContain('at 9 AM');
+  });
+  it('a watch that fails to compute is skipped, and every other watch still gets its push', async () => {
+    const core = globalThis.BOS.core, real = core.alertAnchors;
+    core.alertAnchors = () => { throw new Error('boom'); };
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      mem['curb:subs'] = { [EP]: rec(bos), [EP + '#1']: rec(SPOT) };   // SPOT: the SF lead push due at NOW
+      const out = await run(bearer());
+      expect(out.code).toBe(200);
+      expect(out.body.web).toMatchObject({ watches: 2, sent: 1 });
+      expect(JSON.parse(send.mock.calls[0][1]).body).toContain('Steiner St');
+    } finally { core.alertAnchors = real; quiet.mockRestore(); }
+  });
+});

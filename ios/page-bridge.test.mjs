@@ -299,6 +299,23 @@ describe('saved alerts: a map of watched sides', () => {
     expect(s.run('otherAlerts(x).full')).toBe(false);
   });
 
+  it('keeps a Boston curb apart from an SF one with the same block id, and "on" for Boston\'s longer watch age', async () => {
+    const { CITIES } = await import('../lib/cities.js');
+    const s = alertState();
+    s.g.sf = side('8', 'South'); s.g.bos = { ...side('8', 'South', 'A St'), city: 'boston' };
+    s.run('rememberAlert(sf);rememberAlert(bos)');
+    expect(Object.keys(JSON.parse(s.store.curbAlert))).toEqual(['8|South', 'boston:8|South']);
+    expect(JSON.parse(s.store.curbAlert)['boston:8|South'].city).toBe('boston');
+    expect(s.run('sameCurb(savedAlerts()["8|South"],bos)')).toBe(false);
+    s.run('forgetAlert(bos)');
+    expect(Object.keys(JSON.parse(s.store.curbAlert))).toEqual(['8|South']);
+    const old = Date.now() - 150 * 864e5;
+    s.g.e = { ...JSON.parse(s.store.curbAlert)['8|South'], armedAt: old };
+    expect(s.run('alertLive(e)')).toBe(false);                                   // SF: past 120 days
+    expect(s.run('alertLive({...e,city:"boston"})')).toBe(true);                // Boston: through its winter break
+    expect(s.run('WATCH_AGES.boston')).toBe(CITIES.boston.watchAge);
+  });
+
   it('"on" lapses at the server\'s MAX_WATCH_AGE (one value, api/_schedule.js)', async () => {
     const { MAX_WATCH_AGE } = await import('../api/_schedule.js');
     expect(alertState().run('WATCH_MAX_AGE')).toBe(MAX_WATCH_AGE);

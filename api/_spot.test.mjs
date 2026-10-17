@@ -70,3 +70,27 @@ describe('sanitizeSide (which watch a Turn off names)', () => {
     expect(sanitizeSide('North')).toBe(null);
   });
 });
+
+describe('Boston spots: the season and the city', () => {
+  const B = { ...SPOT, cnn: '5084', sideKey: 'South', city: 'boston', rules: [R({ weekday: 'Mon', fromhour: '8', tohour: '12', months: [11, 4, 5, 6, 7, 8, 9, 10, 4] })] };
+  it('keeps a rule\'s months, sorted and distinct, and drops bad ones', () => {
+    expect(sanitizeSpot(B).rules[0].months).toEqual([4, 5, 6, 7, 8, 9, 10, 11]);
+    expect(sanitizeRules([R({ months: [0, 13, 'x', 2.5, 3] })])[0].months).toEqual([3]);
+  });
+  it('leaves months out for a rule swept all year, or with none, so SF rules are unchanged', () => {
+    expect(sanitizeRules([R({ months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] })])[0]).not.toHaveProperty('months');
+    expect(sanitizeRules([R({ months: [] })])[0]).not.toHaveProperty('months');
+    expect(sanitizeRules([R()])[0]).toEqual(sanitizeRules([R()])[0]);
+    expect(Object.keys(sanitizeRules([R()])[0])).not.toContain('months');
+  });
+  it('keeps city "boston", leaves it off San Francisco spots, and refuses a city it doesn\'t know', () => {
+    expect(sanitizeSpot(B).city).toBe('boston');
+    expect(sanitizeSpot({ ...SPOT, rules: [R()] })).not.toHaveProperty('city');
+    expect(sanitizeSpot({ ...SPOT, rules: [R()], city: '' })).not.toHaveProperty('city');
+    expect(sanitizeSpot({ ...SPOT, rules: [R()], city: 'nyc' })).toBeNull();
+  });
+  it('names the city in a Turn off\'s side', () => {
+    expect(sanitizeSide({ cnn: '5084', sideKey: 'South', city: 'boston' })).toMatchObject({ cnn: '5084', city: 'boston' });
+    expect(sanitizeSide({ cnn: '7735000', sideKey: 'West' })).not.toHaveProperty('city');
+  });
+});

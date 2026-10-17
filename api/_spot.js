@@ -23,7 +23,7 @@ export function sanitizeRule(rule) {
   const fromH = parseInt(rule.fromhour, 10);
   if (Number.isNaN(fromH)) return null;
   const bit = (v) => (String(v) === '1' ? '1' : '0');
-  return {
+  const out = {
     // store a canonical label (never arbitrary client text); guard above ensures a valid index
     weekday: LABEL[dow],
     fromhour: String(fromH),
@@ -32,7 +32,18 @@ export function sanitizeRule(rule) {
     week4: bit(rule.week4), week5: bit(rule.week5),
     holidays: bit(rule.holidays),
   };
+  // A seasonal rule's months (Boston sweeps April to November): kept only when they leave some month out, so a
+  // rule swept all year, every SF rule among them, stores exactly as before.
+  const months = Array.isArray(rule.months) ? [...new Set(rule.months.map(Number).filter((m) => Number.isInteger(m) && m >= 1 && m <= 12))].sort((a, b) => a - b) : [];
+  if (months.length && months.length < 12) out.months = months;
+  return out;
 }
+
+// The cities a spot can name (lib/cities.js); no city is San Francisco, and an unknown one is refused rather than
+// timed as SF.
+const CITY_IDS = ['boston'];
+const cityField = (v) => (CITY_IDS.includes(v) ? { city: v } : {});
+const unknownCity = (v) => v != null && v !== '' && !CITY_IDS.includes(v);
 
 // Every rule of the curb side: a quarter of SF sides are swept on several days (or on one weekday split
 // across week bits), and a single `rule` alerted on only one of them. The cron re-arms to the EARLIEST
@@ -67,6 +78,7 @@ export function sanitizeSide(spot) {
     corridor: t(spot.corridor, 120),
     limits: t(spot.limits, 120),
     blockside: t(spot.blockside, 60),
+    ...cityField(spot.city),
   };
   return side.cnn || side.corridor || side.limits || side.blockside ? side : null;
 }
@@ -77,6 +89,7 @@ export function sanitizeSpot(spot) {
   const t = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
   const ts = Date.parse(spot.nextSweepISO);
   if (!Number.isFinite(ts)) return null; // no valid sweep time => nothing for the cron to fire on
+  if (unknownCity(spot.city)) return null;
   let lead = Number(spot.leadMinutes);
   if (!Number.isFinite(lead)) lead = 30;
   // Floor at 15 (the cron interval) so the lead window can never be narrower than a tick gap and get
@@ -90,6 +103,7 @@ export function sanitizeSpot(spot) {
     blockside: t(spot.blockside, 60),
     nextSweepISO: new Date(ts).toISOString(),
     leadMinutes: lead,
+    ...cityField(spot.city),
   };
   if (Number.isFinite(ev) && ev < ts) out.eveningISO = new Date(ev).toISOString();
   // morning-of anchor for the Intense level (set client-side / by recomputeSpot); must precede sweep.

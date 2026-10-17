@@ -1,15 +1,19 @@
 // Re-arm logic for the push "forever-watch" — kept pure (a helper, not a routed function) so it
 // can be unit-tested under frozen clocks without touching the store or web-push.
 //
-// Side-effect import: the SF time core attaches nextSweep/alertAnchors to globalThis.
+// Side-effect import: the SF time core attaches isHolidayRow (and nextSweep/alertAnchors) to globalThis. Each watch
+// re-arms on its own city's core (lib/cities.js): no city is San Francisco.
 import '../lib/sweep-core.js';
+import { CITIES, cityOf } from '../lib/cities.js';
 import { sanitizeRule, sanitizeRules } from './_spot.js';
-const { nextSweep, alertAnchors, isHolidayRow } = globalThis;
+const { isHolidayRow } = globalThis;
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with live data)
 // for this long, so a frozen rule can't push wrong times forever after a city schedule change. One value for
-// the sender (stops the re-arm) and the store (such a watch, once its sweep is over, frees its slot).
-export const MAX_WATCH_AGE = 120 * 864e5; // ~120 days
+// the sender (stops the re-arm) and the store (such a watch, once its sweep is over, frees its slot). San Francisco's;
+// a Boston watch keeps re-arming 165 days, through the December to March break (watchAgeOf).
+export const MAX_WATCH_AGE = CITIES.sf.watchAge; // ~120 days
+export const watchAgeOf = (spot) => cityOf(spot).watchAge;
 
 // The side's rules: its weekday rows plus its posted holiday schedule ('holiday', api/_spot.js), which
 // nextSweep places only on minor holidays, when the weekday rows are stopped (lib/sweep-core.js).
@@ -24,7 +28,7 @@ const rulesOf = (spot) => (Array.isArray(spot.rules) && spot.rules.length ? spot
  *  clamped to 8 by sanitizeSpot) as the start of a baked side name, and a cnnrightleft key ('L', 'R', 'C')
  *  matches the rows DataSF gave no blockside. Pure; the cron persists the result only through an advance. */
 export function withHolidayRules(spot, holidayRows) {
-  if (!spot || !spot.cnn) return spot;
+  if (!spot || !spot.cnn || spot.city) return spot;   // SF's posted holiday schedules: SF blocks only
   const rules = rulesOf(spot);
   if (!rules.length || rules.some(isHolidayRow)) return spot;
   const rows = holidayRows(spot.cnn);
@@ -63,7 +67,7 @@ export function watchDead(rec, now = Date.now()) {
   if (!spot) return false;
   const rules = rulesOf(spot), start = Date.parse(spot.nextSweepISO);
   if (Number.isFinite(start) && now < start + windowMs(rules)) return false;
-  return !rules.length || Boolean(rec.savedAt && now - rec.savedAt >= MAX_WATCH_AGE);
+  return !rules.length || Boolean(rec.savedAt && now - rec.savedAt >= watchAgeOf(spot));
 }
 
 /** Given a stored spot carrying its recurring `rules` (or a legacy single `rule`), return an ADVANCED
@@ -78,6 +82,7 @@ export function watchDead(rec, now = Date.now()) {
  *  coupled to "right after the lead push fired". */
 export function recomputeSpot(spot) {
   if (!spot) return null;
+  const { nextSweep, alertAnchors } = cityOf(spot).core;
   const rules = rulesOf(spot);
   let ns = null;
   for (const r of rules) {
@@ -87,8 +92,8 @@ export function recomputeSpot(spot) {
   if (!ns) return null; // no occurrence within nextSweep's 150-day scan (e.g. a rule the city dropped)
   const iso = ns.start.toISOString();
   if (iso === spot.nextSweepISO) return null; // unchanged — nothing to advance
-  // Anchors from the ONE rule the page also uses (lib/sweep-core.js alertAnchors): eve = 8pm SF the
-  // evening before; morn only when start−2h lands 06:00-21:59 SF on the sweep day. A night sweep
+  // Anchors from the ONE rule the page also uses (lib/sweep-core.js alertAnchors), on the spot's own clock: eve =
+  // 8pm the evening before; morn only when start−2h lands 06:00-21:59 on the sweep day. A night sweep
   // (before 7am) carries neither — it gets the "tonight" push, derived at send time.
   const a = alertAnchors(ns.start);
   const out = { ...spot, nextSweepISO: iso };

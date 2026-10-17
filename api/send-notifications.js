@@ -24,7 +24,8 @@ import {
   loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot,
   saveRunStatus, loadRunStatus, loadDelivery,
 } from './_store.js';
-import { recomputeSpot, withHolidayRules, MAX_WATCH_AGE } from './_schedule.js';
+import { recomputeSpot, withHolidayRules, watchAgeOf } from './_schedule.js';
+import { cityOf } from '../lib/cities.js';
 import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
 import { dueAlert } from '../lib/notify-core.js';
 
@@ -51,8 +52,8 @@ function holidayRowsOf(cnn) {
 }
 
 // A forever-watch stops auto-advancing once it hasn't been refreshed (by reopening the app with
-// live data) for MAX_WATCH_AGE (~120 days, api/_schedule.js, shared with the store) — bounds wrong-time
-// pushes if the city changes a block's schedule.
+// live data) for its city's watch age (api/_schedule.js watchAgeOf, shared with the store: ~120 days in SF, 165 in
+// Boston, through its winter break) — bounds wrong-time pushes if the city changes a block's schedule.
 // The run lock's lifetime: longer than the 60 s maxDuration (vercel.json), so it outlives any run.
 const RUN_LOCK_MS = 120000;
 
@@ -100,9 +101,32 @@ export function judgeDelivery(prev, run) {
 // A notification tap opens the specific block when we know its cnn, else the map. It names the curb side
 // (?side=North; /b/ passes it on to the live map link, like a shared link): with both sides of a block
 // watched, a tap on one side's push must not open the other side's sheet. Letters only, as /b/ accepts.
+// Each city has its own block link (lib/cities.js): /b/<cnn> in SF, the Boston map's /boston?b=<cnn>.
 const deepLink = (spot) => (spot && spot.cnn
-  ? '/b/' + spot.cnn + (/^[A-Za-z]{1,12}$/.test(spot.blockside || '') ? '?side=' + spot.blockside : '')
-  : '/');
+  ? cityOf(spot).blockLink(spot.cnn, /^[A-Za-z]{1,12}$/.test(spot.blockside || '') ? spot.blockside : '')
+  : cityOf(spot).home);
+
+// One watch's re-arm or due push, worked out apart from its store writes, which stay in the loops (a store error
+// must still end the run: see the lock). A watch whose arithmetic throws (odd stored data, a city's time core) is
+// skipped and logged, never the end of the run for every watch after it. null when skipped.
+function planWatch(spot, notified, savedAt, now) {
+  try {
+    // A watch from before the holiday model gets its side's Holiday rules here, every run (an old page's re-save
+    // drops them again); they are stored only by an advance.
+    const watch = withHolidayRules(spot, holidayRowsOf);
+    // Forever-watch re-arm: advance to the next occurrence once the window ends (its OWN pass, never coupled to the
+    // lead push, which still returns the same instant at lead time). Stops once stale (its city's watch age) so a
+    // frozen rule can't track a city schedule change. The advanced occurrence is in the future: nothing pushes.
+    if (!savedAt || now - savedAt < watchAgeOf(spot)) {
+      const advanced = recomputeSpot(watch);
+      if (advanced) return { advanced };
+    }
+    return { due: dueAlert(watch, notified, now) };
+  } catch (e) {
+    console.error('watch skipped:', String((e && e.message) || e).slice(0, 200));
+    return null;
+  }
+}
 
 // A device keeps up to 5 watches (one per curb side, api/_store.js MAX_WATCHES), each its own record, so
 // both loops below run per WATCH exactly as they ran per device. What is per DEVICE: `checked` (devices
@@ -254,8 +278,8 @@ export default async function handler(req, res) {
 
   try {
     const now = Date.now();
-    let sent = 0, pruned = 0, rearmed = 0;
-    let iosSent = 0, iosPruned = 0, iosRearmed = 0;
+    let sent = 0, pruned = 0, rearmed = 0, skipped = 0;
+    let iosSent = 0, iosPruned = 0, iosRearmed = 0, iosSkipped = 0;
     // Delivery health: failures by status per channel, and each device's outcome (see judgeDelivery).
     const webFailures = {}, iosFailures = {}, webOut = [], iosOut = [];
     const failedOn = (map, out, id, why) => { map[why] = (map[why] || 0) + 1; out.push({ id: deviceId(id), ok: false, why }); };
@@ -265,20 +289,12 @@ export default async function handler(req, res) {
     const webGone = new Set(), webDown = new Set();
     for (const { field, slot, endpoint, subscription, spot, notified, savedAt } of subs) {
       if (!spot || !spot.nextSweepISO || webGone.has(endpoint)) continue;
-      // A watch from before the holiday model gets its side's Holiday rules here, every run (an old page's
-      // re-save drops them again); they are stored only by an advance, below.
-      const watch = withHolidayRules(spot, holidayRowsOf);
-      // Forever-watch re-arm: advance to the next occurrence once the window ends (its OWN pass —
-      // never coupled to the lead push, which still returns the same instant at lead time). Stops
-      // while stale (MAX_WATCH_AGE) so a frozen rule can't track a city schedule change. The
-      // advanced occurrence is in the future, so nothing pushes this tick → continue. Skipped when the
-      // user turned the watch off or re-saved it since the snapshot (advanceSpot re-reads it and compares
-      // with the stored `spot`, never the filled `watch`).
-      if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
-        const advanced = recomputeSpot(watch);
-        if (advanced) { if (await advanceSpot(field, advanced, spot)) rearmed++; continue; }
-      }
-      const due = dueAlert(watch, notified, now);
+      const plan = planWatch(spot, notified, savedAt, now);
+      if (!plan) { skipped++; continue; }
+      // The re-arm is skipped when the user turned the watch off or re-saved it since the snapshot (advanceSpot
+      // re-reads it and compares with the stored `spot`, never the holiday-filled watch).
+      if (plan.advanced) { if (await advanceSpot(field, plan.advanced, spot)) rearmed++; continue; }
+      const due = plan.due;
       if (!due || webDown.has(endpoint)) continue;
       const payload = JSON.stringify({ title: due.title, body: due.body, url: deepLink(spot), tag: tagFor(due.tag, slot), requireInteraction: due.urgent });
       // Bounded TTL (web-push's default is 4 weeks: an offline phone would get "move your car" days
@@ -324,12 +340,10 @@ export default async function handler(req, res) {
       try {
         for (const { field, slot, token, spot, notified, savedAt } of iosSubs) {
           if (!spot || !spot.nextSweepISO || iosGone.has(token)) continue;
-          const watch = withHolidayRules(spot, holidayRowsOf);
-          if (!savedAt || now - savedAt < MAX_WATCH_AGE) {
-            const advanced = recomputeSpot(watch);
-            if (advanced) { if (await advanceIosSpot(field, advanced, spot)) iosRearmed++; continue; }
-          }
-          const due = dueAlert(watch, notified, now);
+          const plan = planWatch(spot, notified, savedAt, now);
+          if (!plan) { iosSkipped++; continue; }
+          if (plan.advanced) { if (await advanceIosSpot(field, plan.advanced, spot)) iosRearmed++; continue; }
+          const due = plan.due;
           if (!due || iosDown.has(token)) continue;
           const tag = tagFor(due.tag, slot);
           // The act-now pushes (30 min before, "move it tonight": notify-core `urgent`) are Time Sensitive: in the app
@@ -387,7 +401,7 @@ export default async function handler(req, res) {
     };
     // checked = devices (alerts off included, as before); watches = armed watches across them
     const count = (list, dev) => ({ checked: new Set(list.map((x) => x[dev])).size, watches: list.filter((x) => x.spot).length });
-    await finish(200, { ok: true, web: { ...count(subs, 'endpoint'), ...tally(sent, pruned, webFailures), rearmed }, ios: { configured: iosConfigured, ...count(iosSubs, 'token'), ...tally(iosSent, iosPruned, iosFailures), rearmed: iosRearmed, ...(iosError ? { error: iosError } : {}) } },
+    await finish(200, { ok: true, web: { ...count(subs, 'endpoint'), ...tally(sent, pruned, webFailures), rearmed, ...(skipped ? { skipped } : {}) }, ios: { configured: iosConfigured, ...count(iosSubs, 'token'), ...tally(iosSent, iosPruned, iosFailures), rearmed: iosRearmed, ...(iosSkipped ? { skipped: iosSkipped } : {}), ...(iosError ? { error: iosError } : {}) } },
       undefined, { web: webOut, ios: iosOut, iosError, iosUnconfigured: iosConfigured ? 0 : iosSubs.filter((t) => t.spot).length });
   } catch (e) {
     console.error('send-notifications failed:', e);

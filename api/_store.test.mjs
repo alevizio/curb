@@ -766,3 +766,24 @@ describe('dead watches free their slot', () => {
     expect(await saveSub(SUB, SIX)).toEqual({ slot: 4 });
   });
 });
+
+describe('two cities on one device (a Boston curb and an SF curb)', () => {
+  const w = (n = 0) => { const v = mem['curb:subs'] && mem['curb:subs'][n ? `${EP}#${n}` : EP]; return v ? JSON.parse(v) : undefined; };
+  const bos = { ...spotA, city: 'boston' };   // the same block id and side as spotA, in Boston
+  it('keeps them apart: a Boston save never lands on the SF watch of the same block id and side', async () => {
+    await saveSub(SUB, spotA);
+    expect(await saveSub(SUB, bos)).toEqual({ slot: 1 });
+    expect(w(0).spot).toEqual(spotA);
+    expect(w(1).spot.city).toBe('boston');
+    expect(sameSide(spotA, bos)).toBe(false);
+    expect(sameSide(bos, { ...bos })).toBe(true);
+  });
+  it('a Turn off naming the Boston side turns off only that watch, which keeps its city to be found again', async () => {
+    await saveSub(SUB, spotA);
+    await saveSub(SUB, bos);
+    expect(await disarmSub(EP, 'a', { cnn: '123', sideKey: 'L', corridor: 'Haight St', limits: '', blockside: '', city: 'boston' })).toBe('ok');
+    expect(w(0).spot).toEqual(spotA);
+    expect(w(1)).toMatchObject({ spot: null, offSide: { cnn: '123', sideKey: 'L', city: 'boston' } });
+    expect(await saveSub(SUB, bos)).toEqual({ slot: 1 });
+  });
+});

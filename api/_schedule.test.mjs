@@ -208,3 +208,46 @@ describe('watchDead — a watch that can never push again (it may give up its sl
     expect(watchDead({ spot: both, savedAt: stale }, THIS_WED + 6 * 36e5)).toBe(true);
   });
 });
+
+// Boston watches (city: 'boston'): Eastern time, the City's holidays, the April to November season.
+describe('Boston watches', () => {
+  const at = (iso) => { vi.useFakeTimers(); vi.setSystemTime(new Date(iso)); };
+  const TUE = { weekday: 'tue', fromhour: '9', tohour: '13', week1: '1', week2: '0', week3: '1', week4: '0', week5: '0', holidays: '0', months: [4, 5, 6, 7, 8, 9, 10, 11] };
+  const spot = (rules, nextSweepISO) => ({ corridor: 'A St', limits: 'W 2nd St - W 3rd St', blockside: 'Southeast', city: 'boston', cnn: '8', sideKey: 'Southeas',
+    rule: rules[0], rules, nextSweepISO, leadMinutes: 30, level: 'normal', voice: 'cheeky' });
+  it('re-arms in Eastern time, across the November clock change', () => {
+    at('2026-10-20T18:00:00Z');                                         // Tue Oct 20, 2 PM in Boston, after the 9 to 1
+    const out = recomputeSpot(spot([TUE], '2026-10-20T13:00:00.000Z'));
+    expect(out.nextSweepISO).toBe('2026-11-03T14:00:00.000Z');          // 1st Tuesday of November, 9 AM EST
+    expect(out.eveningISO).toBe('2026-11-03T01:00:00.000Z');            // 8 PM Boston time the evening before
+    expect(out.morningISO).toBe('2026-11-03T12:00:00.000Z');            // 7 AM Boston time
+  });
+  it('waits out the winter: the last sweep of November re-arms to April', () => {
+    at('2026-11-17T18:00:00Z');
+    expect(recomputeSpot(spot([TUE], '2026-11-17T14:00:00.000Z')).nextSweepISO).toBe('2027-04-06T13:00:00.000Z');
+  });
+  it('gives an overnight sweep no evening or morning anchor (it gets the 9 PM push)', () => {
+    at('2026-10-20T18:00:00Z');
+    const NIGHT = { ...TUE, fromhour: '0', tohour: '7', week2: '1', week4: '1', week5: '1' }; delete NIGHT.months;
+    const out = recomputeSpot(spot([NIGHT], '2026-10-20T04:00:00.000Z'));
+    expect(out.nextSweepISO).toBe('2026-10-27T04:00:00.000Z');          // midnight Tue Oct 27 in Boston
+    expect(out).not.toHaveProperty('eveningISO');
+    expect(out).not.toHaveProperty('morningISO');
+  });
+  it('skips daytime sweeping on a City holiday', () => {
+    at('2026-11-05T12:00:00Z');
+    const WED2 = { ...TUE, weekday: 'wed', week1: '0', week2: '1', week3: '0' };   // Nov 11, 2026 is Veterans Day
+    expect(recomputeSpot(spot([WED2], '2026-10-14T13:00:00.000Z')).nextSweepISO).toBe('2027-04-14T13:00:00.000Z');
+  });
+  it('keeps re-arming past SF\'s watch age, through the winter', () => {
+    const now = Date.UTC(2027, 3, 1), savedAt = now - 150 * 864e5;
+    const rec = (city) => ({ savedAt, spot: { ...spot([TUE], '2026-11-17T14:00:00.000Z'), city } });
+    expect(watchDead(rec('boston'), now)).toBe(false);
+    expect(watchDead(rec(undefined), now)).toBe(true);
+    expect(MAX_WATCH_AGE).toBe(120 * 864e5);
+  });
+  it('never takes SF\'s holiday schedules: a Boston block id can match an SF one', () => {
+    const s = spot([TUE], '2026-11-03T14:00:00.000Z');
+    expect(withHolidayRules(s, () => [['Southeast', 7, 6, 8, 31, 1]])).toBe(s);
+  });
+});

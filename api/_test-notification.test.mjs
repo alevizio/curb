@@ -81,3 +81,18 @@ describe('sw.js push handler', () => {
     expect(pushOnce({ title: 'x', tag: 'curb-test-lead' }).requireInteraction).toBe(false);
   });
 });
+
+describe('test push for a Boston curb', () => {
+  it('names when each alert really fires in Boston time, and opens the Boston map', async () => {
+    const { plan } = await call({ which: 'all', level: 'normal', spot: { corridor: 'A St', blockside: 'Southeast', city: 'boston', nextSweepISO: '2026-10-06T13:00:00.000Z' } });
+    expect(plan.map((p) => p.title)).toEqual(['Test · Night before (Mon 8 PM)', 'Test · 30 min before (Tue 8:30 AM)']);   // 9 AM EDT sweep
+    expect(plan[0].body).toContain('gets cleaned at 9 AM');
+    await call({ which: 'lead', spot: { corridor: 'A St', city: 'boston', nextSweepISO: '2026-10-06T13:00:00.000Z' },
+      subscription: { endpoint: 'https://web.push.apple.com/x', keys: { p256dh: 'p', auth: 'a' } } }, {});
+    expect(JSON.parse(send.mock.calls[0][1]).url).toBe('/boston');
+  });
+  it('replays an overnight Boston sweep as its 9 PM push, Boston time', async () => {
+    const { plan } = await call({ which: 'all', level: 'intense', spot: { corridor: 'Boylston St', city: 'boston', nextSweepISO: '2026-10-06T04:00:00.000Z' } });
+    expect(plan.map((p) => [p.key, p.title])).toEqual([['tonight', 'Test · Night before (Mon 9 PM)']]);
+  });
+});

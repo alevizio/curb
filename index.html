@@ -1668,7 +1668,7 @@ function alertSpotFor(group, side, armNs, armRow){
   // earliest next sweep across them each tick (the "forever-watch"). `rule` = the row that produced
   // `ns`, kept for back-compat; cnn+sideKey identify this curb (also the saved-alert key).
   const ruleOf=r=>({weekday:r.weekday,fromhour:r.fromhour,tohour:r.tohour,
-    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0'});
+    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{})});
   const r0=armRow;
   // the block's avg ticket time flavors the copy
   const _et=enfFor(group.cnn, r0&&normDay(r0.weekday));
@@ -1677,7 +1677,7 @@ function alertSpotFor(group, side, armNs, armRow){
   // loaded before multi-watch, whose save moves the alerts (api/_store.js pickLegacy).
   return {
     corridor: group.corridor||'', limits: group.limits||'', blockside: side.blockside||'',
-    nextSweepISO: armNs.start.toISOString(), leadMinutes: 30, multi: 1,
+    nextSweepISO: armNs.start.toISOString(), leadMinutes: 30, multi: 1, ...(CITY!=='sf'?{city:CITY}:{}),
     level: getAlertLevel(), voice: getAlertVoice(),
     ...(_et?{tip:fmtMin(_et.avg)}:{}),
     ...(r0?{rule:ruleOf(r0), rules:(side.rows||[r0]).map(ruleOf), cnn:String(group.cnn||''), sideKey:String(side.key||'')}:{}),
@@ -2025,12 +2025,16 @@ function pushSupported(){
 // "On" is only claimed while the watch is alive: younger than the server's MAX_WATCH_AGE and, on web,
 // with notification permission — a false "on" would be worse than a false "off".
 const WATCH_MAX_AGE=120*864e5, WATCH_REFRESH=864e5, MAX_ALERTS=5;
+// This page's city (boston.html is built with 'boston'). Alerts carry their city, and one device's map holds both:
+// each page's panel resolves its own city's curbs and sends the others to their page. A Boston watch keeps
+// re-arming 165 days, through its December to March break (lib/cities.js).
+const CITY='sf', WATCH_AGES={boston:165*864e5}, CITY_NAME={sf:'San Francisco',boston:'Boston'}, CITY_PAGE={sf:'/',boston:'/boston'};
 const ALERT_LIMIT_MSG='You can have alerts on for '+MAX_ALERTS+' curbs at a time. To add this one, open one of them and turn its alerts off.';
 function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}  // legacy 'curbAlertKey' format
 function savedAlertKey(){try{return localStorage.getItem('curbAlertKey')||'';}catch(_){return '';}}
 function getAlertLevel(){try{return localStorage.getItem('curbAlertLevel')||'normal';}catch(_){return 'normal';}}
 function getAlertVoice(){try{return localStorage.getItem('curbAlertVoice')||'cheeky';}catch(_){return 'cheeky';}}
-const alertId=s=>String(s.cnn)+'|'+String(s.sideKey||'');
+const alertId=s=>(s.city?s.city+':':'')+String(s.cnn)+'|'+String(s.sideKey||'');
 function savedAlerts(){try{
   const a=JSON.parse(localStorage.getItem('curbAlert')||'null');
   if(!a||typeof a!=='object')return {};
@@ -2044,7 +2048,7 @@ function savedAlerts(){try{
 function savedAlert(spot){return spot&&spot.cnn?savedAlerts()[alertId(spot)]||null:null;}
 function rememberAlert(spot,v){
   const a={cnn:String(spot.cnn),sideKey:String(spot.sideKey||''),corridor:spot.corridor||'',limits:spot.limits||'',
-    blockside:spot.blockside||'',level:spot.level,voice:spot.voice,armedAt:Date.now(),v:v||2};
+    blockside:spot.blockside||'',level:spot.level,voice:spot.voice,armedAt:Date.now(),v:v||2,...(spot.city?{city:spot.city}:{})};
   const m=savedAlerts(); m[alertId(a)]=a;
   try{localStorage.setItem('curbAlert',JSON.stringify(m));localStorage.removeItem('curbAlertKey');}catch(_){}
   return a;
@@ -2056,8 +2060,8 @@ function forgetAlert(spot){try{
   if(!spot)return localStorage.removeItem('curbAlert');
   const m=savedAlerts(); delete m[alertId(spot)]; localStorage.setItem('curbAlert',JSON.stringify(m));
 }catch(_){}}
-function sameCurb(a,spot){return !!(a&&spot&&spot.cnn&&a.cnn===String(spot.cnn)&&a.sideKey===String(spot.sideKey||''));}
-function alertLive(a){return !!a&&Date.now()-a.armedAt<WATCH_MAX_AGE&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
+function sameCurb(a,spot){return !!(a&&spot&&spot.cnn&&a.cnn===String(spot.cnn)&&a.sideKey===String(spot.sideKey||'')&&(a.city||'')===(spot.city||''));}
+function alertLive(a){return !!a&&Date.now()-a.armedAt<(WATCH_AGES[a.city]||WATCH_MAX_AGE)&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
 function liveAlerts(){return Object.values(savedAlerts()).filter(alertLive);}
 // The other live sides when this one isn't on, and whether they fill every slot.
 function otherAlerts(spot){const o=liveAlerts().filter(a=>!sameCurb(a,spot));return {list:o,full:o.length>=MAX_ALERTS&&!alertSpotMatches(spot)};}
@@ -2227,7 +2231,7 @@ async function onAlertTap(spot, btn){
 }
 
 // The curb side a Turn off names, so the server disarms that one watch and leaves the device's others on.
-const sideOf=s=>({cnn:String(s.cnn||''),sideKey:String(s.sideKey||''),corridor:s.corridor||'',limits:s.limits||'',blockside:s.blockside||''});
+const sideOf=s=>({cnn:String(s.cnn||''),sideKey:String(s.sideKey||''),corridor:s.corridor||'',limits:s.limits||'',blockside:s.blockside||'',...(s.city?{city:s.city}:{})});
 // "✓ Alerts on" → Turn off: disarms this side's watch on the server (web: DELETE proven by the
 // subscription's own keys; iOS: the bridge posts {off:true, <side>} with the device token).
 // From the sheet, or from the Sweep alerts panel for any side: the sheet's controls change only when it shows
@@ -2407,6 +2411,7 @@ function pingLine(spot,level){
 }
 // The saved sides' rows from DataSF in one request → per side the sweep it is armed for and the spot a save sends.
 async function alertSides(list){
+  list=list.filter(a=>(a.city||'sf')===CITY);  // another city's curbs are resolved on their own page
   const cnns=[...new Set(list.map(a=>a.cnn).filter(c=>/^\d{1,12}$/.test(c)))];
   if(!cnns.length)return {};
   const where=`cnn in(${cnns.map(c=>`'${c}'`).join(',')})`;
@@ -2441,14 +2446,15 @@ function apStatus(app,n){
 }
 function apRow(a,level){
   const x=AP.sides[alertId(a)];
-  let when;
-  if(x&&x.armNs){const rp=relPhrase(x.armNs);
+  let when; const ac=a.city||'sf', away=ac!==CITY;
+  if(away)when=`<div class="ap-next">In ${CITY_NAME[ac]}. Its next sweep shows on that map.</div>`;
+  else if(x&&x.armNs){const rp=relPhrase(x.armNs);
     when=`<div class="ap-next ${rp.cls}">Next sweep ${esc(rp.txt)}${x.armNs.holiday?' · holiday schedule':''}</div>`
       +`<div class="ap-ping">${ICONS.bell}<span>${esc(pingLine(x.spot,level))}</span></div>`;}
   else when=`<div class="ap-next">${!AP.loaded?'Loading the schedule…':AP.err?"Couldn't load the schedule. Its alerts still work.":'No sweep coming up here.'}</div>`;
   return `<div class="ap-row" data-id="${esc(alertId(a))}"><div class="ap-nm">${esc(alertLabel(a,[a]))}</div>`
     +(a.limits?`<div class="ap-lim">${esc(fmtLimits(a.limits))}</div>`:'')+when
-    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">Show on map</button>`
+    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">${away?'Open the '+CITY_NAME[ac]+' map':'Show on map'}</button>`
     +(AP.offing.has(alertId(a))?`<button class="btn alt ap-x busy" type="button" data-act="off" aria-busy="true">Turning off…</button>`
       :`<button class="btn alt ap-x" type="button" data-act="off">Turn off</button>`)+`</div></div>`;
 }
@@ -2497,6 +2503,8 @@ function renderAlertsPanel(){
     const id=row.dataset.id, a=savedAlerts()[id]; if(!a)return;
     row.querySelector('[data-act="show"]').onclick=()=>{
       closeAlertsPanel();
+      const ac=a.city||'sf';
+      if(ac!==CITY){location.href=CITY_PAGE[ac]+'?b='+encodeURIComponent(a.cnn)+'&side='+encodeURIComponent(a.sideKey||a.blockside||'');return;}
       if(!/^\d{1,12}$/.test(a.cnn))return;
       userPicked(); showEveryCurb();  // a day chip or a hidden curb color would open another side, or block
       openCurb(a.cnn,a.sideKey||a.blockside||'');

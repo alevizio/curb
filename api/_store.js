@@ -62,9 +62,9 @@ function carryAnchors(out, prevSpot) {
 // dials. Another side, a changed schedule or a future sweep is saved as sent.
 function staleResave(prevSpot, spot) {
   const p = Date.parse(prevSpot.nextSweepISO), s = Date.parse(spot.nextSweepISO);
-  const sameSide = prevSpot.cnn || spot.cnn
+  const sameSide = (prevSpot.city || '') === (spot.city || '') && (prevSpot.cnn || spot.cnn
     ? prevSpot.cnn === spot.cnn && prevSpot.sideKey === spot.sideKey
-    : prevSpot.corridor === spot.corridor && prevSpot.limits === spot.limits && prevSpot.blockside === spot.blockside;
+    : prevSpot.corridor === spot.corridor && prevSpot.limits === spot.limits && prevSpot.blockside === spot.blockside);
   const sched = (x) => JSON.stringify(x.rules || x.rule || null);
   return s < p && s <= Date.now() && sameSide && sched(prevSpot) === sched(spot);
 }
@@ -85,6 +85,7 @@ function carryForward(prev, spot) {
       if (prev.spot.rules) out.rules = prev.spot.rules;
       if (prev.spot.cnn) out.cnn = prev.spot.cnn;
       if (prev.spot.sideKey) out.sideKey = prev.spot.sideKey;
+      if (prev.spot.city) out.city = prev.spot.city;
     }
     carryAnchors(out, prev.spot);
   }
@@ -116,14 +117,15 @@ export function splitField(field) {
 
 /** Two spots name the same curb side: the same cnn and sideKey, or the same cnn and blockside (auto-park
  *  keys a side by cnnrightleft, 'L'/'R', where the page uses the blockside, 'North'); else the block's text
- *  (a spot without a rule, from an old cached page, carries no cnn). */
+ *  (a spot without a rule, from an old cached page, carries no cnn). Never across cities: a Boston block id can equal an
+ *  SF one (no city = San Francisco). */
 export function sameSide(a, b) {
-  if (!a || !b) return false;
+  if (!a || !b || (a.city || '') !== (b.city || '')) return false;
   if (a.cnn && b.cnn) return a.cnn === b.cnn && ((a.sideKey || '') === (b.sideKey || '') || Boolean(a.blockside && a.blockside === b.blockside));
   return (a.corridor || '') === (b.corridor || '') && (a.limits || '') === (b.limits || '') && (a.blockside || '') === (b.blockside || '');
 }
 // A turned-off watch keeps naming its side (`offSide`), so turning that side back on finds its de-dupe.
-const sideOf = (s) => ({ cnn: s.cnn || '', sideKey: s.sideKey || '', corridor: s.corridor || '', limits: s.limits || '', blockside: s.blockside || '' });
+const sideOf = (s) => ({ cnn: s.cnn || '', sideKey: s.sideKey || '', corridor: s.corridor || '', limits: s.limits || '', blockside: s.blockside || '', ...(s.city ? { city: s.city } : {}) });
 
 /** The device's MAX_WATCHES slots, read in one HMGET as the exact stored strings (a save's write is a
  *  compare-and-set against them): [{ n, field, raw, rec }], rec null for an empty slot. */
