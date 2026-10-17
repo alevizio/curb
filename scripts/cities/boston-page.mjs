@@ -57,7 +57,7 @@ const edits = [
   ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
     '<p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston\'s open data</a>. The posted sign always wins.</p>'],
   // ---- scripts: Boston's time core and data --------------------------------------------------------
-  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=2"></script>'],
+  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=3"></script>'],
   ['retry it like the time core', "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');}",
     "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');\nif(window.nextSweep&&!window.BOS)again('script[src^=\"/lib/city-boston.js\"]');}"],
   ['fail without it', 'if(!window.L||!window.nextSweep){', 'if(!window.L||!window.nextSweep||!window.BOS){'],
@@ -234,13 +234,18 @@ async function loadRppBlock(latlngs,mid,cnn){
   ['open a block from the file', /async function openCurb\(cnn,side\)\{[\s\S]*?\n\}\n/, `async function openCurb(cnn,side){
   try{
     const b=(await BOS.load()).find(x=>String(x.c)===String(cnn)); if(!b)return;
-    const mid=b.g[Math.floor(b.g.length/2)];
+    const mid=BOS.midpoint(b.g);
     map.setView([mid[1],mid[0]],17);
     openWhenLoaded(mid[1],mid[0],cnn,700,side);
   }catch(_){}
 }
 `],
   ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", "'No street-sweeping schedule here. This preview covers Boston.'"],
+  // location allowed on curb.guide (for the SF map) carries over to /boston: a fix outside Boston must not fly to an empty map
+  ['a fix outside Boston stays put', 'function placeFix(p,quiet){\n  const c=p.coords, acc=c.accuracy;\n', `function placeFix(p,quiet){
+  const c=p.coords, acc=c.accuracy;
+  if(!L.latLngBounds(BOS.BOUNDS).contains([c.latitude,c.longitude])){ if(!quiet)toast("You're outside Boston, and this preview only covers Boston. Search a street or tap a curb."); return; }
+`],
   ['street list from the file', /async function ensureCorridors\(\)\{[\s\S]*?\n\}\n/, `async function ensureCorridors(){
   if(corridors)return;
   try{ corridors=BOS.streets(await BOS.load()); }catch(_){corridors=null;}

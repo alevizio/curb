@@ -863,7 +863,7 @@
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=7"></script>
-<script src="/lib/city-boston.js?v=2"></script>
+<script src="/lib/city-boston.js?v=3"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -2610,6 +2610,7 @@ const ACC_MAX=100;
 let accRing=null;
 function placeFix(p,quiet){
   const c=p.coords, acc=c.accuracy;
+  if(!L.latLngBounds(BOS.BOUNDS).contains([c.latitude,c.longitude])){ if(!quiet)toast("You're outside Boston, and this preview only covers Boston. Search a street or tap a curb."); return; }
   if(!(acc>ACC_MAX)){  // unknown (null/0/NaN) is trusted, as before
     placeYou(c.latitude,c.longitude,true,null,quiet);
     if(pendingOpen&&!quiet){pendingOpen.loc=true;locBusy(true);}  // stay busy until the block opens
@@ -2663,7 +2664,7 @@ function placeYou(lat,lng,fly,cnnHint,quiet){
 async function openCurb(cnn,side){
   try{
     const b=(await BOS.load()).find(x=>String(x.c)===String(cnn)); if(!b)return;
-    const mid=b.g[Math.floor(b.g.length/2)];
+    const mid=BOS.midpoint(b.g);
     map.setView([mid[1],mid[0]],17);
     openWhenLoaded(mid[1],mid[0],cnn,700,side);
   }catch(_){}

@@ -1,6 +1,7 @@
 // Headless check of the Boston preview (boston.html, built by scripts/cities/boston-page.mjs) on a phone screen:
 // the page loads with no errors, the citywide overview draws, street zoom draws curb sides from data/boston/,
-// a block opens its sheet with Boston's season line, and an address search opens the right side of the street.
+// a block opens its sheet with Boston's season line, an address search opens the right side of the street, and a
+// location outside Boston (allowed on curb.guide for the SF map) never flies the map off Boston.
 // Views change with animate:false: Leaflet drops a setView issued during another zoom animation.
 // Usage: node scripts/check-boston.mjs [site] [--shots dir]   (default site http://localhost:3077, `npm run dev`)
 import { createRequire } from 'node:module';
@@ -16,13 +17,16 @@ const fails = [];
 const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (!ok) fails.push(what); };
 const b = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox'] });
 try {
+  const errors = [], bad = [];
+  const watch = (pg) => {
+    pg.on('pageerror', (e) => errors.push(e.message));
+    pg.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
+    pg.on('response', (r) => { const u = r.url(); if (r.status() >= 400 && !/\/basemap\/|_vercel|favicon|api\/client-error|\/config\.js$/.test(u)) bad.push(r.status() + ' ' + u); });
+    pg.on('request', (r) => { if (/data\.sf\.gov|open-meteo\.com\/v1\/forecast\?latitude=37/.test(r.url())) bad.push('SF request ' + r.url()); });
+  };
   const p = await b.newPage();
   await p.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  const errors = [], bad = [];
-  p.on('pageerror', (e) => errors.push(e.message));
-  p.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
-  p.on('response', (r) => { const u = r.url(); if (r.status() >= 400 && !/\/basemap\/|_vercel|favicon|api\/client-error|\/config\.js$/.test(u)) bad.push(r.status() + ' ' + u); });
-  p.on('request', (r) => { if (/data\.sf\.gov|open-meteo\.com\/v1\/forecast\?latitude=37/.test(r.url())) bad.push('SF request ' + r.url()); });
+  watch(p);
   await p.evaluateOnNewDocument(() => { try { localStorage.setItem('curbOnboarded', '1'); } catch (_) {} });
 
   await p.goto(SITE + '/boston', { waitUntil: 'load' });
@@ -71,6 +75,34 @@ try {
   const lay = await p.evaluate(() => ({ meters: meterLayer.getLayers().length, rpp: rppLayer.getLayers().length }));
   check(lay.meters > 0, `paid parking dots drawn (${lay.meters})`);
   if (SHOTS) await p.screenshot({ path: SHOTS + '/5-layers.png' });
+
+  // location already allowed on curb.guide (from the SF map, say) by someone in San Francisco: Boston stays on Boston
+  const cnn = await p.evaluate(async () => BOS.findAddress(await BOS.load(), 120, 'Marlborough St').block.c);
+  await b.defaultBrowserContext().overridePermissions(SITE, ['geolocation']);
+  const g = await b.newPage();
+  await g.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  watch(g);
+  await g.evaluateOnNewDocument(() => { try { localStorage.setItem('curbOnboarded', '1'); } catch (_) {} });
+  const nearBoston = () => g.evaluate(() => map.getCenter().distanceTo([42.3603, -71.0580]) < 30000);   // City Hall
+  await g.setGeolocation({ latitude: 37.7749, longitude: -122.4194, accuracy: 20 });
+  await g.goto(SITE + '/boston', { waitUntil: 'load' });
+  await new Promise((r) => setTimeout(r, 4000));
+  check(await nearBoston(), 'opened in San Francisco with location allowed, the map stays on Boston');
+  await g.evaluate(() => document.getElementById('locate').click());
+  await g.waitForFunction(() => /outside Boston/.test(document.getElementById('toast').textContent), { timeout: 15000, polling: 250 }).catch(() => {});
+  check(await nearBoston() && await g.evaluate(() => /outside Boston/.test(document.getElementById('toast').textContent)), 'the locate button in San Francisco says so and keeps Boston on screen');
+  // someone in Back Bay still lands on their block
+  await g.setGeolocation({ latitude: 42.3503, longitude: -71.0810, accuracy: 20 });
+  await g.reload({ waitUntil: 'load' });
+  await g.waitForFunction(() => map.getCenter().distanceTo([42.3503, -71.0810]) < 50, { timeout: 15000, polling: 250 }).catch(() => {});
+  check(await g.evaluate(() => map.getCenter().distanceTo([42.3503, -71.0810]) < 50), 'opened in Back Bay, the map centers on you');
+  // a shared block link (/boston?b=) centers on the middle of the block
+  await g.goto(`${SITE}/boston?b=${cnn}`, { waitUntil: 'load' });
+  await g.waitForFunction(() => document.getElementById('sheet').classList.contains('open'), { timeout: 30000, polling: 250 }).catch(() => {});
+  const linked = await g.evaluate(async (c) => { const l = (await BOS.load()).find((x) => String(x.c) === String(c)).g;
+    const away = ([lo, la]) => map.getCenter().distanceTo([la, lo]);
+    return Math.round(Math.min(away(l[0]), away(l[l.length - 1]))); }, cnn);
+  check(linked > 60, `a shared block link centers mid-block, ${linked} m from the nearer end`);
 
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));
   check(!bad.length, 'no failed or SF requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));
