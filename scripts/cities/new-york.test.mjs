@@ -264,7 +264,8 @@ describe('the join, on real rows', () => {
 });
 
 const BUILT = new URL('../../data/new-york/segments.json', import.meta.url);
-describe.skipIf(!fs.existsSync(BUILT))('data/new-york/', () => {
+// the built file is 38k blocks: these checks take seconds on a CI runner
+describe.skipIf(!fs.existsSync(BUILT))('data/new-york/', { timeout: 30000 }, () => {
   const data = fs.existsSync(BUILT) ? JSON.parse(fs.readFileSync(BUILT, 'utf8')) : { b: [] };
   const city = fs.existsSync(BUILT) ? JSON.parse(fs.readFileSync(new URL('../../data/new-york/city.json', import.meta.url), 'utf8')) : {};
   const report = fs.existsSync(BUILT) ? JSON.parse(fs.readFileSync(new URL('../../data/new-york/report.json', import.meta.url), 'utf8')) : {};

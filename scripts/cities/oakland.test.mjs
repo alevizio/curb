@@ -175,7 +175,7 @@ describe('the data the build wrote (data/oakland/)', () => {
   const seg = JSON.parse(fs.readFileSync(ROOT + 'data/oakland/segments.json', 'utf8'));
   const city = JSON.parse(fs.readFileSync(ROOT + 'data/oakland/city.json', 'utf8'));
   const block = (c) => seg.b.find((b) => b.c === c);
-  it('has the shape of docs/multi-city/city-build.md', () => {
+  it('has the shape of docs/multi-city/city-build.md', { timeout: 30000 }, () => {
     expect(seg._meta.format).toMatch(/rule = \[jsDow/);
     expect(seg.b.length).toBeGreaterThan(9000);
     const ids = new Set();

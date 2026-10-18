@@ -191,7 +191,7 @@ describe.skipIf(!has)('data/saint-paul', () => {
     expect(segs.b.length).toBeGreaterThan(5000);
     expect(new Set(segs.b.map((b) => b.c)).size).toBe(segs.b.length);
   });
-  it('writes every block with a street, a line in 6 decimals and both sides', () => {
+  it('writes every block with a street, a line in 6 decimals and both sides', { timeout: 30000 }, () => {
     for (const b of segs.b) {
       expect(typeof b.c).toBe('string');
       expect(b.s.length).toBeGreaterThan(0);

@@ -107,7 +107,7 @@ describe('holidays', () => {
 describe('data/denver/segments.json', () => {
   const file = new URL('../../data/denver/segments.json', import.meta.url);
   const data = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
-  it.skipIf(!data || !data.b.length)('holds monthly day rules and overnight rules inside Denver', () => {
+  it.skipIf(!data || !data.b.length)('holds monthly day rules and overnight rules inside Denver', { timeout: 30000 }, () => {
     let day = 0, night = 0;
     for (const b of data.b) {
       for (const [lng, lat] of b.g) { expect(lng).toBeGreaterThan(-105.12); expect(lng).toBeLessThan(-104.6); expect(lat).toBeGreaterThan(39.6); expect(lat).toBeLessThan(39.92); }
