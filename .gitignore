@@ -23,3 +23,7 @@ _capture.mjs
 /pmtiles.zip
 basemap/*.pmtiles
 basemap/parchment-style.json
+
+# per-area splits some city builds write for a later load-by-area page (scripts/cities/new-york.mjs, los-angeles.mjs);
+# the city pages read data/<id>/segments.json only
+data/*/segments-*.json

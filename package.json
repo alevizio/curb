@@ -8,6 +8,7 @@
     "dev": "npx serve . -l 3077",
     "og": "sh og/render.sh",
     "og:boston": "sh og/render.sh boston",
+    "og:cities": "node scripts/cities/og-city.mjs",
     "build:enforcement": "python3 scripts/build-enforcement-records.py",
     "build:enforcement:legacy": "node scripts/build-enforcement.mjs",
     "build:sweeps": "python3 scripts/build-sweeps.py",

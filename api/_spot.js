@@ -8,7 +8,20 @@
 // validate an incoming recurrence rule with the EXACT guards the cron's nextSweep() uses.
 import '../lib/sweep-core.js';
 import { normLevel, normVoice } from '../lib/notify-core.js';
-const normDay = globalThis.normDay;
+import { CITIES } from '../lib/cities.js';
+const normDay = globalThis.normDay, toHours = globalThis.toHours;
+
+// A window end as the rule stores it: a whole hour exactly as before ("8"), or a time with minutes ("9:30", the
+// other cities' data, docs/multi-city/city-build.md). null when unreadable.
+function canonTime(v) {
+  const h = toHours(v);
+  if (Number.isNaN(h) || h < 0 || h > 24) return null;
+  const hr = Math.floor(h), mi = Math.round((h - hr) * 60);
+  return mi ? hr + ':' + String(mi).padStart(2, '0') : String(hr);
+}
+// A rule on listed dates (cities that publish dates, not a weekday pattern): valid dates, deduplicated, in order.
+export const MAX_DATES = 60;
+const listedDates = (v) => (Array.isArray(v) ? [...new Set(v.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d))).map(String))].sort().slice(0, MAX_DATES) : null);
 
 // A recurring sweep rule the cron can recompute the next occurrence from (the "forever-watch").
 // Validated with nextSweep's own guards (weekday must normalize, fromhour must parse) — anything
@@ -18,20 +31,27 @@ const normDay = globalThis.normDay;
 const LABEL = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'holiday']; // index = normDay (7 = Holiday)
 export function sanitizeRule(rule) {
   if (!rule || typeof rule !== 'object') return null;
-  const dow = normDay(rule.weekday);
-  if (dow === null || !LABEL[dow]) return null;
-  const fromH = parseInt(rule.fromhour, 10);
-  if (Number.isNaN(fromH)) return null;
+  const dates = listedDates(rule.dates);
+  if (dates && !dates.length) return null;
+  const dow = dates ? null : normDay(rule.weekday);
+  if (!dates && (dow === null || !LABEL[dow])) return null;
+  const from = canonTime(rule.fromhour);
+  if (from === null) return null;
+  const fromH = parseInt(from, 10);
+  const to = canonTime(rule.tohour);
   const bit = (v) => (String(v) === '1' ? '1' : '0');
   const out = {
     // store a canonical label (never arbitrary client text); guard above ensures a valid index
-    weekday: LABEL[dow],
-    fromhour: String(fromH),
-    tohour: String(parseInt(rule.tohour, 10) || fromH + 1),
+    ...(dates ? { dates } : { weekday: LABEL[dow] }),
+    fromhour: from,
+    // an end of 0 or none: one hour after the start, as always
+    tohour: to !== null && to !== '0' ? to : String(fromH + 1),
     week1: bit(rule.week1), week2: bit(rule.week2), week3: bit(rule.week3),
     week4: bit(rule.week4), week5: bit(rule.week5),
     holidays: bit(rule.holidays),
   };
+  // a rule that runs on holidays anyway (lib/city.js); absent on every San Francisco and Boston rule
+  if (Number(rule.flags) & 1) out.flags = 1;
   // A seasonal rule's months (Boston sweeps April to November): kept only when they leave some month out, so a
   // rule swept all year, every SF rule among them, stores exactly as before.
   const months = Array.isArray(rule.months) ? [...new Set(rule.months.map(Number).filter((m) => Number.isInteger(m) && m >= 1 && m <= 12))].sort((a, b) => a - b) : [];
@@ -41,8 +61,13 @@ export function sanitizeRule(rule) {
 
 // The cities a spot can name (lib/cities.js); no city is San Francisco, and an unknown one is refused rather than
 // timed as SF.
-const CITY_IDS = ['boston'];
+const CITY_IDS = Object.keys(CITIES).filter((id) => id !== 'sf');
 const cityField = (v) => (CITY_IDS.includes(v) ? { city: v } : {});
+// A block id as its city writes it: San Francisco's and Boston's are digits (kept exactly as before); the other
+// cities keep their own ids, which can carry letters and dashes (San Diego "SS-018818", Oakland "395510630-1").
+const blockId = (v, city) => (city !== 'boston' && CITY_IDS.includes(city)
+  ? String(v || '').replace(/[^A-Za-z0-9_.:-]/g, '').slice(0, 40)
+  : String(v || '').replace(/[^0-9]/g, '').slice(0, 12));
 const unknownCity = (v) => v != null && v !== '' && !CITY_IDS.includes(v);
 
 // Every rule of the curb side: a quarter of SF sides are swept on several days (or on one weekday split
@@ -73,7 +98,7 @@ export function sanitizeSide(spot) {
   if (!spot || typeof spot !== 'object') return null;
   const t = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
   const side = {
-    cnn: String(spot.cnn || '').replace(/[^0-9]/g, '').slice(0, 12),
+    cnn: blockId(spot.cnn, spot.city),
     sideKey: t(spot.sideKey, 8),
     corridor: t(spot.corridor, 120),
     limits: t(spot.limits, 120),
@@ -122,7 +147,7 @@ export function sanitizeSpot(spot) {
   if (rule || rules.length) {
     out.rule = rule || rules[0];
     if (rules.length) out.rules = rules;
-    out.cnn = String(spot.cnn || '').replace(/[^0-9]/g, '').slice(0, 12);
+    out.cnn = blockId(spot.cnn, spot.city);
     out.sideKey = t(spot.sideKey, 8);
   }
   return out;

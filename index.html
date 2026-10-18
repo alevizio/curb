@@ -883,7 +883,7 @@
      loaded before the main script so its exports are on globalThis. Unit-tested separately.
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
-<script src="/lib/sweep-core.js?v=7"></script>
+<script src="/lib/sweep-core.js?v=8"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -2029,6 +2029,8 @@ const WATCH_MAX_AGE=120*864e5, WATCH_REFRESH=864e5, MAX_ALERTS=5;
 // each page's panel resolves its own city's curbs and sends the others to their page. A Boston watch keeps
 // re-arming 165 days, through its December to March break (lib/cities.js).
 const CITY='sf', WATCH_AGES={boston:165*864e5}, CITY_NAME={sf:'San Francisco',boston:'Boston'}, CITY_PAGE={sf:'/',boston:'/boston'};
+// a city this page doesn't list (one built by scripts/cities/city-page.mjs): its name from its id, "saint-paul" → "Saint Paul"
+const cityLabel=c=>CITY_NAME[c]||String(c||'').split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
 const ALERT_LIMIT_MSG='You can have alerts on for '+MAX_ALERTS+' curbs at a time. To add this one, open one of them and turn its alerts off.';
 function spotKey(s){return s?[s.corridor,s.limits,s.blockside,s.nextSweepISO].join('|'):'';}  // legacy 'curbAlertKey' format
 function savedAlertKey(){try{return localStorage.getItem('curbAlertKey')||'';}catch(_){return '';}}
@@ -2061,7 +2063,7 @@ function forgetAlert(spot){try{
   const m=savedAlerts(); delete m[alertId(spot)]; localStorage.setItem('curbAlert',JSON.stringify(m));
 }catch(_){}}
 function sameCurb(a,spot){return !!(a&&spot&&spot.cnn&&a.cnn===String(spot.cnn)&&a.sideKey===String(spot.sideKey||'')&&(a.city||'')===(spot.city||''));}
-function alertLive(a){return !!a&&Date.now()-a.armedAt<(WATCH_AGES[a.city]||WATCH_MAX_AGE)&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
+function alertLive(a){return !!a&&Date.now()-a.armedAt<(WATCH_AGES[a.city]||(a.city&&a.city!=='sf'?165*864e5:WATCH_MAX_AGE))&&(!!window.__curbNativePush||!('Notification' in window)||Notification.permission==='granted');}
 function liveAlerts(){return Object.values(savedAlerts()).filter(alertLive);}
 // The other live sides when this one isn't on, and whether they fill every slot.
 function otherAlerts(spot){const o=liveAlerts().filter(a=>!sameCurb(a,spot));return {list:o,full:o.length>=MAX_ALERTS&&!alertSpotMatches(spot)};}
@@ -2447,14 +2449,14 @@ function apStatus(app,n){
 function apRow(a,level){
   const x=AP.sides[alertId(a)];
   let when; const ac=a.city||'sf', away=ac!==CITY;
-  if(away)when=`<div class="ap-next">In ${CITY_NAME[ac]}. Its next sweep shows on that map.</div>`;
+  if(away)when=`<div class="ap-next">In ${cityLabel(ac)}. Its next sweep shows on that map.</div>`;
   else if(x&&x.armNs){const rp=relPhrase(x.armNs);
     when=`<div class="ap-next ${rp.cls}">Next sweep ${esc(rp.txt)}${x.armNs.holiday?' · holiday schedule':''}</div>`
       +`<div class="ap-ping">${ICONS.bell}<span>${esc(pingLine(x.spot,level))}</span></div>`;}
   else when=`<div class="ap-next">${!AP.loaded?'Loading the schedule…':AP.err?"Couldn't load the schedule. Its alerts still work.":'No sweep coming up here.'}</div>`;
   return `<div class="ap-row" data-id="${esc(alertId(a))}"><div class="ap-nm">${esc(alertLabel(a,[a]))}</div>`
     +(a.limits?`<div class="ap-lim">${esc(fmtLimits(a.limits))}</div>`:'')+when
-    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">${away?'Open the '+CITY_NAME[ac]+' map':'Show on map'}</button>`
+    +`<div class="ap-acts"><button class="btn alt" type="button" data-act="show">${away?'Open the '+cityLabel(ac)+' map':'Show on map'}</button>`
     +(AP.offing.has(alertId(a))?`<button class="btn alt ap-x busy" type="button" data-act="off" aria-busy="true">Turning off…</button>`
       :`<button class="btn alt ap-x" type="button" data-act="off">Turn off</button>`)+`</div></div>`;
 }
@@ -2504,7 +2506,7 @@ function renderAlertsPanel(){
     row.querySelector('[data-act="show"]').onclick=()=>{
       closeAlertsPanel();
       const ac=a.city||'sf';
-      if(ac!==CITY){location.href=CITY_PAGE[ac]+'?b='+encodeURIComponent(a.cnn)+'&side='+encodeURIComponent(a.sideKey||a.blockside||'');return;}
+      if(ac!==CITY){location.href=(CITY_PAGE[ac]||'/'+ac)+'?b='+encodeURIComponent(a.cnn)+'&side='+encodeURIComponent(a.sideKey||a.blockside||'');return;}
       if(!/^\d{1,12}$/.test(a.cnn))return;
       userPicked(); showEveryCurb();  // a day chip or a hidden curb color would open another side, or block
       openCurb(a.cnn,a.sideKey||a.blockside||'');

@@ -124,7 +124,7 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
   ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
     '<p class="wfoot">Free, no account. Built on <a href="https://data.boston.gov" target="_blank" rel="noopener">Boston\'s open data</a>. The posted sign always wins.</p>'],
   // ---- scripts: Boston's time core and data --------------------------------------------------------
-  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=7"></script>', '<script src="/lib/sweep-core.js?v=7"></script>\n<script src="/lib/city-boston.js?v=7"></script>'],
+  ['load lib/city-boston.js', '<script src="/lib/sweep-core.js?v=8"></script>', '<script src="/lib/sweep-core.js?v=8"></script>\n<script src="/lib/city-boston.js?v=7"></script>'],
   ['retry it like the time core', "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');}",
     "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');\nif(window.nextSweep&&!window.BOS)again('script[src^=\"/lib/city-boston.js\"]');}"],
   ['fail without it', 'if(!window.L||!window.nextSweep){', 'if(!window.L||!window.nextSweep||!window.BOS){'],
