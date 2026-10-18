@@ -1,0 +1,158 @@
+{
+ "generated": "2026-10-18T18:49:46.917Z",
+ "inputs": {
+  "routeRows": 8209,
+  "routeLayerUpdated": "2026-07-17",
+  "centerlineSegments": 41252,
+  "duplicateSegIds": 0
+ },
+ "output": {
+  "blocks": 8191,
+  "sides": 16382,
+  "rules": 16382,
+  "sidesWithDifferentDays": 281,
+  "blocksWithoutOddSide": 4,
+  "sizeBytes": 1956686
+ },
+ "cleaned": {
+  "timeTypos": "Time \"1PM - 3PMl\" read as 1 to 3 PM; padded street names trimmed (320 rows touched by either)",
+  "bothSidesFromDayField": 38,
+  "oneSideFromDayField": 2,
+  "areaNames": {
+   "West Philly": "West Philadelphia",
+   "South Philly": "South Philadelphia"
+  }
+ },
+ "skipped": [
+  {
+   "why": "the two sides have different days and the address ranges do not say which side is odd",
+   "count": 2,
+   "examples": [
+    {
+     "id": "620432",
+     "street": "Wayne Ave",
+     "area": "Nicetown",
+     "day": "MON - THU",
+     "time": "11AM - 1PM",
+     "class": 5
+    },
+    {
+     "id": "621783",
+     "street": "Germantown Ave",
+     "area": "Nicetown",
+     "day": "MON - TUE",
+     "time": "11AM - 1PM",
+     "class": 2
+    }
+   ]
+  },
+  {
+   "why": "expressway or its ramp",
+   "count": 1,
+   "examples": [
+    {
+     "id": "640549",
+     "street": "W Roosevelt Blvd Ramp B",
+     "area": "Logan",
+     "day": "MON",
+     "time": "1PM - 3PM",
+     "class": 1
+    }
+   ]
+  },
+  {
+   "why": "street closed to traffic (City street class 12, not travelable)",
+   "count": 14,
+   "examples": [
+    {
+     "id": "642643",
+     "street": "N 7th St",
+     "area": "Logan",
+     "day": "TUE",
+     "time": "1PM - 3PM",
+     "class": 12
+    },
+    {
+     "id": "640196",
+     "street": "N 10th St",
+     "area": "Logan",
+     "day": "THU",
+     "time": "1PM - 3PM",
+     "class": 12
+    },
+    {
+     "id": "640294",
+     "street": "N 8th St",
+     "area": "Logan",
+     "day": "THU",
+     "time": "1PM - 3PM",
+     "class": 12
+    },
+    {
+     "id": "640316",
+     "street": "N 10th St",
+     "area": "Logan",
+     "day": "THU",
+     "time": "1PM - 3PM",
+     "class": 12
+    },
+    {
+     "id": "642641",
+     "street": "N 8th St",
+     "area": "Logan",
+     "day": "THU",
+     "time": "1PM - 3PM",
+     "class": 12
+    }
+   ]
+  },
+  {
+   "why": "driveway with no house numbers (City street class 6)",
+   "count": 1,
+   "examples": [
+    {
+     "id": "621883",
+     "street": "Septa Dwy",
+     "area": "North Central",
+     "day": "MON",
+     "time": "1PM - 3PM",
+     "class": 6
+    }
+   ]
+  }
+ ],
+ "season": {
+  "months": "April to October (mask 1016)",
+  "programDates": "2026-04-06 to 2026-10-29",
+  "enforcementFrom": "2026-04-20",
+  "overreach": "The months mask also marks 2026-04-01 and 2026-04-02 (Wed, Thu) as swept; the 2027 dates are not published (April 1, 2027 is a Thursday).",
+  "holidaysInSeason": [
+   "2026-05-25 Memorial Day",
+   "2026-09-07 Labor Day",
+   "2026-10-12 Columbus Day/Indigenous Peoples' Day",
+   "2027-05-31 Memorial Day",
+   "2027-09-06 Labor Day",
+   "2027-10-11 Columbus Day/Indigenous Peoples' Day"
+  ]
+ },
+ "checks": {
+  "sideByParity": {
+   "withNumbers": 8201,
+   "rising": 8200,
+   "oddFaces": {
+    "North": 3267,
+    "Northwest": 476,
+    "East": 2810,
+    "Northeast": 1038,
+    "Southeast": 536,
+    "Southwest": 1,
+    "South": 67,
+    "West": 6
+   },
+   "note": "Odd numbers are on the north and east sides in Philadelphia (520 Chestnut St, south side, is even). Rising addresses and an odd side facing north or east (or between, where the grid turns) mean the layer's L/R are the line's own left and right."
+  },
+  "cityMaps": "Checked by hand on 2026-10-18 against the route maps (PDF) linked from the City's 2026 schedule page: South Philadelphia (map dated March 2020: every street's day and the 9 to 11 AM window match) and Port Richmond (map dated March 2026: 1 to 3 PM, and the two day streets, Frankford Ave, Aramingo Ave and E Allegheny Ave, are drawn in both days' colors). The maps cannot say which side is which.",
+  "postedSigns": "Not checkable from the data: the City posts no parking signs only on select blocks (by width).",
+  "tickets": "No cross check: the City's parking violation data on OpenDataPhilly stops in 2017, before these routes."
+ }
+}

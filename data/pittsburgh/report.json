@@ -1,0 +1,800 @@
+{
+ "generated": "2026-10-18T18:50:55.238Z",
+ "inputs": {
+  "centerlineSegments": 19683,
+  "withSweepCode": 3763,
+  "layerUpdated": "2026-09-24"
+ },
+ "output": {
+  "blocks": 3758,
+  "sides": 6822,
+  "rules": 6910,
+  "blocksWithSameCodeBothSides": 73,
+  "blocksSweptOnOneSideOnly": 694,
+  "blocksWithTwoDaysOnASide": 53,
+  "sizeBytes": 1142780
+ },
+ "decoding": {
+  "source": "WPRDC data dictionary (https://data.wprdc.org/dataset/pittsburgh-street-centerlines): \"the Street Sweeping Route identifier to the right and left of a segment, when facing the direction the line segment has been drawn\"; e.g. 5SW8-2W = 5th Division, route 8, the 2nd Wednesday of each month.",
+  "pattern": "<division>SW<route>[A|B]-<week><day letters>, day letters M Mon, T Tue, W Wed, R Thu, F Fri. A and B pair two routes on the same blocks (A one side, B the other, consecutive days of the same week).",
+  "uncertain": "3SW1-3MW (Oakland: Fifth Ave, Forbes Ave, Bigelow Blvd and side streets near them) is read literally as the 3rd Monday and the 3rd Wednesday on that side; the dictionary has no two letter example.",
+  "codes": [
+   {
+    "code": "1SW6-2M",
+    "sides": 213,
+    "division": 1,
+    "route": "6",
+    "week": 2,
+    "days": "Mon"
+   },
+   {
+    "code": "1SW7-2T",
+    "sides": 227,
+    "division": 1,
+    "route": "7",
+    "week": 2,
+    "days": "Tue"
+   },
+   {
+    "code": "1SW8-2W",
+    "sides": 115,
+    "division": 1,
+    "route": "8",
+    "week": 2,
+    "days": "Wed"
+   },
+   {
+    "code": "1SW9-1W",
+    "sides": 116,
+    "division": 1,
+    "route": "9",
+    "week": 1,
+    "days": "Wed"
+   },
+   {
+    "code": "1SW10-1R",
+    "sides": 116,
+    "division": 1,
+    "route": "10",
+    "week": 1,
+    "days": "Thu"
+   },
+   {
+    "code": "1SW11-2R",
+    "sides": 105,
+    "division": 1,
+    "route": "11",
+    "week": 2,
+    "days": "Thu"
+   },
+   {
+    "code": "2SW3A-4W",
+    "sides": 135,
+    "division": 2,
+    "route": "3A",
+    "week": 4,
+    "days": "Wed"
+   },
+   {
+    "code": "2SW3B-4R",
+    "sides": 130,
+    "division": 2,
+    "route": "3B",
+    "week": 4,
+    "days": "Thu"
+   },
+   {
+    "code": "2SW4A-1M",
+    "sides": 227,
+    "division": 2,
+    "route": "4A",
+    "week": 1,
+    "days": "Mon"
+   },
+   {
+    "code": "2SW4A-3W",
+    "sides": 192,
+    "division": 2,
+    "route": "4A",
+    "week": 3,
+    "days": "Wed"
+   },
+   {
+    "code": "2SW4B-1T",
+    "sides": 227,
+    "division": 2,
+    "route": "4B",
+    "week": 1,
+    "days": "Tue"
+   },
+   {
+    "code": "2SW4B-3R",
+    "sides": 195,
+    "division": 2,
+    "route": "4B",
+    "week": 3,
+    "days": "Thu"
+   },
+   {
+    "code": "2SW7A-3M",
+    "sides": 260,
+    "division": 2,
+    "route": "7A",
+    "week": 3,
+    "days": "Mon"
+   },
+   {
+    "code": "2SW7B-3T",
+    "sides": 250,
+    "division": 2,
+    "route": "7B",
+    "week": 3,
+    "days": "Tue"
+   },
+   {
+    "code": "2SW8A-2M",
+    "sides": 157,
+    "division": 2,
+    "route": "8A",
+    "week": 2,
+    "days": "Mon"
+   },
+   {
+    "code": "2SW8B-2T",
+    "sides": 135,
+    "division": 2,
+    "route": "8B",
+    "week": 2,
+    "days": "Tue"
+   },
+   {
+    "code": "2SW9A-2W",
+    "sides": 97,
+    "division": 2,
+    "route": "9A",
+    "week": 2,
+    "days": "Wed"
+   },
+   {
+    "code": "2SW9A-3W",
+    "sides": 6,
+    "division": 2,
+    "route": "9A",
+    "week": 3,
+    "days": "Wed"
+   },
+   {
+    "code": "2SW9B-2R",
+    "sides": 98,
+    "division": 2,
+    "route": "9B",
+    "week": 2,
+    "days": "Thu"
+   },
+   {
+    "code": "2SW9B-3R",
+    "sides": 6,
+    "division": 2,
+    "route": "9B",
+    "week": 3,
+    "days": "Thu"
+   },
+   {
+    "code": "2SW10A-4M",
+    "sides": 291,
+    "division": 2,
+    "route": "10A",
+    "week": 4,
+    "days": "Mon"
+   },
+   {
+    "code": "2SW10B-4T",
+    "sides": 277,
+    "division": 2,
+    "route": "10B",
+    "week": 4,
+    "days": "Tue"
+   },
+   {
+    "code": "2SW11A-2W",
+    "sides": 42,
+    "division": 2,
+    "route": "11A",
+    "week": 2,
+    "days": "Wed"
+   },
+   {
+    "code": "2SW11B-2R",
+    "sides": 43,
+    "division": 2,
+    "route": "11B",
+    "week": 2,
+    "days": "Thu"
+   },
+   {
+    "code": "2SW13A-1W",
+    "sides": 163,
+    "division": 2,
+    "route": "13A",
+    "week": 1,
+    "days": "Wed"
+   },
+   {
+    "code": "2SW13B-1R",
+    "sides": 167,
+    "division": 2,
+    "route": "13B",
+    "week": 1,
+    "days": "Thu"
+   },
+   {
+    "code": "3SW1-3MW",
+    "sides": 88,
+    "division": 3,
+    "route": "1",
+    "week": 3,
+    "days": "Mon and Wed"
+   },
+   {
+    "code": "3SW4-3M",
+    "sides": 52,
+    "division": 3,
+    "route": "4",
+    "week": 3,
+    "days": "Mon"
+   },
+   {
+    "code": "3SW5-3T",
+    "sides": 34,
+    "division": 3,
+    "route": "5",
+    "week": 3,
+    "days": "Tue"
+   },
+   {
+    "code": "3SW6-3W",
+    "sides": 113,
+    "division": 3,
+    "route": "6",
+    "week": 3,
+    "days": "Wed"
+   },
+   {
+    "code": "3SW7-3R",
+    "sides": 81,
+    "division": 3,
+    "route": "7",
+    "week": 3,
+    "days": "Thu"
+   },
+   {
+    "code": "3SW8-4M",
+    "sides": 118,
+    "division": 3,
+    "route": "8",
+    "week": 4,
+    "days": "Mon"
+   },
+   {
+    "code": "3SW9-4T",
+    "sides": 144,
+    "division": 3,
+    "route": "9",
+    "week": 4,
+    "days": "Tue"
+   },
+   {
+    "code": "3SW10-4W",
+    "sides": 174,
+    "division": 3,
+    "route": "10",
+    "week": 4,
+    "days": "Wed"
+   },
+   {
+    "code": "3SW11-4R",
+    "sides": 172,
+    "division": 3,
+    "route": "11",
+    "week": 4,
+    "days": "Thu"
+   },
+   {
+    "code": "3SW12-1M",
+    "sides": 165,
+    "division": 3,
+    "route": "12",
+    "week": 1,
+    "days": "Mon"
+   },
+   {
+    "code": "3SW13-1T",
+    "sides": 146,
+    "division": 3,
+    "route": "13",
+    "week": 1,
+    "days": "Tue"
+   },
+   {
+    "code": "3SW14-1W",
+    "sides": 129,
+    "division": 3,
+    "route": "14",
+    "week": 1,
+    "days": "Wed"
+   },
+   {
+    "code": "3SW15-1R",
+    "sides": 119,
+    "division": 3,
+    "route": "15",
+    "week": 1,
+    "days": "Thu"
+   },
+   {
+    "code": "3SW18-2M",
+    "sides": 40,
+    "division": 3,
+    "route": "18",
+    "week": 2,
+    "days": "Mon"
+   },
+   {
+    "code": "3SW42-2W",
+    "sides": 22,
+    "division": 3,
+    "route": "42",
+    "week": 2,
+    "days": "Wed"
+   },
+   {
+    "code": "3SW43-2R",
+    "sides": 23,
+    "division": 3,
+    "route": "43",
+    "week": 2,
+    "days": "Thu"
+   },
+   {
+    "code": "3SW44-2T",
+    "sides": 43,
+    "division": 3,
+    "route": "44",
+    "week": 2,
+    "days": "Tue"
+   },
+   {
+    "code": "4SW1-3M",
+    "sides": 108,
+    "division": 4,
+    "route": "1",
+    "week": 3,
+    "days": "Mon"
+   },
+   {
+    "code": "4SW2-3T",
+    "sides": 107,
+    "division": 4,
+    "route": "2",
+    "week": 3,
+    "days": "Tue"
+   },
+   {
+    "code": "4SW3-3W",
+    "sides": 64,
+    "division": 4,
+    "route": "3",
+    "week": 3,
+    "days": "Wed"
+   },
+   {
+    "code": "4SW4-3R",
+    "sides": 41,
+    "division": 4,
+    "route": "4",
+    "week": 3,
+    "days": "Thu"
+   },
+   {
+    "code": "4SW5-4M",
+    "sides": 123,
+    "division": 4,
+    "route": "5",
+    "week": 4,
+    "days": "Mon"
+   },
+   {
+    "code": "4SW6-4T",
+    "sides": 120,
+    "division": 4,
+    "route": "6",
+    "week": 4,
+    "days": "Tue"
+   },
+   {
+    "code": "4SW7-4W",
+    "sides": 102,
+    "division": 4,
+    "route": "7",
+    "week": 4,
+    "days": "Wed"
+   },
+   {
+    "code": "4SW8-4R",
+    "sides": 121,
+    "division": 4,
+    "route": "8",
+    "week": 4,
+    "days": "Thu"
+   },
+   {
+    "code": "5SW6-2M",
+    "sides": 79,
+    "division": 5,
+    "route": "6",
+    "week": 2,
+    "days": "Mon"
+   },
+   {
+    "code": "5SW7-2T",
+    "sides": 83,
+    "division": 5,
+    "route": "7",
+    "week": 2,
+    "days": "Tue"
+   },
+   {
+    "code": "5SW8-2W",
+    "sides": 110,
+    "division": 5,
+    "route": "8",
+    "week": 2,
+    "days": "Wed"
+   },
+   {
+    "code": "5SW9-2R",
+    "sides": 110,
+    "division": 5,
+    "route": "9",
+    "week": 2,
+    "days": "Thu"
+   },
+   {
+    "code": "6SW6-2M",
+    "sides": 1,
+    "division": 6,
+    "route": "6",
+    "week": 2,
+    "days": "Mon"
+   }
+  ],
+  "unreadable": {}
+ },
+ "hours": {
+  "from": "8:00",
+  "to": "14:30",
+  "source": "https://www.pittsburghpa.gov/Resident-Services/Road-Maintenance/Street-Maintenance/Street-Sweeping",
+  "quote": "Neighborhood and residential street sweeping begins after 8 AM and ends approximately at 2:30 PM.",
+  "unverified": "Hours are not in the data and the City publishes no sign text; older signs are reported to read 8:30 AM to 2 PM. 8 AM to 2:30 PM covers both."
+ },
+ "season": {
+  "months": "April to November (mask 2040)",
+  "cityDates": "April 1 to November 30",
+  "holidaysInSeason": [
+   "2026-05-25 Memorial Day",
+   "2026-09-07 Labor Day",
+   "2026-11-11 Veterans Day",
+   "2026-11-26 Thanksgiving Day",
+   "2027-05-31 Memorial Day",
+   "2027-07-05 Independence Day (observed)",
+   "2027-09-06 Labor Day",
+   "2027-11-11 Veterans Day",
+   "2027-11-25 Thanksgiving Day"
+  ]
+ },
+ "skipped": [
+  {
+   "why": "retired segment (replaced in the centerline)",
+   "count": 5,
+   "examples": [
+    {
+     "id": "19923",
+     "street": "N Craig St",
+     "from": "Bayard St",
+     "to": "Centre Ave",
+     "left": "3SW4-3M",
+     "right": "3SW5-3T"
+    },
+    {
+     "id": "19954",
+     "street": "Sarah St",
+     "from": "Sarah St",
+     "to": "E Carson St",
+     "left": "4SW4-3R",
+     "right": "4SW3-3W"
+    },
+    {
+     "id": "20094",
+     "street": "Federal St S",
+     "from": "Federal St S",
+     "to": "South Commons",
+     "left": "",
+     "right": "1SW8-2W"
+    },
+    {
+     "id": "20093",
+     "street": "Federal St S",
+     "from": "Federal St S",
+     "to": "South Commons",
+     "left": "",
+     "right": "1SW11-2R"
+    },
+    {
+     "id": "6875",
+     "street": "N Craig St",
+     "from": "Centre Ave",
+     "to": "Truro Pl",
+     "left": "3SW4-3M",
+     "right": "3SW5-3T"
+    }
+   ]
+  }
+ ],
+ "checks": {
+  "sideByAddress": {
+   "withNumbers": 3606,
+   "rising": 3601,
+   "oddOnLeft": 3565,
+   "oddOnRight": 41,
+   "note": "Addresses rise from the first point to the last, and the odd numbers sit on the left in most of the City: the City's left and right are the drawn line's, as the dictionary says. Grant St downtown: 437 (Frick Building) is on its northwest side, 436 (County Courthouse) on its southeast, as the data puts them."
+  },
+  "opdcOakland": {
+   "source": "https://www.opdc.org/street-cleaning-2025",
+   "sides": 204,
+   "agree": 139,
+   "otherSide": 37,
+   "differ": 28,
+   "rows": [
+    {
+     "street": "ATWOOD ST",
+     "part": "300",
+     "agree": 2,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "ATWOOD ST",
+     "part": "400",
+     "agree": 2,
+     "otherSide": 0,
+     "differ": 2
+    },
+    {
+     "street": "BATES ST",
+     "part": "3400",
+     "agree": 0,
+     "otherSide": 2,
+     "differ": 0
+    },
+    {
+     "street": "BATES ST",
+     "part": "3800",
+     "agree": 3,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "COLTART AVE",
+     "part": "",
+     "agree": 4,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "DAWSON ST",
+     "part": "C",
+     "agree": 15,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "HALKET ST",
+     "part": "",
+     "agree": 4,
+     "otherSide": 0,
+     "differ": 2
+    },
+    {
+     "street": "MCKEE PL",
+     "part": "",
+     "agree": 8,
+     "otherSide": 0,
+     "differ": 4
+    },
+    {
+     "street": "MEYRAN AVE",
+     "part": "",
+     "agree": 6,
+     "otherSide": 0,
+     "differ": 4
+    },
+    {
+     "street": "OAKLAND AVE",
+     "part": "",
+     "agree": 0,
+     "otherSide": 7,
+     "differ": 2
+    },
+    {
+     "street": "OAKLAND SQ",
+     "part": "",
+     "agree": 2,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "PARKVIEW AVE",
+     "part": "C",
+     "agree": 7,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "SEMPLE ST",
+     "part": "",
+     "agree": 10,
+     "otherSide": 0,
+     "differ": 2
+    },
+    {
+     "street": "S BOUQUET ST",
+     "part": "",
+     "agree": 0,
+     "otherSide": 8,
+     "differ": 3
+    },
+    {
+     "street": "WARD ST",
+     "part": "C",
+     "agree": 4,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "DAWSON ST",
+     "part": "S",
+     "agree": 8,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "FRAZIER ST",
+     "part": "",
+     "agree": 11,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "JULIET ST",
+     "part": "",
+     "agree": 8,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "PARKVIEW AVE",
+     "part": "S",
+     "agree": 0,
+     "otherSide": 12,
+     "differ": 0
+    },
+    {
+     "street": "WARD ST",
+     "part": "S",
+     "agree": 11,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "JOE HAMMER SQ",
+     "part": "",
+     "agree": 1,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "CRAFT AVE",
+     "part": "",
+     "agree": 6,
+     "otherSide": 0,
+     "differ": 2
+    },
+    {
+     "street": "LAWN ST",
+     "part": "",
+     "agree": 5,
+     "otherSide": 5,
+     "differ": 0
+    },
+    {
+     "street": "NIAGARA ST",
+     "part": "",
+     "agree": 2,
+     "otherSide": 1,
+     "differ": 0
+    },
+    {
+     "street": "NIAGARA ST",
+     "part": "3300",
+     "agree": 1,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "OPHELIA ST",
+     "part": "",
+     "agree": 5,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "BIGELOW BLVD",
+     "part": "",
+     "agree": 5,
+     "otherSide": 0,
+     "differ": 1
+    },
+    {
+     "street": "DEVONSHIRE ST",
+     "part": "",
+     "agree": 0,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "ELLSWORTH AVE",
+     "part": "",
+     "agree": 0,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "N BELLEFIELD AVE",
+     "part": "",
+     "agree": 0,
+     "otherSide": 2,
+     "differ": 2
+    },
+    {
+     "street": "N DITHRIDGE ST",
+     "part": "",
+     "agree": 0,
+     "otherSide": 0,
+     "differ": 3
+    },
+    {
+     "street": "N NEVILLE ST",
+     "part": "",
+     "agree": 8,
+     "otherSide": 0,
+     "differ": 0
+    },
+    {
+     "street": "RUSKIN AVE",
+     "part": "",
+     "agree": 1,
+     "otherSide": 0,
+     "differ": 1
+    },
+    {
+     "street": "WALLINGFORD ST",
+     "part": "",
+     "agree": 0,
+     "otherSide": 0,
+     "differ": 0
+    }
+   ]
+  },
+  "tickets": "No cross check: the City publishes no parking citations with time and place."
+ }
+}

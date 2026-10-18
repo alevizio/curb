@@ -1,0 +1,699 @@
+{
+ "generated": "2026-10-18T18:52:40.949Z",
+ "season": {
+  "months": "March to October (bits 2-9, mask 1020)",
+  "posted": "MARCH 1 THRU OCTOBER 31 EXCEPT HOLIDAYS (sign plaque text in DDOT data)",
+  "dpw2026": "2026-03-02 to 2026-10-30",
+  "partialMonths": "none for 2026: March 1 is a Sunday and October 31 a Saturday, and DC sweeps Monday to Friday"
+ },
+ "zones": {
+  "sweeping": 5675,
+  "used": 5454,
+  "skipped": {
+   "window over 12 hours": {
+    "n": 19,
+    "examples": [
+     "00b71a7c9152adaa420411abbd3ea4f1-left-3",
+     "07140bfaaf3d1618fbba651dbf4bbf13-right-0",
+     "161e65f8a2949df25ec37f4b49a8b590-left-2",
+     "24105feb3a835e7bda9e54aef9b848d6-left-0",
+     "3d77cbda1d850d07b6f388fbb7a098ab-left-0"
+    ]
+   },
+   "on an alley or driveway route, not a street block": {
+    "n": 97,
+    "examples": [
+     "05454aa54975b615110618703a77ca0a-right-0",
+     "1199522969fd75074ca57386293dbb15-left-0",
+     "057a00075f920315c6b1e503d01751b5-left-0",
+     "1641f960e2f4ce6ce62fe40a74beb674-left-1",
+     "125cdf277afbe2491cb6e11bfbadbfbd-right-2"
+    ]
+   },
+   "no hours": {
+    "n": 92,
+    "examples": [
+     "0c01d7afc0ffa277bc7ecfe660c7f2e1-right-4",
+     "05122464f8a678902a9df0ff66f67a0b-right-1",
+     "0d4573aa920b4306c7e0be595c02ce31-right-3",
+     "235f9e07bd74d91312c54d0c305562aa-right-2",
+     "1e245c2d241f6308287b27a1d3884282-left-2"
+    ]
+   },
+   "no sign on the street (DDOT field note)": {
+    "n": 8,
+    "examples": [
+     "2c73f548c556ad44348de1d9effa1c40-left-0",
+     "5442b7f1f2e2e49142fe65f98217b983-right-1",
+     "5f87d7a0b90d18e087c4bbfa2d0dea53-left-2",
+     "90d027b70c345346679239a514f16257-right-6",
+     "8b1cd90c12f9077b284ee069cf319c60-left-0"
+    ]
+   },
+   "night over several days": {
+    "n": 4,
+    "examples": [
+     "9911db4985ed20b6914217f163906e0b-right-7",
+     "a9768a467ba4c2c3fbc6de1aac5f6ec9-right-4",
+     "d9db3e5b9d66a1c2acd0b9f6df2c08cf-left-3",
+     "e85806a54975bd23d37b5dbba86d8bf1-right-3"
+    ]
+   },
+   "no weekday": {
+    "n": 1,
+    "examples": [
+     "891e9776ffa3e30ff69adf3d1a3320d1-left-4"
+    ]
+   }
+  },
+  "dataErrors": {
+   "Missing: | ": 5345,
+   "Missing: | Invalid Time Range": 231,
+   "Missing: | Invalid Day Range,Invalid Time Range": 90,
+   "Missing: | Invalid Day Range,": 8,
+   "Missing: Time Restriction | ": 1
+  },
+  "fixedAmPm": 41,
+  "fixedAmPmZones": [
+   {
+    "zone": "0bff1fbcdfc1a74d93ed33d219cc1a00-left-5",
+    "street": "11th St NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "1fe95b352825019de6d9a939d3398f3b-left-3",
+    "street": "Constitution Ave NW",
+    "was": [
+     10,
+     5
+    ],
+    "now": [
+     22,
+     5
+    ]
+   },
+   {
+    "zone": "1a45277e378f7a06778f4e88b02e457f-left-1",
+    "street": "Kansas Ave NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "17ca8ac4336329d4a85c2485503f3587-left-1",
+    "street": "Otis Pl NW",
+    "was": [
+     "21:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "2ef23dfeb6c7b1644f355c75bb6f939a-left-9",
+    "street": "Connecticut Ave NW",
+    "was": [
+     10,
+     5
+    ],
+    "now": [
+     22,
+     5
+    ]
+   },
+   {
+    "zone": "3358c7b32058893e904c01332b0da0cc-right-3",
+    "street": "Lincoln Rd NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "34209dcdabfca8338819314b3269dcc1-right-1",
+    "street": "13th St NW",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "3374da25d9cb5ada720dac4491fedb7c-left-1",
+    "street": "Central Ave SE",
+    "was": [
+     "0:30",
+     "14:30"
+    ],
+    "now": [
+     "12:30",
+     "14:30"
+    ]
+   },
+   {
+    "zone": "2f3c71b4c12ff7f02943fe06be364a0d-right-3",
+    "street": "Fairmont St NW",
+    "was": [
+     "21:30",
+     "11:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "244d8d843597f85822ae53bd976c85a2-left-1",
+    "street": "Bryant St NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "3b9ce86a9597fb4bb55ad5a610bda0b5-right-5",
+    "street": "E St NW",
+    "was": [
+     10,
+     5
+    ],
+    "now": [
+     22,
+     5
+    ]
+   },
+   {
+    "zone": "4fa45668f5224006e8863bbcc4232973-right-9",
+    "street": "7th St NW",
+    "was": [
+     22,
+     17
+    ],
+    "now": [
+     22,
+     5
+    ]
+   },
+   {
+    "zone": "54b9e97d2769e90d965416cf6107782d-right-2",
+    "street": "Caroline St NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "45aa84581f7f777ceb8416b271930271-left-2",
+    "street": "2nd St NW",
+    "was": [
+     "12:30",
+     "2:30"
+    ],
+    "now": [
+     "12:30",
+     "14:30"
+    ]
+   },
+   {
+    "zone": "66462100822f722c603e6f0c00814686-right-2",
+    "street": "N St NW",
+    "was": [
+     "21:30",
+     "11:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "632b0753dffcd913212870df1ae00172-left-2",
+    "street": "University Pl NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "5c426485e73d42bd46dfae097ca3f8bb-left-0",
+    "street": "Forrester St SW",
+    "was": [
+     "21:30",
+     "11:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "6d57e87ef4e157b56118c686cfe747f0-right-2",
+    "street": "O St NW",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "75a8c13216c2bd9feaf666ba01572a83-right-2",
+    "street": "Holbrook St NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "7cf5b0717082b545674b2fbb22bc1b1d-left-1",
+    "street": "Holbrook St NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "7db3512d13c95296efaaeae3aaf8756a-left-3",
+    "street": "Wisconsin Ave NW",
+    "was": [
+     10,
+     5
+    ],
+    "now": [
+     22,
+     5
+    ]
+   },
+   {
+    "zone": "91a47aa14e683466daa8f23cb63965cc-left-5",
+    "street": "N St NW",
+    "was": [
+     "21:30",
+     "11:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "9843647fdb3e5fd0cbc066a300252bbd-right-3",
+    "street": "58th St SE",
+    "was": [
+     "12:30",
+     "2:30"
+    ],
+    "now": [
+     "12:30",
+     "14:30"
+    ]
+   },
+   {
+    "zone": "89c82a8f390ce014e6b9a6a604d03c38-right-2",
+    "street": "Lincoln Rd NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "a176e826d2ecf18d6f3fc2ae7990653e-left-0",
+    "street": "Forrester St SW",
+    "was": [
+     "21:30",
+     "11:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "a0c98065d1437337bcd8c2015afb5180-left-3",
+    "street": "Massachusetts Ave SE",
+    "was": [
+     "21:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "9f5d77b9df9e88917719725ea69a7c8b-left-3",
+    "street": "Holbrook St NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "a12a0fb8450256bea24787eaf3c5f9da-right-3",
+    "street": "Forrester St SW",
+    "was": [
+     "21:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "b617de9d41a053cc8726b26e08a804c6-left-4",
+    "street": "13th St NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "c339f64efa15deef49194a4492fece11-right-1",
+    "street": "Bryant St NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "cbdd5960dcc03eb66605d0c67067422a-right-5",
+    "street": "10th St NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "c6c1d237f91624ca440269cf0d726b56-right-4",
+    "street": "Constitution Ave NW",
+    "was": [
+     10,
+     5
+    ],
+    "now": [
+     22,
+     5
+    ]
+   },
+   {
+    "zone": "bd279cad43d9ba1d0cc76e9ba4458cd2-right-0",
+    "street": "Holbrook St NE",
+    "was": [
+     21,
+     "11:30"
+    ],
+    "now": [
+     9,
+     "11:30"
+    ]
+   },
+   {
+    "zone": "c43f2e86025c250c5e983905fdd156a6-left-3",
+    "street": "Wisconsin Ave NW",
+    "was": [
+     1,
+     17
+    ],
+    "now": [
+     1,
+     5
+    ]
+   },
+   {
+    "zone": "d44a2cb2fc592c54d9b1bd10cb3490b1-right-4",
+    "street": "13th St NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "d16780db1c9d9f98fb21cbb34274b97d-left-7",
+    "street": "Connecticut Ave NW",
+    "was": [
+     13,
+     5
+    ],
+    "now": [
+     1,
+     5
+    ]
+   },
+   {
+    "zone": "d2797178eef6120ba4ec7cc53343787d-left-8",
+    "street": "G St SW",
+    "was": [
+     "21:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "e78e79955fc980d8ce2aec23313956cb-left-3",
+    "street": "11th St NW",
+    "was": [
+     "21:30",
+     "11:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "ed3d6466aed9afc3644f8a009415efb9-left-1",
+    "street": "57th St NE",
+    "was": [
+     "12:30",
+     "2:30"
+    ],
+    "now": [
+     "12:30",
+     "14:30"
+    ]
+   },
+   {
+    "zone": "fa0af6e212d5d45a6797edce7a97005b-right-3",
+    "street": "Kansas Ave NW",
+    "was": [
+     "9:30",
+     "23:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   },
+   {
+    "zone": "f2093fdb04cf1889a0827e048a927faa-right-1",
+    "street": "11th St NW",
+    "was": [
+     "21:30",
+     "11:30"
+    ],
+    "now": [
+     "9:30",
+     "11:30"
+    ]
+   }
+  ],
+  "sideCheck": {
+   "agree": 5452,
+   "differ": 2
+  },
+  "sidesWithSeveralZonesAndRules": 313
+ },
+ "output": {
+  "blocks": 2064,
+  "blockSides": 3541,
+  "rules": 3897,
+  "windows": {
+   "9:30-11:30": 3685,
+   "12:30-14:30": 1298,
+   "22-5": 174,
+   "7-19": 74,
+   "9-11:30": 48,
+   "2-5": 38,
+   "8:30-11:30": 38,
+   "9:30-10:30": 25,
+   "1-5": 22,
+   "9:30-11": 10,
+   "9:30-12:30": 7,
+   "0-5": 5,
+   "22-0": 5,
+   "9:30-20:30": 4,
+   "7-18:30": 3,
+   "12:30-14": 3,
+   "9-11": 3,
+   "7-11:30": 3,
+   "10-17": 3,
+   "10:30-12:30": 3,
+   "12:30-15:30": 3,
+   "12:30-14:45": 2,
+   "4-5": 2,
+   "12-14:30": 2,
+   "22-23:45": 2,
+   "7:30-11:30": 2,
+   "10-17:15": 2,
+   "22-3:45": 2,
+   "12:30-14:15": 2,
+   "8:30-10:30": 1,
+   "22-2": 1,
+   "9:15-11:30": 1,
+   "9-10:30": 1,
+   "9:30-18:30": 1,
+   "12-15": 1,
+   "9:30-10": 1,
+   "22-23:30": 1,
+   "23-5": 1,
+   "22-5:15": 1,
+   "12:30-20:30": 1,
+   "8-11": 1,
+   "9:30-11:15": 1,
+   "7-9:30": 1,
+   "2:30-5": 1,
+   "0:30-2:30": 1,
+   "10-11:30": 1,
+   "9:30-11:45": 1
+  }
+ },
+ "tickets": {
+  "tickets": 68529,
+  "unlocated": 540,
+  "located": 67989,
+  "onPostedBlock": 64985,
+  "blockInWindow": 62374,
+  "withSide": 58256,
+  "onSideInWindow": 52929,
+  "onSideOtherTime": 3234,
+  "otherSideInWindow": 318,
+  "sideNotPosted": 1775,
+  "byMonth": {
+   "2026-01": 1,
+   "2026-03": 7479,
+   "2026-04": 12202,
+   "2026-05": 9390,
+   "2026-06": 10903,
+   "2026-07": 10145,
+   "2026-08": 9089,
+   "2026-09": 9320
+  },
+  "holidays": [
+   {
+    "date": "2026-04-16",
+    "name": "DC Emancipation Day",
+    "tickets": 0,
+    "weekBefore": "2026-04-09",
+    "ticketsWeekBefore": 526,
+    "nextMorningBefore6": 0
+   },
+   {
+    "date": "2026-05-25",
+    "name": "Memorial Day",
+    "tickets": 0,
+    "weekBefore": "2026-05-18",
+    "ticketsWeekBefore": 731,
+    "nextMorningBefore6": 0
+   },
+   {
+    "date": "2026-06-19",
+    "name": "Juneteenth",
+    "tickets": 0,
+    "weekBefore": "2026-06-12",
+    "ticketsWeekBefore": 5,
+    "nextMorningBefore6": 0
+   },
+   {
+    "date": "2026-07-03",
+    "name": "Independence Day (observed)",
+    "tickets": 0,
+    "weekBefore": "2026-06-26",
+    "ticketsWeekBefore": 7,
+    "nextMorningBefore6": 0
+   },
+   {
+    "date": "2026-09-07",
+    "name": "Labor Day",
+    "tickets": 0,
+    "weekBefore": "2026-08-31",
+    "ticketsWeekBefore": 538,
+    "nextMorningBefore6": 0
+   }
+  ],
+  "shareOnSideInWindow": "90.9%",
+  "shareBlockInWindow": "96.0%",
+  "shareOnPostedBlock": "95.6%",
+  "note": "located = XCOORD/YCOORD within 30 m of a DDOT street block (preferring one named like LOCATION); withSide = located on a posted block and LOCATION names a side; onSideInWindow = that side has a rule for the ticket's weekday and time (windows ending the next morning count on the night before). The tickets' points are block address points, not the officer's position."
+ }
+}

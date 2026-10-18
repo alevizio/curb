@@ -1,0 +1,141 @@
+{
+ "id": "montreal",
+ "name": "Montréal",
+ "region": "Quebec",
+ "tz": "America/Toronto",
+ "center": [
+  45.5249,
+  -73.5901
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   45.4314,
+   -73.7537
+  ],
+  [
+   45.7018,
+   -73.4791
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-04-03": "Good Friday",
+  "2026-04-06": "Easter Monday",
+  "2026-05-18": "National Patriots' Day",
+  "2026-06-24": "Fête nationale du Québec",
+  "2026-07-01": "Canada Day",
+  "2026-09-07": "Labour Day",
+  "2026-10-12": "Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-03-26": "Good Friday",
+  "2027-03-29": "Easter Monday",
+  "2027-05-24": "National Patriots' Day",
+  "2027-06-24": "Fête nationale du Québec",
+  "2027-07-01": "Canada Day",
+  "2027-09-06": "Labour Day",
+  "2027-10-11": "Thanksgiving",
+  "2027-12-25": "Christmas Day"
+ },
+ "holidaysSource": "https://www.cnesst.gouv.qc.ca/fr/conditions-travail/conges/jours-feries-chomes-payes",
+ "holidayRule": "all",
+ "fine": "",
+ "tow": "sometimes",
+ "fineSource": "",
+ "agency": "Ville de Montréal (boroughs)",
+ "scheduleUrl": "https://montreal.ca/en/how-to/find-out-when-parking-prohibited-street-maintenance",
+ "sources": [
+  {
+   "name": "Signalisation (stationnement sur rue), Ville de Montréal",
+   "url": "https://donnees.montreal.ca/dataset/stationnement-sur-rue-signalisation-courant",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Géobase double: côtés de rue du réseau routier, Ville de Montréal",
+   "url": "https://donnees.montreal.ca/dataset/geobase-double",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Géobase: réseau routier, Ville de Montréal",
+   "url": "https://donnees.montreal.ca/dataset/geobase",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Remorquages de véhicules gênants, Ville de Montréal (cross-check only)",
+   "url": "https://donnees.montreal.ca/dataset/remorquages-de-vehicules-genants",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Each side of the street has its own street cleaning time on the signs: no parking for a few hours, usually one day a week, from April 1 to December 1 in most boroughs.",
+  "afterpass": "Signs give exact dates, April 1 to December 1 in most boroughs; the map moves each date to the nearest first of a month (December 1 is left out, March 15 starts March 1, November 15 ends October 31). Also on holidays. A ticket, sometimes a tow.",
+  "dataNotes": "Read sign by sign from the City of Montréal's parking sign inventory (Signalisation, updated daily, CC BY 4.0): each street cleaning sign goes on the nearest street side of the City's Géobase within 15 m, and a side shows every rule its signs post. The inventory is thin in Lachine, Saint-Laurent, Montréal-Nord and Saint-Léonard and nearly empty in LaSalle and Verdun; Pierrefonds-Roxboro and L'Île-Bizard–Sainte-Geneviève have no street cleaning. The sign on the street wins."
+ },
+ "neighborhoods": [
+  {
+   "name": "Ahuntsic-Cartierville",
+   "bbox": "-73.7419,45.5168,-73.6304,45.5770"
+  },
+  {
+   "name": "Anjou",
+   "bbox": "-73.5918,45.5921,-73.5392,45.6169"
+  },
+  {
+   "name": "Côte-des-Neiges–Notre-Dame-de-Grâce",
+   "bbox": "-73.6575,45.4547,-73.6083,45.5119"
+  },
+  {
+   "name": "Lachine",
+   "bbox": "-73.7170,45.4324,-73.6486,45.4480"
+  },
+  {
+   "name": "Le Plateau-Mont-Royal",
+   "bbox": "-73.6039,45.5089,-73.5635,45.5394"
+  },
+  {
+   "name": "Le Sud-Ouest",
+   "bbox": "-73.6050,45.4467,-73.5531,45.4943"
+  },
+  {
+   "name": "Mercier–Hochelaga-Maisonneuve",
+   "bbox": "-73.5644,45.5404,-73.5106,45.6123"
+  },
+  {
+   "name": "Montréal-Nord",
+   "bbox": "-73.6531,45.5782,-73.6231,45.6119"
+  },
+  {
+   "name": "Outremont",
+   "bbox": "-73.6215,45.5077,-73.5927,45.5240"
+  },
+  {
+   "name": "Rivière-des-Prairies–Pointe-aux-Trembles",
+   "bbox": "-73.6093,45.6244,-73.4865,45.6965"
+  },
+  {
+   "name": "Rosemont–La Petite-Patrie",
+   "bbox": "-73.6161,45.5295,-73.5556,45.5788"
+  },
+  {
+   "name": "Saint-Laurent",
+   "bbox": "-73.6992,45.4956,-73.6615,45.5297"
+  },
+  {
+   "name": "Saint-Léonard",
+   "bbox": "-73.6199,45.5743,-73.6023,45.5930"
+  },
+  {
+   "name": "Ville-Marie",
+   "bbox": "-73.5986,45.4911,-73.5460,45.5372"
+  },
+  {
+   "name": "Villeray–Saint-Michel–Parc-Extension",
+   "bbox": "-73.6433,45.5264,-73.5919,45.5826"
+  }
+ ]
+}

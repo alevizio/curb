@@ -1,0 +1,85 @@
+{
+ "id": "berkeley",
+ "name": "Berkeley",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  37.8765,
+  -122.29
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   37.8463,
+   -122.3198
+  ],
+  [
+   37.9049,
+   -122.2346
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr.'s Birthday",
+  "2026-02-12": "Lincoln's Birthday",
+  "2026-02-16": "Washington's Birthday",
+  "2026-03-30": "César Chávez Day (observed)",
+  "2026-05-18": "Malcolm X's Birthday (observed)",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Thanksgiving Holiday",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr.'s Birthday (observed)",
+  "2027-02-12": "Lincoln's Birthday",
+  "2027-02-15": "Washington's Birthday (observed)",
+  "2027-03-29": "César Chávez Farmworkers Day (observed)",
+  "2027-05-17": "Malcolm X's Birthday (observed)",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Thanksgiving Holiday",
+  "2027-12-24": "Christmas (observed)"
+ },
+ "holidaysSource": "https://berkeleyca.gov/your-government/city-holidays",
+ "holidayRule": "all",
+ "fine": "$73",
+ "tow": "no",
+ "fineSource": "https://berkeleyca.gov/sites/default/files/Schedule%20of%20Parking%20Violations%20and%20Fines.pdf",
+ "agency": "Berkeley Public Works",
+ "scheduleUrl": "https://berkeleyca.gov/city-services/streets-sidewalks-sewers-and-utilities/street-sweeping",
+ "sources": [
+  {
+   "name": "Residential Street Sweeping Schedule (Public Works): three PDFs, streets A-G and numbered streets (created 2018-02-08), H-Z (created 2025-09-25)",
+   "url": "https://berkeleyca.gov/city-services/streets-sidewalks-sewers-and-utilities/street-sweeping",
+   "license": "not stated (City of Berkeley public document)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Street Sweep Status (Public Works GIS): street centerline with house number ranges",
+   "url": "https://gis.cityofberkeley.info/arcgis/rest/services/PublicWorks/PubWorks/MapServer/28",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Addresses (City GIS portal), house number and street only, to tell the odd side",
+   "url": "https://gis.cityofberkeley.info/arcgis/rest/services/Public/GISportal/MapServer/0",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Each side of a residential block is swept once a month on a set day, like the 2nd Tuesday: no parking 9 AM to noon or 12:30 to 3:30 PM, as the signs say.",
+  "afterpass": "All year · not on City holidays (swept on the next scheduled day) · $73 ticket, no tow",
+  "dataNotes": "The City's Residential Street Sweeping Schedule (Public Works; streets A to G and numbered streets from February 2018, H to Z from September 2025), 2,479 block sides placed on the City's street centerline by house number; the City's address points tell which side holds the odd numbers. The schedule says only AM or PM: the hours are the ones on the posted signs. Blocks that opted out of the program are not swept and are left off."
+ }
+}

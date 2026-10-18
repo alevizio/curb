@@ -1,0 +1,191 @@
+{
+ "id": "san-jose",
+ "name": "San Jose",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  37.3455,
+  -121.8332
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   37.2414,
+   -122.0174
+  ],
+  [
+   37.4358,
+   -121.7889
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-02": "New Year's week (Friday sweeps move to Saturday)",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Thanksgiving week (Friday sweeps move to Saturday)",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Thanksgiving week (Friday sweeps move to Saturday)"
+ },
+ "holidaysSource": "https://gis.sanjoseca.gov/maps/serviceslookuptool/",
+ "holidayRule": "all",
+ "fine": "$65",
+ "tow": "no",
+ "fineSource": "https://sanjoseca.govnita.com/workspaces/Resolutions?query=RES2025-272",
+ "agency": "City of San Jose Department of Transportation",
+ "scheduleUrl": "https://www.sanjoseca.gov/your-government/departments-offices/transportation/streets/street-sweeping",
+ "sources": [
+  {
+   "name": "Residential Street Sweeping Routes (Department of Transportation)",
+   "url": "https://data.sanjoseca.gov/dataset/residential-street-sweeping-routes",
+   "license": "CC BY",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Major Road Street Sweeping Routes (Department of Transportation)",
+   "url": "https://data.sanjoseca.gov/dataset/major-road-street-sweeping-routes",
+   "license": "CC BY",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Streets",
+   "url": "https://geo.sanjoseca.gov/server/rest/services/OPN/OPN_OpenDataService/MapServer/60",
+   "license": "CC BY",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Neighborhoods",
+   "url": "https://geo.sanjoseca.gov/server/rest/services/OPN/OPN_OpenDataService/MapServer/549",
+   "license": "CC BY",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Residential streets with no parking signs: once a month, on the weekday and hours on the sign, both sides the same day. Downtown and major streets with signs: the night or morning on the sign, often a different day for each side.",
+  "afterpass": "All year · residential sweeps in the weeks of Thanksgiving, Christmas and New Year's Day move one day later · $65 ticket, no tow",
+  "dataNotes": "The City's street sweeping routes (Department of Transportation, data.sanjoseca.gov, CC BY 4.0): only the routes with no parking signs, where tickets are written; streets without signs are swept monthly too but get no tickets. Residential hours are the sign's two windows around a lunch break; the major road windows come from the City's posted text for each side, placed by compass."
+ },
+ "neighborhoods": [
+  {
+   "name": "Aborn and Silver Creek",
+   "bbox": "-121.8238,37.3065,-121.8158,37.3139"
+  },
+  {
+   "name": "Alviso",
+   "bbox": "-121.9748,37.4252,-121.9646,37.4328"
+  },
+  {
+   "name": "Ballbach and SOFA",
+   "bbox": "-121.8969,37.3257,-121.8860,37.3399"
+  },
+  {
+   "name": "Bonita Park",
+   "bbox": "-121.8632,37.3378,-121.8545,37.3459"
+  },
+  {
+   "name": "Cassell and Foxdale",
+   "bbox": "-121.8349,37.3367,-121.8210,37.3495"
+  },
+  {
+   "name": "Checkers",
+   "bbox": "-121.8622,37.3569,-121.8468,37.3650"
+  },
+  {
+   "name": "Dobern and Capitol Park",
+   "bbox": "-121.8375,37.3482,-121.8284,37.3555"
+  },
+  {
+   "name": "Fruitdale and Sherman Oaks",
+   "bbox": "-121.9318,37.3058,-121.9160,37.3164"
+  },
+  {
+   "name": "Goodyear Mastic",
+   "bbox": "-121.8866,37.3110,-121.8750,37.3204"
+  },
+  {
+   "name": "Guadalupe Washington",
+   "bbox": "-121.8895,37.3151,-121.8795,37.3252"
+  },
+  {
+   "name": "Hillview",
+   "bbox": "-121.8404,37.3310,-121.8269,37.3448"
+  },
+  {
+   "name": "Horace Mann and SJSU",
+   "bbox": "-121.8901,37.3338,-121.8775,37.3467"
+  },
+  {
+   "name": "Little Portugal",
+   "bbox": "-121.8649,37.3472,-121.8534,37.3574"
+  },
+  {
+   "name": "Los Arboles",
+   "bbox": "-121.8340,37.2824,-121.8235,37.2911"
+  },
+  {
+   "name": "Lyndale",
+   "bbox": "-121.8341,37.3526,-121.8200,37.3645"
+  },
+  {
+   "name": "Mayfair",
+   "bbox": "-121.8523,37.3514,-121.8385,37.3591"
+  },
+  {
+   "name": "Meadow Fair",
+   "bbox": "-121.8238,37.3149,-121.8136,37.3248"
+  },
+  {
+   "name": "Mount Pleasant",
+   "bbox": "-121.8136,37.3466,-121.7970,37.3557"
+  },
+  {
+   "name": "Overfelt High",
+   "bbox": "-121.8338,37.3258,-121.8229,37.3351"
+  },
+  {
+   "name": "Seven Trees and Lairon",
+   "bbox": "-121.8329,37.2781,-121.8234,37.2837"
+  },
+  {
+   "name": "Sierra Vista",
+   "bbox": "-121.8395,37.3557,-121.8315,37.3611"
+  },
+  {
+   "name": "South University",
+   "bbox": "-121.8839,37.3266,-121.8732,37.3346"
+  },
+  {
+   "name": "Spanish Cove",
+   "bbox": "-121.8402,37.2945,-121.8292,37.3024"
+  },
+  {
+   "name": "Starbird",
+   "bbox": "-121.9759,37.3011,-121.9651,37.3086"
+  },
+  {
+   "name": "Thompson Creek",
+   "bbox": "-121.8044,37.3159,-121.7938,37.3222"
+  },
+  {
+   "name": "Tropicana and Lanai",
+   "bbox": "-121.8465,37.3269,-121.8325,37.3383"
+  },
+  {
+   "name": "Valley Palms",
+   "bbox": "-121.8395,37.3203,-121.8274,37.3292"
+  },
+  {
+   "name": "Virginia and Martha",
+   "bbox": "-121.8827,37.3207,-121.8667,37.3287"
+  },
+  {
+   "name": "Welch Park",
+   "bbox": "-121.8285,37.3236,-121.8203,37.3355"
+  },
+  {
+   "name": "West Evergreen",
+   "bbox": "-121.8281,37.3111,-121.8182,37.3185"
+  }
+ ]
+}

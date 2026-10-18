@@ -1,0 +1,79 @@
+{
+ "id": "cambridge",
+ "name": "Cambridge",
+ "region": "Massachusetts",
+ "tz": "America/New_York",
+ "center": [
+  42.3736,
+  -71.1097
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   42.3516,
+   -71.1613
+  ],
+  [
+   42.4046,
+   -71.0684
+  ]
+ ],
+ "holidays": {
+  "2026-04-20": "Patriots' Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-12-25": "Christmas Day",
+  "2027-04-19": "Patriots' Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-12-24": "Christmas Day (observed)"
+ },
+ "holidaysSource": "https://www.cambridgema.gov/services/streetcleaning",
+ "holidayRule": "all",
+ "fine": "$100",
+ "tow": "no",
+ "fineSource": "https://www.cambridgema.gov/services/streetcleaning",
+ "agency": "Cambridge Department of Public Works",
+ "scheduleUrl": "https://www.cambridgema.gov/services/streetcleaning",
+ "sources": [
+  {
+   "name": "Traffic Regulation Schedule M, Section 16.7 Street Cleaning (revision 9/15/2014)",
+   "url": "https://www.cambridgema.gov/~/media/Files/Traffic/trafficregulations/schedules/mschedulejuly2014.pdf",
+   "license": "City of Cambridge public record (no license stated)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Street Centerline",
+   "url": "https://data.cambridgema.gov/Basemap/Street-Centerline/3d3q-sfd6",
+   "license": "ODC PDDL",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Master Addresses List",
+   "url": "https://data.cambridgema.gov/Addresses/Master-Addresses-List/vup6-kpwv",
+   "license": "ODC PDDL",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Cambridge Parking Tickets (2025, street cleaning)",
+   "url": "https://data.cambridgema.gov/Traffic-Parking-and-Transportation/Cambridge-Parking-Tickets/vnxa-cuyr",
+   "license": "ODC PDDL",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Each side of a residential street is swept once a month, April to December, on the day on its signs (for example \"4th Wednesday\"), usually 8 AM to 2 PM.",
+  "afterpass": "April 1 to December 31. $100 ticket, no tow. A sweep that falls on a City holiday moves to a make-up day, which CURB does not show yet.",
+  "dataNotes": "The only street-by-street table the City publishes is Traffic Regulation Schedule M from 2014, placed on the City's street centerlines. The City's 2025 tickets show that one side of three districts has moved to another week since then, so CURB does not show Cambridge until the City publishes the current table."
+ }
+}

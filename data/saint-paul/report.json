@@ -1,0 +1,365 @@
+{
+ "generated": "2026-10-18T19:25:53.842Z",
+ "inputs": {
+  "sweepingFeatures": 11882,
+  "withSweepDate": 6574,
+  "byOperation": {
+   "Seasonal": 6602,
+   "Arterial": 4919,
+   "Highway": 328,
+   "": 26,
+   "(none)": 3,
+   "[STATUS]": 4
+  },
+  "residentialWithoutDate": 30,
+  "routes": 77,
+  "districts": 17,
+  "centerlines": 11496
+ },
+ "output": {
+  "blocks": 6462,
+  "sides": 12924,
+  "rules": 12924,
+  "dateEntries": 12924,
+  "distinctDates": 21,
+  "mergedSameLine": 0,
+  "sizeBytes": 1781738
+ },
+ "season": {
+  "from": "2026-10-19",
+  "to": "2026-11-18",
+  "sweepDays": 21,
+  "weekdaysWithoutSweeps": [
+   "2026-11-03",
+   "2026-11-11 (Veterans Day)"
+  ],
+  "blocksPerDate": {
+   "2026-10-19": 431,
+   "2026-10-20": 366,
+   "2026-10-21": 307,
+   "2026-10-22": 356,
+   "2026-10-23": 302,
+   "2026-10-26": 312,
+   "2026-10-27": 356,
+   "2026-10-28": 350,
+   "2026-10-29": 269,
+   "2026-10-30": 413,
+   "2026-11-02": 308,
+   "2026-11-04": 161,
+   "2026-11-05": 312,
+   "2026-11-06": 290,
+   "2026-11-09": 355,
+   "2026-11-10": 347,
+   "2026-11-12": 350,
+   "2026-11-13": 339,
+   "2026-11-16": 185,
+   "2026-11-17": 179,
+   "2026-11-18": 174
+  }
+ },
+ "skipped": [
+  {
+   "why": "arterial: no residential sweep date (overnight bans are posted, hours not in the data)",
+   "count": 4918,
+   "examples": [
+    {
+     "id": "75",
+     "street": "Robert St S",
+     "from": "Fairfield Ave W",
+     "to": "Plato Blvd E",
+     "operation": "Arterial"
+    },
+    {
+     "id": "76",
+     "street": "Shepard Rd To WB Hwy5",
+     "from": "Shepard Rd",
+     "to": "Shepard Rd To WB Hwy 5",
+     "operation": "Arterial"
+    },
+    {
+     "id": "77",
+     "street": null,
+     "from": "Christie Pl",
+     "to": "Hazelwood St",
+     "operation": "Arterial"
+    },
+    {
+     "id": "78",
+     "street": "McKnight Rd N",
+     "from": "Reany Ave",
+     "to": "Bush Ave",
+     "operation": "Arterial"
+    },
+    {
+     "id": "83",
+     "street": "McKnight Rd N",
+     "from": "Bush Ave",
+     "to": "7th St E",
+     "operation": "Arterial"
+    }
+   ]
+  },
+  {
+   "why": "highway: not swept by this program",
+   "count": 328,
+   "examples": [
+    {
+     "id": "81",
+     "street": "Interstate 94",
+     "from": "EB I94 To Marion St",
+     "to": "EB I94 To WB 7th St W",
+     "operation": "Highway"
+    },
+    {
+     "id": "84",
+     "street": "Interstate 94",
+     "from": null,
+     "to": "EB I94 To SB Mounds Blvd",
+     "operation": "Highway"
+    },
+    {
+     "id": "86",
+     "street": "Highway 61",
+     "from": null,
+     "to": null,
+     "operation": "Highway"
+    },
+    {
+     "id": "199",
+     "street": "SB I35E To WB I94",
+     "from": "SB I35E To 12th St E",
+     "to": "Interstate 94",
+     "operation": "Highway"
+    },
+    {
+     "id": "302",
+     "street": "WB I94 To SB Hwy52",
+     "from": "WB I94 To 6th St E",
+     "to": "Highway 52",
+     "operation": "Highway"
+    }
+   ]
+  },
+  {
+   "why": "unnamed piece under 20 m (an intersection sliver)",
+   "count": 111,
+   "examples": [
+    {
+     "id": "89",
+     "street": null,
+     "from": "Earl St",
+     "to": "Earl St Service Drive East",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "413",
+     "street": null,
+     "from": "Desoto St",
+     "to": "Desoto St",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "476",
+     "street": null,
+     "from": "Maury St",
+     "to": "Dellwood Pl",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "678",
+     "street": null,
+     "from": "Herschel St",
+     "to": "Wheeler St N",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "771",
+     "street": null,
+     "from": "University Ave W",
+     "to": "Sherburne Ave",
+     "operation": "Seasonal"
+    }
+   ]
+  },
+  {
+   "why": "no sweep program and no date (private drives, dead ends, blank rows)",
+   "count": 32,
+   "examples": [
+    {
+     "id": "145",
+     "street": "Hoyt Ave E",
+     "from": "Westminster St",
+     "to": "Dead End",
+     "operation": null
+    },
+    {
+     "id": "387",
+     "street": "Skyway Dr",
+     "from": "Dead End",
+     "to": "S. To Dirt",
+     "operation": null
+    },
+    {
+     "id": "576",
+     "street": "Fremont Ave",
+     "from": "Clarence St",
+     "to": "Alley",
+     "operation": null
+    },
+    {
+     "id": "979",
+     "street": "Sylvan St",
+     "from": "Winter St",
+     "to": "Dead End",
+     "operation": null
+    },
+    {
+     "id": "1457",
+     "street": "Earl St Service Drive East",
+     "from": "Ross Ave",
+     "to": "Dead End",
+     "operation": null
+    }
+   ]
+  },
+  {
+   "why": "residential block with no sweep date yet (not scheduled)",
+   "count": 30,
+   "examples": [
+    {
+     "id": "635",
+     "street": "Sylvan St",
+     "from": "Dead End",
+     "to": "Acker St W",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "1167",
+     "street": "Sims Ave",
+     "from": "Frank St",
+     "to": "Dead End",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "1472",
+     "street": "Bush Ave",
+     "from": "Hazelwood St",
+     "to": "Dead End",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "1475",
+     "street": "Arundel St",
+     "from": "Idaho Ave W",
+     "to": "Parking Lot",
+     "operation": "Seasonal"
+    },
+    {
+     "id": "2453",
+     "street": "Gorman Ave",
+     "from": "Dead End",
+     "to": "Belvidere St E",
+     "operation": "Seasonal"
+    }
+   ]
+  },
+  {
+   "why": "no street name, in this layer or on a centerline under it",
+   "count": 1,
+   "examples": [
+    {
+     "id": "6824",
+     "street": null,
+     "from": null,
+     "to": null,
+     "operation": "Seasonal"
+    }
+   ]
+  }
+ ],
+ "checks": {
+  "geometryJoined": 1,
+  "geometryLongestPart": 0,
+  "namedFromCenterlines": 33,
+  "crossStreetsInLineOrder": 6340,
+  "crossStreetsReversed": 87,
+  "crossStreetsUnplaced": 35,
+  "districtByNearestEdge": 20,
+  "noDistrict": 0,
+  "otherOperationsWithADate": {
+   "Arterial": 1
+  },
+  "routesWithMoreThanOneDate": 0,
+  "routesWithMoreThanOneDateList": [],
+  "weekendDates": [],
+  "datesOnHolidays": [],
+  "arterialNightRoutes": {
+   "arterialBlocks": 4919,
+   "withANightRouteCode": 3359,
+   "note": "NIGHT_N_E / NIGHT_S_W give one weekday per side (M-3-N = Monday, north side). They match the posted overnight bans a 2020 City memo lists for Grand Ave (north Monday, south Tuesday), Dale St (east Monday, west Thursday) and Cleveland Ave (Friday), but Snelling Ave, posted three nights a side, has one; the hours (most 2 to 7 AM, per the memo) are not in the data. Not modeled: a one night rule would call a banned night free."
+  },
+  "citations2025": {
+   "what": "No-parking-zone tickets (Minn. Stat. 169.34 subd. 1(a)(14)) on weekdays of the 2025 fall sweep (Oct 16 to Nov 26, 2025), snapped to the nearest block line within 30 m.",
+   "tickets": 2321,
+   "snapped": 2313,
+   "onResidentialBlocks": 961,
+   "residentialShare8to18": 85.5,
+   "arterialShare8to18": 80.8,
+   "residentialByHour": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    8,
+    59,
+    125,
+    185,
+    129,
+    116,
+    47,
+    45,
+    19,
+    47,
+    50,
+    27,
+    32,
+    28,
+    39,
+    5,
+    0
+   ],
+   "caveats": [
+    "The ticket data does not say which ticket was for sweeping: the same statute covers every posted no parking sign (construction, events, the summer sweep).",
+    "A ticket's place is a block point, not the curb: it cannot tell the side of the street.",
+    "The City does not publish 2025's sweep date for each block, so the dates themselves cannot be checked; the 2026 route codes are new each season."
+   ]
+  }
+ },
+ "assumptions": [
+  "Both sides of a block share its date: the layer has one SweepDate per block and no side, the City's map shows one date per block, and the City's pages never say the sides are swept on different days.",
+  "The window is 8 AM to 6 PM on the date, from the City's Street Sweeping Operations page and the Street Sweep Map's description; the date is the SweepDate's calendar date in Saint Paul.",
+  "Every swept block can be ticketed and towed (flags 2): the City says cars in the posted zone \"could be ticketed and towed\".",
+  "A block with no SweepDate is not shown: arterials (posted overnight bans, hours not in the data), highways, and residential blocks the City has not scheduled yet.",
+  "Not modeled: snow emergencies (declared) and the winter weekly alternate side parking pilot (two pilot areas, January to April in 2025 and 2026).",
+  "Unnamed pieces under 20 m are intersection slivers and are left off; longer unnamed blocks take the name of the City centerline (2019) under them.",
+  "Holidays: the City's eleven paid holidays (policy 209.00) with the Minnesota weekend rule (Minn. Stat. 645.44 subd. 5); 2027 is derived, not published. No 2026 sweep date falls on one."
+ ],
+ "unverified": [
+  "The fine: no City page gives the amount for a sweeping ticket. Tickets during sweeps are written as \"no parking zone\" (Minn. Stat. 169.34 subd. 1(a)(14)), whose 2025 statewide payable is $25 plus a $12 surcharge ($37), but that the City uses this payable for sweeping tickets is not confirmed. The snow emergency ticket ($56) is a different code. city.json leaves fine empty.",
+  "That both sides are swept the same day (see assumptions).",
+  "That signs go up on every block: the operations page also says streets \"may or may not be posted in advance\".",
+  "The 2027 holiday dates (derived by rule)."
+ ],
+ "questionsForCity": [
+  "What is the fine for parking on a block during its posted residential sweep, and what does the tow cost (the impound lot's standard tow, or the snow emergency rate)?",
+  "Are both sides of a residential block always swept on the block's SweepDate, or can one side be done another day?",
+  "When a block is rescheduled, is SweepDate updated the same day, and are the signs moved with it? How late can a date change?",
+  "Can the posted nights and hours of the arterial overnight sanitation bans be added to the layer? NIGHT_N_E and NIGHT_S_W give one weekday per side, and some streets (Snelling Ave) are posted three nights a side.",
+  "Is the layer's OBJECTID stable from season to season (it matched the 2022 copy of the layer), so saved alerts keep working next spring?",
+  "Will the spring 2027 dates be published in the same layer, and when?",
+  "Will the weekly alternate side parking pilot (winters 2025 and 2026, two pilot areas, layer Weekly_Alternate_Side_Parking) run again this winter, and where?"
+ ]
+}

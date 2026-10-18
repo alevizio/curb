@@ -1,0 +1,134 @@
+{
+ "id": "philadelphia",
+ "name": "Philadelphia",
+ "region": "Pennsylvania",
+ "tz": "America/New_York",
+ "center": [
+  39.9905,
+  -75.155
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   39.9047,
+   -75.2553
+  ],
+  [
+   40.0575,
+   -75.0395
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King, Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-04-03": "Good Friday",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-04": "Independence Day",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Columbus Day/Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving",
+  "2026-11-27": "Thanksgiving Friday",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King, Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-03-26": "Good Friday",
+  "2027-05-31": "Memorial Day",
+  "2027-06-19": "Juneteenth",
+  "2027-07-04": "Independence Day",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Columbus Day/Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving",
+  "2027-11-26": "Thanksgiving Friday",
+  "2027-12-25": "Christmas Day"
+ },
+ "holidaysSource": "https://www.phila.gov/media/20251202123436/Final-NPhilly-Twice-a-Week-Collections-Palmcard-6x9-3.pdf",
+ "holidayRule": "all",
+ "fine": "$31",
+ "tow": "no",
+ "fineSource": "https://philapark.org/enforcement/",
+ "agency": "Philadelphia Department of Sanitation",
+ "scheduleUrl": "https://www.phila.gov/programs/mechanical-street-cleaning/cleaning-schedule/",
+ "sources": [
+  {
+   "name": "SweepPHL Route Locations (Streets Department, Mechanical Broom Routes)",
+   "url": "https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/Broom_Routes_SweepPHL/FeatureServer/0",
+   "license": "No license stated (a public City of Philadelphia layer, not in the OpenDataPhilly catalog)",
+   "fetched": "2026-10-18",
+   "updated": "2026-07-17"
+  },
+  {
+   "name": "Street Centerline (OpenDataPhilly), node ids and street names only, for cross streets",
+   "url": "https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/Street_Centerline/FeatureServer/0",
+   "license": "City of Philadelphia open data terms (OpenDataPhilly)",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Mechanical street cleaning, April 6 to October 29, Monday to Thursday: on signed blocks, no parking during the posted two hour window (9 to 11 AM, 11 AM to 1 PM, or 1 to 3 PM).",
+  "afterpass": "Signs are posted on select blocks only. A $31 ticket, no tow. No cleaning on City holidays.",
+  "dataNotes": "Days and windows come from the City's SweepPHL route map (Streets Department), placed on each side of the street by its even or odd house numbers. The City posts no parking signs only on blocks wide enough to move cars and the data does not say which, so every route block is shown: the sign on the block wins."
+ },
+ "neighborhoods": [
+  {
+   "name": "Frankford",
+   "bbox": "-75.0991,40.0058,-75.0495,40.0285"
+  },
+  {
+   "name": "Germantown",
+   "bbox": "-75.1803,40.0204,-75.1590,40.0369"
+  },
+  {
+   "name": "Kensington",
+   "bbox": "-75.1349,39.9902,-75.0970,40.0216"
+  },
+  {
+   "name": "Logan",
+   "bbox": "-75.1529,39.9997,-75.1214,40.0475"
+  },
+  {
+   "name": "Nicetown",
+   "bbox": "-75.1745,40.0018,-75.1466,40.0315"
+  },
+  {
+   "name": "North Central",
+   "bbox": "-75.1721,39.9715,-75.1529,40.0033"
+  },
+  {
+   "name": "Paschall",
+   "bbox": "-75.2453,39.9149,-75.2194,39.9310"
+  },
+  {
+   "name": "Point Breeze",
+   "bbox": "-75.1860,39.9256,-75.1664,39.9421"
+  },
+  {
+   "name": "Port Richmond",
+   "bbox": "-75.1255,39.9815,-75.0864,40.0060"
+  },
+  {
+   "name": "South Philadelphia",
+   "bbox": "-75.1615,39.9147,-75.1532,39.9243"
+  },
+  {
+   "name": "Southwest",
+   "bbox": "-75.2354,39.9281,-75.2126,39.9431"
+  },
+  {
+   "name": "Strawberry Mansion",
+   "bbox": "-75.1887,39.9738,-75.1659,40.0047"
+  },
+  {
+   "name": "West Fairhill",
+   "bbox": "-75.1594,39.9689,-75.1309,40.0046"
+  },
+  {
+   "name": "West Philadelphia",
+   "bbox": "-75.2274,39.9405,-75.2018,39.9815"
+  }
+ ]
+}

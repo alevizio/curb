@@ -1,0 +1,503 @@
+{
+ "generated": "2026-10-18T19:02:27.858Z",
+ "inputs": {
+  "cityLines": 601,
+  "cityLinesWithGeometry": 601,
+  "routes": 32,
+  "roadCenterlines": 7843,
+  "wards": 6,
+  "linesByTime": {
+   "Saturday": 28,
+   "Daily 6:00AM - 8:00AM": 37,
+   "Wednesday& Thursday 1:00PM - 3:30PM": 89,
+   "Thursday& Friday 8:00AM - 12:00PM": 36,
+   "Wednesday& Friday 1:00PM - 3:30PM": 10,
+   "Wednesday& Thursday 8:00AM - 12:00PM": 104,
+   "Wednesday& Friday 8:00AM - 12:00PM": 14,
+   "Monday& Tuesday 8:00AM - 12:00PM": 131,
+   "Monday& Tuesday 1:00PM - 3:30PM": 112,
+   "Monday& Tuesday 1:00PM - 3:00PM": 15,
+   "Thursday& Friday 1:00PM - 3:30PM": 25
+  },
+  "mapLastEdited": "2026-07-29 (the layer's editingInfo)"
+ },
+ "output": {
+  "blocks": 2574,
+  "sides": 5102,
+  "rules": 11286,
+  "sizeBytes": 837464,
+  "blocksByRoute": {
+   "Bunker Hill": 1,
+   "Downtown": 104,
+   "Route 3A&3B": 97,
+   "Route 4A&4B": 61,
+   "Route 5A&5B": 66,
+   "Route 6A&6B": 58,
+   "Route 7A&7B": 84,
+   "Route 8A&8B": 60,
+   "Route 9A&9B": 109,
+   "Route 10A&10B": 57,
+   "Route 11A&11B": 73,
+   "Route 12A&12B, Route 13A&13B": 84,
+   "Route 14A&14B": 125,
+   "Route 15A&15B": 60,
+   "Route 16A&16B": 82,
+   "Route 17A&17B": 41,
+   "Route 18A&18B": 59,
+   "Route 19A&19B": 73,
+   "Route 20A&20B": 59,
+   "Route 21A&21B": 124,
+   "Route 22A&22B": 57,
+   "Route 23A&23B": 53,
+   "Route 24&34": 165,
+   "Route 25A&25B": 117,
+   "Route 26A&26B": 67,
+   "Route 27A&27B": 69,
+   "Route 28A&28B": 82,
+   "Route 29A&29B": 34,
+   "Route 30A&30B": 101,
+   "Route 31A&31B": 113,
+   "Route 33A&33B": 142,
+   "S1A&B": 111
+  }
+ },
+ "season": {
+  "from": null,
+  "to": null,
+  "note": "All year: no season is published for 2026. In past years the City announced restarts after a winter pause (Feb 3, 2020; Apr 4, 2022), so a winter pause may exist."
+ },
+ "skipped": [
+  {
+   "why": "City lines on a route with no hours (Bunker Hill, Time \"Saturday\")",
+   "count": 28,
+   "examples": [
+    {
+     "id": "1",
+     "route": "Bunker Hill",
+     "time": "Saturday"
+    },
+    {
+     "id": "2",
+     "route": "Bunker Hill",
+     "time": "Saturday"
+    },
+    {
+     "id": "3",
+     "route": "Bunker Hill",
+     "time": "Saturday"
+    },
+    {
+     "id": "4",
+     "route": "Bunker Hill",
+     "time": "Saturday"
+    },
+    {
+     "id": "5",
+     "route": "Bunker Hill",
+     "time": "Saturday"
+    }
+   ]
+  },
+  {
+   "why": "City lines with hours that run along no State centerline block for most of their length (drawn across blocks or off the streets, or along an I-80 ramp)",
+   "count": 13,
+   "examples": [
+    {
+     "id": "168",
+     "route": "Route 4A&4B",
+     "time": "Wednesday& Thursday 1:00PM - 3:30PM",
+     "meters": 166
+    },
+    {
+     "id": "203",
+     "route": "Route 30A&30B",
+     "time": "Wednesday& Thursday 8:00AM - 12:00PM",
+     "meters": 396
+    },
+    {
+     "id": "253",
+     "route": "Route 19A&19B",
+     "time": "Wednesday& Friday 8:00AM - 12:00PM",
+     "meters": 528
+    },
+    {
+     "id": "271",
+     "route": "Route 17A&17B",
+     "time": "Monday& Tuesday 1:00PM - 3:30PM",
+     "meters": 212
+    },
+    {
+     "id": "293",
+     "route": "Route 12A&12B, Route 13A&13B",
+     "time": "Monday& Tuesday 1:00PM - 3:30PM",
+     "meters": 120
+    },
+    {
+     "id": "328",
+     "route": "Route 33A&33B",
+     "time": "Monday& Tuesday 8:00AM - 12:00PM",
+     "meters": 13
+    },
+    {
+     "id": "342",
+     "route": "Route 33A&33B",
+     "time": "Monday& Tuesday 8:00AM - 12:00PM",
+     "meters": 358
+    },
+    {
+     "id": "377",
+     "route": "Route 21A&21B",
+     "time": "Wednesday& Thursday 8:00AM - 12:00PM",
+     "meters": 199
+    },
+    {
+     "id": "415",
+     "route": "Route 15A&15B",
+     "time": "Thursday& Friday 1:00PM - 3:30PM",
+     "meters": 250
+    },
+    {
+     "id": "431",
+     "route": "Route 15A&15B",
+     "time": "Thursday& Friday 1:00PM - 3:30PM",
+     "meters": 64
+    },
+    {
+     "id": "458",
+     "route": "Route 11A&11B",
+     "time": "Monday& Tuesday 1:00PM - 3:30PM",
+     "meters": 253
+    },
+    {
+     "id": "461",
+     "route": "Route 11A&11B",
+     "time": "Monday& Tuesday 1:00PM - 3:30PM",
+     "meters": 137
+    },
+    {
+     "id": "462",
+     "route": "Route 11A&11B",
+     "time": "Monday& Tuesday 1:00PM - 3:30PM",
+     "meters": 177
+    }
+   ]
+  },
+  {
+   "why": "only on a route with no hours on the map (Bunker Hill, \"Saturday\")",
+   "count": 59,
+   "examples": [
+    {
+     "id": "00b19244-1708-11e3-b5f2-0062151309ff",
+     "street": "Wait St",
+     "cover": 1,
+     "routes": [
+      "Bunker Hill"
+     ]
+    },
+    {
+     "id": "1fc42c82-1708-11e3-b5f2-0062151309ff",
+     "street": "6th Ave",
+     "cover": 1,
+     "routes": [
+      "Bunker Hill"
+     ]
+    },
+    {
+     "id": "182a5bae-1708-11e3-b5f2-0062151309ff",
+     "street": "4th Ave",
+     "cover": 1,
+     "routes": [
+      "Bunker Hill"
+     ]
+    },
+    {
+     "id": "166c6bae-1708-11e3-b5f2-0062151309ff",
+     "street": "4th Ave",
+     "cover": 1,
+     "routes": [
+      "Bunker Hill"
+     ]
+    },
+    {
+     "id": "1f0f5c62-1708-11e3-b5f2-0062151309ff",
+     "street": "Erie St",
+     "cover": 1,
+     "routes": [
+      "Bunker Hill"
+     ]
+    }
+   ]
+  },
+  {
+   "why": "block under 8 m (an intersection sliver)",
+   "count": 21,
+   "examples": [
+    {
+     "id": "08b6bcd0-1708-11e3-b5f2-0062151309ff",
+     "street": "Hazel St",
+     "cover": 1,
+     "routes": [
+      "Route 16A&16B"
+     ]
+    },
+    {
+     "id": "0cb4dd6c-1708-11e3-b5f2-0062151309ff",
+     "street": "Hazel St",
+     "cover": 1,
+     "routes": [
+      "Route 16A&16B"
+     ]
+    },
+    {
+     "id": "0ff1e39e-1708-11e3-b5f2-0062151309ff",
+     "street": "E 37th St",
+     "cover": 1,
+     "routes": [
+      "Route 24&34"
+     ]
+    },
+    {
+     "id": "23d66d12-1708-11e3-b5f2-0062151309ff",
+     "street": "Nagle St",
+     "cover": 1,
+     "routes": [
+      "Route 15A&15B"
+     ]
+    },
+    {
+     "id": "070d264e-1708-11e3-b5f2-0062151309ff",
+     "street": "Marshall St",
+     "cover": 1,
+     "routes": [
+      "Route 16A&16B"
+     ]
+    }
+   ]
+  },
+  {
+   "why": "outside Paterson (both sides in a neighboring town)",
+   "count": 11,
+   "examples": [
+    {
+     "id": "01050212-1708-11e3-b5f2-0062151309ff",
+     "street": "Glover Ave",
+     "cover": 1,
+     "routes": [
+      "Route 15A&15B"
+     ]
+    },
+    {
+     "id": "0548578e-1708-11e3-b5f2-0062151309ff",
+     "street": "Hopper St",
+     "cover": 1,
+     "routes": [
+      "Route 8A&8B"
+     ]
+    },
+    {
+     "id": "0856a552-1708-11e3-b5f2-0062151309ff",
+     "street": "Valley Rd",
+     "cover": 0.5,
+     "routes": [
+      "Route 16A&16B"
+     ]
+    },
+    {
+     "id": "1c615eac-1708-11e3-b5f2-0062151309ff",
+     "street": "New St",
+     "cover": 1,
+     "routes": [
+      "Route 15A&15B"
+     ]
+    },
+    {
+     "id": "00fa383c-1708-11e3-b5f2-0062151309ff",
+     "street": "Glover Ave",
+     "cover": 1,
+     "routes": [
+      "Route 15A&15B"
+     ]
+    }
+   ]
+  },
+  {
+   "why": "no street name on the centerline (blank or \"Unnamed Segment\")",
+   "count": 4,
+   "examples": [
+    {
+     "id": "0109ed5e-1708-11e3-b5f2-0062151309ff",
+     "street": "Unnamed Segment",
+     "cover": 0.77,
+     "routes": [
+      "Route 11A&11B"
+     ]
+    },
+    {
+     "id": "05615540-1708-11e3-b5f2-0062151309ff",
+     "street": "Unnamed Segment",
+     "cover": 1,
+     "routes": [
+      "Route 11A&11B"
+     ]
+    },
+    {
+     "id": "09cb41ae-1708-11e3-b5f2-0062151309ff",
+     "street": "Unnamed Segment",
+     "cover": 1,
+     "routes": [
+      "Route 30A&30B"
+     ]
+    },
+    {
+     "id": "1e8a0666-1708-11e3-b5f2-0062151309ff",
+     "street": "Unnamed Segment",
+     "cover": 1,
+     "routes": [
+      "Route 33A&33B"
+     ]
+    }
+   ]
+  }
+ ],
+ "checks": {
+  "secondPass": 49,
+  "partial": "27 blocks are covered between 50% and 80% (a City line ending mid-block)",
+  "multiSchedule": 11,
+  "multiScheduleExamples": [
+   {
+    "id": "1eedaa72-1708-11e3-b5f2-0062151309ff",
+    "street": "21st Ave",
+    "cover": 1,
+    "routes": [
+     "Route 31A&31B",
+     "S1A&B"
+    ],
+    "times": [
+     "Monday& Tuesday 8:00AM - 12:00PM",
+     "Wednesday& Thursday 8:00AM - 12:00PM"
+    ]
+   },
+   {
+    "id": "1cc37d8a-1708-11e3-b5f2-0062151309ff",
+    "street": "Laurel St",
+    "cover": 1,
+    "routes": [
+     "Route 33A&33B",
+     "Route 12A&12B, Route 13A&13B"
+    ],
+    "times": [
+     "Monday& Tuesday 1:00PM - 3:30PM",
+     "Monday& Tuesday 8:00AM - 12:00PM"
+    ]
+   },
+   {
+    "id": "0abbbde6-1708-11e3-b5f2-0062151309ff",
+    "street": "N Main St",
+    "cover": 1,
+    "routes": [
+     "Route 8A&8B",
+     "Route 9A&9B"
+    ],
+    "times": [
+     "Monday& Tuesday 1:00PM - 3:30PM",
+     "Monday& Tuesday 8:00AM - 12:00PM"
+    ]
+   },
+   {
+    "id": "2d8a2542-1708-11e3-b5f2-0062151309ff",
+    "street": "Totowa Ave",
+    "cover": 1,
+    "routes": [
+     "Route 12A&12B, Route 13A&13B",
+     "Route 33A&33B"
+    ],
+    "times": [
+     "Monday& Tuesday 1:00PM - 3:30PM",
+     "Monday& Tuesday 8:00AM - 12:00PM"
+    ]
+   },
+   {
+    "id": "07942702-1708-11e3-b5f2-0062151309ff",
+    "street": "Union Ave",
+    "cover": 1,
+    "routes": [
+     "Route 33A&33B",
+     "Route 12A&12B, Route 13A&13B"
+    ],
+    "times": [
+     "Monday& Tuesday 1:00PM - 3:30PM",
+     "Monday& Tuesday 8:00AM - 12:00PM"
+    ]
+   },
+   {
+    "id": "23d85ece-1708-11e3-b5f2-0062151309ff",
+    "street": "Totowa Ave",
+    "cover": 1,
+    "routes": [
+     "Route 14A&14B",
+     "Route 33A&33B"
+    ],
+    "times": [
+     "Monday& Tuesday 8:00AM - 12:00PM",
+     "Wednesday& Thursday 8:00AM - 12:00PM"
+    ]
+   },
+   {
+    "id": "05a54174-1708-11e3-b5f2-0062151309ff",
+    "street": "River St",
+    "cover": 1,
+    "routes": [
+     "Route 31A&31B",
+     "Downtown"
+    ],
+    "times": [
+     "Daily 6:00AM - 8:00AM",
+     "Wednesday& Thursday 8:00AM - 12:00PM"
+    ]
+   },
+   {
+    "id": "098fbd32-1708-11e3-b5f2-0062151309ff",
+    "street": "Totowa Ave",
+    "cover": 1,
+    "routes": [
+     "Route 14A&14B",
+     "Route 33A&33B"
+    ],
+    "times": [
+     "Monday& Tuesday 8:00AM - 12:00PM",
+     "Wednesday& Thursday 8:00AM - 12:00PM"
+    ]
+   }
+  ],
+  "noOddSide": 326,
+  "noCrossStreet": 23,
+  "noWard": 21,
+  "cityLimitOneSide": 46,
+  "method": "Each State centerline block (ramps and limited access highways left out) is sampled every 4 m, 5 m in from each end; a sample counts when a City line runs within 10 m of it in the same direction (within about 32 degrees). A block is swept when at least 50% of its samples are on City lines; it takes the rules of every City line holding at least 25% of them. A second pass widens the distance to 30 m, but only for a City line already laid on blocks of the same street name (hand-drawn lines drift, South Main St's by up to 27 m: 49 blocks were placed by this pass). 97% of the City lines' points lie within 6 m of a State centerline."
+ },
+ "assumptions": [
+  "Both sides of a block carry both days of its route. The City's map gives each route two days (routes are named \"3A&3B\": one side each day, apparently) but no side, and no City page, PDF or ordinance found online says which side goes on which day. A resident on one side is told about both days; the posted sign gives the one day for that side.",
+  "\"Daily 6:00AM - 8:00AM\" (the Downtown route) is read as every day of the week, Sunday included, because the map says Daily.",
+  "Every swept block is towable (flags 2): Paterson Code § 435-131 says vehicles parked during the designated street cleaning days and hours shall be removed at the owner's cost; § 435-132 sets the fine at $50 plus $30 court costs.",
+  "All year (months 0): no season is published for 2026.",
+  "A block takes the rules of every City line laid on it; where two routes overlap (a street on a route boundary), the block shows both schedules.",
+  "Only Paterson's own curbs: on a street along the city limit (46 blocks) only the side the State codes to Paterson is shown, and 11 blocks wholly in Clifton, Haledon, Prospect Park or Totowa that the City's lines run onto are left out.",
+  "Block ids (c) are the State's RCL_NGUID for the centerline block, not the City's line OBJECTID: the City republished its map as a new layer in July 2026 (its earlier copy, \"Street Sweeping Route and Time\", has other ids), while the State's ids have been stable since 2013.",
+  "Holidays: the days City Hall closed in 2026 on the City's own monthly calendars (Presidents' Day, Good Friday, Memorial Day, Juneteenth, Labor Day, Columbus Day; Christmas Eve and Christmas in December 2025), with the usual federal holidays for the months with no calendar online and all of 2027 derived the same way."
+ ],
+ "unverified": [
+  "Which side is swept on which of the two days, on every route (the main gap).",
+  "That street cleaning stops on City holidays (holidayRule \"all\" is the City's office closing list; no page says sweeping follows it).",
+  "Whether \"Daily\" downtown includes Sunday (and Saturday).",
+  "Bunker Hill's Saturday route: no hours on the map, so it is left off.",
+  "A winter pause: in 2020 and 2022 the City announced dates when cleaning and enforcement resumed.",
+  "The 2026 holidays in January, July and November, and every 2027 holiday (derived, not published)."
+ ],
+ "questionsForCity": [
+  "On a route swept two days a week (for example Route 3A&3B, Monday and Tuesday 8 AM to noon), which side is swept on which day? Is there a rule (north and east sides on the first day) or a list by street?",
+  "Does \"Daily 6:00AM - 8:00AM\" downtown include Saturday and Sunday?",
+  "What are the hours of the Bunker Hill route swept on Saturdays?",
+  "Is street cleaning (and its ticketing) suspended on City holidays, and on which days? Is there a winter pause, and when does it start and end?",
+  "Will the Street Sweeping Map layer keep its fields (Route, Time) when it is updated, and can it carry the street names and the side for each day?"
+ ]
+}

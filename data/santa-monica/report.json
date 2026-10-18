@@ -1,0 +1,907 @@
+{
+ "generated": "2026-10-18T19:14:41.158Z",
+ "season": "All year, weekly. No sweeping on the 13 City holidays of santamonica.gov/street-sweeping (2026: Juneteenth and Independence Day swept as usual). No make-up day.",
+ "input": {
+  "curbLines": 19550,
+  "withDayAndHours": 13375,
+  "noDay": 6141,
+  "noDayKm": 110.1,
+  "unreadable": 34,
+  "unreadableWhy": {
+   "no hours": 34
+  },
+  "scheduledKm": 326.9,
+  "centerlines": 3465,
+  "streetCenterlines": 2645,
+  "intersectionPiecesLeftOut": 380
+ },
+ "placement": {
+  "method": "Each scheduled curb line sampled every 5 m; a sample goes to the nearest block line (a STREET centerline) within 30 m whose direction is within about 37 degrees of the curb, on the side where it lies. A side keeps a schedule carried by at least 15% of the block length and 15 m of curb (60% of a block shorter than 25 m).",
+  "sampledKm": 326.9,
+  "placedKm": 325.2,
+  "placedShare": 0.995,
+  "curbLinesMostlyUnplaced": 246,
+  "curbLinesMostlyUnplacedKm": 1.21,
+  "unplacedExamples": [
+   {
+    "id": 14953,
+    "m": 209,
+    "rules": 1,
+    "at": [
+     -118.472588,
+     34.005591
+    ]
+   },
+   {
+    "id": 13047,
+    "m": 166,
+    "rules": 1,
+    "at": [
+     -118.464699,
+     34.006286
+    ]
+   },
+   {
+    "id": 561,
+    "m": 145,
+    "rules": 3,
+    "at": [
+     -118.453351,
+     34.027471
+    ]
+   },
+   {
+    "id": 14961,
+    "m": 105,
+    "rules": 1,
+    "at": [
+     -118.472899,
+     34.005208
+    ]
+   },
+   {
+    "id": 14965,
+    "m": 92,
+    "rules": 1,
+    "at": [
+     -118.471939,
+     34.005769
+    ]
+   },
+   {
+    "id": 5211,
+    "m": 39,
+    "rules": 1,
+    "at": [
+     -118.465514,
+     34.025032
+    ]
+   },
+   {
+    "id": 13253,
+    "m": 24,
+    "rules": 1,
+    "at": [
+     -118.468045,
+     34.006346
+    ]
+   },
+   {
+    "id": 6522,
+    "m": 16,
+    "rules": 1,
+    "at": [
+     -118.507592,
+     34.034947
+    ]
+   },
+   {
+    "id": 5541,
+    "m": 10,
+    "rules": 1,
+    "at": [
+     -118.507992,
+     34.033982
+    ]
+   },
+   {
+    "id": 4024,
+    "m": 9,
+    "rules": 1,
+    "at": [
+     -118.465048,
+     34.028178
+    ]
+   },
+   {
+    "id": 6185,
+    "m": 9,
+    "rules": 1,
+    "at": [
+     -118.507026,
+     34.038597
+    ]
+   },
+   {
+    "id": 19524,
+    "m": 9,
+    "rules": 1,
+    "at": [
+     -118.476059,
+     34.03129
+    ]
+   },
+   {
+    "id": 19525,
+    "m": 9,
+    "rules": 1,
+    "at": [
+     -118.476131,
+     34.031232
+    ]
+   },
+   {
+    "id": 6184,
+    "m": 6,
+    "rules": 1,
+    "at": [
+     -118.506943,
+     34.03858
+    ]
+   },
+   {
+    "id": 6217,
+    "m": 6,
+    "rules": 1,
+    "at": [
+     -118.507706,
+     34.037954
+    ]
+   }
+  ],
+  "sidesBelowThreshold": 66,
+  "sidesBelowThresholdKm": 0.6,
+  "sidesWithSeveralRules": 13,
+  "severalRulesExamples": [
+   {
+    "c": "1517",
+    "s": "Stewart St",
+    "side": "Northeast",
+    "rules": [
+     [
+      1,
+      13,
+      15,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      13,
+      15,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "1518",
+    "s": "Stewart St",
+    "side": "Northeast",
+    "rules": [
+     [
+      1,
+      13,
+      15,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      13,
+      15,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "1520",
+    "s": "Stewart St",
+    "side": "Northeast",
+    "rules": [
+     [
+      1,
+      13,
+      15,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      13,
+      15,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5098",
+    "s": "Carlyle Ave",
+    "side": "Northwest",
+    "rules": [
+     [
+      4,
+      14,
+      16,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      14,
+      16,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5098",
+    "s": "Carlyle Ave",
+    "side": "Southeast",
+    "rules": [
+     [
+      4,
+      14,
+      16,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      14,
+      16,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "2783",
+    "s": "17th St",
+    "side": "Northeast",
+    "rules": [
+     [
+      1,
+      14,
+      16,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      14,
+      16,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5994",
+    "s": "Bay St",
+    "side": "Southeast",
+    "rules": [
+     [
+      3,
+      14,
+      16,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      14,
+      16,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5403",
+    "s": "Brentwood Ter",
+    "side": "Southeast",
+    "rules": [
+     [
+      4,
+      9,
+      11,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      11,
+      13,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5403",
+    "s": "Brentwood Ter",
+    "side": "Northwest",
+    "rules": [
+     [
+      4,
+      9,
+      11,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      11,
+      13,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "2643",
+    "s": "12th St",
+    "side": "Northeast",
+    "rules": [
+     [
+      2,
+      9,
+      11,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      11,
+      13,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "2596",
+    "s": "11th St",
+    "side": "Southwest",
+    "rules": [
+     [
+      4,
+      9,
+      11,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      11,
+      13,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "2393",
+    "s": "4th St",
+    "side": "Southwest",
+    "rules": [
+     [
+      4,
+      15,
+      17,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      12,
+      14,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5250",
+    "s": "Palisades Ave",
+    "side": "Northwest",
+    "rules": [
+     [
+      4,
+      15,
+      17,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      9,
+      11,
+      31,
+      0,
+      0
+     ]
+    ]
+   }
+  ]
+ },
+ "output": {
+  "blocks": 1649,
+  "sides": 3068,
+  "rules": 3261,
+  "rulesByDayAndHours": {
+   "Wed 14-16": 96,
+   "Tue 14-16": 98,
+   "Thu 9-11": 121,
+   "Fri 11-13": 84,
+   "Wed 10-12": 54,
+   "Tue 9-11": 159,
+   "Fri 12-14": 23,
+   "Thu 15-17": 97,
+   "Fri 10-11": 7,
+   "Tue 10-12": 61,
+   "Wed 12-14": 32,
+   "Fri 9-11": 93,
+   "Mon 10-12": 98,
+   "Thu 13-15": 138,
+   "Thu 12-14": 68,
+   "Mon 9-11": 100,
+   "Thu 11-13": 38,
+   "Thu 12-15": 8,
+   "Sun 11-13": 14,
+   "Mon 14-16": 46,
+   "Thu 14-16": 160,
+   "Fri 13-15": 109,
+   "Mon 13-15": 32,
+   "Thu 10-12": 74,
+   "Fri 15-17": 111,
+   "Mon 11-13": 28,
+   "Fri 10-12": 74,
+   "Wed 15-17": 56,
+   "Wed 9-11": 100,
+   "Wed 11-13": 49,
+   "Tue 11-13": 90,
+   "Tue 15-17": 109,
+   "Tue 15:30-17": 20,
+   "Mon 15:30-17": 21,
+   "Tue 12-14": 72,
+   "Mon 15-17": 36,
+   "Fri 14-16": 135,
+   "Tue 13-15": 84,
+   "Fri 7-9": 2,
+   "Wed 13-15": 142,
+   "Tue 7-9": 2,
+   "Fri 10-14": 3,
+   "Tue 3-6": 40,
+   "Thu 3-6": 40,
+   "Sat 3-6": 40,
+   "Mon 3-6": 50,
+   "Wed 3-6": 50,
+   "Fri 3-6": 50,
+   "Mon 12-14": 41,
+   "Wed 15:30-17": 3,
+   "Thu 15:30-17": 3
+  },
+  "oddSideKnown": 1648,
+  "withNeighborhood": 660
+ },
+ "skipped": {
+  "noDay": "6141 curb lines (110.1 km) have no sweeping day: not swept, or not posted",
+  "unreadable": [
+   {
+    "id": 4955,
+    "day": "Friday",
+    "time": " ",
+    "why": "no hours",
+    "m": 1,
+    "at": [
+     -118.460077,
+     34.020441
+    ]
+   },
+   {
+    "id": 10463,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 51,
+    "at": [
+     -118.484372,
+     34.030943
+    ]
+   },
+   {
+    "id": 10700,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.487407,
+     34.033539
+    ]
+   },
+   {
+    "id": 10701,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.487522,
+     34.033637
+    ]
+   },
+   {
+    "id": 10702,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.487637,
+     34.033736
+    ]
+   },
+   {
+    "id": 10703,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.487753,
+     34.033834
+    ]
+   },
+   {
+    "id": 10704,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.487868,
+     34.033932
+    ]
+   },
+   {
+    "id": 10705,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.487983,
+     34.034031
+    ]
+   },
+   {
+    "id": 10706,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.488098,
+     34.034129
+    ]
+   },
+   {
+    "id": 10707,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.488213,
+     34.034227
+    ]
+   },
+   {
+    "id": 10708,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.488329,
+     34.034326
+    ]
+   },
+   {
+    "id": 10709,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.488444,
+     34.034424
+    ]
+   },
+   {
+    "id": 10710,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.488559,
+     34.034522
+    ]
+   },
+   {
+    "id": 10711,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.488674,
+     34.034621
+    ]
+   },
+   {
+    "id": 10714,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.485799,
+     34.032162
+    ]
+   },
+   {
+    "id": 10715,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 23,
+    "at": [
+     -118.485941,
+     34.032284
+    ]
+   },
+   {
+    "id": 10716,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 19,
+    "at": [
+     -118.486098,
+     34.032418
+    ]
+   },
+   {
+    "id": 10717,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 19,
+    "at": [
+     -118.486242,
+     34.032542
+    ]
+   },
+   {
+    "id": 10718,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.486372,
+     34.032653
+    ]
+   },
+   {
+    "id": 10719,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.486488,
+     34.032752
+    ]
+   },
+   {
+    "id": 10720,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.486601,
+     34.03285
+    ]
+   },
+   {
+    "id": 10721,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.486713,
+     34.032946
+    ]
+   },
+   {
+    "id": 10722,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 14,
+    "at": [
+     -118.486825,
+     34.033042
+    ]
+   },
+   {
+    "id": 10723,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 19,
+    "at": [
+     -118.486952,
+     34.033149
+    ]
+   },
+   {
+    "id": 10724,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 19,
+    "at": [
+     -118.487096,
+     34.033271
+    ]
+   },
+   {
+    "id": 10740,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 14,
+    "at": [
+     -118.484619,
+     34.031153
+    ]
+   },
+   {
+    "id": 10741,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 14,
+    "at": [
+     -118.484722,
+     34.031241
+    ]
+   },
+   {
+    "id": 10742,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 14,
+    "at": [
+     -118.484826,
+     34.031329
+    ]
+   },
+   {
+    "id": 10743,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 14,
+    "at": [
+     -118.484927,
+     34.031417
+    ]
+   },
+   {
+    "id": 10744,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 14,
+    "at": [
+     -118.485032,
+     34.031506
+    ]
+   },
+   {
+    "id": 10745,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 34,
+    "at": [
+     -118.485214,
+     34.031662
+    ]
+   },
+   {
+    "id": 10746,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 15,
+    "at": [
+     -118.4854,
+     34.031821
+    ]
+   },
+   {
+    "id": 10747,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 19,
+    "at": [
+     -118.485529,
+     34.031932
+    ]
+   },
+   {
+    "id": 12956,
+    "day": "Wednesday",
+    "time": " ",
+    "why": "no hours",
+    "m": 1,
+    "at": [
+     -118.46659,
+     34.008839
+    ]
+   }
+  ]
+ },
+ "ticketCheck": "Santa Monica publishes no parking citations with time and place (data.santamonica.gov has none), so no cross-check."
+}

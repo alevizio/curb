@@ -1,0 +1,85 @@
+{
+ "id": "hoboken",
+ "name": "Hoboken",
+ "region": "New Jersey",
+ "tz": "America/New_York",
+ "center": [
+  40.744,
+  -74.0305
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   40.7304,
+   -74.0485
+  ],
+  [
+   40.763,
+   -74.0178
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Birthday",
+  "2026-02-16": "Presidents Day",
+  "2026-04-03": "Good Friday",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Columbus Day",
+  "2026-11-03": "Election Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-24": "Floating Holiday",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Birthday",
+  "2027-02-15": "Presidents Day",
+  "2027-03-26": "Good Friday",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Columbus Day",
+  "2027-11-02": "Election Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Day after Thanksgiving",
+  "2027-12-24": "Christmas Day (observed)"
+ },
+ "holidaysSource": "https://hobokennj.gov/holiday-schedule",
+ "holidayRule": "all",
+ "fine": "$50",
+ "tow": "sometimes",
+ "fineSource": "https://ecode360.com/15237075",
+ "agency": "Hoboken Parking Utility",
+ "scheduleUrl": "https://www.hobokennj.gov/resources/street-cleaning-schedule",
+ "sources": [
+  {
+   "name": "Hoboken Code § 190-28, Alternate parking locations (the schedule)",
+   "url": "https://ecode360.com/15236904",
+   "license": "Municipal code (public law), transcribed",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Hoboken Streets (City of Hoboken GIS): street lines, and an older copy of the schedule for the comparison",
+   "url": "https://services8.arcgis.com/LDmC4ZVHdfKcEzxl/arcgis/rest/services/Hoboken_Streets/FeatureServer/0",
+   "license": "No license stated (public City of Hoboken layer)",
+   "fetched": "2026-10-18",
+   "updated": "2019-12-03"
+  },
+  {
+   "name": "Street Cleaning Schedule (City of Hoboken), compared only",
+   "url": "https://www.hobokennj.gov/resources/street-cleaning-schedule",
+   "license": "City web page",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Alternate side parking for street cleaning, all year: no parking on one side of the street during its posted hour each week (on Washington St, every weekday morning).",
+  "afterpass": "A $50 ticket. Towing only where a Tow Away Zone sign is posted. Suspended on City holidays and some storm days.",
+  "dataNotes": "Days and hours come from the alternate side parking schedule in the Hoboken Code (section 190-28), placed on the City's street map, which carries an older copy of the same schedule; where the two differ, the Code is shown. The sign on the block wins."
+ }
+}

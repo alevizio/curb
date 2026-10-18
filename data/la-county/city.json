@@ -1,0 +1,135 @@
+{
+ "id": "la-county",
+ "name": "Unincorporated LA County",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  34.0352,
+  -118.1598
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   33.84663,
+   -118.25645
+  ],
+  [
+   34.21669,
+   -117.83765
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-03-31": "César Chávez Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-03-31": "César Chávez Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving",
+  "2027-11-26": "Day after Thanksgiving",
+  "2027-12-24": "Christmas Day (observed)",
+  "2027-12-31": "New Year's Day (observed)"
+ },
+ "holidaysSource": "https://pw.lacounty.gov/general/faq/index.cfm?Action=getAnswers&FaqID=JiNNNzBRTV9cCg%3D%3D",
+ "holidaysNote": "Public Works does not sweep on County holidays, but the Sheriff still enforces posted parking rules: every rule carries flag 1 (not suspended). Dates by the County's holiday rules; Juneteenth and the weekend shifts unverified",
+ "holidayRule": "all",
+ "fine": "$60",
+ "tow": "no",
+ "fineSource": "https://library.municode.com/ca/los_angeles_county/codes/code_of_ordinances?nodeId=TIT15VETR_DIV3PEFEREVISTPALA",
+ "fineNote": "$50 civil penalty for failure to obey signs (County Code 15.20.070, under which the Sheriff writes street sweeping tickets) plus $10 of court assessments (15.200.020)",
+ "agency": "LA County Public Works (Road Maintenance)",
+ "ticketAgency": "LA County Sheriff (Parking Enforcement Detail)",
+ "scheduleUrl": "https://pw.lacounty.gov/rmd/streetsweeping/faqs.shtml",
+ "sources": [
+  {
+   "name": "Street Sweeping Routes (Public Works, Road Maintenance Division)",
+   "url": "https://data.lacounty.gov/datasets/los-angeles-county-public-works-road-maintenance-division-street-sweeping-routes",
+   "license": "LA County eGIS terms of use (https://egis-lacounty.hub.arcgis.com/pages/terms-of-use)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "CAMS Address Lines (LA County eGIS)",
+   "url": "https://services.arcgis.com/RmCCgQtiZLDCtblq/arcgis/rest/services/eGIS_Addressing_ROAD_LINES/FeatureServer/0",
+   "license": "LA County eGIS terms of use (https://egis-lacounty.hub.arcgis.com/pages/terms-of-use)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Unincorporated LA County communities (Board of Supervisors boundaries)",
+   "url": "https://services.arcgis.com/RmCCgQtiZLDCtblq/arcgis/rest/services/Unincorporated_LA_County/FeatureServer/0",
+   "license": "LA County eGIS terms of use (https://egis-lacounty.hub.arcgis.com/pages/terms-of-use)",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Posted streets are swept once a week, on the day and in the hours on the sign, one curb at a time: each side of a street has its own sign.",
+  "afterpass": "All year. On County holidays the sweeper skips, but the Sheriff still tickets during posted hours. About $60, no tow.",
+  "dataNotes": "Days and hours are Public Works' street sweeping map, which draws each curb as its own line; CURB laid each posted curb on the County's street centerline on the side it runs along. Streets without sweeping signs (16,685 of the map's lines) are left out: nobody is ticketed there."
+ },
+ "neighborhoods": [
+  {
+   "name": "East Los Angeles",
+   "bbox": "-118.1926,34.0081,-118.127,34.0623"
+  },
+  {
+   "name": "Florence-Firestone",
+   "bbox": "-118.2564,33.9433,-118.2291,33.9895"
+  },
+  {
+   "name": "South Whittier",
+   "bbox": "-118.0552,33.917,-118.0117,33.954"
+  },
+  {
+   "name": "West Whittier/Los Nietos",
+   "bbox": "-118.0879,33.9601,-118.0517,34.0007"
+  },
+  {
+   "name": "Willowbrook",
+   "bbox": "-118.2544,33.9063,-118.2224,33.937"
+  },
+  {
+   "name": "Hacienda Heights",
+   "bbox": "-117.9997,33.9733,-117.9498,34.0248"
+  },
+  {
+   "name": "East Rancho Dominguez",
+   "bbox": "-118.206,33.8814,-118.1872,33.9063"
+  },
+  {
+   "name": "Rowland Heights",
+   "bbox": "-117.919,33.955,-117.8594,33.994"
+  },
+  {
+   "name": "North Whittier",
+   "bbox": "-118.0259,34.0292,-117.9899,34.0469"
+  },
+  {
+   "name": "South San Gabriel",
+   "bbox": "-118.1081,34.031,-118.0728,34.0554"
+  },
+  {
+   "name": "Northeast San Gabriel",
+   "bbox": "-118.0914,34.0916,-118.0569,34.1307"
+  },
+  {
+   "name": "Arcadia",
+   "bbox": "-118.0303,34.0969,-118.0062,34.1151"
+  }
+ ]
+}

@@ -1,0 +1,696 @@
+{
+ "generated": "2026-10-18T19:18:31.161Z",
+ "built": false,
+ "why": "Which streets get tickets, and on which days and hours, cannot be told from the City's data today. The City says most residential routes are unposted and only \"some high traffic streets\" are posted; its only data on which is the SignedNoParking layer, last edited 2019-10-10, and today's schedule (StreeSweep_Times, edited 2026-09-23) disagrees with it on 90% of the signed sides it reaches (other days on 205, same days but other hours on 268, agreeing on 50). A map drawn from the 2019 signs would show a wrong day or wrong hours wherever the signs have changed since; one drawn from today's schedule would mark every street no parking, when most are not posted. No segments.json was written.",
+ "rule": {
+  "posted": "Some high traffic streets are posted with a \"No Parking\" sign that states the time and day of the week the street vacuum comes through. The Police Department will issue citations for violations of the posted restrictions.",
+  "unposted": "Most neighborhood routes do not have signage restricting parking during street cleaning ... We ask residents to voluntarily move their cars.",
+  "fine": "$41",
+  "tow": "none mentioned",
+  "holidays": "We street clean every day of the year except for City Holidays.",
+  "source": "https://www.cityofsanmateo.org/2148/Residential-Street-Cleaning",
+  "expansion": "In 2018 the City changed routes by trash generation and proposed more parking restriction signs on red/high generation streets (https://www.cityofsanmateo.org/3688/Street-Sweeping-Program-Improvements); which signs went up is not published beyond the 2019 layer."
+ },
+ "sources": [
+  {
+   "name": "SignedNoParking_10_2019 (City of San Mateo ArcGIS)",
+   "url": "https://services2.arcgis.com/g26Y0m7OCdjU0ObA/arcgis/rest/services/SignedNoParking_10_2019/FeatureServer/0",
+   "edited": "2019-10-10",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "StreeSweep_Times (City of San Mateo ArcGIS), parcels: street, route and schedule only",
+   "url": "https://services2.arcgis.com/g26Y0m7OCdjU0ObA/arcgis/rest/services/StreeSweep_Times/FeatureServer/2",
+   "edited": "2026-09-23",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Streets_8_9_23 (City of San Mateo ArcGIS), centerline",
+   "url": "https://services2.arcgis.com/g26Y0m7OCdjU0ObA/arcgis/rest/services/Streets_8_9_23/FeatureServer/0",
+   "edited": "2023-08-09",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "input": {
+  "signedPieces": 406,
+  "signedStreets": 95,
+  "signsByHours": {
+   "7-9 AM": 154,
+   "4-6 AM": 114,
+   "12-2 PM": 37,
+   "8-10 AM": 33,
+   "6-8 AM": 31,
+   "11-1 PM": 29,
+   "7-7:30 AM": 7,
+   "4-5 AM": 1
+  },
+  "parcels": 25700,
+  "parcelsPlaced": 23708,
+  "centerlineSegments": 2889,
+  "scheduleByTime": {
+   "5:00am to 7:00am": 12670,
+   "8:00am to 10:00am": 4194,
+   "7:00am to 9:00am": 2033,
+   "9:00am to 11:00am": 1372,
+   "8:30am to 10:30am": 1124,
+   "8:00am to 10:30am": 1048,
+   "4:00am to 6:00am": 698,
+   "3:00am to 7:00am": 590,
+   "6:00am to 8:00am": 583,
+   "3:00am to 5:00am": 500,
+   "11:00am to 1:00pm": 400,
+   "NOON to 2:00pm": 290,
+   "11:30am to 2:00pm": 188,
+   "(blank)": 9,
+   "8:00am to 11:00am": 1
+  }
+ },
+ "signedSides": {
+  "method": "Each signed piece is drawn 5 to 12 m off the centerline, along the curb: sampled every 5 m and put on the nearest centerline segment of its street (25 m) and on that side. Each parcel goes on the nearest segment of its street (80 m), on its side; today's schedule for a side is its parcels' most common record. A signed side \"agrees\" when today's days, weeks and hours are the sign's.",
+  "sides": 753,
+  "agree": 50,
+  "hoursDiffer": 268,
+  "daysDiffer": 205,
+  "noSchedule": 228,
+  "signsDisagree": 2,
+  "unreadSigns": [],
+  "unplacedSigns": [
+   {
+    "fid": 201,
+    "street": "VANNESSA DR"
+   },
+   {
+    "fid": 386,
+    "street": "VANNESSA DR"
+   }
+  ],
+  "signHoursVsTodaysHours": {
+   "4-6 AM | 3:00am to 5:00am": 85,
+   "7-9 AM | 5:00am to 7:00am": 70,
+   "11-1 PM | 11:00am to 1:00pm": 61,
+   "12-2 PM | NOON to 2:00pm": 60,
+   "7-9 AM | 7:00am to 9:00am": 51,
+   "7-9 AM | 9:00am to 11:00am": 39,
+   "7-9 AM | 8:00am to 10:00am": 25,
+   "8-10 AM | 5:00am to 7:00am": 23,
+   "4-6 AM | 3:00am to 7:00am": 23,
+   "12-2 PM | 11:30am to 2:00pm": 22,
+   "6-8 AM | 5:00am to 7:00am": 19,
+   "8-10 AM | 9:00am to 11:00am": 14,
+   "4-6 AM | 5:00am to 7:00am": 10,
+   "6-8 AM | 4:00am to 6:00am": 7,
+   "6-8 AM | 7:00am to 9:00am": 7,
+   "11-1 PM | 7:00am to 9:00am": 4,
+   "7-7:30 AM | 5:00am to 7:00am": 3,
+   "6-8 AM | 8:00am to 10:00am": 3,
+   "4-6 AM | 8:00am to 10:30am": 3,
+   "7-7:30 AM | 7:00am to 9:00am": 3,
+   "11-1 PM | 5:00am to 7:00am": 2,
+   "8-10 AM | 11:00am to 1:00pm": 2,
+   "4-6 AM | 7:00am to 9:00am": 2,
+   "11-1 PM | NOON to 2:00pm": 2,
+   "7-9 AM | 6:00am to 8:00am": 1,
+   "6-8 AM | 3:00am to 7:00am": 1,
+   "6-8 AM | 6:00am to 8:00am": 1,
+   "6-8 AM | 9:00am to 11:00am": 1,
+   "12-2 PM | 11:00am to 1:00pm": 1,
+   "12-2 PM | 7:00am to 9:00am": 1,
+   "12-2 PM | 5:00am to 7:00am": 1
+  },
+  "agreeStreets": [
+   "S CLAREMONT ST (19)",
+   "N ELLSWORTH AVE (10)",
+   "S DELAWARE ST (6)",
+   "S ELDORADO ST (5)",
+   "2ND AVE (4)",
+   "RAMONA ST (2)",
+   "N BAYSHORE BLVD (1)",
+   "E POPLAR AVE (1)",
+   "ROGELL AVE (1)",
+   "BRADLEY CT (1)"
+  ],
+  "hoursDifferStreets": [
+   "N KINGSTON ST (18)",
+   "S B ST (16)",
+   "2ND AVE (15)",
+   "S NORFOLK ST (12)",
+   "PATRICIA AVE (11)",
+   "E 4TH AVE (9)",
+   "LINDBERGH ST (7)",
+   "N AMPHLETT BLVD (7)",
+   "ELEANOR DR (7)",
+   "DAKOTA AVE (6)",
+   "PALM AVE (6)",
+   "S ELLSWORTH AVE (6)",
+   "STATE ST (6)",
+   "E 3RD AVE (6)",
+   "N NORFOLK ST (5)",
+   "BEACON AVE (5)",
+   "CYPRESS AVE (5)",
+   "9TH AVE (5)",
+   "WOLFE DR (5)",
+   "S AMPHLETT BLVD (4)",
+   "N B ST (4)",
+   "W 20TH AVE (4)",
+   "E 25TH AVE (4)",
+   "W 25TH AVE (4)",
+   "S SAN MATEO DR (4)",
+   "CONNIE AVE (4)",
+   "EDNA WY (4)",
+   "N IDAHO ST (4)",
+   "WOODSIDE WY (3)",
+   "N BAYSHORE BLVD (3)",
+   "S BAYSHORE BLVD (3)",
+   "37TH AVE (3)",
+   "42ND AVE (3)",
+   "BALDWIN AVE (3)",
+   "STUDIO CIR (2)",
+   "ROGELL CT (2)",
+   "HURON AVE (2)",
+   "S KINGSTON ST (2)",
+   "CARY AVE (2)",
+   "GLORIA CT (2)",
+   "E 5TH AVE (2)",
+   "21ST AVE (2)",
+   "HILLSDALE CT (2)",
+   "41ST AVE (2)",
+   "OLYMPIC AVE (2)",
+   "43RD AVE (2)",
+   "JAMES CT (2)",
+   "ROGELL AVE (2)",
+   "JEFFERSON CT (2)",
+   "JOANNE DR (2)",
+   "JODY CT (2)",
+   "CELESTE DR (2)",
+   "S GRANT ST (2)",
+   "TERMINAL PL (2)",
+   "6TH AVE (2)",
+   "7TH AVE (2)",
+   "8TH AVE (2)",
+   "E POPLAR AVE (1)",
+   "NORFOLK ST (1)",
+   "19TH AVE (1)",
+   "IVY ST (1)",
+   "E HILLSDALE CT (1)",
+   "S DELAWARE ST (1)",
+   "DORE AVE (1)",
+   "1ST AVE (1)",
+   "S IDAHO ST (1)",
+   "N ELLSWORTH AVE (1)",
+   "N HUMBOLDT ST (1)"
+  ],
+  "daysDifferStreets": [
+   "MONTE DIABLO AVE (15)",
+   "N IDAHO ST (15)",
+   "E SANTA INEZ AVE (14)",
+   "2ND AVE (11)",
+   "TILTON AVE (11)",
+   "N CLAREMONT ST (10)",
+   "N HUMBOLDT ST (10)",
+   "N DELAWARE ST (9)",
+   "CYPRESS AVE (9)",
+   "INDIAN AVE (8)",
+   "N ELDORADO ST (8)",
+   "N GRANT ST (8)",
+   "N FREMONT ST (7)",
+   "PACIFIC BLVD (6)",
+   "COLLEGE AVE (5)",
+   "1ST AVE (4)",
+   "E 4TH AVE (4)",
+   "E 3RD AVE (4)",
+   "E POPLAR AVE (3)",
+   "S IDAHO ST (3)",
+   "TERMINAL PL (2)",
+   "41ST AVE (2)",
+   "S AMPHLETT BLVD (2)",
+   "HILLSDALE CT (2)",
+   "SAN ANTONIO ST (2)",
+   "S ELDORADO ST (2)",
+   "S DELAWARE ST (2)",
+   "S CLAREMONT ST (2)",
+   "S FREMONT ST (2)",
+   "S GRANT ST (2)",
+   "S HUMBOLDT ST (2)",
+   "THOMAS CT (2)",
+   "ST MARYS CT (2)",
+   "CASCADE CT (2)",
+   "SERRA CT (2)",
+   "STATE ST (2)",
+   "N AMPHLETT BLVD (1)",
+   "HACIENDA ST (1)",
+   "43RD AVE (1)",
+   "LA SELVA ST (1)",
+   "WOODSIDE WY (1)",
+   "CYPRESS CT (1)",
+   "9TH AVE (1)",
+   "E 5TH AVE (1)",
+   "BRADLEY CT (1)"
+  ],
+  "examples": {
+   "agree": [
+    {
+     "segment": "ST-1161",
+     "street": "RAMONA ST",
+     "between": "SANTA INEZ AVE - POPLAR AVE",
+     "side": "R",
+     "sign": "10A TUE 1/3 7-9 AM",
+     "today": "10a TUESDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "12 of 12"
+    },
+    {
+     "segment": "ST-1104",
+     "street": "N BAYSHORE BLVD",
+     "between": "ROGELL - POPLAR",
+     "side": "R",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "6 of 7"
+    },
+    {
+     "segment": "ST-792",
+     "street": "S CLAREMONT ST",
+     "between": "1ST - 2ND",
+     "side": "R",
+     "sign": "9B THU 1/3 7-9 AM",
+     "today": "9b THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "3 of 3"
+    },
+    {
+     "segment": "ST-765",
+     "street": "S CLAREMONT ST",
+     "between": "2ND - 3RD",
+     "side": "R",
+     "sign": "9B THU 1/3 7-9 AM",
+     "today": "9b THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "2 of 2"
+    },
+    {
+     "segment": "ST-815",
+     "street": "S DELAWARE ST",
+     "between": "1ST - 2ND",
+     "side": "R",
+     "sign": "9B THU 1/3 7-9 AM",
+     "today": "9b THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "4 of 4"
+    },
+    {
+     "segment": "ST-781",
+     "street": "S DELAWARE ST",
+     "between": "2ND - 3RD",
+     "side": "R",
+     "sign": "9B THU 1/3 7-9 AM",
+     "today": "9b THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "3 of 3"
+    },
+    {
+     "segment": "ST-760",
+     "street": "S DELAWARE ST",
+     "between": "3RD - 4TH",
+     "side": "R",
+     "sign": "9B THU 1/3 7-9 AM",
+     "today": "9b THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "3 of 4"
+    },
+    {
+     "segment": "ST-741",
+     "street": "S DELAWARE ST",
+     "between": "4TH - 5TH",
+     "side": "R",
+     "sign": "9B THU 1/3 7-9 AM",
+     "today": "9b THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "1 of 1"
+    },
+    {
+     "segment": "ST-1161",
+     "street": "RAMONA ST",
+     "between": "SANTA INEZ AVE - POPLAR AVE",
+     "side": "L",
+     "sign": "10B THU 2/4 7-9 AM",
+     "today": "10b THURSDAY 2nd/4th 7:00am to 9:00am",
+     "parcels": "6 of 6"
+    },
+    {
+     "segment": "ST-1122",
+     "street": "E POPLAR AVE",
+     "between": "BAYSHORE - KINGSTON",
+     "side": "R",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "2 of 2"
+    },
+    {
+     "segment": "ST-1113",
+     "street": "ROGELL AVE",
+     "between": "ROGELL - KINGSTON",
+     "side": "R",
+     "sign": "17A THU 1/3 7-9 AM",
+     "today": "7a THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "1 of 1"
+    },
+    {
+     "segment": "ST-2652",
+     "street": "BRADLEY CT",
+     "between": "LINDBERG - E END",
+     "side": "R",
+     "sign": "17A THU 1/3 7-9 AM",
+     "today": "7a THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "6 of 6"
+    }
+   ],
+   "hours differ": [
+    {
+     "segment": "ST-1085",
+     "street": "STUDIO CIR",
+     "between": "WOODSIDE WY - WOODSIDE WY",
+     "side": "L",
+     "sign": "10B THU 2/4 8-10 AM",
+     "today": "10b THURSDAY 2nd/4th 9:00am to 11:00am",
+     "parcels": "12 of 12"
+    },
+    {
+     "segment": "ST-1073",
+     "street": "WOODSIDE WY",
+     "between": "STATE ST - STUDIO CIR",
+     "side": "L",
+     "sign": "10A TUE 1/3 8-10 AM",
+     "today": "10a TUESDAY 1st/3rd 9:00am to 11:00am",
+     "parcels": "2 of 2"
+    },
+    {
+     "segment": "ST-1084",
+     "street": "WOODSIDE WY",
+     "between": "STUDIO CIR - STUDIO CIR",
+     "side": "L",
+     "sign": "10A TUE 1/3 8-10 AM",
+     "today": "10a TUESDAY 1st/3rd 9:00am to 11:00am",
+     "parcels": "80 of 80"
+    },
+    {
+     "segment": "ST-1092",
+     "street": "WOODSIDE WY",
+     "between": "STUDIO CIR - PENINSULA AVE",
+     "side": "L",
+     "sign": "10A TUE 1/3 8-10 AM",
+     "today": "10a TUESDAY 1st/3rd 9:00am to 11:00am",
+     "parcels": "5 of 5"
+    },
+    {
+     "segment": "ST-1112",
+     "street": "ROGELL CT",
+     "between": "ROGELL - N END",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "4 of 4"
+    },
+    {
+     "segment": "ST-1102",
+     "street": "N KINGSTON ST",
+     "between": "DORE - ROGELL",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "8 of 8"
+    },
+    {
+     "segment": "ST-1116",
+     "street": "N KINGSTON ST",
+     "between": "ROGELL - POPLAR",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "9 of 9"
+    },
+    {
+     "segment": "ST-1078",
+     "street": "N KINGSTON ST",
+     "between": "MONTE DIABLO - MEFFERD",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "3 of 3"
+    },
+    {
+     "segment": "ST-1087",
+     "street": "N KINGSTON ST",
+     "between": "MEFFERD - TROLLMAN",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "5 of 5"
+    },
+    {
+     "segment": "ST-1095",
+     "street": "N KINGSTON ST",
+     "between": "TROLLMAN - DORE",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "5 of 5"
+    },
+    {
+     "segment": "ST-86",
+     "street": "N BAYSHORE BLVD",
+     "between": "CYPRESS - MONTE DIABLO",
+     "side": "R",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "7 of 7"
+    },
+    {
+     "segment": "ST-1064",
+     "street": "N BAYSHORE BLVD",
+     "between": "MONTE DIABLO AVE - DORE AVE",
+     "side": "R",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "65 of 65"
+    }
+   ],
+   "days differ": [
+    {
+     "segment": "ST-1067",
+     "street": "MONTE DIABLO AVE",
+     "between": "ALLEY - KINGSTON",
+     "side": "R",
+     "sign": "17A THU 1/3 7-9 AM",
+     "today": "7b FRIDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "1 of 1"
+    },
+    {
+     "segment": "ST-1098",
+     "street": "N AMPHLETT BLVD",
+     "between": "INDIAN - POPLAR",
+     "side": "L",
+     "sign": "SPT TUE 1/3 11-1 PM",
+     "today": "9a WEDNESDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "1 of 1"
+    },
+    {
+     "segment": "ST-2641",
+     "street": "TERMINAL PL",
+     "between": "ALLEY - S END",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7a THURSDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "3 of 3"
+    },
+    {
+     "segment": "ST-2650",
+     "street": "TERMINAL PL",
+     "between": "ALLEY - LINDBERG",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM",
+     "today": "7a THURSDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "1 of 1"
+    },
+    {
+     "segment": "ST-817",
+     "street": "1ST AVE",
+     "between": "CLAREMONT - DELAWARE",
+     "side": "L",
+     "sign": "9A WED 1/3 7-9 AM",
+     "today": "9b THURSDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "2 of 2"
+    },
+    {
+     "segment": "ST-808",
+     "street": "1ST AVE",
+     "between": "RAILROAD - CLAREMENT ST",
+     "side": "R",
+     "sign": "9B THU 1/3 7-9 AM",
+     "today": "9a WEDNESDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "3 of 3"
+    },
+    {
+     "segment": "ST-793",
+     "street": "2ND AVE",
+     "between": "CLAREMONT - DELAWARE",
+     "side": "L",
+     "sign": "DT MWF WEEKLY 4-6 AM",
+     "today": "9b THURSDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "3 of 3"
+    },
+    {
+     "segment": "ST-778",
+     "street": "2ND AVE",
+     "between": "RAILROAD - CLAREMENT ST",
+     "side": "R",
+     "sign": "DT MWF WEEKLY 4-6 AM",
+     "today": "9a WEDNESDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "1 of 1"
+    },
+    {
+     "segment": "ST-729",
+     "street": "E 4TH AVE",
+     "between": "RAILROAD - CLAREMENT ST",
+     "side": "R",
+     "sign": "DT MWF WEEKLY 4-6 AM",
+     "today": "9a WEDNESDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "1 of 1"
+    },
+    {
+     "segment": "ST-1111",
+     "street": "E POPLAR AVE",
+     "between": "IDAHO - AMPHLETT",
+     "side": "L",
+     "sign": "9A WED 1/3 8-10 AM",
+     "today": "SPT TUESDAY WEEKLY 11:00am to 1:00pm",
+     "parcels": "2 of 2"
+    },
+    {
+     "segment": "ST-746",
+     "street": "E 4TH AVE",
+     "between": "CLAREMONT - DELAWARE",
+     "side": "L",
+     "sign": "DT MWF WEEKLY 4-6 AM",
+     "today": "9b THURSDAY 1st/3rd 7:00am to 9:00am",
+     "parcels": "1 of 2"
+    },
+    {
+     "segment": "ST-766",
+     "street": "E 3RD AVE",
+     "between": "CLAREMONT - DELAWARE",
+     "side": "R",
+     "sign": "DT MWF WEEKLY 4-6 AM",
+     "today": "9a WEDNESDAY 1st/3rd 5:00am to 7:00am",
+     "parcels": "1 of 1"
+    }
+   ],
+   "no schedule": [
+    {
+     "segment": "ST-1073",
+     "street": "WOODSIDE WY",
+     "between": "STATE ST - STUDIO CIR",
+     "side": "R",
+     "sign": "10B THU 2/4 8-10 AM"
+    },
+    {
+     "segment": "ST-1092",
+     "street": "WOODSIDE WY",
+     "between": "STUDIO CIR - PENINSULA AVE",
+     "side": "R",
+     "sign": "10B THU 2/4 8-10 AM"
+    },
+    {
+     "segment": "ST-1129",
+     "street": "E POPLAR AVE",
+     "between": "KINGSTON - CAVANAUGH",
+     "side": "R",
+     "sign": "17B FRI 1/3 7-9 AM"
+    },
+    {
+     "segment": "ST-1094",
+     "street": "DORE AVE",
+     "between": "BAYSHORE - KINGSTON",
+     "side": "L",
+     "sign": "17A THU 1/3 7-9 AM"
+    },
+    {
+     "segment": "ST-1065",
+     "street": "MONTE DIABLO AVE",
+     "between": "BAYSHORE - ALLEY",
+     "side": "R",
+     "sign": "17A THU 1/3 7-9 AM"
+    },
+    {
+     "segment": "ST-1111",
+     "street": "E POPLAR AVE",
+     "between": "IDAHO - AMPHLETT",
+     "side": "R",
+     "sign": "SPT TUE 1/3 11-1 PM"
+    },
+    {
+     "segment": "ST-1061",
+     "street": "E POPLAR AVE",
+     "between": "ELDORADO - HUMBOLDT",
+     "side": "R",
+     "sign": "10A TUE 1/3 7-7:30 AM"
+    },
+    {
+     "segment": "ST-2633",
+     "street": "LINDBERGH ST",
+     "between": "ALLEY - 3RD",
+     "side": "R",
+     "sign": "17B FRI 1/3 7-9 AM"
+    },
+    {
+     "segment": "ST-2660",
+     "street": "CYPRESS AVE",
+     "between": "BAYSHORE - ALLEY",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM"
+    },
+    {
+     "segment": "ST-2663",
+     "street": "CYPRESS AVE",
+     "between": "ALLEY - KINGSTON",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM"
+    },
+    {
+     "segment": "ST-2730",
+     "street": "S NORFOLK ST",
+     "between": "ALLEY - 3RD",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM"
+    },
+    {
+     "segment": "ST-2607",
+     "street": "CARY AVE",
+     "between": "ALLEY - NORFOLK ST",
+     "side": "L",
+     "sign": "17B FRI 1/3 7-9 AM"
+    }
+   ],
+   "signs disagree": [
+    {
+     "segment": "ST-1295",
+     "street": "IVY ST",
+     "between": "19TH AVE - 20TH AVE",
+     "side": "L",
+     "sign": "15A FRI 1/3 6-8 AM / 15B FRI 2/4 6-8 AM"
+    },
+    {
+     "segment": "ST-2102",
+     "street": "19TH AVE",
+     "between": "DELAWARE ST - GINNEVER ST",
+     "side": "R",
+     "sign": "15A FRI 1/3 7-9 AM / 15B FRI 2/4 7-9 AM"
+    }
+   ]
+  }
+ },
+ "ifBuilt": "With the City's word that the 2019 layer is still what the signs say, the 753 signed sides could be built from it as they are (days, weeks and hours from the signs). Taking only the 50 sides where the 2019 sign and today's schedule agree would give a partial map: posted streets missing from it would look unswept.",
+ "questionsForTheCity": [
+  "Which streets are posted with street sweeping \"No Parking\" signs today? Is the SignedNoParking_10_2019 layer still current, or is there a newer one?",
+  "On posted streets, do the signs show the hours in StreeSweep_Times (SWEEP_TIME) or other hours? Downtown signs in the 2019 layer say 4-6 AM, today's schedule 3-5 AM.",
+  "Are the 2018 \"proposed new signage\" streets (red, high trash generation) all posted now?",
+  "Which City holidays stop street sweeping and its ticketing, and is there a list for 2026 and 2027?",
+  "Is the fine still $41, and are cars ever towed for street sweeping?"
+ ],
+ "contact": "StreetSweeping@cityofsanmateo.org"
+}

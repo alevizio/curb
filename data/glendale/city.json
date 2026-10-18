@@ -1,0 +1,139 @@
+{
+ "id": "glendale",
+ "name": "Glendale",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  34.1469,
+  -118.2469
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   34.1173,
+   -118.3065
+  ],
+  [
+   34.2234,
+   -118.2261
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-04": "Independence Day",
+  "2026-09-07": "Labor Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-19": "Juneteenth",
+  "2027-07-04": "Independence Day",
+  "2027-09-06": "Labor Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-12-25": "Christmas Day"
+ },
+ "holidaysSource": "https://glendalerecycles.com/street-sweeping/",
+ "holidayRule": "all",
+ "fine": null,
+ "tow": "no",
+ "fineSource": null,
+ "agency": "City of Glendale Public Works, Integrated Waste Management",
+ "scheduleUrl": "https://glendalerecycles.com/street-sweeping/",
+ "sources": [
+  {
+   "name": "Street Sweeping routes (Public Works)",
+   "url": "https://gismap.glendaleca.gov/arcgis/rest/services/PW/StreetSweeping/MapServer/0",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Streets (from LA County CAMS, edited by the City)",
+   "url": "https://gismap.glendaleca.gov/arcgis/rest/services/Common/Streets/FeatureServer/0",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Neighborhood Zones",
+   "url": "https://gismap.glendaleca.gov/arcgis/rest/services/Common/NeighborhoodZones/FeatureServer/1",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Where street sweeping signs are posted, no parking on the day and hours on the sign, every week; the two sides of a street often have different days.",
+  "afterpass": "All year · not on the 9 sweeping holidays · a ticket where signs are posted, no tow",
+  "dataNotes": "The City's street sweeping map data (Public Works) gives each curb its own line with a day and hours, put on the side of the street centerline it runs along. Streets whose hours read 8 AM to 3 PM, the sweeping shift, are swept weekly too but look unposted, so they are left off; the City tickets only where signs are posted."
+ },
+ "neighborhoods": [
+  {
+   "name": "Adams Hill",
+   "bbox": "-118.2535,34.1241,-118.2336,34.1356"
+  },
+  {
+   "name": "Citrus Grove",
+   "bbox": "-118.2493,34.1426,-118.2288,34.1547"
+  },
+  {
+   "name": "City Center",
+   "bbox": "-118.2614,34.1426,-118.2426,34.1594"
+  },
+  {
+   "name": "Glenwood",
+   "bbox": "-118.2814,34.1597,-118.2646,34.1685"
+  },
+  {
+   "name": "Grand Central",
+   "bbox": "-118.3004,34.1569,-118.2804,34.1712"
+  },
+  {
+   "name": "Grandview",
+   "bbox": "-118.2989,34.1615,-118.2804,34.1794"
+  },
+  {
+   "name": "Mariposa",
+   "bbox": "-118.2549,34.1327,-118.2396,34.1427"
+  },
+  {
+   "name": "Moorpark",
+   "bbox": "-118.2724,34.1424,-118.2608,34.1479"
+  },
+  {
+   "name": "Pacific-Edison",
+   "bbox": "-118.2695,34.1335,-118.2550,34.1426"
+  },
+  {
+   "name": "Pelanconi",
+   "bbox": "-118.2825,34.1537,-118.2754,34.1650"
+  },
+  {
+   "name": "Riverside Rancho",
+   "bbox": "-118.3045,34.1611,-118.2974,34.1674"
+  },
+  {
+   "name": "Rossmoyne",
+   "bbox": "-118.2551,34.1552,-118.2422,34.1668"
+  },
+  {
+   "name": "Somerset",
+   "bbox": "-118.2396,34.1349,-118.2290,34.1428"
+  },
+  {
+   "name": "Tropico",
+   "bbox": "-118.2652,34.1193,-118.2516,34.1335"
+  },
+  {
+   "name": "Verdugo Viejo",
+   "bbox": "-118.2655,34.1593,-118.2551,34.1690"
+  },
+  {
+   "name": "Vineyard",
+   "bbox": "-118.2754,34.1473,-118.2579,34.1561"
+  }
+ ]
+}

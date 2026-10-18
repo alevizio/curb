@@ -1,0 +1,158 @@
+{
+ "id": "san-diego",
+ "name": "San Diego",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  32.7172,
+  -117.16
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   32.5438,
+   -117.2815
+  ],
+  [
+   33.0529,
+   -116.9278
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-03-31": "Cesar Chavez Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-03-31": "Cesar Chavez Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-12-24": "Christmas Day (observed)",
+  "2027-12-31": "New Year's Day (observed)"
+ },
+ "holidaysSource": "https://www.sandiego.gov/city-holidays",
+ "holidayRule": "all",
+ "fine": "$83.50",
+ "tow": "no",
+ "fineSource": "https://data.sandiego.gov/datasets/parking-citations/",
+ "agency": "City of San Diego Stormwater Department",
+ "scheduleUrl": "https://www.sandiego.gov/stormwater/services/streetsweeping",
+ "sources": [
+  {
+   "name": "Street Sweeping Schedule (Stormwater Department)",
+   "url": "https://data.sandiego.gov/datasets/street-sweeping-schedule/",
+   "license": "ODC PDDL",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Community Planning Areas",
+   "url": "https://data.sandiego.gov/datasets/gis-community-planning-districts/",
+   "license": "ODC PDDL",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Parking Citations",
+   "url": "https://data.sandiego.gov/datasets/parking-citations/",
+   "license": "ODC PDDL",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Address Points (SANDAG)",
+   "url": "https://data.sandiego.gov/datasets/gis-address-points-apn/",
+   "license": "ODC PDDL",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Where street sweeping signs are posted, no parking during the hours on the sign, on the days it names: weekly on busier streets, once or twice a month on most residential blocks, every other month on some.",
+  "afterpass": "All year · not on City holidays · $83.50 ticket, no tow",
+  "dataNotes": "The City's street sweeping schedule (Stormwater Department, data.sandiego.gov, updated May 5, 2026): the 3,363 blocks with signs, of 28,141 swept; blocks without signs are swept too but get no tickets, so they are left off. The schedule names each side by compass (\"NS\", \"SES\"), drawn on the side of the street line facing that way; where that is unclear, the City's own street sweeping tickets of the past year decide. On 105 blocks whose tickets show the two sides' days reversed, the two are swapped."
+ },
+ "neighborhoods": [
+  {
+   "name": "City Heights",
+   "bbox": "-117.1226,32.7422,-117.0799,32.7545"
+  },
+  {
+   "name": "Clairemont Mesa",
+   "bbox": "-117.1954,32.8210,-117.1656,32.8432"
+  },
+  {
+   "name": "Downtown",
+   "bbox": "-117.1710,32.7063,-117.1485,32.7281"
+  },
+  {
+   "name": "Encanto Neighborhoods",
+   "bbox": "-117.0844,32.7094,-117.0493,32.7160"
+  },
+  {
+   "name": "Greater Golden Hill",
+   "bbox": "-117.1484,32.7130,-117.1270,32.7281"
+  },
+  {
+   "name": "Kensington-Talmadge",
+   "bbox": "-117.1250,32.7351,-117.0543,32.7667"
+  },
+  {
+   "name": "La Jolla",
+   "bbox": "-117.2767,32.8405,-117.2443,32.8616"
+  },
+  {
+   "name": "Mission Bay Park",
+   "bbox": "-117.2511,32.7677,-117.2154,32.8024"
+  },
+  {
+   "name": "Mission Beach",
+   "bbox": "-117.2544,32.7598,-117.2490,32.7908"
+  },
+  {
+   "name": "Navajo",
+   "bbox": "-117.0938,32.7888,-117.0668,32.8068"
+  },
+  {
+   "name": "North Park",
+   "bbox": "-117.1456,32.7484,-117.1230,32.7629"
+  },
+  {
+   "name": "Ocean Beach",
+   "bbox": "-117.2535,32.7376,-117.2337,32.7541"
+  },
+  {
+   "name": "Otay Mesa-Nestor",
+   "bbox": "-117.0922,32.5728,-117.0754,32.5806"
+  },
+  {
+   "name": "Pacific Beach",
+   "bbox": "-117.2581,32.7817,-117.2204,32.8091"
+  },
+  {
+   "name": "Peninsula",
+   "bbox": "-117.2391,32.7388,-117.2195,32.7546"
+  },
+  {
+   "name": "San Ysidro",
+   "bbox": "-117.0611,32.5441,-117.0368,32.5669"
+  },
+  {
+   "name": "Southeastern San Diego",
+   "bbox": "-117.1440,32.6925,-117.0515,32.7180"
+  },
+  {
+   "name": "Uptown",
+   "bbox": "-117.1714,32.7230,-117.1434,32.7625"
+  }
+ ]
+}

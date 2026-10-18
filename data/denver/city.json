@@ -1,0 +1,324 @@
+{
+ "id": "denver",
+ "name": "Denver",
+ "region": "Colorado",
+ "tz": "America/Denver",
+ "center": [
+  39.745,
+  -104.95
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   39.6144,
+   -105.1099
+  ],
+  [
+   39.9141,
+   -104.5997
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-03-30": "Cesar Chavez Day (\"Sí, Se Puede\" Day)",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-03-29": "Cesar Chavez Day (\"Sí, Se Puede\" Day)",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-12-24": "Christmas Day (observed)",
+  "2027-12-31": "New Year's Day (observed)"
+ },
+ "holidaysSource": "https://www.denvergov.org/Events-directory/Holiday-Closures",
+ "holidayRule": "all",
+ "fine": "$50",
+ "tow": "sometimes",
+ "fineSource": "https://www.denvergov.org/files/assets/public/v/2/doti/documents/programsservices/parking/denver-parking-fine-schedule.pdf",
+ "agency": "Denver Department of Transportation and Infrastructure (DOTI)",
+ "scheduleUrl": "https://www.denvergov.org/Online-Services-Hub/Street-Sweeping-Schedules",
+ "words": {
+  "rule": "Posted blocks are swept once a month, April to November: each side on its own week and weekday (the 2nd Tuesday, say), 8 AM to 5 PM. Some downtown streets are swept overnight, 2 to 6 AM.",
+  "afterpass": "Day sweeps skip City holidays. A $50 ticket, and the car may be relocated for a $100 fee.",
+  "dataNotes": "Schedules come from Denver's street centerline, which codes each side's week and weekday, for the areas the City posts. The hours and the overnight sweeps come from the City's sign inventory; 95% of its sweeping signs match the code of the side they stand on."
+ },
+ "sources": [
+  {
+   "name": "Street Centerline (ODC_TRANS_STREET_L)",
+   "url": "https://opendata-geospatialdenver.hub.arcgis.com/",
+   "api": "https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/ODC_TRANS_STREET_L/FeatureServer/145",
+   "license": "CC BY 3.0 (City of Denver Open Data Catalog)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Street Sweep Schedule areas (ODC_ADMN_STREETSWEEPSCHEDULE_A)",
+   "url": "https://opendata-geospatialdenver.hub.arcgis.com/",
+   "api": "https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/ODC_ADMN_STREETSWEEPSCHEDULE_A/FeatureServer/17",
+   "license": "CC BY 3.0 (City of Denver Open Data Catalog)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Sign inventory, December 2025 export (Signs_12022025)",
+   "url": "https://opendata-geospatialdenver.hub.arcgis.com/",
+   "api": "https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/Signs_12022025/FeatureServer/0",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Statistical Neighborhoods (ODC_ADMN_NEIGHBORHOOD_A)",
+   "url": "https://opendata-geospatialdenver.hub.arcgis.com/",
+   "api": "https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/ODC_ADMN_NEIGHBORHOOD_A/FeatureServer/13",
+   "license": "CC BY 3.0 (City of Denver Open Data Catalog)",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "neighborhoods": [
+  {
+   "name": "Athmar Park",
+   "bbox": "-105.0251,39.6967,-104.9923,39.7112"
+  },
+  {
+   "name": "Baker",
+   "bbox": "-105.0158,39.6966,-104.9874,39.7259"
+  },
+  {
+   "name": "Barnum",
+   "bbox": "-105.0397,39.7111,-105.0251,39.7257"
+  },
+  {
+   "name": "Barnum West",
+   "bbox": "-105.0533,39.7113,-105.0395,39.7258"
+  },
+  {
+   "name": "Belcaro",
+   "bbox": "-104.9594,39.6966,-104.9386,39.7159"
+  },
+  {
+   "name": "Berkeley",
+   "bbox": "-105.0532,39.7693,-105.0252,39.7851"
+  },
+  {
+   "name": "Capitol Hill",
+   "bbox": "-104.9874,39.7273,-104.9729,39.7401"
+  },
+  {
+   "name": "CBD",
+   "bbox": "-105.0004,39.7401,-104.9874,39.7523"
+  },
+  {
+   "name": "Central Park",
+   "bbox": "-104.9037,39.7474,-104.8282,39.8128"
+  },
+  {
+   "name": "Chaffee Park",
+   "bbox": "-105.0253,39.7826,-104.9981,39.7945"
+  },
+  {
+   "name": "Cheesman Park",
+   "bbox": "-104.9730,39.7291,-104.9598,39.7400"
+  },
+  {
+   "name": "Cherry Creek",
+   "bbox": "-104.9602,39.7114,-104.9407,39.7256"
+  },
+  {
+   "name": "City Park",
+   "bbox": "-104.9598,39.7400,-104.9406,39.7512"
+  },
+  {
+   "name": "City Park West",
+   "bbox": "-104.9734,39.7400,-104.9598,39.7507"
+  },
+  {
+   "name": "Clayton",
+   "bbox": "-104.9598,39.7617,-104.9406,39.7729"
+  },
+  {
+   "name": "Cole",
+   "bbox": "-104.9734,39.7620,-104.9594,39.7729"
+  },
+  {
+   "name": "College View - South Platte",
+   "bbox": "-105.0252,39.6568,-104.9973,39.6823"
+  },
+  {
+   "name": "Congress Park",
+   "bbox": "-104.9602,39.7256,-104.9407,39.7402"
+  },
+  {
+   "name": "Cory - Merrill",
+   "bbox": "-104.9594,39.6830,-104.9406,39.6966"
+  },
+  {
+   "name": "Country Club",
+   "bbox": "-104.9733,39.7141,-104.9593,39.7291"
+  },
+  {
+   "name": "East Colfax",
+   "bbox": "-104.9035,39.7328,-104.8846,39.7510"
+  },
+  {
+   "name": "Elyria Swansea",
+   "bbox": "-104.9784,39.7703,-104.9401,39.7946"
+  },
+  {
+   "name": "Five Points",
+   "bbox": "-105.0032,39.7438,-104.9719,39.7753"
+  },
+  {
+   "name": "Globeville",
+   "bbox": "-104.9982,39.7621,-104.9675,39.7983"
+  },
+  {
+   "name": "Hale",
+   "bbox": "-104.9407,39.7256,-104.9223,39.7402"
+  },
+  {
+   "name": "Harvey Park",
+   "bbox": "-105.0626,39.6677,-105.0250,39.6823"
+  },
+  {
+   "name": "Highland",
+   "bbox": "-105.0253,39.7539,-104.9982,39.7693"
+  },
+  {
+   "name": "Hilltop",
+   "bbox": "-104.9407,39.7111,-104.9034,39.7256"
+  },
+  {
+   "name": "Jefferson Park",
+   "bbox": "-105.0253,39.7434,-105.0095,39.7585"
+  },
+  {
+   "name": "Lincoln Park",
+   "bbox": "-105.0181,39.7255,-104.9874,39.7405"
+  },
+  {
+   "name": "Lowry Field",
+   "bbox": "-104.9128,39.7069,-104.8706,39.7329"
+  },
+  {
+   "name": "Mar Lee",
+   "bbox": "-105.0532,39.6822,-105.0250,39.6972"
+  },
+  {
+   "name": "Montclair",
+   "bbox": "-104.9228,39.7256,-104.9034,39.7402"
+  },
+  {
+   "name": "North Capitol Hill",
+   "bbox": "-104.9874,39.7400,-104.9734,39.7476"
+  },
+  {
+   "name": "North Park Hill",
+   "bbox": "-104.9406,39.7510,-104.9034,39.7620"
+  },
+  {
+   "name": "Northeast Park Hill",
+   "bbox": "-104.9407,39.7620,-104.9034,39.7910"
+  },
+  {
+   "name": "Overland",
+   "bbox": "-105.0014,39.6677,-104.9874,39.6967"
+  },
+  {
+   "name": "Platt Park",
+   "bbox": "-104.9876,39.6785,-104.9734,39.6967"
+  },
+  {
+   "name": "Regis",
+   "bbox": "-105.0650,39.7834,-105.0252,39.7920"
+  },
+  {
+   "name": "Rosedale",
+   "bbox": "-104.9876,39.6677,-104.9734,39.6786"
+  },
+  {
+   "name": "Ruby Hill",
+   "bbox": "-105.0251,39.6822,-104.9924,39.6968"
+  },
+  {
+   "name": "Skyland",
+   "bbox": "-104.9598,39.7507,-104.9406,39.7620"
+  },
+  {
+   "name": "Sloan Lake",
+   "bbox": "-105.0532,39.7440,-105.0252,39.7585"
+  },
+  {
+   "name": "South Park Hill",
+   "bbox": "-104.9407,39.7401,-104.9034,39.7511"
+  },
+  {
+   "name": "Speer",
+   "bbox": "-104.9876,39.7111,-104.9729,39.7273"
+  },
+  {
+   "name": "Sun Valley",
+   "bbox": "-105.0252,39.7253,-105.0156,39.7476"
+  },
+  {
+   "name": "Sunnyside",
+   "bbox": "-105.0253,39.7693,-104.9982,39.7844"
+  },
+  {
+   "name": "Union Station",
+   "bbox": "-105.0082,39.7455,-104.9917,39.7604"
+  },
+  {
+   "name": "University",
+   "bbox": "-104.9735,39.6604,-104.9594,39.6898"
+  },
+  {
+   "name": "Valverde",
+   "bbox": "-105.0251,39.7112,-105.0001,39.7255"
+  },
+  {
+   "name": "Villa Park",
+   "bbox": "-105.0556,39.7255,-105.0251,39.7366"
+  },
+  {
+   "name": "Virginia Village",
+   "bbox": "-104.9407,39.6784,-104.9035,39.7002"
+  },
+  {
+   "name": "Washington Park",
+   "bbox": "-104.9734,39.6847,-104.9593,39.7184"
+  },
+  {
+   "name": "Washington Park West",
+   "bbox": "-104.9876,39.6898,-104.9734,39.7112"
+  },
+  {
+   "name": "West Colfax",
+   "bbox": "-105.0532,39.7340,-105.0252,39.7464"
+  },
+  {
+   "name": "West Highland",
+   "bbox": "-105.0532,39.7585,-105.0252,39.7695"
+  },
+  {
+   "name": "Westwood",
+   "bbox": "-105.0533,39.6967,-105.0251,39.7113"
+  },
+  {
+   "name": "Whittier",
+   "bbox": "-104.9734,39.7507,-104.9598,39.7620"
+  }
+ ]
+}

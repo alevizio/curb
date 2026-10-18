@@ -1,0 +1,546 @@
+{
+ "generated": "2026-10-18T19:06:12.035Z",
+ "inputs": {
+  "sweepingLines": 27849,
+  "posted": 11164,
+  "notPosted": 16685,
+  "curbLinesUsed": 11109,
+  "centerlines": 70475
+ },
+ "skippedPostedLines": {
+  "no posted hours (\"ALL DAY\")": {
+   "lines": 13,
+   "examples": [
+    {
+     "id": 117976,
+     "schedule": "Wednesday",
+     "time": "ALL DAY",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 125835,
+     "schedule": "Monday",
+     "time": "ALL DAY",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 125843,
+     "schedule": "Monday",
+     "time": "ALL DAY",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 132250,
+     "schedule": "Monday",
+     "time": "ALL DAY",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 132461,
+     "schedule": "Thursday",
+     "time": "ALL DAY",
+     "frequency": "AS NEEDED"
+    }
+   ]
+  },
+  "no weekday": {
+   "lines": 10,
+   "examples": [
+    {
+     "id": 119234,
+     "schedule": "As Needed",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 119270,
+     "schedule": null,
+     "time": "Hand Sweeping",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 119420,
+     "schedule": "As Needed",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 124466,
+     "schedule": "As Needed",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 124768,
+     "schedule": "As Needed",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    }
+   ]
+  },
+  "median curb": {
+   "lines": 6,
+   "examples": [
+    {
+     "id": 123786,
+     "schedule": "Monday",
+     "time": "8:00 AM - 12:00 PM",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 127923,
+     "schedule": "Friday",
+     "time": "5:00 AM - 7:00 AM",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 140583,
+     "schedule": "Friday",
+     "time": "5:00 AM - 8:00 AM",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 140701,
+     "schedule": "Friday",
+     "time": "8:00 AM - 12:00 PM",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 140703,
+     "schedule": "Friday",
+     "time": "8:00 AM - 12:00 PM",
+     "frequency": "WEEKLY"
+    }
+   ]
+  },
+  "no posted hours (\"All Day\")": {
+   "lines": 7,
+   "examples": [
+    {
+     "id": 126282,
+     "schedule": "Tuesday",
+     "time": "All Day",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 128085,
+     "schedule": "Monday",
+     "time": "All Day",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 128109,
+     "schedule": "Friday",
+     "time": "All Day",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 139231,
+     "schedule": "Wednesday",
+     "time": "All Day",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 144838,
+     "schedule": "Friday",
+     "time": "All Day",
+     "frequency": "WEEKLY"
+    }
+   ]
+  },
+  "no posted hours (\"Hand Sweeping\")": {
+   "lines": 4,
+   "examples": [
+    {
+     "id": 141341,
+     "schedule": "Tuesday",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 141342,
+     "schedule": "Tuesday",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 141343,
+     "schedule": "Tuesday",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    },
+    {
+     "id": 141344,
+     "schedule": "Tuesday",
+     "time": "Hand Sweeping",
+     "frequency": "AS NEEDED"
+    }
+   ]
+  },
+  "no posted hours (\"\")": {
+   "lines": 15,
+   "examples": [
+    {
+     "id": 141743,
+     "schedule": "Wednesday",
+     "time": " ",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 141744,
+     "schedule": "Tuesday",
+     "time": " ",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 141745,
+     "schedule": "Wednesday",
+     "time": " ",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 141746,
+     "schedule": "Wednesday",
+     "time": " ",
+     "frequency": "WEEKLY"
+    },
+    {
+     "id": 141764,
+     "schedule": "Wednesday",
+     "time": " ",
+     "frequency": "WEEKLY"
+    }
+   ]
+  },
+  "frequency": {
+   "lines": 2,
+   "examples": [
+    {
+     "id": 141778,
+     "schedule": "Friday",
+     "time": "9:00 AM - 1:00 PM",
+     "frequency": " "
+    },
+    {
+     "id": 142942,
+     "schedule": "Tuesday",
+     "time": "9:00 AM - 1:00 PM",
+     "frequency": " "
+    }
+   ]
+  }
+ },
+ "placement": {
+  "method": "curb lines sampled every 5 m (8 m left out at each end); each sample goes to the nearest centerline within 22 m running within ~30 degrees; a curb counts on a centerline side when it covers 35% of the block or 60 m, with 20 m at least (half of a block shorter than 25 m)",
+  "curbsPlaced": 11017,
+  "curbsNotPlaced": 92,
+  "notPlacedExamples": [
+   {
+    "id": 118670,
+    "schedule": "Wednesday",
+    "time": "6:00 AM - 8:00 AM",
+    "at": [
+     -118.08895,
+     34.043729
+    ]
+   },
+   {
+    "id": 119733,
+    "schedule": "Friday",
+    "time": "8:00 AM - 12:00 PM",
+    "at": [
+     -118.255831,
+     33.959315
+    ]
+   },
+   {
+    "id": 120696,
+    "schedule": "Wednesday",
+    "time": "8:00 AM - 12:00 PM",
+    "at": [
+     -118.154658,
+     34.025667
+    ]
+   },
+   {
+    "id": 121424,
+    "schedule": "Monday",
+    "time": "8:00 AM - 12:00 PM",
+    "at": [
+     -118.194619,
+     33.899387
+    ]
+   },
+   {
+    "id": 122985,
+    "schedule": "Monday",
+    "time": "11:00 AM - 3:00 PM",
+    "at": [
+     -118.233853,
+     33.848129
+    ]
+   },
+   {
+    "id": 123118,
+    "schedule": "Monday",
+    "time": "11:00 AM - 3:00 PM",
+    "at": [
+     -118.234674,
+     33.857995
+    ]
+   },
+   {
+    "id": 123252,
+    "schedule": "Monday",
+    "time": "11:00 AM - 3:00 PM",
+    "at": [
+     -118.235199,
+     33.864181
+    ]
+   },
+   {
+    "id": 123433,
+    "schedule": "Thursday",
+    "time": "11:00 AM - 3:00 PM",
+    "at": [
+     -118.076192,
+     33.968198
+    ]
+   }
+  ],
+  "samples": 313460,
+  "samplesPlaced": 308888
+ },
+ "blocks": {
+  "withRules": 8439,
+  "sides": 15027,
+  "bothSides": 6588,
+  "bothSidesDifferentDays": 5802,
+  "bothSidesSameRules": 786,
+  "oneSideOnly": 1851,
+  "sidesWithTwoRulesOnOneWeekday": 17,
+  "conflictExamples": [
+   {
+    "c": "681C546F-DE82-4E84-ACEC-583FC5660DA9",
+    "s": "E 6th St",
+    "side": "L",
+    "rules": [
+     [
+      2,
+      5,
+      7,
+      31,
+      0,
+      1
+     ],
+     [
+      2,
+      8,
+      12,
+      31,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "c": "27005E0C-A0B3-417E-8303-5C20FC6C8A84",
+    "s": "E 60th St",
+    "side": "R",
+    "rules": [
+     [
+      3,
+      4,
+      7,
+      31,
+      0,
+      1
+     ],
+     [
+      3,
+      11,
+      15,
+      31,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "c": "53BA7201-070A-4D9E-B2E8-9192FCC15ABA",
+    "s": "E 61st St",
+    "side": "L",
+    "rules": [
+     [
+      3,
+      4,
+      7,
+      31,
+      0,
+      1
+     ],
+     [
+      3,
+      11,
+      15,
+      31,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "c": "91401FDA-AC18-4572-8B25-1C9CAAF7C6D0",
+    "s": "N Muscatel Ave",
+    "side": "R",
+    "rules": [
+     [
+      3,
+      5,
+      7,
+      31,
+      0,
+      1
+     ],
+     [
+      3,
+      12,
+      16,
+      31,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "c": "C280551B-64A1-4D2C-9BAA-77AA209A01E8",
+    "s": "",
+    "side": "L",
+    "rules": [
+     [
+      5,
+      5,
+      8,
+      31,
+      0,
+      1
+     ],
+     [
+      5,
+      11,
+      15,
+      31,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "c": "F6EF82DD-9DB1-4126-B98F-5E4B8C0AF166",
+    "s": "",
+    "side": "R",
+    "rules": [
+     [
+      5,
+      5,
+      8,
+      31,
+      0,
+      1
+     ],
+     [
+      5,
+      11,
+      15,
+      31,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "c": "9835BFDF-D88E-4311-B9DE-6F37C5F37E60",
+    "s": "",
+    "side": "R",
+    "rules": [
+     [
+      5,
+      5,
+      8,
+      31,
+      0,
+      1
+     ],
+     [
+      5,
+      11,
+      15,
+      31,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "c": "6DA9D31B-D897-4663-8672-051C33D069A9",
+    "s": "Morrill Ave",
+    "side": "L",
+    "rules": [
+     [
+      3,
+      5,
+      8,
+      31,
+      0,
+      1
+     ],
+     [
+      3,
+      8,
+      12,
+      31,
+      0,
+      1
+     ]
+    ]
+   }
+  ],
+  "curbMiles": 1105,
+  "postedCurbMilesInTheMap": 1065,
+  "sizeBytes": 2309360
+ },
+ "postedFieldIncomplete": {
+  "note": "left out: POSTED is empty, and the County says the field is incomplete (all of district 3: View Park/Windsor Hills, Athens-Westmont, West Carson, Ladera Heights, Lennox...; parts of district 1: Valinda, Bassett, San Jose Hills)",
+  "byDistrict": {
+   "MD 1": {
+    "lines": 3570,
+    "withDayHoursWeekly": 1870
+   },
+   "MD 5": {
+    "lines": 18,
+    "withDayHoursWeekly": 0
+   },
+   "MD 2": {
+    "lines": 1969,
+    "withDayHoursWeekly": 4
+   },
+   "MD 3": {
+    "lines": 5691,
+    "withDayHoursWeekly": 5358
+   },
+   "MD 4": {
+    "lines": 2,
+    "withDayHoursWeekly": 0
+   },
+   "MD ?": {
+    "lines": 27,
+    "withDayHoursWeekly": 2
+   }
+  }
+ },
+ "timeField": "the layer describes TIME as \"time route is typically swept\"; taken as the posted no-parking hours (Board traffic orders read the same, e.g. 7 to 11 a.m.)",
+ "crossCheck": "none: the County publishes no parking citations (the Sheriff writes over 24,000 a month; street sweeping heads its list of citations to be aware of)",
+ "season": "none: all year",
+ "holidays": "no sweeping on County holidays, but the Sheriff enforces posted parking regulations then (Public Works FAQ): rules carry flag 1",
+ "privacy": "the layer's editor user names and ROUTE_NUMBER (some route labels are first names) are not read"
+}

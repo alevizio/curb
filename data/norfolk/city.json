@@ -1,0 +1,165 @@
+{
+ "id": "norfolk",
+ "name": "Norfolk",
+ "region": "Virginia",
+ "tz": "America/New_York",
+ "center": [
+  36.8802,
+  -76.2884
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   36.8209,
+   -76.3294
+  ],
+  [
+   36.9692,
+   -76.1771
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King's Birthday",
+  "2026-02-16": "Washington's Birthday",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-11-03": "Election Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-24": "Christmas Eve",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King's Birthday",
+  "2027-02-15": "Washington's Birthday",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-11-02": "Election Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Day after Thanksgiving",
+  "2027-12-23": "Christmas Eve (observed)",
+  "2027-12-24": "Christmas Day (observed)"
+ },
+ "holidaysSource": "https://www.norfolk.gov/4740/Holidays",
+ "holidayRule": "all",
+ "fine": "$60",
+ "tow": "sometimes",
+ "fineSource": "https://www.norfolk.gov/493/Parking-Fine-Fees",
+ "agency": "Norfolk Public Works",
+ "scheduleUrl": "https://www.norfolk.gov/2658/Street-Sweeping",
+ "sources": [
+  {
+   "name": "Street Sweeping Schedule (Public Works)",
+   "url": "https://data.norfolk.gov/d/pic8-i2xr",
+   "license": "not stated (City of Norfolk Open Data)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Street Centerline (Public Works, Division of Surveys)",
+   "url": "https://gisshare.norfolk.gov/pubserver/rest/services/OpenData/Public_Works/FeatureServer/1",
+   "license": "not stated (City of Norfolk GIS)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Planning Districts (Planning and Community Development)",
+   "url": "https://gisshare.norfolk.gov/pubserver/rest/services/OpenData/Planning/FeatureServer/2",
+   "license": "not stated (City of Norfolk GIS)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Parking Citations (street cleaning tickets, time and street only)",
+   "url": "https://data.norfolk.gov/d/ei2q-6g8n",
+   "license": "not stated (City of Norfolk Open Data)",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Streets with regulatory street sweeping signs are swept on the same day each month, like the second Tuesday: no parking during the hours on the sign.",
+  "afterpass": "All year. $60 ticket, and the car can be towed. No sweeping on City holidays, and a missed signed sweep is not made up.",
+  "dataNotes": "Dates from the City's 2026 Street Sweeping Schedule (one row per address and date), only where the City marks enforcement signs, each address placed on its block and side by the City's centerline address ranges. The City publishes no hours: 8 AM to 2 PM is read from its street cleaning tickets, so the sign's hours win. City holidays are taken off the dates. Streets with advisory signs or none are left off: no ticket there."
+ },
+ "neighborhoods": [
+  {
+   "name": "Campostella",
+   "bbox": "-76.2693,36.8216,-76.2598,36.8312"
+  },
+  {
+   "name": "Campostella Heights",
+   "bbox": "-76.2645,36.8259,-76.255,36.8375"
+  },
+  {
+   "name": "Cape View",
+   "bbox": "-76.2299,36.9348,-76.2145,36.9416"
+  },
+  {
+   "name": "Chesterfield",
+   "bbox": "-76.2545,36.8395,-76.2441,36.8445"
+  },
+  {
+   "name": "Colonial Place",
+   "bbox": "-76.2957,36.8791,-76.2819,36.8914"
+  },
+  {
+   "name": "Coronado",
+   "bbox": "-76.2574,36.8974,-76.2414,36.904"
+  },
+  {
+   "name": "Downtown",
+   "bbox": "-76.2986,36.8479,-76.2897,36.8552"
+  },
+  {
+   "name": "Edgewater - Larchmont",
+   "bbox": "-76.3167,36.8864,-76.305,36.8906"
+  },
+  {
+   "name": "Ghent",
+   "bbox": "-76.3024,36.8543,-76.2922,36.8674"
+  },
+  {
+   "name": "Huntersville",
+   "bbox": "-76.288,36.8555,-76.2684,36.8667"
+  },
+  {
+   "name": "Ingleside",
+   "bbox": "-76.2451,36.8462,-76.2367,36.8517"
+  },
+  {
+   "name": "Kempsville",
+   "bbox": "-76.1926,36.848,-76.1787,36.8562"
+  },
+  {
+   "name": "Medical Center",
+   "bbox": "-76.3106,36.8648,-76.3059,36.8694"
+  },
+  {
+   "name": "North Ghent",
+   "bbox": "-76.3022,36.8622,-76.2915,36.8721"
+  },
+  {
+   "name": "Park Place",
+   "bbox": "-76.3017,36.8704,-76.2797,36.8817"
+  },
+  {
+   "name": "Rosemont",
+   "bbox": "-76.2357,36.9036,-76.2303,36.9086"
+  },
+  {
+   "name": "Sewells Gardens",
+   "bbox": "-76.253,36.8974,-76.2414,36.9042"
+  },
+  {
+   "name": "Tidewater - Young Park",
+   "bbox": "-76.2879,36.8441,-76.2755,36.859"
+  },
+  {
+   "name": "West Ghent",
+   "bbox": "-76.3115,36.8634,-76.2994,36.8735"
+  }
+ ]
+}

@@ -1,0 +1,318 @@
+{
+ "id": "los-angeles",
+ "name": "Los Angeles",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  34.0635,
+  -118.301
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   33.72424,
+   -118.64078
+  ],
+  [
+   34.32274,
+   -118.16039
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-03-30": "César Chávez Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-03-29": "César Chávez Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving",
+  "2027-11-26": "Day after Thanksgiving",
+  "2027-12-24": "Christmas Day (observed)",
+  "2027-12-31": "New Year's Day (observed)"
+ },
+ "holidaysSource": "https://streets.lacity.gov/sites/default/files/2025-12/Sweeping2026.pdf",
+ "holidaysNote": "2026 from StreetsLA's calendar; 2027 not yet posted by StreetsLA, derived from the same City holiday rules (Administrative Code Sec. 4.119)",
+ "holidayRule": "all",
+ "fine": "$73",
+ "tow": "no",
+ "fineSource": "https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv",
+ "agency": "StreetsLA (Bureau of Street Services)",
+ "ticketAgency": "LADOT",
+ "scheduleUrl": "https://streets.lacity.gov/services/street-sweeping",
+ "sources": [
+  {
+   "name": "Posted Street Sweeping Routes (StreetsLA)",
+   "url": "https://services1.arcgis.com/PTh9WC0Sf2WS7AAq/arcgis/rest/services/Posted_Street_Sweeping_Routes_Update/FeatureServer/0",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Streets (Centerline) (Bureau of Engineering, LA GeoHub)",
+   "url": "https://maps.lacity.org/lahub/rest/services/Street_Information/MapServer/36",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Parking Citations (LADOT, Los Angeles Open Data)",
+   "url": "https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv",
+   "license": "CC0 1.0",
+   "fetched": "2026-10-18",
+   "used": "street cleaning tickets (80.69BS) 2025-01-01 to 2026-10-16: date, time, location"
+  },
+  {
+   "name": "Street Sweeping 2026 Biweekly Schedule (StreetsLA)",
+   "url": "https://streets.lacity.gov/sites/default/files/2025-12/Sweeping2026.pdf",
+   "license": "City web page",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Neighborhood Councils (Certified) (LA GeoHub)",
+   "url": "https://maps.lacity.org/lahub/rest/services/Boundaries/MapServer/18",
+   "license": "not stated",
+   "fetched": "2026-10-18",
+   "used": "the welcome card's neighborhood list"
+  }
+ ],
+ "words": {
+  "rule": "Posted streets are swept every other week, on the 1st and 3rd or the 2nd and 4th time that weekday comes in the month: one side of the street on one day, the other side on another, during the hours on the sign.",
+  "afterpass": "All year. No sweeping on City holidays, and no make-up day. $73 ticket, no tow.",
+  "dataNotes": "Days, weeks and hours come from StreetsLA's posted sweeping routes. StreetsLA doesn't publish which side of the street is swept on which day, so CURB placed the 900,142 street cleaning tickets written since January 2025 on their block and side by address, and gave each side the day its tickets fall on; a block with no tickets takes the side of the nearest ticketed block on its street. Where neither tells, both days show on both sides."
+ },
+ "neighborhoods": [
+  {
+   "name": "Venice",
+   "bbox": "-118.4817,33.9657,-118.442,34.0057"
+  },
+  {
+   "name": "Boyle Heights",
+   "bbox": "-118.2272,34.0165,-118.1922,34.0589"
+  },
+  {
+   "name": "Mid City West",
+   "bbox": "-118.3907,34.0541,-118.3429,34.089"
+  },
+  {
+   "name": "Greater Wilshire",
+   "bbox": "-118.3447,34.0525,-118.3091,34.0871"
+  },
+  {
+   "name": "Van Nuys",
+   "bbox": "-118.4738,34.1667,-118.4298,34.2149"
+  },
+  {
+   "name": "Granada Hills South",
+   "bbox": "-118.5274,34.2501,-118.4729,34.2775"
+  },
+  {
+   "name": "South Robertson",
+   "bbox": "-118.406,34.0283,-118.375,34.063"
+  },
+  {
+   "name": "Sherman Oaks",
+   "bbox": "-118.4693,34.1428,-118.4138,34.1721"
+  },
+  {
+   "name": "Wilshire Center - Koreatown",
+   "bbox": "-118.3144,34.0509,-118.2856,34.0836"
+  },
+  {
+   "name": "Watts",
+   "bbox": "-118.2543,33.9295,-118.2288,33.9534"
+  },
+  {
+   "name": "Echo Park",
+   "bbox": "-118.2783,34.0615,-118.2463,34.0999"
+  },
+  {
+   "name": "West Hills",
+   "bbox": "-118.6389,34.1846,-118.6028,34.2315"
+  }
+ ],
+ "segmentFiles": [
+  {
+   "id": "101",
+   "name": "Harbor",
+   "file": "segments-101.json",
+   "bbox": "-118.30118,33.72424,-118.24227,33.801",
+   "blocks": 583
+  },
+  {
+   "id": "102",
+   "name": "South",
+   "file": "segments-102.json",
+   "bbox": "-118.30918,33.819,-118.22876,33.96788",
+   "blocks": 1970
+  },
+  {
+   "id": "103",
+   "name": "Southeast",
+   "file": "segments-103.json",
+   "bbox": "-118.29187,33.96738,-118.19224,34.03772",
+   "blocks": 1913
+  },
+  {
+   "id": "104",
+   "name": "Central",
+   "file": "segments-104.json",
+   "bbox": "-118.29169,34.02064,-118.19228,34.07774",
+   "blocks": 1605
+  },
+  {
+   "id": "105",
+   "name": "East",
+   "file": "segments-105.json",
+   "bbox": "-118.26131,34.04028,-118.16039,34.10774",
+   "blocks": 1424
+  },
+  {
+   "id": "106",
+   "name": "Eagle Rock",
+   "file": "segments-106.json",
+   "bbox": "-118.24678,34.08338,-118.17273,34.13956",
+   "blocks": 700
+  },
+  {
+   "id": "107",
+   "name": "Silverlake",
+   "file": "segments-107.json",
+   "bbox": "-118.32672,34.07048,-118.25269,34.1371",
+   "blocks": 1266
+  },
+  {
+   "id": "108",
+   "name": "Hollywood",
+   "file": "segments-108.json",
+   "bbox": "-118.3922,34.06889,-118.29169,34.11127",
+   "blocks": 1694
+  },
+  {
+   "id": "109",
+   "name": "Wilshire",
+   "file": "segments-109.json",
+   "bbox": "-118.39098,34.02991,-118.29157,34.0765",
+   "blocks": 2553
+  },
+  {
+   "id": "110",
+   "name": "Southwest",
+   "file": "segments-110.json",
+   "bbox": "-118.3782,33.97781,-118.29136,34.03709",
+   "blocks": 2532
+  },
+  {
+   "id": "111",
+   "name": "Westchester",
+   "file": "segments-111.json",
+   "bbox": "-118.45352,33.93822,-118.29146,34.00003",
+   "blocks": 1383
+  },
+  {
+   "id": "112",
+   "name": "Venice",
+   "file": "segments-112.json",
+   "bbox": "-118.48165,33.96572,-118.38368,34.05717",
+   "blocks": 2103
+  },
+  {
+   "id": "213",
+   "name": "Palisades",
+   "file": "segments-213.json",
+   "bbox": "-118.47727,34.02801,-118.44036,34.06423",
+   "blocks": 466
+  },
+  {
+   "id": "214",
+   "name": "Bel Air",
+   "file": "segments-214.json",
+   "bbox": "-118.46508,34.03741,-118.4131,34.07585",
+   "blocks": 616
+  },
+  {
+   "id": "215",
+   "name": "Woodland Hills",
+   "file": "segments-215.json",
+   "bbox": "-118.61256,34.1492,-118.4685,34.17235",
+   "blocks": 276
+  },
+  {
+   "id": "216",
+   "name": "Studio City",
+   "file": "segments-216.json",
+   "bbox": "-118.4674,34.1337,-118.34846,34.15905",
+   "blocks": 458
+  },
+  {
+   "id": "217",
+   "name": "North Hollywood",
+   "file": "segments-217.json",
+   "bbox": "-118.42288,34.15243,-118.3496,34.23308",
+   "blocks": 1232
+  },
+  {
+   "id": "218",
+   "name": "Sunland",
+   "file": "segments-218.json",
+   "bbox": "-118.42307,34.21182,-118.29731,34.28561",
+   "blocks": 338
+  },
+  {
+   "id": "219",
+   "name": "San Fernando",
+   "file": "segments-219.json",
+   "bbox": "-118.47884,34.23787,-118.39707,34.32274",
+   "blocks": 1017
+  },
+  {
+   "id": "220",
+   "name": "Van Nuys",
+   "file": "segments-220.json",
+   "bbox": "-118.4743,34.15562,-118.41325,34.25399",
+   "blocks": 1270
+  },
+  {
+   "id": "221",
+   "name": "Reseda",
+   "file": "segments-221.json",
+   "bbox": "-118.56226,34.17083,-118.47493,34.2208",
+   "blocks": 614
+  },
+  {
+   "id": "222",
+   "name": "Granada Hills",
+   "file": "segments-222.json",
+   "bbox": "-118.52744,34.22111,-118.4672,34.27993",
+   "blocks": 763
+  },
+  {
+   "id": "223",
+   "name": "Northridge",
+   "file": "segments-223.json",
+   "bbox": "-118.60615,34.21966,-118.52299,34.26453",
+   "blocks": 387
+  },
+  {
+   "id": "224",
+   "name": "Canoga Park",
+   "file": "segments-224.json",
+   "bbox": "-118.64078,34.16012,-118.56226,34.21973",
+   "blocks": 987
+  }
+ ]
+}

@@ -1,0 +1,553 @@
+{
+ "generated": "2026-10-18T19:14:40.697Z",
+ "season": "All year, weekly. No sweeping and no sweeping enforcement on the 9 holidays of glendalerecycles.com/street-sweeping; no make-up day.",
+ "input": {
+  "curbLines": 12596,
+  "withDayAndHours": 12144,
+  "noDay": 452,
+  "noDayKm": 40.9,
+  "noDayByTime": {
+   "8AM-3PM": 28,
+   "3AM-6AM": 2,
+   "8AM-10AM": 163,
+   "10AM-12PM": 37,
+   "8AM-11AM": 102,
+   "12PM-2PM": 21,
+   "7AM-8AM": 2,
+   "8AM-12PM": 97
+  },
+  "unreadable": 0,
+  "windows": {
+   "8-10": {
+    "lines": 1059,
+    "km": 117.2
+   },
+   "8-15": {
+    "lines": 9032,
+    "km": 773.7
+   },
+   "3-6": {
+    "lines": 287,
+    "km": 39.5
+   },
+   "12-14": {
+    "lines": 180,
+    "km": 16.7
+   },
+   "8-11": {
+    "lines": 463,
+    "km": 54.8
+   },
+   "10-12": {
+    "lines": 196,
+    "km": 26.8
+   },
+   "8-12": {
+    "lines": 201,
+    "km": 21.3
+   },
+   "3-6:30": {
+    "lines": 424,
+    "km": 34.7
+   },
+   "7-8": {
+    "lines": 43,
+    "km": 4
+   },
+   "9-12": {
+    "lines": 259,
+    "km": 25.3
+   }
+  },
+  "streets": 8070,
+  "blockCenterlines": 6727,
+  "unnamedCenterlines": 978,
+  "unnamedNamedByContinuation": 151,
+  "intersectionPiecesLeftOut": 260
+ },
+ "placement": {
+  "method": "Each curb line sampled every 5 m; a sample goes to the nearest Primary, Secondary or Minor street centerline within 30 m whose direction is within about 37 degrees of the curb, on the side where it lies (code shared with santa-monica.mjs). A side keeps a schedule carried by at least 15% of the block length and 15 m of curb (60% of a block shorter than 25 m).",
+  "sampledKm": 1113.2,
+  "placedKm": 1056.1,
+  "placedShare": 0.9486,
+  "curbLinesMostlyUnplaced": 1101,
+  "curbLinesMostlyUnplacedKm": 49.1,
+  "unplacedKmByWindow": {
+   "8-10": 2.4,
+   "8-15": 20.4,
+   "3-6": 7.1,
+   "8-11": 0.8,
+   "10-12": 0,
+   "8-12": 0.1,
+   "3-6:30": 3.8,
+   "12-14": 1.4,
+   "7-8": 0,
+   "9-12": 1.5
+  },
+  "unplacedNote": "Curb lines with no street centerline of the right kind within 30 m: along the railroad, inside business parks whose streets are not in the layer (Grand Central), or where the curb line strays from the centerline.",
+  "unplacedExamples": [
+   {
+    "id": 51,
+    "label": "Tuesday 8AM-3PM",
+    "m": 1157,
+    "at": [
+     -118.189086,
+     34.178104
+    ]
+   },
+   {
+    "id": 8431,
+    "label": "Tuesday 8AM-3PM",
+    "m": 1067,
+    "at": [
+     -118.203555,
+     34.184887
+    ]
+   },
+   {
+    "id": 975,
+    "label": "Tuesday 3AM-6AM",
+    "m": 757,
+    "at": [
+     -118.263747,
+     34.130202
+    ]
+   },
+   {
+    "id": 3037,
+    "label": "Tuesday 3AM-6AM",
+    "m": 592,
+    "at": [
+     -118.285981,
+     34.156098
+    ]
+   },
+   {
+    "id": 3030,
+    "label": "Tuesday 3AM-6AM",
+    "m": 554,
+    "at": [
+     -118.286842,
+     34.156429
+    ]
+   },
+   {
+    "id": 227,
+    "label": "Tuesday 8AM-10AM",
+    "m": 541,
+    "at": [
+     -118.257513,
+     34.121645
+    ]
+   },
+   {
+    "id": 3036,
+    "label": "Tuesday 8AM-3PM",
+    "m": 396,
+    "at": [
+     -118.285986,
+     34.156475
+    ]
+   },
+   {
+    "id": 8514,
+    "label": "Monday 8AM-3PM",
+    "m": 377,
+    "at": [
+     -118.286166,
+     34.186968
+    ]
+   },
+   {
+    "id": 6365,
+    "label": "Tuesday 3AM-6AM",
+    "m": 376,
+    "at": [
+     -118.298222,
+     34.170255
+    ]
+   },
+   {
+    "id": 4292,
+    "label": "Tuesday 3AM-6AM",
+    "m": 374,
+    "at": [
+     -118.279016,
+     34.153329
+    ]
+   },
+   {
+    "id": 3906,
+    "label": "Friday 8AM-10AM",
+    "m": 361,
+    "at": [
+     -118.259361,
+     34.155873
+    ]
+   },
+   {
+    "id": 8341,
+    "label": "Monday 8AM-3PM",
+    "m": 335,
+    "at": [
+     -118.291784,
+     34.182854
+    ]
+   },
+   {
+    "id": 3916,
+    "label": "Thursday 8AM-3PM",
+    "m": 325,
+    "at": [
+     -118.269209,
+     34.155666
+    ]
+   },
+   {
+    "id": 5547,
+    "label": "Thursday 8AM-10AM",
+    "m": 296,
+    "at": [
+     -118.303176,
+     34.165635
+    ]
+   },
+   {
+    "id": 35,
+    "label": "Thursday 8AM-3PM",
+    "m": 279,
+    "at": [
+     -118.305912,
+     34.162993
+    ]
+   }
+  ],
+  "sidesBelowThreshold": 254,
+  "sidesBelowThresholdKm": 2.31,
+  "sidesWithSeveralSchedules": 13,
+  "severalSchedulesExamples": [
+   {
+    "c": "6634",
+    "s": "San Fernando Rd",
+    "side": "Northeast",
+    "rules": [
+     [
+      1,
+      8,
+      10,
+      31,
+      0,
+      0
+     ],
+     [
+      4,
+      8,
+      10,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "3443",
+    "s": "San Fernando Rd",
+    "side": "Northeast",
+    "rules": [
+     [
+      1,
+      8,
+      10,
+      31,
+      0,
+      0
+     ],
+     [
+      2,
+      3,
+      6,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "3403",
+    "s": "E Windsor Rd",
+    "side": "North",
+    "rules": [
+     [
+      1,
+      8,
+      12,
+      31,
+      0,
+      0
+     ],
+     [
+      1,
+      10,
+      12,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "4736",
+    "s": "Verd Oaks Dr",
+    "side": "North",
+    "rules": [
+     [
+      5,
+      8,
+      12,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "2635",
+    "s": "Rock Glen Ave",
+    "side": "South",
+    "rules": [
+     [
+      5,
+      8,
+      12,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "4543",
+    "s": "S Pacific Ave",
+    "side": "West",
+    "rules": [
+     [
+      4,
+      8,
+      10,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      8,
+      10,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "6711",
+    "s": "S Columbus Ave",
+    "side": "Northeast",
+    "rules": [
+     [
+      1,
+      3,
+      "6:30",
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      8,
+      10,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "4520",
+    "s": "Sinclair Ave",
+    "side": "West",
+    "rules": [
+     [
+      1,
+      10,
+      12,
+      31,
+      0,
+      0
+     ],
+     [
+      1,
+      12,
+      14,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "7087",
+    "s": "E California Ave",
+    "side": "North",
+    "rules": [
+     [
+      1,
+      3,
+      "6:30",
+      31,
+      0,
+      0
+     ],
+     [
+      3,
+      8,
+      11,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5287",
+    "s": "Maryland Pl",
+    "side": "North",
+    "rules": [
+     [
+      1,
+      3,
+      "6:30",
+      31,
+      0,
+      0
+     ],
+     [
+      2,
+      8,
+      11,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "5411",
+    "s": "W Glenoaks Blvd",
+    "side": "North",
+    "rules": [
+     [
+      4,
+      9,
+      12,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "6997",
+    "s": "Grover Ave",
+    "side": "Southeast",
+    "rules": [
+     [
+      2,
+      3,
+      6,
+      31,
+      0,
+      0
+     ],
+     [
+      3,
+      8,
+      12,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "c": "4327",
+    "s": "Spencer St",
+    "side": "North",
+    "rules": [
+     [
+      4,
+      9,
+      12,
+      31,
+      0,
+      0
+     ]
+    ]
+   }
+  ],
+  "onUnnamedCenterlines": {
+   "sides": 412,
+   "km": 28.5,
+   "downTheMiddle": 223,
+   "downTheMiddleKm": 19.2,
+   "note": "Lines placed on a centerline the City leaves unnamed, and that no named street continues: left off the map. Those within 4 m of the centerline on average are sweeping routes down the middle of alleys and lanes, not curbs."
+  }
+ },
+ "sides": {
+  "blocksWithTwoSides": 1282,
+  "sameRulesBothSides": 389,
+  "differentRulesBothSides": 893,
+  "oneSideOnly": 223,
+  "note": "The data has no side field, but its lines are curbs, one per side: the two sides are told apart by where each line lies."
+ },
+ "shiftWindow": {
+  "shown": false,
+  "curbLines": 9032,
+  "curbKm": 773.7,
+  "sidesLeftOff": 5625,
+  "sidesLeftOffKm": 709.5,
+  "blocksLeftOffEntirely": 2922,
+  "note": "8 AM to 3 PM, the sweeping shift, is the window on most residential streets, mostly hillside and low density neighborhoods. Street View (2022 to 2025 imagery) showed no sweeping signs on the 4 such blocks checked (Cordova Ave, E Palmer Ave, W Windsor Rd, W Harvard St), while E Harvard St, with a 2 hour window, had its sign on the side the data says. Glendale enforces only posted signs (GMC 10.36.110; \"the day and timeframe posted on the street signage\"), so these curbs are left off until the City confirms they are posted; SHIFT_IS_POSTED = true in scripts/cities/glendale.mjs puts them on the map."
+ },
+ "output": {
+  "blocks": 1505,
+  "sides": 2787,
+  "rules": 2796,
+  "oddSideKnown": 1463,
+  "withNeighborhood": 1480,
+  "blocksByNeighborhood": {
+   "Rossmoyne": 44,
+   "Pacific-Edison": 103,
+   "Citrus Grove": 169,
+   "Tropico": 134,
+   "Vineyard": 110,
+   "Adams Hill": 31,
+   "Grandview": 187,
+   "Woodbury": 9,
+   "Mariposa": 128,
+   "City Center": 221,
+   "Pelanconi": 27,
+   "Riverside Rancho": 29,
+   "Grand Central": 75,
+   "Glenwood": 25,
+   "Verdugo Viejo": 89,
+   "Somerset": 62,
+   "Montrose": 5,
+   "Moorpark": 32
+  }
+ },
+ "skipped": {
+  "noDay": "452 curb lines (40.9 km) have hours but no day",
+  "unreadable": []
+ },
+ "ticketCheck": "Glendale publishes no parking citations with time and place, so no cross-check."
+}

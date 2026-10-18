@@ -1,0 +1,1719 @@
+{
+ "generated": "2026-10-18T19:18:32.653Z",
+ "sources": [
+  {
+   "name": "Signalisation (stationnement sur rue), Ville de Montréal",
+   "url": "https://donnees.montreal.ca/dataset/stationnement-sur-rue-signalisation-courant",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Géobase double: côtés de rue du réseau routier, Ville de Montréal",
+   "url": "https://donnees.montreal.ca/dataset/geobase-double",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Géobase: réseau routier, Ville de Montréal",
+   "url": "https://donnees.montreal.ca/dataset/geobase",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Signalisation: codification RPA des panneaux (the sign code table, 2020)",
+   "url": "https://donnees.montreal.ca/dataset/stationnement-sur-rue-signalisation-courant",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Remorquages de véhicules gênants, Ville de Montréal (cross-check only)",
+   "url": "https://donnees.montreal.ca/dataset/remorquages-de-vehicules-genants",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "inputs": {
+  "panelRows": 144771,
+  "byState": {
+   "Réel": 118399,
+   "En conception": 8319,
+   "Enlevé": 12311,
+   "Archive": 5742
+  },
+  "inPlace": 118399,
+  "duplicateRows": 25,
+  "textFromCodeTable": 0,
+  "centerlines": 48031,
+  "streetSides": 91606,
+  "streetSidesMontreal": 72254
+ },
+ "decoding": {
+  "streetCleaningPanels": 43495,
+  "decoded": 43495,
+  "notStreetCleaning": {
+   "always": 42115,
+   "no season": 24182,
+   "not a ban": 8089,
+   "other season": 396
+  },
+  "notStreetCleaningMeaning": {
+   "not a ban": "parking allowed or a time limit, a sub-plate",
+   "always": "no parking or no stopping at all times, or at all times with an exception (permits, disabled, deliveries)",
+   "no season": "a weekly no parking window all year (not the seasonal cleaning program), including the orange snow removal signs",
+   "other season": "winter, the school year or summer"
+  },
+  "cleaningSeasonLeftOut": {
+   "exception": 59,
+   "no hours": 36,
+   "not a ban": 2
+  },
+  "cleaningSeasonLeftOutExamples": {
+   "exception": [
+    {
+     "text": "\\P EXCEPTE 8h - 12h MERCREDI 1er AVRIL - 30 NOV",
+     "panels": 25
+    },
+    {
+     "text": "\\P excepté motos  1er avril - 30 nov",
+     "panels": 2
+    },
+    {
+     "text": "\\P EXCEPTE 09h-12h MERCREDI 15 MARS AU 15 NOVEMBRE",
+     "panels": 9
+    },
+    {
+     "text": "\\P EXCEPTE MOTOS 1 AVRIL AU 1 NOV",
+     "panels": 7
+    },
+    {
+     "text": "\\P EXCEPTÉ LUNDI 12H-16H 15 MARS AU 15 NOVEMBRE",
+     "panels": 8
+    },
+    {
+     "text": "\\P EXCEPTÉ MARDI 9H-16H 15 MARS AU 15 NOVEMBRE",
+     "panels": 5
+    },
+    {
+     "text": "\\P 8h à 12h du lundi au vendredi 1 avril au 30 nov. excepté véhicules municipaux",
+     "panels": 3
+    }
+   ],
+   "no hours": [
+    {
+     "text": "\\P 1ER AVRIL - 30 NOV",
+     "panels": 18
+    },
+    {
+     "text": "\\P 1 AVRIL AU 15 NOV",
+     "panels": 5
+    },
+    {
+     "text": "\\P 1 AVRIL  AU 1 DEC",
+     "panels": 11
+    },
+    {
+     "text": "\\P 15 MARS AU 15 NOVEMBRE",
+     "panels": 1
+    },
+    {
+     "text": "\\P 15 AVRIL AU 1 NOV",
+     "panels": 1
+    }
+   ],
+   "not a ban": [
+    {
+     "text": "Stationnement réservé véhicule de promenade, VEN, 8h-12h, 1er AVRIL AU 1ER DÉC REMORQUAGE À VOS FRAIS",
+     "panels": 2
+    }
+   ]
+  },
+  "cleaningSeasonLeftOutMeaning": {
+   "exception": "\"\\P EXCEPTE …\": parking allowed only during the hours (the other side is being cleaned), or reserved for some vehicles (municipal vehicles, motorcycles)",
+   "no hours": "no parking all day for the whole season (no weekly window)",
+   "not a ban": "a sign without \\P or \\A (\"Stationnement réservé véhicule de promenade, VEN, 8h-12h, 1er AVRIL AU 1ER DÉC …\", Anjou): not read as a cleaning window"
+  },
+  "noStopping": 176,
+  "noStoppingNote": "Outremont posts its cleaning on some commercial streets as \\A (no stopping) during the same season; read as street cleaning (code family OUT-ADN, next to OUT-SDN for \\P). An assumption: no City page says so.",
+  "noBackslashP": 10,
+  "noBackslashPNote": "Saint-Laurent panels whose text starts with the hours and has no \\P (\"9H à 12H - LUNDI - 15 AVR au 15 NOV\"): read as no parking, since the season is the borough's cleaning season.",
+  "longWindows": [
+   {
+    "text": "\\P 19h-24h JEUDI  1 AVRIL AU 1 DEC",
+    "panels": 37,
+    "rules": [
+     [
+      4,
+      19,
+      24,
+      31,
+      2040,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "\\P 9h-17h MERCREDI 1 AVRIL AU 1 DEC",
+    "panels": 11,
+    "rules": [
+     [
+      3,
+      9,
+      17,
+      31,
+      2040,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "\\P 9H @ 16H MERCREDI 15 MARS AU 15 NOVEMBRE",
+    "panels": 11,
+    "rules": [
+     [
+      3,
+      9,
+      16,
+      31,
+      1020,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "\\P 9h-17h LUNDI 1 AVRIL AU 1 DEC",
+    "panels": 10,
+    "rules": [
+     [
+      1,
+      9,
+      17,
+      31,
+      2040,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "\\P 7h-19h LUNDI 1 AVRIL AU 1 DEC",
+    "panels": 9,
+    "rules": [
+     [
+      1,
+      7,
+      19,
+      31,
+      2040,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "/P 19h-24h MARDI 1 AVRIL AU 1 DEC",
+    "panels": 4,
+    "rules": [
+     [
+      2,
+      19,
+      24,
+      31,
+      2040,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "\\P 19h-24h LUNDI JEUDI 1 AVRIL AU 1 DEC",
+    "panels": 2,
+    "rules": [
+     [
+      1,
+      19,
+      24,
+      31,
+      2040,
+      1
+     ],
+     [
+      4,
+      19,
+      24,
+      31,
+      2040,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "\\P 19h-24h MARDI VENDREDI 1 AVRIL AU 1 DEC",
+    "panels": 1,
+    "rules": [
+     [
+      2,
+      19,
+      24,
+      31,
+      2040,
+      1
+     ],
+     [
+      5,
+      19,
+      24,
+      31,
+      2040,
+      1
+     ]
+    ]
+   }
+  ],
+  "everyDay": [
+   {
+    "text": "\\P 5H-7H 1 AVRIL AU 1 DEC",
+    "panels": 24
+   },
+   {
+    "text": "\\P 6h-7h 1 AVRIL AU 1 DEC",
+    "panels": 10
+   },
+   {
+    "text": "\\P 4H-5H 1 AVRIL AU 1 DEC",
+    "panels": 7
+   },
+   {
+    "text": "\\P 7h-8h 1 AVRIL AU 1 DEC",
+    "panels": 2
+   },
+   {
+    "text": "\\P 7h30-8h30 1 AVRILS AU 1 DEC",
+    "panels": 1
+   }
+  ],
+  "pastMidnight": [
+   {
+    "text": "\\P 23H30-0h30 MARDI JEUDI 1 AVRIL AU 1 DEC",
+    "panels": 8,
+    "rules": [
+     [
+      2,
+      "23:30",
+      "0:30",
+      31,
+      2040,
+      1
+     ],
+     [
+      4,
+      "23:30",
+      "0:30",
+      31,
+      2040,
+      1
+     ]
+    ]
+   },
+   {
+    "text": "\\P 23h30-0h30 LUNDI MARDI JEUDI VENDREDI 1 AVRIL AU 1 DEC",
+    "panels": 7,
+    "rules": [
+     [
+      1,
+      "23:30",
+      "0:30",
+      31,
+      2040,
+      1
+     ],
+     [
+      2,
+      "23:30",
+      "0:30",
+      31,
+      2040,
+      1
+     ],
+     [
+      4,
+      "23:30",
+      "0:30",
+      31,
+      2040,
+      1
+     ],
+     [
+      5,
+      "23:30",
+      "0:30",
+      31,
+      2040,
+      1
+     ]
+    ]
+   }
+  ],
+  "codeTableCheck": {
+   "agree": 42737,
+   "differ": 200,
+   "tableNotCleaning": 31,
+   "notInTable": 527,
+   "examples": [
+    {
+     "code": "LAC-41",
+     "panel": "\\P 9H @ 12H LUNDI 15 MARS au 15 NOVEMBRE",
+     "table": "\\P 9H @ 12H LUNDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-44",
+     "panel": "\\P 9H @ 12H MARDI 15 MARS AU 15 NOVEMBRE",
+     "table": "\\P 9H @ 16H MARDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-42",
+     "panel": "\\P 9H @ 12H MERCREDI 15 MARS AU 15 NOVEMBRE",
+     "table": "\\P 9H @ 16H LUNDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-40",
+     "panel": "\\P 7H @ 9H LUNDI 15 MARS AU 15 NOVEMBRE",
+     "table": "\\P 7H @ 9H LUNDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-46",
+     "panel": "\\P 9H @ 12H MERCREDI 15 MARS AU 15 NOVEMBRE",
+     "table": "\\P 9H @ 12H MERCREDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-41",
+     "panel": "\\P 9H @ 12H LUNDI 15 MARS au 15 NOVEMBRE",
+     "table": "\\P 9H @ 12H LUNDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-41",
+     "panel": "\\P 9H @ 12H LUNDI 15 MARS au 15 NOVEMBRE",
+     "table": "\\P 9H @ 12H LUNDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-42",
+     "panel": "\\P 9H @ 12H MERCREDI 15 MARS AU 15 NOVEMBRE",
+     "table": "\\P 9H @ 16H LUNDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-48",
+     "panel": "\\P 9H @ 12H JEUDI 15 MARS AU 15 NOVEMBRE",
+     "table": "\\P 9H @ 16H JEUDI 1 AVRIL AU 15 NOVEMBRE"
+    },
+    {
+     "code": "LAC-42",
+     "panel": "\\P 9H @ 12H MERCREDI 15 MARS AU 15 NOVEMBRE",
+     "table": "\\P 9H @ 16H LUNDI 1 AVRIL AU 15 NOVEMBRE"
+    }
+   ],
+   "note": "Each cleaning panel's sign (PANNEAU_ID_RPA) in the 2020 code table, decoded on its own: agree = the same rules from the two wordings."
+  },
+  "codeFamilyCheck": {
+   "agree": 41905,
+   "differ": 19,
+   "examples": [
+    {
+     "code": "SB-NY-A",
+     "text": "\\P 23h30-0h30 LUNDI MARDI JEUDI VENDREDI 1 AVRIL AU 1 DEC",
+     "days": 4
+    },
+    {
+     "code": "SB-DA-A",
+     "text": "\\P 8h30-10h30 JEUDI 1 AVRIL AU 1 DEC",
+     "days": 1
+    },
+    {
+     "code": "SB-SG-B",
+     "text": "\\P 22h-23h MERCREDI 1 AVRIL AU 1 DEC",
+     "days": 1
+    }
+   ],
+   "note": "The days on the sign against its code family: SU one day, SB two, ST three, SV Monday to Friday, SD every day."
+  },
+  "top20": [
+   {
+    "text": "\\P 8h30-11h30 MERCREDI 1 AVRIL AU 1 DEC",
+    "code": "SU-AE-A",
+    "panels": 1051,
+    "rules": [
+     [
+      3,
+      "8:30",
+      "11:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Wed 8:30 to 11:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 8h30-11h30 LUNDI 1AVRIL AU 1DEC",
+    "code": "SU-AB-A",
+    "panels": 1044,
+    "rules": [
+     [
+      1,
+      "8:30",
+      "11:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Mon 8:30 to 11:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 8h30-11h30 MARDI 1 AVRIL AU 1 DEC",
+    "code": "SU-AC-A",
+    "panels": 957,
+    "rules": [
+     [
+      2,
+      "8:30",
+      "11:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Tue 8:30 to 11:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 12h30-15h30 JEUDI 1 AVRIL AU 1 DEC",
+    "code": "SU-PH-A",
+    "panels": 853,
+    "rules": [
+     [
+      4,
+      "12:30",
+      "15:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Thu 12:30 to 15:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 9h30-10h30 JEUDI 1 AVRIL AU 1 DEC",
+    "code": "SU-JD-A",
+    "panels": 779,
+    "rules": [
+     [
+      4,
+      "9:30",
+      "10:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Thu 9:30 to 10:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\\\P 12h30-15h30 MERCREDI 1 AVRIL AU 1 DEC",
+    "code": "SU-PF-A",
+    "panels": 772,
+    "rules": [
+     [
+      3,
+      "12:30",
+      "15:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Wed 12:30 to 15:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 12h30-15h30 LUNDI 1AVRIL AU 1 DEC",
+    "code": "SU-LV-A",
+    "panels": 763,
+    "rules": [
+     [
+      1,
+      "12:30",
+      "15:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Mon 12:30 to 15:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 12h30-15h30 MARDI 1AVRIL AU 1DEC",
+    "code": "SU-MV-A",
+    "panels": 745,
+    "rules": [
+     [
+      2,
+      "12:30",
+      "15:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Tue 12:30 to 15:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 9h30-10h30 MERCREDI 1 AVRIL AU 1 DEC",
+    "code": "SU-ND-A",
+    "panels": 688,
+    "rules": [
+     [
+      3,
+      "9:30",
+      "10:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Wed 9:30 to 10:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 10h-11h MARDI 1 AVRIL AU 1 DEC",
+    "code": "SU-ME-A",
+    "panels": 656,
+    "rules": [
+     [
+      2,
+      10,
+      11,
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Tue 10:00 to 11:00, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 12h30-13h30 JEUDI 1 AVRIL AU 1 DEC",
+    "code": "SU-JK-A",
+    "panels": 623,
+    "rules": [
+     [
+      4,
+      "12:30",
+      "13:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Thu 12:30 to 13:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 12h30-13h30 MERCREDI 1 AVRIL AU 1 DEC",
+    "code": "SU-NK-A",
+    "panels": 617,
+    "rules": [
+     [
+      3,
+      "12:30",
+      "13:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Wed 12:30 to 13:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 10h-11h MERCREDI 1 AVRIL AU 1 DEC",
+    "code": "SU-NE-A",
+    "panels": 608,
+    "rules": [
+     [
+      3,
+      10,
+      11,
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Wed 10:00 to 11:00, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 10h-11h JEUDI 1 AVRIL AU 1 DEC",
+    "code": "SU-JE-A",
+    "panels": 587,
+    "rules": [
+     [
+      4,
+      10,
+      11,
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Thu 10:00 to 11:00, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 9h30-10h30 MARDI 1 AVRIL AU 1 DEC",
+    "code": "SU-MD-A",
+    "panels": 585,
+    "rules": [
+     [
+      2,
+      "9:30",
+      "10:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Tue 9:30 to 10:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 8h30-11h30 JEUDI 1 AVRIL AU 1 DEC",
+    "code": "SU-AI-A",
+    "panels": 581,
+    "rules": [
+     [
+      4,
+      "8:30",
+      "11:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Thu 8:30 to 11:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 13h-14h MAR. 1 AVRIL AU 1 DEC.",
+    "code": "SU-ML-A",
+    "panels": 573,
+    "rules": [
+     [
+      2,
+      13,
+      14,
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Tue 13:00 to 14:00, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 9h30-10h30 LUNDI 1 AVRIL AU 1 DEC",
+    "code": "SU-LD-A",
+    "panels": 544,
+    "rules": [
+     [
+      1,
+      "9:30",
+      "10:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Mon 9:30 to 10:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 12h30-13h30 MARDI 1 AVRIL AU 1 DEC",
+    "code": "SU-MK-A",
+    "panels": 537,
+    "rules": [
+     [
+      2,
+      "12:30",
+      "13:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Tue 12:30 to 13:30, April 1 to December 1 (months: April to November)"
+   },
+   {
+    "text": "\\P 13h30-14h30 MERCREDI 1 AVRIL AU 1 DEC",
+    "code": "SU-NM-A",
+    "panels": 531,
+    "rules": [
+     [
+      3,
+      "13:30",
+      "14:30",
+      31,
+      2040,
+      1
+     ]
+    ],
+    "reads": "Wed 13:30 to 14:30, April 1 to December 1 (months: April to November)"
+   }
+  ],
+  "top20AllSigns": [
+   {
+    "text": "\\A EN TOUT TEMPS",
+    "panels": 19375,
+    "read": "always"
+   },
+   {
+    "text": "\\P EN TOUT TEMPS",
+    "panels": 12390,
+    "read": "always"
+   },
+   {
+    "text": "\\P 9h-23h EXCEPTE S3R",
+    "panels": 6057,
+    "read": "no season"
+   },
+   {
+    "text": "\\P EXCEPTE HANDICAPES (PICTO)",
+    "panels": 2662,
+    "read": "always"
+   },
+   {
+    "text": "\\P (EN TOUT TEMPS) EXCEPTE S3R",
+    "panels": 2105,
+    "read": "always"
+   },
+   {
+    "text": "\\P 9h-21h LUN A VEN EXCEPTE S3R",
+    "panels": 1368,
+    "read": "no season"
+   },
+   {
+    "text": "\\P 9h-21h EXCEPTE S3R",
+    "panels": 1343,
+    "read": "no season"
+   },
+   {
+    "text": "\\P EXCEPTE PICTOGRAMME VOITURE ELECTRIQUE - EN RECHARGE",
+    "panels": 1151,
+    "read": "always"
+   },
+   {
+    "text": "\\P 8h30-11h30 MERCREDI 1 AVRIL AU 1 DEC",
+    "panels": 1051,
+    "read": "street cleaning"
+   },
+   {
+    "text": "\\P 8h30-11h30 LUNDI 1AVRIL AU 1DEC",
+    "panels": 1044,
+    "read": "street cleaning"
+   },
+   {
+    "text": "\\P DEUX COTES",
+    "panels": 975,
+    "read": "always"
+   },
+   {
+    "text": "\\P 8h30-11h30 MARDI 1 AVRIL AU 1 DEC",
+    "panels": 957,
+    "read": "street cleaning"
+   },
+   {
+    "text": "PANONCEAU EXCEPTÉ DETENTEURS DE PERMIS SECTEUR XX",
+    "panels": 892,
+    "read": "not a ban"
+   },
+   {
+    "text": "P 2h 8h - 22h",
+    "panels": 866,
+    "read": "not a ban"
+   },
+   {
+    "text": "\\P 12h30-15h30 JEUDI 1 AVRIL AU 1 DEC",
+    "panels": 853,
+    "read": "street cleaning"
+   },
+   {
+    "text": "\\P EXCEPTE HANDICAPES DEBARCADERE SEULEMENT",
+    "panels": 800,
+    "read": "always"
+   },
+   {
+    "text": "\\P 9h30-10h30 JEUDI 1 AVRIL AU 1 DEC",
+    "panels": 779,
+    "read": "street cleaning"
+   },
+   {
+    "text": "\\\\P 12h30-15h30 MERCREDI 1 AVRIL AU 1 DEC",
+    "panels": 772,
+    "read": "street cleaning"
+   },
+   {
+    "text": "\\P 12h30-15h30 LUNDI 1AVRIL AU 1 DEC",
+    "panels": 763,
+    "read": "street cleaning"
+   },
+   {
+    "text": "\\P 9h-22h30",
+    "panels": 746,
+    "read": "no season"
+   }
+  ]
+ },
+ "season": {
+  "rule": "A month counts when the sign's dates cover more than half of its days (bit m-1 of the months mask). The exact first and last days are in seasonsOnSigns and in words.afterpass.",
+  "seasonsOnSigns": [
+   {
+    "season": "April 1 to December 1",
+    "panels": 41903,
+    "months": "April to November",
+    "monthsMask": 2040
+   },
+   {
+    "season": "April 1 to November 30",
+    "panels": 978,
+    "months": "April to November",
+    "monthsMask": 2040
+   },
+   {
+    "season": "March 1 to December 1",
+    "panels": 363,
+    "months": "March to November",
+    "monthsMask": 2044
+   },
+   {
+    "season": "March 15 to November 15",
+    "panels": 223,
+    "months": "March to October",
+    "monthsMask": 1020
+   },
+   {
+    "season": "April 15 to November 15",
+    "panels": 28,
+    "months": "April to October",
+    "monthsMask": 1016
+   }
+  ],
+  "montrealCaSeasons": {
+   "most boroughs": "April 1 to December 1",
+   "Lachine": "March 15 to November 15",
+   "LaSalle": "April 16 to November 15",
+   "Outremont": "April 1 to November 30",
+   "Verdun": "April 1 to November 14",
+   "Saint-Laurent": "March 1 to December 1, or April 15 to November 15, depending on the sector",
+   "Pierrefonds-Roxboro, L'Île-Bizard–Sainte-Geneviève": "none"
+  },
+  "montrealCaSource": "https://montreal.ca/en/how-to/find-out-when-parking-prohibited-street-maintenance (updated November 27, 2025)",
+  "equivalently": "Each date moves to the nearest first of a month: December 1 stays December 1 (the season ends with November), March 15 and April 15 move back to March 1 and April 1, November 15 moves back to November 1 (the season ends with October).",
+  "notShownThoughOnTheSign": [
+   "December 1 on April 1 to December 1 and March 1 to December 1 signs (Tuesday, December 1, 2026; Wednesday, December 1, 2027)",
+   "November 1 to 15 on signs ending November 15 (Lachine, parts of Saint-Laurent, three signs in Mercier–Hochelaga-Maisonneuve and Anjou)"
+  ],
+  "shownThoughNotOnTheSign": [
+   "March 1 to 14 on signs starting March 15 (Lachine, three signs in Mercier–Hochelaga-Maisonneuve and Anjou)",
+   "April 1 to 14 on signs starting April 15 (parts of Saint-Laurent)"
+  ],
+  "option": "If those days matter, each rule could get a second rule listing those dates ([-1, from, to, 0, 0, flags, [dates]]); not done here, the months are what was asked."
+ },
+ "placement": {
+  "method": "Each pole goes on the nearest Géobase double side line of Montréal within 15 m that is on the pole's side of that side's own centerline. When another side line is less than 2 m farther, the pole goes to the one where other poles already post the same rules, else the nearest.",
+  "poles": 43234,
+  "placed": 43210,
+  "unplaced": {
+   "only street sides of another city (not Montréal) within 15 m": 18,
+   "no street side within 15 m": 6
+  },
+  "unplacedExamples": {
+   "only street sides of another city (not Montréal) within 15 m": [
+    {
+     "pole": "126096",
+     "lon": -73.567258,
+     "lat": 45.634732,
+     "borough": "",
+     "sign": "\\P 13h-16h MERCREDI DU 15 AVRIL AU 15 NOV"
+    },
+    {
+     "pole": "126276",
+     "lon": -73.556903,
+     "lat": 45.641517,
+     "borough": "",
+     "sign": "\\P 13h-16h MERCREDI DU 15 AVRIL AU 15 NOV"
+    },
+    {
+     "pole": "126389",
+     "lon": -73.550852,
+     "lat": 45.645064,
+     "borough": "",
+     "sign": "\\P 13h-16h MERCREDI DU 15 AVRIL AU 15 NOV"
+    },
+    {
+     "pole": "126182",
+     "lon": -73.562764,
+     "lat": 45.637674,
+     "borough": "",
+     "sign": "\\P 13h-16h MERCREDI DU 15 AVRIL AU 15 NOV"
+    },
+    {
+     "pole": "126157",
+     "lon": -73.564652,
+     "lat": 45.636443,
+     "borough": "",
+     "sign": "\\P 13h-16h MERCREDI DU 15 AVRIL AU 15 NOV"
+    },
+    {
+     "pole": "126388",
+     "lon": -73.551911,
+     "lat": 45.644533,
+     "borough": "",
+     "sign": "\\P 13h-16h MERCREDI DU 15 AVRIL AU 15 NOV"
+    }
+   ],
+   "no street side within 15 m": [
+    {
+     "pole": "213560",
+     "lon": -73.529559,
+     "lat": 45.568567,
+     "borough": "Mercier - Hochelaga-Maisonneuve",
+     "sign": "\\P 8h30-11h30 MARDI 1 AVRIL AU 1 DEC"
+    },
+    {
+     "pole": "23083",
+     "lon": -73.532108,
+     "lat": 45.572696,
+     "borough": "Mercier - Hochelaga-Maisonneuve",
+     "sign": "\\P 12h30-15h30 LUNDI 1AVRIL AU 1 DEC"
+    },
+    {
+     "pole": "56983",
+     "lon": -73.517528,
+     "lat": 45.666007,
+     "borough": "Rivière-des-Prairies - Pointe-aux-Trembles",
+     "sign": "\\P 7h-8h MERCREDI 1 AVRIL AU 1 DEC"
+    },
+    {
+     "pole": "127899",
+     "lon": -73.529016,
+     "lat": 45.584422,
+     "borough": "Mercier - Hochelaga-Maisonneuve",
+     "sign": "\\P 12h30-15h30 MARDI 1AVRIL AU 1DEC"
+    },
+    {
+     "pole": "114749",
+     "lon": -73.52924,
+     "lat": 45.5845,
+     "borough": "Mercier - Hochelaga-Maisonneuve",
+     "sign": "\\P 12h30-15h30 JEUDI 1 AVRIL AU 1 DEC"
+    },
+    {
+     "pole": "283898",
+     "lon": -73.560983,
+     "lat": 45.608266,
+     "borough": "Anjou",
+     "sign": "\\P 13h-16h MERCREDI 1 AVRIL AU 1 DEC"
+    }
+   ]
+  },
+  "distanceToSideLine": {
+   "median": 2.9,
+   "p90": 4.6,
+   "p99": 6.7,
+   "unit": "m"
+  },
+  "closeCall": {
+   "poles": 1560,
+   "nearest": 598,
+   "supported": 962,
+   "supportedNotNearest": 228
+  },
+  "twoPanelPoles": {
+   "poles": 219,
+   "panelsMoved": 22,
+   "examples": [
+    {
+     "pole": "18238",
+     "sign": "\\P 8h30-11h30 MERCREDI 1 AVRIL AU 1 DEC",
+     "from": "rue Chauveau (1420078) L",
+     "to": "rue Louis-Veuillot (1420312) L",
+     "meters": 4
+    },
+    {
+     "pole": "277607",
+     "sign": "\\P 8h30-11h30 MARDI 1 AVRIL AU 1 DEC",
+     "from": "impasse de l'Eau-Vive (4004978) R",
+     "to": "impasse de l'Eau-Vive (1613028) R",
+     "meters": 4.9
+    },
+    {
+     "pole": "279324",
+     "sign": "\\P 8h-11h VENDREDI 1 AVRIL AU 1 DEC",
+     "from": "boulevard du Haut-Anjou (1613157) R",
+     "to": "place du Haut-Anjou (1613158) R",
+     "meters": 14.2
+    },
+    {
+     "pole": "98146",
+     "sign": "\\P 7h30-8h30 MERCREDI 1 AVRIL AU 1 DEC",
+     "from": "boulevard Taylor (1020922) L",
+     "to": "boulevard Taylor (1020833) R",
+     "meters": 5.2
+    },
+    {
+     "pole": "65538",
+     "sign": "\\P 7h30-8h30 MARDI VENDREDI 1 AVRIL AU 1 DEC",
+     "from": "avenue Linton (4009038) L",
+     "to": "avenue Linton (4009039) L",
+     "meters": 5
+    },
+    {
+     "pole": "98142",
+     "sign": "\\P 7h30-8h30 MERCREDI 1 AVRIL AU 1 DEC",
+     "from": "boulevard Taylor (1020922) L",
+     "to": "boulevard Taylor (1020833) R",
+     "meters": 5.1
+    }
+   ]
+  },
+  "offStreetFlagPlaced": 183,
+  "offStreetNote": "Poles flagged PAS_SUR_RUE (not on the street) were placed like the others when a street side was within 15 m.",
+  "coteCheck": {
+   "agree": 91592,
+   "differ": 0,
+   "noCenter": 14,
+   "note": "The double's COTE (Droite / Gauche) against the side of the centerline each side line lies on: Droite = R looking from the first point to the last."
+  },
+  "arrows": {
+   "counted": 1053,
+   "hypothesisLeft2": 786,
+   "hypothesisLeft3": 267,
+   "codes": {
+    "0": 41724,
+    "2": 867,
+    "3": 860,
+    "8": 20
+   },
+   "note": "FLECHE_PAN 2 or 3 on cleaning panels near a block end: read facing the sign from the street, 2 as a left arrow points into the block for 786 and out for 267. Most cleaning panels have no arrow (0: the whole side). Arrows were not used to place poles."
+  }
+ },
+ "sides": {
+  "sides": 20873,
+  "onePole": 9771,
+  "polesAgree": 10628,
+  "twoOrMoreRuleSets": 474,
+  "onePoleSetContainsTheOthers": 149,
+  "polesDisagree": 325,
+  "minorityOnOnePole": 446,
+  "meaning": "twoOrMoreRuleSets: sides whose poles do not all post the same rules; onePoleSetContainsTheOthers: one pole posts everything the others post and more (often a short stretch near a corner with its own time); minorityOnOnePole: of those, the sides where every rule set but the commonest is on a single pole.",
+  "policy": "When the poles of one side disagree, every distinct rule is kept, so the side shows all of them.",
+  "examples": [
+   {
+    "c": "1090338",
+    "street": "9e Avenue",
+    "side": "L",
+    "poleRuleSets": [
+     {
+      "rules": "1|10|11|31|2040|1",
+      "poles": 1
+     },
+     {
+      "rules": "1|13:30|15:30|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1200340",
+    "street": "2e Avenue",
+    "side": "L",
+    "poleRuleSets": [
+     {
+      "rules": "2|7|9|31|2040|1 + 3|10:30|11:30|31|2040|1",
+      "poles": 1
+     },
+     {
+      "rules": "3|10:30|11:30|31|2040|1",
+      "poles": 6
+     }
+    ]
+   },
+   {
+    "c": "1200348",
+    "street": "3e Avenue",
+    "side": "R",
+    "poleRuleSets": [
+     {
+      "rules": "3|8:30|9:30|31|2040|1",
+      "poles": 5
+     },
+     {
+      "rules": "2|7|9|31|2040|1 + 3|8:30|9:30|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1200363",
+    "street": "5e Avenue",
+    "side": "R",
+    "poleRuleSets": [
+     {
+      "rules": "1|9:30|10:30|31|2040|1",
+      "poles": 6
+     },
+     {
+      "rules": "1|9:30|10:30|31|2040|1 + 2|7|9|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1200392",
+    "street": "9e Avenue",
+    "side": "L",
+    "poleRuleSets": [
+     {
+      "rules": "3|10:30|11:30|31|2040|1",
+      "poles": 7
+     },
+     {
+      "rules": "2|7|9|31|2040|1 + 3|10:30|11:30|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1250417",
+    "street": "rue Sainte-Famille",
+    "side": "L",
+    "poleRuleSets": [
+     {
+      "rules": "1|8|9|31|2040|1",
+      "poles": 1
+     },
+     {
+      "rules": "1|8|9|31|2040|1 + 1|9:30|10:30|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1250098",
+    "street": "avenue Henri-Julien",
+    "side": "R",
+    "poleRuleSets": [
+     {
+      "rules": "3|6:30|7:30|31|2040|1",
+      "poles": 5
+     },
+     {
+      "rules": "2|7|8|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1320220",
+    "street": "avenue de Monkland",
+    "side": "L",
+    "poleRuleSets": [
+     {
+      "rules": "1|8:30|9:30|31|2040|1 + 4|8:30|9:30|31|2040|1",
+      "poles": 2
+     },
+     {
+      "rules": "1|11:30|12:30|31|2040|1 + 4|11:30|12:30|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1110211",
+    "street": "rue Garnier",
+    "side": "R",
+    "poleRuleSets": [
+     {
+      "rules": "3|13:30|15:30|31|2040|1",
+      "poles": 3
+     },
+     {
+      "rules": "3|10|11|31|2040|1",
+      "poles": 1
+     }
+    ]
+   },
+   {
+    "c": "1390356",
+    "street": "rue Logan",
+    "side": "R",
+    "poleRuleSets": [
+     {
+      "rules": "1|13|14|31|2040|1 + 4|13|14|31|2040|1",
+      "poles": 1
+     },
+     {
+      "rules": "1|13|14|31|2040|1",
+      "poles": 1
+     }
+    ]
+   }
+  ]
+ },
+ "output": {
+  "blocks": 12930,
+  "sides": 20873,
+  "rules": 25943,
+  "sizeBytes": 4315594,
+  "simplifiedPointsDropped": 0,
+  "coordinates": "6 decimals",
+  "blocksWithoutHouseNumbers": 962,
+  "blocksWithoutOddSide": 2772,
+  "blocksWithOneCrossStreet": 741,
+  "crossStreetsFoundFurtherAlong": 1263,
+  "endsAtAnUnnamedWay": 319,
+  "unnamedWayNote": "A block end at one of the Géobase's unnamed ways (\"voie Non-nommée\") is not named; the other end shows alone.",
+  "byBorough": [
+   {
+    "borough": "Rivière-des-Prairies–Pointe-aux-Trembles",
+    "cleaningPanels": 6772,
+    "placed": 6771,
+    "blocks": 2331
+   },
+   {
+    "borough": "Mercier–Hochelaga-Maisonneuve",
+    "cleaningPanels": 5925,
+    "placed": 5921,
+    "blocks": 1849
+   },
+   {
+    "borough": "Ahuntsic-Cartierville",
+    "cleaningPanels": 5828,
+    "placed": 5828,
+    "blocks": 1600
+   },
+   {
+    "borough": "Côte-des-Neiges–Notre-Dame-de-Grâce",
+    "cleaningPanels": 3772,
+    "placed": 3772,
+    "blocks": 1107
+   },
+   {
+    "borough": "Rosemont–La Petite-Patrie",
+    "cleaningPanels": 4503,
+    "placed": 4503,
+    "blocks": 1019
+   },
+   {
+    "borough": "Le Sud-Ouest",
+    "cleaningPanels": 3323,
+    "placed": 3323,
+    "blocks": 1017
+   },
+   {
+    "borough": "Le Plateau-Mont-Royal",
+    "cleaningPanels": 3820,
+    "placed": 3820,
+    "blocks": 978
+   },
+   {
+    "borough": "Ville-Marie",
+    "cleaningPanels": 3012,
+    "placed": 3012,
+    "blocks": 964
+   },
+   {
+    "borough": "Villeray–Saint-Michel–Parc-Extension",
+    "cleaningPanels": 2114,
+    "placed": 2114,
+    "blocks": 722
+   },
+   {
+    "borough": "Anjou",
+    "cleaningPanels": 2193,
+    "placed": 2192,
+    "blocks": 670
+   },
+   {
+    "borough": "Outremont",
+    "cleaningPanels": 983,
+    "placed": 983,
+    "blocks": 294
+   },
+   {
+    "borough": "Montréal-Nord",
+    "cleaningPanels": 624,
+    "placed": 624,
+    "blocks": 140
+   },
+   {
+    "borough": "Saint-Laurent",
+    "cleaningPanels": 374,
+    "placed": 374,
+    "blocks": 139
+   },
+   {
+    "borough": "Lachine",
+    "cleaningPanels": 220,
+    "placed": 220,
+    "blocks": 97
+   },
+   {
+    "borough": "Saint-Léonard",
+    "cleaningPanels": 10,
+    "placed": 10,
+    "blocks": 3
+   },
+   {
+    "borough": "(blank)",
+    "cleaningPanels": 18,
+    "placed": 0,
+    "blocks": 0
+   },
+   {
+    "borough": "LaSalle",
+    "cleaningPanels": 4,
+    "placed": 4,
+    "blocks": 0
+   }
+  ]
+ },
+ "labels": {
+  "convention": "Montréal's street grid directions, not true north: the side of rue Sherbrooke Est toward the mountain is \"North\", the sides of boulevard Saint-Laurent are \"East\" and \"West\", as locals and addresses use them. Each label is the side's direction (from the block line's first point to its last) turned clockwise by the grid angle, then named with the eight compass words.",
+  "gridAngle": 57,
+  "gridAngleMeaning": "grid north points this many degrees west of true north",
+  "measured": {
+   "lengthWeightedPeakOfBearingsMod90": 32.5,
+   "gridNorthFromThatPeak": -57.5,
+   "boulevardSaintLaurentMedianBearing": -57.3,
+   "note": "Bearings in degrees clockwise from true north; parts of the east end run on a second grid about 10° off (rue Sherbrooke Est, rue Ontario Est), still within the same compass words."
+  },
+  "counts": {
+   "West": 5217,
+   "East": 5212,
+   "South": 3975,
+   "North": 4016,
+   "Northwest": 673,
+   "Southeast": 687,
+   "Southwest": 539,
+   "Northeast": 554
+  },
+  "differFromTrueNorth": {
+   "sides": 20873,
+   "examples": [
+    {
+     "c": "1010001",
+     "street": "avenue Adhémar-Mailhiot",
+     "side": "L",
+     "grid": "West",
+     "trueNorth": "Southwest"
+    },
+    {
+     "c": "1010004",
+     "street": "place D'Aiguillon",
+     "side": "L",
+     "grid": "East",
+     "trueNorth": "Northeast"
+    },
+    {
+     "c": "1010005",
+     "street": "avenue Albert-LeSage",
+     "side": "L",
+     "grid": "South",
+     "trueNorth": "Southeast"
+    },
+    {
+     "c": "1010006",
+     "street": "avenue Albert-Prévost",
+     "side": "L",
+     "grid": "West",
+     "trueNorth": "Southwest"
+    },
+    {
+     "c": "1010016",
+     "street": "avenue Alfred-De Vigny",
+     "side": "L",
+     "grid": "South",
+     "trueNorth": "Southeast"
+    },
+    {
+     "c": "1010030",
+     "street": "avenue Antoine-Berthelet",
+     "side": "L",
+     "grid": "West",
+     "trueNorth": "Southwest"
+    }
+   ],
+   "of": 20873,
+   "note": "A 57° turn moves every label one or two compass steps from its true north name."
+  }
+ },
+ "validation": {
+  "wellFormed": true,
+  "polesOnTheirSide": {
+   "poles": 43232,
+   "agree": 43232,
+   "differ": 0
+  },
+  "compassLabel": {
+   "sameAsDirectionToPole": 40291,
+   "oneStepOff": 2234,
+   "more": 707,
+   "note": "Both in street grid directions. The label comes from the block line's first to last point; the direction to a pole near a corner or on a bend can differ."
+  },
+  "spotChecks": [
+   {
+    "c": "1010001",
+    "street": "avenue Adhémar-Mailhiot",
+    "between": "rue Paul-Morand - boulevard Gouin Ouest",
+    "borough": "Ahuntsic-Cartierville",
+    "first": [
+     -73.740805,
+     45.51896
+    ],
+    "last": [
+     -73.741926,
+     45.519667
+    ],
+    "sides": [
+     {
+      "side": "L",
+      "label": "West",
+      "pole": "139224",
+      "at": [
+       -73.741702,
+       45.519445
+      ],
+      "metersFromCenterline": 6.2,
+      "seenFromFirstPoint": "left",
+      "ok": true,
+      "sign": "\\P 10h-11h MERCREDI 1 AVRIL AU 1 DEC"
+     },
+     {
+      "side": "R",
+      "label": "East",
+      "pole": "139219",
+      "at": [
+       -73.741062,
+       45.519185
+      ],
+      "metersFromCenterline": 6.3,
+      "seenFromFirstPoint": "right",
+      "ok": true,
+      "sign": "\\P 9h30-10h30 JEUDI 1 AVRIL AU 1 DEC"
+     }
+    ]
+   },
+   {
+    "c": "1070022",
+    "street": "rue Champdoré",
+    "between": "rue De Saint-Firmin - avenue De Lorimier",
+    "borough": "Villeray–Saint-Michel–Parc-Extension",
+    "first": [
+     -73.641666,
+     45.566421
+    ],
+    "last": [
+     -73.641183,
+     45.566967
+    ],
+    "sides": [
+     {
+      "side": "L",
+      "label": "North",
+      "pole": "135087",
+      "at": [
+       -73.64145,
+       45.566823
+      ],
+      "metersFromCenterline": 9.2,
+      "seenFromFirstPoint": "left",
+      "ok": true,
+      "sign": "\\P 9h-11h LUNDI 1 AVRIL AU 1 DEC"
+     },
+     {
+      "side": "R",
+      "label": "South",
+      "pole": "152773",
+      "at": [
+       -73.641177,
+       45.566828
+      ],
+      "metersFromCenterline": 8.6,
+      "seenFromFirstPoint": "right",
+      "ok": true,
+      "sign": "\\P 9h-10h JEUDI 1 AVRIL AU 1 DEC"
+     }
+    ]
+   },
+   {
+    "c": "1080032",
+    "street": "rue Bélanger",
+    "between": "20e Avenue - 21e Avenue",
+    "borough": "Rosemont–La Petite-Patrie",
+    "first": [
+     -73.58858,
+     45.56352
+    ],
+    "last": [
+     -73.587973,
+     45.564215
+    ],
+    "sides": [
+     {
+      "side": "L",
+      "label": "North",
+      "pole": "5415",
+      "at": [
+       -73.588334,
+       45.563929
+      ],
+      "metersFromCenterline": 7.3,
+      "seenFromFirstPoint": "left",
+      "ok": true,
+      "sign": "\\P 8h-9h LUNDI JEUDI 1 AVRIL AU 1 DEC"
+     },
+     {
+      "side": "R",
+      "label": "South",
+      "pole": "122547",
+      "at": [
+       -73.588048,
+       45.563997
+      ],
+      "metersFromCenterline": 7.8,
+      "seenFromFirstPoint": "right",
+      "ok": true,
+      "sign": "\\P 17h-18h MARDI 1 AVRIL AU 1 DEC"
+     }
+    ]
+   },
+   {
+    "c": "1210001",
+    "street": "rue Angus",
+    "between": "avenue Gascon - rue Hogan",
+    "borough": "Le Plateau-Mont-Royal",
+    "first": [
+     -73.563326,
+     45.538284
+    ],
+    "last": [
+     -73.562434,
+     45.539325
+    ],
+    "sides": [
+     {
+      "side": "L",
+      "label": "North",
+      "pole": "237687",
+      "at": [
+       -73.563273,
+       45.538475
+      ],
+      "metersFromCenterline": 7.4,
+      "seenFromFirstPoint": "left",
+      "ok": true,
+      "sign": "\\P 12h-13h JEUDI 1 AVRIL AU 1 DEC"
+     },
+     {
+      "side": "R",
+      "label": "South",
+      "pole": "26422",
+      "at": [
+       -73.562788,
+       45.538785
+      ],
+      "metersFromCenterline": 7.2,
+      "seenFromFirstPoint": "right",
+      "ok": true,
+      "sign": "\\P 12h-13h MARDI 1 AVRIL AU 1 DEC"
+     }
+    ]
+   },
+   {
+    "c": "1260004",
+    "street": "avenue Argyle",
+    "between": "rue Lucien-L'Allier - rue Guy",
+    "borough": "Ville-Marie",
+    "first": [
+     -73.571215,
+     45.494813
+    ],
+    "last": [
+     -73.573223,
+     45.492981
+    ],
+    "sides": [
+     {
+      "side": "L",
+      "label": "South",
+      "pole": "57302",
+      "at": [
+       -73.572524,
+       45.493514
+      ],
+      "metersFromCenterline": 7.1,
+      "seenFromFirstPoint": "left",
+      "ok": true,
+      "sign": "\\P 9h30-10h30 MARDI VENDREDI 1 AVRIL AU 1 DEC"
+     },
+     {
+      "side": "R",
+      "label": "North",
+      "pole": "57319",
+      "at": [
+       -73.571578,
+       45.494555
+      ],
+      "metersFromCenterline": 5,
+      "seenFromFirstPoint": "right",
+      "ok": true,
+      "sign": "\\P 9h30-10h30 LUNDI JEUDI 1 AVRIL AU 1 DEC"
+     }
+    ]
+   }
+  ]
+ },
+ "crossCheck": {
+  "source": "https://donnees.montreal.ca/dataset/remorquages-de-vehicules-genants",
+  "period": "April 1 to November 30, 2025, and April 1, 2026 to the latest tow",
+  "tows": 21732,
+  "towsWithPlace": 21699,
+  "onCleanedBlock": 13813,
+  "inWindow": 611,
+  "inWindowByReason": {
+   "Constat d'infraction": 580,
+   "(none)": 7,
+   "Déplacement non autorisé": 2,
+   "Autre": 7,
+   "Événement policier": 3,
+   "Remis au propriétaire": 12
+  },
+  "minutesAfterStart": {
+   "median": 43,
+   "quartiles": [
+    21,
+    81
+   ]
+  },
+  "inWindowShare": "4.4%",
+  "chanceShare": "3.8%",
+  "note": "The tow log gives no side of the street and no reason beyond \"Constat d'infraction\" (ticketed); a tow during a window may be for something else (work, an event).",
+  "reading": "4.4% of the tows on cleaned blocks fall inside a cleaning window of that block, against 3.8% for the same tows moved to the other days of the week: hardly more than chance. In the cleaning season the log is mostly tows for work and events, so it neither confirms nor contradicts the schedule; it does say that towing for street cleaning is rare (a few dozen more tows than chance per season, citywide)."
+ },
+ "holidays": {
+  "policy": "Not suspended: montreal.ca says the no parking periods \"sont aussi valables les jours fériés\" (also apply on holidays). Every rule carries flag 1, so the holidays listed in city.json change nothing.",
+  "source": "https://montreal.ca/sujets/stationnement-dans-la-rue (updated December 16, 2025)",
+  "list": "Québec statutory holidays plus Easter Monday, 2026 and 2027 (CNESST)"
+ },
+ "fineAndTow": {
+  "fine": "Not found on montreal.ca (its ticket pages give no amounts). Press reports of the City's 2025 budget put an illegal parking ticket at $65 plus court fees: unverified, so city.json leaves \"fine\" empty.",
+  "tow": "sometimes: no City page says. The tow log has tows of ticketed cars all season (mostly for work and events) and slightly more inside cleaning windows than chance (crossCheck), so towing for street cleaning happens but is rare."
+ },
+ "assumptions": [
+  "Only signs in place (DESCRIPTION_REP \"Réel\") count; removed, archived and planned signs are left out.",
+  "A sign is street cleaning when it bans parking (\\P) or stopping (\\A) during hours, with a season starting in March or April and ending in November or on December 1, and no exception.",
+  "A sign with no day applies every day; a window ending at 24h ends at midnight; \"23h30-0h30\" runs past midnight.",
+  "Every distinct rule of a side is kept when its poles disagree (counts in sides).",
+  "Weeks: every week (31); no Montréal cleaning sign names weeks of the month.",
+  "Holidays do not suspend anything (flag 1 on every rule).",
+  "Outremont's \\A (no stopping) windows in its cleaning season are street cleaning (decoding.noStoppingNote).",
+  "Saint-Laurent panels with hours and its cleaning season but no \\P in the text are no parking (decoding.noBackslashPNote).",
+  "A month is in the season when the sign's dates cover more than half of it (season).",
+  "Only Montréal street sides take poles: signs of other cities in the dataset (Montréal-Est, blank borough) are left out.",
+  "A pole goes on one street side; a second, different panel on it can go to the nearby side whose other poles post its rules (placement.twoPanelPoles)."
+ ]
+}

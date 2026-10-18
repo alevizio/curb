@@ -1,0 +1,573 @@
+{
+ "generated": "2026-10-18T18:49:47.199Z",
+ "inputs": {
+  "layerSegments": 523,
+  "layerEdited": "2019-12-03",
+  "layerSegmentsWithSchedule": 458,
+  "codeRows": 118,
+  "pageRows": 121
+ },
+ "output": {
+  "blocks": 464,
+  "sides": 916,
+  "rules": 1046,
+  "sizeBytes": 84390
+ },
+ "codeRows": {
+  "applied": 117,
+  "setAside": [
+   {
+    "key": "Washington Street|West|Between Newark Street and Seventh Street",
+    "why": "overlaps the 2015 row for the same side (8 to 9 AM from Eighth Street to the southerly boundary), which the City's page and map layer also give there; this 1998 row, amended the same day, reads 9 to 10 AM"
+   }
+  ],
+  "notApplied": [],
+  "notes": [
+   {
+    "key": "Castle Point Terrace|East|Eighth Street and Tenth Street",
+    "notes": [
+     "Tenth Street does not reach Castle Point Ter in the layer: placed at its nearest point (92 m away)"
+    ]
+   },
+   {
+    "key": "Castle Point Terrace|West|Eighth Street to Tenth Street",
+    "notes": [
+     "Tenth Street does not reach Castle Point Ter in the layer: placed at its nearest point (92 m away)"
+    ]
+   },
+   {
+    "key": "Clinton Street|West|Newark Street to Seventeenth Street",
+    "notes": [
+     "no Seventeenth Street in the layer: read as the street's end"
+    ]
+   },
+   {
+    "key": "Clinton Street|East|Newark Street to Seventeenth Street",
+    "notes": [
+     "no Seventeenth Street in the layer: read as the street's end"
+    ]
+   },
+   {
+    "key": "Fifteenth Street|North|Sinatra Drive to Park Avenue",
+    "notes": [
+     "Sinatra Drive does not reach 15th St in the layer: placed at its nearest point (31 m away)"
+    ]
+   },
+   {
+    "key": "Fifteenth Street|South|Sinatra Drive to Park Avenue",
+    "notes": [
+     "Sinatra Drive does not reach 15th St in the layer: placed at its nearest point (31 m away)"
+    ]
+   },
+   {
+    "key": "Harrison Street|East|Fifth Street to the northern boundary",
+    "notes": [
+     "Fifth Street does not meet Harrison St in the layer: placed where its line crosses Harrison St's"
+    ]
+   },
+   {
+    "key": "Paterson Avenue|Both|Monroe Street to west boundary",
+    "notes": [
+     "Monroe Street does not meet Paterson Ave in the layer: placed where its line crosses Paterson Ave's"
+    ]
+   },
+   {
+    "key": "River Terrace|East|Fifth Street to Seventh Street",
+    "notes": [
+     "Seventh Street does not reach River Ter in the layer: placed at its nearest point (83 m away)"
+    ]
+   },
+   {
+    "key": "River Terrace|West|Fifth Street to Seventh Street",
+    "notes": [
+     "Seventh Street does not reach River Ter in the layer: placed at its nearest point (83 m away)"
+    ]
+   },
+   {
+    "key": "Sinatra Drive|East|Fourth Street to Eleventh Street",
+    "notes": [
+     "Eleventh Street does not meet Sinatra Dr in the layer: placed where its line crosses Sinatra Dr's"
+    ]
+   }
+  ]
+ },
+ "layerVsCode": {
+  "sidesCompared": 925,
+  "same": 878,
+  "differ": 18,
+  "codeOnly": 20,
+  "layerOnly": 9,
+  "differences": [
+   {
+    "id": "99",
+    "where": "Newark St (Garden St to Park Ave), North side",
+    "code": "Fri 11 AM to 12 PM",
+    "layer": "Fri 8 AM to 9 AM"
+   },
+   {
+    "id": "341",
+    "where": "Washington St (7th St to 8th St), East side",
+    "code": "Mon 9 AM to 10 AM, Tue 9 AM to 10 AM, Wed 9 AM to 10 AM, Thu 9 AM to 10 AM, Fri 9 AM to 10 AM",
+    "layer": "Mon 8 AM to 9 AM, Tue 8 AM to 9 AM, Wed 8 AM to 9 AM, Thu 8 AM to 9 AM, Fri 8 AM to 9 AM"
+   },
+   {
+    "id": "364",
+    "where": "9th St (Monroe St to Jackson St), South side",
+    "code": "Wed 3 PM to 4 PM",
+    "layer": "Fri 3 PM to 4 PM"
+   },
+   {
+    "id": "364",
+    "where": "9th St (Monroe St to Jackson St), North side",
+    "code": "Fri 3 PM to 4 PM",
+    "layer": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "365",
+    "where": "9th St (Madison St to Monroe St), South side",
+    "code": "Wed 3 PM to 4 PM",
+    "layer": "Fri 3 PM to 4 PM"
+   },
+   {
+    "id": "365",
+    "where": "9th St (Madison St to Monroe St), North side",
+    "code": "Fri 3 PM to 4 PM",
+    "layer": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "366",
+    "where": "9th St (Jefferson St to Madison St), South side",
+    "code": "Wed 3 PM to 4 PM",
+    "layer": "Fri 3 PM to 4 PM"
+   },
+   {
+    "id": "366",
+    "where": "9th St (Jefferson St to Madison St), North side",
+    "code": "Fri 3 PM to 4 PM",
+    "layer": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "371",
+    "where": "9th St (Adams St to Jefferson St), South side",
+    "code": "Wed 3 PM to 4 PM",
+    "layer": "Fri 3 PM to 4 PM"
+   },
+   {
+    "id": "371",
+    "where": "9th St (Adams St to Jefferson St), North side",
+    "code": "Fri 3 PM to 4 PM",
+    "layer": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "372",
+    "where": "9th St (Grand St to Adams St), South side",
+    "code": "Wed 3 PM to 4 PM",
+    "layer": "Fri 3 PM to 4 PM"
+   },
+   {
+    "id": "372",
+    "where": "9th St (Grand St to Adams St), North side",
+    "code": "Fri 3 PM to 4 PM",
+    "layer": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "373",
+    "where": "9th St (Clinton St to Grand St), South side",
+    "code": "Wed 3 PM to 4 PM",
+    "layer": "Fri 3 PM to 4 PM"
+   },
+   {
+    "id": "373",
+    "where": "9th St (Clinton St to Grand St), North side",
+    "code": "Fri 3 PM to 4 PM",
+    "layer": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "375",
+    "where": "9th St (Willow Ave to Clinton St), South side",
+    "code": "Wed 3 PM to 4 PM",
+    "layer": "Fri 3 PM to 4 PM"
+   },
+   {
+    "id": "375",
+    "where": "9th St (Willow Ave to Clinton St), North side",
+    "code": "Fri 3 PM to 4 PM",
+    "layer": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "413",
+    "where": "Grand St (10th St to 11th St), West side",
+    "code": "Wed 2 PM to 3 PM, Fri 1 PM to 2 PM",
+    "layer": "Wed 2 PM to 3 PM"
+   },
+   {
+    "id": "413",
+    "where": "Grand St (10th St to 11th St), East side",
+    "code": "Thu 1 PM to 2 PM, Thu 2 PM to 3 PM",
+    "layer": "Thu 2 PM to 3 PM"
+   }
+  ],
+  "onlyInCode": [
+   {
+    "id": "23",
+    "where": "Harrison St (6th St to end), East side",
+    "code": "Mon 3 PM to 4 PM"
+   },
+   {
+    "id": "51",
+    "where": "2nd St (Harrison St to Marshall St), South side",
+    "code": "Tue 2 PM to 3 PM"
+   },
+   {
+    "id": "71",
+    "where": "15th St (Hudson St to Washington St), North side",
+    "code": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "77",
+    "where": "Newark St (Grove St to Monroe St), North side",
+    "code": "Mon 1 PM to 2 PM"
+   },
+   {
+    "id": "153",
+    "where": "Sinatra Dr (Newark St to 1st St), West side",
+    "code": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "154",
+    "where": "Sinatra Dr (1st St to 2nd St), West side",
+    "code": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "217",
+    "where": "Sinatra Dr (2nd St to 3rd St), West side",
+    "code": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "218",
+    "where": "Sinatra Dr (3rd St to 4th St), West side",
+    "code": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "387",
+    "where": "9th St (Stanley Dr to Castle Point Ter), South side",
+    "code": "Fri 1 PM to 2 PM"
+   },
+   {
+    "id": "387",
+    "where": "9th St (Stanley Dr to Castle Point Ter), North side",
+    "code": "Wed 1 PM to 2 PM"
+   },
+   {
+    "id": "432",
+    "where": "12th St (Sinatra Dr N to McFeeley Ln), South side",
+    "code": "Wed 2 PM to 3 PM"
+   },
+   {
+    "id": "434",
+    "where": "12th St (McFeeley Ln to Hudson St), South side",
+    "code": "Wed 2 PM to 3 PM"
+   },
+   {
+    "id": "480",
+    "where": "14th St (Hudson St to McFeeley Ln), North side",
+    "code": "Wed 8 AM to 9 AM"
+   },
+   {
+    "id": "480",
+    "where": "14th St (Hudson St to McFeeley Ln), South side",
+    "code": "Mon 8 AM to 9 AM"
+   },
+   {
+    "id": "506",
+    "where": "15th St (Garden St to Park Ave), North side",
+    "code": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "507",
+    "where": "15th St (Bloomfield St to Garden St), North side",
+    "code": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "508",
+    "where": "15th St (Washington St to Bloomfield St), North side",
+    "code": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "509",
+    "where": "15th St (McFeeley Ln to Hudson St), North side",
+    "code": "Wed 3 PM to 4 PM"
+   },
+   {
+    "id": "521",
+    "where": "14th St (McFeeley Ln to Sinatra Dr N), North side",
+    "code": "Wed 8 AM to 9 AM"
+   },
+   {
+    "id": "521",
+    "where": "14th St (McFeeley Ln to Sinatra Dr N), South side",
+    "code": "Mon 8 AM to 9 AM"
+   }
+  ],
+  "onlyInLayer": [
+   {
+    "id": "18",
+    "where": "Sinatra Dr (5th St to Sinatra Dr N), West side",
+    "layer": "Wed 8 AM to 9 AM"
+   },
+   {
+    "id": "153",
+    "where": "Sinatra Dr (Newark St to 1st St), East side",
+    "layer": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "154",
+    "where": "Sinatra Dr (1st St to 2nd St), East side",
+    "layer": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "217",
+    "where": "Sinatra Dr (2nd St to 3rd St), East side",
+    "layer": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "218",
+    "where": "Sinatra Dr (3rd St to 4th St), East side",
+    "layer": "Mon 10 AM to 11 AM"
+   },
+   {
+    "id": "275",
+    "where": "Sinatra Dr (4th St to end), West side",
+    "layer": "Wed 8 AM to 9 AM"
+   },
+   {
+    "id": "276",
+    "where": "Sinatra Dr (end to 5th St), West side",
+    "layer": "Wed 8 AM to 9 AM"
+   },
+   {
+    "id": "277",
+    "where": "6th St (Wittpen Walk to River St), North side",
+    "layer": "Wed 11 AM to 12 PM"
+   },
+   {
+    "id": "389",
+    "where": "Sinatra Dr (Sinatra Dr N to Hudson St), West side",
+    "layer": "Wed 8 AM to 9 AM"
+   }
+  ]
+ },
+ "pageVsCode": {
+  "pageRows": 121,
+  "codeRows": 118,
+  "onlyOnPage": [
+   {
+    "street": "8th St",
+    "side": "N",
+    "when": "Wednesday - 1 pm to 2 pm",
+    "location": "East boundary to Willow Ave.",
+    "sameHoursInCode": false
+   },
+   {
+    "street": "8th St",
+    "side": "S",
+    "when": "Friday - 1 pm to 2 pm",
+    "location": "East boundary to Willow Ave.",
+    "sameHoursInCode": false
+   },
+   {
+    "street": "14th St",
+    "side": "S",
+    "when": "Monday - 8 am to 9 am",
+    "location": "Willow Ave. to Hudson St.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "14th St",
+    "side": "N",
+    "when": "Wednesday - 8 am to 9 am",
+    "location": "Hudson St. to Willow Ave.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "Marshall St",
+    "side": "W",
+    "when": "Thursday - 2 pm to 3 pm",
+    "location": "First St. to Second St.",
+    "sameHoursInCode": false
+   },
+   {
+    "street": "Marshall St",
+    "side": "E",
+    "when": "Monday- 2pm to 3pm",
+    "location": "First St. to Second St.",
+    "sameHoursInCode": false
+   },
+   {
+    "street": "Sinatra Dr",
+    "side": "W",
+    "when": "Wednesday 8 am to 9 am",
+    "location": "Sixth St. to Fifth St.",
+    "sameHoursInCode": false
+   },
+   {
+    "street": "Sinatra Dr",
+    "side": "E",
+    "when": "Monday - 10 am to 11 am",
+    "location": "Fifth St. to Eleventh St.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "Sinatra Dr",
+    "side": "W",
+    "when": "Monday - 10 am to 11 am",
+    "location": "First St. to Fourth St.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "6th St",
+    "side": "N",
+    "when": "Wednesday - 11 am to 12 noon",
+    "location": "Willow Ave. to east boundary",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "12th St",
+    "side": "S",
+    "when": "Wednesday - 2 pm to 3 pm",
+    "location": "Willow Ave. to Hudson St.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "Vezzetti Way",
+    "side": "S",
+    "when": "Monday - 8 am to 9 am",
+    "location": "Henderson St. to Washington St.",
+    "sameHoursInCode": false
+   },
+   {
+    "street": "Vezzetti Way",
+    "side": "N",
+    "when": "Tuesday - 8 am to 9 am",
+    "location": "Henderson St. to Washington St.",
+    "sameHoursInCode": false
+   },
+   {
+    "street": "Washington St",
+    "side": "E",
+    "when": "Monday through Friday - 8 am to 9 am",
+    "location": "Observer Hwy. to Seventh St.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "Washington St",
+    "side": "W",
+    "when": "Monday through Friday - 9 am to 10 am",
+    "location": "Eighth St. to Fifteenth St.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "Washington St",
+    "side": "E",
+    "when": "Monday-Friday - 8 am to 9 am",
+    "location": "Eighth St. to Fifteenth St.",
+    "sameHoursInCode": true
+   },
+   {
+    "street": "Washington St",
+    "side": "W",
+    "when": "Monday through Friday - 8 am to 9 am",
+    "location": "Observer Hwy. to Eighth St.",
+    "sameHoursInCode": true
+   }
+  ],
+  "onlyInCode": [
+   {
+    "key": "Eighth Street|South|East boundary to Willow Avenue",
+    "sameHoursOnPage": false
+   },
+   {
+    "key": "Eighth Street|North|East boundary to Willow Avenue",
+    "sameHoursOnPage": false
+   },
+   {
+    "key": "Fifteenth Street|North|Sinatra Drive to Park Avenue",
+    "sameHoursOnPage": false,
+    "note": "Added 11-5-2020 by Ord. No. B-308"
+   },
+   {
+    "key": "Fourteenth Street|North|Sinatra Drive to Willow Avenue",
+    "sameHoursOnPage": true,
+    "note": "Amended 11-5-2020 by Ord. No. B-308"
+   },
+   {
+    "key": "Fourteenth Street|South|Willow Avenue to Sinatra Drive",
+    "sameHoursOnPage": true,
+    "note": "Amended 11-5-2020 by Ord. No. B-308"
+   },
+   {
+    "key": "Marshall Street|Both|First Street to Second Street",
+    "sameHoursOnPage": false
+   },
+   {
+    "key": "Sinatra Drive|East|Fourth Street to Eleventh Street",
+    "sameHoursOnPage": true,
+    "note": "Added 11-6-2002 by Ord. No. DR-70; amended 10-27-2020 by Ord. No. B-292"
+   },
+   {
+    "key": "Sinatra Drive|West|Newark Street to Fourth Street",
+    "sameHoursOnPage": true,
+    "note": "Added 11-6-2002 by Ord. No. DR-70; amended 10-27-2020 by Ord. No. B-292"
+   },
+   {
+    "key": "Sixth Street|North|River Terrace to Willow Avenue",
+    "sameHoursOnPage": true,
+    "note": "Amended 6-21-2017 by Ord. No. Z-504"
+   },
+   {
+    "key": "Twelfth Street|South|Willow Avenue to Sinatra Drive North",
+    "sameHoursOnPage": true,
+    "note": "Amended 10-20-2021 by Ord. No. B-399"
+   },
+   {
+    "key": "Washington Street|East|Observer Highway to Seventh Street, Eighth Street to north boundary",
+    "sameHoursOnPage": true,
+    "note": "Amended 11-6-2002 by Ord. No. DR-70; 5-20-2015 by Ord. No. Z-354; 2-6-2019 by Ord. No. B-105"
+   },
+   {
+    "key": "Washington Street|West|Between Newark Street and Seventh Street",
+    "sameHoursOnPage": true,
+    "note": "Added 2-4-1998 by Ord. No. R-289; amended 5-20-2015 by Ord. No. Z-354"
+   },
+   {
+    "key": "Washington Street|West|Southerly curbline of Fifteenth Street to the northerly curbline of Eight Street",
+    "sameHoursOnPage": true,
+    "note": "Amended 5-20-2015 by Ord. No. Z-354"
+   },
+   {
+    "key": "Washington Street|West|Southerly curbline of Eight Street to the southerly boundary",
+    "sameHoursOnPage": true,
+    "note": "Amended 5-20-2015 by Ord. No. Z-354"
+   }
+  ]
+ },
+ "names": {
+  "Marin Blvd": "shown as Henderson St (the Code's name)",
+  "River St north of 5th St": "shown as River Ter (the Code's River Terrace)",
+  "FID 524": "no name in the layer; Jefferson St by its ends"
+ },
+ "season": "All year (no season in the Code).",
+ "holidays": {
+  "source": "https://hobokennj.gov/holiday-schedule",
+  "note": "2026 from the City's list; 2027 derived by the same rule; the 2027 Floating Holiday is not known."
+ },
+ "fine": {
+  "amount": "$50",
+  "source": "https://ecode360.com/15237075",
+  "section": "§ 190-44A, § 190-28 Alternate side street parking (amended 4-22-2026 by Ord. No. J-28)"
+ },
+ "tow": "§ 190-44B: towing where a section allows it or a Tow Away Zone sign is posted; § 190-28 does not allow it by itself.",
+ "checks": {
+  "tickets": "No cross check: Hoboken publishes no parking citations with time and place."
+ }
+}

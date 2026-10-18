@@ -77,6 +77,98 @@
       "destination": "/boston/notes.html"
     },
     {
+      "source": "/san-diego",
+      "destination": "/san-diego.html"
+    },
+    {
+      "source": "/saint-paul",
+      "destination": "/saint-paul.html"
+    },
+    {
+      "source": "/oakland",
+      "destination": "/oakland.html"
+    },
+    {
+      "source": "/norfolk",
+      "destination": "/norfolk.html"
+    },
+    {
+      "source": "/chicago",
+      "destination": "/chicago.html"
+    },
+    {
+      "source": "/new-york",
+      "destination": "/new-york.html"
+    },
+    {
+      "source": "/sacramento",
+      "destination": "/sacramento.html"
+    },
+    {
+      "source": "/philadelphia",
+      "destination": "/philadelphia.html"
+    },
+    {
+      "source": "/pittsburgh",
+      "destination": "/pittsburgh.html"
+    },
+    {
+      "source": "/hoboken",
+      "destination": "/hoboken.html"
+    },
+    {
+      "source": "/washington-dc",
+      "destination": "/washington-dc.html"
+    },
+    {
+      "source": "/madison",
+      "destination": "/madison.html"
+    },
+    {
+      "source": "/denver",
+      "destination": "/denver.html"
+    },
+    {
+      "source": "/paterson",
+      "destination": "/paterson.html"
+    },
+    {
+      "source": "/riverside",
+      "destination": "/riverside.html"
+    },
+    {
+      "source": "/santa-monica",
+      "destination": "/santa-monica.html"
+    },
+    {
+      "source": "/glendale",
+      "destination": "/glendale.html"
+    },
+    {
+      "source": "/san-jose",
+      "destination": "/san-jose.html"
+    },
+    {
+      "source": "/los-angeles",
+      "destination": "/los-angeles.html"
+    },
+    {
+      "source": "/la-county",
+      "destination": "/la-county.html"
+    },
+    {
+      "source": "/montreal",
+      "destination": "/montreal.html"
+    },
+    {
+      "source": "/berkeley",
+      "destination": "/berkeley.html"
+    },
+    {
+      "source": "/somerville",
+      "destination": "/somerville.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },

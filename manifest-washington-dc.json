@@ -1,0 +1,29 @@
+{
+  "name": "CURB Washington, DC (preview)",
+  "short_name": "CURB Washing",
+  "description": "Washington, DC street sweeping, block by block. A preview on the City's open data.",
+  "start_url": "/washington-dc",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F2ECDF",
+  "theme_color": "#C1121F",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/washington-dc"
+}

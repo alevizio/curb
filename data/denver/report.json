@@ -1,0 +1,240 @@
+{
+ "generated": "2026-10-18T18:52:42.377Z",
+ "hours": {
+  "day": "8 AM to 5 PM",
+  "noon": "8 AM to noon where the side's sign says so",
+  "night": "as each overnight sign says (2 to 6 AM, a few 2 to 8 AM)",
+  "source": "the City's sign inventory (no City page states hours)"
+ },
+ "postedAreas": [
+  "111111Y0",
+  "121111Y0",
+  "131111Y0",
+  "211111Y1",
+  "211111Y2",
+  "211111Y3",
+  "221111Y1",
+  "221111Y2",
+  "221111Y3",
+  "221111Y4",
+  "231111Y0",
+  "241111Y1",
+  "241111Y2",
+  "331111Y0",
+  "341111Y0",
+  "411111Y3",
+  "411111Y4",
+  "421111Y0",
+  "541111Y0"
+ ],
+ "segments": 30706,
+ "inPostedArea": 12064,
+ "codes": {
+  "10": 130,
+  "13": 1294,
+  "14": 1306,
+  "15": 986,
+  "16": 1023,
+  "20": 456,
+  "23": 1445,
+  "24": 1446,
+  "25": 1545,
+  "26": 1533,
+  "30": 118,
+  "33": 1635,
+  "34": 1636,
+  "35": 1666,
+  "36": 1606,
+  "40": 189,
+  "43": 1153,
+  "44": 1165,
+  "45": 1143,
+  "46": 1162,
+  "empty": 115,
+  "N": 1323,
+  "2X": 22,
+  "NDM": 31
+ },
+ "sides": {
+  "posted": 24128,
+  "set": 21744,
+  "weekOnly": 893,
+  "night": 1323,
+  "notCityStreet": 31,
+  "other": 137
+ },
+ "weekDiffersFromArea": 258,
+ "unposted": {
+  "segments": 12154,
+  "withSetDay": 97
+ },
+ "signs": {
+  "sweeping": 41586,
+  "retired": 0,
+  "byNearestStreet": 6479,
+  "noSegment": 22,
+  "onCenterline": 68,
+  "day": 40026,
+  "night": 1002,
+  "nightFixedPM": 10,
+  "nightUnread": 5
+ },
+ "check": {
+  "daySignsOnCodedSide": 39558,
+  "agree": 37180,
+  "otherSide": 1007,
+  "differ": 1371,
+  "differExamples": [
+   {
+    "masterid": 14762,
+    "street": "E 8th Ave",
+    "side": "R",
+    "code": "36",
+    "sign": "26"
+   },
+   {
+    "masterid": 30972,
+    "street": "E Cedar Ave",
+    "side": "L",
+    "code": "13",
+    "sign": "15"
+   },
+   {
+    "masterid": 30051,
+    "street": "S Milwaukee St",
+    "side": "L",
+    "code": "13",
+    "sign": "15"
+   },
+   {
+    "masterid": 2645,
+    "street": "N High St",
+    "side": "L",
+    "code": "23",
+    "sign": "26"
+   },
+   {
+    "masterid": 3100,
+    "street": "W 25th Ave",
+    "side": "R",
+    "code": "36",
+    "sign": "46"
+   },
+   {
+    "masterid": 1433,
+    "street": "W 40th Ave",
+    "side": "R",
+    "code": "45",
+    "sign": "43"
+   },
+   {
+    "masterid": 2728,
+    "street": "E Neil Pl",
+    "side": "R",
+    "code": "25",
+    "sign": "15"
+   },
+   {
+    "masterid": 2728,
+    "street": "E Neil Pl",
+    "side": "R",
+    "code": "25",
+    "sign": "15"
+   },
+   {
+    "masterid": 2812,
+    "street": "Central St",
+    "side": "R",
+    "code": "33",
+    "sign": "36"
+   },
+   {
+    "masterid": 2812,
+    "street": "Central St",
+    "side": "R",
+    "code": "33",
+    "sign": "36"
+   }
+  ],
+  "shareAgree": "94.0%"
+ },
+ "noon": {
+  "sides": 12,
+  "conflicts": 0
+ },
+ "night": {
+  "sides": 445,
+  "blocks": 288,
+  "majoritySides": 31,
+  "tiedSides": 19,
+  "onNightCodedSides": 334,
+  "onDayCodedSides": 104
+ },
+ "byNeighborhood": {
+  "Villa Park": 212,
+  "South Park Hill": 461,
+  "Platt Park": 209,
+  "Montclair": 372,
+  "Skyland": 202,
+  "North Park Hill": 452,
+  "Northeast Park Hill": 261,
+  "Berkeley": 339,
+  "Elyria Swansea": 357,
+  "Mar Lee": 371,
+  "Washington Park West": 239,
+  "Chaffee Park": 147,
+  "Ruby Hill": 272,
+  "Hale": 281,
+  "Belcaro": 37,
+  "Highland": 296,
+  "West Highland": 318,
+  "Sloan Lake": 335,
+  "Congress Park": 283,
+  "Five Points": 407,
+  "Whittier": 190,
+  "Sunnyside": 422,
+  "Cole": 164,
+  "Barnum West": 204,
+  "Valverde": 115,
+  "Regis": 106,
+  "College View - South Platte": 50,
+  "(none)": 37,
+  "Jefferson Park": 84,
+  "North Capitol Hill": 108,
+  "Country Club": 169,
+  "Clayton": 206,
+  "Washington Park": 81,
+  "West Colfax": 240,
+  "Capitol Hill": 167,
+  "Athmar Park": 323,
+  "City Park": 78,
+  "Westwood": 379,
+  "Baker": 145,
+  "East Colfax": 263,
+  "Cory - Merrill": 165,
+  "Overland": 90,
+  "University": 78,
+  "Speer": 207,
+  "Cherry Creek": 184,
+  "Hilltop": 15,
+  "Harvey Park": 57,
+  "Lowry Field": 13,
+  "Rosedale": 106,
+  "Sun Valley": 29,
+  "Barnum": 188,
+  "Lincoln Park": 98,
+  "CBD": 62,
+  "Union Station": 78,
+  "Central Park": 26,
+  "Cheesman Park": 92,
+  "Virginia Village": 1,
+  "City Park West": 154,
+  "Globeville": 123
+ },
+ "output": {
+  "blocks": 11148,
+  "blockSides": 22085,
+  "rules": 22545,
+  "bytes": 2863351
+ }
+}

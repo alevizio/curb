@@ -1,0 +1,686 @@
+{
+ "generated": "2026-10-18T18:39:53.390Z",
+ "season": "All year (monthsMask 0): the signs name no season. Sweeping runs February to October and leaf collection November to January, both on the same weekday, and weekly blocks also have weekly garbage pickup. Unverified: whether first week of the month signs are enforced November to January.",
+ "holidays": "Not suspended (flags 1): the City says garbage, organics and recycling collection \"will occur on holidays\", leaf crews \"work rain or shine, including holidays\", and meters and time limits are enforced \"7 days per week, including holidays\". Unverified for street sweeping itself.",
+ "input": {
+  "parkingPoints": 45738,
+  "withSweepingDay": 7497,
+  "byDay": [
+   [
+    "MON",
+    1995
+   ],
+   [
+    "TUES",
+    1939
+   ],
+   [
+    "WED",
+    1839
+   ],
+   [
+    "THUR",
+    1693
+   ],
+   [
+    "1ST WED",
+    15
+   ],
+   [
+    "1ST THUR",
+    14
+   ],
+   [
+    "1ST TUES",
+    2
+   ]
+  ],
+  "byHours": [
+   [
+    "8 am - 12 pm",
+    7417
+   ],
+   [
+    "8 am - 11 am",
+    70
+   ],
+   [
+    "null - null",
+    5
+   ],
+   [
+    "8 am - 10 am",
+    4
+   ],
+   [
+    "12 pm - null",
+    1
+   ]
+  ],
+  "centerlines": 3083,
+  "inventoryFaces": 1588
+ },
+ "snapping": {
+  "placed": 7497,
+  "noStreet": 0,
+  "noStreetNames": [],
+  "tooFar": 0,
+  "tooFarNames": [],
+  "placedOnAnotherName": [
+   [
+    "N D ST → D ST",
+    10
+   ]
+  ],
+  "medianMeters": 6.1,
+  "p95Meters": 7.9,
+  "parity": {
+   "agree": 6780,
+   "disagree": 0,
+   "unknown": 717,
+   "note": "The side each point lands on, against its EVENODD and the County address range of that side."
+  }
+ },
+ "output": {
+  "blocks": 569,
+  "sides": 1014,
+  "rules": 1014,
+  "weekly": 733,
+  "monthly": 281,
+  "bothSides": 445,
+  "oneSide": 124,
+  "byDay": [
+   [
+    "Thu weekly 8-12",
+    242
+   ],
+   [
+    "Wed weekly 8-12",
+    215
+   ],
+   [
+    "Mon weekly 8-12",
+    138
+   ],
+   [
+    "Tue weekly 8-12",
+    131
+   ],
+   [
+    "Wed 1st week 8-12",
+    91
+   ],
+   [
+    "Thu 1st week 8-12",
+    73
+   ],
+   [
+    "Mon 1st week 8-12",
+    62
+   ],
+   [
+    "Tue 1st week 8-12",
+    53
+   ],
+   [
+    "Tue weekly 8-11",
+    2
+   ],
+   [
+    "Mon weekly 8-11",
+    2
+   ],
+   [
+    "Wed weekly 8-11",
+    2
+   ],
+   [
+    "Thu 1st week 8-10",
+    1
+   ],
+   [
+    "Thu weekly 8-11",
+    1
+   ],
+   [
+    "Thu 1st week 8-11",
+    1
+   ]
+  ]
+ },
+ "weeklyOrMonthly": {
+  "method": "The 2018 sign inventory face (same service day) under most of the side's points, within 25 m; else the inventory record with the same County segment id and day; a \"1ST\" day in the parking data means monthly; no record means weekly (the stricter reading).",
+  "byFace": 1010,
+  "byId": 0,
+  "none": 4,
+  "weekly": 733,
+  "monthly": 281,
+  "assumedWeekly": 4,
+  "faceIdDiffers": 54
+ },
+ "conflicts": {
+  "note": "Block sides whose points give more than one day or more than one window: the day and window most points give are kept (corner spaces often carry the cross street's day).",
+  "count": 29,
+  "list": [
+   {
+    "c": "20900",
+    "s": "10th St",
+    "side": "L",
+    "points": 6,
+    "kept": "Thu 8-12 (4)",
+    "others": "Tue (2)",
+    "windows": 1
+   },
+   {
+    "c": "21163",
+    "s": "13th St",
+    "side": "L",
+    "points": 7,
+    "kept": "Thu 8-12 (7)",
+    "others": null,
+    "windows": 2
+   },
+   {
+    "c": "20610",
+    "s": "D St",
+    "side": "R",
+    "points": 10,
+    "kept": "Mon 8-12 (9)",
+    "others": "Wed (1)",
+    "windows": 1
+   },
+   {
+    "c": "22380",
+    "s": "Capitol Ave",
+    "side": "R",
+    "points": 10,
+    "kept": "Mon 8-11 (10)",
+    "others": null,
+    "windows": 2
+   },
+   {
+    "c": "21304",
+    "s": "G St",
+    "side": "L",
+    "points": 14,
+    "kept": "Tue 8-12 (13)",
+    "others": "Thu (1)",
+    "windows": 1
+   },
+   {
+    "c": "78649",
+    "s": "G St",
+    "side": "L",
+    "points": 4,
+    "kept": "Tue 8-12 (3)",
+    "others": "Thu (1)",
+    "windows": 1
+   },
+   {
+    "c": "21853",
+    "s": "I St",
+    "side": "R",
+    "points": 12,
+    "kept": "Mon 8-12 (11)",
+    "others": "Wed (1)",
+    "windows": 1
+   },
+   {
+    "c": "22999",
+    "s": "P St",
+    "side": "R",
+    "points": 13,
+    "kept": "Mon 8-12 (12)",
+    "others": "Wed (1)",
+    "windows": 1
+   },
+   {
+    "c": "23357",
+    "s": "O St",
+    "side": "R",
+    "points": 13,
+    "kept": "Mon 8-12 (13)",
+    "others": null,
+    "windows": 2
+   },
+   {
+    "c": "22704",
+    "s": "O St",
+    "side": "R",
+    "points": 23,
+    "kept": "Mon 8-12 (21)",
+    "others": "Wed (2)",
+    "windows": 1
+   },
+   {
+    "c": "22974",
+    "s": "N St",
+    "side": "R",
+    "points": 14,
+    "kept": "Mon 8-12 (13)",
+    "others": "Wed (1)",
+    "windows": 1
+   },
+   {
+    "c": "23179",
+    "s": "P St",
+    "side": "R",
+    "points": 13,
+    "kept": "Mon 8-12 (12)",
+    "others": "Tue (1)",
+    "windows": 1
+   },
+   {
+    "c": "23368",
+    "s": "P St",
+    "side": "R",
+    "points": 12,
+    "kept": "Mon 8-12 (11)",
+    "others": "Wed (1)",
+    "windows": 1
+   },
+   {
+    "c": "23425",
+    "s": "P St",
+    "side": "R",
+    "points": 14,
+    "kept": "Mon 8-12 (13)",
+    "others": "Wed (1)",
+    "windows": 1
+   },
+   {
+    "c": "21365",
+    "s": "17th St",
+    "side": "R",
+    "points": 7,
+    "kept": "Wed 8-12 (6)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "20740",
+    "s": "15th St",
+    "side": "L",
+    "points": 6,
+    "kept": "Thu 8-12 (5)",
+    "others": "Tue (1)",
+    "windows": 1
+   },
+   {
+    "c": "91579",
+    "s": "14th St",
+    "side": "L",
+    "points": 2,
+    "kept": "Thu 8-12 (2)",
+    "others": null,
+    "windows": 2
+   },
+   {
+    "c": "20783",
+    "s": "21st St",
+    "side": "R",
+    "points": 3,
+    "kept": "Wed 8-12 (2)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "22479",
+    "s": "18th St",
+    "side": "R",
+    "points": 7,
+    "kept": "Wed 8-11 (7)",
+    "others": null,
+    "windows": 2
+   },
+   {
+    "c": "23335",
+    "s": "25th St",
+    "side": "R",
+    "points": 7,
+    "kept": "Wed 8-12 (6)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "23729",
+    "s": "25th St",
+    "side": "R",
+    "points": 6,
+    "kept": "Wed 8-12 (3)",
+    "others": "Mon (3)",
+    "windows": 1
+   },
+   {
+    "c": "23388",
+    "s": "26th St",
+    "side": "R",
+    "points": 5,
+    "kept": "Wed 8-12 (4)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "23601",
+    "s": "26th St",
+    "side": "R",
+    "points": 6,
+    "kept": "Wed 8-12 (5)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "22641",
+    "s": "24th St",
+    "side": "R",
+    "points": 7,
+    "kept": "Wed 8-12 (6)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "22748",
+    "s": "24th St",
+    "side": "R",
+    "points": 10,
+    "kept": "Wed 8-12 (8)",
+    "others": "Mon (2)",
+    "windows": 1
+   },
+   {
+    "c": "23263",
+    "s": "24th St",
+    "side": "R",
+    "points": 4,
+    "kept": "Wed 8-12 (3)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "23522",
+    "s": "28th St",
+    "side": "R",
+    "points": 6,
+    "kept": "Wed 8-12 (5)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "21866",
+    "s": "27th St",
+    "side": "R",
+    "points": 6,
+    "kept": "Wed 8-12 (5)",
+    "others": "Mon (1)",
+    "windows": 1
+   },
+   {
+    "c": "23656",
+    "s": "27th St",
+    "side": "R",
+    "points": 5,
+    "kept": "Wed 8-12 (4)",
+    "others": "Mon (1)",
+    "windows": 1
+   }
+  ]
+ },
+ "fewPoints": {
+  "note": "Block sides made from one or two parking points (a whole side drawn from one or two spaces): kept, listed to check.",
+  "count": 33,
+  "list": [
+   {
+    "c": "21226",
+    "s": "16th St",
+    "side": "L",
+    "points": 1,
+    "day": "Thu"
+   },
+   {
+    "c": "22427",
+    "s": "17th St",
+    "side": "L",
+    "points": 1,
+    "day": "Thu"
+   },
+   {
+    "c": "22501",
+    "s": "28th St",
+    "side": "L",
+    "points": 2,
+    "day": "Thu"
+   },
+   {
+    "c": "22257",
+    "s": "29th St",
+    "side": "R",
+    "points": 2,
+    "day": "Wed"
+   },
+   {
+    "c": "78636",
+    "s": "D St",
+    "side": "R",
+    "points": 2,
+    "day": "Mon"
+   },
+   {
+    "c": "91450",
+    "s": "D St",
+    "side": "R",
+    "points": 2,
+    "day": "Mon"
+   },
+   {
+    "c": "90940",
+    "s": "D St",
+    "side": "R",
+    "points": 2,
+    "day": "Mon"
+   },
+   {
+    "c": "20793",
+    "s": "F St",
+    "side": "R",
+    "points": 1,
+    "day": "Mon"
+   },
+   {
+    "c": "78651",
+    "s": "H St",
+    "side": "L",
+    "points": 2,
+    "day": "Tue"
+   },
+   {
+    "c": "21118",
+    "s": "I St",
+    "side": "L",
+    "points": 1,
+    "day": "Mon"
+   },
+   {
+    "c": "21164",
+    "s": "H St",
+    "side": "R",
+    "points": 1,
+    "day": "Mon"
+   },
+   {
+    "c": "21757",
+    "s": "J St",
+    "side": "L",
+    "points": 2,
+    "day": "Tue"
+   },
+   {
+    "c": "22402",
+    "s": "I St",
+    "side": "R",
+    "points": 1,
+    "day": "Mon"
+   },
+   {
+    "c": "22224",
+    "s": "L St",
+    "side": "R",
+    "points": 2,
+    "day": "Mon"
+   },
+   {
+    "c": "23160",
+    "s": "N St",
+    "side": "L",
+    "points": 2,
+    "day": "Tue"
+   },
+   {
+    "c": "78681",
+    "s": "N St",
+    "side": "L",
+    "points": 2,
+    "day": "Tue"
+   },
+   {
+    "c": "78681",
+    "s": "N St",
+    "side": "R",
+    "points": 2,
+    "day": "Mon"
+   },
+   {
+    "c": "88226",
+    "s": "N St",
+    "side": "L",
+    "points": 2,
+    "day": "Tue"
+   },
+   {
+    "c": "23576",
+    "s": "Q St",
+    "side": "R",
+    "points": 2,
+    "day": "Mon"
+   },
+   {
+    "c": "78724",
+    "s": "P St",
+    "side": "L",
+    "points": 2,
+    "day": "Tue"
+   },
+   {
+    "c": "23627",
+    "s": "P St",
+    "side": "R",
+    "points": 1,
+    "day": "Mon"
+   },
+   {
+    "c": "23235",
+    "s": "P St",
+    "side": "L",
+    "points": 2,
+    "day": "Tue"
+   },
+   {
+    "c": "24218",
+    "s": "S St",
+    "side": "R",
+    "points": 1,
+    "day": "Mon"
+   },
+   {
+    "c": "20468",
+    "s": "13th St",
+    "side": "L",
+    "points": 2,
+    "day": "Thu"
+   },
+   {
+    "c": "91579",
+    "s": "14th St",
+    "side": "R",
+    "points": 1,
+    "day": "Wed"
+   },
+   {
+    "c": "91579",
+    "s": "14th St",
+    "side": "L",
+    "points": 2,
+    "day": "Thu"
+   },
+   {
+    "c": "20729",
+    "s": "21st St",
+    "side": "R",
+    "points": 2,
+    "day": "Wed"
+   },
+   {
+    "c": "23058",
+    "s": "19th St",
+    "side": "L",
+    "points": 2,
+    "day": "Thu"
+   },
+   {
+    "c": "23994",
+    "s": "26th St",
+    "side": "L",
+    "points": 1,
+    "day": "Thu"
+   },
+   {
+    "c": "21343",
+    "s": "26th St",
+    "side": "R",
+    "points": 2,
+    "day": "Wed"
+   },
+   {
+    "c": "22147",
+    "s": "24th St",
+    "side": "L",
+    "points": 1,
+    "day": "Thu"
+   },
+   {
+    "c": "24015",
+    "s": "28th St",
+    "side": "R",
+    "points": 2,
+    "day": "Wed"
+   },
+   {
+    "c": "21721",
+    "s": "29th St",
+    "side": "R",
+    "points": 1,
+    "day": "Wed"
+   }
+  ]
+ },
+ "sideLabels": {
+  "note": "The label is the City's word for the day (Monday south, …) when the side's compass direction fits it, else the compass word.",
+  "misfits": 2,
+  "list": [
+   {
+    "c": "20880",
+    "s": "E St",
+    "side": "L",
+    "day": "South",
+    "compass": "North"
+   },
+   {
+    "c": "21118",
+    "s": "I St",
+    "side": "L",
+    "day": "South",
+    "compass": "North"
+   }
+  ]
+ },
+ "crossCheck": "None: the City publishes no parking citations (its yearly Citation Data layers are police traffic citations without a place)."
+}

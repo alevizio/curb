@@ -1,0 +1,346 @@
+{
+ "generated": "2026-10-18T18:31:02.190Z",
+ "inputs": {
+  "scheduleRows": 1072458,
+  "scheduleYears": {
+   "2026": 1072458
+  },
+  "scheduleUpdated": "2026-05-13",
+  "addresses": 77706,
+  "signedAddresses": 9546,
+  "signedRows": 114552,
+  "unsignedRows": 957906,
+  "dailyAddresses": 562,
+  "dailyRows": 146682,
+  "rowsWhoseDateIsNotTheirDescription": 0,
+  "centerlineSegments": 16067,
+  "planningDistricts": 87,
+  "streetCleaningTickets": 7465
+ },
+ "output": {
+  "blocks": 952,
+  "sides": 1473,
+  "rules": 1473,
+  "dateEntries": 17050,
+  "distinctDates": 149,
+  "sizeBytes": 502746
+ },
+ "placement": {
+  "signedAddressesPlaced": 9375,
+  "byAddressRange": 9357,
+  "byNearestBlockOfTheStreet": 18,
+  "rangeMatchesFartherThan60m": 222,
+  "sideFromNumbers": 9372,
+  "sideFromPositionOnly": 3,
+  "numbersAndPositionAgree": 9112,
+  "numbersAndPositionDisagree": 260,
+  "disagreeOnBlocksWithRangesOnTheWrongSide": 222,
+  "disagreeElsewhereNumbersKept": 38,
+  "allAddressPoints": {
+   "withASideFromNumbers": 77135,
+   "positionAgrees": 76483,
+   "share": 0.9915
+  },
+  "blocksWithRangesOnTheWrongSide": 10,
+  "signedAddressesOnThem": 222,
+  "rangesOnTheWrongSide": [
+   {
+    "c": "13701",
+    "s": "Nicholson St",
+    "l": "Saint Paul St - Whitaker Ln",
+    "pointsAgree": 0,
+    "pointsDisagree": 40,
+    "signedAddresses": 80
+   },
+   {
+    "c": "13782",
+    "s": "Nicholson St",
+    "l": "Smith St - Saint Paul St",
+    "pointsAgree": 0,
+    "pointsDisagree": 33,
+    "signedAddresses": 74
+   },
+   {
+    "c": "13522",
+    "s": "Nicholson St",
+    "l": "Whitaker Ln - Salter St",
+    "pointsAgree": 0,
+    "pointsDisagree": 24,
+    "signedAddresses": 38
+   },
+   {
+    "c": "18428",
+    "s": "Nicholson St",
+    "l": "Whitaker Ln - Salter St",
+    "pointsAgree": 0,
+    "pointsDisagree": 8,
+    "signedAddresses": 27
+   },
+   {
+    "c": "18972",
+    "s": "Mayflower Rd",
+    "l": "",
+    "pointsAgree": 0,
+    "pointsDisagree": 3,
+    "signedAddresses": 3
+   },
+   {
+    "c": "10472",
+    "s": "E Princess Anne Rd",
+    "l": "Darden St - Sigmon St",
+    "pointsAgree": 0,
+    "pointsDisagree": 18,
+    "signedAddresses": 0
+   },
+   {
+    "c": "14039",
+    "s": "Round Bay Cir",
+    "l": "Round Bay Rd",
+    "pointsAgree": 0,
+    "pointsDisagree": 4,
+    "signedAddresses": 0
+   },
+   {
+    "c": "18985",
+    "s": "River Shore Dr",
+    "l": "",
+    "pointsAgree": 0,
+    "pointsDisagree": 5,
+    "signedAddresses": 0
+   },
+   {
+    "c": "18986",
+    "s": "Rockbridge Ave",
+    "l": "",
+    "pointsAgree": 0,
+    "pointsDisagree": 3,
+    "signedAddresses": 0
+   },
+   {
+    "c": "18992",
+    "s": "Westmoreland Ave",
+    "l": "Bolling Ave",
+    "pointsAgree": 0,
+    "pointsDisagree": 7,
+    "signedAddresses": 0
+   }
+  ],
+  "otherDisagreements": [
+   "Chapel St (segment 15294): 11 points, 0 to 7 m off the line; the number's side kept",
+   "Wiley Dr (segment 16361): 8 points, 84 to 96 m off the line; the number's side kept",
+   "Conoga St (segment 17316): 6 points, 20 to 34 m off the line; the number's side kept",
+   "Arlington Ave (segment 18016): 5 points, 170 to 223 m off the line; the number's side kept",
+   "Waltham St (segment 16639): 1 point, 68 to 68 m off the line; the number's side kept",
+   "Mayflower Rd (segment 18971): 1 point, 785 to 785 m off the line; the number's side kept",
+   "38th St (segment 9471): 1 point, 50 to 50 m off the line; the number's side kept",
+   "Stockley Gardens (segment 12140): 1 point, 15 to 15 m off the line; the number's side kept",
+   "Greenway Ct (segment 12097): 1 point, 20 to 20 m off the line; the number's side kept",
+   "Duke St (segment 14637): 1 point, 17 to 17 m off the line; the number's side kept",
+   "Wolcott Ave (segment 6590): 1 point, 56 to 56 m off the line; the number's side kept",
+   "Charnwood Ct (segment 6695): 1 point, 15 to 15 m off the line; the number's side kept"
+  ],
+  "signedSides": 1473,
+  "sidesWithTwoPatterns": 8,
+  "twoPatternExamples": [
+   "Kimball Loop (segment 18148, L): Second Wednesday x1, Second Friday x3",
+   "Wiley Dr (segment 16361, R): Second Wednesday x8, Second Friday x24",
+   "Wiley Dr (segment 16361, L): Second Wednesday x16, Second Friday x8",
+   "Seay Ave (segment 15206, R): First Wednesday x7, First Thursday x3",
+   "Glenoak Dr (segment 6892, R): First Thursday x1, Second Thursday x3",
+   "Pierce St (segment 6941, R): First Thursday x1, Second Thursday x1",
+   "Pugh St (segment 6980, R): First Thursday x1, Second Thursday x5",
+   "Branch Rd (segment 6243, R): Fourth Thursday x1, Fourth Wednesday x1"
+  ],
+  "sidesWhoseSignedAddressesAllLieOver60m": 6,
+  "farSideExamples": [
+   "Tidewater Dr (segment 15772, R): 13 signed, the nearest 75 m from the line",
+   "Waltham St (segment 16639, R): 1 signed, the nearest 68 m from the line",
+   "Mayflower Rd (segment 18971, L): 1 signed, the nearest 785 m from the line",
+   "Llewellyn Ave (segment 9015, L): 2 signed, the nearest 71 m from the line",
+   "W Tazewell St (segment 15015, L): 1 signed, the nearest 66 m from the line",
+   "E Virginia Beach Blvd (segment 13561, R): 1 signed, the nearest 90 m from the line"
+  ],
+  "sidesMixingSignedAndUnsigned": 70,
+  "sidesWhereSignedAreTheMinority": 41,
+  "minorityExamples": [
+   "Colon Ave (segment 17218, L): 2 signed and 3 unsigned addresses",
+   "E Indian River Rd (segment 17073, R): 2 signed and 6 unsigned addresses",
+   "Colonial Ave (segment 10570, L): 1 signed and 2 unsigned addresses",
+   "Colley Ave (segment 9799, L): 1 signed and 5 unsigned addresses",
+   "Colonial Ave (segment 9503, L): 1 signed and 3 unsigned addresses",
+   "Newport Ave (segment 9519, L): 1 signed and 3 unsigned addresses",
+   "Granby St (segment 10859, R): 2 signed and 3 unsigned addresses",
+   "Colley Ave (segment 10344, R): 1 signed and 5 unsigned addresses",
+   "Colonial Ave (segment 9503, R): 1 signed and 5 unsigned addresses",
+   "Newport Ave (segment 9519, R): 1 signed and 3 unsigned addresses"
+  ]
+ },
+ "skipped": [
+  {
+   "why": "not signed: advisory signs or none, no ticket (signed_area = No), swept monthly",
+   "count": 67598,
+   "unit": "address points",
+   "blocksWithOnlyUnsignedAddresses": 8538,
+   "unsignedNotPlacedOnABlock": 53,
+   "examples": [
+    "most of the city: 87% of address points"
+   ]
+  },
+  {
+   "why": "downtown daily sweeping: every weekday, but signed_area = No on all of it, and the tickets show no enforcement there (4 street cleaning tickets in 27 months on downtown-only streets)",
+   "count": 562,
+   "unit": "address points",
+   "examples": [
+    "Granby St",
+    "Boush St",
+    "E Main St",
+    "Monticello Ave"
+   ]
+  },
+  {
+   "why": "signed address: no block of the street holds the number, nearest over 60 m",
+   "count": 140,
+   "unit": "address points",
+   "examples": [
+    "E Charlotte St (125)",
+    "Fenchurch St (14)",
+    "Delevan St (1)"
+   ]
+  },
+  {
+   "why": "signed address: street not in the centerline",
+   "count": 31,
+   "unit": "address points",
+   "examples": [
+    "Walke St (30)",
+    "E 31st St (1)"
+   ]
+  },
+  {
+   "why": "City holiday dates taken off signed sides (no sweeping on City holidays; a missed signed sweep is not made up)",
+   "count": 722,
+   "unit": "side dates",
+   "examples": [
+    "2026-01-01 New Year's Day: 235 sides",
+    "2026-06-19 Juneteenth: 148 sides",
+    "2026-11-11 Veterans Day: 251 sides",
+    "2026-11-26 Thanksgiving Day: 27 sides",
+    "2026-11-27 Day after Thanksgiving: 17 sides",
+    "2026-12-24 Christmas Eve: 27 sides",
+    "2026-12-25 Christmas Day: 17 sides"
+   ]
+  }
+ ],
+ "season": {
+  "yearRound": true,
+  "from": "2026-01-07",
+  "to": "2026-12-23",
+  "dataCovers": [
+   "2026"
+  ],
+  "note": "The City lists 2026 only (updated at the start of each year); 2027 dates are unknown until it publishes them."
+ },
+ "checks": {
+  "tickets": {
+   "what": "Street cleaning tickets, Jan 2022 to Mar 2024 (the City's citation table, street name only, no house number or point): their time of day, and whether their street and day (nth weekday) are in the signed schedule. They cannot be placed on a block or side.",
+   "total": 7465,
+   "byYear": {
+    "2022": 3896,
+    "2023": 2856,
+    "2024": 713
+   },
+   "byHour": {
+    "0": 1,
+    "1": 1,
+    "3": 1,
+    "7": 1,
+    "8": 366,
+    "9": 1414,
+    "10": 2243,
+    "11": 1899,
+    "12": 1099,
+    "13": 438,
+    "15": 1,
+    "20": 1
+   },
+   "byWeekday": {
+    "Wednesday": 3940,
+    "Thursday": 2514,
+    "Tuesday": 847,
+    "Friday": 163,
+    "Monday": 1
+   },
+   "firstInWindow": "08:00",
+   "lastInWindow": "13:52",
+   "outsideWindow": [
+    "00:04",
+    "01:30",
+    "03:55",
+    "07:56",
+    "15:26",
+    "20:41"
+   ],
+   "inWindow": 7459,
+   "inWindowShare": 0.9992,
+   "onAStreetWithSignedSweeping": 7124,
+   "onSignedStreetShare": 0.9543,
+   "sameDayAsTheSchedule": 6858,
+   "sameDayByYear": {
+    "2022": {
+     "tickets": 3751,
+     "sameDay": 3634
+    },
+    "2023": {
+     "tickets": 2731,
+     "sameDay": 2619
+    },
+    "2024": {
+     "tickets": 642,
+     "sameDay": 605
+    }
+   },
+   "sameDayShare": 0.9627,
+   "otherDay": 266,
+   "otherDayExamples": [
+    "Trice Terrace: ticketed on a First Thursday, schedule says First Wednesday (63)",
+    "Gatling Avenue: ticketed on a First Thursday, schedule says First Wednesday (51)",
+    "Core Avenue: ticketed on a First Thursday, schedule says First Wednesday (48)",
+    "Blow Street: ticketed on a First Thursday, schedule says First Wednesday (34)",
+    "Brooke Avenue: ticketed on a First Wednesday, schedule says First Thursday (23)",
+    "Montclair Avenue: ticketed on a Fourth Friday, schedule says Third Wednesday or Third Friday (11)",
+    "Woodrow Avenue: ticketed on a First Thursday, schedule says First Wednesday (6)",
+    "Washington Avenue: ticketed on a First Thursday, schedule says Third Wednesday or Third Friday (6)",
+    "Washington Avenue: ticketed on a First Wednesday, schedule says Third Wednesday or Third Friday (6)",
+    "Arlington Avenue: ticketed on a Fourth Friday, schedule says Third Wednesday or Third Friday (5)"
+   ],
+   "onDowntownDailyStreetsWithoutSignedSweeping": 4,
+   "onUnsignedOnlyStreets": 102,
+   "streetNotInTheSchedule": 235
+  }
+ },
+ "assumptions": [
+  "Hours: the City publishes none (they are on each sign). 8 AM to 2 PM is read from the tickets: 7459 of 7465 street cleaning tickets were written between 8:00 and 2:00 PM (the first at 08:00, the last at 13:52); the other 6 are scattered (00:04, 01:30, 03:55, 07:56, 15:26, 20:41). A sign with a longer window would be under-warned.",
+  "signed_area = Yes means regulatory (enforced NO PARKING) signs, per the dataset's field description (\"enforcement signs\"); advisory-signed and unsigned curbs are signed_area = No.",
+  "City holidays (City Code Sec. 2-48) stop all sweeping, signed areas included, and are not made up there: closure notices for Feb 16, May 25 and Sep 7 2026 say \"no ... street sweeping operations\", a 2020 City post says Christmas Eve is a City holiday and that areas with regulatory signs cannot be made up, and the sweeping page says a missed regulatory route resumes the next month.",
+  "Both sides of a block get their own dates from their own addresses; a side with addresses on two patterns keeps both (a driver who moves on every listed day is never ticketed).",
+  "A block side is shown when any signed address lands on it, even when most of its addresses are unsigned (counted under placement).",
+  "Tow: the City says regulatory signs carry \"fines and/or towing\", so every rule is marked towable and city.json says tow \"sometimes\"."
+ ],
+ "unverified": [
+  "The 8 AM to 2 PM window (no official page states hours).",
+  "That Parking writes no street cleaning tickets on City holidays that fall on a signed day (Veterans Day, Juneteenth, the day after Thanksgiving, Christmas Eve): sweeping is off, but the signs do not name holidays.",
+  "2027 Christmas: the City Code rule puts Christmas Day on Friday Dec 24, so the library table moves Christmas Eve to Thursday Dec 23; the City has not posted its 2027 dates.",
+  "Address points sit on parcels; where the centerline ranges are mixed or missing, the side comes from which side of the line the point lies on, and on the 10 blocks whose ranges sit on the wrong sides of the line the points decide.",
+  "Signed sides with fewer signed than unsigned addresses (see placement) are shown: the City marks those addresses signed, but some may sit just outside a signed area.",
+  "The ticket check is street level only: the citation table gives a street name, no number and no point, and covers Jan 2022 to Mar 2024 with gaps (it holds about 45,000 tickets in all)."
+ ],
+ "questionsForCity": [
+  "What hours do the regulatory street sweeping signs post? Are they the same everywhere (8 AM to 2 PM?)",
+  "Is street sweeping parking enforced on City holidays that fall on a signed day (Veterans Day Nov 11, the day after Thanksgiving, Christmas Eve)?",
+  "Can the Street Sweeping Schedule carry the posted hours and the side of the street, and list 2027 dates in December?",
+  "Walke St, E Charlotte St (800 to 1100 blocks) and Fenchurch St (500 block), 169 signed addresses near Resilience Dr, have no block in the Street Centerline layer: are they new streets of the St. Paul's area, and when will the layer have them?",
+  "Downtown is listed as swept daily with signed_area = No: is there any posted no-parking window downtown?",
+  "Trice Ter, Gatling Ave, Core Ave and Blow St were ticketed on first Thursdays in 2022 to 2024, but the 2026 schedule says first Wednesdays: did these move?",
+  "Could the parking citation table add the block number or a point, and data after March 2024?"
+ ]
+}

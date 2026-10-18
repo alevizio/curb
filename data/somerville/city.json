@@ -1,0 +1,79 @@
+{
+ "id": "somerville",
+ "name": "Somerville",
+ "region": "Massachusetts",
+ "tz": "America/New_York",
+ "center": [
+  42.3876,
+  -71.0995
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   42.3733,
+   -71.1346
+  ],
+  [
+   42.4174,
+   -71.0776
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-04-20": "Patriots' Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-04": "Independence Day",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-04-19": "Patriots' Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-19": "Juneteenth",
+  "2027-07-04": "Independence Day",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving",
+  "2027-12-25": "Christmas Day"
+ },
+ "holidaysSource": "https://www.somervillema.gov/calendar",
+ "holidayRule": "all",
+ "fine": "$50",
+ "tow": "yes",
+ "fineSource": "https://www.somervillema.gov/departments/sweeping",
+ "agency": "Somerville Department of Public Works",
+ "scheduleUrl": "https://www.somervillema.gov/departments/sweeping",
+ "sources": [
+  {
+   "name": "Street sweeping section pages (City of Somerville)",
+   "url": "https://www.somervillema.gov/departments/sweeping",
+   "license": "City of Somerville public web pages (no license stated)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "MassGIS Roads (NG911 road centerlines)",
+   "url": "https://services1.arcgis.com/hGdibHYSPO59RG1h/arcgis/rest/services/MassGIS_Roads_Hosted_Feature_Layer/FeatureServer",
+   "license": "MassGIS (Commonwealth of Massachusetts), public data",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "MassGIS Master Address Points",
+   "url": "https://arcgisserver.digital.mass.gov/arcgisserver/rest/services/AGOL/MassGIS_Master_Address_Points/FeatureServer",
+   "license": "MassGIS (Commonwealth of Massachusetts), public data",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "The odd side is swept on the 1st and 3rd of its weekday each month and the even side on the 2nd and 4th, 8 AM to noon, as the signs say; main streets and squares are also swept at night.",
+  "afterpass": "April 1 to December 31. $50 ticket, and the car can be towed. No sweeping on City holidays.",
+  "dataNotes": "Schedules come from the City's street sweeping pages, one per street side or stretch, placed on MassGIS street centerlines; the odd side of each block comes from MassGIS address points. The day sweeps match the City's 2025 sweeping contract, and the City's reminder tool at 13 addresses."
+ }
+}

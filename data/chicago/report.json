@@ -1,0 +1,776 @@
+{
+ "generated": "2026-10-18T19:13:25.991Z",
+ "inputs": {
+  "zones": 838,
+  "scheduleRows": 4134,
+  "centerlines": 56338,
+  "centerlinesWithGeometry": 56336,
+  "centerlinesMultiPart": 0,
+  "winterRoutes": 20,
+  "communityAreas": 77,
+  "centerlinesByClass": {
+   "1": 1869,
+   "2": 6265,
+   "3": 6959,
+   "4": 37831,
+   "5": 78,
+   "7": 150,
+   "9": 1157,
+   "99": 556,
+   "E": 1113,
+   "RIV": 351,
+   "S": 6,
+   "-": 1
+  }
+ },
+ "output": {
+  "blocks": 37699,
+  "sides": 75221,
+  "rules": 96581,
+  "dateEntries": 765383,
+  "sizeBytes": 19645423,
+  "sweptBlocks": 36187,
+  "winterBlocks": 1524,
+  "verticesIn": 272870,
+  "verticesOut": 95929
+ },
+ "placement": {
+  "residentialSegments": 37177,
+  "inside": 32442,
+  "boundary": 3314,
+  "edge": 366,
+  "cityLimit": 169,
+  "outside": 886,
+  "splitAlongBlock": 195,
+  "sidesInSectionWithoutDates": 216,
+  "boundaryExamples": [
+   {
+    "c": "100005",
+    "s": "N Greenview Ave",
+    "l": "W Birchwood Ave - W Howard St",
+    "L": "4905",
+    "R": "4906"
+   },
+   {
+    "c": "100033",
+    "s": "N Oakley Ave",
+    "l": "W Touhy Ave - W Chase Ave",
+    "L": "5004",
+    "R": "4902"
+   },
+   {
+    "c": "100038",
+    "s": "N Oakley Ave",
+    "l": "W Chase Ave - W Jarvis Ave",
+    "L": "5004",
+    "R": "4902"
+   },
+   {
+    "c": "100055",
+    "s": "N Oakley Ave",
+    "l": "W Jarvis Ave - W Birchwood Ave",
+    "L": "5004",
+    "R": "4902"
+   },
+   {
+    "c": "100056",
+    "s": "W Birchwood Ave",
+    "l": "N Oakley Ave - N Claremont Ave",
+    "L": "5004",
+    "R": "4902"
+   },
+   {
+    "c": "100057",
+    "s": "W Birchwood Ave",
+    "l": "N Claremont Ave - N Western Ave",
+    "L": "5004",
+    "R": "4902"
+   },
+   {
+    "c": "100065",
+    "s": "N Ridge Blvd",
+    "l": "N Rogers Ave - W Chase Ave",
+    "L": "4902",
+    "R": "4903"
+   },
+   {
+    "c": "100067",
+    "s": "N Ridge Blvd",
+    "l": "W Chase Ave - W Jarvis Ave",
+    "L": "4902",
+    "R": "4903"
+   }
+  ],
+  "edgeExamples": [
+   {
+    "c": "100429",
+    "s": "N Ravenswood Ave",
+    "l": "W Devon Ave - W Schreiber Ave",
+    "section": "4003"
+   },
+   {
+    "c": "100430",
+    "s": "N Ravenswood Ave",
+    "l": "W Arthur Ave - W Albion Ave",
+    "section": "4003"
+   },
+   {
+    "c": "100431",
+    "s": "N Ravenswood Ave",
+    "l": "W Albion Ave - W Wallen Ave",
+    "section": "4908"
+   },
+   {
+    "c": "100432",
+    "s": "N Ravenswood Ave",
+    "l": "W Wallen Ave - W North Shore Ave",
+    "section": "4908"
+   },
+   {
+    "c": "100433",
+    "s": "N Ravenswood Ave",
+    "l": "W North Shore Ave - W Columbia Ave",
+    "section": "4908"
+   },
+   {
+    "c": "100457",
+    "s": "W Arthur Ave",
+    "l": "N Oakley Ave - N Claremont Ave",
+    "section": "5010"
+   },
+   {
+    "c": "100502",
+    "s": "N Ridge Blvd",
+    "l": "W Loyola Ave - W Albion Ave",
+    "section": "4002"
+   },
+   {
+    "c": "100503",
+    "s": "N Ridge Blvd",
+    "l": "W Albion Ave",
+    "section": "4002"
+   }
+  ],
+  "method": "Residential centerlines (class 4, status open or under construction in 2016) only. Each side is looked up at three points 7 m off the line, at a quarter, half and three quarters of its length; the side takes the dates of every section they fall in (one, except where a section boundary crosses the block: splitAlongBlock, which get both). Moving the points to 5 or 10 m changes about 105 assignments (0.3%). inside = both sides in one section; boundary = the street is a section boundary and each side takes its own section's dates; edge = one side falls in no section but inside the city (rail embankments, channels, expressways, parks along the street) and takes the other side's section; cityLimit = the outer side is outside Chicago and is left out; outside = no section on either side (downtown, parks, the airports)."
+ },
+ "skipped": [
+  {
+   "why": "main street: centerline class 2 (arterial) or 3 (collector); these run on their own posted schedules (permanent signs), not the ward section dates",
+   "count": 13224,
+   "arterial": 6265,
+   "collector": 6959,
+   "examples": [
+    {
+     "c": "100004",
+     "s": "N Rogers Ave",
+     "l": "W Howard St"
+    },
+    {
+     "c": "100006",
+     "s": "W Howard St",
+     "l": "N Rogers Ave - N Bosworth Ave"
+    },
+    {
+     "c": "100007",
+     "s": "N Sheridan Rd",
+     "l": "W Birchwood Ave - W Howard St"
+    },
+    {
+     "c": "100008",
+     "s": "N Sheridan Rd",
+     "l": "W Howard St - N Rogers Ave"
+    },
+    {
+     "c": "100010",
+     "s": "W Howard St",
+     "l": "N Eastlake Ter - N Sheridan Rd"
+    }
+   ]
+  },
+  {
+   "why": "not a residential street: expressways (1), small downtown courts (5), lower level streets (7), ramps (9, and class 4 rows typed ER, XR or SR), unclassed (99), class E (undocumented: dead ends, connectors, campus and park drives), rivers, S",
+   "count": 5325,
+   "byClass": {
+    "1": 1869,
+    "5": 78,
+    "7": 150,
+    "9": 1157,
+    "99": 556,
+    "E": 1113,
+    "RIV": 351,
+    "S": 6,
+    "-": 1
+   },
+   "examples": [
+    {
+     "c": "100534",
+     "s": "N Winthrop Ave",
+     "l": "N Kenmore Ave - W Loyola Ave"
+    },
+    {
+     "c": "101736",
+     "s": "W Early Ave",
+     "l": "N Broadway - N Magnolia Ave"
+    },
+    {
+     "c": "104046",
+     "s": "N Lincoln Plz",
+     "l": "W Wisconsin St"
+    },
+    {
+     "c": "104334",
+     "s": "W Winnemac Ave",
+     "l": "N Damen Ave"
+    },
+    {
+     "c": "104335",
+     "s": "W Winnemac Ave",
+     "l": "N Leavitt St"
+    }
+   ]
+  },
+  {
+   "why": "residential class but private (P), vacated (V), closed (C) or no status",
+   "count": 557,
+   "examples": [
+    {
+     "c": "100535",
+     "s": "N Winthrop Ave",
+     "l": "W Sheridan Rd - N Kenmore Ave"
+    },
+    {
+     "c": "100577",
+     "s": "N Winthrop Ave",
+     "l": "N Kenmore Ave"
+    },
+    {
+     "c": "100578",
+     "s": "N Winthrop Ave",
+     "l": "N Kenmore Ave"
+    },
+    {
+     "c": "100579",
+     "s": "N Kenmore Ave",
+     "l": "W Sheridan Rd - N Winthrop Ave"
+    },
+    {
+     "c": "103843",
+     "s": "N Chalmers St",
+     "l": "W Belden Ave - W Chalmers Pl"
+    }
+   ]
+  },
+  {
+   "why": "residential class but no street name in the City's data (unnamed connectors, service roads and dead end stubs): a block needs a street to show",
+   "count": 53,
+   "examples": [
+    {
+     "c": "102665",
+     "l": "N Clarendon Ave - N Broadway"
+    },
+    {
+     "c": "113294",
+     "l": "N Normandy Ave - N Oak Park Ave"
+    },
+    {
+     "c": "114854",
+     "l": ""
+    },
+    {
+     "c": "114855",
+     "l": ""
+    },
+    {
+     "c": "114856",
+     "l": ""
+    },
+    {
+     "c": "114857",
+     "l": ""
+    }
+   ]
+  },
+  {
+   "why": "outside every sweeping section (the Loop and downtown, lakefront and park drives, the airports, industrial areas)",
+   "count": 886,
+   "examples": [
+    {
+     "c": "102192",
+     "s": "W Montrose Ave",
+     "l": "N Marine Dr"
+    },
+    {
+     "c": "102193",
+     "s": "W Montrose Ave",
+     "l": ""
+    },
+    {
+     "c": "102194",
+     "s": "W Montrose Ave",
+     "l": ""
+    },
+    {
+     "c": "102195",
+     "s": "W Wilson Dr",
+     "l": ""
+    },
+    {
+     "c": "102196",
+     "s": "W Wilson Dr",
+     "l": ""
+    },
+    {
+     "c": "102197",
+     "s": "W Wilson Dr",
+     "l": "N Marine Dr"
+    },
+    {
+     "c": "102390",
+     "s": "W Irving Park Dr",
+     "l": ""
+    },
+    {
+     "c": "102391",
+     "s": "W Irving Park Dr",
+     "l": ""
+    }
+   ]
+  },
+  {
+   "why": "in a section with no sweeping dates (34NA)",
+   "count": 104,
+   "examples": [
+    {
+     "c": "118779",
+     "s": "E Washington St",
+     "l": "N State St - N Holden Ct"
+    },
+    {
+     "c": "118782",
+     "s": "W Washington St",
+     "l": "N State St - N Dearborn St"
+    },
+    {
+     "c": "118783",
+     "s": "W Randolph St",
+     "l": "N State St - N Dearborn St"
+    },
+    {
+     "c": "118785",
+     "s": "E Lake St",
+     "l": "N Wabash Ave - N Garland Ct"
+    },
+    {
+     "c": "118786",
+     "s": "E Lake St",
+     "l": "N Garland Ct - N Michigan Ave"
+    }
+   ]
+  },
+  {
+   "why": "no geometry or no trans_id",
+   "count": 2,
+   "examples": []
+  }
+ ],
+ "season": {
+  "sweeping": {
+   "from": "2026-04-01",
+   "to": "2026-11-20"
+  },
+  "sweepingWindow": "9 AM to 2 PM, weekdays",
+  "winterBan": "every night 3 to 7 AM, December 1 to April 1 (April 1 mornings listed as dates: 2027-04-01, 2028-04-01)",
+  "nextYear": "The zones dataset is republished every spring under a new id (2025: utb4-q645, 2026: 2r7q-emq3); 2027 dates appear when the City publishes it."
+ },
+ "checks": {
+  "zonesVsTable": {
+   "sectionsInZones": 838,
+   "sectionsInTable": 837,
+   "tableOnly": [],
+   "differ": [
+    {
+     "section": "3905",
+     "zones": [
+      "2026-09-15"
+     ],
+     "table": [
+      "2026-09-17"
+     ]
+    }
+   ],
+   "note": "Where the two disagree a side gets the dates of both. The ward PDF agrees with the table on 3905 (September 16 and 17)."
+  },
+  "sectionsWithoutDates": [
+   "34NA"
+  ],
+  "blocksWithoutCrossStreets": [
+   {
+    "c": "137731",
+    "s": "E 130th St"
+   },
+   {
+    "c": "145825",
+    "s": "S Sherman Park W"
+   },
+   {
+    "c": "145826",
+    "s": "S Sherman Park E"
+   },
+   {
+    "c": "162913",
+    "s": "W Homer St"
+   }
+  ],
+  "datesNotInATwoDayPair": {
+   "sections": 20,
+   "examples": [
+    {
+     "section": "0204",
+     "dates": [
+      "2026-04-01",
+      "2026-11-10"
+     ]
+    },
+    {
+     "section": "0205",
+     "dates": [
+      "2026-04-01",
+      "2026-11-10"
+     ]
+    },
+    {
+     "section": "0503",
+     "dates": [
+      "2026-04-07",
+      "2026-04-10"
+     ]
+    },
+    {
+     "section": "0505",
+     "dates": [
+      "2026-06-09",
+      "2026-06-12"
+     ]
+    },
+    {
+     "section": "0506",
+     "dates": [
+      "2026-10-08",
+      "2026-10-14"
+     ]
+    },
+    {
+     "section": "0514",
+     "dates": [
+      "2026-07-07",
+      "2026-07-10",
+      "2026-08-26",
+      "2026-08-28"
+     ]
+    },
+    {
+     "section": "0518",
+     "dates": [
+      "2026-09-08",
+      "2026-09-11"
+     ]
+    },
+    {
+     "section": "1112",
+     "dates": [
+      "2026-10-13",
+      "2026-10-16"
+     ]
+    },
+    {
+     "section": "1207",
+     "dates": [
+      "2026-08-24",
+      "2026-08-28"
+     ]
+    },
+    {
+     "section": "2407",
+     "dates": [
+      "2026-08-24",
+      "2026-08-28"
+     ]
+    }
+   ],
+   "note": "Sections the City schedules weekly (Tuesday and Wednesday every week: 0204, 0205, 4205, 4308), on four days in a row, or with a lone day. Both sides get every date."
+  },
+  "workdaysWithNoSweeping": [
+   "2026-05-25",
+   "2026-06-19",
+   "2026-07-03",
+   "2026-09-07",
+   "2026-10-12",
+   "2026-11-11"
+  ],
+  "holidaysInSeason": [
+   "2026-05-25",
+   "2026-06-19",
+   "2026-07-03",
+   "2026-09-07",
+   "2026-10-12",
+   "2026-11-11"
+  ],
+  "noListedDateIsAHoliday": true,
+  "noListedDateOnAWeekend": true,
+  "winterRoutes": [
+   {
+    "street": "N KEDZIE AVE",
+    "from": "W NORTH AVE",
+    "to": "W 87TH ST",
+    "routeM": 19429,
+    "matchedM": 19447,
+    "byGeometryOnlyM": 0,
+    "segments": 168
+   },
+   {
+    "street": "S COTTAGE GROVE AVE",
+    "from": "E MIDWAY PLAISANCE",
+    "to": "E 103RD ST",
+    "routeM": 8986,
+    "matchedM": 8990,
+    "byGeometryOnlyM": 108,
+    "segments": 67
+   },
+   {
+    "street": "79TH ST",
+    "from": "S CICERO AVE",
+    "to": "S SOUTH SHORE DR",
+    "routeM": 20572,
+    "matchedM": 20540,
+    "byGeometryOnlyM": 0,
+    "segments": 233
+   },
+   {
+    "street": "E 103RD ST",
+    "from": "S TORRENCE AVE",
+    "to": "S STATE LINE RD",
+    "routeM": 2920,
+    "matchedM": 2909,
+    "byGeometryOnlyM": 2909,
+    "segments": 28
+   },
+   {
+    "street": "S TORRENCE AVE",
+    "from": "E 103RD ST",
+    "to": "E 106TH ST",
+    "routeM": 599,
+    "matchedM": 599,
+    "byGeometryOnlyM": 0,
+    "segments": 3
+   },
+   {
+    "street": "ARCHER AVE",
+    "from": "S STATE ST",
+    "to": "S HARLEM AVE",
+    "routeM": 16667,
+    "matchedM": 16645,
+    "byGeometryOnlyM": 0,
+    "segments": 186
+   },
+   {
+    "street": "N CLARK ST",
+    "from": "W DEVON AVE",
+    "to": "W HOWARD ST",
+    "routeM": 2420,
+    "matchedM": 2422,
+    "byGeometryOnlyM": 0,
+    "segments": 21
+   },
+   {
+    "street": "W MADISON ST",
+    "from": "AUSTIN BLVD",
+    "to": "DES PLAINES",
+    "routeM": 10837,
+    "matchedM": 10827,
+    "byGeometryOnlyM": 0,
+    "segments": 100
+   },
+   {
+    "street": "CENTRAL AVE",
+    "from": "W HARRISON ST",
+    "to": "W BRYN MAWR AVE",
+    "routeM": 12209,
+    "matchedM": 12266,
+    "byGeometryOnlyM": 0,
+    "segments": 108
+   },
+   {
+    "street": "W FOSTER AVE",
+    "from": "N CENTRAL",
+    "to": "N CLARK ST",
+    "routeM": 8329,
+    "matchedM": 8335,
+    "byGeometryOnlyM": 197,
+    "segments": 76
+   },
+   {
+    "street": "N KEDZIE AVE",
+    "from": "W MOFFAT ST",
+    "to": "N MILWAUKEE AVE",
+    "routeM": 1625,
+    "matchedM": 1626,
+    "byGeometryOnlyM": 870,
+    "segments": 21
+   },
+   {
+    "street": "S STATE ST",
+    "from": "CONGRESS PKWY",
+    "to": "CERMAK RD",
+    "routeM": 2529,
+    "matchedM": 2531,
+    "byGeometryOnlyM": 0,
+    "segments": 21
+   },
+   {
+    "street": "W GARFIELD BLVD",
+    "from": "S ELSWORTH DR",
+    "to": "S DR MARTIN LUTHER KING JR DR",
+    "routeM": 216,
+    "matchedM": 215,
+    "byGeometryOnlyM": 0,
+    "segments": 2
+   },
+   {
+    "street": "E CERMAK RD",
+    "from": "S STATE ST",
+    "to": "S DR MARTIN LUTHER KING DR",
+    "routeM": 696,
+    "matchedM": 695,
+    "byGeometryOnlyM": 0,
+    "segments": 8
+   },
+   {
+    "street": "E RAINEY DR",
+    "from": "S ELSWORTH DR",
+    "to": "S COTTAGE GROVE AVE",
+    "routeM": 824,
+    "matchedM": 823,
+    "byGeometryOnlyM": 536,
+    "segments": 6
+   },
+   {
+    "street": "W DIVISION ST",
+    "from": "N AUSTIN BLVD",
+    "to": "N LA SALLE DR",
+    "routeM": 11821,
+    "matchedM": 11815,
+    "byGeometryOnlyM": 0,
+    "segments": 115
+   },
+   {
+    "street": "N MILWAUKEE AVE",
+    "from": "W FOSTER AVE",
+    "to": "W KINZIE ST",
+    "routeM": 14150,
+    "matchedM": 14153,
+    "byGeometryOnlyM": 0,
+    "segments": 163
+   },
+   {
+    "street": "S DR MARTIN LUTHER KING JR DR",
+    "from": "E CERMAK RD",
+    "to": "E GARFIELD BLVD",
+    "routeM": 8845,
+    "matchedM": 8850,
+    "byGeometryOnlyM": 0,
+    "segments": 70
+   },
+   {
+    "street": "E MIDWAY PLAISANCE",
+    "from": "S COTTAGE GROVE AVE",
+    "to": "S DORCHESTER AVE",
+    "routeM": 2421,
+    "matchedM": 2415,
+    "byGeometryOnlyM": 0,
+    "segments": 12
+   },
+   {
+    "street": "103RD ST",
+    "from": "S TORRENCE AVE",
+    "to": "S KEDZIE AVE",
+    "routeM": 11782,
+    "matchedM": 11751,
+    "byGeometryOnlyM": 0,
+    "segments": 116
+   }
+  ],
+  "winterMatchedByGeometryOnly": [
+   {
+    "street": "N Lovejoy Ave",
+    "route": "W FOSTER AVE",
+    "segments": 1
+   },
+   {
+    "street": "N Kedzie Blvd",
+    "route": "N KEDZIE AVE",
+    "segments": 12
+   },
+   {
+    "street": "W Gettysburg St",
+    "route": "W FOSTER AVE",
+    "segments": 1
+   },
+   {
+    "street": "E 55th Dr",
+    "route": "E RAINEY DR",
+    "segments": 1
+   },
+   {
+    "street": "S Payne Dr",
+    "route": "E RAINEY DR",
+    "segments": 1
+   },
+   {
+    "street": "E Morgan Dr",
+    "route": "E RAINEY DR",
+    "segments": 2
+   },
+   {
+    "street": "E 106th St",
+    "route": "E 103RD ST",
+    "segments": 28
+   },
+   {
+    "street": "E 95th St",
+    "route": "S COTTAGE GROVE AVE",
+    "segments": 2
+   }
+  ],
+  "citations": "Chicago publishes no current parking citations (only the 1996 to 2018 records released under FOIA, via ProPublica), so there is no ticket cross-check."
+ },
+ "assumptions": [
+  "Both sides of a block get both days of each pair: the City says one side is swept on the first date and the other side on the second, without saying which.",
+  "Sweeping hours 9 AM to 2 PM, weekdays: the City's Sweeper Tracker page; the orange signs carry the hours.",
+  "Main streets (centerline class 2 arterial and 3 collector) are left out: the City says some streets have permanently posted signs (once a week or two days a month), and its own winter ban list calls class 3 streets (Milwaukee, Clark, Foster, Division) arterials.",
+  "Section boundaries follow street centerlines, so on a boundary street each side takes the dates of the section it faces.",
+  "A residential side outside every section but inside the city takes the other side's section (streets along rail lines, channels and parks).",
+  "Street sweeping is a ticket, not a tow (rule flags 0): the City's own words for street sweeping never mention towing. Its fine schedule lists \"9-64-040(b) Street Cleaning $60.00\", and its 2026 release says only \"Residents are reminded to check for the bright orange signs announcing temporary parking restrictions. These signs are posted two days prior to scheduled street sweeping events.\" News reports say a tow is possible; the City does not.",
+  "city.json tow is \"sometimes\": sweeping is ticket only, but the winter ban streets on the same map tow. The winter ban tows (flags 2) and runs on holidays (flags 1): \"Violators of the parking ban will be towed\" and it is \"enforced ... from 3 am to 7 am starting December 1st through April 1st, regardless of snow\" (the City's winter page; the 2025 release: \"in effect through April 1, 2026\"; the posted sign: \"NO PARKING 3AM-7AM DEC 1-APR 1\"), so the April 1 morning is in.",
+  "2027 holidays follow the City's 2026 list and its observed date rule (not posted yet).",
+  "Centerlines are the City's 2016 street network (last updated 2021-06-11); newer streets are missing."
+ ],
+ "unverified": [
+  "Which side is swept on the first day of each pair (the orange signs say).",
+  "The posted window: 9 AM to 2 PM is when the City says its sweepers run (\"On weekdays, from 9am to 2pm\", the Sweeper Tracker page); the hours printed on the orange signs are not on any City page.",
+  "Whether collector streets (class 3) inside a section are swept on the section dates or on their own schedule.",
+  "Whether boundary streets are swept side by side with each section, or wholly with one of them.",
+  "Whether street sweeping cars are ever towed.",
+  "The winter ban list (mcad-r2g5, 2021) matches the map the City's winter page links (2017), but the City says 107 miles and the 20 routes measure 98 miles."
+ ],
+ "questionsForCity": [
+  "Is there a list of the block sides swept on the first and on the second day of each pair, or a rule (for example north and east sides first)?",
+  "Are collector streets (such as Grand Ave, Addison St, Damen Ave) swept on their ward section's dates, or are they on the arterial program with permanent signs?",
+  "On a street that is the boundary of two sections, which section sweeps each side?",
+  "Can the streets with permanent street cleaning signs (once a week or two days a month) be published, with their days and hours?",
+  "Is the Winter Overnight Parking Restrictions dataset (2021) the current list of the 107 miles? It measures about 98 miles.",
+  "What hours do the orange street sweeping signs post: 9 AM to 2 PM everywhere?",
+  "Are cars towed for street sweeping, or only ticketed?",
+  "What does street class E mean in Street Center Lines? Its 1113 segments (dead ends, connectors, campus and park drives, a few ordinary looking blocks) are left out.",
+  "Section 3905 reads \"16,15\" for September in the 2026 zones; the table and the ward PDF say 16 and 17. Can the zones be corrected?"
+ ]
+}

@@ -1,0 +1,1993 @@
+{
+ "generated": "2026-10-18T19:01:20.605Z",
+ "inputs": {
+  "zones": 136,
+  "sweptZones": 92,
+  "noSweepZones": 44,
+  "countyStreetLines": 18911,
+  "privateCityCenterlines": 3689,
+  "neighborhoods": 28
+ },
+ "output": {
+  "blocks": 7669,
+  "sides": 15144,
+  "rules": 15144,
+  "sizeBytes": 2867798,
+  "zonesUsed": 85,
+  "zonesLeftOut": 7,
+  "blocksByNeighborhood": {
+   "Airport": 243,
+   "Alessandro Heights": 244,
+   "Arlanza": 502,
+   "Arlington": 242,
+   "Arlington Heights": 162,
+   "Arlington South": 216,
+   "Canyon Crest": 682,
+   "Casa Blanca": 167,
+   "Downtown": 233,
+   "Eastside": 1,
+   "Grand": 174,
+   "Hawarden Hills": 132,
+   "Hunter Industrial Park": 150,
+   "La Sierra": 513,
+   "La Sierra Acres": 181,
+   "La Sierra Hills": 52,
+   "La Sierra South": 439,
+   "Magnolia Center": 357,
+   "Mission Grove": 347,
+   "Northside": 184,
+   "Orangecrest": 764,
+   "Presidential Park": 165,
+   "Ramona": 510,
+   "Sycamore Canyon Park": 1,
+   "Sycamore Canyon/Canyon Springs": 84,
+   "University": 326,
+   "Victoria": 427,
+   "Wood Streets": 111
+  }
+ },
+ "season": {
+  "from": null,
+  "to": null,
+  "note": "All year, Tuesday to Friday; Mondays, weekends, City holidays and the 5th occurrence of a weekday have no sweeping (the City's 2026 calendar)."
+ },
+ "zonesLeftOut": [
+  {
+   "id": "6",
+   "route": "206/7",
+   "day": "Tuesday",
+   "why": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th)"
+  },
+  {
+   "id": "76",
+   "route": "208/9",
+   "day": "Tuesday",
+   "why": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th)"
+  },
+  {
+   "id": "78",
+   "route": "313A",
+   "day": "Wednesday",
+   "why": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "97",
+   "route": "313P",
+   "day": "Wednesday",
+   "why": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "89",
+   "route": "315A",
+   "day": "Wednesday",
+   "why": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "7",
+   "route": "315P",
+   "day": "Wednesday",
+   "why": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "85",
+   "route": "506/7",
+   "day": "Friday",
+   "why": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th)"
+  }
+ ],
+ "zones": [
+  {
+   "id": "103",
+   "route": "201A",
+   "day": "Tuesday",
+   "sides": 328,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "65",
+   "route": "201P",
+   "day": "Tuesday",
+   "sides": 560,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "72",
+   "route": "202A",
+   "day": "Tuesday",
+   "sides": 193,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "33",
+   "route": "202P",
+   "day": "Tuesday",
+   "sides": 181,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "21",
+   "route": "203A",
+   "day": "Tuesday",
+   "sides": 113,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "37",
+   "route": "203P",
+   "day": "Tuesday",
+   "sides": 114,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "94",
+   "route": "204A",
+   "day": "Tuesday",
+   "sides": 454,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "34",
+   "route": "204P",
+   "day": "Tuesday",
+   "sides": 184,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "49",
+   "route": "205A",
+   "day": "Tuesday",
+   "sides": 159,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "84",
+   "route": "205P",
+   "day": "Tuesday",
+   "sides": 219,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "6",
+   "route": "206/7",
+   "day": "Tuesday",
+   "sides": 0,
+   "leftOut": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th)"
+  },
+  {
+   "id": "76",
+   "route": "208/9",
+   "day": "Tuesday",
+   "sides": 0,
+   "leftOut": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th)"
+  },
+  {
+   "id": "132",
+   "route": "210A",
+   "day": "Tuesday",
+   "sides": 276,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "107",
+   "route": "210P",
+   "day": "Tuesday",
+   "sides": 235,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "131",
+   "route": "211A",
+   "day": "Tuesday",
+   "sides": 172,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "124",
+   "route": "211P",
+   "day": "Tuesday",
+   "sides": 350,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "64",
+   "route": "212A",
+   "day": "Tuesday",
+   "sides": 206,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "82",
+   "route": "212P",
+   "day": "Tuesday",
+   "sides": 194,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "11",
+   "route": "213A",
+   "day": "Tuesday",
+   "sides": 220,
+   "rule": [
+    2,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "108",
+   "route": "213P",
+   "day": "Tuesday",
+   "sides": 302,
+   "rule": [
+    2,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "110",
+   "route": "303A",
+   "day": "Wednesday",
+   "sides": 264,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "117",
+   "route": "303P",
+   "day": "Wednesday",
+   "sides": 232,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "73",
+   "route": "304A",
+   "day": "Wednesday",
+   "sides": 165,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "63",
+   "route": "304P",
+   "day": "Wednesday",
+   "sides": 289,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "23",
+   "route": "305A",
+   "day": "Wednesday",
+   "sides": 223,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "58",
+   "route": "305P",
+   "day": "Wednesday",
+   "sides": 155,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "66",
+   "route": "306A",
+   "day": "Wednesday",
+   "sides": 227,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "93",
+   "route": "306P",
+   "day": "Wednesday",
+   "sides": 171,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "130",
+   "route": "307A",
+   "day": "Wednesday",
+   "sides": 120,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "69",
+   "route": "307P",
+   "day": "Wednesday",
+   "sides": 143,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "10",
+   "route": "308A",
+   "day": "Wednesday",
+   "sides": 159,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "118",
+   "route": "308P",
+   "day": "Wednesday",
+   "sides": 224,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "99",
+   "route": "30911",
+   "day": "Wednesday",
+   "sides": 131,
+   "rule": {
+    "odd": [
+     3,
+     "7:30",
+     "11:30",
+     5,
+     0,
+     0
+    ],
+    "even": [
+     3,
+     "11:30",
+     "15:30",
+     5,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "id": "17",
+   "route": "310A",
+   "day": "Wednesday",
+   "sides": 20,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "29",
+   "route": "310A",
+   "day": "Wednesday",
+   "sides": 105,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "68",
+   "route": "310P",
+   "day": "Wednesday",
+   "sides": 379,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "30",
+   "route": "312A",
+   "day": "Wednesday",
+   "sides": 101,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "71",
+   "route": "312P",
+   "day": "Wednesday",
+   "sides": 289,
+   "rule": [
+    3,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "78",
+   "route": "313A",
+   "day": "Wednesday",
+   "sides": 0,
+   "leftOut": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "97",
+   "route": "313P",
+   "day": "Wednesday",
+   "sides": 0,
+   "leftOut": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "67",
+   "route": "314A",
+   "day": "Wednesday",
+   "sides": 200,
+   "rule": [
+    3,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "89",
+   "route": "315A",
+   "day": "Wednesday",
+   "sides": 0,
+   "leftOut": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "7",
+   "route": "315P",
+   "day": "Wednesday",
+   "sides": 0,
+   "leftOut": "route not on the City's schedule map: week pair unknown"
+  },
+  {
+   "id": "32",
+   "route": "402A",
+   "day": "Thursday",
+   "sides": 239,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "20",
+   "route": "402P",
+   "day": "Thursday",
+   "sides": 120,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "12",
+   "route": "403A",
+   "day": "Thursday",
+   "sides": 340,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "13",
+   "route": "403P",
+   "day": "Thursday",
+   "sides": 204,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "54",
+   "route": "404A",
+   "day": "Thursday",
+   "sides": 91,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "14",
+   "route": "404P",
+   "day": "Thursday",
+   "sides": 418,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "47",
+   "route": "405A",
+   "day": "Thursday",
+   "sides": 294,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "77",
+   "route": "405A",
+   "day": "Thursday",
+   "sides": 35,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "4",
+   "route": "405P",
+   "day": "Thursday",
+   "sides": 1,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "87",
+   "route": "405P",
+   "day": "Thursday",
+   "sides": 266,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "61",
+   "route": "406A",
+   "day": "Thursday",
+   "sides": 208,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "133",
+   "route": "406A",
+   "day": "Thursday",
+   "sides": 98,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "26",
+   "route": "406P",
+   "day": "Thursday",
+   "sides": 75,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "51",
+   "route": "406P",
+   "day": "Thursday",
+   "sides": 186,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "16",
+   "route": "407A",
+   "day": "Thursday",
+   "sides": 215,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "39",
+   "route": "407P",
+   "day": "Thursday",
+   "sides": 179,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "92",
+   "route": "408A",
+   "day": "Thursday",
+   "sides": 359,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "81",
+   "route": "408P",
+   "day": "Thursday",
+   "sides": 202,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "70",
+   "route": "409A",
+   "day": "Thursday",
+   "sides": 196,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "79",
+   "route": "409P",
+   "day": "Thursday",
+   "sides": 218,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "43",
+   "route": "410A",
+   "day": "Thursday",
+   "sides": 132,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "5",
+   "route": "410P",
+   "day": "Thursday",
+   "sides": 86,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "35",
+   "route": "411A",
+   "day": "Thursday",
+   "sides": 238,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "135",
+   "route": "411P",
+   "day": "Thursday",
+   "sides": 391,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "129",
+   "route": "412A",
+   "day": "Thursday",
+   "sides": 182,
+   "rule": [
+    4,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "106",
+   "route": "412P",
+   "day": "Thursday",
+   "sides": 115,
+   "rule": [
+    4,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "116",
+   "route": "501A",
+   "day": "Friday",
+   "sides": 222,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "115",
+   "route": "501P",
+   "day": "Friday",
+   "sides": 58,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "134",
+   "route": "501P",
+   "day": "Friday",
+   "sides": 75,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "52",
+   "route": "503A",
+   "day": "Friday",
+   "sides": 144,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "15",
+   "route": "503P",
+   "day": "Friday",
+   "sides": 133,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "1",
+   "route": "504P",
+   "day": "Friday",
+   "sides": 74,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "22",
+   "route": "504P",
+   "day": "Friday",
+   "sides": 92,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "46",
+   "route": "505A",
+   "day": "Friday",
+   "sides": 149,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "83",
+   "route": "505A",
+   "day": "Friday",
+   "sides": 7,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "18",
+   "route": "505P",
+   "day": "Friday",
+   "sides": 46,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "85",
+   "route": "506/7",
+   "day": "Friday",
+   "sides": 0,
+   "leftOut": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th)"
+  },
+  {
+   "id": "95",
+   "route": "510A",
+   "day": "Friday",
+   "sides": 72,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "114",
+   "route": "510A",
+   "day": "Friday",
+   "sides": 150,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "28",
+   "route": "510P",
+   "day": "Friday",
+   "sides": 140,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "48",
+   "route": "512A",
+   "day": "Friday",
+   "sides": 70,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "75",
+   "route": "512A",
+   "day": "Friday",
+   "sides": 85,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "91",
+   "route": "512A",
+   "day": "Friday",
+   "sides": 1,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "55",
+   "route": "512P",
+   "day": "Friday",
+   "sides": 9,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "128",
+   "route": "512P",
+   "day": "Friday",
+   "sides": 195,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "2",
+   "route": "515A",
+   "day": "Friday",
+   "sides": 104,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "8",
+   "route": "515A",
+   "day": "Friday",
+   "sides": 22,
+   "rule": [
+    5,
+    "7:30",
+    "11:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "42",
+   "route": "515P",
+   "day": "Friday",
+   "sides": 67,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "104",
+   "route": "515P",
+   "day": "Friday",
+   "sides": 84,
+   "rule": [
+    5,
+    "11:30",
+    "15:30",
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "3",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "9",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "19",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "24",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "25",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "27",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "31",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "36",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "38",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "40",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "41",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "44",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "45",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "50",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "53",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "56",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "57",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "59",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "60",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "62",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "74",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "80",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "86",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "88",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "90",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "96",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "98",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "100",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "101",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "102",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "105",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "109",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "111",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "112",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "113",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "119",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "120",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "121",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "122",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "123",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "125",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "126",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "127",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  },
+  {
+   "id": "136",
+   "route": "NOSWEEP",
+   "day": "NoSweep",
+   "sides": 0,
+   "leftOut": "NOSWEEP zone (not swept)"
+  }
+ ],
+ "skipped": [
+  {
+   "why": "outside every zone (not in the City, or a gap)",
+   "count": 5368,
+   "examples": []
+  },
+  {
+   "why": "NOSWEEP zone (not swept)",
+   "count": 635,
+   "examples": [
+    {
+     "id": "123204B6-A263-47BE-AFA6-2CA5B10C9E85",
+     "street": "Mathilda Ln",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "BFC167C4-64FF-4B77-975D-03DF692C85B5",
+     "street": "Alder Canyon",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "F15A9D20-64FE-4F8D-921D-62DC22AA42F2",
+     "street": "12th St",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "8826159C-2C71-4842-9217-21264FC279E2",
+     "street": "Lemon St",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "96B153C3-F5CE-4CE8-98BD-EA4736095F6B",
+     "street": "Canyon Creek Dr",
+     "zone": "NOSWEEP"
+    }
+   ]
+  },
+  {
+   "why": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th)",
+   "count": 603,
+   "examples": [
+    {
+     "id": "ED5FEF9D-540F-4864-A25C-C69CA19BDA1D",
+     "street": "4th St",
+     "zone": "506/7"
+    },
+    {
+     "id": "3D3A26A4-641B-47DC-A612-570B35115C6E",
+     "street": "Grove Ave",
+     "zone": "206/7"
+    },
+    {
+     "id": "FF6BEB9A-BD87-4184-8F4E-CF0C53047507",
+     "street": "11th St",
+     "zone": "206/7"
+    },
+    {
+     "id": "BA77FFB5-F9AE-471D-881A-10EA439BB5A4",
+     "street": "Santa Fe Ave",
+     "zone": "208/9"
+    },
+    {
+     "id": "6602F636-1036-4E22-8F30-37F6F728CBC5",
+     "street": "6th St",
+     "zone": "208/9"
+    }
+   ]
+  },
+  {
+   "why": "private street (the City's centerline: owned by Private)",
+   "count": 596,
+   "examples": [
+    {
+     "id": "0395FD53-4786-4974-A44D-6E72F6DCA0F0",
+     "street": "Calle La Paz"
+    },
+    {
+     "id": "2E5D92D7-C0EA-4335-A2B4-51E548652340",
+     "street": "Trailstone Ct"
+    },
+    {
+     "id": "EFCCFB83-9CCE-4D03-BC13-F7BEBC7FF8AD",
+     "street": "Country Gate Ct"
+    },
+    {
+     "id": "2B6ED10B-AEEC-429B-8D90-FB62FA631A41",
+     "street": "Vista Pointe"
+    },
+    {
+     "id": "777CB6C2-A701-45BF-B235-1FA122EAF424",
+     "street": "Miracle Mile"
+    }
+   ]
+  },
+  {
+   "why": "route not on the City's schedule map: week pair unknown",
+   "count": 306,
+   "examples": [
+    {
+     "id": "D4B067D2-3733-428B-911B-1F11B17308BF",
+     "street": "Fordham Pl",
+     "zone": "313A"
+    },
+    {
+     "id": "34A66282-7612-4FA0-A76E-56C4B49E1C41",
+     "street": "Michelin Dr",
+     "zone": "315A"
+    },
+    {
+     "id": "53CA6CC2-FBBB-4A38-9135-FEFEE0BAAD90",
+     "street": "Golden Ave",
+     "zone": "313A"
+    },
+    {
+     "id": "0CE136E1-8740-4587-A6F4-027C461FF15C",
+     "street": "Peacock Ln",
+     "zone": "313A"
+    },
+    {
+     "id": "198C5A80-D24D-4903-85BE-A8B44E700438",
+     "street": "Luke St",
+     "zone": "315P"
+    }
+   ]
+  },
+  {
+   "why": "NOSWEEP zone (not swept) (piece of a block cut at a zone boundary)",
+   "count": 32,
+   "examples": [
+    {
+     "id": "C8804AE1-06DA-4AFC-BB86-D94694BB1F99",
+     "street": "Cape Elizabeth Way",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "76D575C3-E46B-4AE8-B49D-FD888E8821BB",
+     "street": "University Ave",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "09481893-4C2F-49B1-8DD2-591F29C3A1A4",
+     "street": "Richard M Nixon Ct",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "A5205EB7-4738-429E-B533-98EAB3B92587",
+     "street": "Big Springs Rd",
+     "zone": "NOSWEEP"
+    },
+    {
+     "id": "D7E102DC-C584-40CA-8736-E335E8AAA2EF",
+     "street": "Campus Dr",
+     "zone": "NOSWEEP"
+    }
+   ]
+  },
+  {
+   "why": "piece of a block outside every zone",
+   "count": 20,
+   "examples": [
+    {
+     "id": "EE9990C6-9660-4083-BA39-951E6334EB50",
+     "street": "Serpentine Dr"
+    },
+    {
+     "id": "385C6A0B-4954-4ED5-990D-080B35DF2CBF",
+     "street": "Villa St"
+    },
+    {
+     "id": "385C6A0B-4954-4ED5-990D-080B35DF2CBF",
+     "street": "Villa St"
+    },
+    {
+     "id": "E0F22F0C-F878-4F39-9026-162E0A21E5F2",
+     "street": "Sycamore Canyon Blvd"
+    },
+    {
+     "id": "4BFA2E47-819A-48FF-A74B-5B45E2BF9874",
+     "street": "Pedley Substation Rd"
+    }
+   ]
+  },
+  {
+   "why": "not a street (an alley, ramp or walkway, or a placeholder name)",
+   "count": 20,
+   "examples": [
+    {
+     "id": "3FAB969F-F88E-45FE-A49B-E0B38442740E",
+     "street": "Ramp"
+    },
+    {
+     "id": "800A7FE9-5911-4F4D-AEB3-D7DC2379D1C0",
+     "street": "<access Road>"
+    },
+    {
+     "id": "2043A7FB-02CF-4159-9BEA-D276636C2F00",
+     "street": "Ramp"
+    },
+    {
+     "id": "AAB67FA7-4FE2-459D-B251-627FEBAFAE66",
+     "street": "Hughes Alley"
+    },
+    {
+     "id": "3FA1EFFC-9992-413C-AA63-A6C1EBD0E9E4",
+     "street": "Walkway"
+    }
+   ]
+  },
+  {
+   "why": "side-by-side schedule with no hours on the City's map (odd side 1st & 3rd, even side 2nd & 4th) (piece of a block cut at a zone boundary)",
+   "count": 7,
+   "examples": [
+    {
+     "id": "D76A6D58-6840-4216-9A38-6AEA7A011574",
+     "street": "Ridge Rd",
+     "zone": "506/7"
+    },
+    {
+     "id": "82E3EFC4-50E1-4DDC-8AA2-51C49541805C",
+     "street": "Fairmount Blvd",
+     "zone": "506/7"
+    },
+    {
+     "id": "011EA3A5-BA03-4CDA-85C4-09DD6F60E306",
+     "street": "2nd St",
+     "zone": "506/7"
+    },
+    {
+     "id": "7E8CB95D-4A02-4D69-BC25-95EF40C4272D",
+     "street": "3rd St",
+     "zone": "506/7"
+    },
+    {
+     "id": "165F9C09-E450-4FD3-BA39-19EE605C2D7E",
+     "street": "Houghton Ave",
+     "zone": "506/7"
+    }
+   ]
+  },
+  {
+   "why": "no street name",
+   "count": 2,
+   "examples": [
+    {
+     "id": "863A59D5-BBD8-4A73-9ED3-05DA5EBCB4E9",
+     "street": ""
+    },
+    {
+     "id": "C5A6EBFC-72CA-40AD-AF7C-D14F4838CCF9",
+     "street": ""
+    }
+   ]
+  },
+  {
+   "why": "route not on the City's schedule map: week pair unknown (piece of a block cut at a zone boundary)",
+   "count": 2,
+   "examples": [
+    {
+     "id": "3550A490-894C-4A74-AA28-3B4C81D02F82",
+     "street": "Campus Dr",
+     "zone": "313P"
+    },
+    {
+     "id": "857EDB12-FD3B-4F0F-A373-CC656CF2F5B6",
+     "street": "Campus Dr",
+     "zone": "313P"
+    }
+   ]
+  }
+ ],
+ "checks": {
+  "cutAtZoneBoundary": 132,
+  "sidesInDifferentZones": 520,
+  "splitZoneSides": 131,
+  "splitZoneSidesNoParity": 0,
+  "arterialsInZones": "1508 arterial or major road lines (County CLASS 9 and 10) cross swept zones and are not shown: the City sweeps main thoroughfares weekly outside the zone schedule, and their posting is not published.",
+  "method": "Each County collector and residential street line is sampled every 5 m; points 9 m to its left and right are placed in a zone. A side takes its zone's schedule; where the zone changes along the line (a boundary crossing the block), the line is cut there (pieces under 15 m join their neighbor). Lines with half or more of their length within 8 m of a City centerline owned by Private are left out."
+ },
+ "mapCheck": {
+  "source": "https://riversideca.gov/publicworks/sites/riversideca.gov.publicworks/files/Street%20Sweeping%20Schedule.pdf",
+  "zonesSampled": 92,
+  "agreeOnDayAndWindow": 87,
+  "sharesMedian": 99,
+  "sharesMin": 84,
+  "differences": [
+   {
+    "route": "313A",
+    "shows": "1st & 3rd Fri. AM (100%)",
+    "note": "Wednesday zone edited 2023-04-04; the map shows the old Friday route 511/513 here. Left out."
+   },
+   {
+    "route": "313P",
+    "shows": "1st & 3rd Fri. PM (100%)",
+    "note": "As 313A. Left out."
+   },
+   {
+    "route": "315A",
+    "shows": "1st & 3rd Fri. AM (99%)",
+    "note": "As 313A. Left out."
+   },
+   {
+    "route": "315P",
+    "shows": "1st & 3rd Fri. PM (99%)",
+    "note": "As 313A. Left out."
+   },
+   {
+    "route": "406A (second polygon)",
+    "shows": "2nd & 4th Thurs. PM (100%)",
+    "note": "Same weeks, other window: the layer's A (7:30 to 11:30) is used, the newer source. Ask the City."
+   }
+  ],
+  "method": "The map PDF is georeferenced (its viewport carries corner latitudes and longitudes). Each route label's surrounding fill color was matched to the legend, and each current zone was sampled on a grid of interior points projected onto the rendered map; a point counts for the legend color within 20 RGB units of its pixels."
+ },
+ "assumptions": [
+  "The week pair of each route comes from the City's Street Sweeping Schedule map (dated July 2015, still posted on riversideca.gov). Its zones and route labels match today's layer: 87 of the 92 swept zones show their own day, window and a single week pair on the map.",
+  "A = 7:30 to 11:30 AM and P = 11:30 AM to 3:30 PM, the two windows the City's Street Sweeping Program page gives; the first digit of the code is the weekday (2 Tuesday, 3 Wednesday, 4 Thursday, 5 Friday), as the layer's own StreetSweepDay confirms on every zone.",
+  "\"1st & 3rd\" and \"2nd & 4th\" count the weekday's occurrences in the month (weeks masks 5 and 10), as the City's 2026 calendar colors them; a 5th Tuesday to Friday has no sweeping.",
+  "Every collector and residential street inside a zone is swept and posted on both sides (the City: signs are posted on neighborhood streets). Arterials and major roads are left out (main thoroughfares are swept weekly, not on the zone schedule); private streets (City centerline) are left out.",
+  "Zone 406A's second polygon is shown with the layer's AM window although the 2015 map colors that area as the PM window (same weeks): the layer is the newer source.",
+  "No tow (flags 0): the City writes a $46 ticket (RMC 10.52.030(a), Fees and Charges as of July 1, 2026) and mentions no tow.",
+  "Holidays: the days marked H on the City's 2026 Street Sweeping Schedule; a holiday cancels that week's sweep with no make-up day (the City's FAQ). 2027 follows the same list with the 2026 weekend rule (derived)."
+ ],
+ "unverified": [
+  "The week pair of the four Wednesday zones changed in 2023 (313A, 313P, 315A, 315P): left out. The 2015 map shows the old Friday routes there as 1st & 3rd, and odd routes are 1st & 3rd everywhere else on the map, so 1st & 3rd Wednesday is likely, but no City source says so.",
+  "The hours of the side-by-side zones 206/7 and 208/9 (Tuesday) and 506/7 (Friday, Downtown): the map gives odd side 1st & 3rd, even side 2nd & 4th, but no window. Left out.",
+  "Zone 406A's second polygon: AM (layer) or PM (2015 map).",
+  "That arterial streets inside zones are not posted for the zone schedule.",
+  "The 2027 holidays (derived)."
+ ],
+ "questionsForCity": [
+  "Zones 313A, 313P, 315A and 315P (Wednesday since 2023): are they swept on the 1st & 3rd or the 2nd & 4th Wednesday?",
+  "Zones 206/7 and 208/9 (Tuesday) and 506/7 (Friday, Downtown): what are the posted hours on each side?",
+  "Zone 406A: is the part east of the 2015 route 406P now swept in the morning (7:30 to 11:30) or still in the afternoon?",
+  "Could the Street Sweeping Zones layer carry the week pair (1st & 3rd or 2nd & 4th) and the hours, so the schedule does not depend on the 2015 map?",
+  "Are main thoroughfares (weekly sweeping) posted with no parking hours, and where?"
+ ]
+}

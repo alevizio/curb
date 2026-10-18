@@ -1,0 +1,1162 @@
+{
+ "generated": "2026-10-18T18:41:52.295Z",
+ "signs": {
+  "designs": 540,
+  "signs": 195571,
+  "read": 195543,
+  "unreadable": [
+   {
+    "code": "PS-234B",
+    "signs": 19,
+    "why": "no hours",
+    "text": "NO PARKING (SANITATION BROOM SYMBOL) <-> (SUPERSEDES SP-864C)"
+   },
+   {
+    "code": "PS-234BA",
+    "signs": 6,
+    "why": "no hours",
+    "text": "NO PARKING (SANITATION BROOM SYMBOL) --> (SUPERSEDES SP-864CA)"
+   },
+   {
+    "code": "PS-235B",
+    "signs": 2,
+    "why": "no hours",
+    "text": "NO PARKING (SANITATION BROOM SYMBOL) MOON & STARS (SYMBOLS) <-> (SUPERSEDES SP-863C)"
+   },
+   {
+    "code": "SP-798C",
+    "signs": 1,
+    "why": "no hours",
+    "text": "NO PARKING <----> SANITATION BROOM (SYMBOL) XYY-XYY \"DAY\" THRU \"DAY\" (TIMES & DAYS TO BE SPECIFIED) (FOR CIRCULAR BUS SIGNS)"
+   }
+  ],
+  "unknownWords": [],
+  "share": 0.99986
+ },
+ "blockSides": {
+  "total": 58999,
+  "byBorough": {
+   "Manhattan": 6180,
+   "Bronx": 10302,
+   "Brooklyn": 27607,
+   "Queens": 14909,
+   "Staten Island": 1
+  },
+  "placed": 58591,
+  "placedShare": 0.9931,
+  "byWalk": 58304,
+  "bySignPoints": 287,
+  "notPlaced": 408,
+  "withoutSignPoints": 2156,
+  "walkCrossStreets": {
+   "names": 56088,
+   "street end": 908,
+   "similar name": 594,
+   "near": 393,
+   "signs": 216,
+   "sign points off the street": 49,
+   "near, near": 14,
+   "similar name, similar name": 14,
+   "similar name, near": 4,
+   "street end, similar name": 3,
+   "near, street end": 3,
+   "street end, sign points off the street": 3,
+   "street end, near": 3,
+   "similar name, sign points off the street": 3,
+   "signs, similar name": 2,
+   "signs, street end": 2,
+   "street end, street end": 1,
+   "similar name, similar name, sign points off the street": 1,
+   "near, similar name": 1,
+   "street end, signs": 1,
+   "similar name, signs": 1
+  },
+  "walkLengthMeters": {
+   "median": 109,
+   "p95": 268,
+   "max": 1989
+  },
+  "signDistanceToWalkMeters": {
+   "median": 1.2,
+   "p95": 9.3
+  },
+  "sideFromCompass": {
+   "clear": 54655,
+   "fair": 3410,
+   "unclear": 237
+  },
+  "withMoreThanOneSchedule": 726,
+  "notPlacedWhy": {
+   "cross street not found, and no sign points": 207,
+   "no walk between the cross streets, and no sign points": 88,
+   "the only walk is far longer than the signs reach": 32,
+   "street name not in the centerline": 28,
+   "cross street not found, and no line of the street near the signs": 26,
+   "no walk between the cross streets, and no line of the street near the signs": 13,
+   "the walk passes more than 150 m from the signs": 7,
+   "the only walk turns back on itself": 4,
+   "no readable schedule": 3
+  },
+  "placedBySignPointsWhy": {
+   "the walk passes more than 25 m from the signs": 142,
+   "no walk between the cross streets": 118,
+   "the walk is far longer than the signs reach": 13,
+   "cross street not found": 8,
+   "the walk turns back on itself": 6
+  },
+  "notPlacedExamples": {
+   "cross street not found, and no sign points": [
+    "Queens: 100 STREET between 31 AVENUE and 32 STREET, E side",
+    "Queens: 110 AVENUE between GUY R BREWER BOULEVARD and 161 STREET, N side",
+    "Queens: 110 AVENUE between 161 STREET and 160 STREET, N side",
+    "Queens: 12 STREET between 26 AVENUE and ASTORIA PARK SOUTH, E side",
+    "Queens: 136 STREET between MEMORIAL CIRCLE and 57 AVENUE, W side",
+    "Queens: 148 STREET between 85 AVENUE and 84 ROAD, E side"
+   ],
+   "no walk between the cross streets, and no sign points": [
+    "Queens: 110 STREET between 111 STREET and 37 AVENUE, E side",
+    "Queens: 110 STREET between QUEENS BOULEVARD and 72 ROAD, E side",
+    "Queens: 111 STREET between 110 STREET and 37 AVENUE, W side",
+    "Queens: 130 AVENUE between BEDELL STREET and BEDELL STREET, N side",
+    "Queens: 133 AVENUE between BEDELL STREET and BEDELL STREET, N side",
+    "Queens: 141 STREET between 72 ROAD and 72 CRESCENT, E side"
+   ],
+   "the only walk is far longer than the signs reach": [
+    "Queens: 114 STREET between NORTHERN BOULEVARD and GRAND CENTRAL PARKWAY, E side",
+    "Brooklyn: 17 STREET between 4 AVENUE and PROSPECT EXPRESSWAY, N side",
+    "Queens: 23 AVENUE between 86 STREET and DITMARS BOULEVARD, N side",
+    "Brooklyn: 74 STREET between RIDGE BOULEVARD and DEAD END, N side",
+    "Brooklyn: 74 STREET between DEAD END and RIDGE BOULEVARD, S side",
+    "Queens: 94 STREET between JACKSON MILL ROAD and 23 AVENUE, E side"
+   ],
+   "street name not in the centerline": [
+    "Brooklyn: BARTEL PRITCHARD SQUARE between PROSPECT PARK WEST and 15 STREET, N side",
+    "Brooklyn: BARTEL PRITCHARD SQUARE between 15 STREET and PROSPECT PARK WEST, W side",
+    "Bronx: BELMONT STREET between WEBSTER AVENUE and ANTHONY AVENUE, N side",
+    "Bronx: BELMONT STREET between ANTHONY AVENUE and WEBSTER AVENUE, S side",
+    "Bronx: BOSCOBEL AVENUE between UNDERCLIFF AVENUE and UNIVERSITY AVENUE, S side",
+    "Bronx: BOTANICAL SQUARE between WEBSTER AVENUE and WEBSTER AVENUE, N side"
+   ],
+   "cross street not found, and no line of the street near the signs": [
+    "Queens: 100 STREET between 57 AVENUE and 58 AVENUE, W side",
+    "Queens: 34 AVENUE between LINDEN PLACE and 137 STREET, S side",
+    "Queens: ASTORIA BOULEVARD between 38 STREET and STEINWAY STREET, S side",
+    "Queens: ASTORIA BOULEVARD between 47 STREET and 46 STREET, N side",
+    "Queens: ASTORIA BOULEVARD between 35 STREET and 33 STREET, N side",
+    "Brooklyn: AVENUE D between RALPH AVENUE and EAST 58 STREET, N side"
+   ],
+   "no walk between the cross streets, and no line of the street near the signs": [
+    "Queens: 103 STREET between 42 AVENUE and NATIONAL STREET, W side",
+    "Queens: 59 STREET between ROOSEVELT AVENUE and DEAD END, E side",
+    "Queens: 59 STREET between DEAD END and WOODSIDE AVENUE, W side",
+    "Queens: 83 AVENUE between 135 STREET and HOOVER AVENUE, S side",
+    "Queens: CORONA AVENUE between 53 AVENUE and 52 AVENUE, N side",
+    "Bronx: EAST 172 STREET between GRAND CONCOURSE and DEAD END, S side"
+   ],
+   "the walk passes more than 150 m from the signs": [
+    "Bronx: CROSS BRONX EXPRESSWAY between LAFAYETTE AVENUE and CROSS BRONX EXPRESSWAY, S side",
+    "Bronx: CROSS BRONX EXPRESSWAY between BLACKROCK AVENUE and CHATTERTON AVENUE, S side",
+    "Bronx: CROSS BRONX EXPRESSWAY between TAYLOR AVENUE and MCGRAW AVENUE, S side",
+    "Bronx: CROSS BRONX EXPRESSWAY between HUGH J GRANT CIRCLE and NEWBOLD AVENUE, S side",
+    "Brooklyn: EVERGREEN AVENUE between JEFFERSON STREET and GEORGE STREET, E side",
+    "Bronx: HUTCHINSON RIVER PARKWAY between BOLLER AVENUE and EINSTEIN LOOP SOUTH, E side"
+   ],
+   "the only walk turns back on itself": [
+    "Bronx: BRONX BOULEVARD between EAST 219 STREET and EAST 222 STREET, E side",
+    "Bronx: CROSS BRONX EXPRESSWAY between CHATTERTON AVENUE and HAVEMEYER AVENUE, N side",
+    "Manhattan: HARLEM RIVER DRIVE between 5 AVENUE and HARLEM RIVER DRIVE, E side",
+    "Queens: VAN WYCK EXPRESSWAY between 87 AVENUE and 86 AVENUE, E side"
+   ],
+   "no readable schedule": [
+    "Brooklyn: AVENUE D between EAST 29 STREET and NOSTRAND AVENUE, S side",
+    "Manhattan: CHURCH STREET between READE STREET and DUANE STREET, E side",
+    "Bronx: GROTE STREET between CAMBRELENG AVENUE and BELMONT AVENUE, N side"
+   ]
+  },
+  "crossStreetsNotFound": [
+   "Queens: QUEENS MIDTOWN EXPRESSWAY (9)",
+   "Queens: 46 STREET (5)",
+   "Bronx: NO NAME STREET (5)",
+   "Bronx: BRONX RIVER PARKWAY (5)",
+   "Queens: NO NAME STREET (4)",
+   "Queens: BOARDWALK (4)",
+   "Bronx: LELAND AVENUE (4)",
+   "Brooklyn: CHURCH AVENUE (4)",
+   "Brooklyn: BROOME STREET (4)",
+   "Queens: 79 STREET (3)",
+   "Queens: BQE WEST (3)",
+   "Queens: 38 STREET (3)",
+   "Queens: 41 STREET (3)",
+   "Queens: 42 STREET (3)",
+   "Queens: 45 STREET (3)",
+   "Bronx: ST LAWRENCE AVENUE (3)",
+   "Bronx: COMMONWEALTH AVENUE (3)",
+   "Bronx: THIERIOT AVENUE (3)",
+   "Manhattan: SOUTH STREET (3)",
+   "Brooklyn: ENGERT AVENUE (3)",
+   "Brooklyn: NEWTON STREET (3)",
+   "Brooklyn: BROADWAY (3)",
+   "Manhattan: RIVERSIDE DRIVE (3)",
+   "Queens: 161 STREET (2)",
+   "Bronx: A H MURPHY SQUARE (2)",
+   "Queens: BEACH CHANNEL DRIVE (2)",
+   "Queens: 19 ROAD (2)",
+   "Queens: STEINWAY STREET (2)",
+   "Queens: 47 STREET (2)",
+   "Manhattan: EAST 18 STREET (2)",
+   "Brooklyn: EAST 58 STREET (2)",
+   "Queens: BEACH 24 STREET (2)",
+   "Queens: OCEAN PROMENADE (2)",
+   "Queens: BEACH 82 STREET (2)",
+   "Bronx: PAUL AVENUE (2)",
+   "Bronx: SHERIDAN EXPRESSWAY (2)",
+   "Brooklyn: GUIDER AVENUE (2)",
+   "Bronx: OLMSTEAD AVENUE (2)",
+   "Brooklyn: EAST 12 STREET (2)",
+   "Brooklyn: HOMECREST AVENUE (2)"
+  ],
+  "walksThatCrossAShortPieceOfAnotherStreet": 182
+ },
+ "output": {
+  "blocks": 38911,
+  "sides": 69111,
+  "rules": 136495,
+  "sidesWithMoreThanOneWindow": 1081,
+  "sidesByWeekdaysSwept": {
+   "1": 30425,
+   "2": 30381,
+   "3": 1399,
+   "4": 683,
+   "5": 299,
+   "6": 5924
+  },
+  "noHouseNumbers": 10937,
+  "noNeighborhood": 0,
+  "sizes": {
+   "segments.json": 10612917,
+   "segments-manhattan.json": 1358236,
+   "segments-bronx.json": 2137209,
+   "segments-brooklyn.json": 4628732,
+   "segments-queens.json": 2491577,
+   "segments-staten-island.json": 2009
+  },
+  "parts": [
+   {
+    "id": "manhattan",
+    "name": "Manhattan",
+    "file": "segments-manhattan.json",
+    "bbox": "-74.017995,40.70179,-73.906821,40.879046",
+    "blocks": 4563,
+    "sides": 7354,
+    "bytes": 1358236
+   },
+   {
+    "id": "bronx",
+    "name": "Bronx",
+    "file": "segments-bronx.json",
+    "bbox": "-73.93217,40.798585,-73.815973,40.911426",
+    "blocks": 7306,
+    "sides": 12852,
+    "bytes": 2137209
+   },
+   {
+    "id": "brooklyn",
+    "name": "Brooklyn",
+    "file": "segments-brooklyn.json",
+    "bbox": "-74.040858,40.571528,-73.857641,40.739018",
+    "blocks": 17083,
+    "sides": 31371,
+    "bytes": 4628732
+   },
+   {
+    "id": "queens",
+    "name": "Queens",
+    "file": "segments-queens.json",
+    "bbox": "-73.960806,40.568564,-73.727578,40.790741",
+    "blocks": 9955,
+    "sides": 17530,
+    "bytes": 2491577
+   },
+   {
+    "id": "staten-island",
+    "name": "Staten Island",
+    "file": "segments-staten-island.json",
+    "bbox": "-74.076293,40.635944,-74.075849,40.63778",
+    "blocks": 4,
+    "sides": 4,
+    "bytes": 2009
+   }
+  ]
+ },
+ "streetNameAliases": [
+  {
+   "borough": "Brooklyn",
+   "sign": "KOSCIUSKO STREET",
+   "centerline": "KOSCIUSZKO ST",
+   "how": "sign points",
+   "signs": 112,
+   "agree": 103
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "FRED DOUGLASS BOULEVARD",
+   "centerline": "FREDERICK DOUGLASS BLVD",
+   "how": "sign points",
+   "signs": 104,
+   "agree": 101
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "ADAM C POWELL BOULEVARD",
+   "centerline": "ADAM CLAYTON POWELL JR BLVD",
+   "how": "sign points",
+   "signs": 85,
+   "agree": 74
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "SCHAEFFER STREET",
+   "centerline": "SCHAEFER ST",
+   "how": "sign points",
+   "signs": 47,
+   "agree": 47
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "6 AVENUE",
+   "centerline": "AVE OF THE AMERICAS",
+   "how": "sign points",
+   "signs": 41,
+   "agree": 37
+  },
+  {
+   "borough": "Queens",
+   "sign": "GILMORE STREET",
+   "centerline": "GILLMORE ST",
+   "how": "sign points",
+   "signs": 30,
+   "agree": 30
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "FDR DRIVE",
+   "centerline": "FRANKLIN D ROOSEVELT DR",
+   "how": "sign points",
+   "signs": 20,
+   "agree": 20
+  },
+  {
+   "borough": "Bronx",
+   "sign": "AQUEDUCT AVENUE",
+   "centerline": "AQUEDUCT AVE E",
+   "how": "sign points",
+   "signs": 16,
+   "agree": 16
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "DELEVAN STREET",
+   "centerline": "DELAVAN ST",
+   "how": "sign points",
+   "signs": 16,
+   "agree": 16
+  },
+  {
+   "borough": "Bronx",
+   "sign": "ST RAYMONDS AVENUE",
+   "centerline": "ST RAYMOND AVE",
+   "how": "sign points",
+   "signs": 14,
+   "agree": 14
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "MARTIN LUTHER KING PLACE",
+   "centerline": "MARTIN LUTHER KING JR PL",
+   "how": "sign points",
+   "signs": 13,
+   "agree": 13
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "DAHLGREEN PLACE",
+   "centerline": "DAHLGREN PL",
+   "how": "sign points",
+   "signs": 12,
+   "agree": 12
+  },
+  {
+   "borough": "Bronx",
+   "sign": "WESTFARM ROAD",
+   "centerline": "W FARMS RD",
+   "how": "sign points",
+   "signs": 11,
+   "agree": 11
+  },
+  {
+   "borough": "Bronx",
+   "sign": "ANDREWS AVENUE",
+   "centerline": "ANDREWS AVE S",
+   "how": "sign points",
+   "signs": 11,
+   "agree": 11
+  },
+  {
+   "borough": "Queens",
+   "sign": "MOWBRAY PLACE",
+   "centerline": "MOWBRAY DR",
+   "how": "sign points",
+   "signs": 11,
+   "agree": 11
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "WILLETT STREET",
+   "centerline": "BIALYSTOKER PL",
+   "how": "sign points",
+   "signs": 10,
+   "agree": 9
+  },
+  {
+   "borough": "Queens",
+   "sign": "ELDERT LANE",
+   "centerline": "ELDERT LN",
+   "how": "sign points",
+   "signs": 9,
+   "agree": 9
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "WILLIAMS COURT",
+   "centerline": "WILLIAM COURT",
+   "how": "sign points",
+   "signs": 9,
+   "agree": 8
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "SHEPHARD AVENUE",
+   "centerline": "SHEPHERD AVE",
+   "how": "sign points",
+   "signs": 9,
+   "agree": 9
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "RIDGECREST TERRACE",
+   "centerline": "RIDGE CREST TER",
+   "how": "sign points",
+   "signs": 8,
+   "agree": 8
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "COBEK COURT",
+   "centerline": "COBECK CT",
+   "how": "sign points",
+   "signs": 8,
+   "agree": 8
+  },
+  {
+   "borough": "Bronx",
+   "sign": "BURNET PLACE",
+   "centerline": "BURNETT PL",
+   "how": "sign points",
+   "signs": 7,
+   "agree": 7
+  },
+  {
+   "borough": "Bronx",
+   "sign": "REV JAMES POLITE AVENUE",
+   "centerline": "REV JAMES A POLITE AVE",
+   "how": "sign points",
+   "signs": 7,
+   "agree": 7
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "ADAM CLAYTON POWELL BOULEVARD",
+   "centerline": "ADAM CLAYTON POWELL JR BLVD",
+   "how": "sign points",
+   "signs": 7,
+   "agree": 6
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "BAYRIDGE AVENUE",
+   "centerline": "BAY RIDGE AVE",
+   "how": "sign points",
+   "signs": 6,
+   "agree": 6
+  },
+  {
+   "borough": "Bronx",
+   "sign": "SCHIEFELIN AVENUE",
+   "centerline": "SCHIEFFELIN AVE",
+   "how": "sign points",
+   "signs": 6,
+   "agree": 6
+  },
+  {
+   "borough": "Bronx",
+   "sign": "THERIOT AVENUE",
+   "centerline": "THIERIOT AVE",
+   "how": "sign points",
+   "signs": 6,
+   "agree": 6
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "HATTIE JONES COURT",
+   "centerline": "HATTIE JONES PL",
+   "how": "sign points",
+   "signs": 5,
+   "agree": 5
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "THOMAS BOYLAND STREET",
+   "centerline": "THOMAS S BOYLAND ST",
+   "how": "sign points",
+   "signs": 5,
+   "agree": 5
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "NEWELL STREET",
+   "centerline": "NEWEL ST",
+   "how": "sign points",
+   "signs": 5,
+   "agree": 5
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "CUMMINGS STREET",
+   "centerline": "CUMMING ST",
+   "how": "sign points",
+   "signs": 5,
+   "agree": 5
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "BELVEDERE STREET",
+   "centerline": "BELVIDERE ST",
+   "how": "sign points",
+   "signs": 5,
+   "agree": 5
+  },
+  {
+   "borough": "Bronx",
+   "sign": "JACOBUS PLACE",
+   "centerline": "JACOBUS PL",
+   "how": "sign points",
+   "signs": 5,
+   "agree": 5
+  },
+  {
+   "borough": "Bronx",
+   "sign": "FAIRMONT PLACE",
+   "centerline": "FAIRMOUNT PL",
+   "how": "sign points",
+   "signs": 5,
+   "agree": 5
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "ATLANTIC COMMONS",
+   "centerline": "ATLANTIC COMMONS",
+   "how": "sign points",
+   "signs": 4,
+   "agree": 4
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "A C POWELL BOULEVARD",
+   "centerline": "ADAM CLAYTON POWELL JR BLVD",
+   "how": "sign points",
+   "signs": 4,
+   "agree": 3
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "ERIC PLACE",
+   "centerline": "ERIK PL",
+   "how": "sign points",
+   "signs": 4,
+   "agree": 4
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "NORTH ELLIOT PLACE",
+   "centerline": "N ELLIOTT PL",
+   "how": "sign points",
+   "signs": 4,
+   "agree": 4
+  },
+  {
+   "borough": "Bronx",
+   "sign": "WEST 228 STREET",
+   "centerline": "W 228 ST",
+   "how": "sign points",
+   "signs": 3,
+   "agree": 3
+  },
+  {
+   "borough": "Bronx",
+   "sign": "TERRACE VIEW AVENUE",
+   "centerline": "TERRACE VIEW AVE",
+   "how": "sign points",
+   "signs": 3,
+   "agree": 3
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "JEWEL MC COY LANE",
+   "centerline": "JEWELL MCKOY LN",
+   "how": "sign points",
+   "signs": 3,
+   "agree": 3
+  },
+  {
+   "borough": "Bronx",
+   "sign": "ST JOHN AVENUE",
+   "centerline": "AVE ST JOHN",
+   "how": "sign points",
+   "signs": 3,
+   "agree": 3
+  },
+  {
+   "borough": "Manhattan",
+   "sign": "N D PERLMAN PLACE",
+   "centerline": "NATHAN D PERLMAN PL",
+   "how": "sign points",
+   "signs": 3,
+   "agree": 3
+  },
+  {
+   "borough": "Bronx",
+   "sign": "ADRIAN AVENUE",
+   "centerline": "ADRIAN AVE",
+   "how": "sign points",
+   "signs": 2,
+   "agree": 2
+  },
+  {
+   "borough": "Queens",
+   "sign": "IRVING AVENUE",
+   "centerline": "IRVING AVE",
+   "how": "sign points",
+   "signs": 2,
+   "agree": 2
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "MEEKER STREET",
+   "centerline": "MEEKER AVE",
+   "how": "sign points",
+   "signs": 2,
+   "agree": 2
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "FLATLAND AVENUE",
+   "centerline": "FLATLANDS AVE",
+   "how": "sign points",
+   "signs": 2,
+   "agree": 2
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "SCHENK STREET",
+   "centerline": "SCHENCK ST",
+   "how": "sign points",
+   "signs": 2,
+   "agree": 2
+  },
+  {
+   "borough": "Bronx",
+   "sign": "A J GRIFFIN PLACE",
+   "centerline": "ANTHONY J GRIFFIN PL",
+   "how": "sign points",
+   "signs": 2,
+   "agree": 2
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "RAPELYEA STREET",
+   "centerline": "RAPELYE ST",
+   "how": "similar name"
+  },
+  {
+   "borough": "Queens",
+   "sign": "HAWTHORNE AVENUE",
+   "centerline": "HAWTHORN AVE",
+   "how": "similar name"
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "RENAISANCE COURT",
+   "centerline": "RENAISSANCE CT",
+   "how": "similar name"
+  },
+  {
+   "borough": "Brooklyn",
+   "sign": "WALCOTT STREET",
+   "centerline": "WOLCOTT ST",
+   "how": "similar name"
+  },
+  {
+   "borough": "Queens",
+   "sign": "QUEENS MIDTOWN EXP",
+   "centerline": "QUEENS MIDTOWN EXPY",
+   "how": "similar name"
+  },
+  {
+   "borough": "Bronx",
+   "sign": "PALISADES AVENUE",
+   "centerline": "PALISADE AVE",
+   "how": "similar name"
+  },
+  {
+   "borough": "Bronx",
+   "sign": "HUGH GRANT CIRCLE",
+   "centerline": "HUGH J GRANT CIR",
+   "how": "similar name"
+  },
+  {
+   "borough": "Queens",
+   "sign": "CHARLECOTTE RIDGE",
+   "centerline": "CHARLECOTE RDG",
+   "how": "similar name"
+  }
+ ],
+ "holidays": {
+  "days": 42,
+  "years": [
+   2026
+  ],
+  "missing": [
+   2027
+  ],
+  "rule": "all: ASP is off for the whole day citywide (overnight signs too)"
+ },
+ "ticketCheck": {
+  "method": "A 1% sample of FY2027 code 21 tickets (summons number % 100 = 37). Each ticket with a house number goes to the centerline block of its DOF street code (street_code1 = CSCL b5sc) whose address range on one side holds that number, and so to a side (the other side when the ticket says O, opposite). On a block side the build has rules for, it counts whether a rule there covers the ticket's weekday and minute: exactly, within 15 minutes, or with the ticket's A and P swapped (a common entry error).",
+  "counts": {
+   "tickets": 5052,
+   "withHouseNumber": 4563,
+   "onACenterlineBlock": 4390,
+   "opposite": 1061,
+   "onABlockWithRules": 4298,
+   "dayAndHourMatch": 4005,
+   "dayAndHourMatchWithin15min": 10,
+   "aOrPLikelySwapped": 0,
+   "matchOnlyOnOtherSide": 86,
+   "dayMatchOnly": 69,
+   "noMatch": 128,
+   "noRuleOnThatSide": 87,
+   "postedHoursOnTicket": 4293,
+   "postedHoursMatchARule": 3631,
+   "postedHoursMatchIgnoringAMPM": 4018,
+   "postedDayCountMatches": 3641
+  },
+  "summary": {
+   "sample": 5052,
+   "onABlockWithRules": 4298,
+   "dayAndHourMatch": 0.9318,
+   "dayAndHourWithin15minOrAPSwapped": 0.9342,
+   "matchOnlyOnOtherSide": 0.02,
+   "postedHoursMatch": 0.8458,
+   "postedHoursMatchIgnoringAMPM": 0.9359,
+   "postedDayCountMatch": 0.9062
+  },
+  "byBoroughAndMethod": {
+   "Bronx": {
+    "tickets": 601,
+    "match": 533,
+    "share": 0.8869
+   },
+   "placed by walk": {
+    "tickets": 4191,
+    "match": 3987,
+    "share": 0.9513
+   },
+   "Brooklyn": {
+    "tickets": 1967,
+    "match": 1855,
+    "share": 0.9431
+   },
+   "Queens": {
+    "tickets": 718,
+    "match": 680,
+    "share": 0.9471
+   },
+   "Manhattan": {
+    "tickets": 1012,
+    "match": 937,
+    "share": 0.9259
+   },
+   "placed by sign points": {
+    "tickets": 20,
+    "match": 18,
+    "share": 0.9
+   },
+   "placed by walk, sign points off the street": {
+    "tickets": 5,
+    "match": 5,
+    "share": 1
+   }
+  },
+  "noMatchExamples": [
+   {
+    "street": "149 ST",
+    "day": 0,
+    "time": "0420P",
+    "posted": "bbbbbbb ALL ALL",
+    "rulesHere": [
+     [
+      6,
+      9,
+      "10:30",
+      31,
+      0,
+      0
+     ]
+    ],
+    "rulesOtherSide": [
+     [
+      3,
+      9,
+      "10:30",
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "10TH AVE",
+    "day": 5,
+    "time": "0045A",
+    "posted": "bbbbbbb ALL ALL",
+    "rulesHere": [
+     [
+      3,
+      "9:30",
+      11,
+      31,
+      0,
+      0
+     ]
+    ],
+    "rulesOtherSide": [
+     [
+      4,
+      "9:30",
+      11,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "CHAUNCEY ST",
+    "day": 6,
+    "time": "0652P",
+    "posted": "bbbbbbb ALL ALL",
+    "rulesHere": [
+     [
+      1,
+      9,
+      "10:30",
+      31,
+      0,
+      0
+     ],
+     [
+      4,
+      9,
+      "10:30",
+      31,
+      0,
+      0
+     ]
+    ],
+    "rulesOtherSide": [
+     [
+      2,
+      9,
+      "10:30",
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      9,
+      "10:30",
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "MORRISON AVE",
+    "day": 3,
+    "time": "1003P",
+    "posted": "bbbbbbb ALL ALL",
+    "rulesHere": [
+     [
+      2,
+      "8:30",
+      10,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      "8:30",
+      10,
+      31,
+      0,
+      0
+     ]
+    ],
+    "rulesOtherSide": [
+     [
+      1,
+      "8:30",
+      10,
+      31,
+      0,
+      0
+     ],
+     [
+      4,
+      "8:30",
+      10,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "72 STREET",
+    "day": 5,
+    "time": "1151A",
+    "posted": "Y 1130A 0100P",
+    "rulesHere": [
+     [
+      1,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ]
+    ],
+    "rulesOtherSide": [
+     [
+      2,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "BRONX RIVER AVENUE",
+    "day": 4,
+    "time": "0922A",
+    "posted": "Y  Y 0830A 1000A",
+    "rulesHere": [],
+    "rulesOtherSide": [
+     [
+      2,
+      "8:30",
+      10,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      "8:30",
+      10,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "UNION STREET",
+    "day": 3,
+    "time": "0835A",
+    "posted": "YYYYY 0830A 0900A",
+    "rulesHere": [],
+    "rulesOtherSide": [
+     [
+      5,
+      9,
+      "10:30",
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "PECK SLIP",
+    "day": 2,
+    "time": "1140A",
+    "posted": "Y  Y 1130A 0100P",
+    "rulesHere": [],
+    "rulesOtherSide": [
+     [
+      1,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ],
+     [
+      4,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "EAST GUN HILL ROAD",
+    "day": 3,
+    "time": "0847A",
+    "posted": " 0830A 0900A",
+    "rulesHere": [
+     [
+      1,
+      "9:30",
+      11,
+      31,
+      0,
+      0
+     ]
+    ],
+    "rulesOtherSide": [
+     [
+      3,
+      "9:30",
+      11,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "EAST 138 STREET",
+    "day": 3,
+    "time": "0744A",
+    "posted": " 0730A 0800A",
+    "rulesHere": [
+     [
+      2,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ],
+     [
+      5,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ]
+    ],
+    "rulesOtherSide": [
+     [
+      1,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ],
+     [
+      4,
+      "11:30",
+      13,
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "RIVERSIDE DRIVE",
+    "day": 5,
+    "time": "1116A",
+    "posted": "Y  Y 1100A 1230P",
+    "rulesHere": [],
+    "rulesOtherSide": [
+     [
+      1,
+      11,
+      "12:30",
+      31,
+      0,
+      0
+     ],
+     [
+      4,
+      11,
+      "12:30",
+      31,
+      0,
+      0
+     ]
+    ]
+   },
+   {
+    "street": "AUSTIN STREET",
+    "day": 4,
+    "time": "1237P",
+    "posted": "Y 1200P 0130P",
+    "rulesHere": [],
+    "rulesOtherSide": [
+     [
+      5,
+      12,
+      "13:30",
+      31,
+      0,
+      0
+     ]
+    ]
+   }
+  ]
+ },
+ "notes": {
+  "season": "All year, Monday to Saturday (8 signs also name Sunday). No season, so every rule has months 0.",
+  "holidays": "The City's 2026 ASP suspension calendar (DOT's .ics, read with a browser user agent: nyc.gov answers 403 otherwise). The 2027 calendar is not published yet (checked 2026-10-18); every build asks again and adds it once it is. Snow and emergency suspensions are announced the same day (311, Notify NYC) and are in no calendar.",
+  "sides": "Sign points lie on the centerline (median 1.2 m from the walk), at the sign's distance from the corner, so they tell the line, never the side. The side is the order's compass side, taken against each line's own direction, or the walk's where a line runs along that compass direction.",
+  "partialBlocks": "A sign order covers one block side, sometimes a few blocks. Some carry a second schedule on part of the block (a daily \"except Sunday\" sign by a commercial corner, with its arrow and distance). The format has no extent shorter than a block, so the side shows every schedule its signs carry.",
+  "dividedRoads": "Divided streets (Queens Blvd, Ocean Pkwy, Grand Concourse, Delancey St) keep one name on every roadbed in CSCL; the sign points choose the roadbed, and a walk that crosses to the other roadbed and back is refused. Without sign points the shortest walk is taken, which can be the main roadbed.",
+  "houseNumbers": "n is left out where CSCL writes Queens hyphenated numbers (\"22-001\"): the format holds plain numbers only.",
+  "tickets": "The FY2027 file holds tickets from June to September 2026. Its days_parking_in_effect arrives with leading blanks trimmed (\"Y  Y\" for Tuesday and Friday), so only the number of days is compared. 22% of the tickets were written opposite the house number (O).",
+  "sweepNYC": "SweepNYC (c23c-uwsm) logs DSNY broom GPS visits per CSCL physical id and day since 2023-10-27: the same ids as c here, so a \"when the broom passed\" layer can join on them directly. Not used yet."
+ }
+}

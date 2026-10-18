@@ -1,0 +1,29 @@
+{
+  "name": "CURB Saint Paul (preview)",
+  "short_name": "CURB Saint P",
+  "description": "Saint Paul street sweeping, block by block. A preview on the City's open data.",
+  "start_url": "/saint-paul",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F2ECDF",
+  "theme_color": "#C1121F",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/saint-paul"
+}

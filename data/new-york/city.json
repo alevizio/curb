@@ -1,0 +1,252 @@
+{
+ "id": "new-york",
+ "name": "New York City",
+ "region": "New York",
+ "tz": "America/New_York",
+ "center": [
+  40.7835,
+  -73.9765
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   40.498323,
+   -74.254958
+  ],
+  [
+   40.915111,
+   -73.700021
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-06": "Three Kings' Day",
+  "2026-01-19": "Martin Luther King Jr.'s Birthday",
+  "2026-02-12": "Lincoln's Birthday",
+  "2026-02-16": "Lunar New Year's Eve and Washington's Birthday (Presidents Day)",
+  "2026-02-17": "Lunar New Year",
+  "2026-02-18": "Losar (Tibetan New Year) and Ash Wednesday",
+  "2026-03-03": "Purim",
+  "2026-03-20": "Idul-Fitr (Eid Al-Fitr)",
+  "2026-03-21": "Idul-Fitr (Eid Al-Fitr)",
+  "2026-04-02": "Passover and Holy Thursday",
+  "2026-04-03": "Passover and Good Friday",
+  "2026-04-08": "Passover (seventh and eighth days)",
+  "2026-04-09": "Orthodox Holy Thursday and Passover (seventh and eighth days)",
+  "2026-04-10": "Orthodox Good Friday",
+  "2026-05-14": "Solemnity of the Ascension",
+  "2026-05-22": "Shavuoth",
+  "2026-05-23": "Shavuoth",
+  "2026-05-25": "Memorial Day",
+  "2026-05-27": "Idul-Adha (Eid Al-Adha)",
+  "2026-05-28": "Idul-Adha (Eid Al-Adha)",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day",
+  "2026-07-04": "Independence Day",
+  "2026-07-23": "Tisha B'Av",
+  "2026-08-15": "Feast of the Assumption",
+  "2026-09-07": "Labor Day",
+  "2026-09-12": "Rosh Hashanah",
+  "2026-09-13": "Rosh Hashanah",
+  "2026-09-21": "Yom Kippur",
+  "2026-09-26": "Succoth",
+  "2026-09-27": "Succoth",
+  "2026-10-03": "Shemini Atzereth",
+  "2026-10-04": "Simchas Torah",
+  "2026-10-12": "Columbus Day",
+  "2026-11-01": "All Saints' Day",
+  "2026-11-03": "Election Day",
+  "2026-11-08": "Diwali",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-12-08": "Immaculate Conception",
+  "2026-12-25": "Christmas Day"
+ },
+ "holidaysSource": "https://www.nyc.gov/html/dot/html/motorist/alternate-side-parking.shtml",
+ "holidayRule": "all",
+ "fine": "$65",
+ "tow": "no",
+ "fineSource": "https://www.nyc.gov/site/finance/vehicles/services-violation-codes.page",
+ "agency": "NYC Department of Sanitation (the brooms) and NYC DOT (the signs)",
+ "scheduleUrl": "https://www.nyc.gov/html/dot/html/motorist/alternate-side-parking.shtml",
+ "sources": [
+  {
+   "name": "Parking Regulation Locations and Signs (NYC DOT)",
+   "url": "https://data.cityofnewyork.us/d/nfid-uabd",
+   "license": "NYC Open Data Terms of Use",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Centerline, CSCL (NYC Office of Technology and Innovation)",
+   "url": "https://data.cityofnewyork.us/d/inkn-q76z",
+   "license": "NYC Open Data Terms of Use",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "2020 Neighborhood Tabulation Areas (NYC Department of City Planning)",
+   "url": "https://data.cityofnewyork.us/d/9nt8-h7nd",
+   "license": "NYC Open Data Terms of Use",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Alternate Side Parking suspension calendar (NYC DOT)",
+   "url": "https://www.nyc.gov/html/dot/html/motorist/alternate-side-parking.shtml",
+   "license": "NYC.gov terms of use",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Alternate side parking: no parking on the side of the street and at the hours the broom sign shows, Monday to Saturday, all year, so the sweeper can pass.",
+  "afterpass": "All year, Monday to Saturday. A $65 ticket, no tow. No ASP on the City's suspension days (holidays, and some snow days).",
+  "dataNotes": "The rules are the broom signs in NYC DOT's sign inventory (Parking Regulation Locations and Signs), read from their text. Each sign order names its street, cross streets and side; CURB walks the City's street centerlines (CSCL) between the two cross streets, guided by the signs' own points, and puts the rule on that side. ASP is also suspended for snow and emergencies, announced the same day by 311 and Notify NYC."
+ },
+ "neighborhoods": [
+  {
+   "name": "Washington Heights (South)",
+   "borough": "Manhattan",
+   "sides": 511,
+   "bbox": "-73.948278,40.830466,-73.931395,40.849153"
+  },
+  {
+   "name": "East Harlem (North)",
+   "borough": "Manhattan",
+   "sides": 457,
+   "bbox": "-73.948313,40.791566,-73.929544,40.816937"
+  },
+  {
+   "name": "Washington Heights (North)",
+   "borough": "Manhattan",
+   "sides": 444,
+   "bbox": "-73.942055,40.847437,-73.924766,40.867801"
+  },
+  {
+   "name": "Upper East Side-Carnegie Hill",
+   "borough": "Manhattan",
+   "sides": 434,
+   "bbox": "-73.970729,40.762235,-73.949333,40.787236"
+  },
+  {
+   "name": "Mott Haven-Port Morris",
+   "borough": "Bronx",
+   "sides": 806,
+   "bbox": "-73.93217,40.798585,-73.902989,40.818551"
+  },
+  {
+   "name": "Williamsbridge-Olinville",
+   "borough": "Bronx",
+   "sides": 755,
+   "bbox": "-73.870563,40.869665,-73.847445,40.891824"
+  },
+  {
+   "name": "Soundview-Bruckner-Bronx River",
+   "borough": "Bronx",
+   "sides": 578,
+   "bbox": "-73.883553,40.819171,-73.861208,40.840865"
+  },
+  {
+   "name": "Concourse-Concourse Village",
+   "borough": "Bronx",
+   "sides": 555,
+   "bbox": "-73.931333,40.813256,-73.908693,40.837207"
+  },
+  {
+   "name": "Canarsie",
+   "borough": "Brooklyn",
+   "sides": 1419,
+   "bbox": "-73.919822,40.62569,-73.880963,40.654496"
+  },
+  {
+   "name": "Bay Ridge",
+   "borough": "Brooklyn",
+   "sides": 1226,
+   "bbox": "-74.040858,40.609704,-74.015148,40.640783"
+  },
+  {
+   "name": "East Williamsburg",
+   "borough": "Brooklyn",
+   "sides": 1153,
+   "bbox": "-73.952912,40.700733,-73.92075,40.726864"
+  },
+  {
+   "name": "Carroll Gardens-Cobble Hill-Gowanus-Red Hook",
+   "borough": "Brooklyn",
+   "sides": 1137,
+   "bbox": "-74.01813,40.665183,-73.980131,40.69166"
+  },
+  {
+   "name": "Forest Hills",
+   "borough": "Queens",
+   "sides": 1091,
+   "bbox": "-73.859421,40.708513,-73.829835,40.738113"
+  },
+  {
+   "name": "Ridgewood",
+   "borough": "Queens",
+   "sides": 1049,
+   "bbox": "-73.921893,40.692007,-73.885551,40.713445"
+  },
+  {
+   "name": "Elmhurst",
+   "borough": "Queens",
+   "sides": 965,
+   "bbox": "-73.894448,40.72862,-73.864816,40.749072"
+  },
+  {
+   "name": "Astoria (North)-Ditmars-Steinway",
+   "borough": "Queens",
+   "sides": 910,
+   "bbox": "-73.923983,40.766614,-73.887895,40.786048"
+  }
+ ],
+ "parts": {
+  "note": "segments.json is the whole city; the same blocks one borough at a time, for loading what the map shows",
+  "files": [
+   {
+    "id": "manhattan",
+    "name": "Manhattan",
+    "file": "segments-manhattan.json",
+    "bbox": "-74.017995,40.70179,-73.906821,40.879046",
+    "blocks": 4563,
+    "sides": 7354,
+    "bytes": 1358236
+   },
+   {
+    "id": "bronx",
+    "name": "Bronx",
+    "file": "segments-bronx.json",
+    "bbox": "-73.93217,40.798585,-73.815973,40.911426",
+    "blocks": 7306,
+    "sides": 12852,
+    "bytes": 2137209
+   },
+   {
+    "id": "brooklyn",
+    "name": "Brooklyn",
+    "file": "segments-brooklyn.json",
+    "bbox": "-74.040858,40.571528,-73.857641,40.739018",
+    "blocks": 17083,
+    "sides": 31371,
+    "bytes": 4628732
+   },
+   {
+    "id": "queens",
+    "name": "Queens",
+    "file": "segments-queens.json",
+    "bbox": "-73.960806,40.568564,-73.727578,40.790741",
+    "blocks": 9955,
+    "sides": 17530,
+    "bytes": 2491577
+   },
+   {
+    "id": "staten-island",
+    "name": "Staten Island",
+    "file": "segments-staten-island.json",
+    "bbox": "-74.076293,40.635944,-74.075849,40.63778",
+    "blocks": 4,
+    "sides": 4,
+    "bytes": 2009
+   }
+  ]
+ },
+ "holidaysMissing": "The City has not published the 2027 ASP suspension calendar yet (checked 2026-10-18); the next build after it appears at https://www.nyc.gov/html/dot/downloads/misc/2027-alternate-side.ics adds it"
+}

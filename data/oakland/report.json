@@ -1,0 +1,7429 @@
+{
+ "generated": "2026-10-18T18:42:38.915Z",
+ "counts": {
+  "features": 23862,
+  "noGeometry": 4,
+  "multiLineNotJoined": 12,
+  "lines": 22516,
+  "repeatedNameCopies": 1330,
+  "blocks": 10125,
+  "blockSides": 17805,
+  "rules": 25694,
+  "sideUnknown": 66,
+  "sharedOrMissingIds": 10,
+  "segmentsKB": 2536
+ },
+ "season": "none: all year (the layer has no season and the City names none)",
+ "holidays": {
+  "rule": "all",
+  "note": "The City: \"Street sweeping will not occur on the following City of Oakland holidays.\" The tickets agree, night sweeps included (holidayCheck).",
+  "holidayCheck": [
+   {
+    "date": "2026-01-01",
+    "name": "New Year's Day",
+    "tickets": 0,
+    "before6am": 0,
+    "sameWeekdayMedian": 946,
+    "sameWeekdayBefore6amMedian": 190
+   },
+   {
+    "date": "2026-01-19",
+    "name": "Martin Luther King Jr. Day",
+    "tickets": 0,
+    "before6am": 0,
+    "sameWeekdayMedian": 905,
+    "sameWeekdayBefore6amMedian": 141
+   },
+   {
+    "date": "2026-02-16",
+    "name": "Presidents Day",
+    "tickets": 0,
+    "before6am": 0,
+    "sameWeekdayMedian": 871,
+    "sameWeekdayBefore6amMedian": 96
+   },
+   {
+    "date": "2026-03-31",
+    "name": "Farmworkers Day",
+    "tickets": 0,
+    "before6am": 0,
+    "sameWeekdayMedian": 927,
+    "sameWeekdayBefore6amMedian": 270
+   },
+   {
+    "date": "2026-05-25",
+    "name": "Memorial Day",
+    "tickets": 0,
+    "before6am": 0,
+    "sameWeekdayMedian": 854,
+    "sameWeekdayBefore6amMedian": 109
+   },
+   {
+    "date": "2026-06-19",
+    "name": "Juneteenth",
+    "tickets": 0,
+    "before6am": 0,
+    "sameWeekdayMedian": 711,
+    "sameWeekdayBefore6amMedian": 271
+   },
+   {
+    "date": "2026-07-03",
+    "name": "Independence Day (Observed)",
+    "tickets": 376,
+    "before6am": 325,
+    "sameWeekdayMedian": 711,
+    "sameWeekdayBefore6amMedian": 271
+   },
+   {
+    "date": "2026-07-04",
+    "name": "Independence Day",
+    "tickets": 0,
+    "before6am": 0,
+    "sameWeekdayMedian": 268,
+    "sameWeekdayBefore6amMedian": 268
+   }
+  ]
+ },
+ "lineSides": {
+  "note": "Each line's odd and even side (a major street drawn as two lines counts its one side): why it has rules or not, from the City's codes.",
+  "posted schedule": 18416,
+  "not swept": 9724,
+  "not swept (uncontrolled condition)": 8532,
+  "not swept (highway)": 5154,
+  "swept, but no signs: not enforced": 401,
+  "not swept (exempt)": 336,
+  "not swept (outside the city)": 176,
+  "not swept (alley)": 126,
+  "the code \"missing\" (not in the domain)": 85,
+  "a day but no hours": 11,
+  "no even addresses on this street": 8,
+  "no odd addresses on this street": 4,
+  "no such side": 3,
+  "shown on a different map (no schedule here)": 1,
+  "major street: this side is on the street's other line": 1
+ },
+ "leftOut": {
+  "notPosted": {
+   "sides": 401,
+   "why": "code N-S, \"No Signage\": swept, but no signs, so not enforced"
+  },
+  "noHours": {
+   "sides": 11,
+   "why": "a day code with time NA"
+  },
+  "sideUnknown": {
+   "lines": 66,
+   "why": "two different schedules and no way to tell which side holds the odd numbers",
+   "examples": [
+    {
+     "c": "395514603",
+     "s": "Unnamed Street",
+     "l": "41st St - Linda Ave"
+    },
+    {
+     "c": "395517447",
+     "s": "Mandela Pkwy",
+     "l": "W Grand Ave"
+    },
+    {
+     "c": "395525192",
+     "s": "Ramp",
+     "l": "14th Ave - Foothill Blvd"
+    },
+    {
+     "c": "417771328",
+     "s": "Parking Lot",
+     "l": "36th Ave"
+    },
+    {
+     "c": "421988703",
+     "s": "Ramp",
+     "l": "Miles Ave - College Ave"
+    },
+    {
+     "c": "395535878",
+     "s": "Streets",
+     "l": "Lawlor St - Burr St"
+    },
+    {
+     "c": "416184876",
+     "s": "Ramp",
+     "l": "13th Ave - Excelsior Ave"
+    },
+    {
+     "c": "416196210",
+     "s": "Link St",
+     "l": "106th Ave - Bancroft Ave"
+    }
+   ]
+  },
+  "contradicted": {
+   "sides": 498,
+   "why": "the tickets contradict the schedule (crossCheck.contradictedSides): left off the map, --keep-contradicted keeps them"
+  }
+ },
+ "sidePlacement": {
+  "byNumbers": 7740,
+  "byAddressPoints": 41,
+  "byNeighbors": 476,
+  "bothSidesSame": 0,
+  "msByNumbers": 1654,
+  "msByOtherLine": 356,
+  "majorStreetLinesWithBoth": 1624,
+  "majorStreetNumbersVsOtherLine": 3,
+  "addressPoints": {
+   "agreeWithRanges": 4807,
+   "disagree": 21,
+   "notEnoughPoints": 2933,
+   "majorStreetLines": {
+    "agree": 385,
+    "disagree": 5,
+    "notEnoughPoints": 1620,
+    "note": "checked only, not changed"
+   },
+   "correctedLines": [
+    {
+     "c": "469170265",
+     "s": "Medau Pl",
+     "l": "Moraga Ave - Mountain Blvd"
+    },
+    {
+     "c": "445214842",
+     "s": "Eastlawn St",
+     "l": "65th Ave"
+    },
+    {
+     "c": "445214843",
+     "s": "Eastlawn St",
+     "l": "65th Ave"
+    },
+    {
+     "c": "469167671",
+     "s": "Benvenue Ave",
+     "l": "Alcatraz Ave - Woolsey St"
+    },
+    {
+     "c": "469168447",
+     "s": "Miles Ave",
+     "l": "Forest St - College Ave"
+    },
+    {
+     "c": "469167703",
+     "s": "Regent St",
+     "l": "Alcatraz Ave - Woolsey St"
+    },
+    {
+     "c": "469167859",
+     "s": "Florio St",
+     "l": "62nd St - Auburn Ave"
+    },
+    {
+     "c": "469168385",
+     "s": "Miles Ave",
+     "l": "Forest St - College Ave"
+    },
+    {
+     "c": "469175541",
+     "s": "38th Ave",
+     "l": "MacArthur Blvd - Masterson St"
+    },
+    {
+     "c": "469173910",
+     "s": "Bella Vista Ave",
+     "l": "10th Ave - 11th Ave"
+    },
+    {
+     "c": "469174442",
+     "s": "Aspen Pl",
+     "l": "Arizona St"
+    },
+    {
+     "c": "469175113",
+     "s": "E 21st St",
+     "l": "13th Ave - 14th Ave"
+    },
+    {
+     "c": "469172213",
+     "s": "Palm Ave",
+     "l": "Perkins St - Staten Ave"
+    },
+    {
+     "c": "469179762",
+     "s": "65th Ave",
+     "l": "Eastlawn St - International Blvd"
+    },
+    {
+     "c": "469181086",
+     "s": "99th Avenue Ct",
+     "l": "99th Ave"
+    },
+    {
+     "c": "469176658",
+     "s": "Santa Rita St",
+     "l": "Harrington Ave - Ransom Ave"
+    },
+    {
+     "c": "469179861",
+     "s": "65th Ave",
+     "l": "Fenham St - Eastlawn St"
+    },
+    {
+     "c": "469182348",
+     "s": "Estepa Dr",
+     "l": "Bergedo Dr - Catron Dr"
+    },
+    {
+     "c": "493540194",
+     "s": "Gilbert St",
+     "l": "Ridgeway Ave - Del Norte Dr"
+    },
+    {
+     "c": "493544593",
+     "s": "Durant Ave",
+     "l": "Sunnyside St - Kenilworth Ave"
+    },
+    {
+     "c": "469181389",
+     "s": "Durant Ave",
+     "l": "Beverly Ave - Sunnyside St"
+    }
+   ]
+  },
+  "note": "byNumbers: the address ranges say which side is odd (checked against the City's address points, which win where they clearly disagree); byAddressPoints: no ranges, the address points say; byNeighbors: the next line of the same street does; bothSidesSame: unknown, but both sides share one schedule; major streets (MS, two lines, one side each): the curb is on the side of the line's house numbers, else the side away from the street's other line. The tickets' own points were not used: they sit on the side the address points give on only about 80% of blocks."
+ },
+ "repeatedNames": {
+  "note": "The layer repeats a line once per name; when its copies give a side different schedules, the tickets on that side choose, else the primary record.",
+  "sidesWithOneSchedule": 18402,
+  "choseByTickets": 10,
+  "choseByPrimary": 4,
+  "examples": [
+   {
+    "c": "469168351",
+    "s": "61st Pl",
+    "side": "odd",
+    "chose": "M24|A1",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "M24|A1": 0,
+     "T24|A1": 0
+    }
+   },
+   {
+    "c": "469168351",
+    "s": "61st Pl",
+    "side": "even",
+    "chose": "T24|A1",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "T24|A1": 0,
+     "M24|A1": 0
+    }
+   },
+   {
+    "c": "469168364",
+    "s": "61st Pl",
+    "side": "odd",
+    "chose": "M24|A1",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "M24|A1": 2,
+     "T24|A1": 2
+    }
+   },
+   {
+    "c": "469168364",
+    "s": "61st Pl",
+    "side": "even",
+    "chose": "T24|A1",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "T24|A1": 6,
+     "M24|A1": 0
+    }
+   },
+   {
+    "c": "469173904",
+    "s": "Athol Ave",
+    "side": "odd",
+    "chose": "M24|M3",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "M24|M3": 3,
+     "T24|M3": 0
+    }
+   },
+   {
+    "c": "469173904",
+    "s": "Athol Ave",
+    "side": "even",
+    "chose": "T24|M3",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "T24|M3": 12,
+     "M24|M3": 0
+    }
+   },
+   {
+    "c": "469177329",
+    "s": "Lisbon Ave",
+    "side": "odd",
+    "chose": "M24|M3",
+    "from": [
+     "copy",
+     "2024"
+    ],
+    "tickets": {
+     "M24|M3": 19,
+     "S|M3": 0
+    }
+   },
+   {
+    "c": "469177329",
+    "s": "Lisbon Ave",
+    "side": "even",
+    "chose": "T24|M3",
+    "from": [
+     "copy",
+     "2024"
+    ],
+    "tickets": {
+     "T24|M3": 19,
+     "SU|M3": 0
+    }
+   },
+   {
+    "c": "469177406",
+    "s": "28th Ave",
+    "side": "odd",
+    "chose": "S|M3",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "S|M3": 0,
+     "M24|M3": 0
+    }
+   },
+   {
+    "c": "469177406",
+    "s": "28th Ave",
+    "side": "even",
+    "chose": "T24|M3",
+    "from": [
+     "copy",
+     "2024"
+    ],
+    "tickets": {
+     "T24|M3": 12,
+     "SU|M3": 0
+    }
+   },
+   {
+    "c": "469177520",
+    "s": "Lisbon Ave",
+    "side": "odd",
+    "chose": "M24|M3",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "M24|M3": 29,
+     "S|M3": 0
+    }
+   },
+   {
+    "c": "469177520",
+    "s": "Lisbon Ave",
+    "side": "even",
+    "chose": "T24|M3",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "T24|M3": 16,
+     "SU|M3": 0
+    }
+   },
+   {
+    "c": "469173881",
+    "s": "Athol Ave",
+    "side": "odd",
+    "chose": "M24|M3",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "M24|M3": 18,
+     "T24|M3": 0
+    }
+   },
+   {
+    "c": "469173881",
+    "s": "Athol Ave",
+    "side": "even",
+    "chose": "T24|M3",
+    "from": [
+     "primary",
+     "2024"
+    ],
+    "tickets": {
+     "T24|M3": 10,
+     "M24|M3": 1
+    }
+   }
+  ]
+ },
+ "snapshot2024": {
+  "segments": 7512,
+  "matched": 7512,
+  "sameAsPrimary": 7501,
+  "otherCopy": 11,
+  "notIn2021": 0,
+  "notInExamples": [],
+  "note": "Every 2024 line is a 2021 line (same geometry). Its schedule equals the 2021 primary record's, or another copy of the same line in the 2021 layer; it holds no schedule the 2021 layer lacks, so it changes nothing by itself. Where it differs, the tickets chose (repeatedNames)."
+ },
+ "codes": {
+  "day": {
+   "E": "Everyday: Sun Mon Tue Wed Thu Fri Sat, every week",
+   "EEH": "Everyday except Holidays: Sun Mon Tue Wed Thu Fri Sat, every week",
+   "EESSH": "Everyday except Saturday, Sunday & Holidays: Mon Tue Wed Thu Fri, every week",
+   "MF": "Every Mon to Fri: Mon Tue Wed Thu Fri, every week",
+   "MWF": "Every Mon, Wed, Fri: Mon Wed Fri, every week",
+   "TTHS": "Every Tues, Thurs, Sat: Tue Thu Sat, every week",
+   "TTH": "Every Tues, Thurs: Tue Thu, every week",
+   "TTHE": "Every Tues and Thurs: Tue Thu, every week",
+   "TFE": "Every Tues and Fri: Tue Fri, every week",
+   "MTHE": "Every Mon and Thurs: Mon Thu, every week",
+   "THFE": "Every Thurs and Fri: Thu Fri, every week",
+   "MFE": "Every Mon and Fri: Mon Fri, every week",
+   "ME": "Every Mon: Mon, every week",
+   "TE": "Every Tues: Tue, every week",
+   "WE": "Every Wed: Wed, every week",
+   "THE": "Every Thurs: Thu, every week",
+   "FE": "Every Fri: Fri, every week",
+   "S": "Every Sat: Sat, every week",
+   "SU": "Every Sun: Sun, every week",
+   "M13": "1st and 3rd Mon: Mon, 1st and 3rd",
+   "T13": "1st and 3rd Tues: Tue, 1st and 3rd",
+   "W13": "1st and 3rd Wed: Wed, 1st and 3rd",
+   "TH13": "1st and 3rd Thurs: Thu, 1st and 3rd",
+   "F13": "1st and 3rd Fri: Fri, 1st and 3rd",
+   "M24": "2nd and 4th Mon: Mon, 2nd and 4th",
+   "T24": "2nd and 4th Tues: Tue, 2nd and 4th",
+   "M1": "1st Mon: Mon, 1st",
+   "T1": "1st Tues: Tue, 1st",
+   "TH1": "1st Thurs: Thu, 1st",
+   "F1": "1st Fri: Fri, 1st",
+   "FW": "First Wednesday: Wed, 1st",
+   "M2": "2nd Mon: Mon, 2nd",
+   "T2": "2nd Tues: Tue, 2nd",
+   "W2": "2nd Wed: Wed, 2nd",
+   "TH2": "2nd Thurs: Thu, 2nd",
+   "F2": "2nd Fri: Fri, 2nd",
+   "W4": "4th Wed: Wed, 4th",
+   "TH4": "4th Thurs: Thu, 4th",
+   "F4": "4th Fri: Fri, 4th"
+  },
+  "notSwept": {
+   "N-S": "No Signage: swept, but no signs: not enforced",
+   "N": "No Sweeping (Exempt): not swept (exempt)",
+   "NS": "No Sweeping (Within City Of Oakland Limit): not swept",
+   "NS-UC": "No Sweeping (Uncontrol Condition): not swept (uncontrolled condition)",
+   "NS-H": "No Sweeping (HYW): not swept (highway)",
+   "NS-O": "No Sweeping (Outside Of The City Limit): not swept (outside the city)",
+   "NS-A": "No Sweeping(Alleyways): not swept (alley)",
+   "N-O": "No Odd Addresses: no odd addresses on this street",
+   "N-E": "No Even Addresses: no even addresses on this street",
+   "O": "There is no this side of the street: no such side",
+   "DM": "It is shown in the different map.: shown on a different map (no schedule here)",
+   "MS": "It is a major street so it is not using Centerline, it uses 2 lines.: major street: this side is on the street's other line",
+   "missing": "(not in the domain): the code \"missing\" (not in the domain)"
+  },
+  "time": {
+   "M1": "12:00AM-3:00AM: 0 to 3",
+   "M2": "3:00AM-6:00AM: 3 to 6",
+   "M3": "9:00AM-12:00PM: 9 to 12",
+   "A1": "12:30PM-3:30PM: 12:30 to 15:30",
+   "M23": "2:00AM-3:00AM: 2 to 3",
+   "M68": "6:00AM-8:00AM: 6 to 8"
+  },
+  "undecoded": "none: every code in the data is in the domain, except \"missing\" (85 even sides), left out",
+  "weeksCheck": {
+   "1st": "88% of 491 tickets on that weekday and hours fall in those weeks",
+   "2nd": "98.4% of 20187 tickets on that weekday and hours fall in those weeks",
+   "1st and 3rd": "99.9% of 73153 tickets on that weekday and hours fall in those weeks",
+   "2nd and 4th": "99.8% of 41865 tickets on that weekday and hours fall in those weeks",
+   "every week": "100% of 98028 tickets on that weekday and hours fall in those weeks"
+  }
+ },
+ "crossCheck": {
+  "tickets": {
+   "fetched": 326152,
+   "from": "2025-01-01",
+   "to": "2026-07-31",
+   "violation": "10.28.240 NO PARK CERTAIN HRS ($72)",
+   "matchedToALine": 316353,
+   "noHouseNumber": 1299,
+   "streetNotInLayer": 1192,
+   "numberNotOnStreetAndOver100m": 7308,
+   "streetsNotInLayer": [
+    "BROOKLYN BASIN WAY (406)",
+    "64TH AVE PL (79)",
+    "HOME PL EAST (69)",
+    "CHABOT CREST (67)",
+    "ISELTON AVE (63)",
+    "ELLIOTT ST (61)",
+    "AGUA VISTA ST (46)",
+    "CLINTON LN (44)",
+    "CHABOT DR (41)",
+    "99TH AVE CT (38)",
+    "S ELMHURST (34)",
+    "HOME PL WEST (34)"
+   ]
+  },
+  "method": "Each ticket goes to the line of its written street whose house numbers hold its number (on a major street, the line that carries that side), nearest the ticket's point; its side is odd or even by the number. It agrees when the side has a rule for that weekday, that week of the month and that hour (10 minute grace at both ends of the window).",
+  "share": {
+   "asPublished": 69.3,
+   "final": 73.7,
+   "finalStrict": 73.5
+  },
+  "verdictsAsPublished": {
+   "agree": 219262,
+   "other side's window": 42320,
+   "side not swept in the data": 18230,
+   "right day, other hours": 20068,
+   "other day": 15927,
+   "right day and hours, other week": 546
+  },
+  "verdictsFinal": {
+   "agree": 233180,
+   "other side's window": 28384,
+   "side not swept in the data": 18230,
+   "right day, other hours": 20800,
+   "other day": 15215,
+   "right day and hours, other week": 544
+  },
+  "reading": "Daytime residential routes agree (most 80 to 92%). The night routes on main streets (10 to 14) and the weekend routes (W2 to W6) do not: blocks with odd and even reversed, other hours, and weekend sweeps that tickets now show on Thursday and Friday. About 6% of tickets land on sides the layer marks as not swept, mostly downtown and night streets.",
+  "routes": [
+   {
+    "route": "11",
+    "tickets": 20604,
+    "agreeAsPublished": 54.4,
+    "agree": 68.9,
+    "otherSide": 20.6,
+    "otherTimes": 10.1,
+    "notSwept": 0.4
+   },
+   {
+    "route": "10",
+    "tickets": 19560,
+    "agreeAsPublished": 58.8,
+    "agree": 66.9,
+    "otherSide": 14.6,
+    "otherTimes": 18.5,
+    "notSwept": 0
+   },
+   {
+    "route": "12",
+    "tickets": 19367,
+    "agreeAsPublished": 77,
+    "agree": 77,
+    "otherSide": 8.7,
+    "otherTimes": 12.2,
+    "notSwept": 2.2
+   },
+   {
+    "route": "(none)",
+    "tickets": 18016,
+    "agreeAsPublished": 32.4,
+    "agree": 32.4,
+    "otherSide": 4.4,
+    "otherTimes": 5.4,
+    "notSwept": 57.8
+   },
+   {
+    "route": "13",
+    "tickets": 17142,
+    "agreeAsPublished": 71.5,
+    "agree": 71.5,
+    "otherSide": 5,
+    "otherTimes": 23.5,
+    "notSwept": 0
+   },
+   {
+    "route": "14",
+    "tickets": 12878,
+    "agreeAsPublished": 26.7,
+    "agree": 57.1,
+    "otherSide": 24.9,
+    "otherTimes": 17.9,
+    "notSwept": 0
+   },
+   {
+    "route": "2C",
+    "tickets": 12853,
+    "agreeAsPublished": 71.7,
+    "agree": 77.6,
+    "otherSide": 7.7,
+    "otherTimes": 4.2,
+    "notSwept": 10.5
+   },
+   {
+    "route": "2A",
+    "tickets": 12430,
+    "agreeAsPublished": 74.1,
+    "agree": 74.9,
+    "otherSide": 9.7,
+    "otherTimes": 9,
+    "notSwept": 6.4
+   },
+   {
+    "route": "2B",
+    "tickets": 11187,
+    "agreeAsPublished": 75.2,
+    "agree": 83.4,
+    "otherSide": 10.3,
+    "otherTimes": 5.2,
+    "notSwept": 1.2
+   },
+   {
+    "route": "3",
+    "tickets": 8791,
+    "agreeAsPublished": 58.8,
+    "agree": 64.5,
+    "otherSide": 6.1,
+    "otherTimes": 26.9,
+    "notSwept": 2.5
+   },
+   {
+    "route": "3B",
+    "tickets": 6672,
+    "agreeAsPublished": 87.8,
+    "agree": 87.8,
+    "otherSide": 4.2,
+    "otherTimes": 7.5,
+    "notSwept": 0.5
+   },
+   {
+    "route": "1",
+    "tickets": 6416,
+    "agreeAsPublished": 77.5,
+    "agree": 79.6,
+    "otherSide": 8.2,
+    "otherTimes": 11.4,
+    "notSwept": 0.7
+   },
+   {
+    "route": "6D",
+    "tickets": 6329,
+    "agreeAsPublished": 91.5,
+    "agree": 91.5,
+    "otherSide": 5.4,
+    "otherTimes": 3.1,
+    "notSwept": 0
+   },
+   {
+    "route": "1C",
+    "tickets": 6275,
+    "agreeAsPublished": 86.8,
+    "agree": 87.6,
+    "otherSide": 6.8,
+    "otherTimes": 4.4,
+    "notSwept": 1.2
+   },
+   {
+    "route": "1A",
+    "tickets": 5829,
+    "agreeAsPublished": 88.1,
+    "agree": 90.8,
+    "otherSide": 6.1,
+    "otherTimes": 3.1,
+    "notSwept": 0
+   },
+   {
+    "route": "1D",
+    "tickets": 5326,
+    "agreeAsPublished": 84.2,
+    "agree": 85.1,
+    "otherSide": 5.1,
+    "otherTimes": 3.1,
+    "notSwept": 6.7
+   },
+   {
+    "route": "7E",
+    "tickets": 5316,
+    "agreeAsPublished": 88.1,
+    "agree": 88.1,
+    "otherSide": 6.8,
+    "otherTimes": 4.7,
+    "notSwept": 0.3
+   },
+   {
+    "route": "1B",
+    "tickets": 5109,
+    "agreeAsPublished": 83.6,
+    "agree": 84,
+    "otherSide": 10.7,
+    "otherTimes": 3.7,
+    "notSwept": 1.6
+   },
+   {
+    "route": "5M",
+    "tickets": 4921,
+    "agreeAsPublished": 83,
+    "agree": 88.6,
+    "otherSide": 6.3,
+    "otherTimes": 2.4,
+    "notSwept": 2.7
+   },
+   {
+    "route": "5",
+    "tickets": 4725,
+    "agreeAsPublished": 85,
+    "agree": 86.6,
+    "otherSide": 8.1,
+    "otherTimes": 4.6,
+    "notSwept": 0.6
+   },
+   {
+    "route": "4B",
+    "tickets": 4666,
+    "agreeAsPublished": 57.3,
+    "agree": 57.3,
+    "otherSide": 8.1,
+    "otherTimes": 5.8,
+    "notSwept": 28.8
+   },
+   {
+    "route": "6C",
+    "tickets": 4661,
+    "agreeAsPublished": 89.1,
+    "agree": 91.1,
+    "otherSide": 5.3,
+    "otherTimes": 3.5,
+    "notSwept": 0
+   },
+   {
+    "route": "1E",
+    "tickets": 4620,
+    "agreeAsPublished": 67,
+    "agree": 69.5,
+    "otherSide": 5.3,
+    "otherTimes": 21.8,
+    "notSwept": 3.3
+   },
+   {
+    "route": "W6",
+    "tickets": 4472,
+    "agreeAsPublished": 25.5,
+    "agree": 32.1,
+    "otherSide": 4.6,
+    "otherTimes": 59.9,
+    "notSwept": 3.4
+   },
+   {
+    "route": "7C",
+    "tickets": 4368,
+    "agreeAsPublished": 87.3,
+    "agree": 87.7,
+    "otherSide": 6.9,
+    "otherTimes": 4.2,
+    "notSwept": 1.3
+   },
+   {
+    "route": "4",
+    "tickets": 4315,
+    "agreeAsPublished": 80.9,
+    "agree": 82.4,
+    "otherSide": 7.7,
+    "otherTimes": 9.7,
+    "notSwept": 0.2
+   },
+   {
+    "route": "6B",
+    "tickets": 4114,
+    "agreeAsPublished": 88.5,
+    "agree": 88.5,
+    "otherSide": 5.9,
+    "otherTimes": 5.5,
+    "notSwept": 0.2
+   },
+   {
+    "route": "3A",
+    "tickets": 4012,
+    "agreeAsPublished": 84.4,
+    "agree": 87.1,
+    "otherSide": 5.5,
+    "otherTimes": 3.9,
+    "notSwept": 3.6
+   },
+   {
+    "route": "5N",
+    "tickets": 4004,
+    "agreeAsPublished": 63.2,
+    "agree": 65.2,
+    "otherSide": 5.1,
+    "otherTimes": 2.2,
+    "notSwept": 27.5
+   },
+   {
+    "route": "4A",
+    "tickets": 3903,
+    "agreeAsPublished": 46.7,
+    "agree": 46.7,
+    "otherSide": 2.4,
+    "otherTimes": 50.7,
+    "notSwept": 0.2
+   },
+   {
+    "route": "5A",
+    "tickets": 3872,
+    "agreeAsPublished": 82.4,
+    "agree": 85.5,
+    "otherSide": 7.8,
+    "otherTimes": 5.3,
+    "notSwept": 1.3
+   },
+   {
+    "route": "4E",
+    "tickets": 3783,
+    "agreeAsPublished": 86.2,
+    "agree": 86.2,
+    "otherSide": 9.1,
+    "otherTimes": 4.5,
+    "notSwept": 0.2
+   },
+   {
+    "route": "6A",
+    "tickets": 3664,
+    "agreeAsPublished": 86.5,
+    "agree": 88.1,
+    "otherSide": 7.6,
+    "otherTimes": 4.3,
+    "notSwept": 0
+   },
+   {
+    "route": "5D",
+    "tickets": 3465,
+    "agreeAsPublished": 87.6,
+    "agree": 87.6,
+    "otherSide": 6.9,
+    "otherTimes": 4.9,
+    "notSwept": 0.6
+   },
+   {
+    "route": "7A",
+    "tickets": 3409,
+    "agreeAsPublished": 84.2,
+    "agree": 88.5,
+    "otherSide": 7.5,
+    "otherTimes": 3.8,
+    "notSwept": 0.3
+   },
+   {
+    "route": "4C",
+    "tickets": 3370,
+    "agreeAsPublished": 81.2,
+    "agree": 88.7,
+    "otherSide": 7.1,
+    "otherTimes": 4.1,
+    "notSwept": 0.1
+   },
+   {
+    "route": "5E",
+    "tickets": 3218,
+    "agreeAsPublished": 81,
+    "agree": 88.3,
+    "otherSide": 6.2,
+    "otherTimes": 4.8,
+    "notSwept": 0.6
+   },
+   {
+    "route": "7B",
+    "tickets": 3061,
+    "agreeAsPublished": 83.2,
+    "agree": 88.6,
+    "otherSide": 6.9,
+    "otherTimes": 4.5,
+    "notSwept": 0
+   },
+   {
+    "route": "4D",
+    "tickets": 2985,
+    "agreeAsPublished": 82.8,
+    "agree": 82.8,
+    "otherSide": 10.3,
+    "otherTimes": 6.6,
+    "notSwept": 0.3
+   },
+   {
+    "route": "6",
+    "tickets": 2937,
+    "agreeAsPublished": 85,
+    "agree": 85,
+    "otherSide": 6.7,
+    "otherTimes": 7.5,
+    "notSwept": 0.8
+   },
+   {
+    "route": "5C",
+    "tickets": 2765,
+    "agreeAsPublished": 76.5,
+    "agree": 80.1,
+    "otherSide": 6.4,
+    "otherTimes": 5.7,
+    "notSwept": 7.8
+   },
+   {
+    "route": "W4",
+    "tickets": 2594,
+    "agreeAsPublished": 55.1,
+    "agree": 55.1,
+    "otherSide": 4.3,
+    "otherTimes": 32.2,
+    "notSwept": 8.4
+   },
+   {
+    "route": "5F",
+    "tickets": 2456,
+    "agreeAsPublished": 87.5,
+    "agree": 87.5,
+    "otherSide": 7.7,
+    "otherTimes": 4.5,
+    "notSwept": 0.4
+   },
+   {
+    "route": "5H",
+    "tickets": 2414,
+    "agreeAsPublished": 80.2,
+    "agree": 83.2,
+    "otherSide": 5.6,
+    "otherTimes": 10.1,
+    "notSwept": 1.1
+   },
+   {
+    "route": "5B",
+    "tickets": 2366,
+    "agreeAsPublished": 89.8,
+    "agree": 89.8,
+    "otherSide": 6.8,
+    "otherTimes": 3.3,
+    "notSwept": 0.1
+   },
+   {
+    "route": "W5",
+    "tickets": 1865,
+    "agreeAsPublished": 17.6,
+    "agree": 17.6,
+    "otherSide": 1.6,
+    "otherTimes": 77,
+    "notSwept": 3.8
+   },
+   {
+    "route": "7",
+    "tickets": 1862,
+    "agreeAsPublished": 86.1,
+    "agree": 87.3,
+    "otherSide": 10,
+    "otherTimes": 2.7,
+    "notSwept": 0.1
+   },
+   {
+    "route": "5J",
+    "tickets": 1631,
+    "agreeAsPublished": 85.9,
+    "agree": 86.8,
+    "otherSide": 6.5,
+    "otherTimes": 5.4,
+    "notSwept": 1.3
+   },
+   {
+    "route": "5L",
+    "tickets": 1578,
+    "agreeAsPublished": 79.3,
+    "agree": 85.7,
+    "otherSide": 8,
+    "otherTimes": 4.4,
+    "notSwept": 1.8
+   },
+   {
+    "route": "W2",
+    "tickets": 1544,
+    "agreeAsPublished": 32.7,
+    "agree": 33.2,
+    "otherSide": 3.8,
+    "otherTimes": 62.4,
+    "notSwept": 0.6
+   },
+   {
+    "route": "5G",
+    "tickets": 1435,
+    "agreeAsPublished": 83.4,
+    "agree": 83.4,
+    "otherSide": 10.7,
+    "otherTimes": 3.6,
+    "notSwept": 2.2
+   },
+   {
+    "route": "7D",
+    "tickets": 1307,
+    "agreeAsPublished": 71.3,
+    "agree": 84.9,
+    "otherSide": 7.5,
+    "otherTimes": 4.1,
+    "notSwept": 3.4
+   },
+   {
+    "route": "5I",
+    "tickets": 912,
+    "agreeAsPublished": 71.9,
+    "agree": 87.9,
+    "otherSide": 3.2,
+    "otherTimes": 3.4,
+    "notSwept": 5.5
+   },
+   {
+    "route": "6E",
+    "tickets": 894,
+    "agreeAsPublished": 82.7,
+    "agree": 82.7,
+    "otherSide": 12,
+    "otherTimes": 4.7,
+    "notSwept": 0.7
+   },
+   {
+    "route": "2A/3",
+    "tickets": 522,
+    "agreeAsPublished": 16.3,
+    "agree": 16.3,
+    "otherSide": 45,
+    "otherTimes": 38.7,
+    "notSwept": 0
+   },
+   {
+    "route": "1B1E",
+    "tickets": 388,
+    "agreeAsPublished": 91.5,
+    "agree": 91.5,
+    "otherSide": 1.8,
+    "otherTimes": 6.7,
+    "notSwept": 0
+   },
+   {
+    "route": "5A5D",
+    "tickets": 348,
+    "agreeAsPublished": 95.4,
+    "agree": 95.4,
+    "otherSide": 3.4,
+    "otherTimes": 1.1,
+    "notSwept": 0
+   },
+   {
+    "route": "5E5D",
+    "tickets": 299,
+    "agreeAsPublished": 91,
+    "agree": 91,
+    "otherSide": 4,
+    "otherTimes": 5,
+    "notSwept": 0
+   },
+   {
+    "route": "4B4D",
+    "tickets": 279,
+    "agreeAsPublished": 62.7,
+    "agree": 62.7,
+    "otherSide": 1.4,
+    "otherTimes": 6.8,
+    "notSwept": 29
+   },
+   {
+    "route": "6A7E",
+    "tickets": 271,
+    "agreeAsPublished": 92.3,
+    "agree": 92.3,
+    "otherSide": 3.3,
+    "otherTimes": 4.4,
+    "notSwept": 0
+   },
+   {
+    "route": "5A5B",
+    "tickets": 261,
+    "agreeAsPublished": 88.5,
+    "agree": 88.5,
+    "otherSide": 5.7,
+    "otherTimes": 5.7,
+    "notSwept": 0
+   },
+   {
+    "route": "1A1D",
+    "tickets": 240,
+    "agreeAsPublished": 57.9,
+    "agree": 57.9,
+    "otherSide": 6.7,
+    "otherTimes": 35.4,
+    "notSwept": 0
+   },
+   {
+    "route": "6/7E",
+    "tickets": 238,
+    "agreeAsPublished": 86.6,
+    "agree": 86.6,
+    "otherSide": 2.5,
+    "otherTimes": 10.9,
+    "notSwept": 0
+   },
+   {
+    "route": "3B5N",
+    "tickets": 223,
+    "agreeAsPublished": 20.2,
+    "agree": 20.2,
+    "otherSide": 0,
+    "otherTimes": 79.8,
+    "notSwept": 0
+   },
+   {
+    "route": "4/4A",
+    "tickets": 202,
+    "agreeAsPublished": 94.6,
+    "agree": 94.6,
+    "otherSide": 4.5,
+    "otherTimes": 1,
+    "notSwept": 0
+   },
+   {
+    "route": "4C4E",
+    "tickets": 179,
+    "agreeAsPublished": 86,
+    "agree": 86,
+    "otherSide": 3.9,
+    "otherTimes": 10.1,
+    "notSwept": 0
+   },
+   {
+    "route": "5I5J",
+    "tickets": 142,
+    "agreeAsPublished": 94.4,
+    "agree": 94.4,
+    "otherSide": 2.1,
+    "otherTimes": 3.5,
+    "notSwept": 0
+   },
+   {
+    "route": "5K",
+    "tickets": 131,
+    "agreeAsPublished": 76.3,
+    "agree": 76.3,
+    "otherSide": 13,
+    "otherTimes": 5.3,
+    "notSwept": 5.3
+   },
+   {
+    "route": "5CW4",
+    "tickets": 128,
+    "agreeAsPublished": 58.6,
+    "agree": 58.6,
+    "otherSide": 0,
+    "otherTimes": 41.4,
+    "notSwept": 0
+   },
+   {
+    "route": "4B4E",
+    "tickets": 74,
+    "agreeAsPublished": 62.2,
+    "agree": 62.2,
+    "otherSide": 0,
+    "otherTimes": 5.4,
+    "notSwept": 32.4
+   },
+   {
+    "route": "5/5B",
+    "tickets": 66,
+    "agreeAsPublished": 92.4,
+    "agree": 92.4,
+    "otherSide": 4.5,
+    "otherTimes": 3,
+    "notSwept": 0
+   },
+   {
+    "route": "L",
+    "tickets": 34,
+    "agreeAsPublished": 0,
+    "agree": 0,
+    "otherSide": 0,
+    "otherTimes": 0,
+    "notSwept": 100
+   },
+   {
+    "route": "1A1C",
+    "tickets": 30,
+    "agreeAsPublished": 36.7,
+    "agree": 36.7,
+    "otherSide": 0,
+    "otherTimes": 63.3,
+    "notSwept": 0
+   },
+   {
+    "route": "M",
+    "tickets": 9,
+    "agreeAsPublished": 0,
+    "agree": 0,
+    "otherSide": 0,
+    "otherTimes": 0,
+    "notSwept": 100
+   },
+   {
+    "route": "C",
+    "tickets": 7,
+    "agreeAsPublished": 0,
+    "agree": 0,
+    "otherSide": 0,
+    "otherTimes": 0,
+    "notSwept": 100
+   },
+   {
+    "route": "F",
+    "tickets": 6,
+    "agreeAsPublished": 0,
+    "agree": 0,
+    "otherSide": 0,
+    "otherTimes": 0,
+    "notSwept": 100
+   },
+   {
+    "route": "I",
+    "tickets": 5,
+    "agreeAsPublished": 0,
+    "agree": 0,
+    "otherSide": 0,
+    "otherTimes": 0,
+    "notSwept": 100
+   },
+   {
+    "route": "D",
+    "tickets": 2,
+    "agreeAsPublished": 0,
+    "agree": 0,
+    "otherSide": 0,
+    "otherTimes": 0,
+    "notSwept": 100
+   },
+   {
+    "route": "B",
+    "tickets": 1,
+    "agreeAsPublished": 0,
+    "agree": 0,
+    "otherSide": 0,
+    "otherTimes": 0,
+    "notSwept": 100
+   }
+  ],
+  "contradictingRoutes": [
+   "11",
+   "10",
+   "(none)",
+   "14",
+   "3",
+   "4B",
+   "1E",
+   "W6",
+   "5N",
+   "4A",
+   "W4",
+   "W5",
+   "W2",
+   "2A/3"
+  ],
+  "swapped": {
+   "blocks": 217,
+   "applied": true,
+   "rule": "odd numbered tickets in the even side's windows AND even numbered tickets in the odd side's (each at least 3, three times those in their own window, and 40% of that side's tickets); a major street's two lines together",
+   "byRoute": [
+    {
+     "route": "14",
+     "n": 45
+    },
+    {
+     "route": "11",
+     "n": 32
+    },
+    {
+     "route": "10",
+     "n": 21
+    },
+    {
+     "route": "3",
+     "n": 15
+    },
+    {
+     "route": "2B",
+     "n": 11
+    },
+    {
+     "route": "4C",
+     "n": 8
+    },
+    {
+     "route": "5E",
+     "n": 8
+    },
+    {
+     "route": "7A",
+     "n": 7
+    },
+    {
+     "route": "1",
+     "n": 6
+    },
+    {
+     "route": "5L",
+     "n": 5
+    },
+    {
+     "route": "2C",
+     "n": 5
+    },
+    {
+     "route": "7B",
+     "n": 5
+    },
+    {
+     "route": "5M",
+     "n": 4
+    },
+    {
+     "route": "7D",
+     "n": 4
+    },
+    {
+     "route": "5C",
+     "n": 4
+    },
+    {
+     "route": "1A",
+     "n": 3
+    },
+    {
+     "route": "W6",
+     "n": 3
+    },
+    {
+     "route": "1E",
+     "n": 3
+    },
+    {
+     "route": "5I",
+     "n": 3
+    },
+    {
+     "route": "7C",
+     "n": 2
+    },
+    {
+     "route": "6C",
+     "n": 2
+    },
+    {
+     "route": "6A",
+     "n": 2
+    },
+    {
+     "route": "1D",
+     "n": 2
+    },
+    {
+     "route": "2A",
+     "n": 2
+    },
+    {
+     "route": "5H",
+     "n": 2
+    },
+    {
+     "route": "5",
+     "n": 2
+    },
+    {
+     "route": "5A",
+     "n": 2
+    },
+    {
+     "route": "4",
+     "n": 2
+    },
+    {
+     "route": "5J",
+     "n": 1
+    },
+    {
+     "route": "1C",
+     "n": 1
+    },
+    {
+     "route": "1B",
+     "n": 1
+    },
+    {
+     "route": "5N",
+     "n": 1
+    },
+    {
+     "route": "W2",
+     "n": 1
+    },
+    {
+     "route": "7",
+     "n": 1
+    },
+    {
+     "route": "3A",
+     "n": 1
+    }
+   ],
+   "list": [
+    {
+     "c": [
+      "395510630",
+      "395510634"
+     ],
+     "s": "Market St",
+     "l": "61st St - 62nd St",
+     "route": "14",
+     "odd": "36 of 42 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "32 of 43 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "395510744",
+      "395510762"
+     ],
+     "s": "Market St",
+     "l": "Occidental St - 61st St",
+     "route": "14",
+     "odd": "10 of 11 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "3 of 7 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "395510769",
+      "395510782"
+     ],
+     "s": "Market St",
+     "l": "Stanford Ave - Occidental St",
+     "route": "14",
+     "odd": "16 of 22 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "23 of 29 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "395511081",
+      "491655008"
+     ],
+     "s": "Market St",
+     "l": "58th St - 59th St",
+     "route": "14",
+     "odd": "23 of 29 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "23 of 31 even numbered tickets in the odd side's window, 6 in their own"
+    },
+    {
+     "c": [
+      "395511231",
+      "491655010"
+     ],
+     "s": "Market St",
+     "l": "Arlington Ave - 58th St",
+     "route": "14",
+     "odd": "18 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "22 of 25 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "395513325"
+     ],
+     "s": "Mather St",
+     "l": "Terrace St - Broadway",
+     "route": "1",
+     "odd": "22 of 22 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "17 of 21 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "395519415"
+     ],
+     "s": "Linden St",
+     "l": "14th St - 16th St",
+     "route": "2B",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "6 of 8 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "395519945",
+      "418227452"
+     ],
+     "s": "Market St",
+     "l": "14th St - 15th St",
+     "route": "14",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "26 of 34 even numbered tickets in the odd side's window, 7 in their own"
+    },
+    {
+     "c": [
+      "395514821"
+     ],
+     "s": "Glen Ave",
+     "l": "41st St - Linda Ave",
+     "route": "5M",
+     "odd": "51 of 53 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "25 of 29 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "395514907"
+     ],
+     "s": "Glen Ave",
+     "l": "Panama Ct - 41st St",
+     "route": "5M",
+     "odd": "38 of 40 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "59 of 66 even numbered tickets in the odd side's window, 6 in their own"
+    },
+    {
+     "c": [
+      "395517051"
+     ],
+     "s": "Telegraph Ave",
+     "l": "29th St - 30th St",
+     "route": "14",
+     "odd": "20 of 23 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "115 of 122 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "395521292",
+      "493539818"
+     ],
+     "s": "7th St",
+     "l": "Linden St - Filbert St",
+     "route": "14",
+     "odd": "68 of 81 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "253 of 298 even numbered tickets in the odd side's window, 11 in their own"
+    },
+    {
+     "c": [
+      "417775996",
+      "493539818"
+     ],
+     "s": "7th St",
+     "l": "Linden St - Filbert St",
+     "route": "14",
+     "odd": "90 of 95 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "253 of 298 even numbered tickets in the odd side's window, 11 in their own"
+    },
+    {
+     "c": [
+      "395537052",
+      "416196174"
+     ],
+     "s": "Link St",
+     "l": "Bancroft Ave - 104th Ave",
+     "route": "7C",
+     "odd": "4 of 5 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "11 of 13 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "418227437",
+      "397701919"
+     ],
+     "s": "Market St",
+     "l": "14th St - 16th St",
+     "route": "14",
+     "odd": "27 of 28 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "28 of 36 even numbered tickets in the odd side's window, 8 in their own"
+    },
+    {
+     "c": [
+      "395533073"
+     ],
+     "s": "Dowling St",
+     "l": "80th Ave - 82nd Ave",
+     "route": "6C",
+     "odd": "10 of 11 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "20 of 20 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "395533118",
+      "395533144"
+     ],
+     "s": "73rd Ave",
+     "l": "Favor St - Orral St",
+     "route": "10",
+     "odd": "38 of 42 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "25 of 33 even numbered tickets in the odd side's window, 8 in their own"
+    },
+    {
+     "c": [
+      "395533131"
+     ],
+     "s": "Iris St",
+     "l": "83rd Ave - 84th Ave",
+     "route": "6A",
+     "odd": "22 of 26 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "13 of 18 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "395532845",
+      "395532862"
+     ],
+     "s": "73rd Ave",
+     "l": "Weld St - Holly St",
+     "route": "10",
+     "odd": "46 of 48 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "46 of 54 even numbered tickets in the odd side's window, 5 in their own"
+    },
+    {
+     "c": [
+      "395533268"
+     ],
+     "s": "Iris St",
+     "l": "84th Ave",
+     "route": "6A",
+     "odd": "12 of 13 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "12 of 15 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "416189852",
+      "416189853"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Shafter Ave - Webster St",
+     "route": "14",
+     "odd": "3 of 5 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "3 of 3 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "416896964",
+      "421976875"
+     ],
+     "s": "73rd Ave",
+     "l": "Lockwood St - Arthur St",
+     "route": "10",
+     "odd": "17 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "59 of 65 even numbered tickets in the odd side's window, 6 in their own"
+    },
+    {
+     "c": [
+      "416911746"
+     ],
+     "s": "Fisher Ave",
+     "l": "Frazier Ave - Talbot Ave",
+     "route": "7D",
+     "odd": "26 of 26 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "18 of 22 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "421968728",
+      "442124559"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Linden St",
+     "route": "14",
+     "odd": "51 of 57 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "27 of 31 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "416195339"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Frazier Ave - Stanley Ave",
+     "route": "7D",
+     "odd": "32 of 35 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "46 of 50 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "421970079"
+     ],
+     "s": "Telegraph Ave",
+     "l": "31st St - 32nd St",
+     "route": "14",
+     "odd": "20 of 21 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 14 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "418223248",
+      "499345439"
+     ],
+     "s": "7th St",
+     "l": "Magnolia St - Adeline St",
+     "route": "14",
+     "odd": "33 of 36 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "28 of 38 even numbered tickets in the odd side's window, 9 in their own"
+    },
+    {
+     "c": [
+      "421969319",
+      "518682281"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Telegraph Ave - Martin Luther King Jr Way",
+     "route": "14",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "13 of 18 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "421982383"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Byron Ave - Frazier Ave",
+     "route": "7D",
+     "odd": "3 of 5 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 10 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "421989355"
+     ],
+     "s": "Market St",
+     "l": "Milton St - 24th St",
+     "route": "14",
+     "odd": "149 of 173 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "175 of 233 even numbered tickets in the odd side's window, 40 in their own"
+    },
+    {
+     "c": [
+      "421985856"
+     ],
+     "s": "International Blvd",
+     "l": "Munson Way - 23rd Ave",
+     "route": "11",
+     "odd": "15 of 16 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "85 of 85 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "421989398"
+     ],
+     "s": "Market St",
+     "l": "22nd St - 21st St",
+     "route": "14",
+     "odd": "3 of 5 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "89 of 102 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "421989411"
+     ],
+     "s": "Market St",
+     "l": "20th St - 21st St",
+     "route": "14",
+     "odd": "73 of 83 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "184 of 212 even numbered tickets in the odd side's window, 16 in their own"
+    },
+    {
+     "c": [
+      "422290108",
+      "416896951"
+     ],
+     "s": "73rd Ave",
+     "l": "Halliday Ave - Krause Ave",
+     "route": "10",
+     "odd": "3 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469171900"
+     ],
+     "s": "Filbert St",
+     "l": "21st St - W Grand Ave",
+     "route": "2B",
+     "odd": "27 of 33 odd numbered tickets in the even side's window, 4 in their own",
+     "even": "45 of 51 even numbered tickets in the odd side's window, 5 in their own"
+    },
+    {
+     "c": [
+      "469169766"
+     ],
+     "s": "41st St",
+     "l": "Market St - Linden St",
+     "route": "1A",
+     "odd": "20 of 25 odd numbered tickets in the even side's window, 4 in their own",
+     "even": "101 of 110 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469170642"
+     ],
+     "s": "Adeline St",
+     "l": "32nd St - 34th St",
+     "route": "14",
+     "odd": "123 of 130 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "154 of 216 even numbered tickets in the odd side's window, 50 in their own"
+    },
+    {
+     "c": [
+      "469170098"
+     ],
+     "s": "Ridgeway Ave",
+     "l": "Howe St - Montgomery St",
+     "route": "1",
+     "odd": "6 of 6 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469170134"
+     ],
+     "s": "Ridgeway Ave",
+     "l": "Piedmont Ave - Howe St",
+     "route": "1",
+     "odd": "15 of 15 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "4 of 4 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469170857"
+     ],
+     "s": "Adeline St",
+     "l": "30th St - 32nd St",
+     "route": "14",
+     "odd": "14 of 14 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "153 of 182 even numbered tickets in the odd side's window, 15 in their own"
+    },
+    {
+     "c": [
+      "469169376"
+     ],
+     "s": "Shattuck Ave",
+     "l": "48th St - 51st St",
+     "route": "1A",
+     "odd": "23 of 24 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "12 of 13 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469173506"
+     ],
+     "s": "Whittle Ave",
+     "l": "Whittle Ct - Wilbur St",
+     "route": "5J",
+     "odd": "7 of 7 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "8 of 9 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469171886"
+     ],
+     "s": "Wood St",
+     "l": "15th St - 16th St",
+     "route": "W6",
+     "odd": "92 of 102 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "16 of 20 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469168100"
+     ],
+     "s": "61st St",
+     "l": "Racine St - Shattuck Ave",
+     "route": "1E",
+     "odd": "25 of 27 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "30 of 35 even numbered tickets in the odd side's window, 5 in their own"
+    },
+    {
+     "c": [
+      "469170256"
+     ],
+     "s": "Entrada Ave",
+     "l": "Arroyuelo Ave - Glen Ave",
+     "route": "5M",
+     "odd": "8 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469169329"
+     ],
+     "s": "50th St",
+     "l": "Webster St - Clarke St",
+     "route": "1",
+     "odd": "7 of 9 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "7 of 8 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469168512"
+     ],
+     "s": "58th St",
+     "l": "Shattuck Ave - Maccall St",
+     "route": "1D",
+     "odd": "22 of 22 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "16 of 20 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "442126079"
+     ],
+     "s": "International Blvd",
+     "l": "13th Ave - 14th Ave",
+     "route": "11",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "34 of 38 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469169712"
+     ],
+     "s": "41st St",
+     "l": "Linden St",
+     "route": "1A",
+     "odd": "8 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 6 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "442132452"
+     ],
+     "s": "Telegraph Ave",
+     "l": "31st St - 32nd St",
+     "route": "14",
+     "odd": "14 of 14 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "3 of 4 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469169961"
+     ],
+     "s": "Ridgeway Ave",
+     "l": "Gilbert St - Del Norte Dr",
+     "route": "1",
+     "odd": "15 of 15 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "33 of 39 even numbered tickets in the odd side's window, 6 in their own"
+    },
+    {
+     "c": [
+      "469168530"
+     ],
+     "s": "58th St",
+     "l": "Maccall St - Dover St",
+     "route": "1D",
+     "odd": "11 of 12 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "3 of 3 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "445214368",
+      "493539819"
+     ],
+     "s": "7th St",
+     "l": "Adeline St - Linden St",
+     "route": "14",
+     "odd": "72 of 77 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "236 of 248 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "426152167"
+     ],
+     "s": "Grand Ave",
+     "l": "Lenox Ave - Lee St",
+     "route": "11",
+     "odd": "5 of 7 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "225 of 236 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "426152183"
+     ],
+     "s": "Grand Ave",
+     "l": "Lee St - Perkins St",
+     "route": "11",
+     "odd": "17 of 17 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "452 of 515 even numbered tickets in the odd side's window, 36 in their own"
+    },
+    {
+     "c": [
+      "426152194"
+     ],
+     "s": "Grand Ave",
+     "l": "Ellita Ave - Staten Ave",
+     "route": "11",
+     "odd": "17 of 20 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "59 of 69 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469168296"
+     ],
+     "s": "61st St",
+     "l": "Market St - Lowell St",
+     "route": "1C",
+     "odd": "28 of 29 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "28 of 30 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "426152370"
+     ],
+     "s": "Glen Ave",
+     "l": "Piedmont Ave - Panama Ct",
+     "route": "5M",
+     "odd": "36 of 36 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "64 of 64 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469167866"
+     ],
+     "s": "Patton St",
+     "l": "Chabot Rd",
+     "route": "1B",
+     "odd": "18 of 20 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "9 of 10 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469167897"
+     ],
+     "s": "63rd St",
+     "l": "Colby St - Dana St",
+     "route": "1E",
+     "odd": "22 of 23 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "25 of 29 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469167931"
+     ],
+     "s": "63rd St",
+     "l": "Canning St - Telegraph Ave",
+     "route": "1E",
+     "odd": "13 of 13 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "11 of 14 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469175186"
+     ],
+     "s": "Inyo Ave",
+     "l": "E 27th St",
+     "route": "4C",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "12 of 12 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469174561"
+     ],
+     "s": "Kansas St",
+     "l": "Maple Ave - Laurel Ave",
+     "route": "5I",
+     "odd": "41 of 41 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "37 of 42 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469174130"
+     ],
+     "s": "11th Ave",
+     "l": "E 24th St - E 28th St",
+     "route": "3",
+     "odd": "6 of 8 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "18 of 20 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469175371"
+     ],
+     "s": "E 27th St",
+     "l": "25th Ave - Garden St",
+     "route": "4C",
+     "odd": "7 of 7 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "6 of 6 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469174647"
+     ],
+     "s": "11th Ave",
+     "l": "E 22nd St - E 23rd St",
+     "route": "3",
+     "odd": "20 of 22 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "23 of 31 even numbered tickets in the odd side's window, 7 in their own"
+    },
+    {
+     "c": [
+      "469175482"
+     ],
+     "s": "E 27th St",
+     "l": "Barry Pl - Fruitvale Ave",
+     "route": "4C",
+     "odd": "8 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "23 of 24 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469174756"
+     ],
+     "s": "Kansas St",
+     "l": "Laurel Ave - Midvale Ave",
+     "route": "5I",
+     "odd": "26 of 27 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "13 of 13 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469174767"
+     ],
+     "s": "11th Ave",
+     "l": "E 21st St - E 22nd St",
+     "route": "3",
+     "odd": "22 of 22 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "27 of 31 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469175380"
+     ],
+     "s": "Loma Vista Ave",
+     "l": "Redding St - MacArthur Blvd",
+     "route": "5E",
+     "odd": "17 of 18 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "9 of 10 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469175454"
+     ],
+     "s": "Loma Vista Ave",
+     "l": "Quigley St - Redding St",
+     "route": "5E",
+     "odd": "9 of 9 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "3 of 3 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469173782"
+     ],
+     "s": "Ivy Dr",
+     "l": "7th Ave - Booker St",
+     "route": "3",
+     "odd": "40 of 49 odd numbered tickets in the even side's window, 9 in their own",
+     "even": "41 of 53 even numbered tickets in the odd side's window, 12 in their own"
+    },
+    {
+     "c": [
+      "469173819"
+     ],
+     "s": "Ivy Dr",
+     "l": "E 23rd St - 7th Ave",
+     "route": "3",
+     "odd": "5 of 5 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "4 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469175409"
+     ],
+     "s": "10th Ave",
+     "l": "E 12th St - International Blvd",
+     "route": "2A",
+     "odd": "14 of 15 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "61 of 80 even numbered tickets in the odd side's window, 17 in their own"
+    },
+    {
+     "c": [
+      "469173840"
+     ],
+     "s": "Ivy Dr",
+     "l": "E 23rd St - 7th Ave",
+     "route": "3",
+     "odd": "20 of 22 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "20 of 21 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469173909"
+     ],
+     "s": "11th Ave",
+     "l": "Bella Vista Ave - Bayview Ave",
+     "route": "3",
+     "odd": "5 of 5 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "11 of 13 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469173920"
+     ],
+     "s": "Ardley Ave",
+     "l": "MacArthur Blvd - Excelsior Ave",
+     "route": "5L",
+     "odd": "7 of 8 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "6 of 6 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469175291"
+     ],
+     "s": "Bayo St",
+     "l": "Patterson Ave - 39th Ave",
+     "route": "5H",
+     "odd": "18 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 11 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469174407"
+     ],
+     "s": "11th Ave",
+     "l": "E 24th St - E 28th St",
+     "route": "3",
+     "odd": "33 of 33 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "25 of 28 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469175103"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "Hickory St - Nicol Ave",
+     "route": "11",
+     "odd": "7 of 7 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "28 of 29 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469173950"
+     ],
+     "s": "Randolph Ave",
+     "l": "MacArthur Blvd",
+     "route": "5L",
+     "odd": "4 of 5 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "3 of 3 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469173951"
+     ],
+     "s": "Woodruff Ave",
+     "l": "MacArthur Blvd - Miami Ct",
+     "route": "5L",
+     "odd": "11 of 11 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "16 of 16 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469174518"
+     ],
+     "s": "11th Ave",
+     "l": "E 23rd St - E 24th St",
+     "route": "3",
+     "odd": "12 of 13 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "18 of 20 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469172418"
+     ],
+     "s": "Filbert St",
+     "l": "16th St - 18th St",
+     "route": "2B",
+     "odd": "32 of 34 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "50 of 63 even numbered tickets in the odd side's window, 13 in their own"
+    },
+    {
+     "c": [
+      "469171851"
+     ],
+     "s": "24th St",
+     "l": "Martin Luther King Jr Way - San Pablo Ave",
+     "route": "2C",
+     "odd": "99 of 117 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "101 of 134 even numbered tickets in the odd side's window, 29 in their own"
+    },
+    {
+     "c": [
+      "469173058"
+     ],
+     "s": "MacArthur Blvd",
+     "l": "Spruce St - Capell St",
+     "route": "11",
+     "odd": "11 of 19 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "7 of 8 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469171678"
+     ],
+     "s": "Sycamore St",
+     "l": "Martin Luther King Jr Way - West St",
+     "route": "2C",
+     "odd": "112 of 112 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "124 of 145 even numbered tickets in the odd side's window, 20 in their own"
+    },
+    {
+     "c": [
+      "469171679"
+     ],
+     "s": "Adeline St",
+     "l": "W Grand Ave - 24th St",
+     "route": "14",
+     "odd": "16 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "120 of 145 even numbered tickets in the odd side's window, 22 in their own"
+    },
+    {
+     "c": [
+      "469172055"
+     ],
+     "s": "Wood St",
+     "l": "13th St - 14th St",
+     "route": "W6",
+     "odd": "81 of 82 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "43 of 46 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469172216"
+     ],
+     "s": "Filbert St",
+     "l": "18th St - 21st St",
+     "route": "2B",
+     "odd": "94 of 102 odd numbered tickets in the even side's window, 5 in their own",
+     "even": "46 of 52 even numbered tickets in the odd side's window, 5 in their own"
+    },
+    {
+     "c": [
+      "469172142"
+     ],
+     "s": "Chestnut St",
+     "l": "18th St - 21st St",
+     "route": "2B",
+     "odd": "40 of 44 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "44 of 47 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469171532"
+     ],
+     "s": "26th St",
+     "l": "West St - San Pablo Ave",
+     "route": "2C",
+     "odd": "24 of 29 odd numbered tickets in the even side's window, 5 in their own",
+     "even": "27 of 34 even numbered tickets in the odd side's window, 7 in their own"
+    },
+    {
+     "c": [
+      "469171535"
+     ],
+     "s": "Garland Ave",
+     "l": "Fairmount Ave - Harrison St",
+     "route": "5N",
+     "odd": "41 of 45 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "42 of 42 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469172166"
+     ],
+     "s": "Wood St",
+     "l": "12th St - 13th St",
+     "route": "W6",
+     "odd": "33 of 37 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "36 of 37 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469172639"
+     ],
+     "s": "Linden St",
+     "l": "14th St - 16th St",
+     "route": "2B",
+     "odd": "24 of 26 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "43 of 46 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469171582"
+     ],
+     "s": "26th St",
+     "l": "Martin Luther King Jr Way - West St",
+     "route": "2C",
+     "odd": "134 of 138 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "52 of 66 even numbered tickets in the odd side's window, 13 in their own"
+    },
+    {
+     "c": [
+      "469172178"
+     ],
+     "s": "Linden St",
+     "l": "18th St - 21st St",
+     "route": "2B",
+     "odd": "90 of 99 odd numbered tickets in the even side's window, 4 in their own",
+     "even": "176 of 196 even numbered tickets in the odd side's window, 9 in their own"
+    },
+    {
+     "c": [
+      "469172350"
+     ],
+     "s": "Chestnut St",
+     "l": "16th St - 18th St",
+     "route": "2B",
+     "odd": "20 of 24 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "25 of 26 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469172756"
+     ],
+     "s": "MacArthur Blvd",
+     "l": "Wesley Ave - Lake Park Ave",
+     "route": "11",
+     "odd": "5 of 10 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469172362"
+     ],
+     "s": "13th St",
+     "l": "Peralta St - Campbell St",
+     "route": "2B",
+     "odd": "31 of 36 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "48 of 58 even numbered tickets in the odd side's window, 8 in their own"
+    },
+    {
+     "c": [
+      "469172372"
+     ],
+     "s": "Clemens Rd",
+     "l": "Leimert Blvd - Oakmore Rd",
+     "route": "5L",
+     "odd": "18 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "22 of 26 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469171746"
+     ],
+     "s": "Poplar St",
+     "l": "21st St - W Grand Ave",
+     "route": "2B",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "13 of 17 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469172382"
+     ],
+     "s": "Linden St",
+     "l": "16th St - 18th St",
+     "route": "2B",
+     "odd": "28 of 33 odd numbered tickets in the even side's window, 4 in their own",
+     "even": "92 of 100 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469179278"
+     ],
+     "s": "Seminary Ave",
+     "l": "International Blvd - E 16th St",
+     "route": "10",
+     "odd": "11 of 11 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "3 of 4 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469181444"
+     ],
+     "s": "107th Ave",
+     "l": "Pontiac St - International Blvd",
+     "route": "7B",
+     "odd": "13 of 18 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "10 of 11 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469181487"
+     ],
+     "s": "107th Ave",
+     "l": "Graffian St - Pontiac St",
+     "route": "7B",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "20 of 21 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469181561"
+     ],
+     "s": "107th Ave",
+     "l": "Royal Ann St - Graffian St",
+     "route": "7B",
+     "odd": "17 of 20 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "28 of 32 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469181815"
+     ],
+     "s": "107th Ave",
+     "l": "Pippin St - Pearmain St",
+     "route": "W2",
+     "odd": "3 of 5 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "6 of 6 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469181639"
+     ],
+     "s": "107th Ave",
+     "l": "E St - Royal Ann St",
+     "route": "7B",
+     "odd": "27 of 31 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "20 of 20 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469178730"
+     ],
+     "s": "Harmon Ave",
+     "l": "57th Ave - Seminary Ave",
+     "route": "5",
+     "odd": "10 of 12 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "48 of 54 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469179819"
+     ],
+     "s": "80th Ave",
+     "l": "Olive St - Bancroft Ave",
+     "route": "6C",
+     "odd": "29 of 32 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "40 of 45 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469181707"
+     ],
+     "s": "107th Ave",
+     "l": "San Leandro St - Apricot St",
+     "route": "7B",
+     "odd": "19 of 23 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "17 of 24 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469181642"
+     ],
+     "s": "Coral Rd",
+     "l": "Empire Rd - Fitzpatrick Rd",
+     "route": "7",
+     "odd": "8 of 10 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "18 of 20 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "474073910"
+     ],
+     "s": "Seminary Ave",
+     "l": "Brann St",
+     "route": "10",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "6 of 8 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469178318"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Mason St - Seminary Ave",
+     "route": "10",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "13 of 15 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469178439"
+     ],
+     "s": "Foothill Blvd",
+     "l": "62nd Ave - 63rd Ave",
+     "route": "10",
+     "odd": "41 of 47 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "44 of 60 even numbered tickets in the odd side's window, 11 in their own"
+    },
+    {
+     "c": [
+      "469181171"
+     ],
+     "s": "109th Ave",
+     "l": "MacArthur Blvd - McIntyre St",
+     "route": "7D",
+     "odd": "24 of 26 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "31 of 32 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469179244"
+     ],
+     "s": "Seminary Ave",
+     "l": "International Blvd - E 16th St",
+     "route": "10",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 9 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469177927"
+     ],
+     "s": "51st Ave",
+     "l": "Melrose Ave - Vicksburg Ave",
+     "route": "5A",
+     "odd": "68 of 68 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "29 of 31 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469176555"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Austin St - Rutherford St",
+     "route": "11",
+     "odd": "39 of 40 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "97 of 125 even numbered tickets in the odd side's window, 25 in their own"
+    },
+    {
+     "c": [
+      "469176589"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Rutherford St - Fruitvale Ave",
+     "route": "11",
+     "odd": "3 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "11 of 14 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469177238"
+     ],
+     "s": "E 16th St",
+     "l": "35th Ave - 36th Ave",
+     "route": "5C",
+     "odd": "30 of 35 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "19 of 21 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469176192"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "Ashbrook Ct - Galindo St",
+     "route": "11",
+     "odd": "37 of 38 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "33 of 34 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469176207"
+     ],
+     "s": "Minna Ave",
+     "l": "Penniman Ave - Angelo Ave",
+     "route": "5E",
+     "odd": "12 of 12 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "7 of 9 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469177289"
+     ],
+     "s": "E 16th St",
+     "l": "36th Ave - Bridge Ave",
+     "route": "5C",
+     "odd": "4 of 5 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "11 of 11 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469177327"
+     ],
+     "s": "E 16th St",
+     "l": "Bridge Ave - 37th Ave",
+     "route": "5C",
+     "odd": "9 of 11 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "16 of 18 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469178219"
+     ],
+     "s": "Foothill Blvd",
+     "l": "57th Ave - Avenal Ave",
+     "route": "10",
+     "odd": "14 of 14 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "13 of 18 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469176308"
+     ],
+     "s": "Minna Ave",
+     "l": "Dale Pl - Penniman Ave",
+     "route": "5E",
+     "odd": "16 of 16 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "6 of 6 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176312"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "E 23rd St - Ashbrook Ct",
+     "route": "11",
+     "odd": "44 of 49 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "23 of 23 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176699"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "E 19th St - Foothill Blvd",
+     "route": "11",
+     "odd": "8 of 10 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "20 of 23 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469175553"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "E 27th St - Lynde St",
+     "route": "11",
+     "odd": "11 of 13 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "32 of 38 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469176332"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Munson Way - 23rd Ave",
+     "route": "11",
+     "odd": "25 of 26 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "12 of 14 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176379"
+     ],
+     "s": "Minna Ave",
+     "l": "Allendale Ave - Dale Pl",
+     "route": "5E",
+     "odd": "10 of 10 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "15 of 16 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469175607"
+     ],
+     "s": "Bayo St",
+     "l": "Maybelle Ave - Vale Ave",
+     "route": "5H",
+     "odd": "31 of 31 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "16 of 17 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469175677"
+     ],
+     "s": "Viola St",
+     "l": "Suter St - Fullington St",
+     "route": "5E",
+     "odd": "8 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "11 of 14 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469176445"
+     ],
+     "s": "Foothill Blvd",
+     "l": "23rd Ave - Miller Ave",
+     "route": "11",
+     "odd": "24 of 25 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "150 of 205 even numbered tickets in the odd side's window, 46 in their own"
+    },
+    {
+     "c": [
+      "469176874"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "E 17th St",
+     "route": "11",
+     "odd": "29 of 29 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "21 of 21 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176907"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Crosby Ave - 36th Ave",
+     "route": "10",
+     "odd": "7 of 7 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "20 of 22 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176492"
+     ],
+     "s": "Foothill Blvd",
+     "l": "26th Ave - 27th Ave",
+     "route": "11",
+     "odd": "113 of 120 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "321 of 451 even numbered tickets in the odd side's window, 107 in their own"
+    },
+    {
+     "c": [
+      "469176513"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Mitchell St - 28th Ave",
+     "route": "11",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "21 of 21 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469177026"
+     ],
+     "s": "E 17th St",
+     "l": "34th Ave - 35th Ave",
+     "route": "4",
+     "odd": "6 of 8 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "21 of 28 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "469174897"
+     ],
+     "s": "Kansas St",
+     "l": "Laurel Ave - Midvale Ave",
+     "route": "5I",
+     "odd": "19 of 19 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "11 of 12 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176972"
+     ],
+     "s": "E 18th St",
+     "l": "35th Ave - 36th Ave",
+     "route": "5C",
+     "odd": "10 of 11 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "9 of 17 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469177274"
+     ],
+     "s": "Foothill Blvd",
+     "l": "39th Ave - 40th Ave",
+     "route": "10",
+     "odd": "10 of 10 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "35 of 44 even numbered tickets in the odd side's window, 6 in their own"
+    },
+    {
+     "c": [
+      "469173726"
+     ],
+     "s": "Ivy Dr",
+     "l": "Booker St - 8th Ave",
+     "route": "3",
+     "odd": "33 of 45 odd numbered tickets in the even side's window, 8 in their own",
+     "even": "30 of 31 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469175023"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "Nicol Ave - School St",
+     "route": "11",
+     "odd": "62 of 62 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "82 of 111 even numbered tickets in the odd side's window, 22 in their own"
+    },
+    {
+     "c": [
+      "469173739"
+     ],
+     "s": "Lester Ave",
+     "l": "Hanover Ave - Acton Pl",
+     "route": "3A",
+     "odd": "61 of 62 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "55 of 61 even numbered tickets in the odd side's window, 6 in their own"
+    },
+    {
+     "c": [
+      "469173849"
+     ],
+     "s": "Woodruff Ave",
+     "l": "Miami Ct - Excelsior Ave",
+     "route": "5L",
+     "odd": "10 of 11 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "10 of 10 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469173861"
+     ],
+     "s": "Ivy Dr",
+     "l": "E 23rd St - 7th Ave",
+     "route": "3",
+     "odd": "9 of 9 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "32 of 34 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469173866"
+     ],
+     "s": "Ivy Dr",
+     "l": "Carroll St - E 23rd St",
+     "route": "3",
+     "odd": "16 of 18 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "13 of 14 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469175259"
+     ],
+     "s": "E 27th St",
+     "l": "Grande Vista Ave - 25th Ave",
+     "route": "4C",
+     "odd": "12 of 17 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "30 of 30 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469175305"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "Bona St - Brookdale Ave",
+     "route": "11",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "6 of 7 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469175428"
+     ],
+     "s": "26th Ave",
+     "l": "E 27th St",
+     "route": "4C",
+     "odd": "56 of 58 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "39 of 45 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469175523"
+     ],
+     "s": "10th Ave",
+     "l": "E 11th St - E 12th St",
+     "route": "2A",
+     "odd": "18 of 21 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "42 of 53 even numbered tickets in the odd side's window, 10 in their own"
+    },
+    {
+     "c": [
+      "469175656"
+     ],
+     "s": "Deering St",
+     "l": "Coolidge Ave - Bona St",
+     "route": "4",
+     "odd": "7 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "37 of 39 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469178111"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Congress Ave - Fairfax Ave",
+     "route": "10",
+     "odd": "6 of 9 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "46 of 52 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469178118"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Belvedere St - Cole St",
+     "route": "10",
+     "odd": "34 of 34 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "27 of 29 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469178122"
+     ],
+     "s": "51st Ave",
+     "l": "Foothill Blvd - Ygnacio Ave",
+     "route": "5A",
+     "odd": "10 of 11 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "16 of 18 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "469178123"
+     ],
+     "s": "Foothill Blvd",
+     "l": "50th Ave - 51st Ave",
+     "route": "10",
+     "odd": "50 of 56 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "30 of 39 even numbered tickets in the odd side's window, 7 in their own"
+    },
+    {
+     "c": [
+      "469178128"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Cole St - 55th Ave",
+     "route": "10",
+     "odd": "131 of 140 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "147 of 194 even numbered tickets in the odd side's window, 41 in their own"
+    },
+    {
+     "c": [
+      "469174042"
+     ],
+     "s": "11th Ave",
+     "l": "E 28th St - Bella Vista Ave",
+     "route": "3",
+     "odd": "17 of 17 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "21 of 21 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469174302"
+     ],
+     "s": "Sausal St",
+     "l": "Sheffield Ave",
+     "route": "4C",
+     "odd": "13 of 16 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "7 of 8 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469176110"
+     ],
+     "s": "Minna Ave",
+     "l": "Angelo Ave - Liese Ave",
+     "route": "5E",
+     "odd": "26 of 27 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "11 of 11 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469178800"
+     ],
+     "s": "Harmon Ave",
+     "l": "57th Ave - Seminary Ave",
+     "route": "5",
+     "odd": "15 of 15 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 10 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "493545048"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "Brookdale Ave - Evelyn Ct",
+     "route": "11",
+     "odd": "6 of 6 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "7 of 7 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176478"
+     ],
+     "s": "Foothill Blvd",
+     "l": "25th Ave - 26th Ave",
+     "route": "11",
+     "odd": "179 of 186 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "107 of 107 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469182109"
+     ],
+     "s": "Bergedo Dr",
+     "l": "Acalanes Dr - Edes Ave",
+     "route": "7A",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "8 of 9 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469182126"
+     ],
+     "s": "Kerwin Ave",
+     "l": "El Verano St - Douglas Ave",
+     "route": "7A",
+     "odd": "8 of 10 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "4 of 4 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469182348"
+     ],
+     "s": "Estepa Dr",
+     "l": "Bergedo Dr - Catron Dr",
+     "route": "7A",
+     "odd": "33 of 34 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "25 of 25 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "493542009"
+     ],
+     "s": "International Blvd",
+     "l": "25th Ave",
+     "route": "11",
+     "odd": "15 of 15 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "106 of 110 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "493542940"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Miller Ave - 24th Ave",
+     "route": "11",
+     "odd": "10 of 10 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "19 of 20 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "495512515"
+     ],
+     "s": "Grand Ave",
+     "l": "Lenox Ave",
+     "route": "11",
+     "odd": "8 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "32 of 33 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "493542988"
+     ],
+     "s": "Eastman Ave",
+     "l": "Allendale Ave - Penniman Ave",
+     "route": "5E",
+     "odd": "56 of 59 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "28 of 29 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "473517166"
+     ],
+     "s": "View St",
+     "l": "Mather St",
+     "route": "1",
+     "odd": "4 of 6 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 11 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "516428508",
+      "518664632"
+     ],
+     "s": "Market St",
+     "l": "8th St - 10th St",
+     "route": "14",
+     "odd": "18 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "27 of 40 even numbered tickets in the odd side's window, 8 in their own"
+    },
+    {
+     "c": [
+      "515265083"
+     ],
+     "s": "Athens Ave",
+     "l": "San Pablo Ave - Market St",
+     "route": "2C",
+     "odd": "48 of 50 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "114 of 114 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "515248683",
+      "515248686"
+     ],
+     "s": "Mandela Pkwy",
+     "l": "18th St - 20th St",
+     "route": "14",
+     "odd": "7 of 7 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "515259716"
+     ],
+     "s": "Grand Ave",
+     "l": "Lenox Ave",
+     "route": "11",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "130 of 132 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "504967579",
+      "504967595"
+     ],
+     "s": "Link St",
+     "l": "Bancroft Ave - 104th Ave",
+     "route": "7C",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "3 of 4 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469182225"
+     ],
+     "s": "Bernhardt Dr",
+     "l": "Isleton Ave - Kerwin Ave",
+     "route": "7A",
+     "odd": "8 of 9 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "5 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469182258"
+     ],
+     "s": "Bernhardt Dr",
+     "l": "Kerwin Ave - Louvaine Ave",
+     "route": "7A",
+     "odd": "7 of 8 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "10 of 11 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "469182294"
+     ],
+     "s": "Bernhardt Dr",
+     "l": "Louvaine Ave - Malta Ct",
+     "route": "7A",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "7 of 8 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "513546199"
+     ],
+     "s": "Ivy Dr",
+     "l": "5th Ave - Carroll St",
+     "route": "3",
+     "odd": "11 of 13 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "21 of 21 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "513546214"
+     ],
+     "s": "5th Ave",
+     "l": "E 22nd St",
+     "route": "3",
+     "odd": "6 of 7 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "9 of 12 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "469182332"
+     ],
+     "s": "Bernhardt Dr",
+     "l": "Malta Ct",
+     "route": "7A",
+     "odd": "10 of 10 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "19 of 19 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "473823841"
+     ],
+     "s": "Market St",
+     "l": "32nd St",
+     "route": "14",
+     "odd": "5 of 5 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "14 of 14 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "499345132",
+      "499345139"
+     ],
+     "s": "7th St",
+     "l": "Union St - Magnolia St",
+     "route": "14",
+     "odd": "33 of 39 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "33 of 34 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "504968939",
+      "504968942"
+     ],
+     "s": "Market St",
+     "l": "31st St",
+     "route": "14",
+     "odd": "31 of 34 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "80 of 92 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "518659698",
+      "518659707"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Market St",
+     "route": "14",
+     "odd": "41 of 65 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 7 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "518659708",
+      "518659715"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Market St - West St",
+     "route": "14",
+     "odd": "6 of 6 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "101 of 106 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "518659738",
+      "518659715"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Market St - West St",
+     "route": "14",
+     "odd": "172 of 182 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "101 of 106 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "518659826",
+      "518659936"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Martin Luther King Jr Way - West St",
+     "route": "14",
+     "odd": "240 of 277 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "52 of 65 even numbered tickets in the odd side's window, 9 in their own"
+    },
+    {
+     "c": [
+      "516428543"
+     ],
+     "s": "International Blvd",
+     "l": "22nd Ave - Munson Way",
+     "route": "11",
+     "odd": "4 of 7 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "61 of 62 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "516425590"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "Lynde St - E 29th St",
+     "route": "11",
+     "odd": "6 of 6 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 5 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "516425592"
+     ],
+     "s": "E 27th St",
+     "l": "Barry Pl - Fruitvale Ave",
+     "route": "4C",
+     "odd": "22 of 22 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 11 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "516425593"
+     ],
+     "s": "E 27th St",
+     "l": "Barry Pl - Fruitvale Ave",
+     "route": "4C",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 11 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "515750750"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Havenscourt Blvd - 67th Ave",
+     "route": "10",
+     "odd": "23 of 26 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "19 of 25 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "515750755"
+     ],
+     "s": "Foothill Blvd",
+     "l": "64th Ave - Havenscourt Blvd",
+     "route": "10",
+     "odd": "237 of 252 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "132 of 182 even numbered tickets in the odd side's window, 29 in their own"
+    },
+    {
+     "c": [
+      "515750756"
+     ],
+     "s": "Foothill Blvd",
+     "l": "64th Ave - Havenscourt Blvd",
+     "route": "10",
+     "odd": "126 of 136 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "112 of 142 even numbered tickets in the odd side's window, 20 in their own"
+    },
+    {
+     "c": [
+      "515750757"
+     ],
+     "s": "Foothill Blvd",
+     "l": "61st Ave - 62nd Ave",
+     "route": "10",
+     "odd": "37 of 38 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "50 of 65 even numbered tickets in the odd side's window, 13 in their own"
+    },
+    {
+     "c": [
+      "515750850"
+     ],
+     "s": "Market St",
+     "l": "52nd St - 53rd St",
+     "route": "14",
+     "odd": "12 of 13 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "12 of 17 even numbered tickets in the odd side's window, 2 in their own"
+    },
+    {
+     "c": [
+      "516425746",
+      "493541996"
+     ],
+     "s": "International Blvd",
+     "l": "26th Ave - 27th Ave",
+     "route": "11",
+     "odd": "6 of 6 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "56 of 64 even numbered tickets in the odd side's window, 6 in their own"
+    },
+    {
+     "c": [
+      "517228915",
+      "418227440"
+     ],
+     "s": "Market St",
+     "l": "16th St - 18th St",
+     "route": "14",
+     "odd": "32 of 34 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "49 of 68 even numbered tickets in the odd side's window, 16 in their own"
+    },
+    {
+     "c": [
+      "517228953"
+     ],
+     "s": "Market St",
+     "l": "54th St - 55th St",
+     "route": "14",
+     "odd": "14 of 21 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "13 of 18 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "515750424",
+      "493544398"
+     ],
+     "s": "73rd Ave",
+     "l": "International Blvd - Orral St",
+     "route": "10",
+     "odd": "49 of 52 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 11 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "516425321"
+     ],
+     "s": "Foothill Blvd",
+     "l": "19th Ave - 20th Ave",
+     "route": "11",
+     "odd": "116 of 119 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "98 of 135 even numbered tickets in the odd side's window, 32 in their own"
+    },
+    {
+     "c": [
+      "515750430",
+      "518659936"
+     ],
+     "s": "W MacArthur Blvd",
+     "l": "Martin Luther King Jr Way - West St",
+     "route": "14",
+     "odd": "240 of 277 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "3 of 3 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "516425371"
+     ],
+     "s": "International Blvd",
+     "l": "23rd Ave - Miller Ave",
+     "route": "11",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "113 of 113 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "515751093"
+     ],
+     "s": "Adeline St",
+     "l": "28th St - 30th St",
+     "route": "14",
+     "odd": "18 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "44 of 59 even numbered tickets in the odd side's window, 13 in their own"
+    },
+    {
+     "c": [
+      "516425571",
+      "516428187"
+     ],
+     "s": "7th St",
+     "l": "Campbell St - Peralta St",
+     "route": "14",
+     "odd": "10 of 11 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "47 of 56 even numbered tickets in the odd side's window, 1 in their own"
+    },
+    {
+     "c": [
+      "516428125"
+     ],
+     "s": "Adeline St",
+     "l": "26th St - 28th St",
+     "route": "14",
+     "odd": "18 of 18 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "66 of 84 even numbered tickets in the odd side's window, 15 in their own"
+    },
+    {
+     "c": [
+      "518664340",
+      "518664353"
+     ],
+     "s": "7th St",
+     "l": "Campbell St - Willow St",
+     "route": "14",
+     "odd": "88 of 100 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "47 of 52 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "518664363",
+      "518664372"
+     ],
+     "s": "7th St",
+     "l": "Peralta St - Campbell St",
+     "route": "14",
+     "odd": "3 of 3 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "20 of 20 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "518664781",
+      "518664835"
+     ],
+     "s": "7th St",
+     "l": "Market St - Filbert St",
+     "route": "14",
+     "odd": "14 of 17 odd numbered tickets in the even side's window, 2 in their own",
+     "even": "100 of 107 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "518662000"
+     ],
+     "s": "Market St",
+     "l": "32nd St - Brockhurst St",
+     "route": "14",
+     "odd": "10 of 11 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "66 of 85 even numbered tickets in the odd side's window, 8 in their own"
+    },
+    {
+     "c": [
+      "518661405"
+     ],
+     "s": "Market St",
+     "l": "33rd St - 34th St",
+     "route": "14",
+     "odd": "4 of 4 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "16 of 21 even numbered tickets in the odd side's window, 3 in their own"
+    },
+    {
+     "c": [
+      "518660915"
+     ],
+     "s": "Market St",
+     "l": "34th St - 35th St",
+     "route": "14",
+     "odd": "6 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "27 of 34 even numbered tickets in the odd side's window, 4 in their own"
+    }
+   ]
+  },
+  "oneSidedReversal": {
+   "blocks": 330,
+   "note": "one parity's tickets fall in the other side's window, the other parity's do not show it: not changed (a block with houses on one side gives every ticket that side's number)",
+   "byRoute": [
+    {
+     "route": "11",
+     "n": 66
+    },
+    {
+     "route": "14",
+     "n": 48
+    },
+    {
+     "route": "10",
+     "n": 47
+    },
+    {
+     "route": "1B",
+     "n": 11
+    },
+    {
+     "route": "2C",
+     "n": 10
+    },
+    {
+     "route": "2A",
+     "n": 9
+    },
+    {
+     "route": "1",
+     "n": 8
+    },
+    {
+     "route": "2B",
+     "n": 8
+    },
+    {
+     "route": "2A/3",
+     "n": 8
+    },
+    {
+     "route": "4",
+     "n": 7
+    },
+    {
+     "route": "12",
+     "n": 6
+    },
+    {
+     "route": "6B",
+     "n": 6
+    },
+    {
+     "route": "1E",
+     "n": 5
+    },
+    {
+     "route": "1A",
+     "n": 5
+    },
+    {
+     "route": "4C",
+     "n": 5
+    },
+    {
+     "route": "7A",
+     "n": 5
+    },
+    {
+     "route": "",
+     "n": 4
+    },
+    {
+     "route": "13",
+     "n": 4
+    },
+    {
+     "route": "3A",
+     "n": 4
+    },
+    {
+     "route": "3",
+     "n": 4
+    },
+    {
+     "route": "7",
+     "n": 4
+    },
+    {
+     "route": "4B",
+     "n": 4
+    },
+    {
+     "route": "5N",
+     "n": 3
+    },
+    {
+     "route": "5M",
+     "n": 3
+    },
+    {
+     "route": "1C",
+     "n": 3
+    },
+    {
+     "route": "5E",
+     "n": 3
+    },
+    {
+     "route": "7B",
+     "n": 3
+    },
+    {
+     "route": "6C",
+     "n": 3
+    },
+    {
+     "route": "7C",
+     "n": 3
+    },
+    {
+     "route": "5B",
+     "n": 3
+    },
+    {
+     "route": "5G",
+     "n": 3
+    },
+    {
+     "route": "5L",
+     "n": 3
+    },
+    {
+     "route": "7D",
+     "n": 2
+    },
+    {
+     "route": "5H",
+     "n": 2
+    },
+    {
+     "route": "1D",
+     "n": 2
+    },
+    {
+     "route": "W6",
+     "n": 2
+    },
+    {
+     "route": "6D",
+     "n": 2
+    },
+    {
+     "route": "W2",
+     "n": 2
+    },
+    {
+     "route": "4A",
+     "n": 1
+    },
+    {
+     "route": "5J",
+     "n": 1
+    },
+    {
+     "route": "5",
+     "n": 1
+    },
+    {
+     "route": "5D",
+     "n": 1
+    },
+    {
+     "route": "5C",
+     "n": 1
+    },
+    {
+     "route": "5A",
+     "n": 1
+    },
+    {
+     "route": "6A",
+     "n": 1
+    },
+    {
+     "route": "6E",
+     "n": 1
+    },
+    {
+     "route": "5K",
+     "n": 1
+    },
+    {
+     "route": "3B",
+     "n": 1
+    }
+   ],
+   "top": [
+    {
+     "c": [
+      "473825272"
+     ],
+     "s": "Market St",
+     "l": "20th St",
+     "route": "14",
+     "odd": "433 of 510 odd numbered tickets in the even side's window, 3 in their own",
+     "even": "146 of 230 even numbered tickets in the odd side's window, 70 in their own"
+    },
+    {
+     "c": [
+      "469178183"
+     ],
+     "s": "Foothill Blvd",
+     "l": "55th Ave - 57th Ave",
+     "route": "10",
+     "odd": "131 of 140 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "176 of 265 even numbered tickets in the odd side's window, 85 in their own"
+    },
+    {
+     "c": [
+      "493542950"
+     ],
+     "s": "Foothill Blvd",
+     "l": "25th Ave",
+     "route": "11",
+     "odd": "69 of 73 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "212 of 409 even numbered tickets in the odd side's window, 175 in their own"
+    },
+    {
+     "c": [
+      "442126415"
+     ],
+     "s": "Market St",
+     "l": "24th St - Athens Ave",
+     "route": "14",
+     "odd": "53 of 58 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "156 of 256 even numbered tickets in the odd side's window, 87 in their own"
+    },
+    {
+     "c": [
+      "421989336"
+     ],
+     "s": "Market St",
+     "l": "Alicia St - 26th St",
+     "route": "14",
+     "odd": "140 of 154 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "66 of 113 even numbered tickets in the odd side's window, 36 in their own"
+    },
+    {
+     "c": [
+      "515262325",
+      "518682707"
+     ],
+     "s": "Grand Ave",
+     "l": "Bay Pl - Bellevue Ave",
+     "route": "11",
+     "odd": "0 of 0 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "195 of 198 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "421969295"
+     ],
+     "s": "Telegraph Ave",
+     "l": "38th St - Apgar St",
+     "route": "",
+     "odd": "0 of 25 odd numbered tickets in the even side's window, 25 in their own",
+     "even": "175 of 231 even numbered tickets in the odd side's window, 43 in their own"
+    },
+    {
+     "c": [
+      "493542949"
+     ],
+     "s": "Foothill Blvd",
+     "l": "24th Ave - Irving Ave",
+     "route": "11",
+     "odd": "47 of 50 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "128 of 199 even numbered tickets in the odd side's window, 67 in their own"
+    },
+    {
+     "c": [
+      "469175073"
+     ],
+     "s": "4th St",
+     "l": "Oak St - Madison St",
+     "route": "12",
+     "odd": "0 of 9 odd numbered tickets in the even side's window, 9 in their own",
+     "even": "165 of 221 even numbered tickets in the odd side's window, 29 in their own"
+    },
+    {
+     "c": [
+      "499409351"
+     ],
+     "s": "24th St",
+     "l": "27th St - Orin Dr",
+     "route": "11",
+     "odd": "0 of 14 odd numbered tickets in the even side's window, 14 in their own",
+     "even": "164 of 201 even numbered tickets in the odd side's window, 17 in their own"
+    },
+    {
+     "c": [
+      "469178121"
+     ],
+     "s": "Foothill Blvd",
+     "l": "51st Ave - Vicksburg Ave",
+     "route": "10",
+     "odd": "84 of 86 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "76 of 132 even numbered tickets in the odd side's window, 48 in their own"
+    },
+    {
+     "c": [
+      "421989344"
+     ],
+     "s": "Market St",
+     "l": "26th St - Milton St",
+     "route": "14",
+     "odd": "69 of 78 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "90 of 143 even numbered tickets in the odd side's window, 46 in their own"
+    },
+    {
+     "c": [
+      "469170419"
+     ],
+     "s": "Adeline St",
+     "l": "34th St - 35th St",
+     "route": "14",
+     "odd": "67 of 77 odd numbered tickets in the even side's window, 8 in their own",
+     "even": "92 of 134 even numbered tickets in the odd side's window, 37 in their own"
+    },
+    {
+     "c": [
+      "518664778",
+      "518664791"
+     ],
+     "s": "Market St",
+     "l": "7th St - 8th St",
+     "route": "14",
+     "odd": "145 of 154 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "5 of 18 even numbered tickets in the odd side's window, 13 in their own"
+    },
+    {
+     "c": [
+      "469171489"
+     ],
+     "s": "Adeline St",
+     "l": "24th St - 26th St",
+     "route": "14",
+     "odd": "68 of 68 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "63 of 92 even numbered tickets in the odd side's window, 27 in their own"
+    },
+    {
+     "c": [
+      "469173291"
+     ],
+     "s": "Adeline St",
+     "l": "8th St - 10th St",
+     "route": "14",
+     "odd": "87 of 91 odd numbered tickets in the even side's window, 4 in their own",
+     "even": "39 of 73 even numbered tickets in the odd side's window, 29 in their own"
+    },
+    {
+     "c": [
+      "499345135",
+      "499345136"
+     ],
+     "s": "7th St",
+     "l": "Kirkham St - Union St",
+     "route": "14",
+     "odd": "1 of 1 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "125 of 163 even numbered tickets in the odd side's window, 19 in their own"
+    },
+    {
+     "c": [
+      "469178113"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Vicksburg Ave - Congress Ave",
+     "route": "10",
+     "odd": "84 of 92 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "32 of 101 even numbered tickets in the odd side's window, 64 in their own"
+    },
+    {
+     "c": [
+      "469175343"
+     ],
+     "s": "10th Ave",
+     "l": "International Blvd - E 15th St",
+     "route": "2A",
+     "odd": "34 of 38 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "69 of 99 even numbered tickets in the odd side's window, 29 in their own"
+    },
+    {
+     "c": [
+      "397237363",
+      "515750178"
+     ],
+     "s": "73rd Ave",
+     "l": "Hillside St - MacArthur Blvd",
+     "route": "10",
+     "odd": "0 of 0 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "101 of 108 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "515750179",
+      "397237363"
+     ],
+     "s": "73rd Ave",
+     "l": "Foothill Blvd - Connecting Road",
+     "route": "10",
+     "odd": "0 of 0 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "101 of 108 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469176098"
+     ],
+     "s": "Foothill Blvd",
+     "l": "20th Ave - 21st Ave",
+     "route": "11",
+     "odd": "44 of 45 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "54 of 95 even numbered tickets in the odd side's window, 36 in their own"
+    },
+    {
+     "c": [
+      "469178108"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Fairfax Ave - Belvedere St",
+     "route": "10",
+     "odd": "28 of 29 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "68 of 126 even numbered tickets in the odd side's window, 54 in their own"
+    },
+    {
+     "c": [
+      "395532779",
+      "395532802"
+     ],
+     "s": "73rd Ave",
+     "l": "Lockwood St - Weld St",
+     "route": "10",
+     "odd": "54 of 58 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "41 of 55 even numbered tickets in the odd side's window, 14 in their own"
+    },
+    {
+     "c": [
+      "469178371"
+     ],
+     "s": "Foothill Blvd",
+     "l": "60th Ave - 61st Ave",
+     "route": "10",
+     "odd": "56 of 59 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "35 of 67 even numbered tickets in the odd side's window, 26 in their own"
+    },
+    {
+     "c": [
+      "469176503"
+     ],
+     "s": "Foothill Blvd",
+     "l": "27th Ave - Mitchell St",
+     "route": "11",
+     "odd": "35 of 35 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "54 of 104 even numbered tickets in the odd side's window, 49 in their own"
+    },
+    {
+     "c": [
+      "426152197"
+     ],
+     "s": "Grand Ave",
+     "l": "Staten Ave - Bellevue Ave",
+     "route": "11",
+     "odd": "8 of 8 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "76 of 109 even numbered tickets in the odd side's window, 27 in their own"
+    },
+    {
+     "c": [
+      "469174911"
+     ],
+     "s": "Jackson St",
+     "l": "4th St - 5th St",
+     "route": "12",
+     "odd": "1 of 95 odd numbered tickets in the even side's window, 94 in their own",
+     "even": "83 of 95 even numbered tickets in the odd side's window, 0 in their own"
+    },
+    {
+     "c": [
+      "469171878"
+     ],
+     "s": "Linden St",
+     "l": "21st St - W Grand Ave",
+     "route": "2B",
+     "odd": "21 of 22 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "61 of 94 even numbered tickets in the odd side's window, 29 in their own"
+    },
+    {
+     "c": [
+      "469176292"
+     ],
+     "s": "Foothill Blvd",
+     "l": "22nd Ave - Munson Way",
+     "route": "11",
+     "odd": "21 of 21 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "58 of 111 even numbered tickets in the odd side's window, 51 in their own"
+    },
+    {
+     "c": [
+      "516425596"
+     ],
+     "s": "Foothill Blvd",
+     "l": "16th Ave - 17th Ave",
+     "route": "11",
+     "odd": "53 of 55 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "26 of 48 even numbered tickets in the odd side's window, 21 in their own"
+    },
+    {
+     "c": [
+      "469176517"
+     ],
+     "s": "Foothill Blvd",
+     "l": "28th Ave - Austin St",
+     "route": "11",
+     "odd": "19 of 19 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "53 of 108 even numbered tickets in the odd side's window, 51 in their own"
+    },
+    {
+     "c": [
+      "469176989"
+     ],
+     "s": "Foothill Blvd",
+     "l": "36th Ave - Bridge Ave",
+     "route": "10",
+     "odd": "17 of 17 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "53 of 102 even numbered tickets in the odd side's window, 45 in their own"
+    },
+    {
+     "c": [
+      "516427976"
+     ],
+     "s": "Adeline St",
+     "l": "28th St - 30th St",
+     "route": "14",
+     "odd": "30 of 30 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "40 of 56 even numbered tickets in the odd side's window, 16 in their own"
+    },
+    {
+     "c": [
+      "469171972"
+     ],
+     "s": "Wood St",
+     "l": "14th St - 15th St",
+     "route": "W6",
+     "odd": "69 of 70 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "0 of 5 even numbered tickets in the odd side's window, 4 in their own"
+    },
+    {
+     "c": [
+      "473825285",
+      "473825291"
+     ],
+     "s": "Market St",
+     "l": "18th St - 19th St",
+     "route": "14",
+     "odd": "46 of 54 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "22 of 83 even numbered tickets in the odd side's window, 56 in their own"
+    },
+    {
+     "c": [
+      "493544398",
+      "515750425"
+     ],
+     "s": "73rd Ave",
+     "l": "International Blvd - Orral St",
+     "route": "10",
+     "odd": "49 of 52 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "15 of 32 even numbered tickets in the odd side's window, 15 in their own"
+    },
+    {
+     "c": [
+      "421989320"
+     ],
+     "s": "Market St",
+     "l": "28th St",
+     "route": "14",
+     "odd": "36 of 38 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "26 of 49 even numbered tickets in the odd side's window, 19 in their own"
+    },
+    {
+     "c": [
+      "515750749"
+     ],
+     "s": "Foothill Blvd",
+     "l": "Havenscourt Blvd - 67th Ave",
+     "route": "10",
+     "odd": "52 of 62 odd numbered tickets in the even side's window, 0 in their own",
+     "even": "10 of 26 even numbered tickets in the odd side's window, 15 in their own"
+    },
+    {
+     "c": [
+      "469175823"
+     ],
+     "s": "Fruitvale Ave",
+     "l": "Hyde St - Blossom St",
+     "route": "11",
+     "odd": "23 of 25 odd numbered tickets in the even side's window, 1 in their own",
+     "even": "38 of 58 even numbered tickets in the odd side's window, 18 in their own"
+    }
+   ]
+  },
+  "contradictedSides": {
+   "sides": 498,
+   "note": "left off the map: sides with 8 or more tickets outside any window of the data, and under a quarter of their tickets in their own window. mostlyAt = when those tickets fall (weekday, hour).",
+   "byRoute": [
+    {
+     "route": "W6",
+     "n": 74
+    },
+    {
+     "route": "4A",
+     "n": 70
+    },
+    {
+     "route": "14",
+     "n": 53
+    },
+    {
+     "route": "10",
+     "n": 47
+    },
+    {
+     "route": "W2",
+     "n": 44
+    },
+    {
+     "route": "W5",
+     "n": 35
+    },
+    {
+     "route": "W4",
+     "n": 33
+    },
+    {
+     "route": "1E",
+     "n": 25
+    },
+    {
+     "route": "13",
+     "n": 24
+    },
+    {
+     "route": "11",
+     "n": 21
+    },
+    {
+     "route": "4",
+     "n": 11
+    },
+    {
+     "route": "12",
+     "n": 9
+    },
+    {
+     "route": "1",
+     "n": 9
+    },
+    {
+     "route": "(none)",
+     "n": 8
+    },
+    {
+     "route": "3B5N",
+     "n": 4
+    },
+    {
+     "route": "2A",
+     "n": 3
+    },
+    {
+     "route": "4B",
+     "n": 3
+    },
+    {
+     "route": "2A/3",
+     "n": 3
+    },
+    {
+     "route": "3B",
+     "n": 3
+    },
+    {
+     "route": "3",
+     "n": 2
+    },
+    {
+     "route": "5C",
+     "n": 2
+    },
+    {
+     "route": "5F",
+     "n": 2
+    },
+    {
+     "route": "5CW4",
+     "n": 2
+    },
+    {
+     "route": "5L",
+     "n": 1
+    },
+    {
+     "route": "4D",
+     "n": 1
+    },
+    {
+     "route": "1A1D",
+     "n": 1
+    },
+    {
+     "route": "1A1C",
+     "n": 1
+    },
+    {
+     "route": "1C",
+     "n": 1
+    },
+    {
+     "route": "5",
+     "n": 1
+    },
+    {
+     "route": "7D",
+     "n": 1
+    },
+    {
+     "route": "5E",
+     "n": 1
+    },
+    {
+     "route": "5H",
+     "n": 1
+    },
+    {
+     "route": "4B4D",
+     "n": 1
+    },
+    {
+     "route": "6B",
+     "n": 1
+    }
+   ],
+   "list": [
+    {
+     "c": "469174411",
+     "s": "Vallecito Pl",
+     "l": "E 28th St - E 31st St",
+     "route": "3",
+     "side": "odd",
+     "tickets": 2105,
+     "agree": 69,
+     "otherSide": 45,
+     "elsewhere": 1991,
+     "mostlyAt": [
+      "Wed 14h (121)",
+      "Thu 10h (103)",
+      "Wed 10h (85)"
+     ]
+    },
+    {
+     "c": "469172954",
+     "s": "16th St",
+     "l": "Martin Luther King Jr Way - Jefferson St",
+     "route": "13",
+     "side": "even",
+     "tickets": 741,
+     "agree": 24,
+     "otherSide": 0,
+     "elsewhere": 717,
+     "mostlyAt": [
+      "Wed 1h (163)",
+      "Fri 1h (125)",
+      "Mon 1h (104)"
+     ]
+    },
+    {
+     "c": "469172954",
+     "s": "16th St",
+     "l": "Martin Luther King Jr Way - Jefferson St",
+     "route": "13",
+     "side": "odd",
+     "tickets": 500,
+     "agree": 8,
+     "otherSide": 1,
+     "elsewhere": 491,
+     "mostlyAt": [
+      "Thu 1h (116)",
+      "Tue 1h (112)",
+      "Sat 1h (59)"
+     ]
+    },
+    {
+     "c": "469173444",
+     "s": "17th St",
+     "l": "Lakeside Dr - Madison St",
+     "route": "2A",
+     "side": "even",
+     "tickets": 406,
+     "agree": 0,
+     "otherSide": 18,
+     "elsewhere": 388,
+     "mostlyAt": [
+      "Mon 1h (182)",
+      "Thu 1h (114)",
+      "Thu 9h (14)"
+     ]
+    },
+    {
+     "c": "495512724",
+     "s": "MacArthur Blvd",
+     "l": "Maple Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 384,
+     "agree": 16,
+     "otherSide": 1,
+     "elsewhere": 367,
+     "mostlyAt": [
+      "Thu 1h (135)",
+      "Tue 2h (92)",
+      "Tue 1h (50)"
+     ]
+    },
+    {
+     "c": "469173661",
+     "s": "Harrison St",
+     "l": "13th St - 14th St",
+     "route": "12",
+     "side": "even",
+     "tickets": 319,
+     "agree": 19,
+     "otherSide": 0,
+     "elsewhere": 300,
+     "mostlyAt": [
+      "Thu 1h (55)",
+      "Tue 1h (55)",
+      "Fri 2h (48)"
+     ]
+    },
+    {
+     "c": "469174176",
+     "s": "10th St",
+     "l": "Jackson St - Alice St",
+     "route": "12",
+     "side": "even",
+     "tickets": 296,
+     "agree": 7,
+     "otherSide": 1,
+     "elsewhere": 288,
+     "mostlyAt": [
+      "Fri 12h (41)",
+      "Fri 11h (30)",
+      "Thu 11h (28)"
+     ]
+    },
+    {
+     "c": "426152106",
+     "s": "Grand Ave",
+     "l": "Webster St - Valdez St",
+     "route": "(none)",
+     "side": "even",
+     "tickets": 270,
+     "agree": 7,
+     "otherSide": 0,
+     "elsewhere": 263,
+     "mostlyAt": [
+      "Sun 0h (204)",
+      "Sat 1h (26)",
+      "Sun 1h (16)"
+     ]
+    },
+    {
+     "c": "469173437",
+     "s": "5th St",
+     "l": "Mandela Pkwy - Center St",
+     "route": "W5",
+     "side": "even",
+     "tickets": 216,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 216,
+     "mostlyAt": [
+      "Thu 12h (127)",
+      "Thu 13h (39)",
+      "Thu 14h (24)"
+     ]
+    },
+    {
+     "c": "469173678",
+     "s": "8th St",
+     "l": "Castro St - Martin Luther King Jr Way",
+     "route": "13",
+     "side": "even",
+     "tickets": 191,
+     "agree": 12,
+     "otherSide": 0,
+     "elsewhere": 179,
+     "mostlyAt": [
+      "Wed 1h (40)",
+      "Mon 1h (36)",
+      "Wed 2h (32)"
+     ]
+    },
+    {
+     "c": "518664606",
+     "s": "12th St",
+     "l": "Clay St - Jefferson St",
+     "route": "13",
+     "side": "odd",
+     "tickets": 168,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 168,
+     "mostlyAt": [
+      "Sat 3h (68)",
+      "Sat 5h (28)",
+      "Sat 4h (23)"
+     ]
+    },
+    {
+     "c": "469173444",
+     "s": "17th St",
+     "l": "Lakeside Dr - Madison St",
+     "route": "2A",
+     "side": "odd",
+     "tickets": 156,
+     "agree": 2,
+     "otherSide": 0,
+     "elsewhere": 154,
+     "mostlyAt": [
+      "Thu 2h (131)",
+      "Thu 1h (18)",
+      "Thu 0h (5)"
+     ]
+    },
+    {
+     "c": "495526648",
+     "s": "Telegraph Ave",
+     "l": "52nd St - 55th St",
+     "route": "1E",
+     "side": "odd",
+     "tickets": 155,
+     "agree": 0,
+     "otherSide": 2,
+     "elsewhere": 153,
+     "mostlyAt": [
+      "Fri 2h (50)",
+      "Wed 2h (31)",
+      "Fri 1h (25)"
+     ]
+    },
+    {
+     "c": "469173762",
+     "s": "14th St",
+     "l": "Madison St - Jackson St",
+     "route": "12",
+     "side": "even",
+     "tickets": 142,
+     "agree": 6,
+     "otherSide": 0,
+     "elsewhere": 136,
+     "mostlyAt": [
+      "Wed 4h (35)",
+      "Fri 4h (21)",
+      "Mon 4h (21)"
+     ]
+    },
+    {
+     "c": "469179060",
+     "s": "MacArthur Blvd",
+     "l": "77th Ave - 78th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 135,
+     "agree": 3,
+     "otherSide": 1,
+     "elsewhere": 131,
+     "mostlyAt": [
+      "Thu 3h (39)",
+      "Thu 4h (22)",
+      "Tue 3h (20)"
+     ]
+    },
+    {
+     "c": "469172879",
+     "s": "16th St",
+     "l": "Castro St - Martin Luther King Jr Way",
+     "route": "13",
+     "side": "odd",
+     "tickets": 131,
+     "agree": 3,
+     "otherSide": 0,
+     "elsewhere": 128,
+     "mostlyAt": [
+      "Sat 1h (35)",
+      "Sat 2h (26)",
+      "Thu 1h (24)"
+     ]
+    },
+    {
+     "c": "469173363",
+     "s": "Chester St",
+     "l": "5th St - Oakland West Sta",
+     "route": "W5",
+     "side": "even",
+     "tickets": 122,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 122,
+     "mostlyAt": [
+      "Fri 12h (81)",
+      "Fri 13h (13)",
+      "Fri 14h (10)"
+     ]
+    },
+    {
+     "c": "469173685",
+     "s": "14th St",
+     "l": "Jackson St - Alice St",
+     "route": "12",
+     "side": "even",
+     "tickets": 130,
+     "agree": 9,
+     "otherSide": 0,
+     "elsewhere": 121,
+     "mostlyAt": [
+      "Wed 5h (25)",
+      "Wed 4h (16)",
+      "Fri 5h (13)"
+     ]
+    },
+    {
+     "c": "469173363",
+     "s": "Chester St",
+     "l": "5th St - Oakland West Sta",
+     "route": "W5",
+     "side": "odd",
+     "tickets": 117,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 117,
+     "mostlyAt": [
+      "Thu 12h (45)",
+      "Thu 13h (43)",
+      "Thu 14h (17)"
+     ]
+    },
+    {
+     "c": "422290345",
+     "s": "MacArthur Blvd",
+     "l": "Ec Reems Ct - 88th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 112,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 112,
+     "mostlyAt": [
+      "Thu 5h (35)",
+      "Thu 3h (31)",
+      "Tue 3h (16)"
+     ]
+    },
+    {
+     "c": "515750559",
+     "s": "Martin Luther King Jr Way",
+     "l": "31st St - 32nd St",
+     "route": "14",
+     "side": "even",
+     "tickets": 134,
+     "agree": 22,
+     "otherSide": 0,
+     "elsewhere": 112,
+     "mostlyAt": [
+      "Thu 1h (63)",
+      "Thu 2h (22)",
+      "Fri 2h (7)"
+     ]
+    },
+    {
+     "c": "513423395",
+     "s": "Louise St",
+     "l": "34th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 110,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 110,
+     "mostlyAt": [
+      "Thu 13h (63)",
+      "Thu 14h (26)",
+      "Thu 12h (6)"
+     ]
+    },
+    {
+     "c": "418225804",
+     "s": "Hollis St",
+     "l": "32nd St - 34th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 110,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 110,
+     "mostlyAt": [
+      "Thu 13h (52)",
+      "Thu 14h (25)",
+      "Thu 12h (22)"
+     ]
+    },
+    {
+     "c": "469173396",
+     "s": "5th St",
+     "l": "Center St - Chester St",
+     "route": "W5",
+     "side": "even",
+     "tickets": 105,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 105,
+     "mostlyAt": [
+      "Thu 12h (52)",
+      "Thu 13h (32)",
+      "Thu 14h (16)"
+     ]
+    },
+    {
+     "c": "515750561",
+     "s": "Martin Luther King Jr Way",
+     "l": "W MacArthur Blvd - Apgar St",
+     "route": "14",
+     "side": "even",
+     "tickets": 99,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 99,
+     "mostlyAt": [
+      "Thu 1h (29)",
+      "Mon 1h (22)",
+      "Tue 1h (14)"
+     ]
+    },
+    {
+     "c": "418225804",
+     "s": "Hollis St",
+     "l": "32nd St - 34th St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 98,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 98,
+     "mostlyAt": [
+      "Fri 13h (42)",
+      "Fri 14h (19)",
+      "Fri 12h (14)"
+     ]
+    },
+    {
+     "c": "395536389",
+     "s": "MacArthur Blvd",
+     "l": "100th Ave - Byron Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 95,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 95,
+     "mostlyAt": [
+      "Thu 3h (25)",
+      "Thu 5h (22)",
+      "Tue 4h (17)"
+     ]
+    },
+    {
+     "c": "395519546",
+     "s": "Telegraph Ave",
+     "l": "Thomas L Berkley Way - 21st St",
+     "route": "(none)",
+     "side": "even",
+     "tickets": 99,
+     "agree": 2,
+     "otherSide": 4,
+     "elsewhere": 93,
+     "mostlyAt": [
+      "Mon 5h (14)",
+      "Tue 5h (12)",
+      "Mon 4h (11)"
+     ]
+    },
+    {
+     "c": "469171149",
+     "s": "Martin Luther King Jr Way",
+     "l": "30th St - 31st St",
+     "route": "14",
+     "side": "even",
+     "tickets": 103,
+     "agree": 10,
+     "otherSide": 0,
+     "elsewhere": 93,
+     "mostlyAt": [
+      "Thu 1h (45)",
+      "Thu 2h (22)",
+      "Fri 2h (10)"
+     ]
+    },
+    {
+     "c": "469170646",
+     "s": "Helen St",
+     "l": "32nd St - 34th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 92,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 92,
+     "mostlyAt": [
+      "Thu 13h (50)",
+      "Thu 12h (20)",
+      "Thu 14h (12)"
+     ]
+    },
+    {
+     "c": "469170097",
+     "s": "Howe St",
+     "l": "Ridgeway Ave - John St",
+     "route": "1",
+     "side": "even",
+     "tickets": 105,
+     "agree": 8,
+     "otherSide": 11,
+     "elsewhere": 86,
+     "mostlyAt": [
+      "Thu 12h (15)",
+      "Fri 12h (11)",
+      "Tue 13h (7)"
+     ]
+    },
+    {
+     "c": "469173852",
+     "s": "14th St",
+     "l": "Lakeside Dr - Madison St",
+     "route": "12",
+     "side": "even",
+     "tickets": 86,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 86,
+     "mostlyAt": [
+      "Tue 5h (19)",
+      "Thu 5h (14)",
+      "Mon 5h (13)"
+     ]
+    },
+    {
+     "c": "395533970",
+     "s": "MacArthur Blvd",
+     "l": "88th Ave - 89th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 85,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 85,
+     "mostlyAt": [
+      "Thu 3h (32)",
+      "Tue 3h (14)",
+      "Thu 5h (12)"
+     ]
+    },
+    {
+     "c": "442129486",
+     "s": "Moraga Ave",
+     "l": "Medau Pl",
+     "route": "11",
+     "side": "odd",
+     "tickets": 84,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 84,
+     "mostlyAt": [
+      "Wed 8h (27)",
+      "Fri 8h (21)",
+      "Thu 8h (15)"
+     ]
+    },
+    {
+     "c": "469171149",
+     "s": "Martin Luther King Jr Way",
+     "l": "30th St - 31st St",
+     "route": "14",
+     "side": "odd",
+     "tickets": 84,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 83,
+     "mostlyAt": [
+      "Tue 2h (48)",
+      "Fri 1h (22)",
+      "Fri 2h (6)"
+     ]
+    },
+    {
+     "c": "469170699-2",
+     "s": "Ettie St",
+     "l": "32nd St - 34th St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 77,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 77,
+     "mostlyAt": [
+      "Thu 12h (26)",
+      "Thu 13h (23)",
+      "Thu 14h (23)"
+     ]
+    },
+    {
+     "c": "469172879",
+     "s": "16th St",
+     "l": "Castro St - Martin Luther King Jr Way",
+     "route": "13",
+     "side": "even",
+     "tickets": 80,
+     "agree": 4,
+     "otherSide": 0,
+     "elsewhere": 76,
+     "mostlyAt": [
+      "Wed 1h (19)",
+      "Mon 1h (16)",
+      "Fri 1h (12)"
+     ]
+    },
+    {
+     "c": "513423395",
+     "s": "Louise St",
+     "l": "34th St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 75,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 75,
+     "mostlyAt": [
+      "Fri 13h (41)",
+      "Fri 14h (16)",
+      "Fri 12h (14)"
+     ]
+    },
+    {
+     "c": "473825272",
+     "s": "Market St",
+     "l": "20th St",
+     "route": "14",
+     "side": "odd",
+     "tickets": 510,
+     "agree": 3,
+     "otherSide": 433,
+     "elsewhere": 74,
+     "mostlyAt": [
+      "Mon 13h (14)",
+      "Mon 9h (11)",
+      "Fri 13h (10)"
+     ]
+    },
+    {
+     "c": "469173557",
+     "s": "Chester St",
+     "l": "3rd St - 5th St",
+     "route": "W5",
+     "side": "odd",
+     "tickets": 73,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 73,
+     "mostlyAt": [
+      "Thu 12h (40)",
+      "Thu 13h (18)",
+      "Thu 14h (15)"
+     ]
+    },
+    {
+     "c": "495527489",
+     "s": "12th St",
+     "l": "Broadway - Clay St",
+     "route": "13",
+     "side": "odd",
+     "tickets": 79,
+     "agree": 6,
+     "otherSide": 0,
+     "elsewhere": 73,
+     "mostlyAt": [
+      "Sat 3h (25)",
+      "Tue 4h (11)",
+      "Thu 4h (10)"
+     ]
+    },
+    {
+     "c": "517228885",
+     "s": "Coolidge Ave",
+     "l": "Nicol Ave - School St",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 72,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 72,
+     "mostlyAt": [
+      "Fri 9h (49)",
+      "Fri 10h (12)",
+      "Fri 11h (9)"
+     ]
+    },
+    {
+     "c": "469174136",
+     "s": "MacArthur Blvd",
+     "l": "Lincoln Ave - Boston Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 76,
+     "agree": 5,
+     "otherSide": 0,
+     "elsewhere": 71,
+     "mostlyAt": [
+      "Thu 1h (33)",
+      "Tue 1h (14)",
+      "Tue 2h (10)"
+     ]
+    },
+    {
+     "c": "515750596",
+     "s": "MacArthur Blvd",
+     "l": "73rd Ave - 74th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 75,
+     "agree": 4,
+     "otherSide": 0,
+     "elsewhere": 71,
+     "mostlyAt": [
+      "Thu 3h (16)",
+      "Tue 3h (13)",
+      "Thu 4h (12)"
+     ]
+    },
+    {
+     "c": "518663267",
+     "s": "Martin Luther King Jr Way",
+     "l": "26th St - 27th St",
+     "route": "11",
+     "side": "even",
+     "tickets": 73,
+     "agree": 2,
+     "otherSide": 0,
+     "elsewhere": 71,
+     "mostlyAt": [
+      "Wed 1h (24)",
+      "Fri 1h (23)",
+      "Fri 2h (6)"
+     ]
+    },
+    {
+     "c": "442080167",
+     "s": "MacArthur Blvd",
+     "l": "Ritchie St - 82nd Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 71,
+     "agree": 0,
+     "otherSide": 1,
+     "elsewhere": 70,
+     "mostlyAt": [
+      "Thu 4h (22)",
+      "Thu 5h (13)",
+      "Thu 3h (13)"
+     ]
+    },
+    {
+     "c": "495512342",
+     "s": "Helen St",
+     "l": "Peralta St - 32nd St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 70,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 70,
+     "mostlyAt": [
+      "Thu 13h (49)",
+      "Thu 14h (12)",
+      "Thu 12h (4)"
+     ]
+    },
+    {
+     "c": "469181134",
+     "s": "Enterprise Way",
+     "l": "Edes Ave - 85th Ave",
+     "route": "W2",
+     "side": "even",
+     "tickets": 70,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 70,
+     "mostlyAt": [
+      "Tue 12h (35)",
+      "Tue 14h (9)",
+      "Mon 13h (9)"
+     ]
+    },
+    {
+     "c": "518663256",
+     "s": "Oakland Ave",
+     "l": "Fairmount Ave - Pearl St",
+     "route": "3B5N",
+     "side": "odd",
+     "tickets": 69,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 68,
+     "mostlyAt": [
+      "Wed 9h (54)",
+      "Wed 10h (9)",
+      "Wed 11h (5)"
+     ]
+    },
+    {
+     "c": "469179232",
+     "s": "MacArthur Blvd",
+     "l": "Parker Ave - Ritchie St",
+     "route": "10",
+     "side": "odd",
+     "tickets": 68,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 68,
+     "mostlyAt": [
+      "Thu 5h (15)",
+      "Thu 3h (13)",
+      "Tue 5h (11)"
+     ]
+    },
+    {
+     "c": "469171677",
+     "s": "Martin Luther King Jr Way",
+     "l": "Sycamore St - 26th St",
+     "route": "11",
+     "side": "odd",
+     "tickets": 68,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 68,
+     "mostlyAt": [
+      "Tue 1h (42)",
+      "Thu 1h (16)",
+      "Tue 2h (6)"
+     ]
+    },
+    {
+     "c": "421969158",
+     "s": "Telegraph Ave",
+     "l": "66th St",
+     "route": "1E",
+     "side": "odd",
+     "tickets": 68,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 68,
+     "mostlyAt": [
+      "Fri 2h (32)",
+      "Wed 2h (22)",
+      "Mon 2h (10)"
+     ]
+    },
+    {
+     "c": "469172071",
+     "s": "23rd St",
+     "l": "Telegraph Ave - Northgate Ave",
+     "route": "11",
+     "side": "even",
+     "tickets": 69,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 68,
+     "mostlyAt": [
+      "Wed 5h (21)",
+      "Tue 5h (8)",
+      "Mon 5h (8)"
+     ]
+    },
+    {
+     "c": "515750868",
+     "s": "MacArthur Blvd",
+     "l": "98th Ave - Warner Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 66,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 66,
+     "mostlyAt": [
+      "Thu 3h (25)",
+      "Thu 5h (12)",
+      "Tue 4h (11)"
+     ]
+    },
+    {
+     "c": "513423396",
+     "s": "32nd St",
+     "l": "Louise St - Helen St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 65,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 65,
+     "mostlyAt": [
+      "Fri 13h (37)",
+      "Fri 12h (16)",
+      "Fri 14h (8)"
+     ]
+    },
+    {
+     "c": "469176799",
+     "s": "E 17th St",
+     "l": "28th Ave - 29th Ave",
+     "route": "4B",
+     "side": "even",
+     "tickets": 86,
+     "agree": 13,
+     "otherSide": 8,
+     "elsewhere": 65,
+     "mostlyAt": [
+      "Thu 13h (6)",
+      "Fri 4h (4)",
+      "Tue 13h (3)"
+     ]
+    },
+    {
+     "c": "495512342",
+     "s": "Helen St",
+     "l": "Peralta St - 32nd St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 64,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 64,
+     "mostlyAt": [
+      "Fri 13h (40)",
+      "Fri 14h (14)",
+      "Fri 12h (8)"
+     ]
+    },
+    {
+     "c": "416911730",
+     "s": "MacArthur Blvd",
+     "l": "Taylor Ave - 99th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 63,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 63,
+     "mostlyAt": [
+      "Thu 3h (17)",
+      "Thu 4h (9)",
+      "Thu 5h (9)"
+     ]
+    },
+    {
+     "c": "469170460",
+     "s": "Hannah St",
+     "l": "34th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 62,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 62,
+     "mostlyAt": [
+      "Thu 13h (32)",
+      "Thu 12h (19)",
+      "Thu 14h (7)"
+     ]
+    },
+    {
+     "c": "469178887",
+     "s": "MacArthur Blvd",
+     "l": "75th Ave - 76th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 61,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 61,
+     "mostlyAt": [
+      "Thu 3h (12)",
+      "Tue 3h (11)",
+      "Thu 5h (11)"
+     ]
+    },
+    {
+     "c": "469170670",
+     "s": "Hannah St",
+     "l": "32nd St - 34th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 60,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 60,
+     "mostlyAt": [
+      "Thu 13h (25)",
+      "Thu 12h (13)",
+      "Thu 14h (7)"
+     ]
+    },
+    {
+     "c": "515750559",
+     "s": "Martin Luther King Jr Way",
+     "l": "31st St - 32nd St",
+     "route": "14",
+     "side": "odd",
+     "tickets": 68,
+     "agree": 8,
+     "otherSide": 0,
+     "elsewhere": 60,
+     "mostlyAt": [
+      "Tue 2h (24)",
+      "Fri 1h (22)",
+      "Fri 2h (8)"
+     ]
+    },
+    {
+     "c": "469173364",
+     "s": "5th St",
+     "l": "Chester St - Henry St",
+     "route": "W5",
+     "side": "even",
+     "tickets": 59,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 59,
+     "mostlyAt": [
+      "Thu 12h (18)",
+      "Thu 14h (15)",
+      "Thu 13h (8)"
+     ]
+    },
+    {
+     "c": "469170498",
+     "s": "Manila Ave",
+     "l": "W MacArthur Blvd - 38th St",
+     "route": "1",
+     "side": "even",
+     "tickets": 74,
+     "agree": 16,
+     "otherSide": 0,
+     "elsewhere": 58,
+     "mostlyAt": [
+      "Tue 9h (23)",
+      "Tue 10h (22)",
+      "Tue 12h (5)"
+     ]
+    },
+    {
+     "c": "469173452",
+     "s": "Peralta St",
+     "l": "3rd St - 5th St",
+     "route": "W5",
+     "side": "even",
+     "tickets": 57,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 57,
+     "mostlyAt": [
+      "Fri 13h (33)",
+      "Fri 12h (12)",
+      "Thu 12h (5)"
+     ]
+    },
+    {
+     "c": "469175996",
+     "s": "E 21st St",
+     "l": "23rd Ave - 24th Ave",
+     "route": "4B",
+     "side": "even",
+     "tickets": 59,
+     "agree": 0,
+     "otherSide": 2,
+     "elsewhere": 57,
+     "mostlyAt": [
+      "Wed 13h (37)",
+      "Wed 14h (14)",
+      "Wed 15h (2)"
+     ]
+    },
+    {
+     "c": "515750869",
+     "s": "MacArthur Blvd",
+     "l": "98th Ave - Warner Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 57,
+     "agree": 0,
+     "otherSide": 1,
+     "elsewhere": 56,
+     "mostlyAt": [
+      "Thu 3h (23)",
+      "Tue 4h (12)",
+      "Thu 9h (6)"
+     ]
+    },
+    {
+     "c": "495512723",
+     "s": "MacArthur Blvd",
+     "l": "Laurel Ave - Maple Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 61,
+     "agree": 6,
+     "otherSide": 0,
+     "elsewhere": 55,
+     "mostlyAt": [
+      "Tue 2h (21)",
+      "Thu 1h (18)",
+      "Tue 1h (9)"
+     ]
+    },
+    {
+     "c": "469173653",
+     "s": "9th St",
+     "l": "Martin Luther King Jr Way - Jefferson St",
+     "route": "13",
+     "side": "odd",
+     "tickets": 61,
+     "agree": 6,
+     "otherSide": 0,
+     "elsewhere": 55,
+     "mostlyAt": [
+      "Sat 3h (22)",
+      "Tue 3h (9)",
+      "Thu 5h (7)"
+     ]
+    },
+    {
+     "c": "395532971",
+     "s": "MacArthur Blvd",
+     "l": "83rd Ave - 84th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 54,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 54,
+     "mostlyAt": [
+      "Thu 5h (19)",
+      "Tue 3h (14)",
+      "Thu 3h (11)"
+     ]
+    },
+    {
+     "c": "469173281",
+     "s": "Chester St",
+     "l": "Oakland West Sta - 7th St",
+     "route": "W5",
+     "side": "odd",
+     "tickets": 53,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 53,
+     "mostlyAt": [
+      "Thu 13h (23)",
+      "Thu 12h (16)",
+      "Thu 14h (9)"
+     ]
+    },
+    {
+     "c": "469173067",
+     "s": "17th St",
+     "l": "Franklin St - Broadway",
+     "route": "13",
+     "side": "odd",
+     "tickets": 54,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 53,
+     "mostlyAt": [
+      "Tue 4h (18)",
+      "Sat 4h (10)",
+      "Sat 3h (8)"
+     ]
+    },
+    {
+     "c": "469175289",
+     "s": "Pleitner Ave",
+     "l": "Ward Ln - School St",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 55,
+     "agree": 2,
+     "otherSide": 0,
+     "elsewhere": 53,
+     "mostlyAt": [
+      "Fri 11h (23)",
+      "Fri 10h (16)",
+      "Fri 9h (12)"
+     ]
+    },
+    {
+     "c": "469173536",
+     "s": "10th St",
+     "l": "Martin Luther King Jr Way - Jefferson St",
+     "route": "13",
+     "side": "even",
+     "tickets": 71,
+     "agree": 14,
+     "otherSide": 5,
+     "elsewhere": 52,
+     "mostlyAt": [
+      "Wed 6h (16)",
+      "Fri 6h (12)",
+      "Thu 11h (5)"
+     ]
+    },
+    {
+     "c": "516425753",
+     "s": "Wood St",
+     "l": "8th St - Chase St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 52,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 52,
+     "mostlyAt": [
+      "Fri 12h (21)",
+      "Fri 13h (19)",
+      "Fri 14h (10)"
+     ]
+    },
+    {
+     "c": "469181041",
+     "s": "MacArthur Blvd",
+     "l": "Fisher Ave - Talbot Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 51,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 51,
+     "mostlyAt": [
+      "Thu 3h (10)",
+      "Tue 4h (10)",
+      "Thu 5h (10)"
+     ]
+    },
+    {
+     "c": "469171544",
+     "s": "Willow St",
+     "l": "20th St - W Grand Ave",
+     "route": "W6",
+     "side": "even",
+     "tickets": 51,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 51,
+     "mostlyAt": [
+      "Fri 13h (23)",
+      "Fri 12h (11)",
+      "Thu 14h (9)"
+     ]
+    },
+    {
+     "c": "516428027",
+     "s": "Telegraph Ave",
+     "l": "52nd St - 55th St",
+     "route": "1E",
+     "side": "even",
+     "tickets": 50,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 50,
+     "mostlyAt": [
+      "Thu 2h (13)",
+      "Mon 1h (11)",
+      "Fri 1h (6)"
+     ]
+    },
+    {
+     "c": "469177534",
+     "s": "35th Ave",
+     "l": "International Blvd - E 15th St",
+     "route": "4",
+     "side": "even",
+     "tickets": 49,
+     "agree": 0,
+     "otherSide": 1,
+     "elsewhere": 48,
+     "mostlyAt": [
+      "Thu 9h (31)",
+      "Thu 11h (9)",
+      "Thu 4h (5)"
+     ]
+    },
+    {
+     "c": "469174180",
+     "s": "MacArthur Blvd",
+     "l": "Boston Ave - Wilson Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 46,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 46,
+     "mostlyAt": [
+      "Thu 1h (17)",
+      "Tue 2h (12)",
+      "Thu 2h (10)"
+     ]
+    },
+    {
+     "c": "469170646",
+     "s": "Helen St",
+     "l": "32nd St - 34th St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 46,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 46,
+     "mostlyAt": [
+      "Fri 13h (23)",
+      "Fri 14h (14)",
+      "Fri 12h (6)"
+     ]
+    },
+    {
+     "c": "469176920",
+     "s": "35th Ave",
+     "l": "E 18th St - Foothill Blvd",
+     "route": "4",
+     "side": "even",
+     "tickets": 47,
+     "agree": 0,
+     "otherSide": 1,
+     "elsewhere": 46,
+     "mostlyAt": [
+      "Thu 9h (29)",
+      "Thu 11h (7)",
+      "Thu 10h (7)"
+     ]
+    },
+    {
+     "c": "495512720",
+     "s": "MacArthur Blvd",
+     "l": "Laurel Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 51,
+     "agree": 6,
+     "otherSide": 0,
+     "elsewhere": 45,
+     "mostlyAt": [
+      "Tue 2h (31)",
+      "Thu 2h (10)",
+      "Thu 13h (2)"
+     ]
+    },
+    {
+     "c": "469170669",
+     "s": "32nd St",
+     "l": "Helen St - Hannah St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 45,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 45,
+     "mostlyAt": [
+      "Fri 13h (16)",
+      "Fri 12h (11)",
+      "Fri 14h (9)"
+     ]
+    },
+    {
+     "c": "469173396",
+     "s": "5th St",
+     "l": "Center St - Chester St",
+     "route": "W5",
+     "side": "odd",
+     "tickets": 45,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 45,
+     "mostlyAt": [
+      "Fri 12h (33)",
+      "Fri 14h (5)",
+      "Fri 9h (2)"
+     ]
+    },
+    {
+     "c": "469174640",
+     "s": "Georgia St",
+     "l": "Coolidge Ave - Maple Ave",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 45,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 45,
+     "mostlyAt": [
+      "Fri 9h (30)",
+      "Fri 10h (11)",
+      "Fri 3h (4)"
+     ]
+    },
+    {
+     "c": "518659090",
+     "s": "Telegraph Ave",
+     "l": "Aileen St",
+     "route": "1E",
+     "side": "even",
+     "tickets": 44,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 44,
+     "mostlyAt": [
+      "Fri 1h (16)",
+      "Mon 1h (10)",
+      "Wed 1h (5)"
+     ]
+    },
+    {
+     "c": "469175162",
+     "s": "Delaware St",
+     "l": "Laurel Ave - 35th Ave",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 43,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 43,
+     "mostlyAt": [
+      "Fri 9h (35)",
+      "Fri 10h (8)"
+     ]
+    },
+    {
+     "c": "469170670",
+     "s": "Hannah St",
+     "l": "32nd St - 34th St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 43,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 43,
+     "mostlyAt": [
+      "Fri 13h (16)",
+      "Fri 12h (12)",
+      "Fri 14h (10)"
+     ]
+    },
+    {
+     "c": "469172798",
+     "s": "8th St",
+     "l": "Wood St - Pine St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 43,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 43,
+     "mostlyAt": [
+      "Thu 13h (21)",
+      "Thu 14h (12)",
+      "Thu 15h (5)"
+     ]
+    },
+    {
+     "c": "469175572",
+     "s": "Bartlett St",
+     "l": "Penniman Ave - School St",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 45,
+     "agree": 2,
+     "otherSide": 0,
+     "elsewhere": 43,
+     "mostlyAt": [
+      "Fri 9h (30)",
+      "Fri 10h (12)",
+      "Fri 11h (1)"
+     ]
+    },
+    {
+     "c": "469172624",
+     "s": "McElroy St",
+     "l": "Chase St - 9th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 42,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 42,
+     "mostlyAt": [
+      "Fri 13h (18)",
+      "Fri 14h (11)",
+      "Fri 12h (7)"
+     ]
+    },
+    {
+     "c": "469178345",
+     "s": "39th Ave",
+     "l": "Wattling St - San Leandro St",
+     "route": "W4",
+     "side": "odd",
+     "tickets": 42,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 42,
+     "mostlyAt": [
+      "Tue 10h (28)",
+      "Tue 9h (9)",
+      "Tue 11h (4)"
+     ]
+    },
+    {
+     "c": "469169567",
+     "s": "Martin Luther King Jr Way",
+     "l": "45th St - 46th St",
+     "route": "14",
+     "side": "even",
+     "tickets": 42,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 42,
+     "mostlyAt": [
+      "Tue 1h (12)",
+      "Fri 1h (11)",
+      "Thu 1h (7)"
+     ]
+    },
+    {
+     "c": "513423396",
+     "s": "32nd St",
+     "l": "Louise St - Helen St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 42,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 42,
+     "mostlyAt": [
+      "Thu 13h (25)",
+      "Thu 12h (8)",
+      "Thu 14h (8)"
+     ]
+    },
+    {
+     "c": "493540052",
+     "s": "Curran Ave",
+     "l": "Ward Ln - School St",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 43,
+     "agree": 0,
+     "otherSide": 1,
+     "elsewhere": 42,
+     "mostlyAt": [
+      "Fri 10h (18)",
+      "Fri 9h (12)",
+      "Fri 11h (12)"
+     ]
+    },
+    {
+     "c": "469171665",
+     "s": "Oakland Ave",
+     "l": "Fairmount Ave - Pearl St",
+     "route": "3B5N",
+     "side": "odd",
+     "tickets": 41,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 41,
+     "mostlyAt": [
+      "Wed 9h (27)",
+      "Wed 11h (11)",
+      "Wed 10h (3)"
+     ]
+    },
+    {
+     "c": "518664303",
+     "s": "Willow St",
+     "l": "7th St - Goss St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 41,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 41,
+     "mostlyAt": [
+      "Fri 13h (26)",
+      "Fri 14h (13)",
+      "Thu 13h (1)"
+     ]
+    },
+    {
+     "c": "518663022",
+     "s": "Oakland Ave",
+     "l": "Pearl St - Perry Pl",
+     "route": "3B5N",
+     "side": "odd",
+     "tickets": 42,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 41,
+     "mostlyAt": [
+      "Wed 9h (30)",
+      "Wed 11h (7)",
+      "Wed 10h (4)"
+     ]
+    },
+    {
+     "c": "469175277",
+     "s": "Arkansas St",
+     "l": "Laurel Ave",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 43,
+     "agree": 1,
+     "otherSide": 1,
+     "elsewhere": 41,
+     "mostlyAt": [
+      "Fri 10h (28)",
+      "Fri 9h (13)"
+     ]
+    },
+    {
+     "c": "469171850",
+     "s": "Martin Luther King Jr Way",
+     "l": "24th St - 25th St",
+     "route": "11",
+     "side": "odd",
+     "tickets": 41,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 41,
+     "mostlyAt": [
+      "Tue 1h (22)",
+      "Thu 1h (12)",
+      "Tue 2h (3)"
+     ]
+    },
+    {
+     "c": "469172556",
+     "s": "Wood St",
+     "l": "9th St - 10th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 41,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 41,
+     "mostlyAt": [
+      "Thu 13h (24)",
+      "Thu 14h (10)",
+      "Thu 5h (3)"
+     ]
+    },
+    {
+     "c": "469170777",
+     "s": "Martin Luther King Jr Way",
+     "l": "33rd St - 34th St",
+     "route": "14",
+     "side": "even",
+     "tickets": 47,
+     "agree": 6,
+     "otherSide": 0,
+     "elsewhere": 41,
+     "mostlyAt": [
+      "Thu 1h (20)",
+      "Thu 2h (10)",
+      "Fri 2h (6)"
+     ]
+    },
+    {
+     "c": "518659008",
+     "s": "Telegraph Ave",
+     "l": "58th St - 57th St",
+     "route": "1E",
+     "side": "even",
+     "tickets": 40,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 40,
+     "mostlyAt": [
+      "Mon 1h (8)",
+      "Fri 1h (7)",
+      "Thu 2h (7)"
+     ]
+    },
+    {
+     "c": "469172681",
+     "s": "Wood St",
+     "l": "Chase St - 9th St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 39,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 39,
+     "mostlyAt": [
+      "Fri 13h (22)",
+      "Fri 12h (8)",
+      "Fri 14h (5)"
+     ]
+    },
+    {
+     "c": "469181395",
+     "s": "Tyler St",
+     "l": "Walter Ave - Railroad Ave",
+     "route": "W2",
+     "side": "odd",
+     "tickets": 39,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 39,
+     "mostlyAt": [
+      "Tue 13h (27)",
+      "Tue 12h (9)",
+      "Tue 14h (3)"
+     ]
+    },
+    {
+     "c": "469181134",
+     "s": "Enterprise Way",
+     "l": "Edes Ave - 85th Ave",
+     "route": "W2",
+     "side": "odd",
+     "tickets": 39,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 39,
+     "mostlyAt": [
+      "Mon 13h (15)",
+      "Mon 12h (9)",
+      "Mon 15h (8)"
+     ]
+    },
+    {
+     "c": "499345116",
+     "s": "5th St",
+     "l": "Kirkham St - Union St",
+     "route": "W5",
+     "side": "even",
+     "tickets": 39,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 39,
+     "mostlyAt": [
+      "Thu 15h (12)",
+      "Thu 13h (8)",
+      "Thu 14h (8)"
+     ]
+    },
+    {
+     "c": "469174745",
+     "s": "2nd St",
+     "l": "Broadway - Washington St",
+     "route": "13",
+     "side": "odd",
+     "tickets": 40,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 39,
+     "mostlyAt": [
+      "Sat 3h (13)",
+      "Sat 4h (11)",
+      "Sat 5h (7)"
+     ]
+    },
+    {
+     "c": "421969161",
+     "s": "Telegraph Ave",
+     "l": "65th St - 66th St",
+     "route": "1E",
+     "side": "even",
+     "tickets": 39,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 39,
+     "mostlyAt": [
+      "Mon 1h (15)",
+      "Thu 2h (8)",
+      "Fri 1h (5)"
+     ]
+    },
+    {
+     "c": "469170939",
+     "s": "Martin Luther King Jr Way",
+     "l": "32nd St - Brockhurst St",
+     "route": "14",
+     "side": "even",
+     "tickets": 45,
+     "agree": 6,
+     "otherSide": 0,
+     "elsewhere": 39,
+     "mostlyAt": [
+      "Thu 1h (14)",
+      "Fri 2h (10)",
+      "Thu 2h (7)"
+     ]
+    },
+    {
+     "c": "469170669",
+     "s": "32nd St",
+     "l": "Helen St - Hannah St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 38,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 38,
+     "mostlyAt": [
+      "Thu 12h (14)",
+      "Thu 13h (14)",
+      "Thu 14h (5)"
+     ]
+    },
+    {
+     "c": "469181504",
+     "s": "Nevada St",
+     "l": "Edes Ave - Walter Ave",
+     "route": "W2",
+     "side": "even",
+     "tickets": 38,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 38,
+     "mostlyAt": [
+      "Mon 14h (14)",
+      "Mon 13h (10)",
+      "Mon 12h (6)"
+     ]
+    },
+    {
+     "c": "469174895",
+     "s": "Dakota St",
+     "l": "Maple Ave - Laurel Ave",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 40,
+     "agree": 0,
+     "otherSide": 2,
+     "elsewhere": 38,
+     "mostlyAt": [
+      "Fri 9h (24)",
+      "Fri 10h (13)",
+      "Fri 11h (1)"
+     ]
+    },
+    {
+     "c": "515750530",
+     "s": "MacArthur Blvd",
+     "l": "Parker Ave - Ritchie St",
+     "route": "10",
+     "side": "odd",
+     "tickets": 37,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 37,
+     "mostlyAt": [
+      "Thu 3h (9)",
+      "Tue 3h (9)",
+      "Tue 4h (8)"
+     ]
+    },
+    {
+     "c": "469171272",
+     "s": "Martin Luther King Jr Way",
+     "l": "29th St",
+     "route": "14",
+     "side": "odd",
+     "tickets": 38,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 37,
+     "mostlyAt": [
+      "Tue 2h (12)",
+      "Fri 2h (11)",
+      "Fri 1h (7)"
+     ]
+    },
+    {
+     "c": "426152762",
+     "s": "14th Ave",
+     "l": "E 32nd St - E 33rd St",
+     "route": "11",
+     "side": "even",
+     "tickets": 44,
+     "agree": 7,
+     "otherSide": 0,
+     "elsewhere": 37,
+     "mostlyAt": [
+      "Thu 3h (17)",
+      "Thu 5h (5)",
+      "Mon 4h (5)"
+     ]
+    },
+    {
+     "c": "469172681",
+     "s": "Wood St",
+     "l": "Chase St - 9th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 36,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 36,
+     "mostlyAt": [
+      "Thu 13h (21)",
+      "Thu 14h (8)",
+      "Thu 15h (4)"
+     ]
+    },
+    {
+     "c": "469170191",
+     "s": "Opal St",
+     "l": "38th St - 40th St",
+     "route": "1",
+     "side": "odd",
+     "tickets": 47,
+     "agree": 11,
+     "otherSide": 0,
+     "elsewhere": 36,
+     "mostlyAt": [
+      "Tue 9h (16)",
+      "Tue 10h (10)",
+      "Tue 11h (9)"
+     ]
+    },
+    {
+     "c": "469173285",
+     "s": "15th St",
+     "l": "Franklin St - Broadway",
+     "route": "13",
+     "side": "odd",
+     "tickets": 39,
+     "agree": 3,
+     "otherSide": 0,
+     "elsewhere": 36,
+     "mostlyAt": [
+      "Sat 3h (15)",
+      "Tue 4h (6)",
+      "Sat 4h (5)"
+     ]
+    },
+    {
+     "c": "469170477",
+     "s": "34th St",
+     "l": "Hannah St - Ettie St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 36,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 36,
+     "mostlyAt": [
+      "Thu 13h (15)",
+      "Thu 12h (11)",
+      "Thu 14h (5)"
+     ]
+    },
+    {
+     "c": "469172412",
+     "s": "Wood St",
+     "l": "11th St - 10th St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 36,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 36,
+     "mostlyAt": [
+      "Fri 14h (13)",
+      "Fri 13h (12)",
+      "Fri 15h (7)"
+     ]
+    },
+    {
+     "c": "469174295",
+     "s": "Boston Ave",
+     "l": "Palmetto St - MacArthur Blvd",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 36,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 36,
+     "mostlyAt": [
+      "Fri 9h (22)",
+      "Fri 10h (11)",
+      "Fri 1h (3)"
+     ]
+    },
+    {
+     "c": "469174513",
+     "s": "Laguna Ave",
+     "l": "Montana St - MacArthur Blvd",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 37,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 36,
+     "mostlyAt": [
+      "Fri 9h (28)",
+      "Fri 1h (6)",
+      "Fri 10h (2)"
+     ]
+    },
+    {
+     "c": "516425294",
+     "s": "Grand Ave",
+     "l": "Valdez St - Harrison St",
+     "route": "(none)",
+     "side": "even",
+     "tickets": 36,
+     "agree": 1,
+     "otherSide": 0,
+     "elsewhere": 35,
+     "mostlyAt": [
+      "Sun 0h (30)",
+      "Sun 1h (3)",
+      "Thu 1h (1)"
+     ]
+    },
+    {
+     "c": "469170324",
+     "s": "Manila Ave",
+     "l": "38th St - 40th St",
+     "route": "1",
+     "side": "even",
+     "tickets": 45,
+     "agree": 9,
+     "otherSide": 1,
+     "elsewhere": 35,
+     "mostlyAt": [
+      "Tue 10h (15)",
+      "Tue 9h (12)",
+      "Tue 11h (5)"
+     ]
+    },
+    {
+     "c": "469170375",
+     "s": "34th St",
+     "l": "Fitzgerald St - Hollis St",
+     "route": "W6",
+     "side": "odd",
+     "tickets": 35,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 35,
+     "mostlyAt": [
+      "Thu 14h (16)",
+      "Thu 13h (11)",
+      "Thu 12h (4)"
+     ]
+    },
+    {
+     "c": "469172860",
+     "s": "Willow St",
+     "l": "8th St - Chase St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 35,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 35,
+     "mostlyAt": [
+      "Fri 13h (19)",
+      "Fri 14h (10)",
+      "Thu 13h (2)"
+     ]
+    },
+    {
+     "c": "469173486",
+     "s": "13th Ave",
+     "l": "Excelsior Ave - E 38th St",
+     "route": "5L",
+     "side": "even",
+     "tickets": 56,
+     "agree": 6,
+     "otherSide": 15,
+     "elsewhere": 35,
+     "mostlyAt": [
+      "Wed 14h (6)",
+      "Wed 10h (5)",
+      "Thu 9h (4)"
+     ]
+    },
+    {
+     "c": "518663346",
+     "s": "Sycamore St",
+     "l": "I 980 - Martin Luther King Jr Way",
+     "route": "11",
+     "side": "even",
+     "tickets": 39,
+     "agree": 4,
+     "otherSide": 0,
+     "elsewhere": 35,
+     "mostlyAt": [
+      "Fri 13h (8)",
+      "Fri 0h (5)",
+      "Wed 1h (5)"
+     ]
+    },
+    {
+     "c": "469175004",
+     "s": "Georgia St",
+     "l": "Laurel Ave - Midvale Ave",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 36,
+     "agree": 0,
+     "otherSide": 1,
+     "elsewhere": 35,
+     "mostlyAt": [
+      "Fri 9h (27)",
+      "Fri 10h (6)",
+      "Fri 11h (2)"
+     ]
+    },
+    {
+     "c": "469173557",
+     "s": "Chester St",
+     "l": "3rd St - 5th St",
+     "route": "W5",
+     "side": "even",
+     "tickets": 34,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 34,
+     "mostlyAt": [
+      "Fri 12h (21)",
+      "Fri 13h (8)",
+      "Fri 14h (4)"
+     ]
+    },
+    {
+     "c": "469173067",
+     "s": "17th St",
+     "l": "Franklin St - Broadway",
+     "route": "13",
+     "side": "even",
+     "tickets": 34,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 34,
+     "mostlyAt": [
+      "Tue 4h (20)",
+      "Thu 4h (9)",
+      "Mon 4h (2)"
+     ]
+    },
+    {
+     "c": "469173745",
+     "s": "8th St",
+     "l": "Martin Luther King Jr Way - Jefferson St",
+     "route": "13",
+     "side": "odd",
+     "tickets": 34,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 34,
+     "mostlyAt": [
+      "Sat 2h (10)",
+      "Thu 2h (6)",
+      "Thu 1h (5)"
+     ]
+    },
+    {
+     "c": "469174624",
+     "s": "Delaware St",
+     "l": "Coolidge Ave - Curran Way",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 34,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 34,
+     "mostlyAt": [
+      "Fri 10h (18)",
+      "Fri 9h (13)",
+      "Fri 11h (3)"
+     ]
+    },
+    {
+     "c": "469170874",
+     "s": "Martin Luther King Jr Way",
+     "l": "Brockhurst St - 33rd St",
+     "route": "14",
+     "side": "odd",
+     "tickets": 36,
+     "agree": 2,
+     "otherSide": 0,
+     "elsewhere": 34,
+     "mostlyAt": [
+      "Tue 2h (17)",
+      "Fri 1h (9)",
+      "Fri 2h (7)"
+     ]
+    },
+    {
+     "c": "469173870",
+     "s": "7th St",
+     "l": "Martin Luther King Jr Way - Jefferson St",
+     "route": "13",
+     "side": "even",
+     "tickets": 36,
+     "agree": 3,
+     "otherSide": 0,
+     "elsewhere": 33,
+     "mostlyAt": [
+      "Mon 1h (16)",
+      "Wed 1h (5)",
+      "Mon 0h (4)"
+     ]
+    },
+    {
+     "c": "469170436",
+     "s": "Haven St",
+     "l": "Peralta St - 34th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 33,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 33,
+     "mostlyAt": [
+      "Fri 13h (9)",
+      "Thu 14h (8)",
+      "Thu 13h (5)"
+     ]
+    },
+    {
+     "c": "504970639",
+     "s": "San Leandro St",
+     "l": "Apple St - Stone St",
+     "route": "W4",
+     "side": "odd",
+     "tickets": 33,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 33,
+     "mostlyAt": [
+      "Tue 13h (16)",
+      "Tue 14h (13)",
+      "Tue 12h (4)"
+     ]
+    },
+    {
+     "c": "493542531",
+     "s": "Maple Ave",
+     "l": "Berlin Way - School St",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 37,
+     "agree": 0,
+     "otherSide": 4,
+     "elsewhere": 33,
+     "mostlyAt": [
+      "Fri 9h (16)",
+      "Fri 10h (12)",
+      "Fri 11h (5)"
+     ]
+    },
+    {
+     "c": "469174989",
+     "s": "Delaware St",
+     "l": "Maple Ave - Laurel Ave",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 36,
+     "agree": 3,
+     "otherSide": 0,
+     "elsewhere": 33,
+     "mostlyAt": [
+      "Fri 9h (26)",
+      "Fri 10h (7)"
+     ]
+    },
+    {
+     "c": "473516242",
+     "s": "MacArthur Blvd",
+     "l": "Savannah Ct - Palmvilla Ct",
+     "route": "10",
+     "side": "odd",
+     "tickets": 33,
+     "agree": 0,
+     "otherSide": 1,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Thu 5h (10)",
+      "Tue 3h (7)",
+      "Thu 3h (6)"
+     ]
+    },
+    {
+     "c": "495527513",
+     "s": "Telegraph Ave",
+     "l": "17th St",
+     "route": "(none)",
+     "side": "odd",
+     "tickets": 36,
+     "agree": 4,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Wed 3h (5)",
+      "Sat 5h (5)",
+      "Sat 4h (5)"
+     ]
+    },
+    {
+     "c": "395535136",
+     "s": "MacArthur Blvd",
+     "l": "94th Ave - 96th Ave",
+     "route": "10",
+     "side": "odd",
+     "tickets": 32,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Thu 3h (11)",
+      "Tue 4h (6)",
+      "Tue 5h (5)"
+     ]
+    },
+    {
+     "c": "469173595",
+     "s": "Center St",
+     "l": "3rd St - 5th St",
+     "route": "W5",
+     "side": "odd",
+     "tickets": 32,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Thu 12h (14)",
+      "Thu 13h (5)",
+      "Thu 14h (5)"
+     ]
+    },
+    {
+     "c": "469172782",
+     "s": "Willow St",
+     "l": "Chase St - 9th St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 32,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Fri 14h (13)",
+      "Fri 13h (11)",
+      "Fri 12h (4)"
+     ]
+    },
+    {
+     "c": "421969161",
+     "s": "Telegraph Ave",
+     "l": "65th St - 66th St",
+     "route": "1E",
+     "side": "odd",
+     "tickets": 32,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Fri 2h (17)",
+      "Wed 2h (10)",
+      "Mon 2h (3)"
+     ]
+    },
+    {
+     "c": "469173364",
+     "s": "5th St",
+     "l": "Chester St - Henry St",
+     "route": "W5",
+     "side": "odd",
+     "tickets": 32,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Fri 12h (21)",
+      "Fri 13h (8)",
+      "Fri 14h (2)"
+     ]
+    },
+    {
+     "c": "513423402",
+     "s": "32nd St",
+     "l": "Peralta St - Louise St",
+     "route": "W6",
+     "side": "even",
+     "tickets": 32,
+     "agree": 0,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Fri 13h (13)",
+      "Fri 14h (13)",
+      "Fri 12h (6)"
+     ]
+    },
+    {
+     "c": "469175478",
+     "s": "Nicol Ave",
+     "l": "Pleitner Ave - Maple Ave",
+     "route": "4A",
+     "side": "odd",
+     "tickets": 35,
+     "agree": 3,
+     "otherSide": 0,
+     "elsewhere": 32,
+     "mostlyAt": [
+      "Fri 9h (19)",
+      "Fri 10h (7)",
+      "Fri 11h (6)"
+     ]
+    }
+   ]
+  },
+  "ticketedButNotSwept": {
+   "sides": 264,
+   "note": "sides the layer marks as not swept with 10 or more tickets: not on the map (no schedule to show)",
+   "top": [
+    {
+     "c": "469171783",
+     "s": "26th St",
+     "l": "Broadway - Telegraph Ave",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 850,
+     "mostlyAt": [
+      "Sat 4h (300)",
+      "Sat 3h (164)",
+      "Thu 5h (90)"
+     ]
+    },
+    {
+     "c": "469175944",
+     "s": "9th Ave",
+     "l": "Embarcadero - 10th Ave",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 705,
+     "mostlyAt": [
+      "Wed 5h (119)",
+      "Thu 5h (95)",
+      "Fri 13h (64)"
+     ]
+    },
+    {
+     "c": "469171783",
+     "s": "26th St",
+     "l": "Broadway - Telegraph Ave",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 468,
+     "mostlyAt": [
+      "Wed 5h (75)",
+      "Tue 5h (72)",
+      "Fri 5h (62)"
+     ]
+    },
+    {
+     "c": "422471019",
+     "s": "27th St",
+     "l": "Bay Pl - Valdez St",
+     "route": "5N",
+     "side": "even",
+     "code": "NS",
+     "tickets": 401,
+     "mostlyAt": [
+      "Tue 1h (96)",
+      "Wed 1h (78)",
+      "Fri 1h (77)"
+     ]
+    },
+    {
+     "c": "469172779",
+     "s": "18th St",
+     "l": "Jefferson St - Martin Luther King Jr Way",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 393,
+     "mostlyAt": [
+      "Wed 1h (74)",
+      "Mon 1h (72)",
+      "Wed 2h (62)"
+     ]
+    },
+    {
+     "c": "469173546",
+     "s": "Harrison St",
+     "l": "14th St - 15th St",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 363,
+     "mostlyAt": [
+      "Sat 2h (149)",
+      "Thu 2h (81)",
+      "Tue 2h (44)"
+     ]
+    },
+    {
+     "c": "518662805",
+     "s": "30th St",
+     "l": "Telegraph Ave - I 980",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 346,
+     "mostlyAt": [
+      "Fri 14h (127)",
+      "Fri 12h (87)",
+      "Fri 13h (54)"
+     ]
+    },
+    {
+     "c": "516425508",
+     "s": "Thomas L Berkley Way",
+     "l": "Telegraph Ave - San Pablo Ave",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 346,
+     "mostlyAt": [
+      "Sun 5h (85)",
+      "Sun 4h (66)",
+      "Sat 3h (23)"
+     ]
+    },
+    {
+     "c": "518681134",
+     "s": "San Pablo Ave",
+     "l": "Sycamore St - 25th St",
+     "route": "2C",
+     "side": "even",
+     "code": "NS-H",
+     "tickets": 316,
+     "mostlyAt": [
+      "Tue 1h (90)",
+      "Wed 1h (72)",
+      "Mon 1h (41)"
+     ]
+    },
+    {
+     "c": "469172779",
+     "s": "18th St",
+     "l": "Jefferson St - Martin Luther King Jr Way",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 304,
+     "mostlyAt": [
+      "Sat 2h (118)",
+      "Sat 1h (37)",
+      "Thu 1h (37)"
+     ]
+    },
+    {
+     "c": "421969337",
+     "s": "Broadway",
+     "l": "19th St - Thomas L Berkley Way",
+     "route": "12",
+     "side": "even",
+     "code": "NS",
+     "tickets": 297,
+     "mostlyAt": [
+      "Sun 4h (106)",
+      "Sun 5h (48)",
+      "Sat 3h (30)"
+     ]
+    },
+    {
+     "c": "469175944",
+     "s": "9th Ave",
+     "l": "Embarcadero - 10th Ave",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 292,
+     "mostlyAt": [
+      "Thu 13h (103)",
+      "Fri 13h (31)",
+      "Thu 9h (29)"
+     ]
+    },
+    {
+     "c": "516425507",
+     "s": "Thomas L Berkley Way",
+     "l": "Telegraph Ave - San Pablo Ave",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 288,
+     "mostlyAt": [
+      "Sun 4h (97)",
+      "Sun 5h (63)",
+      "Sat 3h (23)"
+     ]
+    },
+    {
+     "c": "469172120",
+     "s": "Walker Ave",
+     "l": "Wickson Ave - Mandana Blvd",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS-UC",
+     "tickets": 262,
+     "mostlyAt": [
+      "Sat 12h (82)",
+      "Sat 13h (77)",
+      "Sat 11h (17)"
+     ]
+    },
+    {
+     "c": "469175035",
+     "s": "Jackson St",
+     "l": "2nd St - 3rd St",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 250,
+     "mostlyAt": [
+      "Wed 2h (50)",
+      "Fri 2h (44)",
+      "Mon 1h (43)"
+     ]
+    },
+    {
+     "c": "495512529",
+     "s": "Lakeshore Ave",
+     "l": "",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 240,
+     "mostlyAt": [
+      "Thu 12h (138)",
+      "Fri 12h (70)",
+      "Thu 14h (6)"
+     ]
+    },
+    {
+     "c": "469172560",
+     "s": "Thomas L Berkley Way",
+     "l": "Telegraph Ave - San Pablo Ave",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 223,
+     "mostlyAt": [
+      "Sun 4h (37)",
+      "Sun 5h (31)",
+      "Mon 5h (20)"
+     ]
+    },
+    {
+     "c": "442120687",
+     "s": "27th St",
+     "l": "Bay Pl - Valdez St",
+     "route": "5N",
+     "side": "even",
+     "code": "NS",
+     "tickets": 202,
+     "mostlyAt": [
+      "Wed 1h (33)",
+      "Mon 1h (31)",
+      "Tue 1h (25)"
+     ]
+    },
+    {
+     "c": "469173699",
+     "s": "8th St",
+     "l": "Martin Luther King Jr Way - 7th St",
+     "route": "(none)",
+     "side": "odd",
+     "code": "MWF",
+     "tickets": 200,
+     "mostlyAt": [
+      "Sat 2h (44)",
+      "Thu 1h (36)",
+      "Tue 1h (30)"
+     ]
+    },
+    {
+     "c": "444093480",
+     "s": "27th St",
+     "l": "Valdez St - Broadway",
+     "route": "5N",
+     "side": "even",
+     "code": "NS",
+     "tickets": 196,
+     "mostlyAt": [
+      "Fri 1h (37)",
+      "Thu 1h (30)",
+      "Tue 1h (30)"
+     ]
+    },
+    {
+     "c": "469173570",
+     "s": "11th St",
+     "l": "Broadway - Clay St",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 190,
+     "mostlyAt": [
+      "Sun 4h (113)",
+      "Sun 3h (27)",
+      "Thu 4h (9)"
+     ]
+    },
+    {
+     "c": "473517133",
+     "s": "MacArthur Blvd",
+     "l": "Adams St - Van Buren Ave",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 180,
+     "mostlyAt": [
+      "Mon 9h (43)",
+      "Mon 11h (38)",
+      "Tue 10h (36)"
+     ]
+    },
+    {
+     "c": "469175870",
+     "s": "8th Ave",
+     "l": "Embarcadero",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 173,
+     "mostlyAt": [
+      "Thu 13h (61)",
+      "Fri 13h (30)",
+      "Thu 14h (15)"
+     ]
+    },
+    {
+     "c": "518662805",
+     "s": "30th St",
+     "l": "Telegraph Ave - I 980",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 166,
+     "mostlyAt": [
+      "Thu 13h (73)",
+      "Thu 14h (47)",
+      "Thu 12h (30)"
+     ]
+    },
+    {
+     "c": "518682267",
+     "s": "27th St",
+     "l": "26th St - 24th St",
+     "route": "5N",
+     "side": "even",
+     "code": "NS",
+     "tickets": 161,
+     "mostlyAt": [
+      "Fri 1h (33)",
+      "Thu 2h (26)",
+      "Wed 1h (19)"
+     ]
+    },
+    {
+     "c": "518681134",
+     "s": "San Pablo Ave",
+     "l": "Sycamore St - 25th St",
+     "route": "2C",
+     "side": "odd",
+     "code": "NS-H",
+     "tickets": 157,
+     "mostlyAt": [
+      "Fri 2h (33)",
+      "Tue 2h (22)",
+      "Wed 1h (21)"
+     ]
+    },
+    {
+     "c": "469171577",
+     "s": "28th St",
+     "l": "Summit St - Telegraph Ave",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 157,
+     "mostlyAt": [
+      "Thu 9h (119)",
+      "Thu 10h (21)",
+      "Thu 11h (12)"
+     ]
+    },
+    {
+     "c": "515747823",
+     "s": "Lakeshore Ave",
+     "l": "",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 147,
+     "mostlyAt": [
+      "Thu 12h (129)",
+      "Thu 14h (6)",
+      "Thu 15h (4)"
+     ]
+    },
+    {
+     "c": "516428004",
+     "s": "Lakeside Dr",
+     "l": "14th St - 17th St",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 147,
+     "mostlyAt": [
+      "Fri 12h (74)",
+      "Fri 13h (47)",
+      "Fri 14h (15)"
+     ]
+    },
+    {
+     "c": "515747823",
+     "s": "Lakeshore Ave",
+     "l": "",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 145,
+     "mostlyAt": [
+      "Fri 12h (99)",
+      "Thu 12h (37)",
+      "Fri 14h (7)"
+     ]
+    },
+    {
+     "c": "469171577",
+     "s": "28th St",
+     "l": "Summit St - Telegraph Ave",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 142,
+     "mostlyAt": [
+      "Wed 9h (83)",
+      "Wed 10h (33)",
+      "Wed 2h (7)"
+     ]
+    },
+    {
+     "c": "518662947",
+     "s": "29th St",
+     "l": "Telegraph Ave - I 980",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 126,
+     "mostlyAt": [
+      "Fri 13h (50)",
+      "Fri 12h (42)",
+      "Fri 14h (26)"
+     ]
+    },
+    {
+     "c": "515265231",
+     "s": "San Pablo Ave",
+     "l": "19th St - 20th St",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS-H",
+     "tickets": 126,
+     "mostlyAt": [
+      "Sun 5h (38)",
+      "Sun 4h (26)",
+      "Sat 3h (12)"
+     ]
+    },
+    {
+     "c": "518681138",
+     "s": "San Pablo Ave",
+     "l": "26th St - Sycamore St",
+     "route": "2C",
+     "side": "odd",
+     "code": "NS-H",
+     "tickets": 125,
+     "mostlyAt": [
+      "Tue 2h (21)",
+      "Fri 2h (19)",
+      "Wed 1h (17)"
+     ]
+    },
+    {
+     "c": "513544395",
+     "s": "E 12th St",
+     "l": "2nd Ave - 3rd Ave",
+     "route": "2A",
+     "side": "even",
+     "code": "NS",
+     "tickets": 124,
+     "mostlyAt": [
+      "Tue 5h (48)",
+      "Thu 5h (21)",
+      "Fri 5h (20)"
+     ]
+    },
+    {
+     "c": "469176477",
+     "s": "26th Ave",
+     "l": "Foothill Blvd - E 20th St",
+     "route": "4B",
+     "side": "odd",
+     "code": "N-S",
+     "tickets": 116,
+     "mostlyAt": [
+      "Fri 10h (92)",
+      "Fri 9h (15)",
+      "Fri 11h (9)"
+     ]
+    },
+    {
+     "c": "473517133",
+     "s": "MacArthur Blvd",
+     "l": "Adams St - Van Buren Ave",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 113,
+     "mostlyAt": [
+      "Tue 9h (51)",
+      "Tue 11h (32)",
+      "Tue 10h (27)"
+     ]
+    },
+    {
+     "c": "469171103",
+     "s": "31st St",
+     "l": "Telegraph Ave - 32nd St",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 106,
+     "mostlyAt": [
+      "Thu 9h (52)",
+      "Thu 10h (47)",
+      "Wed 9h (4)"
+     ]
+    },
+    {
+     "c": "495512529",
+     "s": "Lakeshore Ave",
+     "l": "",
+     "route": "(none)",
+     "side": "odd",
+     "code": "NS",
+     "tickets": 101,
+     "mostlyAt": [
+      "Thu 12h (84)",
+      "Thu 14h (9)",
+      "Thu 13h (5)"
+     ]
+    },
+    {
+     "c": "493539835",
+     "s": "19th St",
+     "l": "Martin Luther King Jr Way",
+     "route": "(none)",
+     "side": "even",
+     "code": "NS",
+     "tickets": 98,
+     "mostlyAt": [
+      "Mon 1h (18)",
+      "Fri 2h (17)",
+      "Wed 1h (15)"
+     ]
+    }
+   ]
+  }
+ }
+}

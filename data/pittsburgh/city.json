@@ -1,0 +1,311 @@
+{
+ "id": "pittsburgh",
+ "name": "Pittsburgh",
+ "region": "Pennsylvania",
+ "tz": "America/New_York",
+ "center": [
+  40.462,
+  -79.948
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   40.3717,
+   -80.0794
+  ],
+  [
+   40.4983,
+   -79.8741
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-04-03": "Good Friday",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-03-26": "Good Friday",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Day after Thanksgiving",
+  "2027-12-24": "Christmas Day (observed)"
+ },
+ "holidaysSource": "https://www.pittsburghpa.gov/files/assets/city/v/2/clerk/documents/2026-annual-council-calendar.pdf",
+ "holidayRule": "all",
+ "fine": "$30",
+ "tow": "no",
+ "fineSource": "https://www.pittsburghparking.com/files/sharedassets/public/v/1/enforcement-and-policies/documents/vehicle-infractions-2025.pdf",
+ "agency": "Pittsburgh Department of Public Works",
+ "scheduleUrl": "https://www.pittsburghpa.gov/Resident-Services/Road-Maintenance/Street-Maintenance/Street-Sweeping",
+ "sources": [
+  {
+   "name": "Pittsburgh Street Centerline (Public Works; sweep_left and sweep_right)",
+   "url": "https://data.wprdc.org/dataset/pittsburgh-street-centerlines",
+   "api": "https://services1.arcgis.com/YZCmUqbcsUpOKfj7/arcgis/rest/services/PavementPublic/FeatureServer/0",
+   "license": "Creative Commons CCZero (WPRDC)",
+   "fetched": "2026-10-18",
+   "updated": "2026-09-24"
+  },
+  {
+   "name": "Neighborhoods (City of Pittsburgh), names only",
+   "url": "https://services1.arcgis.com/YZCmUqbcsUpOKfj7/arcgis/rest/services/PGHWebNeighborhoods/FeatureServer/0",
+   "license": "City of Pittsburgh GIS data, provided as is (no license named)",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Posted street cleaning once a month on each side, April 1 to November 30: no parking on the side's signed day (for example the 2nd Monday), from 8 AM to about 2:30 PM.",
+  "afterpass": "A $30 ticket, mailed after a Parking Authority camera car records the plate. A City holiday cancels that day's cleaning until the next signed day.",
+  "dataNotes": "Days come from the sweep codes on the City's street centerlines (Public Works): 2SW10A-4M means the 4th Monday of the month. The City publishes no hours per block; it says neighborhood sweeping runs from after 8 AM to about 2:30 PM, so that is the window shown. The sign on the block wins."
+ },
+ "neighborhoods": [
+  {
+   "name": "Allegheny Center",
+   "bbox": "-80.0146,40.4491,-80.0009,40.4562"
+  },
+  {
+   "name": "Allegheny West",
+   "bbox": "-80.0194,40.4497,-80.0134,40.4540"
+  },
+  {
+   "name": "Allentown",
+   "bbox": "-79.9974,40.4184,-79.9973,40.4216"
+  },
+  {
+   "name": "Bedford Dwellings",
+   "bbox": "-79.9827,40.4464,-79.9649,40.4557"
+  },
+  {
+   "name": "Beechview",
+   "bbox": "-80.0320,40.3984,-80.0238,40.4112"
+  },
+  {
+   "name": "Beltzhoover",
+   "bbox": "-80.0105,40.4136,-79.9972,40.4214"
+  },
+  {
+   "name": "Bloomfield",
+   "bbox": "-79.9577,40.4526,-79.9351,40.4662"
+  },
+  {
+   "name": "Bluff",
+   "bbox": "-79.9884,40.4354,-79.9744,40.4387"
+  },
+  {
+   "name": "Bon Air",
+   "bbox": "-79.9995,40.4078,-79.9968,40.4105"
+  },
+  {
+   "name": "Brookline",
+   "bbox": "-80.0304,40.3817,-80.0065,40.4117"
+  },
+  {
+   "name": "California-Kirkbride",
+   "bbox": "-80.0163,40.4561,-80.0154,40.4579"
+  },
+  {
+   "name": "Carrick",
+   "bbox": "-79.9951,40.3855,-79.9762,40.4067"
+  },
+  {
+   "name": "Central Business District",
+   "bbox": "-79.9883,40.4385,-79.9850,40.4432"
+  },
+  {
+   "name": "Central Lawrenceville",
+   "bbox": "-79.9654,40.4652,-79.9346,40.4789"
+  },
+  {
+   "name": "Central Northside",
+   "bbox": "-80.0159,40.4542,-80.0016,40.4612"
+  },
+  {
+   "name": "Central Oakland",
+   "bbox": "-79.9621,40.4342,-79.9499,40.4422"
+  },
+  {
+   "name": "Chateau",
+   "bbox": "-80.0302,40.4497,-80.0183,40.4596"
+  },
+  {
+   "name": "Crafton Heights",
+   "bbox": "-80.0628,40.4378,-80.0453,40.4514"
+  },
+  {
+   "name": "Crawford-Roberts",
+   "bbox": "-79.9882,40.4382,-79.9775,40.4465"
+  },
+  {
+   "name": "East Allegheny",
+   "bbox": "-80.0025,40.4516,-79.9924,40.4612"
+  },
+  {
+   "name": "East Liberty",
+   "bbox": "-79.9328,40.4598,-79.9208,40.4733"
+  },
+  {
+   "name": "Elliott",
+   "bbox": "-80.0453,40.4420,-80.0354,40.4475"
+  },
+  {
+   "name": "Friendship",
+   "bbox": "-79.9371,40.4574,-79.9316,40.4646"
+  },
+  {
+   "name": "Garfield",
+   "bbox": "-79.9464,40.4635,-79.9307,40.4727"
+  },
+  {
+   "name": "Highland Park",
+   "bbox": "-79.9286,40.4676,-79.9108,40.4798"
+  },
+  {
+   "name": "Homewood North",
+   "bbox": "-79.9011,40.4551,-79.8859,40.4639"
+  },
+  {
+   "name": "Homewood South",
+   "bbox": "-79.9022,40.4477,-79.8841,40.4579"
+  },
+  {
+   "name": "Homewood West",
+   "bbox": "-79.9084,40.4557,-79.8990,40.4639"
+  },
+  {
+   "name": "Knoxville",
+   "bbox": "-79.9972,40.4088,-79.9911,40.4175"
+  },
+  {
+   "name": "Larimer",
+   "bbox": "-79.9105,40.4558,-79.9080,40.4587"
+  },
+  {
+   "name": "Lincoln-Lemington-Belmar",
+   "bbox": "-79.8945,40.4617,-79.8900,40.4626"
+  },
+  {
+   "name": "Lower Lawrenceville",
+   "bbox": "-79.9688,40.4609,-79.9573,40.4695"
+  },
+  {
+   "name": "Manchester",
+   "bbox": "-80.0302,40.4507,-80.0189,40.4597"
+  },
+  {
+   "name": "Middle Hill",
+   "bbox": "-79.9818,40.4429,-79.9643,40.4529"
+  },
+  {
+   "name": "Morningside",
+   "bbox": "-79.9319,40.4723,-79.9217,40.4883"
+  },
+  {
+   "name": "Mount Washington",
+   "bbox": "-80.0199,40.4156,-79.9974,40.4354"
+  },
+  {
+   "name": "North Oakland",
+   "bbox": "-79.9582,40.4408,-79.9466,40.4570"
+  },
+  {
+   "name": "North Shore",
+   "bbox": "-80.0045,40.4471,-79.9927,40.4539"
+  },
+  {
+   "name": "Overbrook",
+   "bbox": "-79.9945,40.3852,-79.9922,40.3932"
+  },
+  {
+   "name": "Perry South",
+   "bbox": "-80.0206,40.4593,-80.0083,40.4750"
+  },
+  {
+   "name": "Point Breeze",
+   "bbox": "-79.9211,40.4397,-79.8952,40.4539"
+  },
+  {
+   "name": "Point Breeze North",
+   "bbox": "-79.9115,40.4495,-79.8986,40.4564"
+  },
+  {
+   "name": "Regent Square",
+   "bbox": "-79.8991,40.4277,-79.8954,40.4397"
+  },
+  {
+   "name": "Shadyside",
+   "bbox": "-79.9492,40.4471,-79.9185,40.4600"
+  },
+  {
+   "name": "Sheraden",
+   "bbox": "-80.0694,40.4514,-80.0540,40.4551"
+  },
+  {
+   "name": "South Oakland",
+   "bbox": "-79.9658,40.4283,-79.9522,40.4385"
+  },
+  {
+   "name": "South Side Flats",
+   "bbox": "-79.9886,40.4239,-79.9629,40.4307"
+  },
+  {
+   "name": "Spring Garden",
+   "bbox": "-79.9883,40.4616,-79.9875,40.4621"
+  },
+  {
+   "name": "Spring Hill-City View",
+   "bbox": "-79.9932,40.4612,-79.9883,40.4663"
+  },
+  {
+   "name": "Squirrel Hill North",
+   "bbox": "-79.9487,40.4377,-79.9118,40.4478"
+  },
+  {
+   "name": "Squirrel Hill South",
+   "bbox": "-79.9375,40.4193,-79.9088,40.4380"
+  },
+  {
+   "name": "Stanton Heights",
+   "bbox": "-79.9375,40.4706,-79.9255,40.4883"
+  },
+  {
+   "name": "Strip District",
+   "bbox": "-79.9699,40.4602,-79.9682,40.4616"
+  },
+  {
+   "name": "Terrace Village",
+   "bbox": "-79.9756,40.4437,-79.9648,40.4489"
+  },
+  {
+   "name": "Upper Hill",
+   "bbox": "-79.9652,40.4483,-79.9549,40.4569"
+  },
+  {
+   "name": "Upper Lawrenceville",
+   "bbox": "-79.9557,40.4773,-79.9478,40.4833"
+  },
+  {
+   "name": "West Oakland",
+   "bbox": "-79.9775,40.4364,-79.9574,40.4425"
+  },
+  {
+   "name": "Westwood",
+   "bbox": "-80.0559,40.4375,-80.0495,40.4381"
+  },
+  {
+   "name": "Windgap",
+   "bbox": "-80.0694,40.4480,-80.0621,40.4516"
+  }
+ ]
+}

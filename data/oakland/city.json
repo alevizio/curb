@@ -1,0 +1,559 @@
+{
+ "id": "oakland",
+ "name": "Oakland",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  37.8135,
+  -122.2555
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   37.72554,
+   -122.303556
+  ],
+  [
+   37.853888,
+   -122.138676
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents Day",
+  "2026-03-31": "Farmworkers Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (Observed)",
+  "2026-07-04": "Independence Day",
+  "2026-09-07": "Labor Day",
+  "2026-09-09": "California Admission Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Day After Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents Day",
+  "2027-03-31": "Farmworkers Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (Observed)",
+  "2027-06-19": "Juneteenth",
+  "2027-07-04": "Independence Day",
+  "2027-07-05": "Independence Day (Observed)",
+  "2027-09-06": "Labor Day",
+  "2027-09-09": "California Admission Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Day After Thanksgiving",
+  "2027-12-24": "Christmas Day (Observed)",
+  "2027-12-25": "Christmas Day"
+ },
+ "holidaysSource": "https://www.oaklandca.gov/Public-Safety-Streets/Streets/Street-Sweeping",
+ "holidayRule": "all",
+ "fine": "$72",
+ "tow": "no",
+ "fineSource": "https://www.oaklandca.gov/Public-Safety-Streets/Parking-Vehicles/Parking-Tickets",
+ "agency": "Oakland Public Works",
+ "scheduleUrl": "https://www.oaklandca.gov/Public-Safety-Streets/Streets/Street-Sweeping",
+ "sources": [
+  {
+   "name": "Street Sweeping Routes (Oakland Public Works)",
+   "url": "https://services.arcgis.com/9tC74aDHuml0x5Yz/arcgis/rest/services/StreetSweeping/FeatureServer/0",
+   "page": "https://www.oaklandca.gov/Public-Safety-Streets/Streets/Street-Sweeping/Map-Your-Streets-Sweeping",
+   "license": "not stated",
+   "fetched": "2026-10-18",
+   "edited": "2021-06-21"
+  },
+  {
+   "name": "OaklandDayRouteSweepingSegments (Public Works, daytime routes as of Feb 2024)",
+   "url": "https://services.arcgis.com/9tC74aDHuml0x5Yz/arcgis/rest/services/OaklandDayRouteSweepingSegments/FeatureServer/0",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Citation Data Portal (OakDOT), violation 10.28.240",
+   "url": "https://data.oaklandca.gov/d/58em-y96b",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Neighborhoods (City of Oakland)",
+   "url": "https://data.oaklandca.gov/d/sb4q-6bkc",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Oakland Addresses as of December 2022, revised view (City GIS)",
+   "url": "https://services.arcgis.com/9tC74aDHuml0x5Yz/arcgis/rest/services/Oakland_Addresses_as_of_December_2022_revised_view/FeatureServer/0",
+   "license": "not stated",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Street Sweeping page (holidays)",
+   "url": "https://www.oaklandca.gov/Public-Safety-Streets/Streets/Street-Sweeping",
+   "license": "City web page",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Each side of the street has its own posted sweeping day, one for the odd house numbers and one for the even, most often the 1st and 3rd or the 2nd and 4th time that weekday comes in the month; main streets are swept at night.",
+  "afterpass": "All year. A $72 ticket, no tow. No sweeping on City holidays.",
+  "dataNotes": "Schedule from Oakland Public Works' street sweeping map (last edited June 21, 2021), the data behind the City's Map Your Street's Sweeping; each side is placed by its house numbers. Checked against 316,353 of the City's street sweeping tickets (January 2025 to July 2026): 73.7% fall in the window shown for that side. On 217 blocks whose tickets show the odd and even days reversed, the two are swapped. 498 sides whose tickets mostly fall outside the posted window are left off the map."
+ },
+ "neighborhoods": [
+  {
+   "name": "Acorn",
+   "bbox": "-122.29353,37.801152,-122.27847,37.807873"
+  },
+  {
+   "name": "Acorn Industrial",
+   "bbox": "-122.295058,37.797336,-122.280554,37.804993"
+  },
+  {
+   "name": "Adams Point",
+   "bbox": "-122.261241,37.808613,-122.248613,37.817383"
+  },
+  {
+   "name": "Allendale",
+   "bbox": "-122.210383,37.782507,-122.196017,37.792101"
+  },
+  {
+   "name": "Arroyo Viejo",
+   "bbox": "-122.186654,37.756049,-122.170392,37.765865"
+  },
+  {
+   "name": "Bancroft Business",
+   "bbox": "-122.197253,37.765865,-122.172091,37.772633"
+  },
+  {
+   "name": "Bartlett",
+   "bbox": "-122.214791,37.786324,-122.203287,37.792814"
+  },
+  {
+   "name": "Bella Vista",
+   "bbox": "-122.241276,37.796393,-122.233784,37.802082"
+  },
+  {
+   "name": "Brookfield Village",
+   "bbox": "-122.194824,37.725471,-122.179661,37.740589"
+  },
+  {
+   "name": "Bushrod",
+   "bbox": "-122.270992,37.834608,-122.260131,37.85277"
+  },
+  {
+   "name": "Castlemont",
+   "bbox": "-122.170392,37.748364,-122.158815,37.761752"
+  },
+  {
+   "name": "Chinatown",
+   "bbox": "-122.274646,37.794741,-122.263314,37.802304"
+  },
+  {
+   "name": "Civic Center",
+   "bbox": "-122.268905,37.796312,-122.25938,37.802894"
+  },
+  {
+   "name": "Clawson",
+   "bbox": "-122.289933,37.816952,-122.27669,37.82781"
+  },
+  {
+   "name": "Cleveland Heights",
+   "bbox": "-122.254614,37.799727,-122.233452,37.810221"
+  },
+  {
+   "name": "Clinton",
+   "bbox": "-122.253854,37.789335,-122.236779,37.800627"
+  },
+  {
+   "name": "Coliseum",
+   "bbox": "-122.198835,37.754127,-122.187571,37.761647"
+  },
+  {
+   "name": "Coliseum Industrial Complex",
+   "bbox": "-122.221016,37.729505,-122.176553,37.77125"
+  },
+  {
+   "name": "Columbia Gardens",
+   "bbox": "-122.195169,37.725471,-122.183127,37.737488"
+  },
+  {
+   "name": "Cox",
+   "bbox": "-122.173769,37.744705,-122.161842,37.75362"
+  },
+  {
+   "name": "Dimond",
+   "bbox": "-122.218639,37.794145,-122.203327,37.800657"
+  },
+  {
+   "name": "Downtown",
+   "bbox": "-122.277685,37.800903,-122.262271,37.811892"
+  },
+  {
+   "name": "Durant Manor",
+   "bbox": "-122.163075,37.737507,-122.155055,37.742134"
+  },
+  {
+   "name": "East 14th Street Business",
+   "bbox": "-122.216661,37.737365,-122.164795,37.773291"
+  },
+  {
+   "name": "East Peralta",
+   "bbox": "-122.257517,37.78817,-122.24602,37.795712"
+  },
+  {
+   "name": "Eastmont",
+   "bbox": "-122.176989,37.760016,-122.163932,37.769162"
+  },
+  {
+   "name": "Eastmont Hills",
+   "bbox": "-122.172091,37.762686,-122.153705,37.776352"
+  },
+  {
+   "name": "Elmhurst Park",
+   "bbox": "-122.181479,37.741617,-122.171124,37.748196"
+  },
+  {
+   "name": "Fairfax",
+   "bbox": "-122.20645,37.772633,-122.195897,37.782507"
+  },
+  {
+   "name": "Fairfax Business",
+   "bbox": "-122.205961,37.771663,-122.195897,37.772687"
+  },
+  {
+   "name": "Fairview Park",
+   "bbox": "-122.261729,37.841342,-122.252293,37.853742"
+  },
+  {
+   "name": "Fitchburg",
+   "bbox": "-122.195815,37.751283,-122.182345,37.758582"
+  },
+  {
+   "name": "Foothill Square",
+   "bbox": "-122.157261,37.74076,-122.145345,37.74893"
+  },
+  {
+   "name": "Fremont",
+   "bbox": "-122.215823,37.76922,-122.203088,37.780173"
+  },
+  {
+   "name": "Frick",
+   "bbox": "-122.195897,37.769832,-122.176374,37.777895"
+  },
+  {
+   "name": "Fruitvale Station",
+   "bbox": "-122.227965,37.769386,-122.216188,37.777619"
+  },
+  {
+   "name": "Gaskill",
+   "bbox": "-122.283063,37.836661,-122.275855,37.843498"
+  },
+  {
+   "name": "Glenview",
+   "bbox": "-122.233452,37.798767,-122.2149,37.813584"
+  },
+  {
+   "name": "Golden Gate",
+   "bbox": "-122.289194,37.836711,-122.281858,37.850479"
+  },
+  {
+   "name": "Grand Lake",
+   "bbox": "-122.25439,37.809973,-122.239231,37.822032"
+  },
+  {
+   "name": "Harrington",
+   "bbox": "-122.219152,37.778954,-122.207422,37.787929"
+  },
+  {
+   "name": "Havenscourt",
+   "bbox": "-122.194838,37.76083,-122.176989,37.77113"
+  },
+  {
+   "name": "Hawthorne",
+   "bbox": "-122.236828,37.776211,-122.22274,37.784346"
+  },
+  {
+   "name": "Hegenberger",
+   "bbox": "-122.18904,37.759581,-122.181121,37.765187"
+  },
+  {
+   "name": "Highland",
+   "bbox": "-122.187205,37.744635,-122.174321,37.752941"
+  },
+  {
+   "name": "Highland Park",
+   "bbox": "-122.23793,37.79537,-122.233065,37.799776"
+  },
+  {
+   "name": "Highland Terrace",
+   "bbox": "-122.240163,37.788706,-122.226776,37.796605"
+  },
+  {
+   "name": "Hoover/Foster",
+   "bbox": "-122.278684,37.81261,-122.268024,37.827038"
+  },
+  {
+   "name": "Iveywood",
+   "bbox": "-122.1698,37.739647,-122.156775,37.748364"
+  },
+  {
+   "name": "Ivy Hill",
+   "bbox": "-122.250309,37.796183,-122.23527,37.803282"
+  },
+  {
+   "name": "Jefferson",
+   "bbox": "-122.216643,37.775649,-122.204183,37.785405"
+  },
+  {
+   "name": "Lakeshore",
+   "bbox": "-122.247812,37.809164,-122.232518,37.817895"
+  },
+  {
+   "name": "Lakeside",
+   "bbox": "-122.267604,37.800867,-122.260814,37.808095"
+  },
+  {
+   "name": "Las Palmas",
+   "bbox": "-122.161842,37.739063,-122.148442,37.749862"
+  },
+  {
+   "name": "Laurel",
+   "bbox": "-122.205906,37.786738,-122.194818,37.796131"
+  },
+  {
+   "name": "Lincoln Highlands",
+   "bbox": "-122.207277,37.801806,-122.193524,37.810744"
+  },
+  {
+   "name": "Lockwood-Tevis",
+   "bbox": "-122.205181,37.759644,-122.194043,37.765007"
+  },
+  {
+   "name": "Longfellow",
+   "bbox": "-122.278817,37.824261,-122.266159,37.836294"
+  },
+  {
+   "name": "Lynn",
+   "bbox": "-122.2353,37.7989,-122.226676,37.804295"
+  },
+  {
+   "name": "Maxwell Park",
+   "bbox": "-122.204183,37.772633,-122.186941,37.786709"
+  },
+  {
+   "name": "McClymonds",
+   "bbox": "-122.289541,37.812676,-122.274008,37.822735"
+  },
+  {
+   "name": "Meadow Brook",
+   "bbox": "-122.234106,37.784289,-122.221646,37.793547"
+  },
+  {
+   "name": "Melrose",
+   "bbox": "-122.218525,37.763657,-122.204958,37.772644"
+  },
+  {
+   "name": "Merritt",
+   "bbox": "-122.259652,37.793736,-122.249134,37.800722"
+  },
+  {
+   "name": "Mills College",
+   "bbox": "-122.188471,37.775396,-122.171819,37.784522"
+  },
+  {
+   "name": "Millsmont",
+   "bbox": "-122.183838,37.769162,-122.164022,37.780353"
+  },
+  {
+   "name": "Montclair",
+   "bbox": "-122.227788,37.818339,-122.19411,37.83915"
+  },
+  {
+   "name": "Montclair Business",
+   "bbox": "-122.213935,37.824833,-122.207059,37.830694"
+  },
+  {
+   "name": "Mosswood",
+   "bbox": "-122.268024,37.82232,-122.256651,37.829525"
+  },
+  {
+   "name": "North Kennedy Tract",
+   "bbox": "-122.238553,37.77328,-122.22655,37.782533"
+  },
+  {
+   "name": "North Stonehurst",
+   "bbox": "-122.1785,37.731908,-122.165975,37.744048"
+  },
+  {
+   "name": "Northgate/Waverly",
+   "bbox": "-122.272708,37.810806,-122.260602,37.816803"
+  },
+  {
+   "name": "Oak Center",
+   "bbox": "-122.292468,37.804577,-122.275827,37.81376"
+  },
+  {
+   "name": "Oak Knoll-Golf Links",
+   "bbox": "-122.164903,37.751281,-122.147645,37.768899"
+  },
+  {
+   "name": "Oak Tree",
+   "bbox": "-122.235946,37.779854,-122.225513,37.785186"
+  },
+  {
+   "name": "Oakland Avenue/Harrison Street",
+   "bbox": "-122.26401,37.811887,-122.252247,37.824393"
+  },
+  {
+   "name": "Oakmore",
+   "bbox": "-122.218242,37.806469,-122.19759,37.821681"
+  },
+  {
+   "name": "Old City",
+   "bbox": "-122.280554,37.79884,-122.272973,37.80673"
+  },
+  {
+   "name": "Paradise Park",
+   "bbox": "-122.286118,37.840937,-122.276973,37.850809"
+  },
+  {
+   "name": "Patten",
+   "bbox": "-122.22274,37.783194,-122.214801,37.793221"
+  },
+  {
+   "name": "Peralta Hacienda",
+   "bbox": "-122.221336,37.782271,-122.213111,37.790614"
+  },
+  {
+   "name": "Peralta/Laney",
+   "bbox": "-122.265342,37.7891,-122.253636,37.797804"
+  },
+  {
+   "name": "Piedmont Avenue",
+   "bbox": "-122.258668,37.819568,-122.243388,37.834459"
+  },
+  {
+   "name": "Pill Hill",
+   "bbox": "-122.271022,37.815704,-122.259978,37.824261"
+  },
+  {
+   "name": "Prescott",
+   "bbox": "-122.310132,37.804993,-122.288769,37.826438"
+  },
+  {
+   "name": "Produce and Waterfront",
+   "bbox": "-122.283693,37.785461,-122.25176,37.801152"
+  },
+  {
+   "name": "Ralph Bunche",
+   "bbox": "-122.290501,37.80947,-122.272708,37.816952"
+  },
+  {
+   "name": "Rancho San Antonio",
+   "bbox": "-122.24602,37.783417,-122.231628,37.793832"
+  },
+  {
+   "name": "Redwood Heights",
+   "bbox": "-122.200621,37.783792,-122.177221,37.806423"
+  },
+  {
+   "name": "Reservoir Hill",
+   "bbox": "-122.226776,37.790967,-122.218639,37.800013"
+  },
+  {
+   "name": "Rockridge",
+   "bbox": "-122.257581,37.832746,-122.241789,37.851936"
+  },
+  {
+   "name": "Saint Elizabeth",
+   "bbox": "-122.225871,37.772997,-122.212901,37.783788"
+  },
+  {
+   "name": "San Pablo Gateway",
+   "bbox": "-122.277308,37.805294,-122.269009,37.81261"
+  },
+  {
+   "name": "Santa Fe",
+   "bbox": "-122.27772,37.834608,-122.266159,37.847764"
+  },
+  {
+   "name": "Sausal Creek",
+   "bbox": "-122.224575,37.783788,-122.216959,37.798767"
+  },
+  {
+   "name": "School",
+   "bbox": "-122.219011,37.791759,-122.210669,37.798411"
+  },
+  {
+   "name": "Seminary",
+   "bbox": "-122.202948,37.763675,-122.189023,37.771663"
+  },
+  {
+   "name": "Shafter",
+   "bbox": "-122.265674,37.834448,-122.251291,37.844742"
+  },
+  {
+   "name": "Sheffield",
+   "bbox": "-122.142704,37.730786,-122.129137,37.740606"
+  },
+  {
+   "name": "Sobrante Park",
+   "bbox": "-122.183127,37.725171,-122.170516,37.73583"
+  },
+  {
+   "name": "South Kennedy",
+   "bbox": "-122.236263,37.769656,-122.223735,37.775562"
+  },
+  {
+   "name": "South Prescott",
+   "bbox": "-122.310132,37.801019,-122.29353,37.808734"
+  },
+  {
+   "name": "South Stonehurst",
+   "bbox": "-122.181722,37.731126,-122.170254,37.739121"
+  },
+  {
+   "name": "Temescal",
+   "bbox": "-122.267134,37.827588,-122.252386,37.836832"
+  },
+  {
+   "name": "Toler Heights",
+   "bbox": "-122.163297,37.747392,-122.150816,37.760932"
+  },
+  {
+   "name": "Trestle Glen",
+   "bbox": "-122.24519,37.804295,-122.221598,37.81459"
+  },
+  {
+   "name": "Tuxedo",
+   "bbox": "-122.233119,37.793547,-122.224156,37.800474"
+  },
+  {
+   "name": "Upper Diamond",
+   "bbox": "-122.217345,37.793724,-122.194616,37.809992"
+  },
+  {
+   "name": "Upper Peralta Creek",
+   "bbox": "-122.215675,37.78958,-122.204006,37.796556"
+  },
+  {
+   "name": "Upper Rockridge",
+   "bbox": "-122.248752,37.832213,-122.217521,37.852643"
+  },
+  {
+   "name": "Webster",
+   "bbox": "-122.178776,37.749897,-122.165698,37.760016"
+  },
+  {
+   "name": "Wentworth Holland",
+   "bbox": "-122.206599,37.767623,-122.197253,37.771831"
+  },
+  {
+   "name": "Woodland",
+   "bbox": "-122.187415,37.748638,-122.177977,37.75631"
+  }
+ ]
+}

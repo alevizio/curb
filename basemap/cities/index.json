@@ -1,0 +1,117 @@
+{
+  "berkeley": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 6613373
+  },
+  "chicago": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 10591710
+  },
+  "denver": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 7918146
+  },
+  "glendale": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 7313799
+  },
+  "hoboken": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 4803713
+  },
+  "la-county": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 14797075
+  },
+  "los-angeles": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 14379732
+  },
+  "madison": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 3710146
+  },
+  "montreal": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 8601514
+  },
+  "new-york": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 11657240
+  },
+  "norfolk": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 4912196
+  },
+  "oakland": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 7009166
+  },
+  "paterson": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 6879212
+  },
+  "philadelphia": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 8891426
+  },
+  "pittsburgh": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 6223733
+  },
+  "riverside": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 5091093
+  },
+  "sacramento": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 3335583
+  },
+  "saint-paul": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 6912884
+  },
+  "san-diego": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 6563611
+  },
+  "san-jose": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 7464510
+  },
+  "santa-monica": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 4911097
+  },
+  "somerville": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 5625314
+  },
+  "washington-dc": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 9135388
+  }
+}

@@ -1,0 +1,467 @@
+{
+ "generated": "2026-10-18T19:20:52.007Z",
+ "inputs": {
+  "sectionPages": 1042,
+  "nodes": "26349-27390",
+  "massgisRoadSegments": 2704,
+  "addressPoints": 49460,
+  "uniqueAddressPlaces": 17913,
+  "sides": {
+   "odd": 494,
+   "even": 491,
+   "either": 57
+  },
+  "days": 16,
+  "hours": [
+   "12 a.m. - 6 a.m.",
+   "8 a.m. - 12 p.m.",
+   "12 a.m. - 7:30 a.m."
+  ]
+ },
+ "output": {
+  "sectionsPlaced": 1004,
+  "sectionsSkipped": 38,
+  "blocks": 1827,
+  "sides": 3592,
+  "rules": 4086,
+  "dayRules": 2697,
+  "nightRules": 1389,
+  "blockSidesWithNoOddSide": 12,
+  "sidesOutsideSomerville": 0,
+  "sizeBytes": 465549
+ },
+ "season": "April 1 to December 31 (months mask 4088), from the City: \"Regular street sweeping schedules resume Wednesday, April 1, and will continue through December 31, 2026\" (https://www.somervillema.gov/news/somerville-street-sweeping-yard-waste-and-hazardous-waste-services-restart-april). Night sweeps are given the same season (assumption).",
+ "oddSide": {
+  "fromPoints": 1699,
+  "fromRanges": 266,
+  "unknown": 303,
+  "pointsAgreeWithRanges": 1526,
+  "pointsDisagreeWithRanges": 17,
+  "disagreeExamples": [
+   {
+    "id": "BA01CA5B-39FB-4FF6-88CC-D80A61407FF5",
+    "street": "Assembly Row",
+    "points": {
+     "oddLeft": 11,
+     "oddRight": 0
+    }
+   },
+   {
+    "id": "0EE4C31A-7AEF-4555-A19D-146B9AD35AEF",
+    "street": "Arnold Ct",
+    "points": {
+     "oddLeft": 0,
+     "oddRight": 4
+    }
+   },
+   {
+    "id": "F7F22AE6-7A89-48A9-8BDD-2F66BA20ED02",
+    "street": "Union Sq",
+    "points": {
+     "oddLeft": 0,
+     "oddRight": 2
+    }
+   },
+   {
+    "id": "75ADA60E-4AB9-4441-89A4-91ED74C54AAC",
+    "street": "Harding St",
+    "points": {
+     "oddLeft": 0,
+     "oddRight": 2
+    }
+   },
+   {
+    "id": "C2FBB5BA-4A1D-4F4A-A3CC-B763B4D7A064",
+    "street": "Evergreen Sq",
+    "points": {
+     "oddLeft": 6,
+     "oddRight": 0
+    }
+   }
+  ],
+  "fromNeighbors": 369,
+  "method": "Address points of the same street within 45 m of a block, by side: odd decided when at least 2 points and 3 to 1 agree; else MassGIS PARITY_L/PARITY_R; else the next block of the same street (fromNeighbors)."
+ },
+ "sideFixes": {
+  "what": "Day sweeps whose page side disagrees with its weeks: the weeks win (1st and 3rd = odd, 2nd and 4th = even, the City rule; for McGrath Highway the City's street sweeping contract of December 2025 (IFB #26-30) lists that route as \"1st & 3rd Monday odd side, 2nd & 4th Tuesday even side\").",
+  "list": [
+   {
+    "node": 26352,
+    "street": "McGrath Highway",
+    "pageSide": "odd",
+    "day": "2nd and 4th Tuesday",
+    "used": "even"
+   }
+  ]
+ },
+ "squares": {
+  "what": "Squares the pages name without a stretch: MassGIS's own square streets (Union Square, Davis Square, Assembly Square Drive), or the blocks of the square's streets within 120 m of where they meet (Teele: Broadway and Holland St; Ball: Broadway and Boston Ave; Magoun: Broadway and Medford St). An assumption: the pages give no extent.",
+  "blocksPerSquare": {
+   "Union Sq": 12,
+   "Davis Sq": 15,
+   "Teele Sq": 10,
+   "Ball Sq": 8,
+   "Magoun Sq": 8,
+   "Assembly Square Dr": 17,
+   "Union Sq (Somerville Ave)": 6,
+   "Magoun Sq (Broadway)": 5,
+   "Ball Sq (Broadway)": 4,
+   "Teele Sq (Broadway)": 6,
+   "Davis Sq (Holland St)": 2
+  }
+ },
+ "skipped": [
+  {
+   "why": "either-side night sweep on a street with odd and even sweeps: not in the City's reminder tool (spot-checked)",
+   "count": 12,
+   "examples": [
+    {
+     "node": 26448,
+     "street": "Broadway",
+     "side": "either",
+     "day": "Saturday Night",
+     "hours": "12 a.m. - 7:30 a.m.",
+     "stretch": ""
+    },
+    {
+     "node": 26449,
+     "street": "Holland Street",
+     "side": "either",
+     "day": "Saturday Night",
+     "hours": "12 a.m. - 7:30 a.m.",
+     "stretch": ""
+    },
+    {
+     "node": 26450,
+     "street": "College Avenue",
+     "side": "either",
+     "day": "Saturday Night",
+     "hours": "12 a.m. - 7:30 a.m.",
+     "stretch": ""
+    },
+    {
+     "node": 26451,
+     "street": "Highland Avenue",
+     "side": "either",
+     "day": "Saturday Night",
+     "hours": "12 a.m. - 7:30 a.m.",
+     "stretch": ""
+    },
+    {
+     "node": 26471,
+     "street": "Elm Street",
+     "side": "either",
+     "day": "Friday Night",
+     "hours": "12 a.m. - 6 a.m.",
+     "stretch": ""
+    },
+    {
+     "node": 26472,
+     "street": "Sommerville Avenue",
+     "side": "either",
+     "day": "Friday Night",
+     "hours": "12 a.m. - 6 a.m.",
+     "stretch": ""
+    }
+   ]
+  },
+  {
+   "why": "cross street not found on the street",
+   "count": 7,
+   "examples": [
+    {
+     "node": 26357,
+     "street": "REV NAZARENO PROPERZI Way",
+     "side": "odd",
+     "day": "1st and 3rd Thursday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Taylor St. end"
+    },
+    {
+     "node": 26855,
+     "street": "Properzzi Way",
+     "side": "even",
+     "day": "2nd and 4th Friday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Taylor St. end"
+    },
+    {
+     "node": 26897,
+     "street": "Properzzi Way",
+     "side": "odd",
+     "day": "1st and 3rd Thursday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Taylor St. end"
+    },
+    {
+     "node": 27091,
+     "street": "Packard Avenue",
+     "side": "even",
+     "day": "2nd and 4th Wednesday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Powder House Blvd. to Tufts College"
+    },
+    {
+     "node": 27108,
+     "street": "Packard Avenue",
+     "side": "odd",
+     "day": "1st and 3rd Tuesday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Powder House Blvd. to Tufts College"
+    },
+    {
+     "node": 27280,
+     "street": "Rush Street",
+     "side": "even",
+     "day": "2nd and 4th Tuesday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "from Broadway to Comm School"
+    }
+   ]
+  },
+  {
+   "why": "\"at Medford city line\": 5 street ends at a city line",
+   "count": 2,
+   "examples": [
+    {
+     "node": 26363,
+     "street": "Boston Avenue",
+     "side": "odd",
+     "day": "1st and 3rd Tuesday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "at Medford city line"
+    },
+    {
+     "node": 27115,
+     "street": "Boston Avenue",
+     "side": "even",
+     "day": "2nd and 4th Wednesday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "at Medford city line"
+    }
+   ]
+  },
+  {
+   "why": "stretch not understood: \"High School Concourse\"",
+   "count": 3,
+   "examples": [
+    {
+     "node": 26443,
+     "street": "Highland Avenue",
+     "side": "either",
+     "day": "Saturday Night",
+     "hours": "12 a.m. - 7:30 a.m.",
+     "stretch": "High School Concourse"
+    },
+    {
+     "node": 26494,
+     "street": "Highland Avenue",
+     "side": "either",
+     "day": "Wednesday Night",
+     "hours": "12 a.m. - 6 a.m.",
+     "stretch": "High School Concourse"
+    },
+    {
+     "node": 26515,
+     "street": "Highland Avenue",
+     "side": "either",
+     "day": "Monday Night",
+     "hours": "12 a.m. - 6 a.m.",
+     "stretch": "High School Concourse"
+    }
+   ]
+  },
+  {
+   "why": "stretch not understood: \"under McGrath Highway bridges\"",
+   "count": 1,
+   "examples": [
+    {
+     "node": 26478,
+     "street": "McGrath Highway",
+     "side": "either",
+     "day": "Thursday Night",
+     "hours": "12 a.m. - 6 a.m.",
+     "stretch": "under McGrath Highway bridges"
+    }
+   ]
+  },
+  {
+   "why": "stretch not understood: \"to Buena Vista\"",
+   "count": 1,
+   "examples": [
+    {
+     "node": 26489,
+     "street": "Meacham Road",
+     "side": "either",
+     "day": "Tuesday Night",
+     "hours": "12 a.m. - 6 a.m.",
+     "stretch": "to Buena Vista"
+    }
+   ]
+  },
+  {
+   "why": "stretch not understood: \"parking lot town houses\"",
+   "count": 2,
+   "examples": [
+    {
+     "node": 26523,
+     "street": "Marshall Street",
+     "side": "even",
+     "day": "2nd and 4th Monday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "parking lot town houses"
+    },
+    {
+     "node": 26560,
+     "street": "Marshall Street",
+     "side": "odd",
+     "day": "1st and 3rd Friday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "parking lot town houses"
+    }
+   ]
+  },
+  {
+   "why": "stretch not understood: \"on terrace\"",
+   "count": 2,
+   "examples": [
+    {
+     "node": 26554,
+     "street": "Broadway",
+     "side": "even",
+     "day": "2nd and 4th Monday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "on terrace"
+    },
+    {
+     "node": 26591,
+     "street": "Broadway",
+     "side": "odd",
+     "day": "1st and 3rd Friday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "on terrace"
+    }
+   ]
+  },
+  {
+   "why": "no parking anytime on this side",
+   "count": 6,
+   "examples": [
+    {
+     "node": 26689,
+     "street": "Smith Avenue",
+     "side": "even",
+     "day": "2nd and 4th Monday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "No Parking either side"
+    },
+    {
+     "node": 26698,
+     "street": "Prospect Street",
+     "side": "odd",
+     "day": "1st and 3rd Friday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Odd side No Parking anytime"
+    },
+    {
+     "node": 26713,
+     "street": "Smith Avenue",
+     "side": "odd",
+     "day": "1st and 3rd Friday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "No Parking either side"
+    },
+    {
+     "node": 26993,
+     "street": "Cutter Avenue",
+     "side": "even",
+     "day": "2nd and 4th Thursday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Parking allowed on the Odd Side only"
+    },
+    {
+     "node": 27267,
+     "street": "Autumn Street",
+     "side": "even",
+     "day": "2nd and 4th Tuesday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "No Parking Anytime"
+    },
+    {
+     "node": 27310,
+     "street": "Autumn Street",
+     "side": "odd",
+     "day": "1st and 3rd Monday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "No Parking Anytime"
+    }
+   ]
+  },
+  {
+   "why": "street not in MassGIS roads",
+   "count": 2,
+   "examples": [
+    {
+     "node": 27320,
+     "street": "Short Pearl Street",
+     "side": "even",
+     "day": "2nd and 4th Tuesday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Short end- Mt Vernon to Crescent Sts"
+    },
+    {
+     "node": 27359,
+     "street": "Short Pearl Street",
+     "side": "odd",
+     "day": "1st and 3rd Monday",
+     "hours": "8 a.m. - 12 p.m.",
+     "stretch": "Short end- Mt Vernon to Crescent Sts"
+    }
+   ]
+  }
+ ],
+ "ticketCheck": "none: Somerville does not publish parking tickets (its open data has moving violations only).",
+ "spotCheck": {
+  "what": "By hand on 2026-10-18, not part of the build: the City's reminder tool (ReCollect) at 13 addresses on Highland Ave (2), Broadway (2), Holland St, Medford St, Somerville Ave, College Ave, Central St, Walnut St, Cedar St, Bow St and Evergreen Ave; 4 more lookups gave nothing usable (3 found no address, 1 no answer). One lookup per address, never more.",
+  "agree": "After the fixes below, the map gives all 13 addresses the days, hours and side the tool gives them (the address on the side its number puts it, by the MassGIS address points).",
+  "differ": [
+   "Broadway: the tool says its night sweeps end at 8 AM (two addresses); the pages say 6 AM. The map uses 8 AM (NIGHT_ENDS).",
+   "No \"either side\" Friday or Saturday night sweep shows at any of the 10 addresses on streets the pages give one: those 12 pages are left out (skipped).",
+   "College Ave even side: the page says \"Wednesday, 12 a.m. - 6 a.m.\" (no weeks, no \"Night\"); the tool says the 2nd and 4th Wednesday, 8 AM to noon. The map uses the tool (PAGE_FIXES, pageFixes below).",
+   "Somerville Ave by Union Square: the map adds the square's Friday night sweep (a square, not checked), which the tool does not show there."
+  ],
+  "pageFixes": [
+   {
+    "node": 26495,
+    "street": "College Avenue",
+    "side": "even",
+    "page": "Wednesday, 12 a.m. - 6 a.m.",
+    "used": "2nd and 4th Wednesday, 8 a.m. - 12 p.m."
+   }
+  ],
+  "nights": "The tool lists night sweeps as \"<weekday> 12AM-6AM\" on that weekday (Monday Night = Monday 12 to 6 AM), as the map does.",
+  "holidays": "The tool marks the nine City holidays of the season and drops the sweeps on them, with no make-up day; it does not mark Thanksgiving Friday."
+ },
+ "contractCheck": {
+  "what": "By hand on 2026-10-18, not part of the build: the street lists of the City's 2025 street sweeping contract (IFB #26-30, Attachment A, December 2025: five routes, each \"1st & 3rd <day> odd side, 2nd & 4th <day> even side\", 8 AM to noon), read with pdfplumber and matched to the pages by street name.",
+  "url": "https://s3.amazonaws.com/somervillema-live/s3fs-public/2025-12/IFB%2026-30%20Street%20Sweeping%20Services.pdf",
+  "streetsInBoth": 368,
+  "bothSidesAgree": 367,
+  "oneSideAgrees": 1,
+  "oneSideExample": "Linwood St: the contract has odd 1st & 3rd Monday, even 2nd & 4th Tuesday; the pages have even 2nd & 4th Monday",
+  "inContractNotOnPages": [
+   "Assembly Row",
+   "Foley St",
+   "Revolution Way (New St)",
+   "Artisan Way",
+   "Canal St",
+   "Grand Union Blvd (and the other new Assembly Square streets)"
+  ],
+  "note": "The streets the contract adds are new Assembly Square streets with no page: they are not on the map. About 70 page streets were not found in the contract text (two-column lines the reader splits badly, or streets the City sweeps itself)."
+ },
+ "holidays": {
+  "rule": "all",
+  "source": "the City's calendar (Holiday: …, all City offices closed) and the holidays the City's reminder tool marks in the sweeping season",
+  "note": "Sweeping is skipped on City holidays, with no make-up day. Thanksgiving Friday (a City holiday) is not a sweeping holiday in the reminder tool and is left out. Independence Day 2026 falls on a Saturday: only Saturday-morning night sweeps are affected. 2027 after New Year's Day is derived (same holidays, same rules)."
+ }
+}

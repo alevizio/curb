@@ -1,0 +1,2965 @@
+{
+ "generated": "2026-10-18T19:18:30.963Z",
+ "season": "All year, once a month per side (the nth weekday of the month). A City holiday cancels that day's sweep; the City says the streets are swept \"on their next regularly scheduled day\", which is the next month's. No make-up day.",
+ "hours": {
+  "AM": "9 AM to 12 noon",
+  "PM": "12:30 PM to 3:30 PM",
+  "source": "Not in the City's schedule, which says only AM or PM. Read on posted signs in Google Street View: \"NO PARKING 9 AM TO 12 NOON, 1ST TUESDAY EACH MONTH, STREET SWEEPING\" (Ward St, 1600 block, south side, imagery Jan 2015) and \"NO PARKING 12:30 PM TO 3:30 PM, 1ST WEDNESDAY EACH MONTH\" (Acton St, 1600 block, east side, imagery Mar 2025); both match the schedule's day for that side. To confirm with the City that every AM and PM sign reads the same."
+ },
+ "input": {
+  "pdfs": [
+   {
+    "file": "StreetSweepingSchedule_StNamesA-G.pdf",
+    "url": "https://berkeleyca.gov/sites/default/files/2022-03/StreetSweepingSchedule_StNamesA-G.pdf",
+    "created": "2018-02-08",
+    "pages": 7,
+    "rows": 334
+   },
+   {
+    "file": "StreetSweepingSchedule_StNamesH-Z.pdf",
+    "url": "https://berkeleyca.gov/sites/default/files/2022-03/StreetSweepingSchedule_StNamesH-Z.pdf",
+    "created": "2025-09-25",
+    "pages": 7,
+    "rows": 357
+   },
+   {
+    "file": "StreetSweepingSchedule_StNumbered.pdf",
+    "url": "https://berkeleyca.gov/sites/default/files/2022-03/StreetSweepingSchedule_StNumbered.pdf",
+    "created": "2018-02-08",
+    "pages": 1,
+    "rows": 31
+   }
+  ],
+  "rows": 722,
+  "usable": 722,
+  "routeAgrees": 722,
+  "unreadable": [],
+  "assumed": [
+   {
+    "street": "Dwight",
+    "side": "N",
+    "numbers": "2801-2899",
+    "between": "Piedmont - Fernwald",
+    "day": "4th Tue PM",
+    "pdf": "StNamesA-G",
+    "page": 6,
+    "note": "no \"to\" number: 2801 to 2899 assumed"
+   },
+   {
+    "street": "Hillcrest Rd",
+    "side": "N",
+    "numbers": "119-199",
+    "between": "Hillcrest Ct - Claremont",
+    "day": "3rd Fri AM",
+    "pdf": "StNamesH-Z",
+    "page": 1,
+    "note": "no \"to\" number: 119 to 199 assumed"
+   },
+   {
+    "street": "Oakvale",
+    "side": "S",
+    "numbers": "25-99",
+    "between": "Claremont - Domingo",
+    "day": "3rd Fri AM",
+    "pdf": "StNamesH-Z",
+    "page": 3,
+    "note": "no \"to\" number: 25 to 99 assumed"
+   }
+  ],
+  "centerline": {
+   "segments": 3101,
+   "withName": 2853,
+   "shorterThan3m": 9
+  },
+  "addressPoints": 31510
+ },
+ "output": {
+  "blocks": 1283,
+  "sides": 2479,
+  "rules": 2482,
+  "oneSideOnly": 87,
+  "am": 1435,
+  "pm": 1044,
+  "sidesWithTwoRules": 3
+ },
+ "placement": {
+  "method": "A row goes on each segment of its street (its type if the row names one, else the street's main types) whose numbers on the row's side are at least 50% inside the row's range, on the side holding the row's parity (N and E odd, S and W even, as the PDFs say). A segment's odd side is the address points' (4 points, 80%) where they decide, else the centerline's ranges; when only the ranges say it and the row's word points clearly the other way (conf >= 0.7), the word wins (\"compass over ranges\"); with no odd side, or numbers that are not the segment's at all, the side facing the row's word. A row whose numbers place nothing is walked along its street between its two cross streets (\"Terminus\", \"Cul De Sac\" = a dead end inside the City, \"City Limit\" = one at the City boundary). A side two rows give different days keeps the row whose numbers and cross streets both put it there, then the row with the narrower range; still tied, both rules stay.",
+  "rowsPlaced": 675,
+  "rowsPlacedBy": {
+   "numbersAndCrossStreets": 455,
+   "numbersOnly": 169,
+   "crossStreetsOnly": 51
+  },
+  "sidesBy": {
+   "both": 1477,
+   "numbers": 924,
+   "numbers past the cross streets": 20,
+   "cross streets": 58
+  },
+  "sidesPastTheCrossStreets": [
+   {
+    "c": "1065",
+    "street": "Acton St",
+    "side": "R",
+    "n": [
+     1400,
+     1412
+    ],
+    "row": "Acton W 1330-1599 (Hopkins - Keoncrest)"
+   },
+   {
+    "c": "1767",
+    "street": "Carleton St",
+    "side": "L",
+    "n": [
+     2430,
+     2499
+    ],
+    "row": "Carleton N 2201-2499 (Fulton - Telegraph)"
+   },
+   {
+    "c": "566",
+    "street": "Catalina Ave",
+    "side": "L",
+    "n": [
+     1800,
+     1859
+    ],
+    "row": "Catalina N 1801-1899 (Station Pl - The Alameda)"
+   },
+   {
+    "c": "2556",
+    "street": "Chabolyn Ter",
+    "side": "L",
+    "n": [
+     6001,
+     6004
+    ],
+    "row": "Chabolyn Terr N 6001-6039 (City Limit - Roslyn)"
+   },
+   {
+    "c": "1318",
+    "street": "Chestnut St",
+    "side": "L",
+    "n": [
+     1625,
+     1699
+    ],
+    "row": "Chestnut E 1601-1699 (Lincoln - Rose)"
+   },
+   {
+    "c": "2205",
+    "street": "Hillcrest Rd",
+    "side": "R",
+    "n": [
+     122,
+     129
+    ],
+    "row": "Hillcrest Rd S 70-222 (Eucalyptus - Roanoke)"
+   },
+   {
+    "c": "2216",
+    "street": "Hillcrest Rd",
+    "side": "R",
+    "n": [
+     100,
+     121
+    ],
+    "row": "Hillcrest Rd S 70-222 (Eucalyptus - Roanoke)"
+   },
+   {
+    "c": "2552",
+    "street": "Hillcrest Rd",
+    "side": "R",
+    "n": [
+     50,
+     99
+    ],
+    "row": "Hillcrest Rd S 70-222 (Eucalyptus - Roanoke)"
+   },
+   {
+    "c": "1413",
+    "street": "Martin Luther King Jr Way",
+    "side": "R",
+    "n": [
+     1921,
+     1999
+    ],
+    "row": "M L King W 1600-1998 (Cedar - Berkeley Way)"
+   },
+   {
+    "c": "820",
+    "street": "Milvia St",
+    "side": "L",
+    "n": [
+     1200,
+     1206
+    ],
+    "row": "Milvia E 1201-1599 (Eunice - Cedar)"
+   },
+   {
+    "c": "754",
+    "street": "Oak St",
+    "side": "R",
+    "n": [
+     2400,
+     2499
+    ],
+    "row": "Oak N 2301-2549 (Arch - Glen)"
+   },
+   {
+    "c": "2794",
+    "street": "Oak St",
+    "side": "L",
+    "n": [
+     2330,
+     2399
+    ],
+    "row": "Oak N 2301-2549 (Arch - Glen)"
+   },
+   {
+    "c": "2242",
+    "street": "Prince St",
+    "side": "L",
+    "n": [
+     1491,
+     1499
+    ],
+    "row": "Prince N 1401-1499 (Acton - Stanton)"
+   },
+   {
+    "c": "245",
+    "street": "Russell St",
+    "side": "L",
+    "n": [
+     1971,
+     1999
+    ],
+    "row": "Russell N 1501-1999 (Sacramento - Milvia)"
+   },
+   {
+    "c": "245",
+    "street": "Russell St",
+    "side": "R",
+    "n": [
+     1971,
+     1999
+    ],
+    "row": "Russell S 1500-1998 (Sacramento - Milvia)"
+   },
+   {
+    "c": "1254",
+    "street": "Stannage Ave",
+    "side": "L",
+    "n": [
+     1551,
+     1599
+    ],
+    "row": "Stannage E 1201-1599 (City Limit - Hopkins)"
+   },
+   {
+    "c": "1254",
+    "street": "Stannage Ave",
+    "side": "R",
+    "n": [
+     1551,
+     1599
+    ],
+    "row": "Stannage W 1200-1598 (City Limit - Hopkins)"
+   },
+   {
+    "c": "2691",
+    "street": "Tevlin St",
+    "side": "L",
+    "n": [
+     1200,
+     1230
+    ],
+    "row": "Tevlin E 1201-1379 (Terminus - Watkins)"
+   },
+   {
+    "c": "2691",
+    "street": "Tevlin St",
+    "side": "R",
+    "n": [
+     1200,
+     1230
+    ],
+    "row": "Tevlin W 1200-1398 (Terminus - Watkins)"
+   },
+   {
+    "c": "2239",
+    "street": "Woolsey St",
+    "side": "L",
+    "n": [
+     1850,
+     1899
+    ],
+    "row": "Woolsey N 1501-1899 (Sacramento - M L King)"
+   }
+  ],
+  "rowsOnlyInOptedOutBlocks": 34,
+  "rowsUnplaced": 13,
+  "unplaced": [
+   {
+    "street": "Claremont Blvd",
+    "side": "E",
+    "numbers": "2901-2929",
+    "between": "Claremont Ave - Ashby",
+    "day": "4th Mon AM",
+    "pdf": "StNamesA-G",
+    "page": 4,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Cypress",
+    "side": "W",
+    "numbers": "1400-1414",
+    "between": "Rose - Buena",
+    "day": "2nd Fri PM",
+    "pdf": "StNamesA-G",
+    "page": 5,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Cypress",
+    "side": "E",
+    "numbers": "1401-1419",
+    "between": "Rose - Buena",
+    "day": "2nd Thu PM",
+    "pdf": "StNamesA-G",
+    "page": 5,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Dover",
+    "side": "W",
+    "numbers": "3300-3349",
+    "between": "Alcatraz - City Limit",
+    "day": "1st Thu AM",
+    "pdf": "StNamesA-G",
+    "page": 5,
+    "why": "street not on the centerline"
+   },
+   {
+    "street": "Garber",
+    "side": "S",
+    "numbers": "3000-3099",
+    "between": "Belrose - City Limit",
+    "day": "4th Mon AM",
+    "pdf": "StNamesA-G",
+    "page": 7,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Garber",
+    "side": "N",
+    "numbers": "3001-3099",
+    "between": "Belrose - City Limit",
+    "day": "4th Wed AM",
+    "pdf": "StNamesA-G",
+    "page": 7,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Hillcrest Rd",
+    "side": "W",
+    "numbers": "254-266",
+    "between": "Roanoke - City Limit",
+    "day": "3rd Fri AM",
+    "pdf": "StNamesH-Z",
+    "page": 1,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Hillcrest Rd",
+    "side": "E",
+    "numbers": "257-265",
+    "between": "Roanoke - City Limit",
+    "day": "3rd Fri AM",
+    "pdf": "StNamesH-Z",
+    "page": 1,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "North Valley",
+    "side": "W",
+    "numbers": "2100-2198",
+    "between": "Allston - Terminus",
+    "day": "1st Fri AM",
+    "pdf": "StNamesH-Z",
+    "page": 3,
+    "why": "street not on the centerline"
+   },
+   {
+    "street": "North Valley",
+    "side": "E",
+    "numbers": "2101-2199",
+    "between": "Allston - Terminus",
+    "day": "1st Fri AM",
+    "pdf": "StNamesH-Z",
+    "page": 3,
+    "why": "street not on the centerline"
+   },
+   {
+    "street": "Tanglewood",
+    "side": "W",
+    "numbers": "10-28",
+    "between": "Belrose - Claremont Ave",
+    "day": "4th Mon AM",
+    "pdf": "StNamesH-Z",
+    "page": 6,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Tanglewood",
+    "side": "E",
+    "numbers": "2940-2998",
+    "between": "Belrose - Claremont Ave",
+    "day": "4th Wed AM",
+    "pdf": "StNamesH-Z",
+    "page": 6,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   },
+   {
+    "street": "Vicente",
+    "side": "E",
+    "numbers": "150-181",
+    "between": "City Limit - Alvarado",
+    "day": "4th Tue AM",
+    "pdf": "StNamesH-Z",
+    "page": 6,
+    "why": "no segment of the street holds these numbers, and no walk between its cross streets"
+   }
+  ],
+  "sideFrom": {
+   "ranges and points": 2130,
+   "compass": 60,
+   "ranges": 340,
+   "points": 14,
+   "compass over ranges": 3
+  },
+  "oddSide": {
+   "agree": 2004,
+   "rangesWrongWayRound": 56,
+   "fixed": [
+    {
+     "c": "30",
+     "s": "Euclid Ave",
+     "ranges": "501 599 500 598",
+     "points": 6
+    },
+    {
+     "c": "109",
+     "s": "Santa Rosa Ave",
+     "ranges": "501 599 500 598",
+     "points": 9
+    },
+    {
+     "c": "117",
+     "s": "Euclid Ave",
+     "ranges": "701 729 700 728",
+     "points": 8
+    },
+    {
+     "c": "130",
+     "s": "Santa Barbara Rd",
+     "ranges": "701 731 700 732",
+     "points": 7
+    },
+    {
+     "c": "142",
+     "s": "The Spiral",
+     "ranges": "301 319 304 318",
+     "points": 4
+    },
+    {
+     "c": "158",
+     "s": "Forest Ln",
+     "ranges": "201 299 200 298",
+     "points": 4
+    },
+    {
+     "c": "291",
+     "s": "Rock Ln",
+     "ranges": "45 99 46 98",
+     "points": 15
+    },
+    {
+     "c": "296",
+     "s": "Keeler Ave",
+     "ranges": "901 929 900 930",
+     "points": 8
+    },
+    {
+     "c": "318",
+     "s": "Rock Ln",
+     "ranges": "1 43 2 42",
+     "points": 7
+    },
+    {
+     "c": "323",
+     "s": "Forest Ln",
+     "ranges": "101 199 100 198",
+     "points": 14
+    },
+    {
+     "c": "337",
+     "s": "Vincente Ave",
+     "ranges": "677 699 676 698",
+     "points": 7
+    },
+    {
+     "c": "519",
+     "s": "The Alameda",
+     "ranges": "801 833 800 834",
+     "points": 11
+    },
+    {
+     "c": "535",
+     "s": "Hilldale Ave",
+     "ranges": "951 999 950 998",
+     "points": 12
+    },
+    {
+     "c": "547",
+     "s": "San Mateo Rd",
+     "ranges": "1 45 6 38",
+     "points": 11
+    },
+    {
+     "c": "608",
+     "s": "Santa Barbara Rd",
+     "ranges": "951 999 950 998",
+     "points": 13
+    },
+    {
+     "c": "648",
+     "s": "Stevenson Ave",
+     "ranges": "1 65 2 66",
+     "points": 6
+    },
+    {
+     "c": "697",
+     "s": "Del Norte St",
+     "ranges": "2001 2099 2000 2098",
+     "points": 13
+    },
+    {
+     "c": "765",
+     "s": "Shasta Rd",
+     "ranges": "2801 2823 2800 2822",
+     "points": 6
+    },
+    {
+     "c": "807",
+     "s": "Shasta Rd",
+     "ranges": "2701 2739 2700 2742",
+     "points": 14
+    },
+    {
+     "c": "839",
+     "s": "Columbia Cir",
+     "ranges": "1 21 2 22",
+     "points": 4
+    },
+    {
+     "c": "854",
+     "s": "Glen Ave",
+     "ranges": "2227 2319 2226 2318",
+     "points": 9
+    },
+    {
+     "c": "920",
+     "s": "Senior Ave",
+     "ranges": "3 99 2 98",
+     "points": 16
+    },
+    {
+     "c": "974",
+     "s": "Summit Rd",
+     "ranges": "1501 1599 1500 1598",
+     "points": 17
+    },
+    {
+     "c": "1133",
+     "s": "Stannage Ave",
+     "ranges": "1401 1429 1400 1430",
+     "points": 20
+    },
+    {
+     "c": "1263",
+     "s": "San Pablo Ave",
+     "ranges": "1501 1599 1500 1598",
+     "points": 18
+    },
+    {
+     "c": "1308",
+     "s": "Virginia Gardens",
+     "ranges": "1 99 2 98",
+     "points": 12
+    },
+    {
+     "c": "1520",
+     "s": "Arden Rd",
+     "ranges": "1 59 2 60",
+     "points": 7
+    },
+    {
+     "c": "1538",
+     "s": "Panoramic Way",
+     "ranges": "51 99 50 98",
+     "points": 13
+    },
+    {
+     "c": "1881",
+     "s": "Palm Ct",
+     "ranges": "2801 2899 2800 2898",
+     "points": 4
+    },
+    {
+     "c": "2073",
+     "s": "Alvarado Rd",
+     "ranges": "1 57 2 58",
+     "points": 13
+    },
+    {
+     "c": "2082",
+     "s": "Oakvale Ave",
+     "ranges": "11 99 10 98",
+     "points": 26
+    },
+    {
+     "c": "2371",
+     "s": "Keith Ave",
+     "ranges": "1177 1249 1178 1250",
+     "points": 10
+    },
+    {
+     "c": "2391",
+     "s": "Vincente Ave",
+     "ranges": "701 799 700 798",
+     "points": 24
+    },
+    {
+     "c": "2392",
+     "s": "Vincente Ave",
+     "ranges": "801 899 800 898",
+     "points": 4
+    },
+    {
+     "c": "2438",
+     "s": "Eastshore",
+     "ranges": "1701 1899 1700 1898",
+     "points": 4
+    },
+    {
+     "c": "2442",
+     "s": "Addison St",
+     "ranges": "1201 1299 1200 1298",
+     "points": 5
+    },
+    {
+     "c": "2554",
+     "s": "Roslyn Ct",
+     "ranges": "1 19 2 18",
+     "points": 4
+    },
+    {
+     "c": "2731",
+     "s": "Acton Crescent",
+     "ranges": "1431 1499 1430 1498",
+     "points": 6
+    },
+    {
+     "c": "2851",
+     "s": "Vermont Ave",
+     "ranges": "301 357 302 358",
+     "points": 7
+    },
+    {
+     "c": "2870",
+     "s": "Vermont Ave",
+     "ranges": "359 409 360 410",
+     "points": 12
+    },
+    {
+     "c": "2879",
+     "s": "Contra Costa Ave",
+     "ranges": "901 929 900 930",
+     "points": 9
+    },
+    {
+     "c": "2890",
+     "s": "Glendale Ave",
+     "ranges": "1301 1399 1300 1398",
+     "points": 7
+    },
+    {
+     "c": "2924",
+     "s": "Bonnie Ln",
+     "ranges": "1 99 2 98",
+     "points": 22
+    },
+    {
+     "c": "2926",
+     "s": "The Crescent",
+     "ranges": "51 59 52 60",
+     "points": 4
+    },
+    {
+     "c": "2928",
+     "s": "Shasta Rd",
+     "ranges": "2825 2843 2826 2844",
+     "points": 4
+    },
+    {
+     "c": "2936",
+     "s": "Indian Rock Ave",
+     "ranges": "851 899 850 898",
+     "points": 14
+    },
+    {
+     "c": "2937",
+     "s": "Indian Rock Ave",
+     "ranges": "801 851 800 848",
+     "points": 19
+    },
+    {
+     "c": "2943",
+     "s": "Eucalyptus Rd",
+     "ranges": "1 29 2 28",
+     "points": 12
+    },
+    {
+     "c": "2963",
+     "s": "Santa Barbara Rd",
+     "ranges": "733 759 734 758",
+     "points": 7
+    },
+    {
+     "c": "2979",
+     "s": "Camelia St",
+     "ranges": "601 698 600 698",
+     "points": 4
+    },
+    {
+     "c": "2992",
+     "s": "Sonoma Ave",
+     "ranges": "1701 1725 1704 1724",
+     "points": 10
+    },
+    {
+     "c": "2995",
+     "s": "Rose Walk",
+     "ranges": "2501 2599 2500 2598",
+     "points": 28
+    },
+    {
+     "c": "3020",
+     "s": "University Ave",
+     "ranges": "801 829 0 0",
+     "points": 5
+    },
+    {
+     "c": "3041",
+     "s": "University Ave",
+     "ranges": "0 0 800 830",
+     "points": 4
+    },
+    {
+     "c": "3053",
+     "s": "Woodhaven Rd",
+     "ranges": "701 799 700 798",
+     "points": 6
+    },
+    {
+     "c": "3070",
+     "s": "Eastshore Hwy",
+     "ranges": "1101 1299 1100 1298",
+     "points": 4
+    }
+   ],
+   "pointsOnly": 2,
+   "rangesOnly": 652,
+   "pointsUnclear": 11,
+   "noNumbers": 130
+  },
+  "compassCheck": {
+   "note": "Each placed side against the compass side of the row's word (N, S, E, W), where the street runs within 60° of square to it (conf >= 0.5).",
+   "agree": 2473,
+   "differ": 5,
+   "lowConfidence": 37,
+   "differences": [
+    {
+     "c": "2073",
+     "street": "Alvarado Rd",
+     "word": "E",
+     "placed": "West",
+     "by": "points",
+     "row": "1-55"
+    },
+    {
+     "c": "2552",
+     "street": "Hillcrest Rd",
+     "word": "S",
+     "placed": "Northwest",
+     "by": "ranges",
+     "row": "70-222"
+    },
+    {
+     "c": "2552",
+     "street": "Hillcrest Rd",
+     "word": "N",
+     "placed": "Southeast",
+     "by": "ranges",
+     "row": "71-223"
+    },
+    {
+     "c": "2540",
+     "street": "Vicente Rd",
+     "word": "E",
+     "placed": "West",
+     "by": "ranges and points",
+     "row": "1-95"
+    },
+    {
+     "c": "2540",
+     "street": "Vicente Rd",
+     "word": "W",
+     "placed": "East",
+     "by": "ranges and points",
+     "row": "2-94"
+    }
+   ]
+  },
+  "settledBetweenRows": {
+   "note": "Sides two rows gave different days, settled as above (kept: the winning row; dropped: the others).",
+   "sides": 47,
+   "list": [
+    {
+     "c": "1065",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1329-1949 (Gilman - Berkeley)"
+     ],
+     "dropped": [
+      "Acton E 1201-1301 (City Limit - Hopkins) [cross streets]",
+      "Acton E 1331-1499 (Hopkins - Rose) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "1078",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1331-1499 (Hopkins - Rose)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "1121",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1331-1499 (Hopkins - Rose)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "1342",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1651-1999 (Lincoln - University)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "1381",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1651-1999 (Lincoln - University)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "1406",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1651-1999 (Lincoln - University)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "1429",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1651-1999 (Lincoln - University)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "2716",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1601-1699 (Lincoln - Cedar)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "2720",
+     "street": "Acton St",
+     "side": "L",
+     "kept": [
+      "Acton E 1651-1999 (Lincoln - University)"
+     ],
+     "dropped": [
+      "Acton E 1329-1949 (Gilman - Berkeley) [numbers]"
+     ]
+    },
+    {
+     "c": "2957",
+     "street": "Acton St",
+     "side": "R",
+     "kept": [
+      "Acton W 2000-2498 (University - Dwight)"
+     ],
+     "dropped": [
+      "Acton W 1651-2099 (Lincoln - University) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "2073",
+     "street": "Alvarado Rd",
+     "side": "R",
+     "kept": [
+      "Alvarado E 1-55 (Tunnel - City Limit)"
+     ],
+     "dropped": [
+      "Alvarado N 1-141 (Tunnel - Bridge) [numbers]"
+     ]
+    },
+    {
+     "c": "1135",
+     "street": "Buena Ave",
+     "side": "L",
+     "kept": [
+      "Buena N 1501-1699 (Holly - Cypress)"
+     ],
+     "dropped": [
+      "Buena BOTH 1521-1526 (Terminus - Holly) [cross streets]",
+      "Buena N 1501-1599 (Terminus - Holly) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "1125",
+     "street": "Buena Ave",
+     "side": "L",
+     "kept": [
+      "Buena N 1501-1599 (Terminus - Holly)"
+     ],
+     "dropped": [
+      "Buena N 1501-1699 (Holly - Cypress) [numbers]"
+     ]
+    },
+    {
+     "c": "182",
+     "street": "California St",
+     "side": "R",
+     "kept": [
+      "California W 1600-1798 (Cedar - Delaware)"
+     ],
+     "dropped": [
+      "California W 1330-1798 (Terminus - Delaware) [numbers]"
+     ]
+    },
+    {
+     "c": "2756",
+     "street": "California St",
+     "side": "R",
+     "kept": [
+      "California W 1400-1598 (Ada - Cedar)"
+     ],
+     "dropped": [
+      "California W 1330-1798 (Terminus - Delaware) [numbers]"
+     ]
+    },
+    {
+     "c": "2759",
+     "street": "California St",
+     "side": "R",
+     "kept": [
+      "California W 1400-1598 (Ada - Cedar)"
+     ],
+     "dropped": [
+      "California W 1330-1798 (Terminus - Delaware) [numbers]"
+     ]
+    },
+    {
+     "c": "2760",
+     "street": "California St",
+     "side": "R",
+     "kept": [
+      "California W 1400-1598 (Ada - Cedar)"
+     ],
+     "dropped": [
+      "California W 1330-1798 (Terminus - Delaware) [numbers]"
+     ]
+    },
+    {
+     "c": "2762",
+     "street": "California St",
+     "side": "R",
+     "kept": [
+      "California W 1600-1798 (Cedar - Delaware)"
+     ],
+     "dropped": [
+      "California W 1330-1798 (Terminus - Delaware) [numbers]"
+     ]
+    },
+    {
+     "c": "2764",
+     "street": "California St",
+     "side": "R",
+     "kept": [
+      "California W 1600-1798 (Cedar - Delaware)"
+     ],
+     "dropped": [
+      "California W 1330-1798 (Terminus - Delaware) [numbers]"
+     ]
+    },
+    {
+     "c": "2766",
+     "street": "California St",
+     "side": "R",
+     "kept": [
+      "California W 1600-1798 (Cedar - Delaware)"
+     ],
+     "dropped": [
+      "California W 1330-1798 (Terminus - Delaware) [numbers]"
+     ]
+    },
+    {
+     "c": "1244",
+     "street": "Curtis St",
+     "side": "R",
+     "kept": [
+      "Curtis W 1500-1998 (Rose - University)"
+     ],
+     "dropped": [
+      "Curtis W 1200-1598 (City Limit - Hopkins) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "2053",
+     "street": "El Camino Real",
+     "side": "R",
+     "kept": [
+      "El Camino Real W 2-118 (Domingo - The Uplands)"
+     ],
+     "dropped": [
+      "El Camino Real W 10-100 (The Uplands - Cul De Sac) [numbers]"
+     ]
+    },
+    {
+     "c": "2187",
+     "street": "El Camino Real",
+     "side": "R",
+     "kept": [
+      "El Camino Real W 2-118 (Domingo - The Uplands)"
+     ],
+     "dropped": [
+      "El Camino Real W 10-100 (The Uplands - Cul De Sac) [numbers]"
+     ]
+    },
+    {
+     "c": "455",
+     "street": "Fulton St",
+     "side": "R",
+     "kept": [
+      "Fulton W 2350-2499 (Durant - Dwight)"
+     ],
+     "dropped": [
+      "Fulton W 2300-2498 (Bancroft - Dwight) [numbers]"
+     ]
+    },
+    {
+     "c": "1638",
+     "street": "Fulton St",
+     "side": "R",
+     "kept": [
+      "Fulton W 2350-2499 (Durant - Dwight)"
+     ],
+     "dropped": [
+      "Fulton W 2300-2498 (Bancroft - Dwight) [numbers]"
+     ]
+    },
+    {
+     "c": "2494",
+     "street": "Fulton St",
+     "side": "R",
+     "kept": [
+      "Fulton W 2350-2499 (Durant - Dwight)"
+     ],
+     "dropped": [
+      "Fulton W 2300-2498 (Bancroft - Dwight) [numbers]"
+     ]
+    },
+    {
+     "c": "1848",
+     "street": "Garber St",
+     "side": "R",
+     "kept": [
+      "Garber S 2700-2898 (College - E Terminus)"
+     ],
+     "dropped": [
+      "Garber S 2844-2830 (Terminus - Oak Knoll) [cross streets]"
+     ]
+    },
+    {
+     "c": "1852",
+     "street": "Garber St",
+     "side": "R",
+     "kept": [
+      "Garber S 2700-2898 (College - E Terminus)"
+     ],
+     "dropped": [
+      "Garber S 2844-2830 (Terminus - Oak Knoll) [cross streets]"
+     ]
+    },
+    {
+     "c": "413",
+     "street": "Grant St",
+     "side": "L",
+     "kept": [
+      "Grant E 1401-1599 (Rose - Cedar)"
+     ],
+     "dropped": [
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus) [both]"
+     ]
+    },
+    {
+     "c": "413",
+     "street": "Grant St",
+     "side": "R",
+     "kept": [
+      "Grant W 1400-1598 (Rose - Cedar)"
+     ],
+     "dropped": [
+      "Grant BOTH 1300-1499 (Terminus - Rose) [numbers past the cross streets]",
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus) [both]"
+     ]
+    },
+    {
+     "c": "972",
+     "street": "Grant St",
+     "side": "L",
+     "kept": [
+      "Grant BOTH 1300-1499 (Terminus - Rose)"
+     ],
+     "dropped": [
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus) [both]"
+     ]
+    },
+    {
+     "c": "972",
+     "street": "Grant St",
+     "side": "R",
+     "kept": [
+      "Grant BOTH 1300-1499 (Terminus - Rose)"
+     ],
+     "dropped": [
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus) [both]"
+     ]
+    },
+    {
+     "c": "1225",
+     "street": "Grant St",
+     "side": "R",
+     "kept": [
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus)"
+     ],
+     "dropped": [
+      "Grant W 1600-1798 (Lincoln - Delaware) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "1252",
+     "street": "Grant St",
+     "side": "R",
+     "kept": [
+      "Grant W 1600-1798 (Lincoln - Delaware)"
+     ],
+     "dropped": [
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "2406",
+     "street": "Grant St",
+     "side": "L",
+     "kept": [
+      "Grant E 1401-1599 (Rose - Cedar)"
+     ],
+     "dropped": [
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus) [both]"
+     ]
+    },
+    {
+     "c": "2406",
+     "street": "Grant St",
+     "side": "R",
+     "kept": [
+      "Grant W 1400-1598 (Rose - Cedar)"
+     ],
+     "dropped": [
+      "Grant BOTH 1301-1699 (Lincoln - N Terminus) [both]"
+     ]
+    },
+    {
+     "c": "1016",
+     "street": "Hopkins St",
+     "side": "L",
+     "kept": [
+      "Hopkins N 1401-1499 (Albina - Hopkins Ct)"
+     ],
+     "dropped": [
+      "Hopkins N 1100-1498 (Sacramento - San Pablo) [numbers]"
+     ]
+    },
+    {
+     "c": "1016",
+     "street": "Hopkins St",
+     "side": "R",
+     "kept": [
+      "Hopkins S 1400-1498 (Albina - Hopkins Ct)"
+     ],
+     "dropped": [
+      "Hopkins S 1100-1498 (Cedar - Sacramento) [both]"
+     ]
+    },
+    {
+     "c": "1030",
+     "street": "Hopkins St",
+     "side": "L",
+     "kept": [
+      "Hopkins N 1100-1498 (Sacramento - San Pablo)"
+     ],
+     "dropped": [
+      "Hopkins N 1401-1499 (Albina - Hopkins Ct) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "1030",
+     "street": "Hopkins St",
+     "side": "R",
+     "kept": [
+      "Hopkins S 1100-1498 (Cedar - Sacramento)"
+     ],
+     "dropped": [
+      "Hopkins S 1400-1498 (Albina - Hopkins Ct) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "1050",
+     "street": "Hopkins St",
+     "side": "L",
+     "kept": [
+      "Hopkins N 1100-1498 (Sacramento - San Pablo)"
+     ],
+     "dropped": [
+      "Hopkins N 1401-1499 (Albina - Hopkins Ct) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "1050",
+     "street": "Hopkins St",
+     "side": "R",
+     "kept": [
+      "Hopkins S 1100-1498 (Cedar - Sacramento)"
+     ],
+     "dropped": [
+      "Hopkins S 1400-1498 (Albina - Hopkins Ct) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "1086",
+     "street": "Ordway St",
+     "side": "L",
+     "kept": [
+      "Ordway E 1201-1599 (City Limit - Hopkins)"
+     ],
+     "dropped": [
+      "Ordway E 1331-1499 (Hopkins - Rose) [numbers past the cross streets]"
+     ]
+    },
+    {
+     "c": "2095",
+     "street": "The Plaza Dr",
+     "side": "L",
+     "kept": [
+      "The Plaza N 13-89 (Parkside - The Plaza)"
+     ],
+     "dropped": [
+      "The Plaza E 41-131 (Nogales - The Plaza) [both]"
+     ]
+    },
+    {
+     "c": "2137",
+     "street": "The Plaza Dr",
+     "side": "L",
+     "kept": [
+      "The Plaza N 13-89 (Parkside - The Plaza)"
+     ],
+     "dropped": [
+      "The Plaza E 41-131 (Nogales - The Plaza) [both]"
+     ]
+    },
+    {
+     "c": "2137",
+     "street": "The Plaza Dr",
+     "side": "R",
+     "kept": [
+      "The Plaza S 12-88 (Encina Pl - The Plaza)"
+     ],
+     "dropped": [
+      "The Plaza S 128-155 (The Plaza - Parkside) [cross streets]"
+     ]
+    },
+    {
+     "c": "2914",
+     "street": "The Plaza Dr",
+     "side": "L",
+     "kept": [
+      "The Plaza N 0-41 (Encina Pl - Nogales)"
+     ],
+     "dropped": [
+      "The Plaza N 13-89 (Parkside - The Plaza) [both]"
+     ]
+    }
+   ]
+  },
+  "sidesWithTwoRules": [
+   {
+    "c": "1900",
+    "street": "Avalon Ave",
+    "side": "L",
+    "rules": [
+     [
+      1,
+      9,
+      12,
+      8,
+      0,
+      0
+     ],
+     [
+      3,
+      9,
+      12,
+      8,
+      0,
+      0
+     ]
+    ],
+    "rows": [
+     "Avalon N 3001-3099 (Claremont Bl - City Limit)",
+     "Avalon N 3001-3099 (Claremont - Terminus)"
+    ]
+   },
+   {
+    "c": "2689",
+    "street": "Neilson St",
+    "side": "L",
+    "rules": [
+     [
+      5,
+      "12:30",
+      "15:30",
+      1,
+      0,
+      0
+     ],
+     [
+      1,
+      "12:30",
+      "15:30",
+      2,
+      0,
+      0
+     ]
+    ],
+    "rows": [
+     "Neilson E 1201-1299 (City Limit - Gilman)",
+     "Neilson E 1201-1299 (Gilman - Terminus)"
+    ]
+   },
+   {
+    "c": "2693",
+    "street": "Neilson St",
+    "side": "L",
+    "rules": [
+     [
+      5,
+      "12:30",
+      "15:30",
+      1,
+      0,
+      0
+     ],
+     [
+      1,
+      "12:30",
+      "15:30",
+      2,
+      0,
+      0
+     ]
+    ],
+    "rows": [
+     "Neilson E 1201-1299 (City Limit - Gilman)",
+     "Neilson E 1201-1299 (Gilman - Terminus)"
+    ]
+   }
+  ]
+ },
+ "optOut": {
+  "note": "Blocks named in the schedule's Opt-Out column left the program (Resolution 54,513-N.S., 1987) and are not swept. A segment whose numbers lie wholly inside opted-out hundred blocks of its street (any row of the street naming them) is left off, both sides. status = the City layer's own status for it.",
+  "blocks": [
+   "ACTON 1300, 1500",
+   "ADA 1300",
+   "ALLSTON 1700",
+   "ARLINGTON 700",
+   "BERKELEY 1600, 1700",
+   "BLAKE 1300",
+   "BONITA 1300",
+   "BUENA 1700",
+   "CALIFORNIA 1300",
+   "CARLOTTA 1200",
+   "CEDAR 600",
+   "COLUSA 1000, 1100, 1200",
+   "CORNELL 1300, 1400",
+   "CURTIS 1200, 1300, 1400",
+   "DANA 2700",
+   "DERBY 2400",
+   "EDITH 1400",
+   "ENSENADA 600, 800",
+   "GRIZZLY PEAK 600",
+   "HILLCREST 200",
+   "HOLLY 1400, 1500",
+   "JAYNES 1600",
+   "JOSEPHINE 1600",
+   "LASSEN 1000",
+   "LINCOLN 1500, 1600",
+   "LINDEN 2900",
+   "MAGNOLIA 2900",
+   "MC GEE 2400",
+   "NORTH 1500",
+   "NORTH VALLEY 2100",
+   "ORDWAY 1400",
+   "PARKSIDE 100",
+   "PERALTA 600, 700",
+   "PIEDMONT 2900",
+   "POSEN 1600",
+   "ROSE 2300",
+   "SAN ANTONIO 1800",
+   "SAN LORENZO 1600, 1800",
+   "SANTA ROSA 500",
+   "STANNAGE 700",
+   "SUTTER 1100",
+   "THOUSAND OAKS 1500, 1800",
+   "TYLER 1600",
+   "VALLEY 1300",
+   "VINCENTE 600",
+   "VINE 1700",
+   "VIRGINIA 1600",
+   "WARD 2700",
+   "YOLO 1900, 2000",
+   "6TH 1600",
+   "8TH 2100",
+   "9TH 1600"
+  ],
+  "segmentsLeftOff": 133,
+  "list": [
+   {
+    "c": "2952",
+    "street": "Acton St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Acton E 1201-1301"
+   },
+   {
+    "c": "2952",
+    "street": "Acton St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Acton W 1330-1398"
+   },
+   {
+    "c": "1170",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton E 1329-1949"
+   },
+   {
+    "c": "1189",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton E 1329-1949"
+   },
+   {
+    "c": "1231",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton E 1329-1949"
+   },
+   {
+    "c": "2952",
+    "street": "Acton St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Acton E 1329-1949"
+   },
+   {
+    "c": "1170",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton W 1330-1599"
+   },
+   {
+    "c": "1189",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton W 1330-1599"
+   },
+   {
+    "c": "1231",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton W 1330-1599"
+   },
+   {
+    "c": "2952",
+    "street": "Acton St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Acton W 1330-1599"
+   },
+   {
+    "c": "2952",
+    "street": "Acton St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Acton E 1331-1499"
+   },
+   {
+    "c": "1170",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton W 1500-1648"
+   },
+   {
+    "c": "1189",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton W 1500-1648"
+   },
+   {
+    "c": "1231",
+    "street": "Acton St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Acton W 1500-1648"
+   },
+   {
+    "c": "2896",
+    "street": "Ada St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Ada N 1381-1399"
+   },
+   {
+    "c": "1508",
+    "street": "Allston Way",
+    "block": "1700",
+    "status": "enforced",
+    "row": "Allston S 1500-1898"
+   },
+   {
+    "c": "1513",
+    "street": "Allston Way",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Allston S 1500-1898"
+   },
+   {
+    "c": "1508",
+    "street": "Allston Way",
+    "block": "1700",
+    "status": "enforced",
+    "row": "Allston N 1501-1899"
+   },
+   {
+    "c": "1513",
+    "street": "Allston Way",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Allston N 1501-1899"
+   },
+   {
+    "c": "330",
+    "street": "Arlington Ave",
+    "block": "700",
+    "status": "exempt",
+    "row": "Arlington W 300-974"
+   },
+   {
+    "c": "330",
+    "street": "Arlington Ave",
+    "block": "700",
+    "status": "exempt",
+    "row": "Arlington E 501-899"
+   },
+   {
+    "c": "2770",
+    "street": "Berkeley Way",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Berkeley S 1500-1698"
+   },
+   {
+    "c": "430",
+    "street": "Berkeley Way",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Berkeley S 1700-1998"
+   },
+   {
+    "c": "430",
+    "street": "Berkeley Way",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Berkeley N 1501-1999"
+   },
+   {
+    "c": "2770",
+    "street": "Berkeley Way",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Berkeley N 1501-1999"
+   },
+   {
+    "c": "1829",
+    "street": "Blake St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Blake S 1100-1498"
+   },
+   {
+    "c": "1829",
+    "street": "Blake St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Blake N 1101-1499"
+   },
+   {
+    "c": "946",
+    "street": "Bonita Ave",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Bonita W 1200-1598"
+   },
+   {
+    "c": "946",
+    "street": "Bonita Ave",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Bonita E 1201-1599"
+   },
+   {
+    "c": "1061",
+    "street": "California St",
+    "block": "1300",
+    "status": "exempt",
+    "row": "California W 1330-1798"
+   },
+   {
+    "c": "892",
+    "street": "Carlotta Ave",
+    "block": "1200",
+    "status": "exempt",
+    "row": "Carlotta W 1200-1298"
+   },
+   {
+    "c": "892",
+    "street": "Carlotta Ave",
+    "block": "1200",
+    "status": "exempt",
+    "row": "Carlotta E 1201-1299"
+   },
+   {
+    "c": "711",
+    "street": "Colusa Ave",
+    "block": "1000",
+    "status": "exempt",
+    "row": "Colusa W 900-1098"
+   },
+   {
+    "c": "758",
+    "street": "Colusa Ave",
+    "block": "1000",
+    "status": "exempt",
+    "row": "Colusa W 900-1098"
+   },
+   {
+    "c": "711",
+    "street": "Colusa Ave",
+    "block": "1000",
+    "status": "exempt",
+    "row": "Colusa E 901-1099"
+   },
+   {
+    "c": "758",
+    "street": "Colusa Ave",
+    "block": "1000",
+    "status": "exempt",
+    "row": "Colusa E 901-1099"
+   },
+   {
+    "c": "403",
+    "street": "Cornell Ave",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Cornell W 1196-1598"
+   },
+   {
+    "c": "1116",
+    "street": "Cornell Ave",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Cornell W 1196-1598"
+   },
+   {
+    "c": "1224",
+    "street": "Cornell Ave",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Cornell W 1196-1598"
+   },
+   {
+    "c": "403",
+    "street": "Cornell Ave",
+    "block": "1300",
+    "status": "exempt",
+    "row": "Cornell E 1197-1599"
+   },
+   {
+    "c": "1116",
+    "street": "Cornell Ave",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Cornell E 1197-1599"
+   },
+   {
+    "c": "1224",
+    "street": "Cornell Ave",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Cornell E 1197-1599"
+   },
+   {
+    "c": "938",
+    "street": "Curtis St",
+    "block": "1200",
+    "status": "exempt",
+    "row": "Curtis W 1200-1598"
+   },
+   {
+    "c": "1202",
+    "street": "Curtis St",
+    "block": "1300/1400",
+    "status": "exempt",
+    "row": "Curtis W 1200-1598"
+   },
+   {
+    "c": "938",
+    "street": "Curtis St",
+    "block": "1200",
+    "status": "exempt",
+    "row": "Curtis E 1201-1499"
+   },
+   {
+    "c": "1202",
+    "street": "Curtis St",
+    "block": "1300/1400",
+    "status": "exempt",
+    "row": "Curtis E 1201-1499"
+   },
+   {
+    "c": "1863",
+    "street": "Dana St",
+    "block": "2700",
+    "status": "exempt",
+    "row": "Dana W 2700-2722"
+   },
+   {
+    "c": "1863",
+    "street": "Dana St",
+    "block": "2700",
+    "status": "exempt",
+    "row": "Dana E 2701-2723"
+   },
+   {
+    "c": "1817",
+    "street": "Derby St",
+    "block": "2400",
+    "status": "exempt",
+    "row": "Derby S 2200-2998"
+   },
+   {
+    "c": "2557",
+    "street": "Derby St",
+    "block": "2400",
+    "status": "enforced",
+    "row": "Derby S 2200-2998"
+   },
+   {
+    "c": "1817",
+    "street": "Derby St",
+    "block": "2400",
+    "status": "exempt",
+    "row": "Derby N 2201-2999"
+   },
+   {
+    "c": "2557",
+    "street": "Derby St",
+    "block": "2400",
+    "status": "enforced",
+    "row": "Derby N 2201-2999"
+   },
+   {
+    "c": "2401",
+    "street": "Edith St",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Edith W 1400-1598"
+   },
+   {
+    "c": "2401",
+    "street": "Edith St",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Edith E 1401-1599"
+   },
+   {
+    "c": "56",
+    "street": "Grizzly Peak Blvd",
+    "block": "600",
+    "status": "enforced",
+    "row": "Grizzly Peak E 400-1530"
+   },
+   {
+    "c": "72",
+    "street": "Grizzly Peak Blvd",
+    "block": "600",
+    "status": "exempt",
+    "row": "Grizzly Peak E 400-1530"
+   },
+   {
+    "c": "56",
+    "street": "Grizzly Peak Blvd",
+    "block": "600",
+    "status": "enforced",
+    "row": "Grizzly Peak W 401-1599"
+   },
+   {
+    "c": "72",
+    "street": "Grizzly Peak Blvd",
+    "block": "600",
+    "status": "exempt",
+    "row": "Grizzly Peak W 401-1599"
+   },
+   {
+    "c": "1206",
+    "street": "Holly St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Holly W 1500-1598"
+   },
+   {
+    "c": "1206",
+    "street": "Holly St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Holly E 1501-1599"
+   },
+   {
+    "c": "2757",
+    "street": "Jaynes St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Jaynes S 1600-1798"
+   },
+   {
+    "c": "2758",
+    "street": "Jaynes St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Jaynes S 1600-1798"
+   },
+   {
+    "c": "2757",
+    "street": "Jaynes St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Jaynes N 1630-1699"
+   },
+   {
+    "c": "1248",
+    "street": "Josephine St",
+    "block": "1600",
+    "status": "enforced",
+    "row": "Josephine W 1600-1698"
+   },
+   {
+    "c": "1248",
+    "street": "Josephine St",
+    "block": "1600",
+    "status": "enforced",
+    "row": "Josephine E 1601-1699"
+   },
+   {
+    "c": "728",
+    "street": "Lassen St",
+    "block": "1000",
+    "status": "exempt",
+    "row": "Lassen E 1001-1099"
+   },
+   {
+    "c": "728",
+    "street": "Lassen St",
+    "block": "1000",
+    "status": "exempt",
+    "row": "Lassen W 1101-1198"
+   },
+   {
+    "c": "181",
+    "street": "Lincoln St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Lincoln S 1500-1798"
+   },
+   {
+    "c": "2761",
+    "street": "Lincoln St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Lincoln S 1500-1798"
+   },
+   {
+    "c": "181",
+    "street": "Lincoln St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Lincoln N 1501-1799"
+   },
+   {
+    "c": "2761",
+    "street": "Lincoln St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Lincoln N 1501-1799"
+   },
+   {
+    "c": "2046",
+    "street": "Linden Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Linden W 2900-2998"
+   },
+   {
+    "c": "2046",
+    "street": "Linden Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Linden E 2961-2999"
+   },
+   {
+    "c": "2044",
+    "street": "Magnolia St",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Magnolia W 2960-2998"
+   },
+   {
+    "c": "2044",
+    "street": "Magnolia St",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Magnolia E 2901-2999"
+   },
+   {
+    "c": "1739",
+    "street": "McGee Ave",
+    "block": "2400",
+    "status": "enforced",
+    "row": "McGee W 2000-2898"
+   },
+   {
+    "c": "1739",
+    "street": "McGee Ave",
+    "block": "2400",
+    "status": "enforced",
+    "row": "McGee E 2001-2899"
+   },
+   {
+    "c": "1130",
+    "street": "North St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "North W 1500-1598"
+   },
+   {
+    "c": "1130",
+    "street": "North St",
+    "block": "1500",
+    "status": "exempt",
+    "row": "North E 1501-1599"
+   },
+   {
+    "c": "1111",
+    "street": "Ordway St",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Ordway E 1201-1599"
+   },
+   {
+    "c": "1161",
+    "street": "Ordway St",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Ordway E 1201-1599"
+   },
+   {
+    "c": "1111",
+    "street": "Ordway St",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Ordway E 1331-1499"
+   },
+   {
+    "c": "1161",
+    "street": "Ordway St",
+    "block": "1400",
+    "status": "exempt",
+    "row": "Ordway E 1331-1499"
+   },
+   {
+    "c": "167",
+    "street": "Peralta Ave",
+    "block": "600",
+    "status": "exempt",
+    "row": "Peralta W 601-699"
+   },
+   {
+    "c": "328",
+    "street": "Peralta Ave",
+    "block": "600",
+    "status": "exempt",
+    "row": "Peralta W 601-699"
+   },
+   {
+    "c": "167",
+    "street": "Peralta Ave",
+    "block": "600",
+    "status": "exempt",
+    "row": "Peralta E 601-699"
+   },
+   {
+    "c": "328",
+    "street": "Peralta Ave",
+    "block": "600",
+    "status": "exempt",
+    "row": "Peralta E 601-699"
+   },
+   {
+    "c": "2393",
+    "street": "Peralta Ave",
+    "block": "700",
+    "status": "exempt",
+    "row": "Peralta E 701-799"
+   },
+   {
+    "c": "2395",
+    "street": "Peralta Ave",
+    "block": "700",
+    "status": "exempt",
+    "row": "Peralta E 701-799"
+   },
+   {
+    "c": "236",
+    "street": "Piedmont Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Piedmont W 2900-2998"
+   },
+   {
+    "c": "1980",
+    "street": "Piedmont Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Piedmont W 2900-2998"
+   },
+   {
+    "c": "2052",
+    "street": "Piedmont Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Piedmont W 2900-2998"
+   },
+   {
+    "c": "236",
+    "street": "Piedmont Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Piedmont E 2901-2999"
+   },
+   {
+    "c": "1980",
+    "street": "Piedmont Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Piedmont E 2901-2999"
+   },
+   {
+    "c": "2052",
+    "street": "Piedmont Ave",
+    "block": "2900",
+    "status": "exempt",
+    "row": "Piedmont E 2901-2999"
+   },
+   {
+    "c": "882",
+    "street": "Rose St",
+    "block": "2300",
+    "status": "exempt",
+    "row": "Rose S 2300-2348"
+   },
+   {
+    "c": "882",
+    "street": "Rose St",
+    "block": "2300",
+    "status": "exempt",
+    "row": "Rose N 2301-2349"
+   },
+   {
+    "c": "73",
+    "street": "San Antonio Ave",
+    "block": "1800",
+    "status": "exempt",
+    "row": "San Antonio S 1800-1898"
+   },
+   {
+    "c": "73",
+    "street": "San Antonio Ave",
+    "block": "1800",
+    "status": "exempt",
+    "row": "San Antonio N 1801-1899"
+   },
+   {
+    "c": "794",
+    "street": "Sutter St",
+    "block": "1100",
+    "status": "exempt",
+    "row": "Sutter W 1000-1198"
+   },
+   {
+    "c": "813",
+    "street": "Sutter St",
+    "block": "1100",
+    "status": "exempt",
+    "row": "Sutter W 1000-1198"
+   },
+   {
+    "c": "794",
+    "street": "Sutter St",
+    "block": "1100",
+    "status": "exempt",
+    "row": "Sutter E 1101-1199"
+   },
+   {
+    "c": "813",
+    "street": "Sutter St",
+    "block": "1100",
+    "status": "exempt",
+    "row": "Sutter E 1101-1199"
+   },
+   {
+    "c": "136",
+    "street": "Thousand Oaks Blvd",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Thousand Oaks S 1532-2098"
+   },
+   {
+    "c": "137",
+    "street": "Thousand Oaks Blvd",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Thousand Oaks S 1532-2098"
+   },
+   {
+    "c": "139",
+    "street": "Thousand Oaks Blvd",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Thousand Oaks S 1532-2098"
+   },
+   {
+    "c": "2383",
+    "street": "Thousand Oaks Blvd",
+    "block": "1800",
+    "status": "exempt",
+    "row": "Thousand Oaks S 1532-2098"
+   },
+   {
+    "c": "2385",
+    "street": "Thousand Oaks Blvd",
+    "block": "1800",
+    "status": "exempt",
+    "row": "Thousand Oaks S 1532-2098"
+   },
+   {
+    "c": "136",
+    "street": "Thousand Oaks Blvd",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Thousand Oaks N 1531-2199"
+   },
+   {
+    "c": "137",
+    "street": "Thousand Oaks Blvd",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Thousand Oaks N 1531-2199"
+   },
+   {
+    "c": "139",
+    "street": "Thousand Oaks Blvd",
+    "block": "1500",
+    "status": "exempt",
+    "row": "Thousand Oaks N 1531-2199"
+   },
+   {
+    "c": "2383",
+    "street": "Thousand Oaks Blvd",
+    "block": "1800",
+    "status": "exempt",
+    "row": "Thousand Oaks N 1531-2199"
+   },
+   {
+    "c": "2385",
+    "street": "Thousand Oaks Blvd",
+    "block": "1800",
+    "status": "exempt",
+    "row": "Thousand Oaks N 1531-2199"
+   },
+   {
+    "c": "2191",
+    "street": "Tyler St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Tyler S 1500-1698"
+   },
+   {
+    "c": "2191",
+    "street": "Tyler St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Tyler N 1501-1699"
+   },
+   {
+    "c": "2400",
+    "street": "Vine St",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Vine S 1600-1998"
+   },
+   {
+    "c": "2755",
+    "street": "Vine St",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Vine S 1600-1998"
+   },
+   {
+    "c": "2400",
+    "street": "Vine St",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Vine N 1601-1999"
+   },
+   {
+    "c": "2755",
+    "street": "Vine St",
+    "block": "1700",
+    "status": "exempt",
+    "row": "Vine N 1601-1999"
+   },
+   {
+    "c": "2779",
+    "street": "Virginia St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Virginia S 1500-1698"
+   },
+   {
+    "c": "2779",
+    "street": "Virginia St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "Virginia N 1501-1999"
+   },
+   {
+    "c": "2888",
+    "street": "Yolo Ave",
+    "block": "1900",
+    "status": "exempt",
+    "row": "Yolo S 1900-2026"
+   },
+   {
+    "c": "2889",
+    "street": "Yolo Ave",
+    "block": "1900",
+    "status": "exempt",
+    "row": "Yolo S 1900-2026"
+   },
+   {
+    "c": "2888",
+    "street": "Yolo Ave",
+    "block": "1900",
+    "status": "exempt",
+    "row": "Yolo N 1901-1999"
+   },
+   {
+    "c": "2889",
+    "street": "Yolo Ave",
+    "block": "1900",
+    "status": "exempt",
+    "row": "Yolo N 1901-1999"
+   },
+   {
+    "c": "2888",
+    "street": "Yolo Ave",
+    "block": "1900",
+    "status": "exempt",
+    "row": "Yolo N 1901-2027"
+   },
+   {
+    "c": "2889",
+    "street": "Yolo Ave",
+    "block": "1900",
+    "status": "exempt",
+    "row": "Yolo N 1901-2027"
+   },
+   {
+    "c": "2906",
+    "street": "6th St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "6 th Street W 1400-1998"
+   },
+   {
+    "c": "2906",
+    "street": "6th St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "6 th Street E 1401-1999"
+   },
+   {
+    "c": "1633",
+    "street": "8th St",
+    "block": "2100",
+    "status": "exempt",
+    "row": "8 th Street W 2000-2498"
+   },
+   {
+    "c": "1633",
+    "street": "8th St",
+    "block": "2100",
+    "status": "exempt",
+    "row": "8 th Street E 2001-2499"
+   },
+   {
+    "c": "1363",
+    "street": "9th St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "9 th Street W 1400-1998"
+   },
+   {
+    "c": "1363",
+    "street": "9th St",
+    "block": "1600",
+    "status": "exempt",
+    "row": "9 th Street E 1401-1999"
+   }
+  ]
+ },
+ "cityStatusLayer": {
+  "note": "The Street Sweep Status layer's own status for the segments the schedule placed. Not used to place rules; the schedule wins.",
+  "placedByStatus": {
+   "enforced": 1222,
+   "exempt": 27,
+   "excluded": 16,
+   "(blank)": 11,
+   "Commercial": 7
+  },
+  "exemptButScheduled": [
+   {
+    "c": "110",
+    "s": "Thousand Oaks Blvd",
+    "n": [
+     1721,
+     1770
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "112",
+    "s": "Thousand Oaks Blvd",
+    "n": [
+     1770,
+     1799
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "122",
+    "s": "Thousand Oaks Blvd",
+    "n": [
+     1669,
+     1699
+    ],
+    "optInStage": "4"
+   },
+   {
+    "c": "140",
+    "s": "Thousand Oaks Blvd",
+    "n": [
+     1600,
+     1667
+    ],
+    "optInStage": "4"
+   },
+   {
+    "c": "165",
+    "s": "Santa Rosa Ave",
+    "n": [
+     631,
+     660
+    ],
+    "optInStage": "4"
+   },
+   {
+    "c": "321",
+    "s": "Santa Rosa Ave",
+    "n": [
+     660,
+     699
+    ],
+    "optInStage": "4"
+   },
+   {
+    "c": "1110",
+    "s": "Buena Ave",
+    "n": [
+     1600,
+     1699
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "1125",
+    "s": "Buena Ave",
+    "n": [
+     1527,
+     1599
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "1129",
+    "s": "Jaynes St",
+    "n": [
+     1714,
+     1799
+    ],
+    "optInStage": "3"
+   },
+   {
+    "c": "1136",
+    "s": "Jaynes St",
+    "n": [
+     1700,
+     1712
+    ],
+    "optInStage": "3"
+   },
+   {
+    "c": "1247",
+    "s": "Virginia St",
+    "n": [
+     1822,
+     1899
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "1308",
+    "s": "Virginia Gardens",
+    "n": [
+     1,
+     99
+    ],
+    "optInStage": "2"
+   },
+   {
+    "c": "1929",
+    "s": "Russell St",
+    "n": [
+     2821,
+     2899
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "1933",
+    "s": "Russell St",
+    "n": [
+     2800,
+     2820
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2053",
+    "s": "El Camino Real",
+    "n": [
+     1,
+     74
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2082",
+    "s": "Oakvale Ave",
+    "n": [
+     10,
+     99
+    ],
+    "optInStage": "2"
+   },
+   {
+    "c": "2187",
+    "s": "El Camino Real",
+    "n": [
+     75,
+     109
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2205",
+    "s": "Hillcrest Rd",
+    "n": [
+     122,
+     129
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2216",
+    "s": "Hillcrest Rd",
+    "n": [
+     100,
+     121
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2217",
+    "s": "Roble Rd",
+    "n": [
+     1,
+     98
+    ],
+    "optInStage": "3"
+   },
+   {
+    "c": "2223",
+    "s": "Roble Ct",
+    "n": [
+     1,
+     98
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2224",
+    "s": "Hillcrest Rd",
+    "n": [
+     1,
+     49
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2230",
+    "s": "Hillcrest Rd",
+    "n": [
+     150,
+     249
+    ],
+    "optInStage": "2"
+   },
+   {
+    "c": "2388",
+    "s": "Santa Rosa Ave",
+    "n": [
+     600,
+     629
+    ],
+    "optInStage": "4"
+   },
+   {
+    "c": "2544",
+    "s": "Oakvale Ave",
+    "n": [
+     1,
+     9
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2552",
+    "s": "Hillcrest Rd",
+    "n": [
+     50,
+     99
+    ],
+    "optInStage": null
+   },
+   {
+    "c": "2569",
+    "s": "Regent St",
+    "n": [
+     2900,
+     2949
+    ],
+    "optInStage": "2"
+   }
+  ],
+  "enforcedWithoutScheduleRow": 99,
+  "enforcedWithoutScheduleRowExamples": [
+   {
+    "c": "68",
+    "s": "San Antonio Ave",
+    "n": [
+     1900,
+     1917
+    ]
+   },
+   {
+    "c": "123",
+    "s": "Vincente Ave",
+    "n": [
+     500,
+     599
+    ]
+   },
+   {
+    "c": "164",
+    "s": "El Paseo Path",
+    "n": null
+   },
+   {
+    "c": "176",
+    "s": "Highland Pl",
+    "n": [
+     1700,
+     1798
+    ]
+   },
+   {
+    "c": "212",
+    "s": "South St",
+    "n": null
+   },
+   {
+    "c": "268",
+    "s": "Essex St",
+    "n": [
+     1900,
+     1999
+    ]
+   },
+   {
+    "c": "302",
+    "s": "El Paseo Path",
+    "n": null
+   },
+   {
+    "c": "404",
+    "s": "Talbot Ave",
+    "n": null
+   },
+   {
+    "c": "443",
+    "s": "Court St",
+    "n": null
+   },
+   {
+    "c": "470",
+    "s": "Warring St",
+    "n": null
+   },
+   {
+    "c": "479",
+    "s": "Warring St",
+    "n": null
+   },
+   {
+    "c": "534",
+    "s": "Ensenada Ave",
+    "n": [
+     800,
+     825
+    ]
+   },
+   {
+    "c": "601",
+    "s": "Grizzly Peak Blvd",
+    "n": null
+   },
+   {
+    "c": "641",
+    "s": "Arlington Ave",
+    "n": [
+     980,
+     999
+    ]
+   },
+   {
+    "c": "823",
+    "s": "Josephine St",
+    "n": [
+     1100,
+     1179
+    ]
+   },
+   {
+    "c": "837",
+    "s": "Josephine St",
+    "n": [
+     1180,
+     1199
+    ]
+   },
+   {
+    "c": "956",
+    "s": "Hopkins Ct",
+    "n": [
+     1,
+     39
+    ]
+   },
+   {
+    "c": "1002",
+    "s": "California St",
+    "n": [
+     1300,
+     1320
+    ]
+   },
+   {
+    "c": "1022",
+    "s": "Vine St",
+    "n": [
+     2225,
+     2299
+    ]
+   },
+   {
+    "c": "1024",
+    "s": "Neilson St",
+    "n": [
+     1300,
+     1399
+    ]
+   },
+   {
+    "c": "1025",
+    "s": "Vine St",
+    "n": [
+     2200,
+     2223
+    ]
+   },
+   {
+    "c": "1047",
+    "s": "Rose St",
+    "n": null
+   },
+   {
+    "c": "1068",
+    "s": "Rose St",
+    "n": null
+   },
+   {
+    "c": "1072",
+    "s": "Camelia St",
+    "n": null
+   },
+   {
+    "c": "1355",
+    "s": "West St",
+    "n": [
+     1700,
+     1749
+    ]
+   },
+   {
+    "c": "1374",
+    "s": "California St",
+    "n": [
+     1800,
+     1899
+    ]
+   },
+   {
+    "c": "1391",
+    "s": "West St",
+    "n": [
+     1750,
+     1799
+    ]
+   },
+   {
+    "c": "1433",
+    "s": "West St",
+    "n": [
+     1900,
+     1949
+    ]
+   },
+   {
+    "c": "1457",
+    "s": "West St",
+    "n": [
+     1950,
+     1999
+    ]
+   },
+   {
+    "c": "1545",
+    "s": "Piedmont Ave",
+    "n": null
+   },
+   {
+    "c": "1551",
+    "s": "Piedmont Ave",
+    "n": null
+   },
+   {
+    "c": "1558",
+    "s": "Piedmont Ave",
+    "n": null
+   },
+   {
+    "c": "1562",
+    "s": "Piedmont Ave",
+    "n": null
+   },
+   {
+    "c": "1563",
+    "s": "Piedmont Ave",
+    "n": null
+   },
+   {
+    "c": "1564",
+    "s": "West St",
+    "n": [
+     2100,
+     2199
+    ]
+   },
+   {
+    "c": "1584",
+    "s": "Hillside Ave",
+    "n": null
+   },
+   {
+    "c": "1647",
+    "s": "Dwight Way",
+    "n": [
+     2921,
+     3099
+    ]
+   },
+   {
+    "c": "1652",
+    "s": "Dwight Way",
+    "n": [
+     2921,
+     3099
+    ]
+   },
+   {
+    "c": "1661",
+    "s": "Piedmont Crescent",
+    "n": [
+     2425,
+     2499
+    ]
+   },
+   {
+    "c": "1682",
+    "s": "Piedmont Crescent",
+    "n": [
+     2500,
+     2550
+    ]
+   }
+  ]
+ },
+ "crossCheck": "None: the City of Berkeley publishes no parking citation data (open data portal checked 2026-10-18)."
+}

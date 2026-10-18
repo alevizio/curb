@@ -1,0 +1,628 @@
+{
+ "generated": "2026-10-18T19:18:06.695Z",
+ "verdict": "not shipped: the 2014 table is no longer what the signs say (see ticketCheck)",
+ "shipRule": "segments.json is written only when at least 90% of the 2025 street cleaning tickets land where the table sweeps that day and hour, both on the street and side (from the house number) and on the block side",
+ "inputs": {
+  "scheduleRows": 946,
+  "centerlineSegments": 2627,
+  "addresses": 20874,
+  "tickets2025": 20059
+ },
+ "schedule": {
+  "rowsPlaced": 807,
+  "rowsSkipped": 139,
+  "blocks": 1349,
+  "sides": 2658,
+  "rules": 2683,
+  "blockSidesUnclear": 211,
+  "written": false,
+  "season": "April 1 to December 31 (months mask 4088)",
+  "windows": [
+   "7AM-10AM",
+   "7am-10am",
+   "8AM-2PM"
+  ]
+ },
+ "skipped": [
+  {
+   "why": "side letter runs along the street",
+   "count": 68,
+   "examples": [
+    {
+     "street": "Aberdeen Ave",
+     "side": "N",
+     "from": "Mt Auburn St",
+     "to": "Huron Ave",
+     "days": "4th Wednesday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Aberdeen Ave",
+     "side": "S",
+     "from": "Mt Auburn St",
+     "to": "Huron Ave",
+     "days": "4th Tuesday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Acadia St",
+     "side": "W",
+     "from": "Ash St",
+     "to": "Hawthorne St",
+     "days": "3rd Monday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Akron St",
+     "side": "E",
+     "from": "Banks St",
+     "to": "Memorial Dr",
+     "days": "2nd Friday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Akron St",
+     "side": "w",
+     "from": "Banks St",
+     "to": "Memorial Dr",
+     "days": "2nd Thursday",
+     "hours": "8AM-2PM"
+    }
+   ]
+  },
+  {
+   "why": "same side listed twice with different days",
+   "count": 12,
+   "examples": [
+    {
+     "street": "Allen St",
+     "side": "N",
+     "from": "Orchard St",
+     "to": "Mass Ave",
+     "days": "3rd Wednesday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Allen St",
+     "side": "N",
+     "from": "Orchard St",
+     "to": "Mass Ave",
+     "days": "3rd Thursday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Callender St",
+     "side": "E",
+     "from": "Putnam Ave",
+     "to": "Howard St",
+     "days": "2nd Friday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Callender St",
+     "side": "E",
+     "from": "Putnam Ave",
+     "to": "Howard St",
+     "days": "2nd Thursday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Concord Ave",
+     "side": "W",
+     "from": "Huron Ave",
+     "to": "Garden St",
+     "days": "4th Wednesday",
+     "hours": "8AM-2PM"
+    }
+   ]
+  },
+  {
+   "why": "cross street not found on the street",
+   "count": 48,
+   "examples": [
+    {
+     "street": "Bellis Circle",
+     "side": "N",
+     "from": "Walden St",
+     "to": "Walden St",
+     "days": "3rd Friday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Bellis Circle",
+     "side": "S",
+     "from": "Walden St",
+     "to": "Walden St",
+     "days": "3rd Monday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Bristol St",
+     "side": "N",
+     "from": "Hampshire St",
+     "to": "Portland St",
+     "days": "1st Wednesday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Bristol St",
+     "side": "S",
+     "from": "Hampshire St",
+     "to": "Portland St",
+     "days": "1st Thursday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Chetwynd Rd",
+     "side": "N",
+     "from": "Newman St",
+     "to": "Dead End",
+     "days": "3rd Friday",
+     "hours": "8AM-2PM"
+    }
+   ]
+  },
+  {
+   "why": "no cross streets",
+   "count": 3,
+   "examples": [
+    {
+     "street": "Eliot St",
+     "side": "N",
+     "from": "None",
+     "to": "None",
+     "days": "4th Friday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Eliot St",
+     "side": "S",
+     "from": "None",
+     "to": "None",
+     "days": "4th Thursday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Elmer St",
+     "side": "W",
+     "days": "2nd Thursday",
+     "hours": "8AM-2PM"
+    }
+   ]
+  },
+  {
+   "why": "no walk between the cross streets",
+   "count": 5,
+   "examples": [
+    {
+     "street": "Fairoaks St",
+     "side": "S",
+     "from": "26'W of Cameron Ave",
+     "to": "200'W of Cameron Ave",
+     "days": "3rd Thursday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Lawn St",
+     "side": "N",
+     "from": "Cushing St",
+     "to": "St Sauver Ct",
+     "days": "4th Tuesday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Lawn St",
+     "side": "S",
+     "from": "Cushing St",
+     "to": "St Sauver Ct",
+     "days": "4th Wednesday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Tierney St",
+     "side": "E",
+     "from": "Orrin St",
+     "to": "Huron Ave",
+     "days": "4th Wednesday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Tierney St",
+     "side": "W",
+     "from": "Orrin St",
+     "to": "Huron Ave",
+     "days": "4th Tuesday",
+     "hours": "8AM-2PM"
+    }
+   ]
+  },
+  {
+   "why": "street not on the centerline",
+   "count": 2,
+   "examples": [
+    {
+     "street": "Little Mass Ave",
+     "side": "E",
+     "from": "Mass Ave",
+     "to": "Waterhouse",
+     "days": "3rd Friday",
+     "hours": "8AM-2PM"
+    },
+    {
+     "street": "Little Mass Ave",
+     "side": "W",
+     "from": "Mass Ave",
+     "to": "Waterhouse",
+     "days": "3rd Monday",
+     "hours": "8AM-2PM"
+    }
+   ]
+  },
+  {
+   "why": "no day or hours",
+   "count": 1,
+   "examples": [
+    {
+     "street": "South St",
+     "side": "S",
+     "from": "JFK St",
+     "to": "Dunster St",
+     "days": "None",
+     "hours": "8AM-2PM"
+    }
+   ]
+  }
+ ],
+ "ticketCheck": {
+  "what": "2025 street cleaning tickets (violation S1) against the 2014 table: is the ticket on a street, a street side and a block side the table sweeps on that weekday of that week, at that hour? The side comes from the house number: odd or even, and the letter in the table (N, S, E or W) that holds those numbers on that street, as the placed rows show it.",
+  "tickets": 20059,
+  "corner": 4866,
+  "makeUpDay": 543,
+  "streetLevel": {
+   "tickets": 14650,
+   "streetNotInTable": 1039,
+   "match": 11410
+  },
+  "sideLevel": {
+   "tickets": 12398,
+   "match": 8027,
+   "sideUnclear": 1604
+  },
+  "blockLevel": {
+   "tickets": 14002,
+   "match": 7456,
+   "dayNotHour": 11,
+   "otherSide": 1257,
+   "sideNotThatDay": 1667,
+   "blockNotInTable": 3611
+  },
+  "notPlaced": 648,
+  "shares": {
+   "street": 0.779,
+   "streetAndSide": 0.647,
+   "blockSide": 0.532
+  },
+  "notes": "corner = written at an intersection, side unknown; makeUpDay = written on a 5th weekday of a month (days 29 to 31), when no regular sweep is scheduled: the City moves holiday sweeps there; notPlaced = the house number is in no centerline address range (counted at street level only); blockLevel: dayNotHour = that side is swept that day but the ticket time is outside the window, otherSide = the other side of the block is swept then, sideNotThatDay = the side is in the table for another day, blockNotInTable = no row of the table reaches that block (a street or a stretch the 2014 table does not list, or a row this build could not place)",
+  "byDistrict": {
+   "?": {
+    "tickets": 786,
+    "sideTickets": 681,
+    "streetSide": 328,
+    "block": 300,
+    "streetSideShare": 0.482,
+    "blockShare": 0.382
+   },
+   "A": {
+    "tickets": 2038,
+    "sideTickets": 1840,
+    "streetSide": 1411,
+    "block": 1161,
+    "streetSideShare": 0.767,
+    "blockShare": 0.57
+   },
+   "B": {
+    "tickets": 1332,
+    "sideTickets": 1267,
+    "streetSide": 749,
+    "block": 752,
+    "streetSideShare": 0.591,
+    "blockShare": 0.565
+   },
+   "C": {
+    "tickets": 1484,
+    "sideTickets": 1358,
+    "streetSide": 495,
+    "block": 492,
+    "streetSideShare": 0.365,
+    "blockShare": 0.332
+   },
+   "D": {
+    "tickets": 1390,
+    "sideTickets": 1388,
+    "streetSide": 1152,
+    "block": 1089,
+    "streetSideShare": 0.83,
+    "blockShare": 0.783
+   },
+   "E": {
+    "tickets": 1085,
+    "sideTickets": 654,
+    "streetSide": 597,
+    "block": 579,
+    "streetSideShare": 0.913,
+    "blockShare": 0.534
+   },
+   "F": {
+    "tickets": 1060,
+    "sideTickets": 1027,
+    "streetSide": 898,
+    "block": 825,
+    "streetSideShare": 0.874,
+    "blockShare": 0.778
+   },
+   "G": {
+    "tickets": 1427,
+    "sideTickets": 1228,
+    "streetSide": 889,
+    "block": 907,
+    "streetSideShare": 0.724,
+    "blockShare": 0.636
+   },
+   "H": {
+    "tickets": 1313,
+    "sideTickets": 1196,
+    "streetSide": 472,
+    "block": 462,
+    "streetSideShare": 0.395,
+    "blockShare": 0.352
+   },
+   "J": {
+    "tickets": 1319,
+    "sideTickets": 1065,
+    "streetSide": 669,
+    "block": 540,
+    "streetSideShare": 0.628,
+    "blockShare": 0.409
+   },
+   "K": {
+    "tickets": 768,
+    "sideTickets": 694,
+    "streetSide": 367,
+    "block": 349,
+    "streetSideShare": 0.529,
+    "blockShare": 0.454
+   }
+  }
+ },
+ "districtPattern": {
+  "what": "The day the 2025 tickets show for each street cleaning district (from the Master Addresses List) and side parity: the most common weekday and week among the placed tickets, its ticket count and the share on that day.",
+  "pattern": {
+   "A": {
+    "even": {
+     "day": "1st Thu",
+     "nth": 1,
+     "dow": 4,
+     "tickets": 779,
+     "share": 0.919
+    },
+    "odd": {
+     "day": "1st Wed",
+     "nth": 1,
+     "dow": 3,
+     "tickets": 1259,
+     "share": 0.969
+    }
+   },
+   "B": {
+    "even": {
+     "day": "1st Tue",
+     "nth": 1,
+     "dow": 2,
+     "tickets": 655,
+     "share": 0.969
+    },
+    "odd": {
+     "day": "1st Mon",
+     "nth": 1,
+     "dow": 1,
+     "tickets": 677,
+     "share": 0.972
+    }
+   },
+   "C": {
+    "even": {
+     "day": "2nd Mon",
+     "nth": 2,
+     "dow": 1,
+     "tickets": 728,
+     "share": 0.973
+    },
+    "odd": {
+     "day": "1st Fri",
+     "nth": 1,
+     "dow": 5,
+     "tickets": 756,
+     "share": 0.983
+    }
+   },
+   "D": {
+    "odd": {
+     "day": "2nd Tue",
+     "nth": 2,
+     "dow": 2,
+     "tickets": 829,
+     "share": 0.902
+    },
+    "even": {
+     "day": "2nd Wed",
+     "nth": 2,
+     "dow": 3,
+     "tickets": 561,
+     "share": 0.963
+    }
+   },
+   "E": {
+    "odd": {
+     "day": "2nd Thu",
+     "nth": 2,
+     "dow": 4,
+     "tickets": 607,
+     "share": 0.988
+    },
+    "even": {
+     "day": "2nd Fri",
+     "nth": 2,
+     "dow": 5,
+     "tickets": 478,
+     "share": 0.948
+    }
+   },
+   "F": {
+    "odd": {
+     "day": "3rd Mon",
+     "nth": 3,
+     "dow": 1,
+     "tickets": 624,
+     "share": 0.938
+    },
+    "even": {
+     "day": "3rd Tue",
+     "nth": 3,
+     "dow": 2,
+     "tickets": 436,
+     "share": 0.938
+    }
+   },
+   "G": {
+    "odd": {
+     "day": "3rd Wed",
+     "nth": 3,
+     "dow": 3,
+     "tickets": 862,
+     "share": 0.983
+    },
+    "even": {
+     "day": "3rd Thu",
+     "nth": 3,
+     "dow": 4,
+     "tickets": 565,
+     "share": 0.959
+    }
+   },
+   "H": {
+    "even": {
+     "day": "4th Mon",
+     "nth": 4,
+     "dow": 1,
+     "tickets": 522,
+     "share": 0.944
+    },
+    "odd": {
+     "day": "3rd Fri",
+     "nth": 3,
+     "dow": 5,
+     "tickets": 791,
+     "share": 0.917
+    }
+   },
+   "J": {
+    "odd": {
+     "day": "4th Tue",
+     "nth": 4,
+     "dow": 2,
+     "tickets": 641,
+     "share": 0.949
+    },
+    "even": {
+     "day": "4th Wed",
+     "nth": 4,
+     "dow": 3,
+     "tickets": 678,
+     "share": 0.857
+    }
+   },
+   "K": {
+    "odd": {
+     "day": "4th Thu",
+     "nth": 4,
+     "dow": 4,
+     "tickets": 427,
+     "share": 0.864
+    },
+    "even": {
+     "day": "4th Fri",
+     "nth": 4,
+     "dow": 5,
+     "tickets": 341,
+     "share": 0.915
+    }
+   }
+  },
+  "ticketsOnTheirDistrictDay": 12492,
+  "ticketsWithADistrict": 13216,
+  "share": 0.945,
+  "spotCheck": "By hand on 2026-10-18, not part of the build: the City's reminder tool (ReCollect) for one address in each of the 10 districts gives the same odd side and even side days as this pattern, for 2025 and 2026 (10 of 10).",
+  "tableVsPattern": {
+   "rows": 2079,
+   "agree": 1467,
+   "differ": 612,
+   "byDistrict": {
+    "K": {
+     "blockSides": 122,
+     "differ": 15
+    },
+    "C": {
+     "blockSides": 252,
+     "differ": 135
+    },
+    "H": {
+     "blockSides": 241,
+     "differ": 144
+    },
+    "J": {
+     "blockSides": 214,
+     "differ": 71
+    },
+    "B": {
+     "blockSides": 252,
+     "differ": 103
+    },
+    "D": {
+     "blockSides": 159,
+     "differ": 38
+    },
+    "E": {
+     "blockSides": 143,
+     "differ": 4
+    },
+    "G": {
+     "blockSides": 275,
+     "differ": 61
+    },
+    "A": {
+     "blockSides": 267,
+     "differ": 20
+    },
+    "F": {
+     "blockSides": 154,
+     "differ": 21
+    }
+   }
+  }
+ },
+ "holidays": {
+  "rule": "all",
+  "makeUpDays": {
+   "2026-04-20": "Patriots' Day → 2026-04-29",
+   "2026-05-25": "Memorial Day → 2026-05-29",
+   "2026-06-19": "Juneteenth → 2026-06-29",
+   "2026-07-03": "Independence Day (observed) → 2026-06-30",
+   "2026-09-07": "Labor Day → 2026-08-31",
+   "2026-10-12": "Indigenous Peoples' Day → 2026-09-29",
+   "2026-11-11": "Veterans Day → 2026-10-29",
+   "2026-11-26": "Thanksgiving Day → 2026-11-30",
+   "2026-12-25": "Christmas Day → 2026-12-29"
+  },
+  "note": "A sweep on a City holiday moves to a make-up day (a 5th weekday). CURB does not model make-up days yet: the holiday shows as no sweep."
+ }
+}

@@ -1,0 +1,5372 @@
+{
+ "generated": "2026-10-18T18:49:45.554Z",
+ "season": "All year. 502 blocks have a side swept only in odd or even months (monthsMask 1365 or 2730). A City holiday skips the sweep (\"swept on the next assigned sweeping day\", sandiego.gov); no make-up day.",
+ "scheduleUpdated": "May 5, 2026",
+ "input": {
+  "rows": 28141,
+  "segments": 28100,
+  "posted": 3367,
+  "notPosted": 24774,
+  "distinctPostedSchedules": 217,
+  "notPostedByKind": {
+   "Not Posted": 24574,
+   "Not Posted (8am - 11am)": 1,
+   "Not Posted (8am - 10am)": 1,
+   "NS 1st Thu": 1,
+   "Odd Month 4th Fri": 75,
+   "UNFUNDED": 122
+  }
+ },
+ "output": {
+  "blocks": 3363,
+  "sides": 6612,
+  "rules": 7799,
+  "oneSideOnly": 114,
+  "everyWeek": 1388,
+  "oddOrEvenMonths": 502,
+  "overnight": 892
+ },
+ "skipped": {
+  "notPosted": 24774,
+  "unreadable": [
+   {
+    "c": "SS-013642",
+    "s": "HOLLISTER ST",
+    "why": "no day for W",
+    "schedule": "Posted (12am-3am), WS, Not Posted, ES"
+   },
+   {
+    "c": "SS-013656",
+    "s": "HOLLISTER ST",
+    "why": "no day for W",
+    "schedule": "Posted (12am-3am), WS, Not Posted, ES"
+   },
+   {
+    "c": "SS-000380",
+    "s": "14TH ST",
+    "why": "unknown word \"RED\"; unknown word \"CURB\"; no hours for E; no hours for W",
+    "schedule": "Red Curb ES Mon & Thu, WS Tue & Fri"
+   },
+   {
+    "c": "SS-000403",
+    "s": "15TH ST",
+    "why": "unknown word \"RED\"; unknown word \"CURB\"; no hours for E; no hours for W",
+    "schedule": "Red Curb ES Mon & Thu, WS Tue & Fri"
+   }
+  ],
+  "partlyRead": []
+ },
+ "oddSide": {
+  "method": "SANDAG address points of the City (ADDRJUR SD) on each posted block's street, inside its number range and within 60 m of the line: the side holding the odd numbers when 4 or more points agree 80%; else the City's L/R address ranges.",
+  "addressPoints": 461598,
+  "pointsOnPostedBlocks": 58722,
+  "agreeWithRanges": 2550,
+  "rangesFixed": 8,
+  "fixedBlocks": [
+   {
+    "c": "SS-029125",
+    "s": "WYSTONE DR",
+    "l": "WYCONDA LN - MAGNUS WY",
+    "points": 10
+   },
+   {
+    "c": "SS-029117",
+    "s": "WYCONDA WY",
+    "l": "WYCONDA LN - MAGNUS WY",
+    "points": 13
+   },
+   {
+    "c": "SS-022992",
+    "s": "REGINA AV",
+    "l": "BEGIN - LIMERICK AV",
+    "points": 5
+   },
+   {
+    "c": "SS-010360",
+    "s": "ENELRA PL",
+    "l": "ARLENE PL - END",
+    "points": 10
+   },
+   {
+    "c": "SS-027375",
+    "s": "VALLECITOS",
+    "l": "CAM DEL ORO - AVNDA DE LA RIBERA",
+    "points": 70
+   },
+   {
+    "c": "SS-023715",
+    "s": "RUE DE ROARK",
+    "l": "RUE DENISE - END",
+    "points": 6
+   },
+   {
+    "c": "SS-000600",
+    "s": "28TH ST",
+    "l": "B ST - A ST",
+    "points": 27
+   },
+   {
+    "c": "SS-002645",
+    "s": "ARDATH CT",
+    "l": "TORREY PINES LN - END",
+    "points": 10
+   }
+  ],
+  "rangesOnly": 795,
+  "unclear": 10
+ },
+ "sidePlacement": {
+  "method": "Each named side (NS, SS, ES, WS, NS/WS, SES, …) goes on the side of the line whose outward normal is closest to that compass direction, length weighted. When the direction runs within ~20° of the street (conf < 0.35), the City's word is ambiguous: the side is the one the block's street sweeping tickets of the past year carry (house number parity, on dates only that rule sweeps; 5 tickets and 80% to decide), else the same street's with the same schedule text, else the compass guess stays. \"Every Tues & Wed\" names no side: split by the tickets the same way (each day on the side its tickets are on), else both sides both days.",
+  "ambiguous": 362,
+  "confirmedByTickets": 146,
+  "movedByTickets": 136,
+  "compassGuess": 80,
+  "splitByTickets": 64,
+  "bothSidesNotSettled": 58,
+  "notes": [
+   {
+    "c": "SS-026019",
+    "s": "SWIFT AV",
+    "schedule": "Posted (8am - 11am), SS Mon, NS Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-026019",
+    "s": "SWIFT AV",
+    "schedule": "Posted (8am - 11am), SS Mon, NS Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-013571",
+    "s": "HILLSBORO ST",
+    "schedule": "Posted (7am - 11am), Even Month 1st Tue (NS/WS), Odd Month 1st Tue (SS/ES)",
+    "kind": "compass guess",
+    "dir": "NW",
+    "conf": 0.28
+   },
+   {
+    "c": "SS-013571",
+    "s": "HILLSBORO ST",
+    "schedule": "Posted (7am - 11am), Even Month 1st Tue (NS/WS), Odd Month 1st Tue (SS/ES)",
+    "kind": "compass guess",
+    "dir": "SE",
+    "conf": 0.28
+   },
+   {
+    "c": "SS-009958",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009959",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009960",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009961",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009962",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009963",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009964",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009965",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-009967",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009968",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-009969",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009970",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-009972",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009973",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-009975",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009976",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009977",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009978",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009979",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009980",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009981",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009982",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009983",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009984",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009985",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009986",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009987",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009988",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009989",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-027115",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027118",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027119",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027120",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027121",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027169",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027171",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027173",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027221",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-009957",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009773",
+    "s": "EAST MTN VIEW DR",
+    "schedule": "Posted (10am-1pm) WS 3rd Mon, ES 3rd Wed",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.19,
+    "from": "block"
+   },
+   {
+    "c": "SS-009773",
+    "s": "EAST MTN VIEW DR",
+    "schedule": "Posted (10am-1pm) WS 3rd Mon, ES 3rd Wed",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.19,
+    "from": "block"
+   },
+   {
+    "c": "SS-009210",
+    "s": "DIANE PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.23
+   },
+   {
+    "c": "SS-009210",
+    "s": "DIANE PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.23
+   },
+   {
+    "c": "SS-009209",
+    "s": "DIANE CT",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.26
+   },
+   {
+    "c": "SS-009209",
+    "s": "DIANE CT",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.26
+   },
+   {
+    "c": "SS-014505",
+    "s": "JAMESTOWN WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-014505",
+    "s": "JAMESTOWN WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-008261",
+    "s": "CRISP WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.03,
+    "from": "street"
+   },
+   {
+    "c": "SS-008261",
+    "s": "CRISP WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.03,
+    "from": "street"
+   },
+   {
+    "c": "SS-014499",
+    "s": "JAMESTOWN CT",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.14
+   },
+   {
+    "c": "SS-014499",
+    "s": "JAMESTOWN CT",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.14
+   },
+   {
+    "c": "SS-008262",
+    "s": "CRISP WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.24,
+    "from": "street"
+   },
+   {
+    "c": "SS-008262",
+    "s": "CRISP WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.24,
+    "from": "street"
+   },
+   {
+    "c": "SS-007471",
+    "s": "COBB DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.1
+   },
+   {
+    "c": "SS-007471",
+    "s": "COBB DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.1
+   },
+   {
+    "c": "SS-014502",
+    "s": "JAMESTOWN RD",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-014502",
+    "s": "JAMESTOWN RD",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-014503",
+    "s": "JAMESTOWN RD",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0
+   },
+   {
+    "c": "SS-014503",
+    "s": "JAMESTOWN RD",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0
+   },
+   {
+    "c": "SS-021725",
+    "s": "PEYTON PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-021725",
+    "s": "PEYTON PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-021726",
+    "s": "PEYTON PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-021726",
+    "s": "PEYTON PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003663",
+    "s": "BAXTER CT",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.19
+   },
+   {
+    "c": "SS-003663",
+    "s": "BAXTER CT",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.19
+   },
+   {
+    "c": "SS-007958",
+    "s": "CORK PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-007958",
+    "s": "CORK PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-007959",
+    "s": "CORK PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.11
+   },
+   {
+    "c": "SS-007959",
+    "s": "CORK PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.11
+   },
+   {
+    "c": "SS-029007",
+    "s": "WINTHROP ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-029007",
+    "s": "WINTHROP ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-029008",
+    "s": "WINTHROP ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-029008",
+    "s": "WINTHROP ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-029009",
+    "s": "WINTHROP ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0,
+    "from": "street"
+   },
+   {
+    "c": "SS-029009",
+    "s": "WINTHROP ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0,
+    "from": "street"
+   },
+   {
+    "c": "SS-002740",
+    "s": "ARLENE ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.22,
+    "from": "street"
+   },
+   {
+    "c": "SS-002740",
+    "s": "ARLENE ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.22,
+    "from": "street"
+   },
+   {
+    "c": "SS-002737",
+    "s": "ARLENE PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.19,
+    "from": "block"
+   },
+   {
+    "c": "SS-002737",
+    "s": "ARLENE PL",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.19,
+    "from": "block"
+   },
+   {
+    "c": "SS-011153",
+    "s": "FIRESTONE ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.27,
+    "from": "block"
+   },
+   {
+    "c": "SS-011153",
+    "s": "FIRESTONE ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.27,
+    "from": "block"
+   },
+   {
+    "c": "SS-002741",
+    "s": "ARLENE ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-002741",
+    "s": "ARLENE ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-016266",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-016266",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-016267",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-016267",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-016268",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-016268",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-016269",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-016269",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-016270",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.22,
+    "from": "block"
+   },
+   {
+    "c": "SS-016270",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.22,
+    "from": "block"
+   },
+   {
+    "c": "SS-016271",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.19,
+    "from": "block"
+   },
+   {
+    "c": "SS-016271",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.19,
+    "from": "block"
+   },
+   {
+    "c": "SS-016273",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.06,
+    "from": "block"
+   },
+   {
+    "c": "SS-016273",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.06,
+    "from": "block"
+   },
+   {
+    "c": "SS-016274",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.04,
+    "from": "block"
+   },
+   {
+    "c": "SS-016274",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.04,
+    "from": "block"
+   },
+   {
+    "c": "SS-016275",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0,
+    "from": "street"
+   },
+   {
+    "c": "SS-016275",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0,
+    "from": "street"
+   },
+   {
+    "c": "SS-016276",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.27,
+    "from": "street"
+   },
+   {
+    "c": "SS-016276",
+    "s": "LEHRER DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.27,
+    "from": "street"
+   },
+   {
+    "c": "SS-001618",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-001618",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-001619",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.22,
+    "from": "block"
+   },
+   {
+    "c": "SS-001619",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.22,
+    "from": "block"
+   },
+   {
+    "c": "SS-001620",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.12,
+    "from": "street"
+   },
+   {
+    "c": "SS-001620",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.12,
+    "from": "street"
+   },
+   {
+    "c": "SS-001621",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-001621",
+    "s": "ABERDEEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-002556",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-002556",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-002557",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-002557",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-002558",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.03,
+    "from": "block"
+   },
+   {
+    "c": "SS-002558",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.03,
+    "from": "block"
+   },
+   {
+    "c": "SS-002560",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.04,
+    "from": "block"
+   },
+   {
+    "c": "SS-002560",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.04,
+    "from": "block"
+   },
+   {
+    "c": "SS-002561",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-002561",
+    "s": "APPLETON ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-007812",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.3,
+    "from": "block"
+   },
+   {
+    "c": "SS-007812",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.3,
+    "from": "block"
+   },
+   {
+    "c": "SS-030192",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.07
+   },
+   {
+    "c": "SS-030192",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.07
+   },
+   {
+    "c": "SS-030193",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-030193",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-030194",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-030194",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-030195",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-030195",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-030196",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.04,
+    "from": "block"
+   },
+   {
+    "c": "SS-030196",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.04,
+    "from": "block"
+   },
+   {
+    "c": "SS-007813",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0
+   },
+   {
+    "c": "SS-007813",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0
+   },
+   {
+    "c": "SS-007814",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-007814",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-007815",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-007815",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-007826",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-007826",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-007827",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0
+   },
+   {
+    "c": "SS-007827",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0
+   },
+   {
+    "c": "SS-007829",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-007829",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-007830",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-007830",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003625",
+    "s": "BARSTOW ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003625",
+    "s": "BARSTOW ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003626",
+    "s": "BARSTOW ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003626",
+    "s": "BARSTOW ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003627",
+    "s": "BARSTOW ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003627",
+    "s": "BARSTOW ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-008263",
+    "s": "CRISP WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.1,
+    "from": "block"
+   },
+   {
+    "c": "SS-008263",
+    "s": "CRISP WY",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.1,
+    "from": "block"
+   },
+   {
+    "c": "SS-007472",
+    "s": "COBB DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.05,
+    "from": "block"
+   },
+   {
+    "c": "SS-007472",
+    "s": "COBB DR",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.05,
+    "from": "block"
+   },
+   {
+    "c": "SS-020153",
+    "s": "NORWICH ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-020153",
+    "s": "NORWICH ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-007831",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.07,
+    "from": "block"
+   },
+   {
+    "c": "SS-007831",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.07,
+    "from": "block"
+   },
+   {
+    "c": "SS-030197",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-030197",
+    "s": "CONRAD AV",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-004018",
+    "s": "BERGEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-004018",
+    "s": "BERGEN ST",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0.01,
+    "from": "block"
+   },
+   {
+    "c": "SS-003158",
+    "s": "AVNDA DE LAS ONDAS",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.17
+   },
+   {
+    "c": "SS-003158",
+    "s": "AVNDA DE LAS ONDAS",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.17
+   },
+   {
+    "c": "SS-003159",
+    "s": "AVNDA DE LAS ONDAS",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.32
+   },
+   {
+    "c": "SS-003159",
+    "s": "AVNDA DE LAS ONDAS",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.32
+   },
+   {
+    "c": "SS-028648",
+    "s": "WESTWAY DR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-028648",
+    "s": "WESTWAY DR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-009010",
+    "s": "DEL ORO CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-009010",
+    "s": "DEL ORO CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.01
+   },
+   {
+    "c": "SS-005515",
+    "s": "CALLE DEL CIELO",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.21,
+    "from": "block"
+   },
+   {
+    "c": "SS-005515",
+    "s": "CALLE DEL CIELO",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.21,
+    "from": "block"
+   },
+   {
+    "c": "SS-005517",
+    "s": "CALLE DEL CIELO",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.03
+   },
+   {
+    "c": "SS-005517",
+    "s": "CALLE DEL CIELO",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.03
+   },
+   {
+    "c": "SS-005484",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-005484",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-009357",
+    "s": "DORADO CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.05
+   },
+   {
+    "c": "SS-009357",
+    "s": "DORADO CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.05
+   },
+   {
+    "c": "SS-010100",
+    "s": "EL PASEO GRANDE",
+    "schedule": "Posted (7am - 11am), WS 1st & 3rd Thu, ES 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.22
+   },
+   {
+    "c": "SS-010100",
+    "s": "EL PASEO GRANDE",
+    "schedule": "Posted (7am - 11am), WS 1st & 3rd Thu, ES 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.22
+   },
+   {
+    "c": "SS-005485",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-005485",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-016958",
+    "s": "LOWRY TR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.13,
+    "from": "block"
+   },
+   {
+    "c": "SS-016958",
+    "s": "LOWRY TR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.13,
+    "from": "block"
+   },
+   {
+    "c": "SS-003084",
+    "s": "AVNDA ALAMAR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.23
+   },
+   {
+    "c": "SS-003084",
+    "s": "AVNDA ALAMAR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.23
+   },
+   {
+    "c": "SS-025486",
+    "s": "ST LOUIS TR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.34
+   },
+   {
+    "c": "SS-025486",
+    "s": "ST LOUIS TR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.34
+   },
+   {
+    "c": "SS-005486",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-005486",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-022370",
+    "s": "PRINCESS ST",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.32,
+    "from": "block"
+   },
+   {
+    "c": "SS-022370",
+    "s": "PRINCESS ST",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.32,
+    "from": "block"
+   },
+   {
+    "c": "SS-013443",
+    "s": "HIDDEN VALLEY CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.33
+   },
+   {
+    "c": "SS-013443",
+    "s": "HIDDEN VALLEY CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.33
+   },
+   {
+    "c": "SS-027581",
+    "s": "VIA AVOLA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.3
+   },
+   {
+    "c": "SS-027581",
+    "s": "VIA AVOLA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.3
+   },
+   {
+    "c": "SS-013448",
+    "s": "HIDDEN VALLEY RD",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.06,
+    "from": "street"
+   },
+   {
+    "c": "SS-013448",
+    "s": "HIDDEN VALLEY RD",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.06,
+    "from": "street"
+   },
+   {
+    "c": "SS-027623",
+    "s": "VIA CAPRI",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.16
+   },
+   {
+    "c": "SS-027623",
+    "s": "VIA CAPRI",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.16
+   },
+   {
+    "c": "SS-027630",
+    "s": "VIA CAPRI",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.11
+   },
+   {
+    "c": "SS-027630",
+    "s": "VIA CAPRI",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.11
+   },
+   {
+    "c": "SS-023716",
+    "s": "RUE DENISE",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.29,
+    "from": "block"
+   },
+   {
+    "c": "SS-023716",
+    "s": "RUE DENISE",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.29,
+    "from": "block"
+   },
+   {
+    "c": "SS-027631",
+    "s": "VIA CAPRI",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-027631",
+    "s": "VIA CAPRI",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.02
+   },
+   {
+    "c": "SS-023717",
+    "s": "RUE DENISE",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.14,
+    "from": "street"
+   },
+   {
+    "c": "SS-023717",
+    "s": "RUE DENISE",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.14,
+    "from": "street"
+   },
+   {
+    "c": "SS-023731",
+    "s": "RUE MICHAEL",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.27,
+    "from": "block"
+   },
+   {
+    "c": "SS-023731",
+    "s": "RUE MICHAEL",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.27,
+    "from": "block"
+   },
+   {
+    "c": "SS-028651",
+    "s": "WHALE WATCH WY",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.32
+   },
+   {
+    "c": "SS-028651",
+    "s": "WHALE WATCH WY",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.32
+   },
+   {
+    "c": "SS-022367",
+    "s": "PRESTWICK DR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.03,
+    "from": "block"
+   },
+   {
+    "c": "SS-022367",
+    "s": "PRESTWICK DR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.03,
+    "from": "block"
+   },
+   {
+    "c": "SS-020173",
+    "s": "NOYES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.25
+   },
+   {
+    "c": "SS-020173",
+    "s": "NOYES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.25
+   },
+   {
+    "c": "SS-020855",
+    "s": "PACIFIC BEACH DR",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.24
+   },
+   {
+    "c": "SS-020855",
+    "s": "PACIFIC BEACH DR",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.24
+   },
+   {
+    "c": "SS-008303",
+    "s": "CROWN POINT DR",
+    "schedule": "Posted (10am - 1pm), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.31,
+    "from": "block"
+   },
+   {
+    "c": "SS-008303",
+    "s": "CROWN POINT DR",
+    "schedule": "Posted (10am - 1pm), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.31,
+    "from": "block"
+   },
+   {
+    "c": "SS-012901",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012901",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012902",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-012902",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010676",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010676",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-008788",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008788",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012903",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012903",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006620",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006620",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010677",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010677",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008789",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008789",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012904",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012904",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006621",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-006621",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010678",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010678",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-008790",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008790",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006622",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006622",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010679",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010679",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008791",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008791",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006623",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006623",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010680",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010680",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-008792",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008792",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012905",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012905",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006624",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006624",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010681",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010681",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008793",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008793",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012906",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012906",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006625",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-006625",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010682",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010682",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008794",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008794",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012907",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012907",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006626",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006626",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010683",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010683",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008795",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008795",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006627",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006627",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012908",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-012908",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-010684",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010684",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008796",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-008796",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-006628",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006628",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012909",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-012909",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-010685",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-010685",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-008797",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-008797",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-012910",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-012910",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-006629",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-006629",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010686",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-010686",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-008798",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-008798",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-012911",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-012911",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-006630",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006630",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010687",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "street"
+   },
+   {
+    "c": "SS-010687",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "street"
+   },
+   {
+    "c": "SS-008799",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "street"
+   },
+   {
+    "c": "SS-008799",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "street"
+   },
+   {
+    "c": "SS-006631",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-006631",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010688",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.28,
+    "from": "block"
+   },
+   {
+    "c": "SS-010688",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.28,
+    "from": "block"
+   },
+   {
+    "c": "SS-008800",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-008800",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-006632",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006632",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-004999",
+    "s": "BROOKHAVEN RD",
+    "schedule": "Posted, (7am-10am) SS Odd Month 3rd Tuesday, (10am-1pm) NS Odd Month 3rd Tuesday",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.34
+   },
+   {
+    "c": "SS-004999",
+    "s": "BROOKHAVEN RD",
+    "schedule": "Posted, (7am-10am) SS Odd Month 3rd Tuesday, (10am-1pm) NS Odd Month 3rd Tuesday",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.34
+   },
+   {
+    "c": "SS-018490",
+    "s": "MISSION BL",
+    "schedule": "Posted (8am - 10am), WS Mon & Thu, ES Tue & Fri",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.19
+   },
+   {
+    "c": "SS-018490",
+    "s": "MISSION BL",
+    "schedule": "Posted (8am - 10am), WS Mon & Thu, ES Tue & Fri",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.19
+   },
+   {
+    "c": "SS-000774",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.02,
+    "from": "street"
+   },
+   {
+    "c": "SS-000774",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.02,
+    "from": "street"
+   },
+   {
+    "c": "SS-000775",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-000775",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-000776",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-000776",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-000777",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-000777",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-000778",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-000778",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.02,
+    "from": "block"
+   },
+   {
+    "c": "SS-000779",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-000779",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-000780",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-000780",
+    "s": "32ND ST",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.01,
+    "from": "street"
+   },
+   {
+    "c": "SS-020865",
+    "s": "PACIFIC BEACH DR",
+    "schedule": "Posted (12am - 3am), WS Mon, ES Fri",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.25
+   },
+   {
+    "c": "SS-020865",
+    "s": "PACIFIC BEACH DR",
+    "schedule": "Posted (12am - 3am), WS Mon, ES Fri",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.25
+   },
+   {
+    "c": "SS-022962",
+    "s": "REED AV",
+    "schedule": "Posted (12am - 3am), WS Mon, ES Fri",
+    "kind": "moved by tickets",
+    "dir": "W",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-022962",
+    "s": "REED AV",
+    "schedule": "Posted (12am - 3am), WS Mon, ES Fri",
+    "kind": "moved by tickets",
+    "dir": "E",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-009996",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009997",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-009998",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-009999",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010000",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010001",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-010002",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-010004",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010005",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010006",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010007",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010008",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010009",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-027116",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027117",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-020017",
+    "s": "NORMAL ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-028291",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028292",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028295",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028296",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028297",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030079",
+    "s": "W WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030080",
+    "s": "W WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030081",
+    "s": "W WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030082",
+    "s": "W WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030045",
+    "s": "W UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-030046",
+    "s": "W UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-030047",
+    "s": "W UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-030048",
+    "s": "W UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027134",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027135",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027136",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027137",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027138",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027139",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027140",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027141",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027143",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027145",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027148",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027149",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027152",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027153",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027156",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027157",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027158",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-010032",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-010033",
+    "s": "EL CAJON BL",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-028299",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028301",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "block"
+   },
+   {
+    "c": "SS-030097",
+    "s": "W WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028302",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030098",
+    "s": "W WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030099",
+    "s": "W WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028303",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-028304",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-030053",
+    "s": "W UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027202",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027203",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027204",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027205",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027206",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027207",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027208",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027209",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027210",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027211",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027212",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027213",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027214",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027215",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027216",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-030054",
+    "s": "W UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027217",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027218",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027219",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-030051",
+    "s": "W UNIVERSITY AV",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027150",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027151",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027155",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-027159",
+    "s": "UNIVERSITY AV",
+    "schedule": "Posted (2am - 5am), Every Tues & Wed",
+    "kind": "both sides, not settled",
+    "days": [
+     2,
+     3
+    ]
+   },
+   {
+    "c": "SS-018457",
+    "s": "MISSION AV",
+    "schedule": "Posted (10am - 1pm), SS 2nd & 4th Mon, NS 2nd & 4th Tue",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.11,
+    "from": "block"
+   },
+   {
+    "c": "SS-018457",
+    "s": "MISSION AV",
+    "schedule": "Posted (10am - 1pm), SS 2nd & 4th Mon, NS 2nd & 4th Tue",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.11,
+    "from": "block"
+   },
+   {
+    "c": "SS-010670",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010670",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-008782",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008782",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006614",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006614",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008783",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-008783",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-006615",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006615",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010673",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.24,
+    "from": "street"
+   },
+   {
+    "c": "SS-010673",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.24,
+    "from": "street"
+   },
+   {
+    "c": "SS-008784",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008784",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006616",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006616",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010674",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-010674",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-008785",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-008785",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-006617",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006617",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-008786",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-008786",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.26,
+    "from": "block"
+   },
+   {
+    "c": "SS-006618",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006618",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-010675",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-010675",
+    "s": "EVERTS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-008787",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-008787",
+    "s": "DAWES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "street"
+   },
+   {
+    "c": "SS-006619",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-006619",
+    "s": "CASS ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012897",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-012897",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.24,
+    "from": "block"
+   },
+   {
+    "c": "SS-012898",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012898",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012899",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "N",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-012899",
+    "s": "HAINES ST",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "kind": "moved by tickets",
+    "dir": "S",
+    "conf": 0.25,
+    "from": "block"
+   },
+   {
+    "c": "SS-005487",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-005487",
+    "s": "CALLE DE LA PLATA",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.15,
+    "from": "block"
+   },
+   {
+    "c": "SS-025487",
+    "s": "ST LOUIS TR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.07
+   },
+   {
+    "c": "SS-025487",
+    "s": "ST LOUIS TR",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.07
+   },
+   {
+    "c": "SS-002645",
+    "s": "ARDATH CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "S",
+    "conf": 0.04
+   },
+   {
+    "c": "SS-002645",
+    "s": "ARDATH CT",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "compass guess",
+    "dir": "N",
+    "conf": 0.04
+   },
+   {
+    "c": "SS-028300",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-031397",
+    "s": "WASHINGTON ST",
+    "schedule": "Posted (3am - 6am), Every Tues & Wed",
+    "kind": "split by tickets",
+    "days": {
+     "2": "even",
+     "3": "odd"
+    },
+    "from": "street"
+   },
+   {
+    "c": "SS-013446",
+    "s": "HIDDEN VALLEY RD",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "S",
+    "conf": 0.2,
+    "from": "block"
+   },
+   {
+    "c": "SS-013446",
+    "s": "HIDDEN VALLEY RD",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "kind": "confirmed by tickets",
+    "dir": "N",
+    "conf": 0.2,
+    "from": "block"
+   },
+   {
+    "c": "SS-007051",
+    "s": "CHELFORD ST",
+    "schedule": "Posted (7am-11am), WS 3rd THUR Even Month, ES 3rd THUR Odd Month",
+    "kind": "compass guess",
+    "dir": "W",
+    "conf": 0.23
+   },
+   {
+    "c": "SS-007051",
+    "s": "CHELFORD ST",
+    "schedule": "Posted (7am-11am), WS 3rd THUR Even Month, ES 3rd THUR Odd Month",
+    "kind": "compass guess",
+    "dir": "E",
+    "conf": 0.23
+   },
+   {
+    "c": "SS-013016",
+    "s": "HANNON CT",
+    "schedule": "Posted (7am-11am), ES 3rd THUR Even Month, WS 3rd THUR Odd Month",
+    "kind": "confirmed by tickets",
+    "dir": "E",
+    "conf": 0,
+    "from": "block"
+   },
+   {
+    "c": "SS-013016",
+    "s": "HANNON CT",
+    "schedule": "Posted (7am-11am), ES 3rd THUR Even Month, WS 3rd THUR Odd Month",
+    "kind": "confirmed by tickets",
+    "dir": "W",
+    "conf": 0,
+    "from": "block"
+   }
+  ]
+ },
+ "crossCheck": {
+  "tickets": 88524,
+  "from": "2025-08-01",
+  "to": "2026-07-31",
+  "withAddress": 88422,
+  "onPostedBlock": 84201,
+  "onUnpostedBlockOnly": 742,
+  "noBlock": 3479,
+  "onHoliday": 6,
+  "matchedTwoBlocks": 225,
+  "sideSweptThatDay": 73201,
+  "otherSideOnly": 10800,
+  "blockNotSweptThatDay": 200,
+  "sideUnknown": 0,
+  "note": "Street sweeping tickets (86.0112(E)) of the last 12 months in the City's citation data, which has the date and the typed address but no time. Each ticket goes on the posted block of its street whose numbers hold it, on the side holding its parity; \"sideSweptThatDay\" = that side has a rule on that date (weekday, week of the month, month). Tickets are written only where a sign says no parking that day, so this is how we know the schedule is the one on the signs.",
+  "finesByMonth": {
+   "2025-08 $85.0": 6940,
+   "2025-08 $0.0": 10,
+   "2025-08 $83.5": 192,
+   "2025-09 $85.0": 6529,
+   "2025-09 $0.0": 1,
+   "2025-10 $85.0": 8500,
+   "2025-11 $83.5": 5649,
+   "2025-12 $83.5": 7524,
+   "2025-12 $85.0": 45,
+   "2026-01 $83.5": 5782,
+   "2026-02 $83.5": 6593,
+   "2026-03 $83.5": 8302,
+   "2026-04 $83.5": 8348,
+   "2026-05 $83.5": 6888,
+   "2026-06 $83.5": 8021,
+   "2026-07 $83.5": 9200
+  },
+  "afterSwaps": {
+   "sideSweptThatDay": 77153,
+   "otherSideOnly": 6848,
+   "blockNotSweptThatDay": 200
+  }
+ },
+ "sideSwapCandidates": {
+  "note": "Blocks where the City names both sides clearly but the tickets on both sides are on the other side (5 tickets and 80% each, on dates only that rule sweeps): the sides look swapped in the schedule, or the signs differ from it. Swapped to follow the tickets (--as-published keeps the City's text); a question for the City.",
+  "blocks": 105,
+  "swapped": 105,
+  "list": [
+   {
+    "c": "SS-000872",
+    "s": "35th St",
+    "l": "Wightman St - University Ave",
+    "schedule": "Posted (8am - 11am), WS Mon, ES Thu",
+    "tickets": "W: 32 on the other side, 2 on its own; E: 39 on the other side, 3 on its own"
+   },
+   {
+    "c": "SS-010173",
+    "s": "Elgin Ave",
+    "l": "Birchwood St - Eldridge St",
+    "schedule": "Posted (7am - 11am), Even Month 1st Tue (NS/ES), Odd Month 1st Tue (SS/WS)",
+    "tickets": "NE: 12 on the other side, 0 on its own; SW: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-015118",
+    "s": "Kensington Dr",
+    "l": "Adams Ave - Alder Dr",
+    "schedule": "Posted (10am - 1pm), WS 3rd Wed, ES 3rd Mon",
+    "tickets": "W: 45 on the other side, 3 on its own; E: 28 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-000596",
+    "s": "28th St",
+    "l": "K St - Island Ave",
+    "schedule": "Posted (8am - 10am), WS Thu, ES Tue",
+    "tickets": "W: 15 on the other side, 0 on its own; E: 6 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-000869",
+    "s": "35th St",
+    "l": "Orange Ave - El Cajon Blvd",
+    "schedule": "Posted (8am - 11am), WS Mon, ES Thu",
+    "tickets": "W: 10 on the other side, 0 on its own; E: 29 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-004941",
+    "s": "Broadway",
+    "l": "20th St - 21st St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 17 on the other side, 0 on its own; N: 45 on the other side, 2 on its own"
+   },
+   {
+    "c": "SS-004942",
+    "s": "Broadway",
+    "l": "21st St - 22nd St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 7 on the other side, 0 on its own; N: 21 on the other side, 5 on its own"
+   },
+   {
+    "c": "SS-004943",
+    "s": "Broadway",
+    "l": "22nd St - 23rd St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 16 on the other side, 0 on its own; N: 7 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-004944",
+    "s": "Broadway",
+    "l": "23rd St - 24th St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 22 on the other side, 0 on its own; N: 16 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-004945",
+    "s": "Broadway",
+    "l": "24th St - 25th St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 46 on the other side, 0 on its own; N: 40 on the other side, 5 on its own"
+   },
+   {
+    "c": "SS-000654",
+    "s": "30th St",
+    "l": "Meade Ave - Monroe Ave",
+    "schedule": "Posted (10am - 1pm), WS 2nd & 4th Mon, ES 2nd & 4th Tue",
+    "tickets": "W: 65 on the other side, 5 on its own; E: 41 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-003470",
+    "s": "Bancroft St",
+    "l": "University Ave - Boundary St",
+    "schedule": "Posted (7am - 10am), WS 2nd & 4th Mon, ES 2nd & 4th Tue",
+    "tickets": "W: 37 on the other side, 1 on its own; E: 18 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016451",
+    "s": "Lincoln Ave",
+    "l": "Florida St - Alabama St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 23 on the other side, 4 on its own; S: 9 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016452",
+    "s": "Lincoln Ave",
+    "l": "Park Blvd - Georgia St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 24 on the other side, 5 on its own; S: 18 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016454",
+    "s": "Lincoln Ave",
+    "l": "Alabama St - Mississippi St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 16 on the other side, 3 on its own; S: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016455",
+    "s": "Lincoln Ave",
+    "l": "Mississippi St - Louisiana St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 12 on the other side, 0 on its own; S: 16 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016456",
+    "s": "Lincoln Ave",
+    "l": "Louisiana St - Texas St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 17 on the other side, 3 on its own; S: 14 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016458",
+    "s": "Lincoln Ave",
+    "l": "Arizona St - Hamilton St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 22 on the other side, 1 on its own; S: 18 on the other side, 3 on its own"
+   },
+   {
+    "c": "SS-016459",
+    "s": "Lincoln Ave",
+    "l": "Hamilton St - Oregon St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 30 on the other side, 4 on its own; S: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016461",
+    "s": "Lincoln Ave",
+    "l": "Idaho St - Utah St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 21 on the other side, 4 on its own; S: 23 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016462",
+    "s": "Lincoln Ave",
+    "l": "Utah St - Kansas St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 15 on the other side, 0 on its own; S: 20 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016465",
+    "s": "Lincoln Ave",
+    "l": "Ohio St - Illinois St",
+    "schedule": "Posted (7am - 10am), NS 2nd & 4th Mon, SS 2nd & 4th Tue",
+    "tickets": "N: 14 on the other side, 0 on its own; S: 10 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-009673",
+    "s": "E St",
+    "l": "30th St - 31st St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 37 on the other side, 0 on its own; N: 33 on the other side, 8 on its own"
+   },
+   {
+    "c": "SS-016426",
+    "s": "Limerick Ct",
+    "l": "Limerick Ave - End",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "tickets": "E: 10 on the other side, 2 on its own; W: 9 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-021088",
+    "s": "Palmyra Ave",
+    "l": "Limerick Ave - Northridge Ct",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "tickets": "E: 5 on the other side, 0 on its own; W: 5 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-011536",
+    "s": "Frink Ave",
+    "l": "Conrad Ave - Lehrer Dr",
+    "schedule": "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
+    "tickets": "E: 14 on the other side, 0 on its own; W: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-027375",
+    "s": "Vallecitos",
+    "l": "Camino del Oro - Avenida de la Ribera",
+    "schedule": "Posted (7am - 11am), NS 1st & 3rd Thu, SS 2nd & 4th Thu",
+    "tickets": "N: 18 on the other side, 0 on its own; S: 5 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-010096",
+    "s": "El Paseo Grande",
+    "l": "Calle Clara - Vallecitos",
+    "schedule": "Posted (7am - 11am), WS 1st & 3rd Thu, ES 2nd & 4th Thu",
+    "tickets": "W: 21 on the other side, 0 on its own; E: 14 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-010097",
+    "s": "El Paseo Grande",
+    "l": "Avenida de la Playa - Calle Clara",
+    "schedule": "Posted (7am - 11am), WS 1st & 3rd Thu, ES 2nd & 4th Thu",
+    "tickets": "W: 7 on the other side, 0 on its own; E: 6 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016957",
+    "s": "Lowry Ter",
+    "l": "El Paseo Grande - Paseo Dorado",
+    "schedule": "Posted (7am - 11am), SS 1st & 3rd Thu, NS 2nd & 4th Thu",
+    "tickets": "S: 8 on the other side, 0 on its own; N: 7 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016195",
+    "s": "Law St",
+    "l": "Lamont St - Academy St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 11 on the other side, 0 on its own; S: 20 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-018655",
+    "s": "Missouri St",
+    "l": "Noyes St - Olney St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 14 on the other side, 0 on its own; S: 6 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-009180",
+    "s": "Diamond St",
+    "l": "Morrell St - Noyes St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 19 on the other side, 0 on its own; S: 28 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-009181",
+    "s": "Diamond St",
+    "l": "Lamont St - Morrell St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 26 on the other side, 1 on its own; S: 25 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-009182",
+    "s": "Diamond St",
+    "l": "Jewell St - Lamont St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 60 on the other side, 4 on its own; S: 49 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-009183",
+    "s": "Diamond St",
+    "l": "Ingraham St - Jewell St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 7 on the other side, 1 on its own; S: 16 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-010977",
+    "s": "Felspar St",
+    "l": "Morrell St - Noyes St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 8 on the other side, 1 on its own; S: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-010978",
+    "s": "Felspar St",
+    "l": "Lamont St - Morrell St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 19 on the other side, 0 on its own; S: 9 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026382",
+    "s": "Thomas Ave",
+    "l": "Noyes St - Olney St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 23 on the other side, 5 on its own; S: 31 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026384",
+    "s": "Thomas Ave",
+    "l": "Lamont St - Morrell St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 10 on the other side, 0 on its own; S: 33 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026387",
+    "s": "Thomas Ave",
+    "l": "Ingraham St - Jewell St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 33 on the other side, 6 on its own; S: 26 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-020480",
+    "s": "Oliver Ave",
+    "l": "Morrell St - Noyes St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 6 on the other side, 0 on its own; S: 27 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-020481",
+    "s": "Oliver Ave",
+    "l": "Lamont St - Morrell St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 9 on the other side, 2 on its own; S: 28 on the other side, 3 on its own"
+   },
+   {
+    "c": "SS-020482",
+    "s": "Oliver Ave",
+    "l": "Kendall St - Lamont St",
+    "schedule": "Posted (7am - 10am), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 9 on the other side, 0 on its own; S: 31 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-024785",
+    "s": "Sequoia St",
+    "l": "Chico St - Pacific Beach Dr",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 6 on the other side, 0 on its own; W: 13 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-013700",
+    "s": "Honeycutt St",
+    "l": "Fortuna Ave - Pacific Beach Dr",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 15 on the other side, 0 on its own; W: 17 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-024839",
+    "s": "Shasta St",
+    "l": "Chico St - Pacific Beach Dr",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 9 on the other side, 0 on its own; W: 6 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-024840",
+    "s": "Shasta St",
+    "l": "Fortuna Ave - Chico St",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 8 on the other side, 0 on its own; W: 5 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-013701",
+    "s": "Honeycutt St",
+    "l": "Crown Point Dr - Fortuna Ave",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 5 on the other side, 0 on its own; W: 14 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-024787",
+    "s": "Sequoia St",
+    "l": "Roosevelt Ave - Fortuna Ave",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 5 on the other side, 0 on its own; W: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-024841",
+    "s": "Shasta St",
+    "l": "Roosevelt Ave - Fortuna Ave",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 23 on the other side, 0 on its own; W: 21 on the other side, 2 on its own"
+   },
+   {
+    "c": "SS-024842",
+    "s": "Shasta St",
+    "l": "La Playa Ave - Roosevelt Ave",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 8 on the other side, 0 on its own; W: 11 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-005108",
+    "s": "Buena Vista St",
+    "l": "La Mancha Dr - Moorland Dr",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 6 on the other side, 0 on its own; W: 4 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-015923",
+    "s": "Lamont St",
+    "l": "Chalcedony St - Law St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 6 on the other side, 0 on its own; W: 7 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-020174",
+    "s": "Noyes St",
+    "l": "Missouri St - Chalcedony St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 13 on the other side, 0 on its own; W: 7 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-020175",
+    "s": "Noyes St",
+    "l": "Diamond St - Missouri St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 17 on the other side, 0 on its own; W: 9 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-011107",
+    "s": "Figueroa Blvd",
+    "l": "End - Bond St",
+    "schedule": "Posted (10am - 1pm), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 8 on the other side, 0 on its own; S: 9 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-015925",
+    "s": "Lamont St",
+    "l": "Diamond St - Missouri St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 8 on the other side, 0 on its own; W: 11 on the other side, 2 on its own"
+   },
+   {
+    "c": "SS-020176",
+    "s": "Noyes St",
+    "l": "Emerald St - Diamond St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 8 on the other side, 0 on its own; W: 11 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-015926",
+    "s": "Lamont St",
+    "l": "Emerald St - Diamond St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 14 on the other side, 0 on its own; W: 19 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-015927",
+    "s": "Lamont St",
+    "l": "Felspar St - Emerald St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 6 on the other side, 0 on its own; W: 17 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-020178",
+    "s": "Noyes St",
+    "l": "Garnet Ave - Felspar St",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 16 on the other side, 0 on its own; W: 25 on the other side, 5 on its own"
+   },
+   {
+    "c": "SS-020179",
+    "s": "Noyes St",
+    "l": "Hornblend St - Garnet Ave",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 15 on the other side, 0 on its own; W: 23 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-020182",
+    "s": "Noyes St",
+    "l": "Reed Ave - Thomas Ave",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 7 on the other side, 0 on its own; W: 7 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-015933",
+    "s": "Lamont St",
+    "l": "Oliver Ave - Reed Ave",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 7 on the other side, 0 on its own; W: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-015914",
+    "s": "Lamont St",
+    "l": "Pacific Beach Dr - Oliver Ave",
+    "schedule": "Posted (7am - 10am), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 9 on the other side, 0 on its own; W: 6 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-006879",
+    "s": "Chalcedony St",
+    "l": "Haines St - Ingraham St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 9 on the other side, 1 on its own; S: 13 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-006880",
+    "s": "Chalcedony St",
+    "l": "Gresham St - Haines St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 16 on the other side, 0 on its own; S: 15 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-006882",
+    "s": "Chalcedony St",
+    "l": "Everts St - Fanuel St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 8 on the other side, 0 on its own; S: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-006884",
+    "s": "Chalcedony St",
+    "l": "Bayard St - Cass St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 16 on the other side, 0 on its own; S: 13 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-006885",
+    "s": "Chalcedony St",
+    "l": "Mission Blvd - Bayard St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 17 on the other side, 4 on its own; S: 18 on the other side, 3 on its own"
+   },
+   {
+    "c": "SS-026388",
+    "s": "Thomas Ave",
+    "l": "Haines St - Ingraham St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 7 on the other side, 1 on its own; S: 9 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026389",
+    "s": "Thomas Ave",
+    "l": "Gresham St - Haines St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 10 on the other side, 1 on its own; S: 16 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026390",
+    "s": "Thomas Ave",
+    "l": "Fanuel St - Gresham St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 7 on the other side, 0 on its own; S: 14 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026391",
+    "s": "Thomas Ave",
+    "l": "Everts St - Fanuel St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 11 on the other side, 0 on its own; S: 12 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-026394",
+    "s": "Thomas Ave",
+    "l": "Bayard St - Cass St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 13 on the other side, 3 on its own; S: 14 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-006890",
+    "s": "Chalcedony St",
+    "l": "Cass St - Dawes St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 7 on the other side, 0 on its own; S: 25 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-012705",
+    "s": "Gresham St",
+    "l": "Garnet Ave - Felspar St",
+    "schedule": "Posted (7am - 10am), ES 1st Wed, WS 1st Thu",
+    "tickets": "E: 13 on the other side, 0 on its own; W: 10 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-012706",
+    "s": "Gresham St",
+    "l": "Hornblend St - Garnet Ave",
+    "schedule": "Posted (7am - 10am), ES 1st Wed, WS 1st Thu",
+    "tickets": "E: 10 on the other side, 0 on its own; W: 22 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-012708",
+    "s": "Gresham St",
+    "l": "Thomas Ave - Grand Ave",
+    "schedule": "Posted (7am - 10am), ES 1st Wed, WS 1st Thu",
+    "tickets": "E: 17 on the other side, 0 on its own; W: 23 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-012709",
+    "s": "Gresham St",
+    "l": "Reed Ave - Thomas Ave",
+    "schedule": "Posted (7am - 10am), ES 1st Wed, WS 1st Thu",
+    "tickets": "E: 7 on the other side, 0 on its own; W: 12 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026395",
+    "s": "Thomas Ave",
+    "l": "Mission Blvd - Bayard St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 40 on the other side, 2 on its own; S: 22 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-013956",
+    "s": "Idaho St",
+    "l": "Adams Ave - Collier Ave",
+    "schedule": "Posted (10am - 1pm), WS 3rd Mon, ES 3rd Wed",
+    "tickets": "W: 55 on the other side, 2 on its own; E: 96 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-000689",
+    "s": "30th St",
+    "l": "Adams Ave - Suncrest Dr",
+    "schedule": "Posted (10am - 1pm), WS 3rd Wed, ES 3rd Mon",
+    "tickets": "W: 71 on the other side, 1 on its own; E: 11 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-000592",
+    "s": "28th St",
+    "l": "A St - Ash St",
+    "schedule": "Posted (8am - 10am), WS Thu, ES Tue",
+    "tickets": "W: 43 on the other side, 2 on its own; E: 32 on the other side, 7 on its own"
+   },
+   {
+    "c": "SS-004946",
+    "s": "Broadway",
+    "l": "25th St - 26th St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 39 on the other side, 1 on its own; N: 47 on the other side, 8 on its own"
+   },
+   {
+    "c": "SS-004947",
+    "s": "Broadway",
+    "l": "27th St - 28th St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 36 on the other side, 5 on its own; N: 58 on the other side, 7 on its own"
+   },
+   {
+    "c": "SS-004948",
+    "s": "Broadway",
+    "l": "29th St - 30th St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 65 on the other side, 5 on its own; N: 41 on the other side, 6 on its own"
+   },
+   {
+    "c": "SS-004958",
+    "s": "Broadway",
+    "l": "30th St - 32nd St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 63 on the other side, 1 on its own; N: 45 on the other side, 10 on its own"
+   },
+   {
+    "c": "SS-000600",
+    "s": "28th St",
+    "l": "B St - A St",
+    "schedule": "Posted (8am - 10am), WS Thu, ES Tue",
+    "tickets": "W: 110 on the other side, 4 on its own; E: 73 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-000601",
+    "s": "28th St",
+    "l": "C St - B St",
+    "schedule": "Posted (8am - 10am), WS Thu, ES Tue",
+    "tickets": "W: 42 on the other side, 3 on its own; E: 22 on the other side, 5 on its own"
+   },
+   {
+    "c": "SS-004965",
+    "s": "Broadway",
+    "l": "26th St - 27th St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 40 on the other side, 4 on its own; N: 41 on the other side, 5 on its own"
+   },
+   {
+    "c": "SS-004966",
+    "s": "Broadway",
+    "l": "28th St - 29th St",
+    "schedule": "Posted (10am - 1pm), SS Thu, NS Tue",
+    "tickets": "S: 28 on the other side, 3 on its own; N: 33 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-000604",
+    "s": "28th St",
+    "l": "G St - Treat St",
+    "schedule": "Posted (8am - 10am), WS Thu, ES Tue",
+    "tickets": "W: 5 on the other side, 1 on its own; E: 31 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-012156",
+    "s": "Girard Ave",
+    "l": "Wall St - Prospect St",
+    "schedule": "Posted (2am - 6am), ES Mon, WS Fri",
+    "tickets": "E: 7 on the other side, 0 on its own; W: 9 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-026709",
+    "s": "Tourmaline St",
+    "l": "Fanuel St - Foothill Blvd",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 11 on the other side, 0 on its own; S: 10 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026712",
+    "s": "Tourmaline St",
+    "l": "Cass St - Dawes St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 23 on the other side, 3 on its own; S: 28 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026713",
+    "s": "Tourmaline St",
+    "l": "Bayard St - Cass St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 10 on the other side, 0 on its own; S: 8 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-026714",
+    "s": "Tourmaline St",
+    "l": "Mission Blvd - Bayard St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 21 on the other side, 0 on its own; S: 8 on the other side, 1 on its own"
+   },
+   {
+    "c": "SS-016874",
+    "s": "Loring St",
+    "l": "Cass St - Dawes St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 18 on the other side, 0 on its own; S: 9 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-016875",
+    "s": "Loring St",
+    "l": "Bayard St - Cass St",
+    "schedule": "Posted (10am - 1pm), NS 1st Wed, SS 1st Thur",
+    "tickets": "N: 45 on the other side, 0 on its own; S: 19 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-012695",
+    "s": "Gresham St",
+    "l": "La Palma St - Pacific Beach Dr",
+    "schedule": "Posted (7am - 10am), ES 1st Wed, WS 1st Thu",
+    "tickets": "E: 14 on the other side, 0 on its own; W: 15 on the other side, 3 on its own"
+   },
+   {
+    "c": "SS-012696",
+    "s": "Gresham St",
+    "l": "Graham St - La Palma St",
+    "schedule": "Posted (7am - 10am), ES 1st Wed, WS 1st Thu",
+    "tickets": "E: 18 on the other side, 3 on its own; W: 43 on the other side, 3 on its own"
+   },
+   {
+    "c": "SS-004545",
+    "s": "Bond St",
+    "l": "Hornblend St - Magnolia Ave",
+    "schedule": "Posted (10am - 1pm), ES 1st Thu, WS 1st Wed",
+    "tickets": "E: 12 on the other side, 0 on its own; W: 6 on the other side, 0 on its own"
+   },
+   {
+    "c": "SS-011106",
+    "s": "Figueroa Blvd",
+    "l": "Bond St - Magnolia Ave",
+    "schedule": "Posted (10am - 1pm), NS 1st Thu, SS 1st Wed",
+    "tickets": "N: 12 on the other side, 0 on its own; S: 8 on the other side, 0 on its own"
+   }
+  ]
+ }
+}

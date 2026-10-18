@@ -1,0 +1,90 @@
+{
+ "id": "washington-dc",
+ "name": "Washington, DC",
+ "region": "District of Columbia",
+ "tz": "America/New_York",
+ "center": [
+  38.918,
+  -77.025
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   38.7932,
+   -77.1166
+  ],
+  [
+   38.9953,
+   -76.9095
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Washington's Birthday",
+  "2026-04-16": "DC Emancipation Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Indigenous Peoples' Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Washington's Birthday",
+  "2027-04-16": "DC Emancipation Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Indigenous Peoples' Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-12-24": "Christmas Day (observed)",
+  "2027-12-31": "New Year's Day (observed)"
+ },
+ "holidaysSource": "https://dchr.dc.gov/page/holiday-schedules",
+ "holidayRule": "all",
+ "fine": "$45",
+ "tow": "sometimes",
+ "fineSource": "https://dpw.dc.gov/spring",
+ "agency": "DC Department of Public Works (DPW)",
+ "scheduleUrl": "https://dpw.dc.gov/page/street-and-alley-cleaning",
+ "words": {
+  "rule": "Posted street cleaning: each side one weekday a week, 9:30 to 11:30 AM or 12:30 to 2:30 PM (overnight on some main roads), March to October.",
+  "afterpass": "Not on DC holidays. A $45 ticket, and the car can be relocated for a $100 fee.",
+  "dataNotes": "Sweeping rules come from DDOT's Parking Zones, the District's inventory of posted street cleaning signs, placed on DDOT's street blocks by route and side. Checked against the District's 2026 street cleaning tickets: 91% land on a side, day and window the data posts."
+ },
+ "sources": [
+  {
+   "name": "Parking Zones (DDOT)",
+   "url": "https://opendata.dc.gov/datasets/DCGIS::parking-zones",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18",
+   "api": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_Parking_WebMercator/MapServer/156"
+  },
+  {
+   "name": "Roadway Block (DDOT)",
+   "url": "https://opendata.dc.gov/datasets/DCGIS::roadway-block",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18",
+   "api": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/163"
+  },
+  {
+   "name": "Parking Violations Issued, 2026 (DPW, DDOT)",
+   "url": "https://opendata.dc.gov/",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18",
+   "api": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Violations_Parking_2026/MapServer"
+  },
+  {
+   "name": "Neighborhood Names (Office of Planning)",
+   "url": "https://opendata.dc.gov/",
+   "license": "CC BY 4.0",
+   "fetched": "2026-10-18",
+   "api": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Administrative_Other_Boundaries_WebMercator/MapServer/18"
+  }
+ ]
+}

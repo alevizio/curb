@@ -8,6 +8,7 @@ city we are looking at. Read this file first.
 | [README.md](README.md) | The plan: principles, what a city gets, architecture, phases, open decisions |
 | [adding-a-city.md](adding-a-city.md) | What we need from someone who wants CURB in their city, step by step |
 | [data-contract.md](data-contract.md) | The one data format every city gets converted into |
+| [city-build.md](city-build.md) | How each city after Boston is built: the files, segments.json and city.json, the rules for a build |
 | [boston.md](boston.md) | Boston: what the City publishes, the rules, the gaps, what to ask for |
 | [buenos-aires.md](buenos-aires.md) | Buenos Aires: how parking works there, the data, what a first version looks like |
 
@@ -18,6 +19,40 @@ city we are looking at. Read this file first.
 | San Francisco | Live at curb.guide and in the App Store | Ale | Nothing |
 | Boston | Prototype at curb.guide/boston (2026-10-16): map, sheet, calendar, sweep alerts, six Curb Lab layers | Ale | Sign data covers 15% of swept curbs and was last published 2026-05-07. See [boston.md](boston.md) |
 | Buenos Aires | Researched. A volunteer wants to run it | A local maintainer | The City publishes the rule for every curb side, but under a license that forbids commercial use. It is not a street sweeping city, so the map has to draw other rule types, and it needs Spanish. See [buenos-aires.md](buenos-aires.md) |
+
+Previews at curb.guide/&lt;id&gt; since 2026-10-18 (unlisted, noindex): map, sheet, calendar and sweep alerts, built by
+[city-build.md](city-build.md). Each city's page (docs/multi-city/&lt;id&gt;.md) has the data, the checks and the questions
+for the City.
+
+| City | Built from | What is in the way |
+|---|---|---|
+| [Oakland](oakland.md) | Public Works' sweeping layer (2021), checked against 316k tickets: 74% agree | Night and weekend routes disagree with the tickets; 217 blocks swapped and 498 sides left off by the tickets |
+| [San Diego](san-diego.md) | Stormwater's schedule, posted blocks only; 89k tickets, 92% on the right side and date | 105 blocks swapped by the tickets; sides named by compass on streets that run the other way |
+| [Sacramento](sacramento.md) | Downtown and Midtown parking data, weekly or monthly from the 2018 sign inventory | No tickets published; the fine is inferred |
+| [Santa Monica](santa-monica.md) | One line per curb from the City's map | The data has no AM or PM: hours are read as daytime |
+| [Glendale](glendale.md) | One line per curb from the City's map | 72% of curbs (the 8 to 3 shift) look unposted and are left off; the fine is not published |
+| [San Jose](san-jose.md) | Signed routes (residential layer from 2023) | Holiday weeks move sweeps a day |
+| [Berkeley](berkeley.md) | The City's three schedule PDFs (2018 and 2025) | The schedule says only AM or PM; hours from posted signs |
+| [Los Angeles](los-angeles.md) | StreetsLA's posted routes; sides from 900k tickets | Routes don't say which side gets which day; 1,977 blocks show both days on both sides |
+| [LA County (unincorporated)](la-county.md) | Public Works' curb lines, posted only | 7,234 lines have no posting status and are left off |
+| [Riverside](riverside.md) | Sweeping zones, weeks from the City's 2015 schedule map | 7 of 92 zones have no weeks or hours |
+| [New York](new-york.md) | DOT's broom signs on the street centerline; tickets 93% on the right side, day and minute | 408 block sides not placed; 2027 suspension calendar not out |
+| [Hoboken](hoboken.md) | The alternate side schedule in the Hoboken Code, on the City's street map | The City's page and map lag the Code |
+| [Paterson](paterson.md) | The City's sweeping map on the State's centerlines | The map doesn't say which side is swept on which day: both days show on both sides |
+| [Philadelphia](philadelphia.md) | SweepPHL routes | Signs are posted on some blocks only and the data doesn't say which |
+| [Pittsburgh](pittsburgh.md) | Sweep codes on the City's centerlines | No hours per block: the City's general 8 AM to 2:30 PM window |
+| [Washington, DC](washington-dc.md) | DDOT's Parking Zones; 91% of 2026 tickets agree | Overnight sweeping in winter unverified |
+| [Chicago](chicago.md) | 2026 ward section dates and the winter overnight ban | Which side is swept first is unknown: both dates show on both sides. 19.6 MB of dates |
+| [Saint Paul](saint-paul.md) | The fall sweep dates, both sides of each block | Dates move with the weather; the fine is not published |
+| [Norfolk](norfolk.md) | The City's sweeping table by address; tickets 96% on the schedule's day | Hours inferred from tickets |
+| [Madison](madison.md) | The posted sweeping signs | The winter alternate side rule is not shown (a design decision, and the City's 2026-27 plan) |
+| [Denver](denver.md) | Sweep codes on the centerline; hours from the sign inventory | Hours inferred for most blocks |
+| [Somerville](somerville.md) | The City's sweeping pages, one per street stretch | No tickets published; the pages' index is gone |
+| [Montréal](montreal.md) | 43k street cleaning signs placed on the Géobase | The sign inventory is thin in six boroughs; the page is in English |
+
+Not built: [Cambridge](cambridge.md) (the only street table is from 2014, and 2025 tickets contradict it), [San Mateo](san-mateo.md)
+(which streets are posted is not known), and the snow and winter rule cities (Toronto, Milwaukee, Minneapolis, Winnipeg,
+Calgary, Edmonton), which need the map to show a rule that switches sides by date.
 
 ## Principles
 

@@ -1,0 +1,149 @@
+{
+ "id": "saint-paul",
+ "name": "Saint Paul",
+ "region": "Minnesota",
+ "tz": "America/Chicago",
+ "center": [
+  44.9395,
+  -93.146
+ ],
+ "zoom": 14,
+ "bounds": [
+  [
+   44.8858,
+   -93.2128
+  ],
+  [
+   44.997,
+   -92.9994
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Day after Thanksgiving",
+  "2027-12-24": "Christmas Day (observed)",
+  "2027-12-31": "New Year's Day (observed)"
+ },
+ "holidaysSource": "https://www.stpaul.gov/books/20900-holidays",
+ "holidayRule": "all",
+ "fine": "",
+ "tow": "yes",
+ "fineSource": "",
+ "agency": "Saint Paul Public Works",
+ "scheduleUrl": "https://www.stpaul.gov/departments/public-works/street-maintenance/street-sweeping-operations",
+ "sources": [
+  {
+   "name": "Street Sweeping (Saint Paul Public Works; the data behind the City's Street Sweep Map)",
+   "url": "https://services1.arcgis.com/9meaaHE3uiba0zr8/arcgis/rest/services/Street_Sweeping/FeatureServer/0",
+   "notice": "The Geographic Information System (GIS) Data to which this notice is attached are made available pursuant to the Minnesota Government Data Practices Act (Minnesota Statutes Chapter 13). The GIS Data are provided to you “AS IS” and without any warranty as to their performance, merchantability, or fitness for any particular purpose. The GIS Data were developed by the City of Saint Paul for its own internal business purposes. The City of Saint Paul does not represent or warrant that the GIS Data or the data documentation are error-free, complete, current, or accurate. You are responsible for any consequences resulting from your use of the GIS Data or your reliance on the GIS Data. You should consult the data documentation for this particular GIS Data to determine the limitations of the GIS Data and the precision with which the GIS Data may depict distance, direction, location, or other geographic features. If you transmit or provide the GIS Data (or any portion of it) to another user, the GIS Data must include a copy of this disclaimer.",
+   "license": "City of Saint Paul GIS data notice (Minnesota Government Data Practices Act): provided as is; a copy must include the notice",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "District Councils (planning districts)",
+   "url": "https://services1.arcgis.com/9meaaHE3uiba0zr8/arcgis/rest/services/District_Councils/FeatureServer/0",
+   "license": "Public domain (City of Saint Paul notice)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Centerlines (2019), only to name swept blocks whose street name is blank",
+   "url": "https://services1.arcgis.com/9meaaHE3uiba0zr8/arcgis/rest/services/Centerlines/FeatureServer/0",
+   "license": "City of Saint Paul GIS data (no license stated)",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "During the fall sweep, temporary No Parking signs go up 24 to 48 hours ahead: no parking 8 AM to 6 PM on the block's sweep date.",
+  "afterpass": "Fall sweep Oct 19 to Nov 18, 2026, one day per block; the City can move a date for weather. Parked cars can be ticketed and towed.",
+  "dataNotes": "Dates come from the City's Street Sweeping layer, the data behind its Street Sweep Map, which gives one date per block and no side, so both sides show it. Dates can move on short notice: the temporary signs on the block win. Arterial overnight bans (hours only on the signs) and snow emergencies are not shown. The City provides its GIS data as is, with no warranty; its full notice comes with the data file."
+ },
+ "neighborhoods": [
+  {
+   "name": "Battle Creek-Conway-Eastview-Highwood Hills",
+   "bbox": "-93.0569,44.8907,-93.0043,44.9631"
+  },
+  {
+   "name": "Greater East Side",
+   "bbox": "-93.0460,44.9630,-93.0051,44.9920"
+  },
+  {
+   "name": "West Side",
+   "bbox": "-93.1286,44.9195,-93.0495,44.9476"
+  },
+  {
+   "name": "Dayton's Bluff",
+   "bbox": "-93.0914,44.9426,-93.0363,44.9750"
+  },
+  {
+   "name": "Payne-Phalen",
+   "bbox": "-93.0914,44.9558,-93.0449,44.9920"
+  },
+  {
+   "name": "North End",
+   "bbox": "-93.1263,44.9631,-93.0887,44.9919"
+  },
+  {
+   "name": "Frogtown",
+   "bbox": "-93.1466,44.9549,-93.0909,44.9675"
+  },
+  {
+   "name": "Summit-University",
+   "bbox": "-93.1466,44.9413,-93.1057,44.9558"
+  },
+  {
+   "name": "West Seventh-Fort Road",
+   "bbox": "-93.1557,44.9039,-93.0943,44.9468"
+  },
+  {
+   "name": "Como Park",
+   "bbox": "-93.1721,44.9658,-93.1261,44.9920"
+  },
+  {
+   "name": "Hamline-Midway",
+   "bbox": "-93.1874,44.9556,-93.1466,44.9724"
+  },
+  {
+   "name": "Saint Anthony Park",
+   "bbox": "-93.2078,44.9544,-93.1670,44.9881"
+  },
+  {
+   "name": "Union Park",
+   "bbox": "-93.2078,44.9414,-93.1466,44.9600"
+  },
+  {
+   "name": "Macalester-Groveland",
+   "bbox": "-93.2008,44.9269,-93.1439,44.9415"
+  },
+  {
+   "name": "Highland Park",
+   "bbox": "-93.2016,44.8874,-93.1386,44.9270"
+  },
+  {
+   "name": "Summit Hill",
+   "bbox": "-93.1529,44.9287,-93.1122,44.9415"
+  },
+  {
+   "name": "Downtown",
+   "bbox": "-93.1101,44.9406,-93.0793,44.9579"
+  }
+ ]
+}

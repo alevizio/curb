@@ -1,0 +1,112 @@
+{
+ "id": "sacramento",
+ "name": "Sacramento",
+ "region": "California",
+ "tz": "America/Los_Angeles",
+ "center": [
+  38.5785,
+  -121.4688
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   38.438,
+   -121.5608
+  ],
+  [
+   38.6856,
+   -121.3629
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Martin Luther King Jr. Day",
+  "2026-02-16": "Presidents' Day",
+  "2026-03-31": "Cesar Chavez Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-11-27": "Thanksgiving (observed)",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King Jr. Day",
+  "2027-02-15": "Presidents' Day",
+  "2027-03-31": "Cesar Chavez Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-11-26": "Thanksgiving (observed)",
+  "2027-12-24": "Christmas Day (observed)",
+  "2027-12-31": "New Year's Day (observed)"
+ },
+ "holidaysSource": "https://www.cityofsacramento.gov/city-government/holiday-schedule",
+ "holidayRule": "all",
+ "fine": "$72.50",
+ "tow": "no",
+ "fineSource": "https://www.cityofsacramento.gov/public-works/parking/citation-services/citation-fines",
+ "agency": "City of Sacramento Public Works",
+ "scheduleUrl": "https://www.cityofsacramento.gov/public-works/recycling-solid-waste/Collectionservices/StreetSweeping",
+ "sources": [
+  {
+   "name": "City of Sacramento On-street Parking Data (Public Works)",
+   "url": "https://services5.arcgis.com/54falWtcpty3V47Z/arcgis/rest/services/ONSTREETPARKING/FeatureServer/0",
+   "license": "not stated (City open data)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Sacramento County Street Centerlines",
+   "url": "https://mapservices.gis.saccounty.net/arcgis/rest/services/BASE_MAP_LABELS/MapServer/7",
+   "license": "not stated (County GIS)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Streetsweep Sign Inventory (City of Sacramento, 2018)",
+   "url": "https://services5.arcgis.com/54falWtcpty3V47Z/arcgis/rest/services/StreetServicesSignInventory_VW/FeatureServer/0",
+   "license": "not stated (City open data)",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "City of Sacramento Neighborhoods",
+   "url": "https://services5.arcgis.com/54falWtcpty3V47Z/arcgis/rest/services/Neighborhoods/FeatureServer/0",
+   "license": "not stated (City open data)",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "In parts of Downtown and Midtown, signs say no parking 8 AM to noon for City services: Monday on the south side of lettered streets, Tuesday the north side, Wednesday the west side of numbered streets, Thursday the east side; every week on blocks with weekly garbage pickup, the first week of the month on the others.",
+  "afterpass": "All year, holidays included · $72.50 ticket",
+  "dataNotes": "The City's on-street parking data (Public Works, updated daily): 7,497 parking spaces with a City services day, placed on the County's street centerlines and grouped into 1,014 block sides. Whether a block is restricted every week or the first week of the month comes from the City's 2018 sign inventory, the latest it publishes."
+ },
+ "neighborhoods": [
+  {
+   "name": "Alkali Flat",
+   "bbox": "-121.4948,38.5831,-121.4884,38.5877"
+  },
+  {
+   "name": "Boulevard Park",
+   "bbox": "-121.4839,38.5760,-121.4735,38.5823"
+  },
+  {
+   "name": "Mansion Flats",
+   "bbox": "-121.4888,38.5809,-121.4829,38.5874"
+  },
+  {
+   "name": "Marshall School",
+   "bbox": "-121.4741,38.5746,-121.4660,38.5800"
+  },
+  {
+   "name": "Midtown / Winn Park / Capital Avenue",
+   "bbox": "-121.4871,38.5661,-121.4706,38.5756"
+  },
+  {
+   "name": "New Era Park",
+   "bbox": "-121.4815,38.5795,-121.4648,38.5846"
+  }
+ ]
+}

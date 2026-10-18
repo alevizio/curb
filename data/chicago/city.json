@@ -1,0 +1,403 @@
+{
+ "id": "chicago",
+ "name": "Chicago",
+ "region": "Illinois",
+ "tz": "America/Chicago",
+ "center": [
+  41.8985,
+  -87.6559
+ ],
+ "zoom": 15,
+ "bounds": [
+  [
+   41.645,
+   -87.847
+  ],
+  [
+   42.023,
+   -87.524
+  ]
+ ],
+ "holidays": {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Dr. Martin Luther King Jr.'s Birthday",
+  "2026-02-12": "Lincoln's Birthday",
+  "2026-02-16": "Washington's Birthday",
+  "2026-03-02": "Pulaski Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth Day",
+  "2026-07-03": "Independence Day",
+  "2026-09-07": "Labor Day",
+  "2026-10-12": "Columbus Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving Day",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Dr. Martin Luther King Jr.'s Birthday",
+  "2027-02-12": "Lincoln's Birthday",
+  "2027-02-15": "Washington's Birthday",
+  "2027-03-01": "Pulaski Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth Day",
+  "2027-07-05": "Independence Day",
+  "2027-09-06": "Labor Day",
+  "2027-10-11": "Columbus Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving Day",
+  "2027-12-24": "Christmas Day"
+ },
+ "holidaysSource": "https://www.chicago.gov/city/en/narr/misc/city-holidays.html",
+ "holidayRule": "all",
+ "fine": "$60",
+ "tow": "sometimes",
+ "fineSource": "https://www.chicago.gov/city/en/depts/fin/provdrs/parking_and_redlightcitationadministration/supp_info/ParkingStandingandComplianceViolations.html",
+ "agency": "Chicago Department of Streets and Sanitation",
+ "scheduleUrl": "https://www.chicago.gov/city/en/depts/streets/provdrs/streets_san/svcs/street_sweeping2026.html",
+ "sources": [
+  {
+   "name": "Street Sweeping Zones - 2026 (Streets and Sanitation)",
+   "url": "https://data.cityofchicago.org/d/2r7q-emq3",
+   "license": "City of Chicago Data Portal terms of use",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Street Sweeping Schedule - 2026 (Streets and Sanitation)",
+   "url": "https://data.cityofchicago.org/d/u5ai-3efk",
+   "license": "City of Chicago Data Portal terms of use",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Street Center Lines",
+   "url": "https://data.cityofchicago.org/d/6imu-meau",
+   "license": "City of Chicago Data Portal terms of use",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Winter Overnight Parking Restrictions (Streets and Sanitation)",
+   "url": "https://data.cityofchicago.org/d/mcad-r2g5",
+   "license": "City of Chicago Data Portal terms of use",
+   "fetched": "2026-10-18"
+  },
+  {
+   "name": "Boundaries - Community Areas",
+   "url": "https://data.cityofchicago.org/d/igwz-8jzy",
+   "license": "City of Chicago Data Portal terms of use",
+   "fetched": "2026-10-18"
+  }
+ ],
+ "words": {
+  "rule": "Residential streets are swept ward section by ward section on two weekdays a month, April to November, between 9 AM and 2 PM; bright orange signs go up two days before.",
+  "afterpass": "One side is swept on each of the two days; the orange signs say which. Both days show on both sides. Season April 1 to November 20, $60 ticket. On the winter overnight ban streets, no parking 3 to 7 AM, December 1 to April 1: cars are towed.",
+  "dataNotes": "Dates from the City's 2026 street sweeping zones (Streets and Sanitation), placed on the City's street centerlines: each side of a block takes the dates of the ward section it sits in. The data doesn't say which side is swept first, so both sides list both days. Main streets (arterials and collectors) are left out: they run on their own posted schedules. Winter ban streets come from the City's list of 20 routes."
+ },
+ "neighborhoods": [
+  {
+   "name": "Albany Park",
+   "bbox": "-87.7480,41.9609,-87.6947,41.9761"
+  },
+  {
+   "name": "Archer Heights",
+   "bbox": "-87.7386,41.7953,-87.7138,41.8263"
+  },
+  {
+   "name": "Armour Square",
+   "bbox": "-87.6440,41.8236,-87.6289,41.8578"
+  },
+  {
+   "name": "Ashburn",
+   "bbox": "-87.7415,41.7345,-87.6728,41.7615"
+  },
+  {
+   "name": "Auburn Gresham",
+   "bbox": "-87.6786,41.7286,-87.6337,41.7581"
+  },
+  {
+   "name": "Austin",
+   "bbox": "-87.8062,41.8655,-87.7394,41.9234"
+  },
+  {
+   "name": "Avalon Park",
+   "bbox": "-87.5979,41.7368,-87.5657,41.7569"
+  },
+  {
+   "name": "Avondale",
+   "bbox": "-87.7352,41.9317,-87.6879,41.9467"
+  },
+  {
+   "name": "Belmont Cragin",
+   "bbox": "-87.7908,41.9139,-87.7413,41.9389"
+  },
+  {
+   "name": "Beverly",
+   "bbox": "-87.6965,41.6989,-87.6560,41.7357"
+  },
+  {
+   "name": "Bridgeport",
+   "bbox": "-87.6650,41.8233,-87.6340,41.8495"
+  },
+  {
+   "name": "Brighton Park",
+   "bbox": "-87.7144,41.8039,-87.6839,41.8348"
+  },
+  {
+   "name": "Burnside",
+   "bbox": "-87.6045,41.7220,-87.5867,41.7368"
+  },
+  {
+   "name": "Calumet Heights",
+   "bbox": "-87.5953,41.7226,-87.5457,41.7372"
+  },
+  {
+   "name": "Chatham",
+   "bbox": "-87.6395,41.7225,-87.5953,41.7514"
+  },
+  {
+   "name": "Chicago Lawn",
+   "bbox": "-87.7129,41.7571,-87.6782,41.7866"
+  },
+  {
+   "name": "Clearing",
+   "bbox": "-87.8012,41.7711,-87.7372,41.7858"
+  },
+  {
+   "name": "Douglas",
+   "bbox": "-87.6300,41.8237,-87.6027,41.8457"
+  },
+  {
+   "name": "Dunning",
+   "bbox": "-87.8367,41.9343,-87.7762,41.9602"
+  },
+  {
+   "name": "East Garfield Park",
+   "bbox": "-87.7210,41.8691,-87.6887,41.8883"
+  },
+  {
+   "name": "East Side",
+   "bbox": "-87.5459,41.6828,-87.5241,41.7330"
+  },
+  {
+   "name": "Edgewater",
+   "bbox": "-87.6750,41.9761,-87.6473,41.9982"
+  },
+  {
+   "name": "Edison Park",
+   "bbox": "-87.8214,41.9954,-87.8065,42.0190"
+  },
+  {
+   "name": "Englewood",
+   "bbox": "-87.6549,41.7561,-87.6282,41.7946"
+  },
+  {
+   "name": "Forest Glen",
+   "bbox": "-87.7902,41.9680,-87.7264,42.0154"
+  },
+  {
+   "name": "Fuller Park",
+   "bbox": "-87.6364,41.7945,-87.6286,41.8237"
+  },
+  {
+   "name": "Gage Park",
+   "bbox": "-87.7138,41.7861,-87.6788,41.8049"
+  },
+  {
+   "name": "Garfield Ridge",
+   "bbox": "-87.8016,41.7847,-87.7376,41.8221"
+  },
+  {
+   "name": "Grand Boulevard",
+   "bbox": "-87.6294,41.8019,-87.6064,41.8240"
+  },
+  {
+   "name": "Greater Grand Crossing",
+   "bbox": "-87.6399,41.7507,-87.5921,41.7832"
+  },
+  {
+   "name": "Hegewisch",
+   "bbox": "-87.5890,41.6445,-87.5246,41.6918"
+  },
+  {
+   "name": "Hermosa",
+   "bbox": "-87.7422,41.9135,-87.7223,41.9390"
+  },
+  {
+   "name": "Humboldt Park",
+   "bbox": "-87.7414,41.8878,-87.6916,41.9139"
+  },
+  {
+   "name": "Hyde Park",
+   "bbox": "-87.6064,41.7858,-87.5752,41.8026"
+  },
+  {
+   "name": "Irving Park",
+   "bbox": "-87.7479,41.9389,-87.6943,41.9681"
+  },
+  {
+   "name": "Jefferson Park",
+   "bbox": "-87.7880,41.9676,-87.7526,41.9974"
+  },
+  {
+   "name": "Kenwood",
+   "bbox": "-87.6067,41.8023,-87.5800,41.8169"
+  },
+  {
+   "name": "Lake View",
+   "bbox": "-87.6740,41.9323,-87.6304,41.9616"
+  },
+  {
+   "name": "Lincoln Park",
+   "bbox": "-87.6828,41.9108,-87.6201,41.9330"
+  },
+  {
+   "name": "Lincoln Square",
+   "bbox": "-87.7069,41.9613,-87.6740,41.9908"
+  },
+  {
+   "name": "Logan Square",
+   "bbox": "-87.7315,41.9135,-87.6636,41.9361"
+  },
+  {
+   "name": "Loop",
+   "bbox": "-87.6383,41.8673,-87.6025,41.8906"
+  },
+  {
+   "name": "Lower West Side",
+   "bbox": "-87.6881,41.8348,-87.6352,41.8600"
+  },
+  {
+   "name": "McKinley Park",
+   "bbox": "-87.6875,41.8230,-87.6561,41.8391"
+  },
+  {
+   "name": "Montclare",
+   "bbox": "-87.8067,41.9175,-87.7894,41.9382"
+  },
+  {
+   "name": "Morgan Park",
+   "bbox": "-87.6959,41.6760,-87.6422,41.6996"
+  },
+  {
+   "name": "Mount Greenwood",
+   "bbox": "-87.7397,41.6804,-87.6958,41.7133"
+  },
+  {
+   "name": "Near North Side",
+   "bbox": "-87.6592,41.8862,-87.5985,41.9117"
+  },
+  {
+   "name": "Near South Side",
+   "bbox": "-87.6352,41.8447,-87.6056,41.8685"
+  },
+  {
+   "name": "Near West Side",
+   "bbox": "-87.6923,41.8577,-87.6345,41.8891"
+  },
+  {
+   "name": "New City",
+   "bbox": "-87.6844,41.7939,-87.6355,41.8236"
+  },
+  {
+   "name": "North Center",
+   "bbox": "-87.6969,41.9322,-87.6734,41.9615"
+  },
+  {
+   "name": "North Lawndale",
+   "bbox": "-87.7400,41.8456,-87.6880,41.8710"
+  },
+  {
+   "name": "North Park",
+   "bbox": "-87.7483,41.9718,-87.7040,41.9974"
+  },
+  {
+   "name": "Norwood Park",
+   "bbox": "-87.8366,41.9683,-87.7778,42.0030"
+  },
+  {
+   "name": "O'Hare",
+   "bbox": "-87.9401,41.9373,-87.8348,42.0090"
+  },
+  {
+   "name": "Oakland",
+   "bbox": "-87.6126,41.8168,-87.5922,41.8314"
+  },
+  {
+   "name": "Portage Park",
+   "bbox": "-87.7870,41.9384,-87.7421,41.9687"
+  },
+  {
+   "name": "Pullman",
+   "bbox": "-87.6114,41.6854,-87.5846,41.7223"
+  },
+  {
+   "name": "Riverdale",
+   "bbox": "-87.6203,41.6446,-87.5784,41.6862"
+  },
+  {
+   "name": "Rogers Park",
+   "bbox": "-87.6847,41.9980,-87.6546,42.0230"
+  },
+  {
+   "name": "Roseland",
+   "bbox": "-87.6428,41.6851,-87.6032,41.7395"
+  },
+  {
+   "name": "South Chicago",
+   "bbox": "-87.5857,41.7228,-87.5245,41.7552"
+  },
+  {
+   "name": "South Deering",
+   "bbox": "-87.6019,41.6592,-87.5422,41.7239"
+  },
+  {
+   "name": "South Lawndale",
+   "bbox": "-87.7393,41.8187,-87.6874,41.8570"
+  },
+  {
+   "name": "South Shore",
+   "bbox": "-87.5956,41.7515,-87.5406,41.7738"
+  },
+  {
+   "name": "Uptown",
+   "bbox": "-87.6744,41.9544,-87.6309,41.9778"
+  },
+  {
+   "name": "Washington Heights",
+   "bbox": "-87.6681,41.6994,-87.6331,41.7325"
+  },
+  {
+   "name": "Washington Park",
+   "bbox": "-87.6288,41.7800,-87.6060,41.8023"
+  },
+  {
+   "name": "West Elsdon",
+   "bbox": "-87.7379,41.7858,-87.7133,41.8060"
+  },
+  {
+   "name": "West Englewood",
+   "bbox": "-87.6797,41.7576,-87.6539,41.7942"
+  },
+  {
+   "name": "West Garfield Park",
+   "bbox": "-87.7406,41.8685,-87.7202,41.8881"
+  },
+  {
+   "name": "West Lawn",
+   "bbox": "-87.7421,41.7530,-87.7124,41.7861"
+  },
+  {
+   "name": "West Pullman",
+   "bbox": "-87.6616,41.6573,-87.6123,41.6854"
+  },
+  {
+   "name": "West Ridge",
+   "bbox": "-87.7107,41.9831,-87.6748,42.0195"
+  },
+  {
+   "name": "West Town",
+   "bbox": "-87.7070,41.8882,-87.6394,41.9162"
+  },
+  {
+   "name": "Woodlawn",
+   "bbox": "-87.6158,41.7659,-87.5664,41.7864"
+  }
+ ]
+}
