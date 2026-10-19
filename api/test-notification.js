@@ -57,7 +57,8 @@ export default async function handler(req, res) {
       tip: String(real.tip || '').replace(/[^0-9apmAPM:.\s~-]/g, '').trim().slice(0, 14),
       nextSweepISO: new Date(sweep).toISOString(),
       level, voice,
-      ...(city.id === 'boston' ? { city: 'boston' } : {}),
+      // the curb's city, so the times read on its clock (every city but San Francisco)
+      ...(city.id !== 'sf' ? { city: city.id } : {}),
     };
     const a = city.core.alertAnchors(sweep);
     const fireAt = { eve: +a.eve, morn: sweep - 2 * 3600e3, lead: sweep - 30 * 60000, tonight: +a.tonight };
