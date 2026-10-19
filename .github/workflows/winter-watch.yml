@@ -1,0 +1,55 @@
+name: winter-watch
+run-name: ${{ github.event_name == 'workflow_dispatch' && (inputs.test && 'test email' || 'manual check') || 'winter watch' }}
+
+# Madison's winter rule applies only once the City turns it on (a declared snow emergency or its first general plowing),
+# so CURB's switch (data/madison/winter.json) flips on the City's announcement. This reads the City's news every two hours
+# from November to March and emails the owner when a notice about winter parking appears
+# (scripts/cities/winter-watch.mjs). It never flips the switch itself: the owner says "Madison winter on", or runs
+# scripts/cities/winter.mjs and pushes. What was already emailed is kept in the Actions cache, so each notice goes once.
+on:
+  schedule:
+    - cron: '17 */2 * 11,12,1,2,3 *'
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Send a sample email now (checks delivery; reads no news)'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run: read the news and print the email, send nothing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winter-watch
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/cache/restore@v6
+        with:
+          path: .winter-watch
+          key: winter-watch-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: winter-watch-
+      - name: Read Madison's news
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          WATCH_TO: ${{ secrets.WEEKLY_TO }}
+          FLAGS: ${{ github.event_name == 'workflow_dispatch' && (inputs.test && '--test' || (inputs.dry_run && '--dry-run' || '')) || '' }}
+        run: node scripts/cities/winter-watch.mjs madison --seen .winter-watch/seen.json $FLAGS
+      # a real check keeps what it emailed; a test or a dry run reads that memory but never replaces it
+      - uses: actions/cache/save@v6
+        if: always() && hashFiles('.winter-watch/seen.json') != '' && (github.event_name == 'schedule' || (!inputs.test && !inputs.dry_run))
+        with:
+          path: .winter-watch
+          key: winter-watch-${{ github.run_id }}-${{ github.run_attempt }}

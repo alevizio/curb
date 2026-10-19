@@ -116,6 +116,11 @@ The design picked on 2026-10-18 (view A, "tonight's side", with alerts "only onc
   (lib/city.js `suspended`). Switch it with `node scripts/cities/winter.mjs madison on --reason "Madison called its first
   plowing."` (from the coming night by default; `--from YYYY-MM-DD` for another), `paused` or `waiting`, then commit and
   push: the page and the alerts follow the deploy.
+- **The watch** (owner pick 2026-10-18, "email me when it's posted"): `.github/workflows/winter-watch.yml` reads the City's
+  news (cityofmadison.com/news) every two hours from November to March and emails the owner (secrets `WEEKLY_TO`,
+  `GMAIL_*`) when a notice mentions a snow emergency, a general plowing, alternate side or winter parking
+  (scripts/cities/winter-watch.mjs). It never flips the switch. Last winter's start was the news release of 2025-11-29,
+  "Madison Declares a Snow Emergency; Winter Parking Rules Are In Effect Citywide". A manual run can send a test email.
 - **Not on yet** (waiting, paused): winter sides are dashed, a plate under the day chips says "Not in effect yet" (or
   "Paused"), the sheet says which dates close the side, and alerts can be turned on so they start with the rule. The
   saved spot carries the side's winter rule; the server sends nothing for a night the City doesn't enforce

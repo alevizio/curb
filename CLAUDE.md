@@ -228,7 +228,8 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   drawing, the alert sender at start, vercel.json includeFiles). Waiting: dashed sides, a "Not in effect yet" plate, alerts
   can be on early (the sender holds them: lib/notify-core.js `winterPlan`). On: the plate names tonight's side, closed side
   red, open side green; one "starts tonight" push per switch-on, then the 9 PM push of each night the side closes. Flip it
-  with `node scripts/cities/winter.mjs madison on --reason "…"` and push. See docs/multi-city/madison.md.
+  with `node scripts/cities/winter.mjs madison on --reason "…"` and push; .github/workflows/winter-watch.yml emails the owner
+  when the City's news mentions a snow emergency or plowing (it never flips it). See docs/multi-city/madison.md.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy
