@@ -52,6 +52,9 @@ const CRAWLER = new RegExp([
 ].join('|'), 'i');
 export const isCrawler = (ua) => CRAWLER.test(String(ua || ''));
 
+const EXTENSION_MSG = /\bruntime\.(?:sendMessage|connect)\(\)|Extension context invalidated/;
+const EXTENSION_URL = /\b(?:safari-web-extension|safari-extension|chrome-extension|moz-extension|webkit-masked-url):\/\//;
+
 /** Validate + normalize a raw report. Returns null for junk / noise we never want to store. */
 export function normalize(body, ua, now = Date.now()) {
   if (!body || typeof body !== 'object') return null;
@@ -62,6 +65,9 @@ export function normalize(body, ua, now = Date.now()) {
   if (!msg || msg === 'Script error.' || /ResizeObserver loop/.test(msg)) return null;
   const src = cleanSrc(body.src);
   if (src && !src.startsWith('/')) return null; // third-party / extension script — not ours to fix
+  // A promise rejection carries no src, so an extension's own failures arrive looking like ours. CURB never
+  // calls the extension APIs (runtime.*), and a stack inside an extension's code is the extension's.
+  if (EXTENSION_MSG.test(msg) || EXTENSION_URL.test(String(body.stack || ''))) return null;
   const toInt = (v) => (Number.isFinite(+v) ? Math.max(0, Math.min(1e7, Math.trunc(+v))) : 0);
   return {
     ts: now,
