@@ -53,8 +53,9 @@ export function sanitizeRule(rule) {
     holidays: bit(rule.holidays),
   };
   // a rule that runs on holidays anyway (1), a side-switching rule, applied only while the City enforces it (4; lib/city.js),
-  // or one closing both sides (8); absent on every San Francisco and Boston rule
-  const flags = Number(rule.flags) & 13;
+  // one closing both sides (8), or a City crew sweep that the City's other holidays stop too (16); absent on every San
+  // Francisco and Boston rule
+  const flags = Number(rule.flags) & 29;
   if (flags) out.flags = flags;
   // A seasonal rule's months (Boston sweeps April to November): kept only when they leave some month out, so a
   // rule swept all year, every SF rule among them, stores exactly as before.

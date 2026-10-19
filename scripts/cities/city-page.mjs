@@ -222,7 +222,7 @@ function datesAfter(r,ns){const iso=ns.y+'-'+String(ns.mo).padStart(2,'0')+'-'+S
   return later.length?'then '+later.join(' and '):'the last date posted';}
 function freqLabel(weeks){`],
     ['alerts carry dates and the holiday flag', "holidays:r.holidays||'0',...(r.months?{months:r.months}:{})});",
-      "holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates.filter(d=>d>=todayISO())}:{}),...(r.flags&13?{flags:r.flags&13}:{})});"],
+      "holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates.filter(d=>d>=todayISO())}:{}),...(r.flags&29?{flags:r.flags&29}:{})});"],
     // ---- the block sheet ----------------------------------------------------------------------------
     ['season and fine instead of the SF re-park rule',
       "${_soon?`<div class=\"afterpass\">Once the sweeper has passed, you can re-park here, even before the posted window ends. <a href=\"https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets\" target=\"_blank\" rel=\"noopener\">SFMTA rule ↗</a></div>`:''}",

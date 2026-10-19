@@ -15,7 +15,8 @@
 //
 // Holidays: the City's own lookup tool (gis.sanjoseca.gov/maps/serviceslookuptool, its calendar API) moves a
 // residential sweep one day later in the weeks of New Year's Day, Thanksgiving and Christmas, on and after the holiday
-// ("Residential Street Sweep (Moved for Holiday)"), and cancels major road sweeps on City holidays.
+// ("Residential Street Sweep (Moved for Holiday)"), and cancels major road sweeps on City holidays (sanjoseca.gov's
+// City holiday closures; the major road rules are flagged 16, so `cityHolidays` stops them and not the residential ones).
 //
 // Run: node scripts/cities/san-jose.mjs [--refresh]   (Node 18+; inputs cached in private/cache/san-jose/)
 
@@ -138,13 +139,23 @@ export function crossName(s) {
 // Other City holidays (Indigenous Peoples Day 2026-10-12, Veterans Day 2026-11-11, MLK Day 2027-01-18, Presidents' Day
 // 2027-02-15) keep their residential sweeps. 2026-01-01/02 and 2027-11-25/26 are derived by the same rule; Christmas
 // 2027 and New Year's Day 2028 fall on Saturdays and move nothing (unverified: past the calendar's 12 months).
-// Major road sweeps (City crews) are canceled on every City holiday; only these dates are listed, so on the other City
-// holidays the map still shows a major road sweep the City cancels.
+// Major road sweeps (City crews) are canceled on every City holiday (San Jose Enterprise GIS by email, 2026-10-19):
+// these dates stop them too, and CITY_HOLIDAYS below the rest.
 export const HOLIDAYS = {
   '2026-01-01': "New Year's Day", '2026-01-02': "New Year's week (Friday sweeps move to Saturday)",
   '2026-11-26': 'Thanksgiving Day', '2026-11-27': 'Thanksgiving week (Friday sweeps move to Saturday)',
   '2026-12-25': 'Christmas Day', '2027-01-01': "New Year's Day",
   '2027-11-25': 'Thanksgiving Day', '2027-11-26': 'Thanksgiving week (Friday sweeps move to Saturday)',
+};
+// The City's other holidays, which stop only the major road sweeps (rules flagged 16): sanjoseca.gov's City holiday
+// closures (news-stories/city-calendar/city-holiday-closures, read 2026-10-19), with the observed dates it gives
+// (Juneteenth and Independence Day 2027 fall on weekends). Left out: the other days of its Christmas and New Year
+// closures (12/24 to 1/1, 12/23 to 12/31), which it doesn't call holidays, so the map keeps those sweeps rather
+// than hide one the City runs.
+export const CITY_HOLIDAYS = {
+  '2026-11-11': 'Veterans Day', '2027-01-18': 'Martin Luther King Jr. Day', '2027-02-05': 'Lunar New Year',
+  '2027-02-15': "Presidents' Day", '2027-03-31': 'Farmworkers Day', '2027-05-31': 'Memorial Day', '2027-06-18': 'Juneteenth',
+  '2027-07-05': 'Independence Day', '2027-09-06': 'Labor Day', '2027-10-11': "Indigenous Peoples' Day", '2027-11-11': 'Veterans Day',
 };
 
 // ---------- build ---------------------------------------------------------------------------------
@@ -237,7 +248,7 @@ async function main() {
     b.kinds.add('major');
     for (const r of rules) {
       const sides = r.side === 'B' ? ['L', 'R'] : [sideFacing(b.coords, r.side)];
-      for (const side of sides) for (const dow of r.dows) add(b, side, [dow, r.from, r.to, r.weeks, 0, 0]);
+      for (const side of sides) for (const dow of r.dows) add(b, side, [dow, r.from, r.to, r.weeks, 0, 16]);
     }
   }
 
@@ -275,12 +286,13 @@ async function main() {
   const lastUpdate = (fs2) => new Date(Math.max(...fs2.map((f) => f.properties.LASTUPDATE || 0))).toISOString().slice(0, 10);
 
   // 5. write
-  const today = new Date().toISOString().slice(0, 10);
+  // the day each input was fetched: its cache file's date (a rebuild from the cache fetches nothing)
+  const fetched = (src) => fs.statSync(CACHE + src.file).mtime.toISOString().slice(0, 10);
   const sources = [
-    { name: 'Residential Street Sweeping Routes (Department of Transportation)', url: 'https://data.sanjoseca.gov/dataset/residential-street-sweeping-routes', license: 'CC BY', fetched: today },
-    { name: 'Major Road Street Sweeping Routes (Department of Transportation)', url: 'https://data.sanjoseca.gov/dataset/major-road-street-sweeping-routes', license: 'CC BY', fetched: today },
-    { name: 'Streets', url: SOURCES.streets.url, license: 'CC BY', fetched: today },
-    { name: 'Neighborhoods', url: SOURCES.hoods.url, license: 'CC BY', fetched: today },
+    { name: 'Residential Street Sweeping Routes (Department of Transportation)', url: 'https://data.sanjoseca.gov/dataset/residential-street-sweeping-routes', license: 'CC BY', fetched: fetched(SOURCES.residential) },
+    { name: 'Major Road Street Sweeping Routes (Department of Transportation)', url: 'https://data.sanjoseca.gov/dataset/major-road-street-sweeping-routes', license: 'CC BY', fetched: fetched(SOURCES.major) },
+    { name: 'Streets', url: SOURCES.streets.url, license: 'CC BY', fetched: fetched(SOURCES.streets) },
+    { name: 'Neighborhoods', url: SOURCES.hoods.url, license: 'CC BY', fetched: fetched(SOURCES.hoods) },
   ];
   fs.mkdirSync(OUT, { recursive: true });
   let w = 180, s = 90, e = -180, nn = -90;
@@ -288,7 +300,7 @@ async function main() {
   fs.writeFileSync(OUT + 'segments.json', JSON.stringify({
     _meta: { city: 'san-jose', time_zone: 'America/Los_Angeles', generated: new Date().toISOString(), sources, blocks: out.length, sides: sideCount,
       format: 'b[] = {c: CENTERLINEID (the Streets layer INTID), s: street, l: cross streets, h: neighborhood (2020 boundaries), n: [lowest, highest house number], o: the side with odd numbers (L|R), g: centerline [[lng,lat]], d: [[side L|R, compass label, rules]]}; '
-        + 'rule = [jsDow, from, to, weeksMask (bit i = week i+1; 31 = every week), monthsMask (0 = all year), flags (0: holidays stop it, no tow)]; a residential side has two rules on its day, one per window around the lunch break' },
+        + 'rule = [jsDow, from, to, weeksMask (bit i = week i+1; 31 = every week), monthsMask (0 = all year), flags (0: holidays stop it, no tow; 16: a major road sweep, which cityHolidays stop too)]; a residential side has two rules on its day, one per window around the lunch break' },
     b: out }));
 
   const city = {
@@ -296,6 +308,7 @@ async function main() {
     center: [37.3455, -121.8332], zoom: 15,   // the most signed blocks within 600 m (east San Jose, around Alum Rock Ave)
     bounds: [[+(s - 0.003).toFixed(4), +(w - 0.003).toFixed(4)], [+(nn + 0.003).toFixed(4), +(e + 0.003).toFixed(4)]],
     holidays: HOLIDAYS, holidaysSource: 'https://gis.sanjoseca.gov/maps/serviceslookuptool/', holidayRule: 'all',
+    cityHolidays: CITY_HOLIDAYS, cityHolidaysSource: 'https://www.sanjoseca.gov/news-stories/city-calendar/city-holiday-closures',
     fine: '$65', tow: 'no', fineSource: 'https://sanjoseca.govnita.com/workspaces/Resolutions?query=RES2025-272',
     agency: 'City of San Jose Department of Transportation', scheduleUrl: 'https://www.sanjoseca.gov/your-government/departments-offices/transportation/streets/street-sweeping',
     sources,
@@ -311,7 +324,7 @@ async function main() {
 
   const report = {
     generated: new Date().toISOString(),
-    season: 'All year. Residential: once a month on the nth weekday (posted). Major roads: weekly or 1st and 3rd / 2nd and 4th weekdays, at night or early morning (posted). Residential sweeps in the weeks of New Year\'s Day, Thanksgiving and Christmas move one day later from the holiday on (City lookup calendar); major road sweeps are canceled on City holidays, of which only those dates are in holidays.',
+    season: 'All year. Residential: once a month on the nth weekday (posted). Major roads: weekly or 1st and 3rd / 2nd and 4th weekdays, at night or early morning (posted). Residential sweeps in the weeks of New Year\'s Day, Thanksgiving and Christmas move one day later from the holiday on (City lookup calendar); major road sweeps are canceled on every City holiday (holidays, and cityHolidays for their rules, flagged 16).',
     input: {
       residentialRows: residential.length, residentialSigned: signedRes.length, residentialNotSigned: residential.length - signedRes.length,
       residentialByType: residential.reduce((o, f) => ((o[f.properties.ROUTETYPE] = (o[f.properties.ROUTETYPE] || 0) + 1), o), {}),

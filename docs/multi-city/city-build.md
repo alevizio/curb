@@ -56,7 +56,9 @@ A **rule** is one of:
 - `months`: the season, bit 0 = January to bit 11 = December. 0 = all year. April to November = 2040.
 - `flags`: 1 = not suspended on holidays (an overnight program that runs anyway), 2 = towable, 4 = a side-switching rule shown
   as tonight's side, applied only while the City enforces it (`winter` in city.json and the switch in `data/<id>/winter.json`,
-  see madison.md), 8 = it closes both sides (Milwaukee's winter ban on bus routes, see milwaukee.md). city.json `winter` may add
+  see madison.md), 8 = it closes both sides (Milwaukee's winter ban on bus routes, see milwaukee.md), 16 = a sweep by City
+  crews that the City's other holidays stop too (city.json `cityHolidays`, the dates that stop only these rules: San Jose's
+  major roads, where the contractor's residential sweeps keep those days). city.json `winter` may add
   `night: 'evening'` (the evening's date names the side) and `permit: true` (for cars with a permit); `words.what` names what a
   map without sweeping is about ("night parking").
 - `dates`: local dates `"YYYY-MM-DD"`, for cities that publish dates instead of a pattern (Chicago, Saint Paul,

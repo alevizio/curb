@@ -26,6 +26,10 @@ describe('saved rules', () => {
     expect(sanitizeRule({ ...sf, flags: 3 }).flags).toBe(1);
     expect(sanitizeRule({ ...sf, flags: 2 }).flags).toBeUndefined();
   });
+  it('mark a City crew sweep (16), so the City\'s other holidays stop its alerts too', () => {
+    expect(sanitizeRule({ ...sf, flags: 18 }).flags).toBe(16);
+    expect(sanitizeRule({ ...sf, flags: 32 }).flags).toBeUndefined();
+  });
   it('mark a winter rule (Madison\'s alternate side parking) and keep a whole season of its dates', () => {
     const odd = [];
     for (let t = Date.parse('2026-11-15T12:00Z'); t <= Date.parse('2027-03-15T12:00Z'); t += 2 * 864e5) odd.push(new Date(t).toISOString().slice(0, 10));

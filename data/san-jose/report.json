@@ -1,6 +1,6 @@
 {
- "generated": "2026-10-18T19:14:40.966Z",
- "season": "All year. Residential: once a month on the nth weekday (posted). Major roads: weekly or 1st and 3rd / 2nd and 4th weekdays, at night or early morning (posted). Residential sweeps in the weeks of New Year's Day, Thanksgiving and Christmas move one day later from the holiday on (City lookup calendar); major road sweeps are canceled on City holidays, of which only those dates are in holidays.",
+ "generated": "2026-10-19T18:53:43.120Z",
+ "season": "All year. Residential: once a month on the nth weekday (posted). Major roads: weekly or 1st and 3rd / 2nd and 4th weekdays, at night or early morning (posted). Residential sweeps in the weeks of New Year's Day, Thanksgiving and Christmas move one day later from the holiday on (City lookup calendar); major road sweeps are canceled on every City holiday (holidays, and cityHolidays for their rules, flagged 16).",
  "input": {
   "residentialRows": 18810,
   "residentialSigned": 2252,

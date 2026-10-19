@@ -868,8 +868,8 @@
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=8"></script>
 <script>window.CURB_CITY="montreal";</script>
-<script src="/lib/city-configs.js?v=c6f9cb01"></script>
-<script src="/lib/city.js?v=6d890724"></script>
+<script src="/lib/city-configs.js?v=804afe3f"></script>
+<script src="/lib/city.js?v=e7874488"></script>
 <script src="/lib/i18n-fr.js?v=aceb5a89"></script>
 <script>window.CURB_FR&&CURB_FR.startI18n([["Each side of the street has its own street cleaning time on the signs: no parking for a few hours, usually one day a week, from April 1 to December 1 in most boroughs.","Chaque côté de la rue a son heure de nettoyage sur les panneaux : quelques heures sans stationnement, souvent un jour par semaine, du 1er avril au 1er décembre dans la plupart des arrondissements."],[" Tap where you parked for the rules."," Touchez la bordure où vous êtes stationné pour voir les règles."],["Signs give exact dates, April 1 to December 1 in most boroughs; the map moves each date to the nearest first of a month (December 1 is left out, March 15 starts March 1, November 15 ends October 31). Also on holidays. A ticket, sometimes a tow.","Les panneaux donnent les dates exactes, du 1er avril au 1er décembre dans la plupart des arrondissements; la carte ramène chaque date au premier du mois le plus proche (le 1er décembre est omis, le 15 mars commence le 1er mars, le 15 novembre finit le 31 octobre). Aussi les jours fériés. Une contravention, parfois le remorquage."],["Read sign by sign from the City of Montréal's parking sign inventory (Signalisation, updated daily, CC BY 4.0): each street cleaning sign goes on the nearest street side of the City's Géobase within 15 m, and a side shows every rule its signs post. The inventory is thin in Lachine, Saint-Laurent, Montréal-Nord and Saint-Léonard and nearly empty in LaSalle and Verdun; Pierrefonds-Roxboro and L'Île-Bizard–Sainte-Geneviève have no street cleaning. The sign on the street wins.","Lu panneau par panneau dans l'inventaire de la signalisation de stationnement de la Ville de Montréal (Signalisation, mis à jour chaque jour, CC BY 4.0) : chaque panneau de nettoyage est placé sur le côté de rue le plus proche de la Géobase, à moins de 15 m, et un côté montre toutes les règles de ses panneaux. L'inventaire est mince à Lachine, Saint-Laurent, Montréal-Nord et Saint-Léonard, et presque vide à LaSalle et à Verdun; Pierrefonds-Roxboro et L'Île-Bizard–Sainte-Geneviève n'ont pas de nettoyage. Le panneau sur la rue a toujours raison."]]);</script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
@@ -1649,7 +1649,7 @@ function alertSpotFor(group, side, armNs, armRow){
   // earliest next sweep across them each tick (the "forever-watch"). `rule` = the row that produced
   // `ns`, kept for back-compat; cnn+sideKey identify this curb (also the saved-alert key).
   const ruleOf=r=>({weekday:r.weekday,fromhour:r.fromhour,tohour:r.tohour,
-    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates.filter(d=>d>=todayISO())}:{}),...(r.flags&13?{flags:r.flags&13}:{})});
+    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates.filter(d=>d>=todayISO())}:{}),...(r.flags&29?{flags:r.flags&29}:{})});
   const r0=armRow;
   // the block's avg ticket time flavors the copy
   const _et=enfFor(group.cnn, r0&&normDay(r0.weekday));

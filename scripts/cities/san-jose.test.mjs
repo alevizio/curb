@@ -2,7 +2,7 @@
 // roads' posted text per side, and the holidays, on real rows of the City's sweeping routes (2023-12-14 / 2026-08-24).
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
-import { parseMonthly, parseWindows, parsePosted, sideFacing, crossName, HOLIDAYS } from './san-jose.mjs';
+import { parseMonthly, parseWindows, parsePosted, sideFacing, crossName, HOLIDAYS, CITY_HOLIDAYS } from './san-jose.mjs';
 
 const ROOT = new URL('../../', import.meta.url);
 
@@ -87,6 +87,14 @@ describe('holidays: the City\'s lookup calendar', () => {
   it('keeps residential sweeps on the other City holidays (Indigenous Peoples Day, Veterans Day, MLK Day)', () => {
     for (const d of ['2026-10-12', '2026-11-11', '2027-01-18', '2027-02-15']) expect(HOLIDAYS[d]).toBeUndefined();
   });
+  it('lists the other City holidays, which stop the major road sweeps: weekdays, none already a holiday for everyone', () => {
+    expect(Object.keys(CITY_HOLIDAYS)).toHaveLength(11);
+    for (const d of Object.keys(CITY_HOLIDAYS)) {
+      expect(HOLIDAYS[d]).toBeUndefined();
+      expect([1, 2, 3, 4, 5]).toContain(new Date(d + 'T12:00:00Z').getUTCDay());
+    }
+    expect(CITY_HOLIDAYS['2027-07-05']).toBe('Independence Day');   // observed: July 4, 2027 is a Sunday
+  });
 });
 
 describe('the built data, read by lib/city.js', () => {
@@ -101,5 +109,19 @@ describe('the built data, read by lib/city.js', () => {
     expect(rows.map((r) => [r.weekday, r.fromhour, r.tohour, r.week1])).toEqual([['Fri', '7', '12', '1'], ['Fri', '12:30', '17', '1']]);
     const next = rows.map((r) => city.core.nextSweep(r)).sort((a, b) => a.start - b.start)[0];
     expect([next.y, next.mo, next.da, next.fromH]).toEqual([2027, 2, 5, 7]);
+  });
+  it('flags every major road rule 16, and only those', () => {
+    const rules = read('segments.json').b.flatMap((b) => b.d.flatMap(([, , r]) => r));
+    expect(rules.filter((r) => r[5] === 16).length).toBe(521);
+    expect(rules.every((r) => r[5] === 0 || r[5] === 16)).toBe(true);
+  });
+  it('S 1st St (a major road, 3 to 6 AM every day): no Wednesday sweep on Veterans Day, the next on Nov 18', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-05T20:00:00Z'));
+    const city = globalThis.makeCity(read('city.json'));
+    const row = city.rowsOf(read('segments.json').b.find((b) => b.c === '9553')).find((r) => r.cnnrightleft === 'L' && r.weekday === 'Wed');
+    expect([row.fromhour, row.tohour, row.flags]).toEqual(['3', '6', 16]);
+    expect(city.core.holidaySkip(row)).toMatchObject({ iso: '2026-11-11', name: 'Veterans Day' });
+    const next = city.core.nextSweep(row);
+    expect([next.mo, next.da, next.fromH]).toEqual([11, 18, 3]);
   });
 });
