@@ -3337,8 +3337,8 @@ loadRoutes();       // background; the block's DPW sweeper-route line + colors t
 window.addEventListener('offline',()=>toast("You're offline. Showing cached data; sweep times may be stale."));
 window.addEventListener('online',()=>{toast('Back online. Refreshing.');loadViewport();});
 
-/* First-run onboarding: one welcome card until dismissed or the first curb is tapped.
-   The sheet itself is the "aha" — we never tour past it. Tracked, never repeated. */
+/* The welcome card: the explainer behind the logo and ⓘ > How CURB works. It no longer opens by itself on a first
+   visit (owner, 2026-10-18: "take out the initial little modal"): the map opens at once. */
 function onboarded(){try{return localStorage.getItem('curbOnboarded')==='1';}catch(_){return true;}}
 function markOnboarded(){
   try{localStorage.setItem('curbOnboarded','1');}catch(_){}
@@ -3356,7 +3356,8 @@ function showWelcome(){
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'&&document.getElementById('welcome').classList.contains('open'))markOnboarded();
   });
-  if(!EMBED&&!onboarded())showWelcome();
+  // a first visit opens on the map; it is remembered after this script, so the iPhone hint below still waits a visit
+  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);
 })();
 
 /* iOS install hint: close on × or backdrop tap; auto-show once for un-installed iOS Safari. */
@@ -3364,7 +3365,7 @@ document.getElementById('iosClose').onclick=hideIosHint;
 document.getElementById('iosGet').onclick=()=>track('ios_app_offer_tap');
 document.getElementById('iosHint').addEventListener('click',e=>{ if(e.target.id==='iosHint') hideIosHint(); });
 (function maybeIosHint(){
-  if(!onboarded()) return; // never stack on the welcome card — it shows on a later visit
+  if(!onboarded()) return; // not on a first visit: it shows on a later one
   if(!(isIOS() && !isStandalone())) return;
   let shown=''; try{shown=localStorage.getItem('curbIosHintShown')||'';}catch(_){}
   if(shown) return;

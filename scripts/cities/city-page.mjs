@@ -107,7 +107,7 @@ function cityPage(id) {
       `<p>${esc(rule)} Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>`],
     ['neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, hoods.length ? '<nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul>'
       + hoods.map((h) => `<li><a href="/${id}?bbox=${h.bbox}" data-bbox="${h.bbox}">${esc(h.name)}</a></li>`).join('') + '</ul></nav>' : ''],
-    ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())showWelcome();\n})();\n", `  if(!EMBED&&!onboarded())showWelcome();
+    ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);\n})();\n", `  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);
 })();
 ${hoods.length ? `document.getElementById('imHoods').onclick=()=>{ closeInfoMenu(); showWelcome(); document.querySelector('.whoods')?.scrollIntoView({block:'nearest'}); };
 document.querySelector('.whoods')?.addEventListener('click',e=>{

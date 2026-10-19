@@ -111,7 +111,7 @@ map.createPane('curbs').style.zIndex=450;
   ['Boston neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, '<nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul>'
     + hoods.map((h) => `<li><a href="/boston?bbox=${h.bbox}" data-bbox="${h.bbox}">${esc(h.name)}</a></li>`).join('') + '</ul></nav>'],
   // SF's neighborhood links open /n/ pages; Boston's frame the map in place (the href is the fallback)
-  ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())showWelcome();\n})();\n", `  if(!EMBED&&!onboarded())showWelcome();
+  ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);\n})();\n", `  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);
 })();
 // the menu's Neighborhoods opens the welcome card at its neighborhood list
 document.getElementById('imHoods').onclick=()=>{ closeInfoMenu(); showWelcome(); document.querySelector('.whoods')?.scrollIntoView({block:'nearest'}); };

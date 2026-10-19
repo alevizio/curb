@@ -881,7 +881,7 @@
      loaded before the main script so its exports are on globalThis. Unit-tested separately.
      Bump ?v= whenever the page starts using a new export: sw.js serves same-origin files
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
-<script src="/lib/sweep-core.js?v=7"></script>
+<script src="/lib/sweep-core.js?v=8"></script>
 <script src="/lib/city-boston.js?v=7"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
@@ -3341,8 +3341,8 @@ map.whenReady(()=>setTimeout(loadViewport,400));
 window.addEventListener('offline',()=>toast("You're offline. Showing cached data; sweep times may be stale."));
 window.addEventListener('online',()=>{toast('Back online. Refreshing.');loadViewport();});
 
-/* First-run onboarding: one welcome card until dismissed or the first curb is tapped.
-   The sheet itself is the "aha" — we never tour past it. Tracked, never repeated. */
+/* The welcome card: the explainer behind the logo and ⓘ > How CURB works. It no longer opens by itself on a first
+   visit (owner, 2026-10-18: "take out the initial little modal"): the map opens at once. */
 function onboarded(){try{return localStorage.getItem('curbOnboarded')==='1';}catch(_){return true;}}
 function markOnboarded(){
   try{localStorage.setItem('curbOnboarded','1');}catch(_){}
@@ -3360,7 +3360,8 @@ function showWelcome(){
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'&&document.getElementById('welcome').classList.contains('open'))markOnboarded();
   });
-  if(!EMBED&&!onboarded())showWelcome();
+  // a first visit opens on the map; it is remembered after this script, so the iPhone hint below still waits a visit
+  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);
 })();
 // the menu's Neighborhoods opens the welcome card at its neighborhood list
 document.getElementById('imHoods').onclick=()=>{ closeInfoMenu(); showWelcome(); document.querySelector('.whoods')?.scrollIntoView({block:'nearest'}); };
@@ -3375,7 +3376,7 @@ document.getElementById('iosClose').onclick=hideIosHint;
 document.getElementById('iosGet').onclick=()=>track('ios_app_offer_tap');
 document.getElementById('iosHint').addEventListener('click',e=>{ if(e.target.id==='iosHint') hideIosHint(); });
 (function maybeIosHint(){ return;  // the iPhone app is San Francisco only
-  if(!onboarded()) return; // never stack on the welcome card — it shows on a later visit
+  if(!onboarded()) return; // not on a first visit: it shows on a later one
   if(!(isIOS() && !isStandalone())) return;
   let shown=''; try{shown=localStorage.getItem('curbIosHintShown')||'';}catch(_){}
   if(shown) return;

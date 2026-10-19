@@ -47,8 +47,11 @@ try {
   const waitFor = (fn, ms, ...a) => page.waitForFunction(fn, { timeout: ms, polling: 250 }, ...a).then(() => true, () => false);
 
   await page.goto(SITE + '/', { waitUntil: 'load', timeout: 45000 });
-  // A first-time visitor sees the welcome card; dismiss it the way a person would.
-  if (await waitFor(() => { const b = document.getElementById('welcomeGo'); return b && b.offsetParent; }, 8000)) await page.click('#welcomeGo');
+  // A first-time visitor lands on the map: no welcome card opens by itself (2026-10-18).
+  await new Promise((r) => setTimeout(r, 1500));
+  (await page.evaluate(() => !document.getElementById('welcome').classList.contains('open')))
+    ? ok('browser: a first visit opens on the map, no welcome card')
+    : fail('browser: a first visit opens on the map, no welcome card', 'the welcome card opened by itself');
 
   (await waitFor(() => document.querySelectorAll('.leaflet-tile-loaded').length >= 8, 25000))
     ? ok('browser: basemap renders')
