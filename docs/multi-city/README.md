@@ -46,13 +46,14 @@ for the City.
 | [Saint Paul](saint-paul.md) | The fall sweep dates, both sides of each block | Dates move with the weather; the fine is not published |
 | [Norfolk](norfolk.md) | The City's sweeping table by address; tickets 96% on the schedule's day | Hours inferred from tickets |
 | [Madison](madison.md) | The posted sweeping signs, and winter alternate side parking (shown as tonight's side once the City turns it on) | The winter switch follows the City's announcements by hand |
+| [Milwaukee](milwaukee.md) | Night parking: tonight's side all year for cars with a night permit, the City's exception streets and the winter ban on bus routes | Streets signed for one side and snow emergencies are not in the data |
 | [Denver](denver.md) | Sweep codes on the centerline; hours from the sign inventory | Hours inferred for most blocks |
 | [Somerville](somerville.md) | The City's sweeping pages, one per street stretch | No tickets published; the pages' index is gone |
 | [Montréal](montreal.md) | 43k street cleaning signs placed on the Géobase | The sign inventory is thin in six boroughs; the page is in English |
 
 Not built: [Cambridge](cambridge.md) (the only street table is from 2014, and 2025 tickets contradict it), [San Mateo](san-mateo.md)
-(which streets are posted is not known), and the snow and winter rule cities (Toronto, Milwaukee, Minneapolis, Winnipeg,
-Calgary, Edmonton), which need the map to show a rule that switches sides by date.
+(which streets are posted is not known), and the snow and winter rule cities (Toronto, Minneapolis, Winnipeg, Calgary,
+Edmonton): the map now shows a rule that switches sides by date (Madison, Milwaukee), so each is a data build plus its words.
 
 ## Principles
 

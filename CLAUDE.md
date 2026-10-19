@@ -230,6 +230,9 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   red, open side green; one "starts tonight" push per switch-on, then the 9 PM push of each night the side closes. Flip it
   with `node scripts/cities/winter.mjs madison on --reason "…"` and push; .github/workflows/winter-watch.yml emails the owner
   when the City's news mentions a snow emergency or plowing (it never flips it). See docs/multi-city/madison.md.
+  Milwaukee uses the same view all year (owner pick 2026-10-19): `winter.night: 'evening'` (the evening's date names the
+  side), `permit: true`, flag 8 for its winter ban on both sides of bus routes, free Sunday and holiday mornings (absent from
+  the lists), `words.what: 'night parking'` (title, words, no day chips), switch always on. See docs/multi-city/milwaukee.md.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy

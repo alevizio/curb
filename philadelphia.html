@@ -864,8 +864,8 @@
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=8"></script>
 <script>window.CURB_CITY="philadelphia";</script>
-<script src="/lib/city-configs.js?v=75e8abce"></script>
-<script src="/lib/city.js?v=425e01fc"></script>
+<script src="/lib/city-configs.js?v=c6f9cb01"></script>
+<script src="/lib/city.js?v=6d890724"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -1643,7 +1643,7 @@ function alertSpotFor(group, side, armNs, armRow){
   // earliest next sweep across them each tick (the "forever-watch"). `rule` = the row that produced
   // `ns`, kept for back-compat; cnn+sideKey identify this curb (also the saved-alert key).
   const ruleOf=r=>({weekday:r.weekday,fromhour:r.fromhour,tohour:r.tohour,
-    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates}:{}),...(r.flags&5?{flags:r.flags&5}:{})});
+    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates.filter(d=>d>=todayISO())}:{}),...(r.flags&13?{flags:r.flags&13}:{})});
   const r0=armRow;
   // the block's avg ticket time flavors the copy
   const _et=enfFor(group.cnn, r0&&normDay(r0.weekday));
@@ -2855,6 +2855,8 @@ function setDayFilter(v){
 }
 const MONLBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 // frequency phrase from the 5 week flags: all -> "every week", else ordinals
+// the city's date today ("YYYY-MM-DD"): an alert carries a listed rule's dates from today on, a year of them fits
+function todayISO(){const p=sfTodayParts();return p.y+'-'+String(p.mo).padStart(2,'0')+'-'+String(p.da).padStart(2,'0');}
 // a rule on listed dates: the dates after this one ("then Nov 2 and Nov 16"), or that it is the last
 function datesAfter(r,ns){const iso=ns.y+'-'+String(ns.mo).padStart(2,'0')+'-'+String(ns.da).padStart(2,'0');
   const later=r.dates.filter(d=>d>iso).slice(0,2).map(d=>MONLBL[+d.slice(5,7)-1]+' '+(+d.slice(8,10)));

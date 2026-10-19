@@ -72,20 +72,26 @@ function cityPage(id) {
   const ex = top ? data.b.find((b) => b.s === top[0] && b.n) : null;
   const example = ex ? `${ex.n[0] % 2 ? ex.n[0] : ex.n[0] + 1} ${ex.s}` : (data.b[0] && data.b[0].s) || 'Main St';
   const rule = words.rule || `Every swept curb in ${name}, colored by its next street sweep.`;
+  // What the map is about: street sweeping (every city so far) or another rule (Milwaukee: "night parking", city.json
+  // words.what), for the title, descriptions, share text and the words for an empty area. A city with no sweeping has no day
+  // chips: they filter sweeps by weekday.
+  const what = words.what || 'street sweeping', sweeps = what === 'street sweeping';
+  const What = what.replace(/\b\w/g, (ch) => ch.toUpperCase()), Cap = what.charAt(0).toUpperCase() + what.slice(1);
+  const noRule = sweeps ? 'No street-sweeping schedule here' : `No ${what} rule here`;
 
   const edits = [
     // ---- head --------------------------------------------------------------------------------------
     ['title + noindex', '<title>SF Street Cleaning Map: When Tickets Actually Land | CURB</title>',
-      `<title>${esc(name)} Street Cleaning Map (preview) | CURB</title>\n<meta name="robots" content="noindex">`],
+      `<title>${esc(name)} ${sweeps ? 'Street Cleaning' : esc(What)} Map (preview) | CURB</title>\n<meta name="robots" content="noindex">`],
     ['description', /<meta name="description" content="[^"]*">/,
-      `<meta name="description" content="${esc(name)} street sweeping, block by block: every swept curb colored by its next sweep, from the City's open data. A CURB preview.">`],
+      `<meta name="description" content="${esc(name)} ${sweeps ? 'street sweeping, block by block: every swept curb colored by its next sweep' : `${esc(what)}, block by block: tonight's side of every curb`}, from the City's open data. A CURB preview.">`],
     ['canonical', '<link rel="canonical" href="https://curb.guide/">', `<link rel="canonical" href="${url}">`],
     ['no SF app schema', /<script type="application\/ld\+json">[\s\S]*?<\/script>\n/, ''],
     ['card titles', 'Know where to park in SF', `Know where to park in ${esc(name)}`, 2],
     ['card description', '<meta property="og:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts. From SF open data.">',
-      `<meta property="og:description" content="Street sweeping block by block, with alerts before the sweeper comes. From ${esc(name)} open data.">`],
+      `<meta property="og:description" content="${sweeps ? 'Street sweeping block by block, with alerts before the sweeper comes' : `${esc(Cap)} block by block, with an alert the night your side closes`}. From ${esc(name)} open data.">`],
     ['card description (X)', '<meta name="twitter:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts.">',
-      `<meta name="twitter:description" content="${esc(name)} street sweeping block by block, with alerts before the sweeper comes.">`],
+      `<meta name="twitter:description" content="${esc(name)} ${sweeps ? 'street sweeping block by block, with alerts before the sweeper comes' : `${esc(what)} block by block, with an alert the night your side closes`}.">`],
     ['card url', '<meta property="og:url" content="https://curb.guide/">', `<meta property="og:url" content="${url}">`],
     ['card image', '<meta property="og:image" content="https://curb.guide/og.png?v=3">', `<meta property="og:image" content="https://curb.guide/og-${id}.png?v=1">`],
     ['card image words', '<meta property="og:image:alt" content="CURB: SF street parking map with green, amber and red curb lines showing sweeping status">',
@@ -95,13 +101,13 @@ function cityPage(id) {
       `<meta name="twitter:image:alt" content="CURB ${esc(name)}: Know where to park in ${esc(name)}">`],
     ['info button words', 'data-tip="Alerts, guide, tickets &amp; about"', 'data-tip="Alerts, guide &amp; about"'],
     // ---- body: words and menus ---------------------------------------------------------------------
-    ['h1', /<h1 class="srh">[^<]*<\/h1>/, `<h1 class="srh">${esc(name)} street cleaning map: sweeping schedules by block (a CURB preview)</h1>`],
+    ['h1', /<h1 class="srh">[^<]*<\/h1>/, `<h1 class="srh">${esc(name)} ${sweeps ? 'street cleaning map: sweeping schedules' : `${esc(what)} map: tonight's side`} by block (a CURB preview)</h1>`],
     ['map label', '<main id="map" aria-label="San Francisco parking map">', `<main id="map" aria-label="${esc(name)} parking map">`],
     // SF's three pages: here the neighborhood list (in the welcome card), when the city has one
     ['SF pages → neighborhoods', /<a class="im-item" href="\/n\/" role="menuitem">[\s\S]*?<a class="im-item" href="\/tickets" role="menuitem">[\s\S]*?<\/a>/,
       hoods.length ? `<button class="im-item" id="imHoods" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-          <span class="im-tx"><b>Neighborhoods</b><small>Street cleaning by ${esc(name)} neighborhood</small></span>
+          <span class="im-tx"><b>Neighborhoods</b><small>${sweeps ? 'Street cleaning' : esc(Cap)} by ${esc(name)} neighborhood</small></span>
         </button>` : ''],
     ['menu footer link', '<a href="https://datasf.org" target="_blank" rel="noopener">SF open data</a>', `<a href="${esc(portal)}" target="_blank" rel="noopener">${esc(name)} open data</a>`],
     ['menu footer', 'Built on SF open data (DataSF). The posted sign is always the final word.', `Built on ${esc(name)} open data. The posted sign is always the final word.`],
@@ -114,7 +120,7 @@ function cityPage(id) {
     ['no permit areas', '<div class="lp-sec">Permit areas</div>\n    <div class="arearow">', '<div class="lp-sec" style="display:none">Permit areas</div>\n    <div class="arearow" style="display:none">'],
     ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/,
       `<p>${esc(rule)} Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>`],
-    ['neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, hoods.length ? '<nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul>'
+    ['neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, hoods.length ? `<nav class="whoods" aria-label="${sweeps ? 'Street cleaning' : esc(Cap)} by neighborhood"><p>${sweeps ? 'Street cleaning' : esc(Cap)} by neighborhood</p><ul>`
       + hoods.map((h) => `<li><a href="/${id}?bbox=${h.bbox}" data-bbox="${h.bbox}">${esc(h.name)}</a></li>`).join('') + '</ul></nav>' : ''],
     ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);\n})();\n", `  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);
 })();
@@ -180,7 +186,7 @@ function addCityBasemap(){
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}
   hint.style.opacity='0';hint.style.visibility='hidden';
   lastRows=data; segBounds=b;
-  if(!data.length&&!noCovToasted){noCovToasted=true; toast(${js(`No street-sweeping schedule here. This preview covers ${name}.`)});}
+  if(!data.length&&!noCovToasted){noCovToasted=true; toast(${js(`${noRule}. This preview covers ${name}.`)});}
   drawSegments(data);
   tryPendingOpen();
 }
@@ -208,19 +214,21 @@ const placeSides=rows=>new Set(rows.map(r=>r.cnn+r.cnnrightleft)).size;
       "function dayTag(r){if(Array.isArray(r.dates)){const n=nextSweep(r);return n?(MONLBL[n.mo-1]+' '+n.da).toUpperCase():'NO MORE DATES';}return isHolidayRow(r)?'HOLIDAYS':"],
     ['no week boxes for listed dates', "${allW||hol?'':`<div class=\"weeks\">${wkHtml}</div>`}", "${allW||hol||r.dates?'':`<div class=\"weeks\">${wkHtml}</div>`}"],
     ['the dates after the next one', "${ns.holiday?'holiday schedule':freqLabel(_aw)}", "${ns.holiday?'holiday schedule':_ar.dates?datesAfter(_ar,ns):freqLabel(_aw)}"],
-    ['dates after: words', 'function freqLabel(weeks){', `// a rule on listed dates: the dates after this one ("then Nov 2 and Nov 16"), or that it is the last
+    ['dates after: words', 'function freqLabel(weeks){', `// the city's date today ("YYYY-MM-DD"): an alert carries a listed rule's dates from today on, a year of them fits
+function todayISO(){const p=sfTodayParts();return p.y+'-'+String(p.mo).padStart(2,'0')+'-'+String(p.da).padStart(2,'0');}
+// a rule on listed dates: the dates after this one ("then Nov 2 and Nov 16"), or that it is the last
 function datesAfter(r,ns){const iso=ns.y+'-'+String(ns.mo).padStart(2,'0')+'-'+String(ns.da).padStart(2,'0');
   const later=r.dates.filter(d=>d>iso).slice(0,2).map(d=>MONLBL[+d.slice(5,7)-1]+' '+(+d.slice(8,10)));
   return later.length?'then '+later.join(' and '):'the last date posted';}
 function freqLabel(weeks){`],
     ['alerts carry dates and the holiday flag', "holidays:r.holidays||'0',...(r.months?{months:r.months}:{})});",
-      "holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates}:{}),...(r.flags&5?{flags:r.flags&5}:{})});"],
+      "holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates.filter(d=>d>=todayISO())}:{}),...(r.flags&13?{flags:r.flags&13}:{})});"],
     // ---- the block sheet ----------------------------------------------------------------------------
     ['season and fine instead of the SF re-park rule',
       "${_soon?`<div class=\"afterpass\">Once the sweeper has passed, you can re-park here, even before the posted window ends. <a href=\"https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets\" target=\"_blank\" rel=\"noopener\">SFMTA rule ↗</a></div>`:''}",
       "<div class=\"afterpass\">${PLACE.seasonText(_ar&&_ar.months)?'Swept '+PLACE.seasonText(_ar.months)+'. ':''}" + tpl(words.afterpass || (c.fine ? `Usually a ${c.fine} ticket.` : '')) + '</div>'],
     ['data notes', /<p>\$\{ae\?'"Ticketed" times[\s\S]*?Schedules live from DataSF\.<\/p>/,
-      `<p>${tpl(words.dataNotes || `Sweeping schedules come from ${name}'s open data.`)} Sweep alerts and calendar reminders run on ${tpl(name)} time: an overnight sweep gets one alert around 9 PM the evening before.</p>`],
+      `<p>${tpl(words.dataNotes || `Sweeping schedules come from ${name}'s open data.`)} ${sweeps ? 'Sweep alerts' : 'Alerts'} and calendar reminders run on ${tpl(name)} time: ${sweeps ? 'an overnight sweep gets' : 'a night your side closes gets'} one alert around 9 PM the evening before.</p>`],
     // ---- sweep alerts: the shared sender, each spot with its city (lib/cities.js) --------------------------------
     ['this page is the city', "const CITY='sf', WATCH_AGES={boston:165*864e5}, CITY_NAME={sf:'San Francisco',boston:'Boston'}, CITY_PAGE={sf:'/',boston:'/boston'};",
       `const CITY=${js(id)}, WATCH_AGES={boston:165*864e5,[${js(id)}]:165*864e5}, CITY_NAME={sf:'San Francisco',boston:'Boston',[${js(id)}]:${js(name)}}, CITY_PAGE={sf:'/',boston:'/boston',[${js(id)}]:${js('/' + id)}};`],
@@ -257,7 +265,7 @@ function freqLabel(weeks){`],
   }catch(_){}
 }
 `],
-    ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", js(`No street-sweeping schedule here. This preview covers ${name}.`)],
+    ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", js(`${noRule}. This preview covers ${name}.`)],
     ['the city is the city', 'L.latLngBounds([[37.685,-122.56],[37.84,-122.34]])', 'L.latLngBounds(PLACE.BOUNDS)'],
     ['outside words', "You're outside San Francisco, and this map only covers San Francisco.", `You're outside ${name}, and this preview only covers ${name}.`],
     ['one tap opens a block', "map.on('click',e=>{ userPicked(); if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});",
@@ -321,7 +329,7 @@ if(CAN_HOVER){
       placeYou(mid[1],mid[0],true,hit.block.c); if(hit.side&&pendingOpen)pendingOpen.sideHint=hit.side; return; } }
   const q=PLACE.streetKey(m?m[2]:v), exact=blocks.filter(b=>PLACE.streetKey(b.s)===q);
   const pool=exact.length?exact:blocks.filter(b=>PLACE.streetKey(b.s).includes(q));
-  if(!pool.length){toast('No swept street matched "'+v+'".');return;}
+  if(!pool.length){toast('No ${sweeps ? 'swept ' : ''}street matched "'+v+'".');return;}
   const all=pool.filter(b=>b.s===pool[0].s);
   map.flyToBounds(L.latLngBounds(all.flatMap(b=>b.g.map(([lo,la])=>[la,lo]))),{maxZoom:17,padding:[40,40],duration:.8});
 }
@@ -337,9 +345,10 @@ if(CAN_HOVER){
     ['no iPhone app prompt', '(function maybeIosHint(){', '(function maybeIosHint(){ return;  // the iPhone app is San Francisco only'],
     ['no App Store links', "const rate=document.getElementById('imRate'), get=document.getElementById('imGet');", 'const rate=null, get=null;  // the iPhone app is San Francisco only'],
     ['share words', "text:'Free SF street-parking map: every block colored by its next street sweep, plus when tickets actually land.',url:'https://curb.guide'",
-      `text:${js(`${name} street sweeping, block by block: every swept curb colored by its next sweep.`)},url:${js(url)}`],
+      `text:${js(sweeps ? `${name} street sweeping, block by block: every swept curb colored by its next sweep.` : `${name} ${what}, block by block: tonight's side of every curb.`)},url:${js(url)}`],
   ];
 
+  if (perDay.every((n) => !n)) edits.push(['no day chips without sweeping', '<div class="dayrow" aria-label="Filter by sweep day">', '<div class="dayrow" aria-label="Filter by sweep day" style="display:none">']);
   // ---- winter alternate side parking (lib/winter-ui.js): hooks where the page decides colors, the sheet and alerts ----
   if (winter) edits.push(
     ['winter: map status', 'rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns);', 'rows.forEach(r=>{const ns=nextSweep(r);const st=window.WINTER?WINTER.statusFor(r,ns):statusFor(ns);'],
@@ -383,7 +392,7 @@ if(CAN_HOVER){
   // the city's Home Screen web app (iPhone alerts)
   const manifest = JSON.parse(fs.readFileSync(ROOT + 'manifest-boston.json', 'utf8'));
   Object.assign(manifest, { name: `CURB ${name} (preview)`, short_name: `CURB ${name}`.slice(0, 12),
-    description: `${name} street sweeping, block by block. A preview on the City's open data.`, start_url: `/${id}`, scope: '/', id: `/${id}` });
+    description: `${name} ${what}, block by block. A preview on the City's open data.`, start_url: `/${id}`, scope: '/', id: `/${id}` });
   fs.writeFileSync(`${ROOT}manifest-${id}.json`, JSON.stringify(manifest, null, 2) + '\n');
   // curb.guide/<id> serves the page: its rewrite in vercel.json, next to Boston's
   const vercel = JSON.parse(fs.readFileSync(ROOT + 'vercel.json', 'utf8'));

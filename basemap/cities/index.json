@@ -40,6 +40,11 @@
     "bytes": 5299445,
     "rev": 2
   },
+  "milwaukee": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 5808030
+  },
   "montreal": {
     "build": "20261018",
     "maxzoom": 13,

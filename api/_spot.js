@@ -20,8 +20,9 @@ function canonTime(v) {
   return mi ? hr + ':' + String(mi).padStart(2, '0') : String(hr);
 }
 // A rule on listed dates (cities that publish dates, not a weekday pattern): valid dates, deduplicated, in order. Room for
-// a winter season's odd or even dates (Madison: 62 odd dates from November 15 to March 15).
-export const MAX_DATES = 64;
+// a season of side-switching nights (Madison: 62 odd dates from November 15 to March 15; Milwaukee's year-round lists, sent
+// from today on, 96 closings cover about six months, past a watch's 165-day age).
+export const MAX_DATES = 96;
 const listedDates = (v) => (Array.isArray(v) ? [...new Set(v.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d))).map(String))].sort().slice(0, MAX_DATES) : null);
 
 // A recurring sweep rule the cron can recompute the next occurrence from (the "forever-watch").
@@ -51,9 +52,9 @@ export function sanitizeRule(rule) {
     week4: bit(rule.week4), week5: bit(rule.week5),
     holidays: bit(rule.holidays),
   };
-  // a rule that runs on holidays anyway (1) or a winter rule, applied only while the City enforces it (4; lib/city.js);
-  // absent on every San Francisco and Boston rule
-  const flags = Number(rule.flags) & 5;
+  // a rule that runs on holidays anyway (1), a side-switching rule, applied only while the City enforces it (4; lib/city.js),
+  // or one closing both sides (8); absent on every San Francisco and Boston rule
+  const flags = Number(rule.flags) & 13;
   if (flags) out.flags = flags;
   // A seasonal rule's months (Boston sweeps April to November): kept only when they leave some month out, so a
   // rule swept all year, every SF rule among them, stores exactly as before.

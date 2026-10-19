@@ -123,15 +123,16 @@ try {
       }
       await w.goto(`${SITE}/${ID}`, { waitUntil: 'load' });
       await w.waitForFunction(() => window.WINTER && !document.getElementById('wPlate').hidden, { timeout: 30000, polling: 250 }).catch(() => {});
-      // a block with the winter rule only, at street zoom, and its sheet
-      const q = await w.evaluate(async () => { const b = (await PLACE.load()).find((x) => x.n && x.d.length === 2 && x.d.every((d) => d[2].length === 1 && d[2][0][5] & 4));
+      // a block whose two sides switch (each its own list, one rule a side), at street zoom, and its sheet
+      const q = await w.evaluate(async () => { const b = (await PLACE.load()).find((x) => x.n && x.d.length === 2 && x.d.every((d) => d[2].length === 1 && d[2][0][5] & 4 && !(d[2][0][5] & 8))
+          && x.d[0][2][0][6] !== x.d[1][2][0][6]);
         const m = PLACE.midpoint(b.g); map.setView([m[1], m[0]], 17, { animate: false }); return String(b.c); });
       await w.waitForFunction((c) => !ovMode && segCache.some((x) => String(x.group.cnn) === c), { timeout: 30000, polling: 250 }, q).catch(() => {});
       return { w, q };
     };
     const sheetOf = (w, q) => w.evaluate((c) => { const o = segCache.find((x) => String(x.group.cnn) === c); openSheet(o.group, o.side.key);
       return { text: document.getElementById('sheetBody').innerText.replace(/\s+/g, ' ').trim(), cal: !!document.getElementById('calBtn'), alert: !!document.getElementById('alertBtn'),
-        spot: sheetSpot && { next: sheetSpot.nextSweepISO, winter: (sheetSpot.rules || []).filter((r) => r.flags & 4 && Array.isArray(r.dates) && r.dates.length > 55).length } }; }, q);
+        spot: sheetSpot && { next: sheetSpot.nextSweepISO, winter: (sheetSpot.rules || []).filter((r) => r.flags & 4 && Array.isArray(r.dates) && r.dates.length > 20).length } }; }, q);
     const plate = (w) => w.evaluate(() => document.getElementById('wPlate').innerText.replace(/\s+/g, ' ').trim());
     if (sw.state !== 'on') {
       const { w, q } = await winterPage();
@@ -141,13 +142,15 @@ try {
       check(/Winter rule/i.test(s1.text) && s1.alert && !s1.cal && s1.spot && s1.spot.winter === 1, `winter (${sw.state}): the sheet says so, alerts can be on, no calendar (${s1.text.slice(0, 70)})`);
       await w.close();
     }
-    // Dec 1 of the season at 4 PM, switched on from that night: tonight's window falls on Dec 2, so park on the even side
+    // Tue Dec 1 of the season at 4 PM (no Sunday or holiday morning ahead), switched on from that night; which side tonight
+    // is the page's own answer (the morning's date in Madison, the evening's in Milwaukee)
     const y = city.winter.from.slice(0, 4), clock = Date.parse(`${y}-12-01T22:00:00Z`);
     const { w, q } = await winterPage(clock, { state: 'on', from: `${y}-12-01`, at: `${y}-11-30T22:00:00Z` });
     const colors = await w.evaluate((c) => segCache.filter((x) => String(x.group.cnn) === c).map((x) => x.side.color), q);
     const red = await w.evaluate(() => getCSS('--red')), green = await w.evaluate(() => getCSS('--green'));
-    check(/Park on the even side/i.test(await plate(w)) && colors.length === 2 && colors.includes(red) && colors.includes(green),
-      `winter on: the plate says tonight's side and the block has one red and one green side (${(await plate(w)).slice(0, 60)})`);
+    const park = await w.evaluate(() => PLACE.winterNight().park);
+    check(new RegExp(`Park on the ${park} side`, 'i').test(await plate(w)) && colors.length === 2 && colors.includes(red) && colors.includes(green),
+      `winter on: the plate says tonight's side (${park}) and the block has one red and one green side (${(await plate(w)).slice(0, 60)})`);
     const s2 = await sheetOf(w, q);
     check(/Move by|Park until/i.test(s2.text) && /where you are/i.test(s2.text) && s2.cal && s2.spot && Date.parse(s2.spot.next) > clock,
       `winter on: the sheet says when to move, both sides tonight, alerts and calendar (${s2.text.slice(0, 70)})`);

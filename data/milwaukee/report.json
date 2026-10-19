@@ -1,0 +1,494 @@
+{
+ "generated": "2026-10-19T07:13:15.246Z",
+ "centerlines": {
+  "fetched": 17649,
+  "official": 17445,
+  "inTheCity": 17426,
+  "boundaryStreetsOneSide": 289
+ },
+ "exceptionStreetsMap": {
+  "level2BothSides": 3082,
+  "level1WinterOnly": 33,
+  "otherLinesNotOnTheMap": 156,
+  "questionable": 2,
+  "noNightParking": 1892,
+  "classes": {
+   "alternate": 10054,
+   "both sides": 2380,
+   "ban": 4949,
+   "winter alternate": 43
+  },
+  "coverRule": "a centerline takes a class when that layer runs along 50% of it (red first, then green, then blue)",
+  "partial": {
+   "count": 93,
+   "examples": [
+    {
+     "id": 477,
+     "street": "S 5TH PL",
+     "class": "both sides",
+     "cover": {
+      "green": 0.5,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 556,
+     "street": "S 5TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0.33,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 798,
+     "street": "N 7TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.29
+     }
+    },
+    {
+     "id": 807,
+     "street": "N 7TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.34
+     }
+    },
+    {
+     "id": 906,
+     "street": "N 8TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.29
+     }
+    },
+    {
+     "id": 915,
+     "street": "N 8TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.25
+     }
+    },
+    {
+     "id": 983,
+     "street": "S 9TH PL",
+     "class": "both sides",
+     "cover": {
+      "green": 0.67,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 1050,
+     "street": "S 9TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0.25,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 1260,
+     "street": "S 11TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0.2,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 2100,
+     "street": "N 18TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0.29,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 2117,
+     "street": "N 18TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.24
+     }
+    },
+    {
+     "id": 2241,
+     "street": "S 19TH ST",
+     "class": "both sides",
+     "cover": {
+      "green": 0.71,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 2319,
+     "street": "N 20TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.43
+     }
+    },
+    {
+     "id": 2320,
+     "street": "N 20TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.35
+     }
+    },
+    {
+     "id": 2347,
+     "street": "S 20TH ST",
+     "class": "both sides",
+     "cover": {
+      "green": 0.5,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 2454,
+     "street": "N 21ST ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.25
+     }
+    },
+    {
+     "id": 2455,
+     "street": "N 21ST ST",
+     "class": "ban",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.55
+     }
+    },
+    {
+     "id": 2474,
+     "street": "S 21ST ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0.25,
+      "blue": 0,
+      "red": 0
+     }
+    },
+    {
+     "id": 3032,
+     "street": "N 27TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.31
+     }
+    },
+    {
+     "id": 3161,
+     "street": "N 28TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.38
+     }
+    },
+    {
+     "id": 3728,
+     "street": "S 35TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.21
+     }
+    },
+    {
+     "id": 3729,
+     "street": "S 35TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.33
+     }
+    },
+    {
+     "id": 3745,
+     "street": "S 35TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.32
+     }
+    },
+    {
+     "id": 4163,
+     "street": "N 40TH ST",
+     "class": "ban",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.7
+     }
+    },
+    {
+     "id": 4200,
+     "street": "N 40TH ST",
+     "class": "alternate",
+     "cover": {
+      "green": 0,
+      "blue": 0,
+      "red": 0.3
+     }
+    }
+   ]
+  }
+ },
+ "winter": {
+  "year": "2026-10-01 to 2027-10-31 (mornings), 2 to 6 AM, except Sunday mornings and the holiday mornings",
+  "winter": "2026-12-01 to 2027-03-01: blue streets alternate, through highways and bus routes have no night parking (every morning)",
+  "dates": {
+   "odd": 165,
+   "even": 161,
+   "wodd": 36,
+   "weven": 36,
+   "sodd": 129,
+   "seven": 125,
+   "ban": 91
+  },
+  "alternate": {
+   "segments": 10091,
+   "blockSides": 20081,
+   "winterOnlyStreets": 43
+  },
+  "ban": {
+   "segments": 4949,
+   "sides": 9712,
+   "noRangesSides": 62
+  }
+ },
+ "leftOut": {
+  "both sides every night (Exception Streets map, Level 2)": {
+   "n": 2380,
+   "examples": [
+    49,
+    50,
+    123,
+    136,
+    137
+   ]
+  },
+  "not an official City street (private)": {
+   "n": 170,
+   "examples": [
+    132,
+    17140,
+    22407,
+    800108,
+    800109
+   ]
+  },
+  "not an official City street (unofficial)": {
+   "n": 34,
+   "examples": [
+    33018,
+    33019,
+    33102,
+    34587,
+    34588
+   ]
+  },
+  "outside the City": {
+   "n": 19,
+   "examples": [
+    800485,
+    800486,
+    800548,
+    801022,
+    801148
+   ]
+  },
+  "no odd and even address ranges": {
+   "n": 6,
+   "examples": [
+    906525,
+    906526,
+    906527,
+    906531,
+    909338
+   ]
+  }
+ },
+ "checks": {
+  "addressParity": {
+   "points": 4426,
+   "used": 4037,
+   "agree": 4013,
+   "disagree": 24,
+   "examples": [
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    },
+    {
+     "segment": 900954,
+     "street": "W LINWAL LA",
+     "number": "even"
+    }
+   ],
+   "share": 99.4
+  },
+  "dpwListing": {
+   "No Winter Parking/48 Hour Exception": {
+    "rows": 99,
+    "segments": 712,
+    "sameClass": 693,
+    "classes": {
+     "both sides": 18,
+     "ban": 693,
+     "alternate": 1
+    },
+    "share": 97.3
+   },
+   "No Winter Night Parking": {
+    "rows": 264,
+    "segments": 4101,
+    "sameClass": 4054,
+    "classes": {
+     "ban": 4054,
+     "alternate": 45,
+     "both sides": 2
+    },
+    "share": 98.9
+   },
+   "48 Hour Exception": {
+    "rows": 497,
+    "segments": 2346,
+    "sameClass": 2305,
+    "classes": {
+     "both sides": 2305,
+     "alternate": 16,
+     "ban": 24,
+     "winter alternate": 1
+    },
+    "share": 98.3
+   },
+   "Non Winter Exception to Alternate Side Night Parking": {
+    "rows": 13,
+    "segments": 42,
+    "sameClass": 42,
+    "classes": {
+     "winter alternate": 42
+    },
+    "share": 100
+   },
+   "No Winter Night Parking (EVEN side only)": {
+    "rows": 1,
+    "segments": 1,
+    "sameClass": 0,
+    "classes": {
+     "ban": 1
+    },
+    "share": 0
+   },
+   "No Winter Night Parking No Winter Parking/48 Hour Exception": {
+    "rows": 1,
+    "segments": 4,
+    "sameClass": 0,
+    "classes": {
+     "ban": 4
+    },
+    "share": 0
+   },
+   "Special Case": {
+    "rows": 1,
+    "segments": 3,
+    "sameClass": 3,
+    "classes": {
+     "ban": 3
+    },
+    "share": 100
+   }
+  }
+ },
+ "sweeping": "not included: the City publishes sweeping route areas (DPW_Sanitation/MapServer/19, a route name only) and a 2008 frequency map, no days and hours by block side; posted sweeping tow away streets (MCO 101-26.7) are listed only in Common Council proceedings",
+ "tickets": "not published: no citation data with time and place on data.milwaukee.gov",
+ "output": {
+  "blocks": 15040,
+  "blockSides": 29793,
+  "bytes": 4041691,
+  "gzipBytes": 500817
+ }
+}

@@ -169,6 +169,10 @@
       "destination": "/somerville.html"
     },
     {
+      "source": "/milwaukee",
+      "destination": "/milwaukee.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },
