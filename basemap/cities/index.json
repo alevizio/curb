@@ -37,7 +37,8 @@
   "madison": {
     "build": "20261018",
     "maxzoom": 13,
-    "bytes": 3710146
+    "bytes": 5299445,
+    "rev": 2
   },
   "montreal": {
     "build": "20261018",

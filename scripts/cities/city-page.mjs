@@ -146,7 +146,7 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
       `// The city's basemap: the parchment style SF's tiles are baked from (basemap/cities/style.json), drawn live by MapLibre
 // from the city's one vector file (scripts/cities/basemap-city.mjs). It loads after the curbs; without WebGL or the
 // libraries the map keeps its paper and the curbs.
-const CITY_BASEMAP=${js(bm ? `/basemap/cities/${id}.pmtiles?v=${bm.build}` : '')};
+const CITY_BASEMAP=${js(bm ? `/basemap/cities/${id}.pmtiles?v=${bm.build}${bm.rev ? '-' + bm.rev : ''}` : '')};
 function addCityBasemap(){
   const load=(src)=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('could not load '+src));document.head.appendChild(s);});
   return load(${js(MAPLIBRE)})

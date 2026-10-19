@@ -54,7 +54,11 @@ try {
     fs.writeFileSync(geo, JSON.stringify(region(blocks)));
     execFileSync(ROOT + 'pmtiles', ['extract', planet, `${OUT}${id}.pmtiles`, `--region=${geo}`, `--maxzoom=${MAXZOOM}`], { stdio: 'ignore' });
     const bytes = fs.statSync(`${OUT}${id}.pmtiles`).size;
-    index[id] = { build, maxzoom: MAXZOOM, bytes };
+    // The page's ?v= is the planet build, plus a revision when the same build is cut again with other bytes (more blocks,
+    // another zoom): a browser must never mix byte ranges of two different files under one URL (basemap/ is cached 30 days).
+    const prev = index[id], same = prev && prev.build === build;
+    const rev = same && prev.bytes !== bytes ? (prev.rev || 1) + 1 : same ? prev.rev : undefined;
+    index[id] = { build, maxzoom: MAXZOOM, bytes, ...(rev ? { rev } : {}) };
     console.error(`[basemap-city] basemap/cities/${id}.pmtiles: ${(bytes / 1e6).toFixed(1)} MB, z0-${MAXZOOM}, planet ${build}`);
   }
 } finally { fs.rmSync(tmp, { recursive: true, force: true }); }

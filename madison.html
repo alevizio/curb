@@ -986,7 +986,7 @@ function addSelfBasemap(){
 // The city's basemap: the parchment style SF's tiles are baked from (basemap/cities/style.json), drawn live by MapLibre
 // from the city's one vector file (scripts/cities/basemap-city.mjs). It loads after the curbs; without WebGL or the
 // libraries the map keeps its paper and the curbs.
-const CITY_BASEMAP="/basemap/cities/madison.pmtiles?v=20261018";
+const CITY_BASEMAP="/basemap/cities/madison.pmtiles?v=20261018-2";
 function addCityBasemap(){
   const load=(src)=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('could not load '+src));document.head.appendChild(s);});
   return load("https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.0/maplibre-gl.js")
