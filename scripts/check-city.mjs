@@ -88,6 +88,23 @@ try {
   const opened = await p.evaluate(() => document.querySelector('#sheetBody .where')?.innerText || '');
   check(opened.includes(link.s) && link.ends.every((e) => opened.includes(e)), `a shared link to block ${link.c} opens ${link.s} (${opened.replace(/\s+/g, ' ').trim().slice(0, 80)})`);
 
+  // a city that offers French: the ⓘ menu switches language, and in French the page reads French
+  if ((city.languages || []).includes('fr')) {
+    const f = await b.newPage();
+    await f.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    f.on('pageerror', (e) => errors.push('fr: ' + e.message));
+    await f.evaluateOnNewDocument(() => { try { localStorage.setItem('curbLang', 'fr'); localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbFirstSheet', '1'); } catch (_) {} });
+    await f.goto(`${SITE}/${ID}`, { waitUntil: 'load' });
+    await f.waitForFunction(() => typeof segCache !== 'undefined' && segCache.length > 0, { timeout: 30000, polling: 250 }).catch(() => {});
+    await f.evaluate(() => { const o = segCache.find((x) => x.side.ns); if (o) openSheet(o.group, o.side.key); });
+    await new Promise((r) => setTimeout(r, 900));
+    const fr = await f.evaluate(() => ({ lang: document.documentElement.lang, item: document.querySelector('#imLang .im-tx b')?.textContent,
+      sheet: document.getElementById('sheetBody').innerText.replace(/\s+/g, ' ').trim() }));
+    check(fr.lang === 'fr' && fr.item === 'English' && /Stationnez|Nettoyage en cours|voir le panneau/i.test(fr.sheet) && !/Park until|every week|\bin \d+ days\b/i.test(fr.sheet),
+      `in French the page reads French (${fr.sheet.slice(0, 80)})`);
+    await f.close();
+  }
+
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));
   check(!bad.length, 'no failed or San Francisco requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));
 } finally { await b.close(); }

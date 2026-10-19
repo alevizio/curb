@@ -24,7 +24,7 @@ const tpl = (s) => esc(s).replace(/`/g, '&#96;').replace(/\$\{/g, '$&#123;');   
 // The scripts' ?v= follows their content: the service worker serves a cached copy of the same URL first, which would
 // miss a city added since (or lib/city.js's last change).
 const ver = (f) => createHash('sha1').update(fs.readFileSync(ROOT + f)).digest('hex').slice(0, 8);
-const CONFIGS_V = ver('lib/city-configs.js'), CITY_V = ver('lib/city.js');
+const CONFIGS_V = ver('lib/city-configs.js'), CITY_V = ver('lib/city.js'), FR_V = ver('lib/i18n-fr.js');
 // The basemap (scripts/cities/basemap-city.mjs): the parchment style, drawn live by MapLibre from the city's one vector file.
 const BASEMAPS = fs.existsSync(ROOT + 'basemap/cities/index.json') ? JSON.parse(fs.readFileSync(ROOT + 'basemap/cities/index.json', 'utf8')) : {};
 const STYLE_V = fs.existsSync(ROOT + 'basemap/cities/style.json') ? ver('basemap/cities/style.json') : '';
@@ -42,6 +42,11 @@ function cityPage(id) {
     portal = c.portal || (c.sources || []).flatMap((x) => [x.page, x.url]).find(readable) || c.scheduleUrl || '';
   const words = c.words || {};
   const bm = BASEMAPS[id];   // its vector basemap, if built
+  // A city that offers French (city.json languages + words_fr): lib/i18n-fr.js translates the page, and the ⓘ menu
+  // switches language. The city's own sentences go in as phrases, the way the page composes them.
+  const french = (c.languages || []).includes('fr') && c.words_fr;
+  const frWords = french ? [[words.rule, c.words_fr.rule], [' Tap where you parked for the rules.', ' Touchez la bordure où vous êtes stationné pour voir les règles.'],
+    [words.afterpass, c.words_fr.afterpass], [words.dataNotes, c.words_fr.dataNotes]].filter(([en, f]) => en && f) : [];
   // Blocks swept per weekday, for the day-chip heads-up (weekly rules by weekday; listed dates by their weekday).
   const perDay = [0, 1, 2, 3, 4, 5, 6].map((d) => data.b.filter((b) => b.d.some(([, , rules]) => rules.some((r) =>
     r[0] === d || (r[0] === -1 && Array.isArray(r[6]) && r[6].some((iso) => new Date(iso + 'T12:00:00Z').getUTCDay() === d))))).length);
@@ -120,7 +125,13 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
       `<p class="wfoot">Free, no account. Built on <a href="${esc(portal)}" target="_blank" rel="noopener">${esc(name)}'s open data</a>. The posted sign always wins.</p>`],
     // ---- scripts: the city's time core and data (lib/city.js) -----------------------------------------
     ['load the city', '<script src="/lib/sweep-core.js?v=8"></script>',
-      `<script src="/lib/sweep-core.js?v=8"></script>\n<script>window.CURB_CITY=${js(id)};</script>\n<script src="/lib/city-configs.js?v=${CONFIGS_V}"></script>\n<script src="/lib/city.js?v=${CITY_V}"></script>`],
+      `<script src="/lib/sweep-core.js?v=8"></script>\n<script>window.CURB_CITY=${js(id)};</script>\n<script src="/lib/city-configs.js?v=${CONFIGS_V}"></script>\n<script src="/lib/city.js?v=${CITY_V}"></script>`
+      + (french ? `\n<script src="/lib/i18n-fr.js?v=${FR_V}"></script>\n<script>window.CURB_FR&&CURB_FR.startI18n(${JSON.stringify(frWords).replace(/</g, '\\u003c')});</script>` : '')],
+    ['the language item', '        <button class="im-item" id="imAlerts" role="menuitem">', (french ? `        <button class="im-item" id="imLang" role="menuitem" data-no-i18n>
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></span>
+          <span class="im-tx"><b>Français</b><small>Voir la carte en français</small></span>
+        </button>
+` : '') + '        <button class="im-item" id="imAlerts" role="menuitem">'],
     ['retry it like the time core', "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');}",
       "if(!window.nextSweep)again('script[src^=\"/lib/sweep-core.js\"]');\nif(window.nextSweep&&!window.CITY_CONFIGS)again('script[src^=\"/lib/city-configs.js\"]');\nif(window.nextSweep&&!window.PLACE)again('script[src^=\"/lib/city.js\"]');}"],
     ['fail without it', 'if(!window.L||!window.nextSweep){', 'if(!window.L||!window.nextSweep||!window.PLACE){'],

@@ -753,6 +753,13 @@ const WORDS = {
   dataNotes: 'Read sign by sign from the City of Montréal\'s parking sign inventory (Signalisation, updated daily, CC BY 4.0): each street cleaning sign goes on the nearest street side of the City\'s Géobase within 15 m, and a side shows every rule its signs post. The inventory is thin in Lachine, Saint-Laurent, Montréal-Nord and Saint-Léonard and nearly empty in LaSalle and Verdun; Pierrefonds-Roxboro and L\'Île-Bizard–Sainte-Geneviève have no street cleaning. The sign on the street wins.',
 };
 
+// The page's French (its English/French switch, lib/i18n-fr.js): the same three sentences.
+const WORDS_FR = {
+  rule: 'Chaque côté de la rue a son heure de nettoyage sur les panneaux : quelques heures sans stationnement, souvent un jour par semaine, du 1er avril au 1er décembre dans la plupart des arrondissements.',
+  afterpass: 'Les panneaux donnent les dates exactes, du 1er avril au 1er décembre dans la plupart des arrondissements; la carte ramène chaque date au premier du mois le plus proche (le 1er décembre est omis, le 15 mars commence le 1er mars, le 15 novembre finit le 31 octobre). Aussi les jours fériés. Une contravention, parfois le remorquage.',
+  dataNotes: 'Lu panneau par panneau dans l\'inventaire de la signalisation de stationnement de la Ville de Montréal (Signalisation, mis à jour chaque jour, CC BY 4.0) : chaque panneau de nettoyage est placé sur le côté de rue le plus proche de la Géobase, à moins de 15 m, et un côté montre toutes les règles de ses panneaux. L\'inventaire est mince à Lachine, Saint-Laurent, Montréal-Nord et Saint-Léonard, et presque vide à LaSalle et à Verdun; Pierrefonds-Roxboro et L\'Île-Bizard–Sainte-Geneviève n\'ont pas de nettoyage. Le panneau sur la rue a toujours raison.',
+};
+
 function write(R) {
   const { blocks, today } = R;
   const sources = [
@@ -795,7 +802,7 @@ function write(R) {
     holidayRule: 'all',
     fine: '', tow: 'sometimes', fineSource: '',
     agency: 'Ville de Montréal (boroughs)', scheduleUrl: 'https://montreal.ca/en/how-to/find-out-when-parking-prohibited-street-maintenance',
-    sources: [...sources, towSource], words: WORDS, neighborhoods,
+    sources: [...sources, towSource], words: WORDS, languages: ['fr', 'en'], words_fr: WORDS_FR, neighborhoods,
   };
   fs.writeFileSync(OUT + 'city.json', JSON.stringify(city, null, 1) + '\n');
 

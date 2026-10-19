@@ -218,6 +218,10 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   scripts/check-city.mjs <id>. Order after a city's data changes: configs.mjs, basemap-city.mjs <id>, city-page.mjs
   <id>, og-city.mjs <id>, then check-city.mjs <id> against `npm run dev`. Rules may carry minutes ("9:30"), cross
   midnight, or list dates instead of a pattern (lib/sweep-core.js `crossMidnight`, `nextListed`).
+  A city whose city.json lists `languages: ['fr','en']` and `words_fr` (Montréal) also gets lib/i18n-fr.js: the page,
+  built in English, is translated to French as it renders (a dictionary for fixed text, pattern rules for the times,
+  dates, countdowns, sides and weeks it builds, the city's own sentences as phrases), and the ⓘ menu's language item
+  switches (localStorage `curbLang`, else the browser's language). Push alerts stay in English for now.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy
@@ -263,7 +267,8 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   hub for the other pages — Sweep alerts first (`#imAlerts`, opens the Sweep alerts panel, see "Sweep alerts
   panel" under Saved alerts below; its line says "2 on · Normal", "None on yet" or, in red, "Off in iPhone
   Settings"), How CURB works (opens the welcome explainer), Neighborhoods (`/n/`),
-  Sweeping holidays (`/holidays`), Parking tickets (`/tickets`), About (`/about`). The old buried `lp-link` to /tickets in the Layers panel
+  Sweeping holidays (`/holidays`), Parking tickets (`/tickets`), About (`/about`). The welcome card no longer opens by itself on a first visit (owner,
+  2026-10-18): a first visit lands on the map, and the logo or How CURB works opens it. The old buried `lp-link` to /tickets in the Layers panel
   was removed; don't re-add scattered page links. Opens/closes like the Layers panel
   (outside-click + Esc, mirrored via `closeInfoMenu`).
 - **Truck-route day**: routes are per-day (`drawRoutes` keys off `dayFilter ?? today`). The
