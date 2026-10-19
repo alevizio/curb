@@ -26,6 +26,14 @@ describe('saved rules', () => {
     expect(sanitizeRule({ ...sf, flags: 3 }).flags).toBe(1);
     expect(sanitizeRule({ ...sf, flags: 2 }).flags).toBeUndefined();
   });
+  it('mark a winter rule (Madison\'s alternate side parking) and keep a whole season of its dates', () => {
+    const odd = [];
+    for (let t = Date.parse('2026-11-15T12:00Z'); t <= Date.parse('2027-03-15T12:00Z'); t += 2 * 864e5) odd.push(new Date(t).toISOString().slice(0, 10));
+    const r = sanitizeRule({ dates: odd, fromhour: '1', tohour: '7', flags: 7 });
+    expect(r.flags).toBe(5);                 // holidays too (1) and a winter rule (4); towable (2) is not kept
+    expect(r.dates).toHaveLength(odd.length);
+    expect(r.dates[r.dates.length - 1]).toBe(odd[odd.length - 1]);
+  });
 });
 
 // any city built from lib/city-configs.js (not SF, not Boston), when one is built

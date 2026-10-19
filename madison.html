@@ -753,6 +753,7 @@
     <button class="dchip" data-day="6">Sat</button>
     <button class="dchip" data-day="0">Sun</button>
   </div>
+  <div class="wplate" id="wPlate" hidden></div>
 </div>
 
 <!-- layers control: everything map-related lives in one corner, Google-Maps style -->
@@ -799,7 +800,7 @@
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
-  <p>Posted street sweeping (Clean Streets Clean Lakes): one weekday morning or midday a week on each signed side. Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>
+  <p>Posted street sweeping (Clean Streets Clean Lakes), one weekday morning or midday a week per side; and from November 15 to March 15, 1 to 7 AM, park on the odd-numbered side on odd dates and the even side on even dates, outside the Snow Emergency Zone. Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps soon</span>
@@ -807,7 +808,7 @@
   </div>
   <button class="btn-go" id="welcomeGo">Show me the map</button>
   <a class="wabout" href="/about">How it works →</a>
-  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/madison?bbox=-89.4202,43.0431,-89.4073,43.0484" data-bbox="-89.4202,43.0431,-89.4073,43.0484">Arboretum</a></li><li><a href="/madison?bbox=-89.4025,43.0492,-89.3796,43.0582" data-bbox="-89.4025,43.0492,-89.3796,43.0582">Bay Creek</a></li><li><a href="/madison?bbox=-89.3939,43.0430,-89.3897,43.0490" data-bbox="-89.3939,43.0430,-89.3897,43.0490">Bram's Addition</a></li><li><a href="/madison?bbox=-89.4023,43.0426,-89.3940,43.0450" data-bbox="-89.4023,43.0426,-89.3940,43.0450">Burr Oaks</a></li><li><a href="/madison?bbox=-89.4090,43.0677,-89.3933,43.0773" data-bbox="-89.4090,43.0677,-89.3933,43.0773">Campus Area</a></li><li><a href="/madison?bbox=-89.3941,43.0665,-89.3798,43.0807" data-bbox="-89.3941,43.0665,-89.3798,43.0807">Capitol Neighborhoods</a></li><li><a href="/madison?bbox=-89.3888,43.0411,-89.3842,43.0456" data-bbox="-89.3888,43.0411,-89.3842,43.0456">Capitol View</a></li><li><a href="/madison?bbox=-89.4410,43.0515,-89.4175,43.0658" data-bbox="-89.4410,43.0515,-89.4175,43.0658">Dudgeon-Monroe</a></li><li><a href="/madison?bbox=-89.4090,43.0573,-89.4008,43.0671" data-bbox="-89.4090,43.0573,-89.4008,43.0671">Greenbush</a></li><li><a href="/madison?bbox=-89.3725,43.0773,-89.3514,43.0901" data-bbox="-89.3725,43.0773,-89.3514,43.0901">Marquette</a></li><li><a href="/madison?bbox=-89.4008,43.0601,-89.3919,43.0664" data-bbox="-89.4008,43.0601,-89.3919,43.0664">Monona Bay</a></li><li><a href="/madison?bbox=-89.4363,43.0625,-89.4149,43.0729" data-bbox="-89.4363,43.0625,-89.4149,43.0729">Regent</a></li><li><a href="/madison?bbox=-89.3534,43.0896,-89.3380,43.0969" data-bbox="-89.3534,43.0896,-89.3380,43.0969">Schenk-Atwood Revitalization</a></li><li><a href="/madison?bbox=-89.3467,43.0971,-89.3308,43.1030" data-bbox="-89.3467,43.0971,-89.3308,43.1030">Schenk-Atwood-Starkweather-Yahara</a></li><li><a href="/madison?bbox=-89.3806,43.0806,-89.3656,43.0920" data-bbox="-89.3806,43.0806,-89.3656,43.0920">Tenney-Lapham</a></li><li><a href="/madison?bbox=-89.4191,43.0612,-89.4090,43.0677" data-bbox="-89.4191,43.0612,-89.4090,43.0677">Vilas</a></li><li><a href="/madison?bbox=-89.3389,43.0998,-89.3356,43.1035" data-bbox="-89.3389,43.0998,-89.3356,43.1035">Worthington Park</a></li></ul></nav>
+  <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/madison?bbox=-89.4611,43.0249,-89.4439,43.0360" data-bbox="-89.4611,43.0249,-89.4439,43.0360">Allied Dunn's Marsh</a></li><li><a href="/madison?bbox=-89.4345,43.0249,-89.4230,43.0319" data-bbox="-89.4345,43.0249,-89.4230,43.0319">Arbor Hills</a></li><li><a href="/madison?bbox=-89.4202,43.0431,-89.4039,43.0484" data-bbox="-89.4202,43.0431,-89.4039,43.0484">Arboretum</a></li><li><a href="/madison?bbox=-89.4025,43.0492,-89.3796,43.0584" data-bbox="-89.4025,43.0492,-89.3796,43.0584">Bay Creek</a></li><li><a href="/madison?bbox=-89.3635,43.1259,-89.3551,43.1339" data-bbox="-89.3635,43.1259,-89.3551,43.1339">Berkley Oaks</a></li><li><a href="/madison?bbox=-89.5664,43.0462,-89.5523,43.0589" data-bbox="-89.5664,43.0462,-89.5523,43.0589">Birchwood-Oaks</a></li><li><a href="/madison?bbox=-89.5603,43.0751,-89.5375,43.0816" data-bbox="-89.5603,43.0751,-89.5375,43.0816">Blackhawk Homeowners</a></li><li><a href="/madison?bbox=-89.3940,43.0385,-89.3895,43.0490" data-bbox="-89.3940,43.0385,-89.3895,43.0490">Bram's Addition</a></li><li><a href="/madison?bbox=-89.3706,43.1190,-89.3648,43.1228" data-bbox="-89.3706,43.1190,-89.3648,43.1228">Brentwood Village</a></li><li><a href="/madison?bbox=-89.3512,43.0481,-89.3377,43.0495" data-bbox="-89.3512,43.0481,-89.3377,43.0495">Bridge-Lakepoint</a></li><li><a href="/madison?bbox=-89.3147,43.1067,-89.3023,43.1123" data-bbox="-89.3147,43.1067,-89.3023,43.1123">Burke Heights</a></li><li><a href="/madison?bbox=-89.4048,43.0350,-89.3940,43.0492" data-bbox="-89.4048,43.0350,-89.3940,43.0492">Burr Oaks</a></li><li><a href="/madison?bbox=-89.4090,43.0677,-89.3933,43.0773" data-bbox="-89.4090,43.0677,-89.3933,43.0773">Campus Area</a></li><li><a href="/madison?bbox=-89.3941,43.0665,-89.3798,43.0807" data-bbox="-89.3941,43.0665,-89.3798,43.0807">Capitol Neighborhoods</a></li><li><a href="/madison?bbox=-89.3889,43.0385,-89.3842,43.0457" data-bbox="-89.3889,43.0385,-89.3842,43.0457">Capitol View</a></li><li><a href="/madison?bbox=-89.5516,43.0460,-89.5330,43.0590" data-bbox="-89.5516,43.0460,-89.5330,43.0590">Cardinal Glenn</a></li><li><a href="/madison?bbox=-89.3545,43.1070,-89.3305,43.1222" data-bbox="-89.3545,43.1070,-89.3305,43.1222">Carpenter-Ridgeway</a></li><li><a href="/madison?bbox=-89.3816,43.1495,-89.3674,43.1604" data-bbox="-89.3816,43.1495,-89.3674,43.1604">Cherokee Park</a></li><li><a href="/madison?bbox=-89.5132,43.0090,-89.5045,43.0152" data-bbox="-89.5132,43.0090,-89.5045,43.0152">Country Grove</a></li><li><a href="/madison?bbox=-89.4508,43.0353,-89.4382,43.0509" data-bbox="-89.4508,43.0353,-89.4382,43.0509">Crawford-Marlborough-Nakoma</a></li><li><a href="/madison?bbox=-89.4822,43.0680,-89.4780,43.0749" data-bbox="-89.4822,43.0680,-89.4780,43.0749">Crestwood</a></li><li><a href="/madison?bbox=-89.4410,43.0515,-89.4175,43.0658" data-bbox="-89.4410,43.0515,-89.4175,43.0658">Dudgeon-Monroe</a></li><li><a href="/madison?bbox=-89.3010,43.0662,-89.2796,43.0735" data-bbox="-89.3010,43.0662,-89.2796,43.0735">East Buckeye</a></li><li><a href="/madison?bbox=-89.3318,43.0839,-89.3136,43.0999" data-bbox="-89.3318,43.0839,-89.3136,43.0999">Eastmorland Community</a></li><li><a href="/madison?bbox=-89.3541,43.1020,-89.3412,43.1108" data-bbox="-89.3541,43.1020,-89.3412,43.1108">Eken Park</a></li><li><a href="/madison?bbox=-89.5704,43.0603,-89.5373,43.0747" data-bbox="-89.5704,43.0603,-89.5373,43.0747">Elderberry</a></li><li><a href="/madison?bbox=-89.3087,43.0733,-89.2826,43.0840" data-bbox="-89.3087,43.0733,-89.2826,43.0840">Elvehjem</a></li><li><a href="/madison?bbox=-89.3622,43.0933,-89.3491,43.1062" data-bbox="-89.3622,43.0933,-89.3491,43.1062">Emerson East</a></li><li><a href="/madison?bbox=-89.4921,43.0628,-89.4784,43.0676" data-bbox="-89.4921,43.0628,-89.4784,43.0676">Faircrest</a></li><li><a href="/madison?bbox=-89.5156,43.0032,-89.5045,43.0151" data-bbox="-89.5156,43.0032,-89.5045,43.0151">Glacier Ridge</a></li><li><a href="/madison?bbox=-89.4781,43.0680,-89.4680,43.0742" data-bbox="-89.4781,43.0680,-89.4680,43.0742">Glen Oak Hills</a></li><li><a href="/madison?bbox=-89.3258,43.0557,-89.3098,43.0699" data-bbox="-89.3258,43.0557,-89.3098,43.0699">Glendale</a></li><li><a href="/madison?bbox=-89.3247,43.1208,-89.2997,43.1423" data-bbox="-89.3247,43.1208,-89.2997,43.1423">Greater Sandburg</a></li><li><a href="/madison?bbox=-89.4090,43.0573,-89.4008,43.0671" data-bbox="-89.4090,43.0573,-89.4008,43.0671">Greenbush</a></li><li><a href="/madison?bbox=-89.4965,43.0391,-89.4776,43.0459" data-bbox="-89.4965,43.0391,-89.4776,43.0459">Greentree</a></li><li><a href="/madison?bbox=-89.5563,43.0747,-89.5515,43.0780" data-bbox="-89.5563,43.0747,-89.5515,43.0780">Greystone</a></li><li><a href="/madison?bbox=-89.3307,43.1068,-89.3166,43.1168" data-bbox="-89.3307,43.1068,-89.3166,43.1168">Hawthorne</a></li><li><a href="/madison?bbox=-89.2991,43.0844,-89.2866,43.0984" data-bbox="-89.2991,43.0844,-89.2866,43.0984">Heritage Heights Community</a></li><li><a href="/madison?bbox=-89.4913,43.0770,-89.4797,43.0824" data-bbox="-89.4913,43.0770,-89.4797,43.0824">Highlands Community Inc., The</a></li><li><a href="/madison?bbox=-89.4778,43.0609,-89.4544,43.0706" data-bbox="-89.4778,43.0609,-89.4544,43.0706">Hill Farms, University</a></li><li><a href="/madison?bbox=-89.3819,43.0274,-89.3665,43.0355" data-bbox="-89.3819,43.0274,-89.3665,43.0355">Indian Springs</a></li><li><a href="/madison?bbox=-89.5370,43.0566,-89.5221,43.0860" data-bbox="-89.5370,43.0566,-89.5221,43.0860">Junction Ridge</a></li><li><a href="/madison?bbox=-89.3258,43.0699,-89.3113,43.0835" data-bbox="-89.3258,43.0699,-89.3113,43.0835">Lake Edge</a></li><li><a href="/madison?bbox=-89.3818,43.1332,-89.3633,43.1410" data-bbox="-89.3818,43.1332,-89.3633,43.1410">Lake View Hill</a></li><li><a href="/madison?bbox=-89.4239,43.0265,-89.4129,43.0347" data-bbox="-89.4239,43.0265,-89.4129,43.0347">Leopold</a></li><li><a href="/madison?bbox=-89.3933,43.1292,-89.3809,43.1354" data-bbox="-89.3933,43.1292,-89.3809,43.1354">Lerdahl Park</a></li><li><a href="/madison?bbox=-89.2963,43.0268,-89.2917,43.0329" data-bbox="-89.2963,43.0268,-89.2917,43.0329">Liberty Place</a></li><li><a href="/madison?bbox=-89.5598,43.0252,-89.4999,43.0505" data-bbox="-89.5598,43.0252,-89.4999,43.0505">Madison West</a></li><li><a href="/madison?bbox=-89.4988,43.0157,-89.4847,43.0219" data-bbox="-89.4988,43.0157,-89.4847,43.0219">Maple-Prairie</a></li><li><a href="/madison?bbox=-89.4922,43.0608,-89.4888,43.0633" data-bbox="-89.4922,43.0608,-89.4888,43.0633">Marbella Condominium</a></li><li><a href="/madison?bbox=-89.3725,43.0773,-89.3514,43.0901" data-bbox="-89.3725,43.0773,-89.3514,43.0901">Marquette</a></li><li><a href="/madison?bbox=-89.3214,43.1096,-89.3019,43.1225" data-bbox="-89.3214,43.1096,-89.3019,43.1225">Mayfair Park</a></li><li><a href="/madison?bbox=-89.4880,43.0257,-89.4685,43.0391" data-bbox="-89.4880,43.0257,-89.4685,43.0391">Meadowood</a></li><li><a href="/madison?bbox=-89.3813,43.1304,-89.3746,43.1329" data-bbox="-89.3813,43.1304,-89.3746,43.1329">Mendota Hills</a></li><li><a href="/madison?bbox=-89.4722,43.0466,-89.4511,43.0604" data-bbox="-89.4722,43.0466,-89.4511,43.0604">Midvale Heights Community</a></li><li><a href="/madison?bbox=-89.4008,43.0601,-89.3919,43.0664" data-bbox="-89.4008,43.0601,-89.3919,43.0664">Monona Bay</a></li><li><a href="/madison?bbox=-89.5218,43.0461,-89.5185,43.0475" data-bbox="-89.5218,43.0461,-89.5185,43.0475">Newbery Heights</a></li><li><a href="/madison?bbox=-89.4071,43.1349,-89.3946,43.1435" data-bbox="-89.4071,43.1349,-89.3946,43.1435">North Lake Mendota</a></li><li><a href="/madison?bbox=-89.2825,43.0853,-89.2676,43.0987" data-bbox="-89.2825,43.0853,-89.2676,43.0987">North Star</a></li><li><a href="/madison?bbox=-89.5218,43.0639,-89.5174,43.0673" data-bbox="-89.5218,43.0639,-89.5174,43.0673">Oakbridge Community</a></li><li><a href="/madison?bbox=-89.4878,43.0814,-89.4822,43.0893" data-bbox="-89.4878,43.0814,-89.4822,43.0893">Old Middleton Greenway</a></li><li><a href="/madison?bbox=-89.4827,43.0318,-89.4542,43.0452" data-bbox="-89.4827,43.0318,-89.4542,43.0452">Orchard Ridge</a></li><li><a href="/madison?bbox=-89.5003,43.0611,-89.4882,43.0752" data-bbox="-89.5003,43.0611,-89.4882,43.0752">Parkwood Hills Community</a></li><li><a href="/madison?bbox=-89.4996,43.0230,-89.4883,43.0385" data-bbox="-89.4996,43.0230,-89.4883,43.0385">Prairie Hills</a></li><li><a href="/madison?bbox=-89.4363,43.0625,-89.4149,43.0729" data-bbox="-89.4363,43.0625,-89.4149,43.0729">Regent</a></li><li><a href="/madison?bbox=-89.2765,43.0774,-89.2722,43.0841" data-bbox="-89.2765,43.0774,-89.2722,43.0841">Richmond Hill Homeowners</a></li><li><a href="/madison?bbox=-89.3003,43.1071,-89.2878,43.1205" data-bbox="-89.3003,43.1071,-89.2878,43.1205">Ridgewood</a></li><li><a href="/madison?bbox=-89.4453,43.0679,-89.4364,43.0752" data-bbox="-89.4453,43.0679,-89.4364,43.0752">Rocky Bluff</a></li><li><a href="/madison?bbox=-89.3147,43.0860,-89.2974,43.0984" data-bbox="-89.3147,43.0860,-89.2974,43.0984">Rolling Meadows</a></li><li><a href="/madison?bbox=-89.5215,43.0658,-89.5130,43.0750" data-bbox="-89.5215,43.0658,-89.5130,43.0750">Sauk Creek</a></li><li><a href="/madison?bbox=-89.3534,43.0896,-89.3380,43.0969" data-bbox="-89.3534,43.0896,-89.3380,43.0969">Schenk-Atwood Revitalization</a></li><li><a href="/madison?bbox=-89.3467,43.0971,-89.3308,43.1030" data-bbox="-89.3467,43.0971,-89.3308,43.1030">Schenk-Atwood-Starkweather-Yahara</a></li><li><a href="/madison?bbox=-89.2763,43.0271,-89.2699,43.0345" data-bbox="-89.2763,43.0271,-89.2699,43.0345">Secret Places</a></li><li><a href="/madison?bbox=-89.3685,43.1151,-89.3638,43.1190" data-bbox="-89.3685,43.1151,-89.3638,43.1190">Sheridan Triangle</a></li><li><a href="/madison?bbox=-89.3640,43.1029,-89.3549,43.1284" data-bbox="-89.3640,43.1029,-89.3549,43.1284">Sherman</a></li><li><a href="/madison?bbox=-89.4914,43.0825,-89.4895,43.0855" data-bbox="-89.4914,43.0825,-89.4895,43.0855">Skyview Terrace</a></li><li><a href="/madison?bbox=-89.2667,43.0858,-89.2509,43.1011" data-bbox="-89.2667,43.0858,-89.2509,43.1011">Sprecher East</a></li><li><a href="/madison?bbox=-89.4812,43.0752,-89.4643,43.0887" data-bbox="-89.4812,43.0752,-89.4643,43.0887">Spring Harbor</a></li><li><a href="/madison?bbox=-89.4990,43.0022,-89.4849,43.0151" data-bbox="-89.4990,43.0022,-89.4849,43.0151">Stone Meadows</a></li><li><a href="/madison?bbox=-89.4576,43.0373,-89.4511,43.0455" data-bbox="-89.4576,43.0373,-89.4511,43.0455">Summit Woods</a></li><li><a href="/madison?bbox=-89.4439,43.0640,-89.4403,43.0671" data-bbox="-89.4439,43.0640,-89.4403,43.0671">Sunset Hills</a></li><li><a href="/madison?bbox=-89.4530,43.0608,-89.4410,43.0746" data-bbox="-89.4530,43.0608,-89.4410,43.0746">Sunset Village Community</a></li><li><a href="/madison?bbox=-89.5126,43.0606,-89.5036,43.0666" data-bbox="-89.5126,43.0606,-89.5036,43.0666">Tamarack Trails Community Condominium</a></li><li><a href="/madison?bbox=-89.3806,43.0806,-89.3656,43.0920" data-bbox="-89.3806,43.0806,-89.3656,43.0920">Tenney-Lapham</a></li><li><a href="/madison?bbox=-89.2914,43.0265,-89.2895,43.0310" data-bbox="-89.2914,43.0265,-89.2895,43.0310">Twin Oaks</a></li><li><a href="/madison?bbox=-89.4388,43.0680,-89.4338,43.0715" data-bbox="-89.4388,43.0680,-89.4338,43.0715">VanChaMasShe</a></li><li><a href="/madison?bbox=-89.4191,43.0612,-89.4090,43.0677" data-bbox="-89.4191,43.0612,-89.4090,43.0677">Vilas</a></li><li><a href="/madison?bbox=-89.5118,43.0684,-89.5025,43.0754" data-bbox="-89.5118,43.0684,-89.5025,43.0754">Walnut Grove Homeowners</a></li><li><a href="/madison?bbox=-89.3657,43.0441,-89.3444,43.0501" data-bbox="-89.3657,43.0441,-89.3444,43.0501">Waunona</a></li><li><a href="/madison?bbox=-89.5132,43.0158,-89.5042,43.0226" data-bbox="-89.5132,43.0158,-89.5042,43.0226">Westhaven Trails Homeowners Assoc</a></li><li><a href="/madison?bbox=-89.4511,43.0488,-89.4387,43.0607" data-bbox="-89.4511,43.0488,-89.4387,43.0607">Westmorland</a></li><li><a href="/madison?bbox=-89.5194,43.0767,-89.5024,43.0857" data-bbox="-89.5194,43.0767,-89.5024,43.0857">Wexford Village Homeowners</a></li><li><a href="/madison?bbox=-89.3625,43.1402,-89.3552,43.1433" data-bbox="-89.3625,43.1402,-89.3552,43.1433">Whitetail Ridge</a></li><li><a href="/madison?bbox=-89.5023,43.0752,-89.4956,43.0823" data-bbox="-89.5023,43.0752,-89.4956,43.0823">Woodland Hills</a></li><li><a href="/madison?bbox=-89.4987,43.0774,-89.4950,43.0802" data-bbox="-89.4987,43.0774,-89.4950,43.0802">Woodlands Condominium Owners</a></li><li><a href="/madison?bbox=-89.3389,43.0998,-89.3356,43.1035" data-bbox="-89.3389,43.0998,-89.3356,43.1035">Worthington Park</a></li></ul></nav>
   <p class="wfoot">Free, no account. Built on <a href="https://data-cityofmadison.opendata.arcgis.com/" target="_blank" rel="noopener">Madison's open data</a>. The posted sign always wins.</p>
 </div>
 
@@ -864,8 +865,9 @@
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=8"></script>
 <script>window.CURB_CITY="madison";</script>
-<script src="/lib/city-configs.js?v=4c18d748"></script>
-<script src="/lib/city.js?v=7b4729dc"></script>
+<script src="/lib/city-configs.js?v=75e8abce"></script>
+<script src="/lib/city.js?v=425e01fc"></script>
+<script src="/lib/winter-ui.js?v=69026c54"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -1240,6 +1242,7 @@ function overviewStyle(b,ow){
   let rules=b.rules;
   // the day chip: weekday rows of that day, plus a holiday schedule whose next sweep falls on it this week (sweepsOnDay)
   if(dayFilter!=null){rules=rules.filter(r=>sweepsOnDay(r,dayFilter));if(!rules.length)return null;}
+  if(window.WINTER){const w=WINTER.ovStyle(rules,ow);if(w!==undefined)return w;}
   let rank=0,color=getCSS('--gray');
   rules.forEach(r=>{const st=statusFor(nextSweep(r));if(st.rank>rank){rank=st.rank;color=st.color;}});
   const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
@@ -1487,7 +1490,7 @@ async function fillRange(cnn){
 const sideKeyOf=r=>r.blockside||r.cnnrightleft||'C';
 function sideNext(rows){
   let best=null,bestRow=rows.find(r=>!isHolidayRow(r))||rows[0],rank=0,color=getCSS('--gray');
-  rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank||(st.rank===rank&&ns&&best&&+ns.start<+best.start)){rank=st.rank;color=st.color;best=ns;bestRow=r}});
+  rows.forEach(r=>{const ns=nextSweep(r);const st=window.WINTER?WINTER.statusFor(r,ns):statusFor(ns); if(st.rank>rank||(st.rank===rank&&ns&&best&&+ns.start<+best.start)){rank=st.rank;color=st.color;best=ns;bestRow=r}});
   return {best,bestRow,rank,color};
 }
 function drawSegments(rows){
@@ -1526,7 +1529,7 @@ function drawSegments(rows){
       const cls=rank>=5?'red':rank>=4?'amber':rank>=2?'green':'gray';
       if(cls!=='gray'&&!statusOn[cls])return;
       const click=()=>openSheet(group, s.key);
-      const vis=L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round'}).on('click',click).addTo(segLayer);
+      const vis=L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round',...(window.WINTER&&WINTER.lineStyle(s.rows,rank))}).on('click',click).addTo(segLayer);
       const hit=L.polyline(ll,{color:'#000',opacity:0,weight:16}).on('click',click).addTo(segLayer);
       if(CAN_HOVER){
         hit.bindTooltip(()=>previewHtml(group,side),
@@ -1597,6 +1600,7 @@ function verdictClass(ns){
   return hrs<3?'now':hrs<24?'soon':'ok';
 }
 function previewHtml(group, side){
+  if(window.WINTER){const w=WINTER.tip(group,side);if(w)return w;}
   const ns=side.ns, now=new Date();
   const head=!ns?'Posted sign':(now>=ns.start&&now<ns.end)?'Sweeping now':sweepWords(ns,now).head;
   const rp=relPhrase(ns);
@@ -1643,7 +1647,7 @@ function alertSpotFor(group, side, armNs, armRow){
   // earliest next sweep across them each tick (the "forever-watch"). `rule` = the row that produced
   // `ns`, kept for back-compat; cnn+sideKey identify this curb (also the saved-alert key).
   const ruleOf=r=>({weekday:r.weekday,fromhour:r.fromhour,tohour:r.tohour,
-    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates}:{}),...(r.flags&1?{flags:1}:{})});
+    week1:r.week1,week2:r.week2,week3:r.week3,week4:r.week4,week5:r.week5,holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates}:{}),...(r.flags&5?{flags:r.flags&5}:{})});
   const r0=armRow;
   // the block's avg ticket time flavors the copy
   const _et=enfFor(group.cnn, r0&&normDay(r0.weekday));
@@ -1666,12 +1670,14 @@ let sheetSpot=null;
 function openSheet(group, activeKey){
   const active=group.sides.find(s=>s.key===activeKey)||group.sides[0];
   const ns=active.ns, now=new Date();
-  const {armNs,armRow,sweepingNow}=armFor(active,now);
+  const {armNs,armRow,sweepingNow}=(window.WINTER&&WINTER.arm(active,now))||armFor(active,now);
+  const WS=window.WINTER?WINTER.sheet(group,active):null;
   sheetArmNote=sweepingNow&&armNs?`, next sweep ${sweepWords(armNs,now).day}`:'';
   let vClass=verdictClass(ns),kicker='Park until',head='';
   if(!ns){kicker='Schedule';head='Posted sign';}
   else if(now>=ns.start&&now<ns.end){kicker='Restricted';head='Sweeping now';}
   else{head=sweepWords(ns,now).head;}  // "Tue 9AM", or "Mon night" for a sweep starting before 6 AM
+  if(WS&&WS.head){vClass=WS.vClass;kicker=WS.kicker;head=WS.head;}
 
   // the active side IS the verdict at the top — list only the OTHER side(s), no repeat
   const others=group.sides.filter(s=>s!==active);
@@ -1695,7 +1701,7 @@ function openSheet(group, activeKey){
         ${allW||hol||r.dates?'':`<div class="weeks">${wkHtml}</div>`}
       </div></div>`;
   }).join('');
-  const sidesBlock=others.length?`<div class="sideslbl">Other side${others.length>1?'s':''}</div><div class="sides">${sidesHtml}</div>`:'';
+  const sidesBlock=WS&&WS.sides!=null?WS.sides:others.length?`<div class="sideslbl">Other side${others.length>1?'s':''}</div><div class="sides">${sidesHtml}</div>`:'';
 
   // permit-area chip is filled async per block (loadRppBlock), clickable to outline the area
   const canRemind = armNs && relPhrase(armNs).when;
@@ -1729,7 +1735,7 @@ function openSheet(group, activeKey){
   const _arp=relPhrase(ns);
   // the window: "9AM to 11AM" under a "Tue 9AM" head; "Tue 12 to 2 AM" under a "Mon night" one
   // a sweep by the side's holiday schedule says so where the weekly frequency would be
-  const aSched=ns?`<div class="asched ${_arp.cls}">${sweepWords(ns,now).win} · ${ns.holiday?'holiday schedule':_ar.dates?datesAfter(_ar,ns):freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
+  const aSched=WS&&WS.sched!=null?WS.sched:ns?`<div class="asched ${_arp.cls}">${sweepWords(ns,now).win} · ${ns.holiday?'holiday schedule':_ar.dates?datesAfter(_ar,ns):freqLabel(_aw)}${_arp.rel?' · '+_arp.rel:''}</div>`:'';
   // The "park after the sweeper passes" rule — most useful when a sweep is active now or imminent (within 24h).
   const _soon=ns&&((now>=ns.start&&now<ns.end)||(ns.start-now)<864e5);
   // City holiday heads-up (lib/sweep-core.js holidayNote): regular sweeps stop on every holiday, and a side with a
@@ -1767,16 +1773,17 @@ function openSheet(group, activeKey){
       <div class="headrow"><span class="head">${head}</span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb: pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div></div>
     <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${fmtLimits(group.limits)}</span></span></div>
     ${aSched}
+    ${WS&&WS.note?WS.note:''}
     ${_holRow}
     ${_holNote}
     ${enfHtml}
     ${rtHtml}
-    <div class="afterpass">${PLACE.seasonText(_ar&&_ar.months)?'Swept '+PLACE.seasonText(_ar.months)+'. ':''}Sweeping signs: a $35 ticket, and the car can be towed. Winter alternate side parking (November 15 to March 15) is not on this map.</div>
+    <div class="afterpass">${PLACE.seasonText(_ar&&_ar.months)?'Swept '+PLACE.seasonText(_ar.months)+'. ':''}Sweeping signs: a $35 ticket. Winter alternate side: $20, $60 in a declared snow emergency, and the car can be towed ($115). Last winter the City enforced it from its first plowing and paused it in dry spells.</div>
     <div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>
     ${canRemind?'<hr class="shdiv">':''}
     <div class="actions">
       ${canRemind?`<button class="btn ${alertOn?'on':''}" id="alertBtn">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}
-      ${canRemind?`<button class="btn alt" id="calBtn">${ICONS.cal} Calendar${calPref?'<span class="vsep" id="calMore" title="Change calendar type">▾</span>':''}</button>`:''}
+      ${canRemind&&!(WS&&WS.noCal)?`<button class="btn alt" id="calBtn">${ICONS.cal} Calendar${calPref?'<span class="vsep" id="calMore" title="Change calendar type">▾</span>':''}</button>`:''}
       ${canRemind?`<div class="calchoice" id="calChoice" hidden>
         <button class="btn alt" id="calGoogle">Google Calendar</button>
         <button class="btn alt" id="calICS">Apple / .ics</button>
@@ -1806,7 +1813,7 @@ function openSheet(group, activeKey){
     ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins. Temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>Sweeping rules come from the City's Street Sweeping Restrictions (the posted signs), placed on the City's street centerlines by the curb side they are drawn on. Winter alternate side parking is not shown: the City has not said how it will enforce it this winter. Sweep alerts and calendar reminders run on Madison time: an overnight sweep gets one alert around 9 PM the evening before.</p>
+      <p>Sweeping rules come from the City's Street Sweeping Restrictions (the posted signs), placed on the City's street centerlines by the curb side they are drawn on. The winter rule follows the ordinance on every City street with house numbers outside the Snow Emergency Zone, on the side the address ranges give. Sweep alerts and calendar reminders run on Madison time: an overnight sweep gets one alert around 9 PM the evening before.</p>
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
 
@@ -1822,7 +1829,7 @@ function openSheet(group, activeKey){
       const below=o.offsetTop+o.offsetHeight+parseFloat(getComputedStyle(s).paddingBottom)-(s.scrollTop+s.clientHeight);
       if(below>0)s.scrollBy({top:below,behavior:'smooth'});};
     const openCalChoice=()=>{const c=document.getElementById('calChoice');c.hidden=false;reveal(c);};
-    document.getElementById('calBtn').onclick=()=>{
+    if(document.getElementById('calBtn'))document.getElementById('calBtn').onclick=()=>{
       const p=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
       p?doCal(p):openCalChoice();
     };
@@ -1947,8 +1954,8 @@ function downloadICS(street,block,ns){
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CURB//Madison Sweeping//EN','CALSCALE:GREGORIAN',
     'BEGIN:VEVENT','UID:curb-'+Date.now()+'@sweep','DTSTAMP:'+dt(new Date()),
     'DTSTART:'+dt(ns.start),'DTEND:'+dt(ns.end),
-    'SUMMARY:🧹 Move car: street sweeping ('+street+')','LOCATION:'+street+' · '+block,
-    'DESCRIPTION:Street sweeping starts now. Move your car. Block: '+block,
+    'SUMMARY:'+((window.WINTER&&WINTER.calTitle(street))||'🧹 Move car: street sweeping ('+street+')'),'LOCATION:'+street+' · '+block,
+    'DESCRIPTION:'+((window.WINTER&&WINTER.calDesc())||'Street sweeping starts now. Move your car.')+' Block: '+block,
     'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:Move your car in 30 min','END:VALARM',
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
   const a=document.createElement('a');
@@ -1964,10 +1971,10 @@ function openGoogleCal(street,block,ns){
   const dt=d=>{const p=sfParts(d),z=n=>String(n).padStart(2,'0');
     return p.y+z(p.mo)+z(p.da)+'T'+z(p.h)+z(p.mi)+'00';};
   const u='https://calendar.google.com/calendar/render?action=TEMPLATE'
-    +'&text='+encodeURIComponent('🧹 Move car: street sweeping ('+street+')')
+    +'&text='+encodeURIComponent((window.WINTER&&WINTER.calTitle(street))||'🧹 Move car: street sweeping ('+street+')')
     +'&dates='+dt(ns.start)+'/'+dt(ns.end)+'&ctz=America/Chicago'
     +'&location='+encodeURIComponent(street+' · '+block)
-    +'&details='+encodeURIComponent('Street sweeping starts. Move your car.\nBlock: '+block);
+    +'&details='+encodeURIComponent(((window.WINTER&&WINTER.calDesc())||'Street sweeping starts. Move your car.')+'\nBlock: '+block);
   window.open(u,'_blank','noopener');
 }
 
@@ -2395,8 +2402,8 @@ async function alertSides(list){
     if(!mine.length)continue;  // the city no longer lists this side: the row shows no schedule
     const {best,bestRow}=sideNext(mine);
     const side={key:a.sideKey,blockside:mine[0].blockside,rows:mine,row:bestRow,ns:best};
-    const {armNs,armRow}=armFor(side,now);
-    out[alertId(a)]={armNs,spot:alertSpotFor({cnn:a.cnn,corridor:block[0].corridor,limits:block[0].limits},side,armNs,armRow)};
+    const {armNs,armRow}=(window.WINTER&&WINTER.arm(side,now))||armFor(side,now);
+    out[alertId(a)]={armNs,rows:mine,spot:alertSpotFor({cnn:a.cnn,corridor:block[0].corridor,limits:block[0].limits},side,armNs,armRow)};
   }
   return out;
 }
@@ -2420,6 +2427,7 @@ function apRow(a,level){
   const x=AP.sides[alertId(a)];
   let when; const ac=a.city||'sf', away=ac!==CITY;
   if(away)when=`<div class="ap-next">In ${cityLabel(ac)}. Its next sweep shows on that map.</div>`;
+  else if(x&&window.WINTER&&(when=WINTER.apNext(x,level))){}
   else if(x&&x.armNs){const rp=relPhrase(x.armNs);
     when=`<div class="ap-next ${rp.cls}">Next sweep ${esc(rp.txt)}${x.armNs.holiday?' · holiday schedule':''}</div>`
       +`<div class="ap-ping">${ICONS.bell}<span>${esc(pingLine(x.spot,level))}</span></div>`;}
@@ -3216,7 +3224,7 @@ function renderSug(showEmpty){
   s.innerHTML=sugItems.length?sugItems.map((it,i)=>
     `<button class="sugi${i===sugIdx?' sel':''}" role="option" aria-selected="${i===sugIdx}" data-i="${i}">
       <i class="k ${it.kind==='addr'?'addr':'st'}"></i><span>${it.t}</span></button>`).join('')
-    :`<div class="sugi none">No matching Madison street. Try an address like “913 Vilas Ave”.</div>`;
+    :`<div class="sugi none">No matching Madison street. Try an address like “3801 Mineral Point Rd”.</div>`;
   s.hidden=false;
   document.getElementById('q').setAttribute('aria-expanded','true');
   s.querySelectorAll('button.sugi').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>pickSug(+b.dataset.i);});

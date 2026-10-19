@@ -8,7 +8,7 @@
     },
     "api/send-notifications.js": {
       "maxDuration": 60,
-      "includeFiles": "data/schedules.json"
+      "includeFiles": "{data/schedules.json,data/*/winter.json}"
     }
   },
   "crons": [

@@ -24,7 +24,7 @@ const tpl = (s) => esc(s).replace(/`/g, '&#96;').replace(/\$\{/g, '$&#123;');   
 // The scripts' ?v= follows their content: the service worker serves a cached copy of the same URL first, which would
 // miss a city added since (or lib/city.js's last change).
 const ver = (f) => createHash('sha1').update(fs.readFileSync(ROOT + f)).digest('hex').slice(0, 8);
-const CONFIGS_V = ver('lib/city-configs.js'), CITY_V = ver('lib/city.js'), FR_V = ver('lib/i18n-fr.js');
+const CONFIGS_V = ver('lib/city-configs.js'), CITY_V = ver('lib/city.js'), FR_V = ver('lib/i18n-fr.js'), WINTER_V = ver('lib/winter-ui.js');
 // The basemap (scripts/cities/basemap-city.mjs): the parchment style, drawn live by MapLibre from the city's one vector file.
 const BASEMAPS = fs.existsSync(ROOT + 'basemap/cities/index.json') ? JSON.parse(fs.readFileSync(ROOT + 'basemap/cities/index.json', 'utf8')) : {};
 const STYLE_V = fs.existsSync(ROOT + 'basemap/cities/style.json') ? ver('basemap/cities/style.json') : '';
@@ -47,9 +47,13 @@ function cityPage(id) {
   const french = (c.languages || []).includes('fr') && c.words_fr;
   const frWords = french ? [[words.rule, c.words_fr.rule], [' Tap where you parked for the rules.', ' Touchez la bordure où vous êtes stationné pour voir les règles.'],
     [words.afterpass, c.words_fr.afterpass], [words.dataNotes, c.words_fr.dataNotes]].filter(([en, f]) => en && f) : [];
-  // Blocks swept per weekday, for the day-chip heads-up (weekly rules by weekday; listed dates by their weekday).
-  const perDay = [0, 1, 2, 3, 4, 5, 6].map((d) => data.b.filter((b) => b.d.some(([, , rules]) => rules.some((r) =>
-    r[0] === d || (r[0] === -1 && Array.isArray(r[6]) && r[6].some((iso) => new Date(iso + 'T12:00:00Z').getUTCDay() === d))))).length);
+  // A city with a winter rule (city.json `winter`: Madison) gets lib/winter-ui.js: the plate under the day chips, tonight's
+  // sides on the map and in the sheet, and alerts that can be on before the City turns the rule on (design A, 2026-10-18).
+  const winter = !!c.winter;
+  // Blocks swept per weekday, for the day-chip heads-up (weekly rules by weekday; listed dates by their weekday). A winter
+  // rule (flag 4) is not a sweep: it closes a side every other night.
+  const perDay = [0, 1, 2, 3, 4, 5, 6].map((d) => data.b.filter((b) => b.d.some(([, , rules]) => rules.some((r) => !(r[5] & 4) && (
+    r[0] === d || (r[0] === -1 && Array.isArray(r[6]) && r[6].some((iso) => new Date(iso + 'T12:00:00Z').getUTCDay() === d)))))).length);
   // The welcome card's neighborhood list: city.json's, else framed from the blocks' neighborhoods (2nd to 98th percentile)
   // when most blocks name one (a list of the few a partial layer covers would read as the whole city).
   let hoods = c.neighborhoods || null;
@@ -126,6 +130,7 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
     // ---- scripts: the city's time core and data (lib/city.js) -----------------------------------------
     ['load the city', '<script src="/lib/sweep-core.js?v=8"></script>',
       `<script src="/lib/sweep-core.js?v=8"></script>\n<script>window.CURB_CITY=${js(id)};</script>\n<script src="/lib/city-configs.js?v=${CONFIGS_V}"></script>\n<script src="/lib/city.js?v=${CITY_V}"></script>`
+      + (winter ? `\n<script src="/lib/winter-ui.js?v=${WINTER_V}"></script>` : '')
       + (french ? `\n<script src="/lib/i18n-fr.js?v=${FR_V}"></script>\n<script>window.CURB_FR&&CURB_FR.startI18n(${JSON.stringify(frWords).replace(/</g, '\\u003c')});</script>` : '')],
     ['the language item', '        <button class="im-item" id="imAlerts" role="menuitem">', (french ? `        <button class="im-item" id="imLang" role="menuitem" data-no-i18n>
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></span>
@@ -209,7 +214,7 @@ function datesAfter(r,ns){const iso=ns.y+'-'+String(ns.mo).padStart(2,'0')+'-'+S
   return later.length?'then '+later.join(' and '):'the last date posted';}
 function freqLabel(weeks){`],
     ['alerts carry dates and the holiday flag', "holidays:r.holidays||'0',...(r.months?{months:r.months}:{})});",
-      "holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates}:{}),...(r.flags&1?{flags:1}:{})});"],
+      "holidays:r.holidays||'0',...(r.months?{months:r.months}:{}),...(r.dates?{dates:r.dates}:{}),...(r.flags&5?{flags:r.flags&5}:{})});"],
     // ---- the block sheet ----------------------------------------------------------------------------
     ['season and fine instead of the SF re-park rule',
       "${_soon?`<div class=\"afterpass\">Once the sweeper has passed, you can re-park here, even before the posted window ends. <a href=\"https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets\" target=\"_blank\" rel=\"noopener\">SFMTA rule ↗</a></div>`:''}",
@@ -334,6 +339,37 @@ if(CAN_HOVER){
     ['share words', "text:'Free SF street-parking map: every block colored by its next street sweep, plus when tickets actually land.',url:'https://curb.guide'",
       `text:${js(`${name} street sweeping, block by block: every swept curb colored by its next sweep.`)},url:${js(url)}`],
   ];
+
+  // ---- winter alternate side parking (lib/winter-ui.js): hooks where the page decides colors, the sheet and alerts ----
+  if (winter) edits.push(
+    ['winter: map status', 'rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns);', 'rows.forEach(r=>{const ns=nextSweep(r);const st=window.WINTER?WINTER.statusFor(r,ns):statusFor(ns);'],
+    ['winter: dashed until enforced', "const vis=L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round'}).on('click',click).addTo(segLayer);",
+      "const vis=L.polyline(ll,{color,weight:5,opacity:.95,lineCap:'round',...(window.WINTER&&WINTER.lineStyle(s.rows,rank))}).on('click',click).addTo(segLayer);"],
+    ['winter: citywide lines', '  if(dayFilter!=null){rules=rules.filter(r=>sweepsOnDay(r,dayFilter));if(!rules.length)return null;}',
+      '  if(dayFilter!=null){rules=rules.filter(r=>sweepsOnDay(r,dayFilter));if(!rules.length)return null;}\n  if(window.WINTER){const w=WINTER.ovStyle(rules,ow);if(w!==undefined)return w;}'],
+    ['winter: hover card', 'function previewHtml(group, side){', 'function previewHtml(group, side){\n  if(window.WINTER){const w=WINTER.tip(group,side);if(w)return w;}'],
+    ['winter: arm a night not yet enforced', '  const {armNs,armRow,sweepingNow}=armFor(active,now);',
+      '  const {armNs,armRow,sweepingNow}=(window.WINTER&&WINTER.arm(active,now))||armFor(active,now);\n  const WS=window.WINTER?WINTER.sheet(group,active):null;'],
+    ['winter: the verdict', '  else{head=sweepWords(ns,now).head;}  // "Tue 9AM", or "Mon night" for a sweep starting before 6 AM',
+      '  else{head=sweepWords(ns,now).head;}  // "Tue 9AM", or "Mon night" for a sweep starting before 6 AM\n  if(WS&&WS.head){vClass=WS.vClass;kicker=WS.kicker;head=WS.head;}'],
+    ['winter: the schedule line', '  const aSched=ns?', '  const aSched=WS&&WS.sched!=null?WS.sched:ns?'],
+    ['winter: tonight\'s sides', '  const sidesBlock=others.length?', '  const sidesBlock=WS&&WS.sides!=null?WS.sides:others.length?'],
+    ['winter: the note', '    ${aSched}\n    ${_holRow}', "    ${aSched}\n    ${WS&&WS.note?WS.note:''}\n    ${_holRow}"],
+    ['winter: no calendar before it starts', '${canRemind?`<button class="btn alt" id="calBtn">', '${canRemind&&!(WS&&WS.noCal)?`<button class="btn alt" id="calBtn">'],
+    ['winter: calendar button may be absent', "    document.getElementById('calBtn').onclick=()=>{", "    if(document.getElementById('calBtn'))document.getElementById('calBtn').onclick=()=>{"],
+    ['winter: calendar title', "'SUMMARY:🧹 Move car: street sweeping ('+street+')'", "'SUMMARY:'+((window.WINTER&&WINTER.calTitle(street))||'🧹 Move car: street sweeping ('+street+')')"],
+    ['winter: calendar words', "'DESCRIPTION:Street sweeping starts now. Move your car. Block: '+block",
+      "'DESCRIPTION:'+((window.WINTER&&WINTER.calDesc())||'Street sweeping starts now. Move your car.')+' Block: '+block"],
+    ['winter: Google calendar title', "'&text='+encodeURIComponent('🧹 Move car: street sweeping ('+street+')')",
+      "'&text='+encodeURIComponent((window.WINTER&&WINTER.calTitle(street))||'🧹 Move car: street sweeping ('+street+')')"],
+    ['winter: Google calendar words', "'&details='+encodeURIComponent('Street sweeping starts. Move your car.\\nBlock: '+block)",
+      "'&details='+encodeURIComponent(((window.WINTER&&WINTER.calDesc())||'Street sweeping starts. Move your car.')+'\\nBlock: '+block)"],
+    ['winter: alerts panel arms it too', '    const {armNs,armRow}=armFor(side,now);', '    const {armNs,armRow}=(window.WINTER&&WINTER.arm(side,now))||armFor(side,now);'],
+    ['winter: alerts panel keeps the rows', '    out[alertId(a)]={armNs,spot:alertSpotFor(', '    out[alertId(a)]={armNs,rows:mine,spot:alertSpotFor('],
+    ['winter: alerts panel line', '  else if(x&&x.armNs){const rp=relPhrase(x.armNs);', '  else if(x&&window.WINTER&&(when=WINTER.apNext(x,level))){}\n  else if(x&&x.armNs){const rp=relPhrase(x.armNs);'],
+    ['winter: the plate', '    <button class="dchip" data-day="0">Sun</button>\n  </div>\n</div>',
+      '    <button class="dchip" data-day="0">Sun</button>\n  </div>\n  <div class="wplate" id="wPlate" hidden></div>\n</div>'],
+  );
 
   let out = src;
   for (const [what, find, rep, count = 1] of edits) {

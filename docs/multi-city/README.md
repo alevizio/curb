@@ -45,7 +45,7 @@ for the City.
 | [Chicago](chicago.md) | 2026 ward section dates and the winter overnight ban | Which side is swept first is unknown: both dates show on both sides. 19.6 MB of dates |
 | [Saint Paul](saint-paul.md) | The fall sweep dates, both sides of each block | Dates move with the weather; the fine is not published |
 | [Norfolk](norfolk.md) | The City's sweeping table by address; tickets 96% on the schedule's day | Hours inferred from tickets |
-| [Madison](madison.md) | The posted sweeping signs | The winter alternate side rule is not shown (a design decision, and the City's 2026-27 plan) |
+| [Madison](madison.md) | The posted sweeping signs, and winter alternate side parking (shown as tonight's side once the City turns it on) | The winter switch follows the City's announcements by hand |
 | [Denver](denver.md) | Sweep codes on the centerline; hours from the sign inventory | Hours inferred for most blocks |
 | [Somerville](somerville.md) | The City's sweeping pages, one per street stretch | No tickets published; the pages' index is gone |
 | [Montréal](montreal.md) | 43k street cleaning signs placed on the Géobase | The sign inventory is thin in six boroughs; the page is in English |

@@ -128,14 +128,20 @@ describe('blocks', () => {
 describe('data/madison/segments.json', () => {
   const file = new URL('../../data/madison/segments.json', import.meta.url);
   const data = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
-  it.skipIf(!data)('holds weekly sweeping rules (and winter date lists when built with them), inside Madison', () => {
+  it.skipIf(!data)('holds weekly sweeping rules and the winter rule (named date lists), inside Madison', () => {
     let weekly = 0, listed = 0;
+    if (data._meta.winter) {
+      expect(data.dates.odd.every((iso) => +iso.slice(8, 10) % 2 === 1)).toBe(true);
+      expect(data.dates.even.every((iso) => +iso.slice(8, 10) % 2 === 0)).toBe(true);
+      expect(data.dates.odd.length + data.dates.even.length).toBe(121);
+    }
     for (const b of data.b) {
       for (const [lng, lat] of b.g) { expect(lng).toBeGreaterThan(-89.6); expect(lng).toBeLessThan(-89.2); expect(lat).toBeGreaterThan(42.98); expect(lat).toBeLessThan(43.2); }
       for (const [side, , rules] of b.d) {
         expect(['L', 'R']).toContain(side);
         for (const r of rules) {
-          if (r[0] === -1) { listed++; expect(r.slice(0, 6)).toEqual([-1, 1, 7, 0, 0, 3]); expect(r[6].length).toBeGreaterThan(55); }
+          // the winter rule: 1 to 7 AM, flags 7 (holidays too, towable, a winter rule), on one of the file's two lists
+          if (r[0] === -1) { listed++; expect(r.slice(0, 6)).toEqual([-1, 1, 7, 0, 0, 7]); expect(['odd', 'even']).toContain(r[6]); }
           else { weekly++; expect(r[0]).toBeGreaterThanOrEqual(1); expect(r[0]).toBeLessThanOrEqual(5); expect(r[3]).toBe(31); }
         }
       }
@@ -143,11 +149,17 @@ describe('data/madison/segments.json', () => {
       if (b.o) {
         const oddSideRules = (b.d.find((d) => d[0] === b.o) || [])[2] || [];
         const w = oddSideRules.find((r) => r[0] === -1);
-        if (w) expect(w[6].every((iso) => +iso.slice(8, 10) % 2 === 0)).toBe(true);
+        if (w) expect(w[6]).toBe('even');
       }
     }
     expect(weekly).toBeGreaterThan(1000);
-    if (data._meta.winter) expect(listed).toBeGreaterThan(1000);   // built with --with-winter
+    if (data._meta.winter) expect(listed).toBeGreaterThan(1000);   // the default build; --without-winter leaves it out
     else expect(listed).toBe(0);
+  });
+  const city = JSON.parse(fs.readFileSync(new URL('../../data/madison/city.json', import.meta.url), 'utf8'));
+  it.skipIf(!data || !data._meta.winter)('city.json carries the season the page and the alert server read, and the switch starts off', () => {
+    expect(city.winter).toEqual(WINTER);
+    const sw = JSON.parse(fs.readFileSync(new URL('../../data/madison/winter.json', import.meta.url), 'utf8'));
+    expect(['waiting', 'on', 'paused']).toContain(sw.state);
   });
 });

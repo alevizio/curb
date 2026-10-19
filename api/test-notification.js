@@ -16,6 +16,7 @@ import { renderOne, normLevel, normVoice, touchpointsFor, localHour } from '../l
 import { cityOf } from '../lib/cities.js';
 import { apnsConfigured, getProviderToken, openSession, sendOne, altHost } from './_apns.js';
 import { claimSlot } from './_store.js';
+import { sanitizeRules } from './_spot.js';
 
 const HEX_TOKEN = /^[0-9a-fA-F]{64,200}$/;
 // Same push-service allowlist as save-subscription.js — without it the web-push branch is an SSRF
@@ -57,8 +58,10 @@ export default async function handler(req, res) {
       tip: String(real.tip || '').replace(/[^0-9apmAPM:.\s~-]/g, '').trim().slice(0, 14),
       nextSweepISO: new Date(sweep).toISOString(),
       level, voice,
-      // the curb's city, so the times read on its clock (every city but San Francisco)
+      // the curb's city, so the times read on its clock (every city but San Francisco), and its rules, so a winter
+      // night (Madison) gets the winter words
       ...(city.id !== 'sf' ? { city: city.id } : {}),
+      ...(Array.isArray(real.rules) ? { rules: sanitizeRules(real.rules) } : {}),
     };
     const a = city.core.alertAnchors(sweep);
     const fireAt = { eve: +a.eve, morn: sweep - 2 * 3600e3, lead: sweep - 30 * 60000, tonight: +a.tonight };

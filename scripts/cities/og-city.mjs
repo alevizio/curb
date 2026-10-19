@@ -53,15 +53,17 @@ function card(id) {
   const c = JSON.parse(fs.readFileSync(`${ROOT}data/${id}/city.json`, 'utf8'));
   const data = JSON.parse(fs.readFileSync(`${ROOT}data/${id}/segments.json`, 'utf8'));
   // The sign: the most common window (hours, weeks, season), counted once per side however many weekdays it runs, so a
-  // nightly arterial (seven rules) can't outweigh a residential 1st & 3rd; then its most common weekday, or DAILY.
+  // nightly arterial (seven rules) can't outweigh a residential 1st & 3rd; then its most common weekday, or DAILY. A
+  // winter rule (flag 4, Madison's alternate side parking) is no posted sweeping sign: left out.
   const tally = new Map(), dows = new Map(), dateDays = [0, 0, 0, 0, 0, 0, 0];
   for (const b of data.b) for (const [, , rules] of b.d) {
     const bySide = new Map();
     for (const r of rules) {
+      if (r[5] & 4) continue;
       const k = JSON.stringify(r[0] === -1 ? [-1, r[1], r[2], 0, 0, r[5]] : [0, r[1], r[2], r[3], r[4], r[5]]);
       if (!bySide.has(k)) bySide.set(k, new Set());
       bySide.get(k).add(r[0]);
-      if (r[0] === -1) for (const iso of r[6] || []) dateDays[new Date(iso + 'T12:00:00Z').getUTCDay()]++;
+      if (r[0] === -1 && Array.isArray(r[6])) for (const iso of r[6]) dateDays[new Date(iso + 'T12:00:00Z').getUTCDay()]++;
     }
     for (const [k, set] of bySide) {
       tally.set(k, (tally.get(k) || 0) + 1);

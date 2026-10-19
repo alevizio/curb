@@ -19,8 +19,9 @@ function canonTime(v) {
   const hr = Math.floor(h), mi = Math.round((h - hr) * 60);
   return mi ? hr + ':' + String(mi).padStart(2, '0') : String(hr);
 }
-// A rule on listed dates (cities that publish dates, not a weekday pattern): valid dates, deduplicated, in order.
-export const MAX_DATES = 60;
+// A rule on listed dates (cities that publish dates, not a weekday pattern): valid dates, deduplicated, in order. Room for
+// a winter season's odd or even dates (Madison: 62 odd dates from November 15 to March 15).
+export const MAX_DATES = 64;
 const listedDates = (v) => (Array.isArray(v) ? [...new Set(v.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d))).map(String))].sort().slice(0, MAX_DATES) : null);
 
 // A recurring sweep rule the cron can recompute the next occurrence from (the "forever-watch").
@@ -50,8 +51,10 @@ export function sanitizeRule(rule) {
     week4: bit(rule.week4), week5: bit(rule.week5),
     holidays: bit(rule.holidays),
   };
-  // a rule that runs on holidays anyway (lib/city.js); absent on every San Francisco and Boston rule
-  if (Number(rule.flags) & 1) out.flags = 1;
+  // a rule that runs on holidays anyway (1) or a winter rule, applied only while the City enforces it (4; lib/city.js);
+  // absent on every San Francisco and Boston rule
+  const flags = Number(rule.flags) & 5;
+  if (flags) out.flags = flags;
   // A seasonal rule's months (Boston sweeps April to November): kept only when they leave some month out, so a
   // rule swept all year, every SF rule among them, stores exactly as before.
   const months = Array.isArray(rule.months) ? [...new Set(rule.months.map(Number).filter((m) => Number.isInteger(m) && m >= 1 && m <= 12))].sort((a, b) => a - b) : [];

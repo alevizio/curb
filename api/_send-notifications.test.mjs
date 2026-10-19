@@ -787,3 +787,47 @@ describe('Boston watches (city: boston)', () => {
     } finally { core.alertAnchors = real; quiet.mockRestore(); }
   });
 });
+
+const { CITIES } = await import('../lib/cities.js');
+describe('Madison winter watches (alternate side parking, quiet until the City turns it on)', () => {
+  const days = (odd) => { const o = []; for (let t = Date.parse('2026-11-15T12:00Z'); t <= Date.parse('2027-03-15T12:00Z'); t += 864e5) { const iso = new Date(t).toISOString().slice(0, 10); if (+iso.slice(8, 10) % 2 === (odd ? 1 : 0)) o.push(iso); } return o; };
+  // Jenifer St's even side, closed 1 to 7 AM on odd dates; saved while waiting, for the coming night (Nov 30 into Dec 1)
+  const R = { dates: days(true).slice(0, 64), fromhour: '1', tohour: '7', week1: '0', week2: '0', week3: '0', week4: '0', week5: '0', holidays: '0', flags: 5 };
+  const mad = { corridor: 'Jenifer St', blockside: 'North', city: 'madison', cnn: 'ST1', sideKey: 'North', rule: R, rules: [R],
+    nextSweepISO: '2026-12-01T07:00:00.000Z', leadMinutes: 30, level: 'normal' };
+  const rec = (spot, notified = {}) => JSON.stringify({ subscription: SUB, spot, notified, savedAt: Date.parse('2026-10-18T20:00:00Z') });
+  afterEach(() => CITIES.madison.place.setWinter({ state: 'waiting' }));
+
+  it('sends nothing while Madison waits, even on the night the watch was saved for', async () => {
+    mem['curb:subs'] = { [EP]: rec(mad) };
+    vi.setSystemTime(Date.parse('2026-12-01T03:30:00Z'));   // 9:30 PM Nov 30 in Madison
+    const out = await run(bearer());
+    expect(out.code).toBe(200);
+    expect(send).not.toHaveBeenCalled();
+  });
+  it('once on: the "starts tonight" push once, then the 9 PM push of each night the side closes', async () => {
+    CITIES.madison.place.setWinter({ state: 'on', from: '2026-12-01', at: '2026-11-30T22:10:00Z', reason: 'Madison called its first plowing.' });
+    mem['curb:subs'] = { [EP]: rec(mad) };
+    vi.setSystemTime(Date.parse('2026-11-30T22:20:00Z'));   // 4:20 PM
+    await run(bearer());
+    expect(send).toHaveBeenCalledTimes(1);
+    const start = JSON.parse(send.mock.calls[0][1]);
+    expect(start).toMatchObject({ title: 'Alternate side parking starts tonight', url: '/madison?b=ST1&side=North', tag: 'curb-winter' });
+    expect(JSON.parse(mem['curb:subs'][EP]).notified).toEqual({ winter: '2026-12-01' });
+    await run(bearer());                                    // the next tick: not again
+    expect(send).toHaveBeenCalledTimes(1);
+    vi.setSystemTime(Date.parse('2026-12-01T03:30:00Z'));   // 9:30 PM
+    await run(bearer());
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(send.mock.calls[1][1])).toMatchObject({ title: 'Move to the odd side tonight', body: 'Jenifer St, even side: no parking 1 to 7 AM.' });
+    expect(JSON.parse(mem['curb:subs'][EP]).notified).toEqual({ winter: '2026-12-01', tonight: '2026-12-01T07:00:00.000Z' });
+  });
+  it('a watch saved while waiting moves to the first night the City enforces', async () => {
+    CITIES.madison.place.setWinter({ state: 'on', from: '2026-12-03', at: '2026-12-02T20:00:00Z' });   // on from the night of Dec 2
+    mem['curb:subs'] = { [EP]: rec(mad, { winter: '2026-12-03' }) };
+    vi.setSystemTime(Date.parse('2026-12-02T21:00:00Z'));
+    await run(bearer());
+    expect(send).not.toHaveBeenCalled();
+    expect(JSON.parse(mem['curb:subs'][EP]).spot.nextSweepISO).toBe('2026-12-03T07:00:00.000Z');   // Dec 3: odd, enforced
+  });
+});

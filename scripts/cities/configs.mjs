@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
-const KEEP = ['id', 'name', 'region', 'tz', 'center', 'zoom', 'bounds', 'holidays', 'holidayRule', 'fine', 'tow'];
+const KEEP = ['id', 'name', 'region', 'tz', 'center', 'zoom', 'bounds', 'holidays', 'holidayRule', 'fine', 'tow', 'winter'];
 const ids = fs.readdirSync(ROOT + 'data', { withFileTypes: true })
   .filter((d) => d.isDirectory() && d.name !== 'boston' && fs.existsSync(`${ROOT}data/${d.name}/city.json`) && fs.existsSync(`${ROOT}data/${d.name}/segments.json`))
   .map((d) => d.name).sort();

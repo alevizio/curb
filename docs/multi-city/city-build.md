@@ -44,6 +44,7 @@ A **rule** is one of:
 ```
 [ dow, from, to, weeks, months, flags ]           a weekly or monthly rule
 [ -1,  from, to, 0,     0,      flags, [dates] ]  a rule on listed dates
+[ -1,  from, to, 0,     0,      flags, "name" ]   a rule on a list stored once in the file's `dates` (Madison's winter rule)
 ```
 
 - `dow`: JavaScript weekday, 0 = Sunday to 6 = Saturday.
@@ -53,9 +54,11 @@ A **rule** is one of:
 - `weeks`: which occurrences of that weekday in the month, bit 0 = the 1st, bit 4 = the 5th. Every week = 31.
   "1st and 3rd" = 5. "2nd and 4th" = 10.
 - `months`: the season, bit 0 = January to bit 11 = December. 0 = all year. April to November = 2040.
-- `flags`: 1 = not suspended on holidays (an overnight program that runs anyway), 2 = towable.
+- `flags`: 1 = not suspended on holidays (an overnight program that runs anyway), 2 = towable, 4 = a winter rule that applies
+  only while the City enforces it (`winter` in city.json and the switch in `data/<id>/winter.json`, see madison.md).
 - `dates`: local dates `"YYYY-MM-DD"`, for cities that publish dates instead of a pattern (Chicago, Saint Paul,
-  Norfolk). List every date the build knows, at least through the end of the current season.
+  Norfolk). List every date the build knows, at least through the end of the current season. When thousands of sides
+  share a list, store it once in the file's top level `dates: { name: [...] }` and name it in the rule.
 
 Keep `segments.json` under about 6 MB. If a city is bigger, say so in the report; don't drop data to fit.
 

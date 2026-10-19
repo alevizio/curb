@@ -27,7 +27,7 @@ import {
 import { recomputeSpot, withHolidayRules, watchAgeOf } from './_schedule.js';
 import { cityOf } from '../lib/cities.js';
 import { apnsConfigured, getProviderToken, resetProviderToken, openSession, sendOne, primaryHost, altHost } from './_apns.js';
-import { dueAlert } from '../lib/notify-core.js';
+import { dueAlert, winterPlan } from '../lib/notify-core.js';
 
 const SEND_TIMEOUT_MS = 10000; // per push request (web push and APNs), well inside the 60 s function limit
 
@@ -121,7 +121,9 @@ function planWatch(spot, notified, savedAt, now) {
       const advanced = recomputeSpot(watch);
       if (advanced) return { advanced };
     }
-    return { due: dueAlert(watch, notified, now) };
+    // A winter rule (Madison): its "starts tonight" push once the City turns it on, and nothing for a night it doesn't
+    // enforce (lib/notify-core.js winterPlan); null for every other watch.
+    return winterPlan(watch, notified, now) || { due: dueAlert(watch, notified, now) };
   } catch (e) {
     console.error('watch skipped:', String((e && e.message) || e).slice(0, 200));
     return null;
@@ -320,7 +322,7 @@ export default async function handler(req, res) {
       }
       // De-dupe write lives OUTSIDE the send try/catch: a transient store error here must not be
       // mistaken for a send failure (which would let the next 15-min tick re-push the same sweep).
-      if (delivered) await markNotified(field, spot.nextSweepISO, due.key);
+      if (delivered) await markNotified(field, due.mark || spot.nextSweepISO, due.key);
     }
 
     // ---- Native APNs (iOS) ---- identical windows / dedupe / re-arm, different transport. Skipped
@@ -377,7 +379,7 @@ export default async function handler(req, res) {
           if (status === 200) { delivered = true; iosSent++; iosOut.push({ id: deviceId(token), ok: true }); }
           else if (isBadToken(status, reason)) { await deleteIosSub(token); iosGone.add(token); iosPruned++; }
           else { iosDown.add(token); failedOn(iosFailures, iosOut, token, `${status}${reason ? ' ' + String(reason).slice(0, 40) : ''}`); } // e.g. 403 InvalidProviderToken
-          if (delivered) await markIosNotified(field, spot.nextSweepISO, due.key);
+          if (delivered) await markIosNotified(field, due.mark || spot.nextSweepISO, due.key);
         }
       } finally {
         try { session.close(); } catch { /* already closed */ }

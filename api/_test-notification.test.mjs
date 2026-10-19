@@ -47,6 +47,13 @@ describe('test push', () => {
     expect(plan[0].body).toContain('gets cleaned at 8 AM');
   });
 
+  it('a winter night (Madison) previews the parking words', async () => {
+    const R = { dates: ['2026-12-01', '2026-12-03'], fromhour: '1', tohour: '7', week1: '0', week2: '0', week3: '0', week4: '0', week5: '0', holidays: '0', flags: 5 };
+    vi.setSystemTime(Date.parse('2026-11-30T18:00:00Z'));
+    const { plan } = await call({ which: 'all', spot: { corridor: 'Jenifer St', city: 'madison', rules: [R], nextSweepISO: '2026-12-01T07:00:00.000Z' } });
+    expect(plan.map((p) => [p.key, p.body])).toEqual([['tonight', 'Move to the odd side tonight. Jenifer St, even side: no parking 1 to 7 AM.']]);
+  });
+
   it('with no future sweep, previews a demo sweep tomorrow at 9 AM (round, real-looking times)', async () => {
     const { plan } = await call({ which: 'lead', spot: { nextSweepISO: '2020-01-01T00:00:00Z' } });
     expect(plan[0].title).toBe('Test · 30 min before (Sun 8:30 AM)');

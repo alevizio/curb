@@ -1,8 +1,8 @@
 // Headless check of a city's page (<id>.html, built by scripts/cities/city-page.mjs) on a phone screen: the page loads
 // with no errors and no San Francisco data requests, the basemap draws from the city's vector file, the citywide view
 // draws, street zoom draws curb sides, a block's sheet opens with its schedule (no "undefined", no "NaN"), an address
-// search opens the right street, a shared link opens its block, the calendar carries the city's time zone, and a saved
-// alert carries the city and every rule.
+// search opens the right street, a shared link opens its block, the calendar carries the city's time zone, a saved
+// alert carries the city and every rule, and a city with a winter rule shows it as its switch says and on an enforced night.
 // Usage: node scripts/check-city.mjs <id> [site]   (default site http://localhost:3077, `npm run dev`)
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync } from 'node:fs';
@@ -103,6 +103,55 @@ try {
     check(fr.lang === 'fr' && fr.item === 'English' && /Stationnez|Nettoyage en cours|voir le panneau/i.test(fr.sheet) && !/Park until|every week|\bin \d+ days\b/i.test(fr.sheet),
       `in French the page reads French (${fr.sheet.slice(0, 80)})`);
     await f.close();
+  }
+
+  // a city with a winter rule (city.json winter: Madison): as the City's switch says today, then on an enforced night
+  if (city.winter) {
+    const sw = JSON.parse(readFileSync(new URL(`../data/${ID}/winter.json`, import.meta.url), 'utf8'));
+    const winterPage = async (clock, status) => {
+      const w = await b.newPage();
+      await w.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+      await w.setBypassServiceWorker(true);
+      w.on('pageerror', (e) => errors.push('winter: ' + e.message));
+      await w.evaluateOnNewDocument((t) => {
+        try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbFirstSheet', '1'); } catch (_) {}
+        if (t) { const D = Date, off = t - D.now(); class FD extends D { constructor(...a) { super(...(a.length ? a : [D.now() + off])); } static now() { return D.now() + off; } } window.Date = FD; }
+      }, clock || 0);
+      if (status) {
+        await w.setRequestInterception(true);
+        w.on('request', (r) => (r.url().includes(`/data/${ID}/winter.json`) ? r.respond({ status: 200, contentType: 'application/json', body: JSON.stringify(status) }) : r.continue()));
+      }
+      await w.goto(`${SITE}/${ID}`, { waitUntil: 'load' });
+      await w.waitForFunction(() => window.WINTER && !document.getElementById('wPlate').hidden, { timeout: 30000, polling: 250 }).catch(() => {});
+      // a block with the winter rule only, at street zoom, and its sheet
+      const q = await w.evaluate(async () => { const b = (await PLACE.load()).find((x) => x.n && x.d.length === 2 && x.d.every((d) => d[2].length === 1 && d[2][0][5] & 4));
+        const m = PLACE.midpoint(b.g); map.setView([m[1], m[0]], 17, { animate: false }); return String(b.c); });
+      await w.waitForFunction((c) => !ovMode && segCache.some((x) => String(x.group.cnn) === c), { timeout: 30000, polling: 250 }, q).catch(() => {});
+      return { w, q };
+    };
+    const sheetOf = (w, q) => w.evaluate((c) => { const o = segCache.find((x) => String(x.group.cnn) === c); openSheet(o.group, o.side.key);
+      return { text: document.getElementById('sheetBody').innerText.replace(/\s+/g, ' ').trim(), cal: !!document.getElementById('calBtn'), alert: !!document.getElementById('alertBtn'),
+        spot: sheetSpot && { next: sheetSpot.nextSweepISO, winter: (sheetSpot.rules || []).filter((r) => r.flags & 4 && Array.isArray(r.dates) && r.dates.length > 55).length } }; }, q);
+    const plate = (w) => w.evaluate(() => document.getElementById('wPlate').innerText.replace(/\s+/g, ' ').trim());
+    if (sw.state !== 'on') {
+      const { w, q } = await winterPage();
+      const lines = await w.evaluate((c) => segCache.filter((x) => String(x.group.cnn) === c).map((x) => !x.side.ns && x.side.color), q);
+      check(/not in effect yet|paused|starts/i.test(await plate(w)) && lines.length === 2 && lines.every(Boolean), `winter (${sw.state}): the plate says it isn't on, and both sides wait (${(await plate(w)).slice(0, 60)})`);
+      const s1 = await sheetOf(w, q);
+      check(/Winter rule/i.test(s1.text) && s1.alert && !s1.cal && s1.spot && s1.spot.winter === 1, `winter (${sw.state}): the sheet says so, alerts can be on, no calendar (${s1.text.slice(0, 70)})`);
+      await w.close();
+    }
+    // Dec 1 of the season at 4 PM, switched on from that night: tonight's window falls on Dec 2, so park on the even side
+    const y = city.winter.from.slice(0, 4), clock = Date.parse(`${y}-12-01T22:00:00Z`);
+    const { w, q } = await winterPage(clock, { state: 'on', from: `${y}-12-01`, at: `${y}-11-30T22:00:00Z` });
+    const colors = await w.evaluate((c) => segCache.filter((x) => String(x.group.cnn) === c).map((x) => x.side.color), q);
+    const red = await w.evaluate(() => getCSS('--red')), green = await w.evaluate(() => getCSS('--green'));
+    check(/Park on the even side/i.test(await plate(w)) && colors.length === 2 && colors.includes(red) && colors.includes(green),
+      `winter on: the plate says tonight's side and the block has one red and one green side (${(await plate(w)).slice(0, 60)})`);
+    const s2 = await sheetOf(w, q);
+    check(/Move by|Park until/i.test(s2.text) && /where you are/i.test(s2.text) && s2.cal && s2.spot && Date.parse(s2.spot.next) > clock,
+      `winter on: the sheet says when to move, both sides tonight, alerts and calendar (${s2.text.slice(0, 70)})`);
+    await w.close();
   }
 
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));

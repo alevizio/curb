@@ -1,8 +1,9 @@
 # Madison, Wisconsin
 
-Built 2026-10-18 by [city-build.md](city-build.md). Build: `node scripts/cities/madison.mjs [--refresh]` (inputs cached
-in `private/cache/madison/`), tests: `npx vitest run scripts/cities/madison.test.mjs`. Output: `data/madison/segments.json`
-(14.2 MB, 0.68 MB gzipped; see "Size"), `city.json`, `report.json`.
+Built 2026-10-18 by [city-build.md](city-build.md). Build: `node scripts/cities/madison.mjs [--refresh] [--without-winter]`
+(inputs cached in `private/cache/madison/`), tests: `npx vitest run scripts/cities/madison.test.mjs`. Output:
+`data/madison/segments.json` (2.6 MB, 0.52 MB gzipped; see "Size"), `city.json`, `report.json`, and `winter.json` (the
+winter rule's switch, written once and then only by `scripts/cities/winter.mjs`).
 
 ## Short version
 
@@ -11,9 +12,8 @@ in `private/cache/madison/`), tests: `npx vitest run scripts/cities/madison.test
   (November 15 to March 15, 1 to 7 AM, odd-numbered side on odd dates, even side on even dates) on every City street
   outside the Snow Emergency Zone.
 - 1,702 of 1,712 sweeping signs are placed on **1,670 block sides of 1,094 blocks**. The winter rule covers **14,734 block
-  sides of 7,367 street segments**, 8,418 blocks in all, but it is **not on the map yet** (2026-10-18): a rule that
-  switches sides by date needs its own design (words, alerts every other night), and the City has not said how it will
-  enforce it this winter. `--with-winter` builds it; the page today shows the 1,094 sweeping blocks.
+  sides of 7,367 street segments**, 8,418 blocks in all. On the map since 2026-10-18 (design A, "tonight's side"): see
+  "The winter rule on the page" below. It applies only once the City turns enforcement on, which CURB follows by hand.
 - The City publishes no parking ticket data with time and place, so there is no ticket cross-check.
 - How the City will enforce the winter rule in 2026-27 is not announced (see below): the data follows the ordinance.
 
@@ -106,15 +106,41 @@ datasets available "without any registration requirement, license requirement or
   towns' streets), with odd and even address ranges. Left out: 659 segments with no address ranges, 55 UW, 8 neighboring
   towns', 686 ramps, alleys, private or unbuilt.
 
+## The winter rule on the page
+
+The design picked on 2026-10-18 (view A, "tonight's side", with alerts "only once the City turns it on"):
+
+- **The switch**: `data/madison/winter.json`, `{ "state": "waiting" | "on" | "paused", "from", "at", "reason" }`. The page
+  reads it before drawing (lib/city.js `load`), the alert server when it starts (lib/cities.js). A winter rule (flag 4)
+  applies on the nights from `from` (the morning's date) while the state is `on`, and on no night otherwise
+  (lib/city.js `suspended`). Switch it with `node scripts/cities/winter.mjs madison on --reason "Madison called its first
+  plowing."` (from the coming night by default; `--from YYYY-MM-DD` for another), `paused` or `waiting`, then commit and
+  push: the page and the alerts follow the deploy.
+- **Not on yet** (waiting, paused): winter sides are dashed, a plate under the day chips says "Not in effect yet" (or
+  "Paused"), the sheet says which dates close the side, and alerts can be turned on so they start with the rule. The
+  saved spot carries the side's winter rule; the server sends nothing for a night the City doesn't enforce
+  (lib/notify-core.js `winterPlan`).
+- **On**: a dark plate names tonight's side ("Park on the even side", "Tomorrow night: odd side"); the map colors the side
+  closed tonight red and the open one green, whatever the hour; the sheet says "Move by 1 AM tonight" or "Park until 1 AM
+  tomorrow night" with both sides as cards; the citywide view draws winter streets as quiet lines (one line a block can't
+  show sides). Calendar adds the closed night.
+- **Alerts**: one "Alternate side parking starts tonight" push per switch-on (the reason, then tonight's side), from the
+  switch until that first night ends; then the night push (about 9 PM) of every night the watched side closes: "Move to
+  the odd side tonight" / "Jenifer St, even side: no parking 1 to 7 AM." The same words in every voice.
+- Code: lib/winter-ui.js (the page), its hooks in scripts/cities/city-page.mjs (only for a city with `winter` in
+  city.json), lib/city.js (switch, `winterNight`, `winterSide`), lib/notify-core.js (`winterPlan`, the copy),
+  scripts/check-city.mjs (both states, the "on" one with a fake December clock).
+
 ## Size
 
-`segments.json` is 14.2 MB (0.68 MB gzipped), over the 6 MB guide: 14,734 block sides each list 59 or 62 dates. With the
-sweeping blocks only it would be 0.29 MB; with one date per list, 2.6 MB. No data was dropped. A city level parity rule in
-the format (the dates once in `city.json`, a flag per block side) would bring it near 2.6 MB.
+`segments.json` is 2.6 MB (0.52 MB gzipped): the winter rules name one of two date lists stored once in the file
+(`dates.odd`, `dates.even`) instead of listing 59 or 62 dates on each of 14,734 sides (14.2 MB that way). With the
+sweeping blocks only it would be 0.29 MB.
 
 ## Gaps
 
-1. The 2026-27 enforcement model of the winter rule (nightly, from the first plowing, or only in plow and snow events).
+1. The 2026-27 enforcement model of the winter rule (nightly, from the first plowing, or only in plow and snow events). The
+   switch follows the City's announcements by hand until the City's planned notification system gives a signal.
 2. Sweeping signs on holidays.
 3. Seasonal signs start and end mid-month (May 1 to Nov 15, Mar 16 to Nov 30); the rules show whole months.
 4. Declared snow emergencies (inside the zone, and the $60 fine everywhere) have no schedule and no public feed.

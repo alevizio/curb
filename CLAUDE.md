@@ -222,6 +222,13 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   built in English, is translated to French as it renders (a dictionary for fixed text, pattern rules for the times,
   dates, countdowns, sides and weeks it builds, the city's own sentences as phrases), and the ⓘ menu's language item
   switches (localStorage `curbLang`, else the browser's language). Push alerts stay in English for now.
+  A city whose city.json has `winter` (Madison's alternate side parking, rules flagged 4 on date lists stored once in
+  segments.json `dates`) also gets lib/winter-ui.js (design A, "tonight's side", owner pick 2026-10-18): winter rules apply
+  only while `data/<id>/winter.json` says the City enforces them (lib/city.js `suspended`; the page reads the file before
+  drawing, the alert sender at start, vercel.json includeFiles). Waiting: dashed sides, a "Not in effect yet" plate, alerts
+  can be on early (the sender holds them: lib/notify-core.js `winterPlan`). On: the plate names tonight's side, closed side
+  red, open side green; one "starts tonight" push per switch-on, then the 9 PM push of each night the side closes. Flip it
+  with `node scripts/cities/winter.mjs madison on --reason "…"` and push. See docs/multi-city/madison.md.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy

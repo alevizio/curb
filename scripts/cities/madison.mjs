@@ -13,7 +13,7 @@
 // Plus the winter rule, from the City's own pages (no dataset): alternate side parking, November 15 to March 15, 1 to 7 AM,
 // on every City street outside the Snow Emergency Zone, written as listed dates per side (odd or even house numbers).
 //
-// Run: node scripts/cities/madison.mjs [--refresh]   (Node 18+; inputs cached in private/cache/madison/)
+// Run: node scripts/cities/madison.mjs [--refresh] [--without-winter]   (Node 18+; inputs cached in private/cache/madison/)
 
 import fs from 'node:fs';
 import zlib from 'node:zlib';
@@ -23,9 +23,9 @@ const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const OUT = ROOT + 'data/madison/';
 const CACHE = process.env.CURB_CACHE_DIR || ROOT + 'private/cache/madison/';
 const REFRESH = process.argv.includes('--refresh');
-// The winter rule waits for a design decision (a date-parity rule, alerts every other night for four months) and for the
-// City's 2026-27 enforcement model; --with-winter builds it.
-const WITH_WINTER = process.argv.includes('--with-winter');
+// The winter rule is on the map since 2026-10-18 (the page shows tonight's side once the City turns enforcement on, in
+// data/madison/winter.json); --without-winter leaves it out.
+const WITH_WINTER = !process.argv.includes('--without-winter');
 const log = (...a) => console.error('[madison]', ...a);
 
 const MAPS = 'https://maps.cityofmadison.com/arcgis/rest/services/Public/';
@@ -45,11 +45,12 @@ export const SEZ_KML_URL = 'https://www.google.com/maps/d/kml?mid=1_AfemcsaUhB9B
 // street on odd-numbered calendar days". The date is the morning's: the first window is 1 AM on November 15, the last ends
 // 7 AM on March 15. Inside the Snow Emergency Zone it applies only in a declared snow emergency, so the zone is left out.
 export const WINTER = { from: '2026-11-15', to: '2027-03-15', start: 1, end: 7 };
-// Flags: 1 = holidays too, 2 = towable. The winter rule has no holiday exception and is towable (MGO 12.1335(4)(d)). The
-// sweeping signs carry no holiday exception either and may be towed (Parking Enforcement FAQ); whether they are enforced on
-// the City's eight parking holidays is not settled, so they keep running on holidays here (the cautious reading).
+// Flags: 1 = holidays too, 2 = towable, 4 = a winter rule (lib/city.js: it applies only while the City enforces it). The
+// winter rule has no holiday exception and is towable (MGO 12.1335(4)(d)). The sweeping signs carry no holiday exception
+// either and may be towed (Parking Enforcement FAQ); whether they are enforced on the City's eight parking holidays is not
+// settled, so they keep running on holidays here (the cautious reading).
 const SWEEP_FLAGS = 3;
-const WINTER_FLAGS = 3;
+const WINTER_FLAGS = 7;
 
 // city.json (bounds and holidays are added by the build)
 export const CITY = { id: 'madison', name: 'Madison', region: 'Wisconsin', tz: 'America/Chicago',
@@ -372,10 +373,11 @@ async function build() {
     const o = oddSide(a);
     if (!o) return out1('no odd and even address ranges');
     winter.segments++;
-    // odd dates: park on the odd side, so the even side is closed 1 to 7 AM; even dates: the odd side is closed
+    // odd dates: park on the odd side, so the even side is closed 1 to 7 AM; even dates: the odd side is closed. The
+    // dates are named, not listed: every winter side shares one of the file's two lists (`dates` below)
     const evenSide = o === 'L' ? 'R' : 'L';
-    put(si, o, [-1, WINTER.start, WINTER.end, 0, 0, WINTER_FLAGS, even]);
-    put(si, evenSide, [-1, WINTER.start, WINTER.end, 0, 0, WINTER_FLAGS, odd]);
+    put(si, o, [-1, WINTER.start, WINTER.end, 0, 0, WINTER_FLAGS, 'even']);
+    put(si, evenSide, [-1, WINTER.start, WINTER.end, 0, 0, WINTER_FLAGS, 'odd']);
     winter.sides += 2;
   });
 
@@ -414,7 +416,9 @@ async function build() {
     _meta: { city: 'madison', time_zone: 'America/Chicago', generated: new Date().toISOString(), winter: WITH_WINTER, sources, blocks: out.length, sides: sideCount,
       format: 'b[] = {c: Pavement Centerlines Asset_ID, s: street, l: cross streets, h: neighborhood association, n: [lowest, highest house number], o: the side with odd numbers (L|R), g: centerline [[lng,lat]], d: [[side L|R, compass label, rules]]}; '
         + 'rule = [jsDow, from, to ("H:MM" when not on the hour), weeksMask (31 = every week), monthsMask (bit m-1; 0 = all year), flags] for posted street sweeping, '
-        + 'or [-1, 1, 7, 0, 0, 1, [dates]] for winter alternate side parking (1 to 7 AM on the listed dates; flags 1 = holidays too)' },
+        + 'or [-1, 1, 7, 0, 0, 7, "odd"|"even"] for winter alternate side parking (1 to 7 AM on the dates of that list in `dates`; '
+        + 'flags 1 = holidays too, 2 = towable, 4 = a winter rule, applied only while data/madison/winter.json says the City enforces it)' },
+    ...(WITH_WINTER ? { dates: { odd, even } } : {}),
     b: out });
   fs.writeFileSync(OUT + 'segments.json', body);
   const gz = zlib.gzipSync(body).length;
@@ -435,7 +439,11 @@ async function build() {
   let w = 180, so = 90, e = -180, n = -90;
   for (const sg of segs) for (const [lo, la] of sg.c) { if (lo < w) w = lo; if (lo > e) e = lo; if (la < so) so = la; if (la > n) n = la; }
   const r4 = (v) => Math.round(v * 1e4) / 1e4;
-  fs.writeFileSync(OUT + 'city.json', JSON.stringify({ ...CITY, bounds: [[r4(so), r4(w)], [r4(n), r4(e)]], holidays: HOLIDAYS, ...CITY_LATE, sources }, null, 1));
+  fs.writeFileSync(OUT + 'city.json', JSON.stringify({ ...CITY, bounds: [[r4(so), r4(w)], [r4(n), r4(e)]], holidays: HOLIDAYS, ...CITY_LATE,
+    ...(WITH_WINTER ? { winter: WINTER } : {}), sources }, null, 1));
+  // Whether the City enforces the winter rule: the page and the alert server read data/madison/winter.json, which
+  // scripts/cities/winter.mjs switches. A build never touches it once it exists.
+  if (WITH_WINTER && !fs.existsSync(OUT + 'winter.json')) fs.writeFileSync(OUT + 'winter.json', JSON.stringify({ state: 'waiting' }, null, 1) + '\n');
   log(`sweeping: ${report.used}/${report.signs} signs on ${sweptSides} block sides (${sweptBlocks} blocks); skipped ${Object.entries(report.skipped).map(([k, v]) => `${v.n} ${k}`).join(', ')}; ${report.unmatched.length} not along a centerline`);
   log(`winter: ${winter.segments} segments, ${winter.sides} sides; left out ${Object.entries(winter.leftOut).map(([k, v]) => `${v} ${k}`).join(', ')}`);
   log(`wrote ${out.length} blocks, ${sideCount} block sides; segments.json ${Math.round(body.length / 1024)} KB (${Math.round(gz / 1024)} KB gzip)`);

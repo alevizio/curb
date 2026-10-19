@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-18T18:54:42.953Z",
+ "generated": "2026-10-19T03:33:48.345Z",
  "sweeping": {
   "signs": 1712,
   "used": 1702,
@@ -164,21 +164,33 @@
    "odd": 62,
    "even": 59
   },
-  "segments": 0,
-  "blockSides": 0,
-  "leftOut": {},
+  "segments": 7367,
+  "blockSides": 14734,
+  "leftOut": {
+   "functional class 6 (ramp, alley, private or unbuilt)": 226,
+   "in the Snow Emergency Zone": 1857,
+   "functional class 7 (ramp, alley, private or unbuilt)": 136,
+   "no odd and even address ranges": 659,
+   "maintained by UW": 55,
+   "functional class 0 (ramp, alley, private or unbuilt)": 244,
+   "maintained by BLO-T": 1,
+   "maintained by MCF-V": 5,
+   "maintained by MAP-V": 2,
+   "functional class 9 (ramp, alley, private or unbuilt)": 48,
+   "functional class none (ramp, alley, private or unbuilt)": 32
+  },
   "snowEmergencyZone": {
    "source": "https://www.google.com/maps/d/kml?mid=1_AfemcsaUhB9B2HnEM4CZGGVjGSE3AMJ&forcekml=1",
    "vertices": 189,
    "note": "the City's official map (a Google My Maps embed on its declared snow emergencies page); a block is in the zone when its midpoint is",
    "sweepingSignsInZone": 1611,
-   "segmentsOutsideTheZoneWithin25mOfItsEdge": 0
+   "segmentsOutsideTheZoneWithin25mOfItsEdge": 17
   }
  },
  "output": {
-  "blocks": 1094,
-  "blockSides": 1670,
-  "bytes": 285785,
-  "gzipBytes": 52540
+  "blocks": 8418,
+  "blockSides": 16338,
+  "bytes": 2650955,
+  "gzipBytes": 532415
  }
 }

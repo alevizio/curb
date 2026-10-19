@@ -44,9 +44,15 @@
  "agency": "City of Madison Parking Utility and Streets Division",
  "scheduleUrl": "https://www.cityofmadison.com/streets/street-maintenance/clean-streets-clean-lakes",
  "words": {
-  "rule": "Posted street sweeping (Clean Streets Clean Lakes): one weekday morning or midday a week on each signed side.",
-  "afterpass": "Sweeping signs: a $35 ticket, and the car can be towed. Winter alternate side parking (November 15 to March 15) is not on this map.",
-  "dataNotes": "Sweeping rules come from the City's Street Sweeping Restrictions (the posted signs), placed on the City's street centerlines by the curb side they are drawn on. Winter alternate side parking is not shown: the City has not said how it will enforce it this winter."
+  "rule": "Posted street sweeping (Clean Streets Clean Lakes), one weekday morning or midday a week per side; and from November 15 to March 15, 1 to 7 AM, park on the odd-numbered side on odd dates and the even side on even dates, outside the Snow Emergency Zone.",
+  "afterpass": "Sweeping signs: a $35 ticket. Winter alternate side: $20, $60 in a declared snow emergency, and the car can be towed ($115). Last winter the City enforced it from its first plowing and paused it in dry spells.",
+  "dataNotes": "Sweeping rules come from the City's Street Sweeping Restrictions (the posted signs), placed on the City's street centerlines by the curb side they are drawn on. The winter rule follows the ordinance on every City street with house numbers outside the Snow Emergency Zone, on the side the address ranges give."
+ },
+ "winter": {
+  "from": "2026-11-15",
+  "to": "2027-03-15",
+  "start": 1,
+  "end": 7
  },
  "sources": [
   {
@@ -54,34 +60,34 @@
    "url": "https://data-cityofmadison.opendata.arcgis.com/",
    "api": "https://maps.cityofmadison.com/arcgis/rest/services/Public/OPEN_DATA_TE/MapServer/5",
    "license": "City of Madison Data Policy (MGO 3.72: no use restrictions)",
-   "fetched": "2026-10-18"
+   "fetched": "2026-10-19"
   },
   {
    "name": "Pavement Centerlines (City Engineering)",
    "url": "https://data-cityofmadison.opendata.arcgis.com/",
    "api": "https://maps.cityofmadison.com/arcgis/rest/services/Public/OPEN_DATA_ENGR/MapServer/1",
    "license": "City of Madison Data Policy (MGO 3.72: no use restrictions)",
-   "fetched": "2026-10-18"
+   "fetched": "2026-10-19"
   },
   {
    "name": "Neighborhood Associations",
    "url": "https://data-cityofmadison.opendata.arcgis.com/",
    "api": "https://maps.cityofmadison.com/arcgis/rest/services/Public/OPEN_DATA/MapServer/12",
    "license": "City of Madison Data Policy (MGO 3.72: no use restrictions)",
-   "fetched": "2026-10-18"
+   "fetched": "2026-10-19"
   },
   {
    "name": "Snow Emergency Zone map (City of Madison)",
    "url": "https://www.cityofmadison.com/live-work/winter/parking/declared-snow-emergencies",
    "api": "https://www.google.com/maps/d/kml?mid=1_AfemcsaUhB9B2HnEM4CZGGVjGSE3AMJ&forcekml=1",
    "license": "City page",
-   "fetched": "2026-10-18"
+   "fetched": "2026-10-19"
   },
   {
    "name": "Winter parking rules, MGO 12.1335",
    "url": "https://www.cityofmadison.com/live-work/winter/parking",
    "license": "facts",
-   "fetched": "2026-10-18"
+   "fetched": "2026-10-19"
   }
  ]
 }
