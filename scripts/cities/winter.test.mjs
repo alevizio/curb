@@ -1,6 +1,7 @@
 // scripts/cities/winter.mjs: the switch for a city's winter rule (data/<id>/winter.json).
 import { describe, it, expect } from 'vitest';
 import { comingNight, switchTo } from './winter.mjs';
+import '../../lib/city-configs.js';
 
 const city = { tz: 'America/Chicago', winter: { from: '2026-11-15', to: '2027-03-15', start: 1, end: 7 } };
 
@@ -24,4 +25,17 @@ describe('the winter switch', () => {
     expect(() => switchTo('enforced', { city })).toThrow(/state must be/);
     expect(() => switchTo('on', { city: { tz: 'America/Chicago' } })).toThrow(/no winter rule/);
   });
+});
+
+// A city's side-switching nights are listed ahead (Madison's season, Milwaukee's year), so a rebuild must come before they
+// run out: this fails in time to rebuild, 60 days before a year's list ends, or by mid-September after a season ends.
+describe('the listed nights', () => {
+  for (const cfg of Object.values(globalThis.CITY_CONFIGS).filter((c) => c.winter)) {
+    it(`${cfg.id}: rebuild before its nights run out (${cfg.winter.from} to ${cfg.winter.to})`, () => {
+      const from = Date.parse(cfg.winter.from), to = Date.parse(cfg.winter.to), day = 864e5;
+      const yearRound = to - from > 300 * day;
+      const due = yearRound ? to - 60 * day : to + 180 * day;
+      expect(Date.now(), `node scripts/cities/${cfg.id}.mjs for the next nights, then configs, city-page, check-city`).toBeLessThan(due);
+    });
+  }
 });
