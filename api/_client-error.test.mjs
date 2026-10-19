@@ -63,6 +63,9 @@ describe('normalize', () => {
     expect(normalize({ ...REPORT, msg: 'Script error.' }, IPHONE)).toBeNull();
     expect(normalize({ ...REPORT, msg: 'ResizeObserver loop limit exceeded' }, IPHONE)).toBeNull();
     expect(normalize({ ...REPORT, src: 'chrome-extension://abc/content.js' }, IPHONE)).toBeNull();
+    expect(normalize({ ...REPORT, k: 'rejection', src: '', msg: 'Invalid call to runtime.sendMessage(). Tab not found.' }, IPHONE)).toBeNull();
+    expect(normalize({ ...REPORT, k: 'rejection', src: '', msg: 'x', stack: 'f@safari-web-extension://ABC/content.js:1:2' }, IPHONE)).toBeNull();
+    expect(normalize({ ...REPORT, k: 'rejection', src: '', msg: 'Failed to fetch', stack: 'f@https://curb.guide/:9:1' }, IPHONE)).not.toBeNull();
     expect(normalize({ ...REPORT, k: 'drop table' }, IPHONE)).toBeNull();
     expect(normalize({ ...REPORT, msg: '   ' }, IPHONE)).toBeNull();
     expect(normalize(null, IPHONE)).toBeNull();
