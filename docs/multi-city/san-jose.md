@@ -30,7 +30,8 @@ tests: `scripts/cities/san-jose.test.mjs`.
   page still links the repealed RES2024-264 on a records site that no longer exists. In May and June 2026 two
   neighborhoods (Council Districts 7 and 10) had four sweeps enforced by towing as a test
   ([City news, 2026-04-07](https://www.sanjoseca.gov/Home/Components/News/News/7243)); over, so no tow flag.
-- Contact: StreetSweeping@sanjoseca.gov (Department of Transportation).
+- Contact: gis.info@sanjoseca.gov (Enterprise GIS, the open data portal's contact for the sweeping routes); the Street
+  Sweeping Section at (408) 794-1920. StreetSweeping@sanjoseca.gov does not exist (it bounced on 2026-10-18).
 
 ## The data
 
