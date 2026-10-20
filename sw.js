@@ -73,7 +73,7 @@ self.addEventListener('push', e => {
   const opts = {
     body: p.body || 'Street sweeping starts soon on your block.',
     icon: 'icons/icon-192.png',
-    badge: 'icons/icon-192.png',
+    badge: 'icons/icon-monochrome.png',   // Android draws the badge as a one-color mask: the full icon was a square
     tag: p.tag || 'curb-sweep',
     renotify: true,
     // Only the act-now pushes (lead / tonight) stay on screen until dismissed; a sticky night-before
