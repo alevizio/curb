@@ -47,7 +47,7 @@ const { saveSub, saveIosSub, advanceSpot, markNotified, loadAllSubs, getSub,
   saveToken, resolveToken, deleteTokensForEndpoint,
   ensureOwnerProof, verifyOwnerProof, claimSlot,
   disarmSub, disarmIosSub, markIosNotified, loadAllIosSubs, advanceIosSpot,
-  deleteSub, deleteIosSub, splitField, sameSide, MAX_WATCHES } = await import('./_store.js');
+  deleteSub, deleteIosSub, splitField, sameSide, scrubOffSides, MAX_WATCHES } = await import('./_store.js');
 const { dueAlert } = await import('../lib/notify-core.js');
 
 const SUB = { endpoint: 'https://web.push.apple.com/abc123', keys: { p256dh: 'p', auth: 'a' } };
@@ -426,11 +426,11 @@ describe('multi-watch: up to 5 curb sides per device, each its own record', () =
     await markNotified(`${EP}#1`, north.nextSweepISO, 'lead');
     expect(await disarmSub(EP, 'a', sideOf(north))).toBe('ok');
     expect(w(0).spot).toEqual(spotA);
-    expect(w(1)).toMatchObject({ spot: null, notified: { lead: north.nextSweepISO }, offSide: { cnn: '123', sideKey: 'R' } });
+    expect(w(1)).toMatchObject({ spot: null, notified: { lead: north.nextSweepISO }, offKeys: { c: expect.any(Array), t: expect.any(String) } });
     expect(await saveSub(SUB, { ...spotA, cnn: '900' })).toEqual({ slot: 2 }); // a new side takes an empty slot, not the off one
     expect(await saveSub(SUB, { ...north })).toEqual({ slot: 1 });             // back on: its own record
     expect(dueAlert(w(1).spot, w(1).notified, leadTime)).toBe(null);           // the push already sent is not repeated
-    expect(w(1).offSide).toBe(undefined);
+    expect(w(1).offKeys).toBe(undefined);
 
     await saveIosSub(tok, spotA);
     await saveIosSub(tok, north);
@@ -580,7 +580,7 @@ describe('multi-watch: up to 5 curb sides per device, each its own record', () =
     await saveSub(SUB, { ...spotA, cnn: '555' }, { atBase: true });          // the car's watch: slot 3
     expect(await saveSub(SUB, { ...north, level: 'light' }, { atBase: true })).toEqual({ slot: 3 });
     expect(w(3)).toMatchObject({ spot: { sideKey: 'R', level: 'light' }, car: true });
-    expect(w(1)).toMatchObject({ spot: null, offSide: { sideKey: 'R' } });   // the page's watch on that side goes off
+    expect(w(1)).toMatchObject({ spot: null, offKeys: expect.any(Object) }); // the page's watch on that side goes off
     expect([w(0).spot.cnn, w(2).spot.cnn]).toEqual(['123', '777']);         // other sides untouched
   });
 
@@ -600,7 +600,7 @@ describe('multi-watch: up to 5 curb sides per device, each its own record', () =
     const armedOn = (bs) => Object.values(mem['curb:subs']).map((v) => JSON.parse(v)).filter((r) => r.spot && r.spot.blockside === bs).length;
     expect(armedOn('South')).toBe(1);             // the car's; the page's, seen by the re-read, was turned off
     expect(w(1)).toMatchObject({ car: true, spot: { sideKey: 'R' } });
-    expect(w(2)).toMatchObject({ spot: null, offSide: { sideKey: 'South' } });
+    expect(w(2)).toMatchObject({ spot: null, offKeys: expect.any(Object) });
     expect(w(0).spot.sideKey).toBe('North');
   });
 
@@ -662,8 +662,8 @@ describe('a save from a page that predates multi-watch moves the alerts, as that
     expect(await saveSub(SUB, at('9'), { legacy: true })).toEqual({ slot: 0 });
     expect(armed('curb:subs')).toEqual([[EP, '9']]);                          // one watch, as that page believes
     expect(w(0).notified).toEqual({});                                          // its entries named cnn 1's sweeps
-    expect(w(1)).toMatchObject({ spot: null, offSide: { cnn: '2' }, notified: { eve: spotA.nextSweepISO } });
-    expect(w(2)).toMatchObject({ spot: null, offSide: { cnn: '3' } });
+    expect(w(1)).toMatchObject({ spot: null, offKeys: expect.any(Object), notified: { eve: spotA.nextSweepISO } });
+    expect(w(2)).toMatchObject({ spot: null, offKeys: expect.any(Object) });
     // the new page turning a moved-away side back on finds its own de-dupe: no repeat of the push already sent
     expect(await saveSub(SUB, at('2'))).toEqual({ slot: 1 });
     expect(w(1).notified).toEqual({ eve: spotA.nextSweepISO });
@@ -714,7 +714,7 @@ describe('a save from a page that predates multi-watch moves the alerts, as that
     expect(await saveIosSub(tok, at('9'), { legacy: true })).toEqual({ slot: 0 });
     expect(armed('curb:apns')).toEqual([[tok, '9']]);
     expect(iw(0)).toMatchObject({ token: tok, platform: 'ios' });
-    expect(iw(1)).toMatchObject({ spot: null, offSide: { cnn: '2' } });
+    expect(iw(1)).toMatchObject({ spot: null, offKeys: expect.any(Object) });
   });
 });
 
@@ -783,7 +783,84 @@ describe('two cities on one device (a Boston curb and an SF curb)', () => {
     await saveSub(SUB, bos);
     expect(await disarmSub(EP, 'a', { cnn: '123', sideKey: 'L', corridor: 'Haight St', limits: '', blockside: '', city: 'boston' })).toBe('ok');
     expect(w(0).spot).toEqual(spotA);
-    expect(w(1)).toMatchObject({ spot: null, offSide: { cnn: '123', sideKey: 'L', city: 'boston' } });
+    expect(w(1)).toMatchObject({ spot: null, offKeys: expect.any(Object) });
     expect(await saveSub(SUB, bos)).toEqual({ slot: 1 });
+  });
+});
+
+// The privacy page says Turn off "removes the block and sweep time". A turned-off watch used to keep its side in
+// plain text (`offSide`) so that side could find its de-dupe again; it now keeps only keyed hashes (`offKeys`).
+describe('Turn off keeps no trace of the block', () => {
+  const tok = 'ab'.repeat(32);
+  const SUB2 = { endpoint: 'https://web.push.apple.com/zzz999', keys: { p256dh: 'p', auth: 'b' } };
+  const rec = (key, f) => JSON.parse(mem[key][f]);
+  const side = { ...spotA, limits: 'Fillmore St - Steiner St', blockside: 'North' };
+  afterEach(() => { delete process.env.VAPID_PRIVATE_KEY; });
+
+  it('a turned-off watch holds no block id, side or street, and its keys need the server secret', async () => {
+    process.env.VAPID_PRIVATE_KEY = 'secret-one';
+    await saveSub(SUB, side);
+    await markNotified(EP, side.nextSweepISO, 'eve');
+    expect(await disarmSub(EP, 'a', side)).toBe('ok');
+    const off = rec('curb:subs', EP);
+    expect(Object.keys(off).sort()).toEqual(['notified', 'offKeys', 'savedAt', 'spot', 'subscription']);
+    const kept = JSON.stringify({ ...off, subscription: undefined });
+    for (const v of ['Haight', 'Fillmore', '"123"', '"L"', 'North']) expect(kept).not.toContain(v);
+    process.env.VAPID_PRIVATE_KEY = 'secret-two';                                 // another server key, the same side
+    await saveSub(SUB2, side);
+    await disarmSub(SUB2.endpoint, 'b', side);
+    expect(rec('curb:subs', SUB2.endpoint).offKeys).not.toEqual(off.offKeys);
+    process.env.VAPID_PRIVATE_KEY = 'secret-one';
+    expect(await saveSub(SUB, side)).toEqual({ slot: 0 });                         // back on: the keys find its de-dupe
+    expect(rec('curb:subs', EP).notified).toEqual({ eve: side.nextSweepISO });
+  });
+
+  it('the keys match exactly the sides sameSide matches', async () => {
+    const text = { ...spotA, cnn: undefined, sideKey: undefined, limits: 'A - B', blockside: 'North' };
+    const pairs = [
+      [spotA, { ...spotA, level: 'light' }],                                                     // same cnn + sideKey
+      [spotA, { ...spotA, sideKey: 'R' }],                                                      // the other side
+      [text, { ...spotA, cnn: '9', limits: 'A - B', blockside: 'North' }],                      // no cnn: the block text
+      [text, { ...text, blockside: 'South' }],
+      [{ ...spotA, cnn: '9', sideKey: 'R', blockside: 'North' }, { ...spotA, cnn: '9', sideKey: 'North', blockside: 'North' }], // auto-park's key vs the page's
+      [{ ...spotA, cnn: '9', sideKey: 'R', blockside: 'North' }, { ...spotA, cnn: '9', sideKey: 'South', blockside: 'South' }],
+      [spotA, { ...spotA, city: 'boston' }],                                                    // never across cities
+    ];
+    const found = [];
+    for (const [a, b] of pairs) {
+      for (const k of Object.keys(mem)) delete mem[k];
+      await saveSub(SUB, a);
+      await disarmSub(EP, 'a', a);
+      found.push((await saveSub(SUB, b)).slot === 0);                                           // 0 = the turned-off watch
+    }
+    expect(found).toEqual(pairs.map(([a, b]) => sameSide(a, b)));
+    expect(found).toEqual([true, false, true, false, true, false, false]);
+  });
+
+  it('a watch turned off before this change (plain offSide) still finds its de-dupe, and scrubOffSides rewrites it', async () => {
+    const north = { ...spotA, sideKey: 'R' };
+    const oldOff = (extra) => JSON.stringify({ ...extra, spot: null, notified: { eve: north.nextSweepISO }, savedAt: 1,
+      offSide: { cnn: '123', sideKey: 'R', corridor: 'Haight St', limits: '', blockside: '' } });
+    const seed = () => {
+      mem['curb:subs'] = { [EP]: JSON.stringify({ subscription: SUB, spot: spotA, notified: {}, savedAt: 1 }), [`${EP}#1`]: oldOff({ subscription: SUB }) };
+      mem['curb:apns'] = { [tok]: oldOff({ token: tok, platform: 'ios' }) };
+    };
+    seed();
+    expect(await saveSub(SUB, north)).toEqual({ slot: 1 });                        // matched on the plain side
+    expect(rec('curb:subs', `${EP}#1`).notified).toEqual({ eve: north.nextSweepISO });
+
+    seed();
+    expect(await scrubOffSides(await loadAllSubs(), await loadAllIosSubs())).toEqual({ web: 1, ios: 1 });
+    for (const [k, f] of [['curb:subs', `${EP}#1`], ['curb:apns', tok]]) {
+      expect(rec(k, f)).toMatchObject({ spot: null, notified: { eve: north.nextSweepISO }, offKeys: expect.any(Object) });
+      expect(rec(k, f).offSide).toBe(undefined);
+      expect(mem[k][f]).not.toContain('Haight');
+    }
+    expect(rec('curb:subs', EP).spot).toEqual(spotA);                             // an armed watch is left alone
+    expect(await scrubOffSides(await loadAllSubs(), await loadAllIosSubs())).toEqual({ web: 0, ios: 0 });
+    expect(await saveSub(SUB, north)).toEqual({ slot: 1 });                        // the rewritten keys still match
+    expect(rec('curb:subs', `${EP}#1`).notified).toEqual({ eve: north.nextSweepISO });
+    expect(await saveIosSub(tok, north)).toEqual({ slot: 0 });
+    expect(rec('curb:apns', tok).notified).toEqual({ eve: north.nextSweepISO });
   });
 });

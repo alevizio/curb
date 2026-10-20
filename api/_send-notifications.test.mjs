@@ -287,6 +287,20 @@ describe('de-dupe across a user\'s off → on', () => {
   });
 });
 
+describe('a watch turned off before 2026-10-20 (its side in plain text)', () => {
+  it('the next run rewrites it to unreadable keys and records that; later runs find nothing to do', async () => {
+    mem['curb:subs'][`${EP}#1`] = JSON.stringify({ subscription: SUB, spot: null, notified: {}, savedAt: NOW,
+      offSide: { cnn: '1', sideKey: 'L', corridor: 'Steiner St', limits: '', blockside: 'North' } });
+    expect((await run(bearer())).body.web).toMatchObject({ sent: 1, scrubbed: 1 });
+    expect(status().ok.web.scrubbed).toBe(1);
+    expect(JSON.parse(mem['curb:subs'][`${EP}#1`])).toMatchObject({ spot: null, offKeys: expect.any(Object) });
+    expect(mem['curb:subs'][`${EP}#1`]).not.toContain('Steiner');
+    vi.setSystemTime(NOW + 60000);
+    expect((await run(bearer())).body.web).toMatchObject({ sent: 0 });
+    expect(status().ok.web.scrubbed).toBe(undefined);
+  });
+});
+
 describe('forever-watch re-arm vs a Turn off during the run', () => {
   const TUE = { weekday: 'Tue', fromhour: '9', tohour: '11', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0' };
   const lastTue = { corridor: 'Steiner St', nextSweepISO: '2026-09-22T16:00:00.000Z', leadMinutes: 30, rule: TUE, rules: [TUE], cnn: '1', sideKey: 'L' };

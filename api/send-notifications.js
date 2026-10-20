@@ -21,7 +21,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import {
   loadAllSubs, deleteSub, markNotified, advanceSpot, storeReady,
-  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot,
+  loadAllIosSubs, deleteIosSub, markIosNotified, advanceIosSpot, claimSlot, releaseSlot, scrubOffSides,
   saveRunStatus, loadRunStatus, loadDelivery,
 } from './_store.js';
 import { recomputeSpot, withHolidayRules, watchAgeOf } from './_schedule.js';
@@ -390,6 +390,11 @@ export default async function handler(req, res) {
       console.error('APNs pass failed:', e);
     }
 
+    // Watches turned off before 2026-10-20 still name their side; rewrite them the way a Turn off stores it now
+    // (api/_store.js scrubOffSides). Once done it finds nothing. Its failure is logged, never the run's.
+    let scrubbed = { web: 0, ios: 0 };
+    try { scrubbed = await scrubOffSides(subs, iosSubs); } catch (e) { console.error('offSide scrub failed:', e); }
+
     // Fully successful = the web loop finished (any store error throws past here) and the APNs pass
     // did too (its errors, markIosNotified's included, land in iosError). Only then free the lock —
     // and only while it is surely still ours (maxDuration 60 s < RUN_LOCK_MS). If the release fails,
@@ -403,7 +408,7 @@ export default async function handler(req, res) {
     };
     // checked = devices (alerts off included, as before); watches = armed watches across them
     const count = (list, dev) => ({ checked: new Set(list.map((x) => x[dev])).size, watches: list.filter((x) => x.spot).length });
-    await finish(200, { ok: true, web: { ...count(subs, 'endpoint'), ...tally(sent, pruned, webFailures), rearmed, ...(skipped ? { skipped } : {}) }, ios: { configured: iosConfigured, ...count(iosSubs, 'token'), ...tally(iosSent, iosPruned, iosFailures), rearmed: iosRearmed, ...(iosSkipped ? { skipped: iosSkipped } : {}), ...(iosError ? { error: iosError } : {}) } },
+    await finish(200, { ok: true, web: { ...count(subs, 'endpoint'), ...tally(sent, pruned, webFailures), rearmed, ...(skipped ? { skipped } : {}), ...(scrubbed.web ? { scrubbed: scrubbed.web } : {}) }, ios: { configured: iosConfigured, ...count(iosSubs, 'token'), ...tally(iosSent, iosPruned, iosFailures), rearmed: iosRearmed, ...(iosSkipped ? { skipped: iosSkipped } : {}), ...(scrubbed.ios ? { scrubbed: scrubbed.ios } : {}), ...(iosError ? { error: iosError } : {}) } },
       undefined, { web: webOut, ios: iosOut, iosError, iosUnconfigured: iosConfigured ? 0 : iosSubs.filter((t) => t.spot).length });
   } catch (e) {
     console.error('send-notifications failed:', e);

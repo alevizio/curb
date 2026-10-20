@@ -386,8 +386,8 @@ Files now present for the push feature:
   and the never-re-arm-a-Turn-off guarantee hold per watch unchanged; `loadAllSubs` returns `{ field, slot,
   endpoint }` per watch (`field` for advanceSpot / markNotified, `endpoint` = the device). Fixed slots, not
   side-named fields: a save reads the 5 known fields in ONE `HMGET` (raw strings) and `pickSlot` picks, in
-  order, the armed watch on this side (in place, no duplicate), a watch turned off on this side (`offSide`
-  remembers it, so off → on keeps its de-dupe), a pre-multi turned-off record (reused with its de-dupe, as
+  order, the armed watch on this side (in place, no duplicate), a watch turned off on this side (`offKeys`
+  remember it, so off → on keeps its de-dupe), a pre-multi turned-off record (reused with its de-dupe, as
   before), an empty slot, a watch turned off on another side (fresh de-dupe), then a DEAD watch (`watchDead`
   in api/_schedule.js: savedAt past `MAX_WATCH_AGE`, or a one-shot spot with no rule, once its sweep window is
   over; never one whose window hasn't ended), fresh de-dupe, so dead watches can't hold slots forever; 5 live
@@ -403,8 +403,12 @@ Files now present for the push feature:
   "Turning them on here moves them to this curb" / "<A> won't alert anymore" and can't see or turn off other
   watches. So it keeps the single-watch meaning (`legacy`, `pickLegacy`): it lands on this side's watch (armed
   or off on this side, de-dupe kept), else watch 0, never 409s, and turns off every other armed watch of the
-  device (de-dupe and `offSide` kept), re-reading the slots after its write so a save landing meanwhile goes
+  device (de-dupe and `offKeys` kept), re-reading the slots after its write so a save landing meanwhile goes
   off too. Then the old page writes ONE side to `curbAlert`, which the new page reads as the whole truth.
+  TURN OFF STORES NO BLOCK (2026-10-20, privacy.html: Turn off "removes the block and sweep time"): a turned-off
+  watch keeps `offKeys`, HMACs of the side (keyed with VAPID_PRIVATE_KEY, one per way `sameSide` matches), never
+  the side itself. Before that it kept `offSide` in plain text: still matched, and the sender's next run rewrites
+  each one (`scrubOffSides`, counted as `scrubbed` in its run record).
   THE CAR SLOT: auto-park (`atBase`, `api/parked.js`; latent, nothing calls enable-auto-park today) tags its
   watch `car: true` and writes the slot already holding `car: true`, else the slot `pickSlot` gives it (409
   when 5 sides are live: parked.js says so, no "Alerts armed" push), so it follows the car and never

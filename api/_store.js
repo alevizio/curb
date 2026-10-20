@@ -8,7 +8,7 @@
 // Files prefixed with "_" are treated as helpers by Vercel and are NOT routed as
 // functions, so this module is import-only.
 import { Redis } from '@upstash/redis';
-import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { watchDead } from './_schedule.js';
 
 const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -30,7 +30,7 @@ function rawRedis() {
 }
 
 // One hash, field = subscription.endpoint (watch 0) or `<endpoint>#<n>` (watch n, see MAX_WATCHES below),
-// value = { subscription, spot, notified, savedAt, proofHash? (watch 0 only), offSide?, car? (auto-park's) }.
+// value = { subscription, spot, notified, savedAt, proofHash? (watch 0 only), offKeys?, car? (auto-park's) }.
 const KEY = 'curb:subs';
 
 // Back-compat: older records carried two named de-dupe fields (notifiedFor / notifiedEveFor); the
@@ -124,8 +124,27 @@ export function sameSide(a, b) {
   if (a.cnn && b.cnn) return a.cnn === b.cnn && ((a.sideKey || '') === (b.sideKey || '') || Boolean(a.blockside && a.blockside === b.blockside));
   return (a.corridor || '') === (b.corridor || '') && (a.limits || '') === (b.limits || '') && (a.blockside || '') === (b.blockside || '');
 }
-// A turned-off watch keeps naming its side (`offSide`), so turning that side back on finds its de-dupe.
-const sideOf = (s) => ({ cnn: s.cnn || '', sideKey: s.sideKey || '', corridor: s.corridor || '', limits: s.limits || '', blockside: s.blockside || '', ...(s.city ? { city: s.city } : {}) });
+// A turned-off watch must not keep its block (the privacy page: Turn off "removes the block and sweep time"),
+// yet turning that side back on has to find its de-dupe. So it keeps `offKeys`: keyed hashes of the side, one
+// for each way sameSide can match it. Keyed with the server's VAPID private key, because an unkeyed hash of
+// the ~25k curb sides could be reversed by trying them all (a key change only loses the matches: at worst one
+// repeat push). Records turned off before 2026-10-20 name the side in `offSide`: still matched, and rewritten
+// by the sender's next run (scrubOffSides).
+const offHash = (s) => createHmac('sha256', 'curb-off-side|' + (process.env.VAPID_PRIVATE_KEY || '')).update(s).digest('hex').slice(0, 32);
+function offKeysOf(s) {
+  const city = s.city || '';
+  const keys = { t: offHash(`${city}|t|${s.corridor || ''}|${s.limits || ''}|${s.blockside || ''}`) };
+  if (s.cnn) {
+    keys.c = [offHash(`${city}|k|${s.cnn}|${s.sideKey || ''}`)];
+    if (s.blockside) keys.c.push(offHash(`${city}|b|${s.cnn}|${s.blockside}`));
+  }
+  return keys;
+}
+// sameSide on the stored keys: block id + side key or blockside when both carry a block id, else the block text.
+function offMatches(keys, spot) {
+  const mine = offKeysOf(spot);
+  return keys.c && mine.c ? keys.c.some((h) => mine.c.includes(h)) : keys.t === mine.t;
+}
 
 /** The device's MAX_WATCHES slots, read in one HMGET as the exact stored strings (a save's write is a
  *  compare-and-set against them): [{ n, field, raw, rec }], rec null for an empty slot. */
@@ -141,8 +160,8 @@ async function readWatches(key, base) {
 const armed = (s) => Boolean(s.rec && s.rec.spot);
 const off = (s) => Boolean(s.rec && !s.rec.spot);
 const onSide = (spot) => (s) => armed(s) && sameSide(s.rec.spot, spot);
-const offOnSide = (spot) => (s) => off(s) && Boolean(s.rec.offSide) && sameSide(s.rec.offSide, spot);
-const preMultiOff = (s) => off(s) && !s.rec.offSide;
+const offOnSide = (spot) => (s) => off(s) && (s.rec.offKeys ? offMatches(s.rec.offKeys, spot) : sameSide(s.rec.offSide, spot));
+const preMultiOff = (s) => off(s) && !s.rec.offKeys && !s.rec.offSide;
 
 // Which watch a save of `spot` writes, first match wins:
 //  1. the watch already on this side, armed → updated in place (no duplicate watch);
@@ -227,9 +246,9 @@ async function saveWatch(key, base, spot, { atBase = false, legacy = false }, re
   throw new Error('watches kept changing during the save');
 }
 
-// Turned off: spot = null (the cron skips spot-less records), the de-dupe map kept, the side remembered.
+// Turned off: spot = null (the cron skips spot-less records), the de-dupe map kept, the side only as offKeys.
 function disarmRec(rec) {
-  if (rec.spot) rec.offSide = sideOf(rec.spot);
+  if (rec.spot) { rec.offKeys = offKeysOf(rec.spot); delete rec.offSide; }
   rec.spot = null;
   rec.notified = notifiedMap(rec);
   return rec;
@@ -464,6 +483,23 @@ export async function markIosNotified(field, nextSweepISO, key = 'lead') {
     delete rec.notifiedFor; delete rec.notifiedEveFor;
     return rec;
   });
+}
+
+/** Rewrite every turned-off watch that still names its side (`offSide`, before 2026-10-20) with the keys a
+ *  Turn off stores now. `web` / `ios` = the sender run's loaded watches; once done it finds nothing.
+ *  → { web, ios }: how many were rewritten. */
+export async function scrubOffSides(web, ios) {
+  const scrub = (rec) => {
+    if (rec.spot || !rec.offSide) return null;
+    rec.offKeys = offKeysOf(rec.offSide);
+    delete rec.offSide;
+    return rec;
+  };
+  const out = { web: 0, ios: 0 };
+  for (const [ch, key, list] of [['web', KEY, web], ['ios', KEY_IOS, ios]]) {
+    for (const w of list) if (!w.spot && w.offSide && (await casUpdate(key, w.field, scrub))) out[ch]++;
+  }
+  return out;
 }
 
 const sha = (s) => createHash('sha256').update(String(s)).digest('hex');

@@ -215,7 +215,7 @@ describe('a save with no multi marker (a page from before multi-watch) moves the
     expect(armed('curb:subs')).toHaveLength(2);
     expect((await call(web, 'POST', { subscription: SUB, spot: at(OLD, '3') })).code).toBe(200);    // old page: B
     expect(armed('curb:subs')).toEqual([[0, '3']]);
-    expect(webRec(1)).toMatchObject({ spot: null, offSide: { cnn: '2' } });
+    expect(webRec(1)).toMatchObject({ spot: null, offKeys: expect.any(Object) });
     expect(JSON.stringify(mem)).not.toContain('multi');
   });
 
