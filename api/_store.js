@@ -660,6 +660,39 @@ export async function underErrorRate(max = 120) {
   return n <= max;
 }
 
+// ---- city requests (curb.guide/cities, api/city-request.js) ----
+// A capped list of requests, newest first: { id, ts, city, region, publishes, link, email? }. No IP and nothing else
+// about the sender; the email, when given, is only read back by the owner's GET (?emails=1), never by the issue filer.
+const QKEY = 'curb:cityreq';
+const QMAX = 1000;
+
+/** Append one validated request (newest first), keeping only the last QMAX. */
+export async function pushCityRequest(entry) {
+  const r = redis();
+  if (!r) return false;
+  await r.lpush(QKEY, JSON.stringify(entry));
+  await r.ltrim(QKEY, 0, QMAX - 1);
+  return true;
+}
+
+/** Every stored request, newest first. */
+export async function readCityRequests() {
+  const r = redis();
+  if (!r) return [];
+  const rows = (await r.lrange(QKEY, 0, QMAX - 1)) || [];
+  return rows.map((v) => (typeof v === 'string' ? safeParse(v) : v)).filter(Boolean);
+}
+
+/** Global hourly intake cap (abuse guard): true while this hour is still under `max`. */
+export async function underCityRequestRate(max = 60) {
+  const r = redis();
+  if (!r) return true;
+  const k = 'curb:cityreq:rate:' + Math.floor(Date.now() / 3600e3);
+  const n = await r.incr(k);
+  if (n === 1) await r.expire(k, 7200);
+  return n <= max;
+}
+
 function safeParse(s) {
   try { return JSON.parse(s); } catch { return null; }
 }
