@@ -44,7 +44,7 @@ export function cityFacts(id) {
     }
   }
   const term = ruleTerm(c), sweeps = sweepsIn(c);
-  const covers = [cap(term), ...(winterish || c.winter ? ['Winter rules'] : [])];
+  const covers = [cap(term), ...((winterish || c.winter) && !/winter/i.test(term) ? ['Winter rules'] : [])];  // not twice (Toronto's winter parking)
   return { id, c, name: c.name, region: c.region || '', blocks: seg.b.length, sides, generated: String(seg._meta.generated).slice(0, 10),
     term, sweeps, covers, nonWinter, flagged, path: '/' + id, about: `/${id}/about` };
 }
@@ -159,13 +159,17 @@ export function aboutPage(f) {
     return `<div class="src"><div class="sh">${esc(s.name)}</div><p>${href ? `<a href="${esc(href)}" rel="noopener">Open the source&nbsp;↗</a>` : ''}`
       + `<span class="lic">License: ${esc(s.license || 'not stated')}${when ? ` · ${esc(when)}` : ''}</span></p></div>`;
   }).join('\n      ');
-  const remind = sweeps
+  const remind = words.alerts
+    ? `Yes. Tap your curb on the map, then turn on alerts. ${esc(words.alerts)} On iPhone, add the map to your Home Screen first.`
+    : sweeps
     ? `Yes. Tap your curb on the map, then <b>Sweep alerts</b>: a push the evening before and 30 minutes before it starts, on ${esc(name)} time, or put it in your calendar. An overnight sweep gets one alert around 9 PM the evening before. On iPhone, add the map to your Home Screen first.`
     : `Yes. Tap your curb on the map, then turn on alerts: a push around 9 PM on the nights your side closes, on ${esc(name)} time, or put them in your calendar. On iPhone, add the map to your Home Screen first.`;
   const seo = seoWords(c);
-  const long = `${name} ${Term}: Rules, Fines and Holidays | CURB`;
+  // a holiday changes nothing where every rule runs on holidays too (Toronto's winter rules): no holiday table there
+  const showHolidays = holidays.length > 0 && (f.sweeps || !f.nonWinter || f.flagged < f.nonWinter);
+  const long = `${name} ${Term}: Rules${showHolidays ? ', Fines and Holidays' : ' and Fines'} | CURB`;
   const title = long.length <= 60 ? long : `${name} ${Term} Rules | CURB`;
-  const description = `How ${term} works in ${name}, in plain words: the rule, the fine${c.tow && c.tow !== 'no' ? ' and towing' : ''}, the holidays and where CURB's map gets its data.`;
+  const description = `How ${term} works in ${name}, in plain words: the rule, the fine${c.tow && c.tow !== 'no' ? ' and towing' : ''}, ${showHolidays ? 'the holidays ' : ''}and where CURB's map gets its data.`;
   const ld = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'CURB', item: 'https://curb.guide/' },
     { '@type': 'ListItem', position: 2, name: 'Cities', item: 'https://curb.guide/cities' },
@@ -221,7 +225,7 @@ export function aboutPage(f) {
     </div>
   </section>
 
-  <section class="wrap sec" id="holidays">
+  ${showHolidays ? `<section class="wrap sec" id="holidays">
     <div class="k">Holidays</div>
     <h2>The ${owner}'s holidays.</h2>
     ${line ? `<p class="lede">${esc(line)}</p>` : ''}
@@ -233,12 +237,12 @@ export function aboutPage(f) {
     </table>
     ${c.holidaysMissing ? `<p class="note">The ${owner} hasn't posted next year's days yet.</p>` : ''}
     ${c.holidaysSource ? `<p class="note">From the ${owner}'s list: <a href="${esc(c.holidaysSource)}" rel="noopener">${esc(c.agency || 'the ' + owner)}&nbsp;↗</a></p>` : ''}
-  </section>
+  </section>` : ''}
 
   <section class="wrap data" id="data">
     <div class="k">The receipts</div>
     <h2>Where the data comes from</h2>
-    <p class="dlede">${esc(words.dataNotes || '')} <b>The posted sign always wins</b>: temporary signs and holidays override everything here.</p>
+    <p class="dlede">${esc(words.dataNotes || '')} <b>The posted sign always wins</b>: temporary signs${showHolidays ? ' and holidays' : ''} override everything here.</p>
     <div class="srcs">
       ${sources}
     </div>
