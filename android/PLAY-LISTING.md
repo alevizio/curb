@@ -71,4 +71,22 @@ CURB is on Android: every San Francisco curb colored by its next sweep, when tic
 - `/.well-known/assetlinks.json` on curb.guide vouches for the upload key. After the first upload, copy the **app signing key SHA-256** from Play Console > Test and release > App integrity and add it there, or the Play-installed app shows a browser bar.
 
 ## Build
-`bubblewrap update --skipVersionUpgrade && bubblewrap build` (BUBBLEWRAP_KEYSTORE_PASSWORD and BUBBLEWRAP_KEY_PASSWORD from the Keychain item). Raise `appVersionCode` for every upload (`bubblewrap update` does it without the flag).
+`bubblewrap build --skipPwaValidation` (BUBBLEWRAP_KEYSTORE_PASSWORD and BUBBLEWRAP_KEY_PASSWORD from the Keychain item). For every upload raise
+`appVersionCode` and `appVersionName` in twa-manifest.json and app/build.gradle, then write the new SHA-1 of twa-manifest.json into
+manifest-checksum.txt (`shasum -a 1 twa-manifest.json`), or the build asks to regenerate the project.
+
+Don't run `bubblewrap update` without a reason: it rewrites the project from its templates and drops these hand-made parts (bring them
+back with `git checkout` after it):
+- `LauncherActivity.java` asks for location before the map opens, and `LocationPermissionAnswer.java` (registered first in
+  `DelegationService.java`) answers Chrome's location check at once. The library's own handler shows the Android prompt from a
+  background service, which Android 10 and later block, so a location request on the page waited forever.
+- The launcher icon: `mipmap-anydpi-v26/ic_launcher.xml` (cream `ic_launcher_background` in values/colors.xml plus
+  `ic_launcher_foreground.png`, the cube inside the 66dp safe zone, drawn from icons/logo.svg). Bubblewrap's template drew the
+  maskable icon cropped inside a pink ring.
+
+The status bar color comes from the page's theme-color, not from the app: index.html and site.js set it to cream in the app.
+
+## Release notes (1.0.1, draft for the owner)
+```
+CURB asks for your location when it opens, and the map no longer waits when location is off. The back button closes the open panel instead of leaving the app. A cream status bar and a new icon.
+```

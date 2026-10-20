@@ -11,6 +11,7 @@ public class DelegationService extends
         super.onCreate();
 
         
+            registerExtraCommandHandler(new LocationPermissionAnswer());  // first: see that class
             registerExtraCommandHandler(new LocationDelegationExtraCommandHandler());
         
     }

@@ -4,8 +4,8 @@
   "name": "CURB",
   "launcherName": "CURB",
   "display": "standalone",
-  "themeColor": "#C1121F",
-  "themeColorDark": "#C1121F",
+  "themeColor": "#F2ECDF",
+  "themeColorDark": "#F2ECDF",
   "navigationColor": "#F2ECDF",
   "navigationColorDark": "#17150F",
   "navigationDividerColor": "#F2ECDF",
@@ -18,8 +18,8 @@
   "monochromeIconUrl": "https://curb.guide/icons/icon-monochrome.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": { "path": "../private/android/curb-upload.keystore", "alias": "upload" },
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionName": "1.0.1",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://curb.guide/manifest.json",
@@ -35,5 +35,5 @@
   "fingerprints": [],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
-  "appVersion": "1.0.0"
+  "appVersion": "1.0.1"
 }
