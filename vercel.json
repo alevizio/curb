@@ -273,6 +273,10 @@
       "destination": "/washington-dc/about.html"
     },
     {
+      "source": "/toronto",
+      "destination": "/toronto.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },

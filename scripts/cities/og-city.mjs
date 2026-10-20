@@ -94,10 +94,11 @@ function card(id) {
     .replace('<h1 style="font-size:80px">Know where to<br>park in Boston<span class="hl">.</span></h1>',
       `<h1 style="font-size:${size}px">Know where to<br>park in ${esc(name)}<span class="hl">.</span></h1>`)
     .replace('<p class="sub">Boston street sweeping, block by block: every curb by its next sweep, with alerts.</p>',
-      `<p class="sub">${esc(name)} ${sweeps ? 'street sweeping, block by block: every curb by its next sweep' : `${esc(what)}, block by block: tonight's side of every curb`}, with alerts.</p>`)
+      `<p class="sub">${esc(name)} ${sweeps ? 'street sweeping, block by block: every curb by its next sweep' : `${esc(what)}, block by block: ${esc((c.words && c.words.tagline) || "tonight's side of every curb")}`}, with alerts.</p>`)
     .replace('<u>curb<i>.</i>guide/boston</u> · <b>from Boston open data</b>', `<u>curb<i>.</i>guide/${id}</u> · <b>from ${esc(name)} open data</b>`)
     .replace(/aria-label="A Boston street cleaning sign[^"]*"/, `aria-label="A ${esc(name)} ${sweeps ? 'street cleaning' : 'parking'} sign and a CURB plate"`)
-    .replace('<div class="s-what">STREET CLEANING</div>', `<div class="s-what">${alt ? 'ALTERNATE SIDE' : 'STREET CLEANING'}</div>`)
+    // a no parking rule that is not a sweep (flag 32: Toronto's North York ban) is the sign's own "NO PARKING", no second line
+    .replace('<div class="s-what">STREET CLEANING</div>', flags & 32 && !alt ? '' : `<div class="s-what">${alt ? 'ALTERNATE SIDE' : 'STREET CLEANING'}</div>`)
     .replace('<div class="s-days">2ND &amp; 4TH MONDAY</div>', `<div class="s-days">${days}</div>`)
     .replace('<div class="s-time">8 <small>A.M.</small> <span class="to">to</span> 12 <small>NOON</small></div>',
       `<div class="s-time">${signHour(from)} <span class="to">to</span> ${signHour(to)}</div>`)

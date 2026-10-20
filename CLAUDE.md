@@ -253,6 +253,13 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   Milwaukee uses the same view all year (owner pick 2026-10-19): `winter.night: 'evening'` (the evening's date names the
   side), `permit: true`, flag 8 for its winter ban on both sides of bus routes, free Sunday and holiday mornings (absent from
   the lists), `words.what: 'night parking'` (title, words, no day chips), switch always on. See docs/multi-city/milwaukee.md.
+  Toronto (owner pick 2026-10-20: the snow route ban follows the City's announcements) has `winter.declared` (start 0, end 24):
+  its snow routes close both sides all day on the days the switch is on (`node scripts/cities/winter.mjs toronto on --reason
+  "…"`, off with `waiting` when the City ends it); dashed while waiting, red both sides while declared, the plate says which;
+  one push when it turns on (lib/notify-core.js `winterPlan`, declared branch), none while it lasts. The former North York's
+  2 to 6 AM ban (December to March) is seven weekly rules flagged 32 (a no parking rule, not a sweep: the night push and the
+  sheet say "no parking"). winter-watch.yml also reads toronto.ca/news every 30 minutes, November to April, and emails when a
+  release declares or ends a Major Snowstorm Condition. See docs/multi-city/toronto.md.
 - README.md — human-facing run/deploy notes.
 
 ## Run / deploy

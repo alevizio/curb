@@ -53,10 +53,12 @@ the questions for the City.
 | [Denver](denver.md) | Sweep codes on the centerline; hours from the sign inventory | Hours inferred for most blocks |
 | [Somerville](somerville.md) | The City's sweeping pages, one per street stretch | No tickets published; the pages' index is gone |
 | [Montréal](montreal.md) | 43k street cleaning signs placed on the Géobase | The sign inventory is thin in six boroughs; the page is in English |
+| [Toronto](toronto.md) | Winter parking: snow routes (no parking while the City declares a Major Snowstorm Condition) and the former North York's 2 to 6 AM ban, from Chapter 950's schedules on the centreline | The declarations have no feed: the switch follows the City's news by hand, told by an email watch |
 
 Not built: [Cambridge](cambridge.md) (the only street table is from 2014, and 2025 tickets contradict it), [San Mateo](san-mateo.md)
-(which streets are posted is not known), and the snow and winter rule cities (Toronto, Minneapolis, Winnipeg, Calgary,
-Edmonton): the map now shows a rule that switches sides by date (Madison, Milwaukee), so each is a data build plus its words.
+(which streets are posted is not known), and the other snow and winter rule cities (Minneapolis, Winnipeg, Calgary, Edmonton):
+the map now shows a rule that switches sides by date (Madison, Milwaukee) and one that follows a declaration (Toronto), so each
+is a data build plus its words.
 
 ## Principles
 

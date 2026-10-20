@@ -58,9 +58,13 @@ A **rule** is one of:
   as tonight's side, applied only while the City enforces it (`winter` in city.json and the switch in `data/<id>/winter.json`,
   see madison.md), 8 = it closes both sides (Milwaukee's winter ban on bus routes, see milwaukee.md), 16 = a sweep by City
   crews that the City's other holidays stop too (city.json `cityHolidays`, the dates that stop only these rules: San Jose's
-  major roads, where the contractor's residential sweeps keep those days). city.json `winter` may add
-  `night: 'evening'` (the evening's date names the side) and `permit: true` (for cars with a permit); `words.what` names what a
-  map without sweeping is about ("night parking").
+  major roads, where the contractor's residential sweeps keep those days), 32 = a no parking rule, not a sweep (Toronto's North
+  York night ban: its night push and its sheet say "no parking"). city.json `winter` may add
+  `night: 'evening'` (the evening's date names the side), `permit: true` (for cars with a permit), or `declared: true` (a rule
+  that follows the City's declaration, all day on both sides while the switch is on, with one alert when it turns on: Toronto's
+  snow routes, `start: 0, end: 24`, see toronto.md); `words.what` names what a map without sweeping is about ("night parking"),
+  `words.tagline` what it shows of each curb (its descriptions and share card), `words.alerts` the data notes' sentence on alerts,
+  and `credit` (with `creditUrl`) a credit line the City asks for, shown in the menu and the welcome card.
 - `dates`: local dates `"YYYY-MM-DD"`, for cities that publish dates instead of a pattern (Chicago, Saint Paul,
   Norfolk). List every date the build knows, at least through the end of the current season. When thousands of sides
   share a list, store it once in the file's top level `dates: { name: [...] }` and name it in the rule.
