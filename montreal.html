@@ -1064,6 +1064,10 @@ const routeLayer=L.layerGroup().addTo(map); // inferred truck routes (from citat
 let routeOn=false;
 const overviewLayer=L.layerGroup();         // citywide endpoints layer for zoom < 15
 const overviewRenderer=L.canvas({padding:.3}).addTo(map);  // pinned (see meterRenderer note)
+// When Chrome's GPU process restarts (Android can kill it while the app is in the background), a canvas comes back
+// blank and without Leaflet's scale and offset: the lines vanished, then drew at half size in the top-left corner until
+// the next pan. Redo the renderer's setup and repaint.
+[meterRenderer,overviewRenderer].forEach(r=>r._container.addEventListener('contextrestored',()=>r._update()));
 let OVR=null, ovrKey='';                    // data/overview.json blocks + render cache key
 let dayFilter=null;  // null = all days, else JS weekday 0–6 — sides without a sweep that day are hidden
 let statusOn={green:true,amber:true,red:true};  // legend toggles: show/hide curb lines by status
