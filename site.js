@@ -13,20 +13,27 @@
   var path = location.pathname.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/+$/, '') || '/';
   var GH = 'https://github.com/alevizio/curb';
   var APP = 'https://apps.apple.com/us/app/curb-sf-street-parking/id6780998238';
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // The Boston preview's pages (/boston/…, scripts/cities/boston-pages.mjs) get Boston's links; the iOS app is SF only.
   var BOS = path === '/boston' || path.indexOf('/boston/') === 0;
-  var HOME = BOS ? '/boston' : '/';
+  // A public city's page (/<id>/about, scripts/cities/city-pages.mjs) names its city on <body>: that city's links, no apps.
+  var CITY = !BOS && document.body.getAttribute('data-city') || '';
+  var CITY_NAME = esc(document.body.getAttribute('data-city-name') || ''), CITY_DATA = document.body.getAttribute('data-city-data') || '';
+  var HOME = BOS ? '/boston' : CITY ? '/' + CITY : '/';
+  var APPS = !BOS && !CITY;
 
   function on(href) {
     var h = href.replace(/\/+$/, '') || '/';
-    if (h === '/' || h === '/boston') return path === h;
+    if (h === '/' || h === HOME) return path === h;
     return path === h || path.indexOf(h + '/') === 0;
   }
   var ext = ' <span class="sn-ext">↗</span>';
   var mapLink = [[HOME, 'Map']];
   var primary = BOS ? [['/boston/about', 'How it works'], ['/boston/fixes', 'Map fixes'], ['/boston/about#holidays', 'Holidays']]
-    : [['/n/', 'Neighborhoods'], ['/tickets', 'Tickets'], ['/about', 'About']];
-  var secondary = BOS ? [['/about', 'About CURB'], ['/', 'San Francisco map'], ['/privacy', 'Privacy']]
+    : CITY ? [[HOME + '/about', 'How it works'], [HOME + '/about#holidays', 'Holidays'], ['/cities', 'Cities']]
+    : [['/n/', 'Neighborhoods'], ['/tickets', 'Tickets'], ['/cities', 'Cities'], ['/about', 'About']];
+  var secondary = BOS ? [['/about', 'About CURB'], ['/', 'San Francisco map'], ['/cities', 'Cities'], ['/privacy', 'Privacy']]
+    : CITY ? [['/about', 'About CURB'], ['/', 'San Francisco map'], ['/privacy', 'Privacy']]
     : [['/holidays', 'Sweeping holidays'], ['/support', 'Support'], ['/press', 'Press kit'], ['/changelog', 'Changelog'], ['/privacy', 'Privacy']];
   function svg(d, extra) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (extra || '') + '<path d="' + d + '"/></svg>'; }
   var IC = {
@@ -39,9 +46,11 @@
     '/about': svg('M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM14 3v5h5'),
     '/press': svg('M3 11v2a1 1 0 0 0 1 1h2l9 4V6L6 10H4a1 1 0 0 0-1 1Z'),
     '/changelog': svg('M12 7.5V12l3 2', '<circle cx="12" cy="12" r="9"/>'),
-    '/privacy': svg('M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10ZM9 12l2 2 4-4')
+    '/privacy': svg('M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10ZM9 12l2 2 4-4'),
+    '/cities': svg('M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4ZM9 4v14M15 6v14')
   };
   IC['/boston'] = IC['/']; IC['/boston/about'] = IC['/about']; IC['/boston/about#holidays'] = IC['/holidays'];
+  if (CITY) { IC[HOME] = IC['/']; IC[HOME + '/about'] = IC['/about']; IC[HOME + '/about#holidays'] = IC['/holidays']; }
   function links(list, ic) {
     return list.map(function (x) {
       var a = on(x[0]);
@@ -51,7 +60,7 @@
   var chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
   var burgerIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
   var extLinks = '<hr><a href="' + GH + '" rel="noopener">' + svg('m9 18-6-6 6-6M15 6l6 6-6 6') + '<span>Open source</span>' + ext + '</a>'
-    + (BOS ? '' : '<a href="' + APP + '" rel="noopener">' + svg('M11 18.5h2', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/>') + '<span>Get the app</span>' + ext + '</a>');
+    + (APPS ? '<a href="' + APP + '" rel="noopener">' + svg('M11 18.5h2', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/>') + '<span>Get the app</span>' + ext + '</a>' : '');
 
   var nav =
     '<header class="sn-nav">' +
@@ -63,18 +72,26 @@
             '<div class="sn-pop" hidden>' + links(secondary, 1) + extLinks + '</div>' +
           '</div>' +
         '</nav>' +
-        (BOS ? '' : '<a class="sn-cta sn-ghost" href="' + APP + '" rel="noopener">Download iOS app</a>') +
+        (APPS ? '<a class="sn-cta sn-ghost" href="' + APP + '" rel="noopener">Download iOS app</a>' : '') +
         '<a class="sn-cta" href="' + HOME + '">Open the map</a>' +
         '<button class="sn-burger" type="button" aria-label="Menu" aria-haspopup="true" aria-expanded="false">' + burgerIcon + '</button>' +
         '<div class="sn-menu" hidden>' + links(mapLink, 1) + links(primary, 1) + '<hr>' + links(secondary, 1) + extLinks + '</div>' +
       '</div>' +
     '</header>';
 
-  var F = BOS ? {
+  var F = CITY ? {
+    tag: 'Know where to park in ' + CITY_NAME + ', block by block, from public open data. CURB started in San Francisco.',
+    app: '',
+    explore: '<a href="' + HOME + '">Map</a><a href="' + HOME + '/about">How it works</a><a href="' + HOME + '/about#holidays">Holidays</a><a href="/cities">Cities</a>',
+    more: '<a href="/about">About CURB</a><a href="/">San Francisco map</a><a href="/privacy">Privacy</a>',
+    data: CITY_DATA ? '<a href="' + esc(CITY_DATA) + '" rel="noopener">Data: ' + CITY_NAME + ' open data</a>' : '',
+    fine: 'The posted street sign is always the source of truth: temporary signs &amp; holidays override everything here. ' +
+      'Free &amp; open source (MIT), no accounts, no ads, no cookies. Built on public data from ' + CITY_NAME + '.'
+  } : BOS ? {
     tag: 'Know where to park in Boston, block by block. A preview of CURB, built on the City of Boston\'s open data.',
     app: '',
     explore: '<a href="/boston">Map</a><a href="/boston/about">How it works</a><a href="/boston/about#holidays">Sweeping holidays</a><a href="/boston/fixes">Map fixes</a>',
-    more: '<a href="/about">About CURB</a><a href="/">San Francisco map</a><a href="/privacy">Privacy</a>',
+    more: '<a href="/about">About CURB</a><a href="/">San Francisco map</a><a href="/cities">Cities</a><a href="/privacy">Privacy</a>',
     data: '<a href="https://data.boston.gov" rel="noopener">Data: Analyze Boston</a>',
     fine: 'The posted street sign is always the source of truth: temporary signs &amp; holidays override everything here. ' +
       'Free &amp; open source (MIT), no accounts, no ads, no cookies. Built on public data from the City of Boston: ' +
@@ -82,7 +99,7 @@
   } : {
     tag: 'Know where to park in San Francisco — block by block, including the part no sign tells you.',
     app: '<a class="sn-fapp" href="' + APP + '" rel="noopener">Download the iOS app' + ext + '</a>',
-    explore: '<a href="/">Map</a><a href="/n/">Neighborhoods</a><a href="/holidays">Sweeping holidays</a><a href="/tickets">The ticket economy</a><a href="/about">About</a>',
+    explore: '<a href="/">Map</a><a href="/n/">Neighborhoods</a><a href="/holidays">Sweeping holidays</a><a href="/tickets">The ticket economy</a><a href="/cities">Cities</a><a href="/about">About</a>',
     more: '<a href="/support">Support CURB</a><a href="/press">Press kit</a><a href="/changelog">Changelog</a><a href="/privacy">Privacy</a>',
     data: '<a href="https://datasf.org" rel="noopener">Data: DataSF</a>',
     fine: 'The posted street sign is always the source of truth — temporary signs &amp; holidays override everything here. ' +
