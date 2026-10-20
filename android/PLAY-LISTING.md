@@ -60,9 +60,10 @@ CURB is on Android: every San Francisco curb colored by its next sweep, when tic
   - *Location, precise* (optional, app functionality, not ephemeral): the block you set an alert for, kept with the alert, plus the area the map loads after you tap locate. The locate fix itself never leaves the phone.
   - *Device or other IDs* (optional, app functionality): the anonymous push subscription, only if alerts are on.
   - *App activity, other actions* (optional, app functionality): the alert settings picked (intensity, voice).
+  - *App activity, in-app search history* (optional, app functionality): a typed street or address goes to DataSF to find it (CURB never stores it).
   - *App activity, app interactions* (required, analytics): cookieless aggregate page views and feature counts.
   - *App info and performance, crash logs and diagnostics* (required, analytics): anonymous error reports (message, page, coarse device type).
-  - Deletion: yes. Turn off on an alert removes the block and sweep time at once (from 20-Oct-2026 a turned-off watch keeps only unreadable keys, `offKeys` in api/_store.js); the anonymous push endpoint stays, with nothing to send, as /privacy says.
+  - Deletion: yes, link https://curb.guide/privacy (its "Remove it any time" paragraph). Turn off on an alert removes the block and sweep time at once (from 20-Oct-2026 a turned-off watch keeps only unreadable keys, `offKeys` in api/_store.js); the anonymous push endpoint stays, with nothing to send, as /privacy says.
   - Not collected: name, email, contacts, photos, financial data.
 
 ## Signing and the site link
