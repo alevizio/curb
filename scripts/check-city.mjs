@@ -106,7 +106,7 @@ try {
   }
 
   // a city with a winter rule (city.json winter: Madison): as the City's switch says today, then on an enforced night
-  if (city.winter) {
+  if (city.winter && !city.winter.declared) {
     const sw = JSON.parse(readFileSync(new URL(`../data/${ID}/winter.json`, import.meta.url), 'utf8'));
     const winterPage = async (clock, status) => {
       const w = await b.newPage();
@@ -154,6 +154,58 @@ try {
     const s2 = await sheetOf(w, q);
     check(/Move by|Park until/i.test(s2.text) && /where you are/i.test(s2.text) && s2.cal && s2.spot && Date.parse(s2.spot.next) > clock,
       `winter on: the sheet says when to move, both sides tonight, alerts and calendar (${s2.text.slice(0, 70)})`);
+    await w.close();
+  }
+
+  // a declared rule (city.json winter.declared: Toronto's snow routes, both sides at all hours while the City's declaration
+  // lasts): as the switch says today, then on a declared day
+  if (city.winter && city.winter.declared) {
+    const sw = JSON.parse(readFileSync(new URL(`../data/${ID}/winter.json`, import.meta.url), 'utf8'));
+    const declaredPage = async (clock, status) => {
+      const w = await b.newPage();
+      await w.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+      await w.setBypassServiceWorker(true);
+      w.on('pageerror', (e) => errors.push('declared: ' + e.message));
+      await w.evaluateOnNewDocument((t) => {
+        try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbFirstSheet', '1'); } catch (_) {}
+        if (t) { const D = Date, off = t - D.now(); class FD extends D { constructor(...a) { super(...(a.length ? a : [D.now() + off])); } static now() { return D.now() + off; } } window.Date = FD; }
+      }, clock || 0);
+      if (status) {
+        await w.setRequestInterception(true);
+        w.on('request', (r) => (r.url().includes(`/data/${ID}/winter.json`) ? r.respond({ status: 200, contentType: 'application/json', body: JSON.stringify(status) }) : r.continue()));
+      }
+      await w.goto(`${SITE}/${ID}`, { waitUntil: 'load' });
+      await w.waitForFunction(() => window.WINTER && !document.getElementById('wPlate').hidden, { timeout: 30000, polling: 250 }).catch(() => {});
+      // a block whose only rule is the declared one, on both sides, at street zoom
+      const q = await w.evaluate(async () => { const b = (await PLACE.load()).find((x) => x.d.length === 2 && x.d.every((d) => d[2].length && d[2].every((r) => r[5] & 4 && r[5] & 8)));
+        const m = PLACE.midpoint(b.g); map.setView([m[1], m[0]], 17, { animate: false }); return String(b.c); });
+      await w.waitForFunction((c) => !ovMode && segCache.filter((x) => String(x.group.cnn) === c).length === 2, { timeout: 30000, polling: 250 }, q).catch(() => {});
+      return { w, q };
+    };
+    const sheetOf = (w, q) => w.evaluate((c) => { const o = segCache.find((x) => String(x.group.cnn) === c); openSheet(o.group, o.side.key);
+      return { text: document.getElementById('sheetBody').innerText.replace(/\s+/g, ' ').trim(), cal: !!document.getElementById('calBtn'), alert: !!document.getElementById('alertBtn'),
+        spot: sheetSpot && { next: sheetSpot.nextSweepISO, declared: (sheetSpot.rules || []).filter((r) => r.flags & 4 && Array.isArray(r.dates) && r.dates.length > 20).length } }; }, q);
+    const plate = (w) => w.evaluate(() => document.getElementById('wPlate').innerText.replace(/\s+/g, ' ').trim());
+    const sideColors = (w, q) => w.evaluate((c) => segCache.filter((x) => String(x.group.cnn) === c).map((x) => x.side.color), q);
+    if (sw.state !== 'on') {
+      const { w, q } = await declaredPage();
+      const dash = await w.evaluate(() => getCSS('--winter-dash')), colors = await sideColors(w, q);
+      check(/not declared|paused|from|not in season/i.test(await plate(w)) && colors.length === 2 && colors.every((x) => x === dash),
+        `declared rule (${sw.state}): the plate says none is declared, and both sides of a snow route are dashed (${(await plate(w)).slice(0, 60)})`);
+      const s1 = await sheetOf(w, q);
+      check(/Snow route/i.test(s1.text) && s1.alert && !s1.cal && s1.spot && s1.spot.declared >= 1,
+        `declared rule (${sw.state}): the sheet says so, alerts can be on, no calendar (${s1.text.slice(0, 70)})`);
+      await w.close();
+    }
+    // a day of the season, 4 PM, declared that day
+    const y = city.winter.from.slice(0, 4), clock = Date.parse(`${y}-12-01T21:00:00Z`);
+    const { w, q } = await declaredPage(clock, { state: 'on', from: `${y}-12-01`, at: `${y}-12-01T20:00:00Z`, reason: `${city.name} declared a Major Snowstorm Condition.` });
+    const red = await w.evaluate(() => getCSS('--red')), colors = await sideColors(w, q);
+    check(/No parking on snow routes/i.test(await plate(w)) && colors.length === 2 && colors.every((x) => x === red),
+      `declared rule on: the plate says no parking on snow routes and both sides are red (${(await plate(w)).slice(0, 60)})`);
+    const s2 = await sheetOf(w, q);
+    check(/No parking/i.test(s2.text) && /until the City ends/i.test(s2.text) && s2.alert && !s2.cal && s2.spot && Date.parse(s2.spot.next) > clock,
+      `declared rule on: the sheet says no parking until the City ends it, and alerts arm the next day (${s2.text.slice(0, 70)})`);
     await w.close();
   }
 

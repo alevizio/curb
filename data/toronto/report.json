@@ -1,0 +1,3069 @@
+{
+ "generated": "2026-10-20T21:27:28.457Z",
+ "snowRoutes": {
+  "rule": "§ 950-406A: no parking or standing on a Schedule XVII-A highway while a Major Snow Storm Condition is declared, where signed. Both sides, all hours. Switch: data/toronto/winter.json.",
+  "season": "2026-11-01 to 2027-04-30 (the dates a declaration can switch on; two lists, 91 and 90 dates)",
+  "entries": 160,
+  "inForce": 147,
+  "placed": 147,
+  "fromTheCityListOnly": [
+   {
+    "entry": "Emdaabiimok Avenue, Eastern Avenue and Queen Street East",
+    "placed": true,
+    "note": "On the City's list as \"Lower Coxwell Avenue, Eastern Avenue and Queen Street East\"; the dataset marks it repealed (1258-2024) and its new name purged"
+   }
+  ],
+  "notPlaced": [],
+  "placedWithNotes": [
+   {
+    "entry": "Lower Jarvis Street, Front Street East and Lake Shore Boulevard West",
+    "notes": [
+     "Lake Shore Boulevard West matched by a typo"
+    ]
+   },
+   {
+    "entry": "Oakwood Avenue, St. Clair Avenue West and Eglinton Avenue West",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Davenport Road, Yonge Street and Old Weston Road",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Eastern Avenue, Broadview Avenue and Coxwell Avenue",
+    "notes": [
+     "Coxwell Avenue matched by its new name"
+    ]
+   },
+   {
+    "entry": "Gerrard Street East, Yonge Street and Main Street",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Vaughan Road, St. Clair Avenue West and Eglinton Avenue West",
+    "notes": [
+     "Eglinton Avenue West matched by the nearest point (61 m)"
+    ]
+   },
+   {
+    "entry": "Avenue Road, St. Clair Avenue West and Wilson Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Keele Street, South end and Ingram Drive",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Bayview Avenue, Bloor Street and Labatt Avenue",
+    "notes": [
+     "Bloor Street matched by a ramp to it",
+     "Labatt Avenue matched by the nearest point (172 m)"
+    ]
+   },
+   {
+    "entry": "Adelaide Street West, Bathurst Street and Yonge Street",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   }
+  ],
+  "blocks": 3792,
+  "blockSides": 7584,
+  "schedule17B": "Schedule XVII-B (parking on or blocking streetcar tracks in a Major Snow Storm Condition) lists 29 streetcar streets, all within the Schedule XVII-A routes: not drawn separately.",
+  "cityListCheck": "The City's list (PDF, current to 2025-12-31) has every in force entry; it also lists Lower Coxwell Avenue (kept, above), and writes Richmond Street East as Yonge to Parliament only (the dataset adds Yonge to Church, inside it)."
+ },
+ "northYork": {
+  "rule": "§ 950-400D(9): no parking 2:00 to 6:00 AM, December 1 to March 31, in the former City of North York, on the highways in Schedule IV (§ 950-1303). Not signed.",
+  "howMapped": "Every City street (local, collector, arterial; City jurisdiction) whose middle is in the former North York (boundary data), both sides; a street on the boundary only where Schedule IV lists it. Less the exemptions: block sides a repealed Schedule IV entry covered that no entry in force covers.",
+  "schedule": {
+   "entries": 2681,
+   "inForce": 2632,
+   "placed": 2548,
+   "repealed": 49
+  },
+  "citySideStreets": {
+   "blockSides": 17974,
+   "listedInForce": 14895,
+   "notListed": {
+    "byClass": {
+     "Major Arterial": 1820,
+     "Local": 545,
+     "Minor Arterial": 432,
+     "Collector": 111
+    },
+    "topStreets": {
+     "Bathurst St": 208,
+     "Bayview Ave": 152,
+     "Finch Ave W": 142,
+     "Leslie St": 140,
+     "Sheppard Ave W": 140,
+     "Don Mills Rd": 120,
+     "Keele St": 112,
+     "Yonge St": 110,
+     "Sheppard Ave E": 100,
+     "Jane St": 94,
+     "Weston Rd": 88,
+     "Finch Ave E": 80,
+     "Eglinton Ave E": 68,
+     "Avenue Rd": 48,
+     "Steeles Ave W": 46,
+     "Wilmington Ave": 44,
+     "Caledonia Rd": 38,
+     "Dufferin St": 38,
+     "Drewry Ave": 36,
+     "Islington Ave": 34,
+     "Sloane Ave": 34,
+     "Cook Rd": 30,
+     "The Donway E": 28,
+     "The Donway W": 26,
+     "Marlee Ave": 26,
+     "Wynford Dr": 24,
+     "Highgate Ave": 24,
+     "The Pond Rd": 22,
+     "Alness St": 20,
+     "Upper Canada Dr": 20
+    }
+   }
+  },
+  "leftOut": {
+   "class River": 224,
+   "class Laneway": 178,
+   "class Trail": 2756,
+   "class Other": 678,
+   "class Walkway": 37,
+   "class Pending": 252,
+   "class Expressway": 463,
+   "class Expressway Ramp": 465,
+   "class Major Railway": 71,
+   "jurisdiction PROVINCE": 109,
+   "class Major Arterial Ramp": 27,
+   "class Hydro Line": 119,
+   "class Creek/Tributary": 16,
+   "class Access Road": 9,
+   "class Busway": 6,
+   "class Minor Railway": 20,
+   "class Collector Ramp": 4,
+   "jurisdiction UNKNOWN": 14,
+   "class Other Ramp": 6,
+   "class Geostatistical line": 1
+  },
+  "boundarySidesNotListed": 300,
+  "exemptionsApplied": 38,
+  "exemptionsNotApplied": 11,
+  "exemptions": [
+   {
+    "entry": "Harlandale Avenue, Beecroft Road and Yonge Street",
+    "bylaw": "323-2014",
+    "effective": "2014-04-08",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 4,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Joyce Parkway (south leg), Caledonia Road and Eugene Street",
+    "bylaw": "156-2016",
+    "effective": "2016-02-23",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 2,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Duplex Avenue (NY), Finch Avenue West and Hendon Avenue",
+    "bylaw": "509-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 2,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Embla Street, Barber Greene Road and Foxden Road",
+    "bylaw": "1246-2019",
+    "effective": "2019-09-16",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 1,
+    "off": [
+     {
+      "block": "443820",
+      "street": "Embla St",
+      "side": "West"
+     }
+    ]
+   },
+   {
+    "entry": "Harrison Garden Boulevard, Avondale Avenue and the east end of Harrison Garden Boulevard",
+    "bylaw": "138-2022",
+    "effective": "2022-02-23",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 16,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Invermay Avenue, Faywood Boulevard and Bathurst Street",
+    "bylaw": "155-2016",
+    "effective": "2016-02-23",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 8,
+    "blockSidesStillBanned": 6,
+    "off": [
+     {
+      "block": "4885295",
+      "street": "Invermay Ave",
+      "side": "South"
+     },
+     {
+      "block": "4885338",
+      "street": "Invermay Ave",
+      "side": "South"
+     },
+     {
+      "block": "4889919",
+      "street": "Invermay Ave",
+      "side": "South"
+     },
+     {
+      "block": "442437",
+      "street": "Invermay Ave",
+      "side": "South"
+     },
+     {
+      "block": "442399",
+      "street": "Invermay Ave",
+      "side": "South"
+     },
+     {
+      "block": "442368",
+      "street": "Invermay Ave",
+      "side": "South"
+     },
+     {
+      "block": "442340",
+      "street": "Invermay Ave",
+      "side": "South"
+     },
+     {
+      "block": "442340",
+      "street": "Invermay Ave",
+      "side": "North"
+     }
+    ]
+   },
+   {
+    "entry": "Flint Road, Alness Street and the south end of Flint Road",
+    "bylaw": "1254-2019",
+    "effective": "2019-09-16",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 3,
+    "blockSidesStillBanned": 3,
+    "off": [
+     {
+      "block": "11272575",
+      "street": "Flint Rd",
+      "side": "West"
+     },
+     {
+      "block": "2453499",
+      "street": "Flint Rd",
+      "side": "West"
+     },
+     {
+      "block": "2453499",
+      "street": "Flint Rd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Glenmount Avenue (west side), Viewmount Avenue and Lawrence Avenue West",
+    "bylaw": "1712-2019",
+    "effective": "2019-12-03",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 9,
+    "off": [
+     {
+      "block": "445109",
+      "street": "Glenmount Ave",
+      "side": "West"
+     }
+    ]
+   },
+   {
+    "entry": "Curlew Drive, Lawrence Avenue East and Victoria Park Avenue",
+    "bylaw": "1006-2019",
+    "effective": "2019-06-25",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 5,
+    "blockSidesStillBanned": 3,
+    "off": [
+     {
+      "block": "8292366",
+      "street": "Curlew Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "8292440",
+      "street": "Curlew Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "8292440",
+      "street": "Curlew Dr",
+      "side": "Northwest"
+     },
+     {
+      "block": "8292371",
+      "street": "Curlew Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "441460",
+      "street": "Curlew Dr",
+      "side": "Southeast"
+     }
+    ]
+   },
+   {
+    "entry": "Eddystone Avenue, Jane Street and Oakdale Road",
+    "bylaw": "312-2014",
+    "effective": "2014-04-08",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "10093106",
+      "street": "Eddystone Ave",
+      "side": "South"
+     },
+     {
+      "block": "10093106",
+      "street": "Eddystone Ave",
+      "side": "North"
+     }
+    ]
+   },
+   {
+    "entry": "Forest Manor Road, Parkway Forest Drive (north intersection) and Parkway Forest Drive (south intersection)",
+    "bylaw": "323-2016",
+    "effective": "2016-04-05",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 4,
+    "blockSidesStillBanned": 4,
+    "off": [
+     {
+      "block": "8754642",
+      "street": "Forest Manor Rd",
+      "side": "Northwest"
+     },
+     {
+      "block": "30053137",
+      "street": "Forest Manor Rd",
+      "side": "West"
+     },
+     {
+      "block": "30095975",
+      "street": "Forest Manor Rd",
+      "side": "Southwest"
+     },
+     {
+      "block": "30095974",
+      "street": "Forest Manor Rd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Dovehouse Avenue, Sentinel Road and Keele Street",
+    "bylaw": "1243-2018",
+    "effective": "2018-07-27",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 4,
+    "blockSidesStillBanned": 4,
+    "off": [
+     {
+      "block": "441496",
+      "street": "Dovehouse Ave",
+      "side": "South"
+     },
+     {
+      "block": "441471",
+      "street": "Dovehouse Ave",
+      "side": "South"
+     },
+     {
+      "block": "441442",
+      "street": "Dovehouse Ave",
+      "side": "South"
+     },
+     {
+      "block": "441413",
+      "street": "Dovehouse Ave",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "Erie Street, Falstaff Avenue and Maple Leaf Drive",
+    "bylaw": "132-2017",
+    "effective": "2017-02-22",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 8,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Denrock Drive, Howard Drive and the south end of Denrock Drive",
+    "bylaw": "1098-2021",
+    "effective": "2020-12-03",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 2,
+    "off": [
+     {
+      "block": "438666",
+      "street": "Denrock Dr",
+      "side": "West"
+     },
+     {
+      "block": "438666",
+      "street": "Denrock Dr",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Densley Avenue, Keele Street and Sheffield Street",
+    "bylaw": "878-2017",
+    "effective": "2017-09-06",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 4,
+    "blockSidesStillBanned": 2,
+    "off": [
+     {
+      "block": "60025297",
+      "street": "Densley Ave",
+      "side": "Northwest"
+     },
+     {
+      "block": "60025297",
+      "street": "Densley Ave",
+      "side": "Southeast"
+     },
+     {
+      "block": "9085266",
+      "street": "Densley Ave",
+      "side": "South"
+     },
+     {
+      "block": "9085879",
+      "street": "Densley Ave",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "Gwendolen Crescent, Johnston Avenue and the south end of Gwendolen Crescent",
+    "bylaw": "1429-2019",
+    "effective": "2019-10-10",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 10,
+    "off": [
+     {
+      "block": "8864914",
+      "street": "Gwendolen Cres",
+      "side": "West"
+     },
+     {
+      "block": "8864914",
+      "street": "Gwendolen Cres",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Evelyn Wiggins Drive, Murray Ross Parkway and Assiniboine Road",
+    "bylaw": "907-2021",
+    "effective": "2021-11-12",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 0,
+    "why": "it covers no City street block on the map (a private, unbuilt or renamed street, or under half a block)"
+   },
+   {
+    "entry": "Herons Hill Way, Yorkland Road and Sheppard Avenue East",
+    "bylaw": "408-2019",
+    "effective": "2019-03-19",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 0,
+    "why": "it covers no City street block on the map (a private, unbuilt or renamed street, or under half a block)"
+   },
+   {
+    "entry": "Franklin Avenue (NY), Walker Road and a point 38.8 metres east of Walker Road",
+    "bylaw": "370-2018",
+    "effective": "2018-04-04",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "440655",
+      "street": "Franklin Ave",
+      "side": "Southeast"
+     },
+     {
+      "block": "440655",
+      "street": "Franklin Ave",
+      "side": "Northwest"
+     }
+    ]
+   },
+   {
+    "entry": "Basil Hall Court, Beecroft Road and the south end of Basil Hall Court",
+    "bylaw": "478-2016",
+    "effective": "2016-05-10",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "60048776",
+      "street": "Basil Hall Crt",
+      "side": "Northeast"
+     },
+     {
+      "block": "60048776",
+      "street": "Basil Hall Crt",
+      "side": "Southwest"
+     }
+    ]
+   },
+   {
+    "entry": "Parrotta Drive, Mainshep Road and Abraham Welsh Road",
+    "bylaw": "497-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 6,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30014167",
+      "street": "Parrotta Dr",
+      "side": "West"
+     },
+     {
+      "block": "30014167",
+      "street": "Parrotta Dr",
+      "side": "East"
+     },
+     {
+      "block": "30014168",
+      "street": "Parrotta Dr",
+      "side": "North"
+     },
+     {
+      "block": "30014168",
+      "street": "Parrotta Dr",
+      "side": "South"
+     },
+     {
+      "block": "30014124",
+      "street": "Parrotta Dr",
+      "side": "North"
+     },
+     {
+      "block": "30014124",
+      "street": "Parrotta Dr",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "Champagne Drive, Finch Avenue West and Chesswood Drive",
+    "bylaw": "1122-2025",
+    "effective": "2025-10-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "7576548",
+      "street": "Champagne Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "7576548",
+      "street": "Champagne Dr",
+      "side": "Northwest"
+     }
+    ]
+   },
+   {
+    "entry": "Abraham Welsh Road, Sheppard Avenue West and McCartney Street",
+    "bylaw": "497-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 8,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30014097",
+      "street": "Abraham Welsh Rd",
+      "side": "West"
+     },
+     {
+      "block": "30014097",
+      "street": "Abraham Welsh Rd",
+      "side": "East"
+     },
+     {
+      "block": "30014121",
+      "street": "Abraham Welsh Rd",
+      "side": "West"
+     },
+     {
+      "block": "30014121",
+      "street": "Abraham Welsh Rd",
+      "side": "East"
+     },
+     {
+      "block": "30014122",
+      "street": "Abraham Welsh Rd",
+      "side": "West"
+     },
+     {
+      "block": "30014122",
+      "street": "Abraham Welsh Rd",
+      "side": "East"
+     },
+     {
+      "block": "30014104",
+      "street": "Abraham Welsh Rd",
+      "side": "West"
+     },
+     {
+      "block": "30014104",
+      "street": "Abraham Welsh Rd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Betty Nagle Street, Isaac Devins Boulevard and the west end of Betty Nagle Street",
+    "bylaw": "4-2020",
+    "effective": "2020-01-08",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30037909",
+      "street": "Betty Nagle St",
+      "side": "South"
+     },
+     {
+      "block": "30037909",
+      "street": "Betty Nagle St",
+      "side": "North"
+     }
+    ]
+   },
+   {
+    "entry": "Ardwick Boulevard, Finch Avenue West (west intersection) and Finch Avenue West (east intersection)",
+    "bylaw": "143-2016",
+    "effective": "2016-02-23",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 3,
+    "blockSidesStillBanned": 15,
+    "off": [
+     {
+      "block": "442079",
+      "street": "Ardwick Blvd",
+      "side": "North"
+     },
+     {
+      "block": "10341104",
+      "street": "Ardwick Blvd",
+      "side": "East"
+     },
+     {
+      "block": "10341104",
+      "street": "Ardwick Blvd",
+      "side": "West"
+     }
+    ]
+   },
+   {
+    "entry": "Bob Yuill Drive, Isaac Devins Boulevard and Mary Chapman Boulevard",
+    "bylaw": "497-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 4,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Charlie Jordan Road, Isaac Devins Boulevard and McCartney Street",
+    "bylaw": "497-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30014179",
+      "street": "Charlie Jordan Rd",
+      "side": "West"
+     },
+     {
+      "block": "30014179",
+      "street": "Charlie Jordan Rd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Isaac Devins Boulevard, Mary Chapman Boulevard (north intersection) and Bob Yuill Drive",
+    "bylaw": "497-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 22,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30014144",
+      "street": "Isaac Devins Blvd",
+      "side": "South"
+     },
+     {
+      "block": "30014144",
+      "street": "Isaac Devins Blvd",
+      "side": "North"
+     },
+     {
+      "block": "30014150",
+      "street": "Isaac Devins Blvd",
+      "side": "South"
+     },
+     {
+      "block": "30014150",
+      "street": "Isaac Devins Blvd",
+      "side": "North"
+     },
+     {
+      "block": "30014149",
+      "street": "Isaac Devins Blvd",
+      "side": "South"
+     },
+     {
+      "block": "30014149",
+      "street": "Isaac Devins Blvd",
+      "side": "North"
+     },
+     {
+      "block": "30014130",
+      "street": "Isaac Devins Blvd",
+      "side": "Southwest"
+     },
+     {
+      "block": "30014130",
+      "street": "Isaac Devins Blvd",
+      "side": "Northeast"
+     },
+     {
+      "block": "30014155",
+      "street": "Isaac Devins Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30014155",
+      "street": "Isaac Devins Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30014158",
+      "street": "Isaac Devins Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30014158",
+      "street": "Isaac Devins Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30014161",
+      "street": "Isaac Devins Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30014161",
+      "street": "Isaac Devins Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30022639",
+      "street": "Isaac Devins Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30022639",
+      "street": "Isaac Devins Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30122385",
+      "street": "Isaac Devins Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30122385",
+      "street": "Isaac Devins Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30122384",
+      "street": "Isaac Devins Blvd",
+      "side": "North"
+     },
+     {
+      "block": "30122384",
+      "street": "Isaac Devins Blvd",
+      "side": "South"
+     },
+     {
+      "block": "30022599",
+      "street": "Isaac Devins Blvd",
+      "side": "North"
+     },
+     {
+      "block": "30022599",
+      "street": "Isaac Devins Blvd",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "Blue Ridge Road, Sheppard Avenue East and the north end of Blue Ridge Road",
+    "bylaw": "183-2024",
+    "effective": "2024-02-22",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 10,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Lou Pomanti Street, Mary Chapman Boulevard and Isaac Devins Boulevard",
+    "bylaw": "673-2018",
+    "effective": "2018-06-06",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30014178",
+      "street": "Lou Pomanti St",
+      "side": "South"
+     },
+     {
+      "block": "30014178",
+      "street": "Lou Pomanti St",
+      "side": "North"
+     }
+    ]
+   },
+   {
+    "entry": "Mary Chapman Boulevard, Sheppard Avenue West and Isaac Devins Boulevard",
+    "bylaw": "497-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 18,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30014094",
+      "street": "Mary Chapman Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30014094",
+      "street": "Mary Chapman Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30014118",
+      "street": "Mary Chapman Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30014118",
+      "street": "Mary Chapman Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30014119",
+      "street": "Mary Chapman Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30014119",
+      "street": "Mary Chapman Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30137230",
+      "street": "Mary Chapman Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30137230",
+      "street": "Mary Chapman Blvd",
+      "side": "East"
+     },
+     {
+      "block": "30014110",
+      "street": "Mary Chapman Blvd",
+      "side": "Southwest"
+     },
+     {
+      "block": "30014110",
+      "street": "Mary Chapman Blvd",
+      "side": "Northeast"
+     },
+     {
+      "block": "30014112",
+      "street": "Mary Chapman Blvd",
+      "side": "Southwest"
+     },
+     {
+      "block": "30014112",
+      "street": "Mary Chapman Blvd",
+      "side": "Northeast"
+     },
+     {
+      "block": "30014115",
+      "street": "Mary Chapman Blvd",
+      "side": "Southwest"
+     },
+     {
+      "block": "30014115",
+      "street": "Mary Chapman Blvd",
+      "side": "Northeast"
+     },
+     {
+      "block": "30022638",
+      "street": "Mary Chapman Blvd",
+      "side": "Southwest"
+     },
+     {
+      "block": "30022638",
+      "street": "Mary Chapman Blvd",
+      "side": "Northeast"
+     },
+     {
+      "block": "30022632",
+      "street": "Mary Chapman Blvd",
+      "side": "West"
+     },
+     {
+      "block": "30022632",
+      "street": "Mary Chapman Blvd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Brookbanks Drive, Parkwoods Village Drive and Three Valleys Drive",
+    "bylaw": "1342-2015",
+    "effective": "2015-12-10",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 12,
+    "blockSidesStillBanned": 30,
+    "off": [
+     {
+      "block": "30004707",
+      "street": "Brookbanks Dr",
+      "side": "Northwest"
+     },
+     {
+      "block": "30004707",
+      "street": "Brookbanks Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "30004706",
+      "street": "Brookbanks Dr",
+      "side": "North"
+     },
+     {
+      "block": "30004706",
+      "street": "Brookbanks Dr",
+      "side": "South"
+     },
+     {
+      "block": "30004710",
+      "street": "Brookbanks Dr",
+      "side": "North"
+     },
+     {
+      "block": "30004710",
+      "street": "Brookbanks Dr",
+      "side": "South"
+     },
+     {
+      "block": "30004709",
+      "street": "Brookbanks Dr",
+      "side": "North"
+     },
+     {
+      "block": "30004709",
+      "street": "Brookbanks Dr",
+      "side": "South"
+     },
+     {
+      "block": "440866",
+      "street": "Brookbanks Dr",
+      "side": "North"
+     },
+     {
+      "block": "440866",
+      "street": "Brookbanks Dr",
+      "side": "South"
+     },
+     {
+      "block": "440879",
+      "street": "Brookbanks Dr",
+      "side": "North"
+     },
+     {
+      "block": "440879",
+      "street": "Brookbanks Dr",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "McCartney Street, Mary Chapman Boulevard and Isaac Devins Boulevard",
+    "bylaw": "497-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 10,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30103539",
+      "street": "McCartney St",
+      "side": "North"
+     },
+     {
+      "block": "30103539",
+      "street": "McCartney St",
+      "side": "South"
+     },
+     {
+      "block": "30103540",
+      "street": "McCartney St",
+      "side": "North"
+     },
+     {
+      "block": "30103540",
+      "street": "McCartney St",
+      "side": "South"
+     },
+     {
+      "block": "30014152",
+      "street": "McCartney St",
+      "side": "North"
+     },
+     {
+      "block": "30014152",
+      "street": "McCartney St",
+      "side": "South"
+     },
+     {
+      "block": "30014153",
+      "street": "McCartney St",
+      "side": "North"
+     },
+     {
+      "block": "30014153",
+      "street": "McCartney St",
+      "side": "South"
+     },
+     {
+      "block": "30014128",
+      "street": "McCartney St",
+      "side": "North"
+     },
+     {
+      "block": "30014128",
+      "street": "McCartney St",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "Ravenhill Road, Belgrave Avenue and Yonge Boulevard",
+    "bylaw": "14-2016",
+    "effective": "2016-01-19",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 1,
+    "off": [
+     {
+      "block": "442286",
+      "street": "Ravenhill Rd",
+      "side": "North"
+     }
+    ]
+   },
+   {
+    "entry": "Torbarrie Road, Kirby Road and Oakdale Road",
+    "bylaw": "745-2015",
+    "effective": "2015-07-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 6,
+    "off": [
+     {
+      "block": "20164823",
+      "street": "Torbarrie Rd",
+      "side": "East"
+     },
+     {
+      "block": "20145214",
+      "street": "Torbarrie Rd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Melrose Avenue (NY), Bathurst Street and a point 180.2 metres east of Avenue Road",
+    "bylaw": "457-2014",
+    "effective": "2014-05-13",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 11,
+    "off": [
+     {
+      "block": "60048803",
+      "street": "Melrose Ave",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "Mulholland Avenue, Dane Avenue and Sparrow Avenue",
+    "bylaw": "28-2022",
+    "effective": "2022-01-06",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 8,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Petrolia Road, The Pond Road and Steeles Avenue West",
+    "bylaw": "468-2018",
+    "effective": "2018-04-27",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 6,
+    "off": [
+     {
+      "block": "5625175",
+      "street": "Petrolia Rd",
+      "side": "West"
+     },
+     {
+      "block": "5625175",
+      "street": "Petrolia Rd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Sam Frustaglio Drive, Denison Road East and a point 43.5 metres northwest of Margaret Rose Court",
+    "bylaw": "163-2014",
+    "effective": "2014-02-25",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 5,
+    "off": [
+     {
+      "block": "14050773",
+      "street": "Sam Frustaglio Dr",
+      "side": "Southwest"
+     }
+    ]
+   },
+   {
+    "entry": "Tippett Road, Wilson Avenue and the south end of Tippett Road",
+    "bylaw": "1003-2019",
+    "effective": "2019-06-25",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 3,
+    "blockSidesStillBanned": 1,
+    "off": [
+     {
+      "block": "30115735",
+      "street": "Tippett Rd",
+      "side": "West"
+     },
+     {
+      "block": "30115735",
+      "street": "Tippett Rd",
+      "side": "East"
+     },
+     {
+      "block": "30115734",
+      "street": "Tippett Rd",
+      "side": "West"
+     }
+    ]
+   },
+   {
+    "entry": "St. Dennis Drive, Don Mills Road and Wynford Drive",
+    "bylaw": "114-2018",
+    "effective": "2018-02-01",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 14,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "30140296",
+      "street": "St Dennis Dr",
+      "side": "Northwest"
+     },
+     {
+      "block": "30140296",
+      "street": "St Dennis Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "30140297",
+      "street": "St Dennis Dr",
+      "side": "North"
+     },
+     {
+      "block": "30140297",
+      "street": "St Dennis Dr",
+      "side": "South"
+     },
+     {
+      "block": "444865",
+      "street": "St Dennis Dr",
+      "side": "North"
+     },
+     {
+      "block": "444865",
+      "street": "St Dennis Dr",
+      "side": "South"
+     },
+     {
+      "block": "444786",
+      "street": "St Dennis Dr",
+      "side": "North"
+     },
+     {
+      "block": "444786",
+      "street": "St Dennis Dr",
+      "side": "South"
+     },
+     {
+      "block": "444780",
+      "street": "St Dennis Dr",
+      "side": "Northwest"
+     },
+     {
+      "block": "444780",
+      "street": "St Dennis Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "60048938",
+      "street": "St Dennis Dr",
+      "side": "Northwest"
+     },
+     {
+      "block": "60048938",
+      "street": "St Dennis Dr",
+      "side": "Southeast"
+     },
+     {
+      "block": "444351",
+      "street": "St Dennis Dr",
+      "side": "West"
+     },
+     {
+      "block": "444351",
+      "street": "St Dennis Dr",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Maxwell Street, Wilmington Avenue and Sheppard Avenue West",
+    "bylaw": "425-2020",
+    "effective": "2020-06-16",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 9,
+    "blockSidesStillBanned": 25,
+    "off": [
+     {
+      "block": "439406",
+      "street": "Maxwell St",
+      "side": "South"
+     },
+     {
+      "block": "439406",
+      "street": "Maxwell St",
+      "side": "North"
+     },
+     {
+      "block": "439373",
+      "street": "Maxwell St",
+      "side": "South"
+     },
+     {
+      "block": "439373",
+      "street": "Maxwell St",
+      "side": "North"
+     },
+     {
+      "block": "439339",
+      "street": "Maxwell St",
+      "side": "South"
+     },
+     {
+      "block": "439339",
+      "street": "Maxwell St",
+      "side": "North"
+     },
+     {
+      "block": "439312",
+      "street": "Maxwell St",
+      "side": "South"
+     },
+     {
+      "block": "439312",
+      "street": "Maxwell St",
+      "side": "North"
+     },
+     {
+      "block": "440807",
+      "street": "Maxwell St",
+      "side": "West"
+     }
+    ]
+   },
+   {
+    "entry": "Risa Boulevard, Dufferin Street and Locksley Avenue (north intersection)",
+    "bylaw": "1713-2019",
+    "effective": "2019-12-03",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 3,
+    "blockSidesStillBanned": 1,
+    "off": [
+     {
+      "block": "14076045",
+      "street": "Risa Blvd",
+      "side": "South"
+     },
+     {
+      "block": "14076045",
+      "street": "Risa Blvd",
+      "side": "North"
+     },
+     {
+      "block": "14076044",
+      "street": "Risa Blvd",
+      "side": "South"
+     }
+    ]
+   },
+   {
+    "entry": "Tolman Street, Yonge Street and Lorraine Drive",
+    "bylaw": "511-2013",
+    "effective": "2013-04-09",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 2,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "60044223",
+      "street": "Tolman St",
+      "side": "South"
+     },
+     {
+      "block": "60044223",
+      "street": "Tolman St",
+      "side": "North"
+     }
+    ]
+   },
+   {
+    "entry": "Flint Road, east side, A point 238 metres south of Martin Ross Avenue and Supertest Road",
+    "bylaw": "751-2021",
+    "effective": "2021-09-13",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 1,
+    "off": [
+     {
+      "block": "2453499",
+      "street": "Flint Rd",
+      "side": "East"
+     }
+    ]
+   },
+   {
+    "entry": "Whitburn Crescent, Blaydon Avenue (north intersection) and Keele Street",
+    "bylaw": "316-2016",
+    "effective": "2016-04-05",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 6,
+    "blockSidesStillBanned": 2,
+    "off": [
+     {
+      "block": "7569339",
+      "street": "Whitburn Cres",
+      "side": "Northwest"
+     },
+     {
+      "block": "7569339",
+      "street": "Whitburn Cres",
+      "side": "Southeast"
+     },
+     {
+      "block": "30085273",
+      "street": "Whitburn Cres",
+      "side": "Northeast"
+     },
+     {
+      "block": "30085272",
+      "street": "Whitburn Cres",
+      "side": "South"
+     },
+     {
+      "block": "30085272",
+      "street": "Whitburn Cres",
+      "side": "North"
+     },
+     {
+      "block": "10144912",
+      "street": "Whitburn Cres",
+      "side": "North"
+     }
+    ]
+   },
+   {
+    "entry": "Torbarrie Road, east side, A point 102 metres north of Sergio Marchi Street and Oakdale Road",
+    "bylaw": "1167-2018",
+    "effective": "2018-07-27",
+    "placed": true,
+    "applied": false,
+    "blockSidesOff": 0,
+    "blockSidesStillBanned": 1,
+    "why": "every block side it covered is still covered by an entry in force (the by-law moved the limits or kept a side; what is left is under half a block)"
+   },
+   {
+    "entry": "Whitburn Crescent (west,north and east sides), A point 79 metres north of Skipton Court and Blaydon Avenue (north intersection)",
+    "bylaw": "1710-2019",
+    "effective": "2019-12-03",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "7569339",
+      "street": "Whitburn Cres",
+      "side": "Northwest"
+     }
+    ]
+   },
+   {
+    "entry": "Embla Street, west side, A point 30.5 metres north of Barber Greene Road and Foxden Road",
+    "bylaw": "665-2025",
+    "effective": "2025-07-06",
+    "placed": true,
+    "applied": true,
+    "blockSidesOff": 1,
+    "blockSidesStillBanned": 0,
+    "off": [
+     {
+      "block": "443820",
+      "street": "Embla St",
+      "side": "West"
+     }
+    ]
+   }
+  ],
+  "blocks": 8919,
+  "blockSides": 17803,
+  "notPlaced": [
+   {
+    "highway": "Flaming Roseway",
+    "between": "Granlea Road and the north/south leg of Flaming Roseway",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Flaming Roseway (Northerly East/West Leg)",
+    "between": "The westerly north/south leg of Flaming Roseway and the easterly north/south leg of Flaming Roseway",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Flaming Roseway (Southerly East/West Leg)",
+    "between": "The westerly north/south leg of Flaming Roseway and the easterly north/south leg of Flaming Roseway",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Highgate Avenue",
+    "between": "Deforest Road and the south end of Highgate Avenue",
+    "why": "first end not found (Deforest Road)"
+   },
+   {
+    "highway": "Industry Street",
+    "between": "Todd Baylis Boulevard and a point 264.8 metres northwest of Ray Avenue",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Knox Avenue",
+    "between": "Queen Street East and Woodfield Road",
+    "why": "first end not found (Queen Street East)"
+   },
+   {
+    "highway": "Deerford Road",
+    "between": "Don Mills Road East and Deerford Road (north/south leg)",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Deerpath Road",
+    "between": "Avonwick Gate and Queenslea Avenue",
+    "why": "second end not found (Queenslea Avenue)"
+   },
+   {
+    "highway": "Dehavilland Drive",
+    "between": "Carl Hall Road and the south end of Dehavilland Drive",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Garamond Court",
+    "between": "Wynford Drive and the east end of Garamond Court",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Flook Lane",
+    "between": "Bathurst Street and the north/south leg of Flook Lane",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Cusack Court",
+    "between": "Sheppard Avenue East and the south end of Cusack Court",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Ealing Drive",
+    "between": "Stubbs Drive and the east/west leg of Ealing Drive",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Faulkner Crescent",
+    "between": "Stanwood Crescent/Lindylou Road and north/south leg of Faulkner Crescent",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Garvin Mews",
+    "between": "Finch Avenue East and the east/west leg of Garvin Mews",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Cook Road",
+    "between": "Leitch Avenue and Delabo Crescent",
+    "why": "second end not found (Delabo Crescent)"
+   },
+   {
+    "highway": "Eastbourne Avenue",
+    "between": "Eglinton Avenue West and the south end of Eastbourne Avenue",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Footbridge Road",
+    "between": "Three Valleys Drive and the west end of Footbridge Road",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Eastview Crescent",
+    "between": "The east/west leg of Eastview Crescent and the north end of Eastview Crescent",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Edgecliff Golfway",
+    "between": "The east/west leg of Edgecliff Golfway and the north end of Edgecliff Golfway",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "George Butchart Drive",
+    "between": "Keele Street and Frederick Tisdale Circle",
+    "why": "second end not found (Frederick Tisdale Circle)"
+   },
+   {
+    "highway": "Jenny Wrenway",
+    "between": "The southerly east/west leg of Jenny Wrenway and Carol Wrenway (west intersection)",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "George Butchart Drive",
+    "between": "Canuck Avenue (north intersection) and George Butchart Drive",
+    "why": "first end not found (Canuck Avenue (north intersection))"
+   },
+   {
+    "highway": "Jenny Wrenway",
+    "between": "The southerly east/west leg of Jenny Wrenway and Carol Wrenway (east intersection)",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Haddon Street",
+    "between": "Brooke Avenue and Old Orchard Grove",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Grado Villaway",
+    "between": "Keele Street and the west end of Grado Villaway",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Elmhurst Avenue",
+    "between": "Beecroft Avenue and Yonge Street",
+    "why": "first end not found (Beecroft Avenue)"
+   },
+   {
+    "highway": "Frederick Tisdale Circle",
+    "between": "The entire length",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Creekside Road",
+    "between": "Debell Lane and Avenue Road",
+    "why": "second end not found (Avenue Road)"
+   },
+   {
+    "highway": "Au Large Boulevard",
+    "between": "Don Mills Road and the east end of Au Large Boulevard",
+    "why": "first end not found (Don Mills Road)"
+   },
+   {
+    "highway": "Au Large Boulevard",
+    "between": "Finch Avenue East and Au Large Boulevard (east/west leg)",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Au Large Boulevard",
+    "between": "Au Large Boulevard (north/south leg) and the northeast end of Au Large Boulevard",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Candle Liteway",
+    "between": "Candle Liteway (west leg) and Candle Liteway (east leg)",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Access Road",
+    "between": "Sheppard Avenue East and the south end of Access Road",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Apache Trail",
+    "between": "Yucatan Road and the east/west leg of Apache Trail",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Adra Villaway",
+    "between": "Leslie Street and the west end of Adra Villaway",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Beechwood Avenue",
+    "between": "Lambton Avenue and the south end of Beechwood Avenue",
+    "why": "first end not found (Lambton Avenue)"
+   },
+   {
+    "highway": "Brentcliffe Road",
+    "between": "A point 41 metres north of Kildeer Crescent and the north end of Brentcliff Road",
+    "why": "first end not found (A point 41 metres north of Kildeer Crescent)"
+   },
+   {
+    "highway": "Banff Road",
+    "between": "Soudan Avenue and the north end of Banff Road",
+    "why": "first end not found (Soudan Avenue)"
+   },
+   {
+    "highway": "Jim Baird Mews",
+    "between": "Joseph Griffith Lane and the westerly north/south leg of Jim Baird Mews",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Blythwood Road",
+    "between": "Yonge Street and Bayview Avenue",
+    "why": "first end not found (Yonge Street)"
+   },
+   {
+    "highway": "Cather Crescent",
+    "between": "Varna Drive (west intersection) and Varna Drive (east intersection)",
+    "why": "the points leave nothing between them"
+   },
+   {
+    "highway": "Pelican Gate",
+    "between": "Picaro Crescent and Finch Avenue West",
+    "why": "first end not found (Picaro Crescent)"
+   },
+   {
+    "highway": "Portage Avenue",
+    "between": "Limerick Avenue and a point 28 metres south of Wall Street",
+    "why": "second end not found (a point 28 metres south of Wall Street)"
+   },
+   {
+    "highway": "Roanoke Road",
+    "between": "Rialto Road and the west end of Roanoak Road",
+    "why": "first end not found (Rialto Road)"
+   },
+   {
+    "highway": "Robert Woodhead Crescent",
+    "between": "John Drury Drive (west intersection) and John Drury Drive (east intersection)",
+    "why": "the points leave nothing between them"
+   },
+   {
+    "highway": "Trafford Lane",
+    "between": "Cather Crescent and the west end of Trafford Lane",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Reed Grassway",
+    "between": "Cane Grassway and Turf Grassway",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Oak Street (NY)",
+    "between": "Weston Road and Yelland Street",
+    "why": "first end not found (Weston Road)"
+   },
+   {
+    "highway": "Oakburn Place",
+    "between": "Oakburn Crescent and the east/west leg of Oakburn Place",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Shaunavon Heights Crescent",
+    "between": "Broadlands Boulevard (north intersection) and Armour Blvd",
+    "why": "second end not found (Armour Blvd)"
+   },
+   {
+    "highway": "Paperbirch Walkway",
+    "between": "The north/south leg of Paperbirch Walkway and Paperbirch Drive",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Shawnee Circle",
+    "between": "Cherokee Boulevard (south intersection) and the entire length",
+    "why": "second end not found (the entire length)"
+   },
+   {
+    "highway": "Ocra Villaway",
+    "between": "Grado Villaway and Adra Villaway",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Old Leslie Street",
+    "between": "Sheppard Avenue East (east intersection) and the north/south leg of Old Leslie Street",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Todd Baylis Boulevard",
+    "between": "Trethewey Drive and a point 10.6 metres south of Trethewey Drive",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Tomar Villaway",
+    "between": "Ocra Villaway and the east end of Ocra Villaway",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Maurice Coulter Mews",
+    "between": "The east/west leg of Maurice Coulter Mews and the north end of Maurice Coulter Mews",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Sutherland Drive (NY)",
+    "between": "A point 38.8 metres north of Glenvale Boulevard and a point 5.2 metres north thereof",
+    "why": "nothing on the named side"
+   },
+   {
+    "highway": "Thimble Berryway",
+    "between": "Edgar Woods Road (north intersection) and Thimble Berryway",
+    "why": "the points leave nothing between them"
+   },
+   {
+    "highway": "Olsen Drive",
+    "between": "Shamokin Drive (north intersection) and the easterly north/south leg of Olsen Drive",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Ridley Boulevard",
+    "between": "A point 38.6 metres south of Brooke Avenue and the north end of Ridley Boulevard",
+    "why": "first end not found (A point 38.6 metres south of Brooke Avenue)"
+   },
+   {
+    "highway": "Sweet Grassway",
+    "between": "Turf Grassway and the northwest end of Sweet Grassway",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Manorpark Court",
+    "between": "George Henry Boulevard/Havenbrook Boulevard and Rondale Boulevard",
+    "why": "second end not found (Rondale Boulevard)"
+   },
+   {
+    "highway": "Paxtonia Boulevard",
+    "between": "Keele Street and Victoria Park Avenue",
+    "why": "second end not found (Victoria Park Avenue)"
+   },
+   {
+    "highway": "Plymbridge Crescent",
+    "between": "Plymbridge Road and Plymbridge Crescent",
+    "why": "the points leave nothing between them"
+   },
+   {
+    "highway": "Ruby Crescent",
+    "between": "Larkfield Drive and Terrington Court",
+    "why": "first end not found (Larkfield Drive)"
+   },
+   {
+    "highway": "Polaris Lane",
+    "between": "Cather Crescent and the southwest end of Polaris Lane",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "Raoul Wallenberg",
+    "between": "The east/west leg of Raoul Wallenberg and the west end of Raoul Wallenberg",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Timberglade Court",
+    "between": "Bayview Avenue and The Bridle Path",
+    "why": "first end not found (Bayview Avenue)"
+   },
+   {
+    "highway": "Vanwyck Road",
+    "between": "Culford Road and the west end of Vanwyck Road",
+    "why": "street not on the centreline"
+   },
+   {
+    "highway": "West Palm Court",
+    "between": "Verobeach Boulevard and the north east end of West Palm Court",
+    "why": "second end not found (the north east end of West Palm Court)"
+   },
+   {
+    "highway": "Bob Yuill Drive, south side",
+    "between": "Mary Chapman Boulevard and a point 24 metres west",
+    "why": "nothing on the named side",
+    "bylaw": "497-2013"
+   },
+   {
+    "highway": "Lawrence Walkway",
+    "between": "Ternhill Crescent (south intersection) and the north/south leg of Lawrence Walkway",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Lawrence Walkway",
+    "between": "Ternhill Crescent (north intersection) and the north/south leg of Lawrence Walkway",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Woodthrush Court",
+    "between": "Page Court and the east end of Woodthrush Court",
+    "why": "first end not found (Page Court)"
+   },
+   {
+    "highway": "Brookbanks Drive",
+    "between": "Three Valleys Drive and a point 180 metres west of Valley Woods Road",
+    "why": "nothing on the named side",
+    "bylaw": "1342-2015"
+   },
+   {
+    "highway": "Twin Circle Court",
+    "between": "Russfax Drive and the entire length",
+    "why": "second end not found (the entire length)"
+   },
+   {
+    "highway": "Lansing Square",
+    "between": "The east end of Lansing Square and the north/south leg of Lansing Square",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Upwood Avenue",
+    "between": "Queen's Drive and the east /west leg of Upwood Avenue",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "William Poole Way",
+    "between": "William Poole Way (westerly north-south leg) and William Poole Way (easterly north-south leg)",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Yorkland Boulevard",
+    "between": "Yorkland Road and the southerly east/west leg of Yorkland Boulevard",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Yorkland Boulevard",
+    "between": "Consumers Road (north intersection) and the north/south leg of Yorkland Boulevard",
+    "why": "a leg of a street (not placed)"
+   },
+   {
+    "highway": "Yorkland Boulevard",
+    "between": "Consumers Road (south intersection) and the north/south leg of Yorkland Boulevard",
+    "why": "a leg of a street (not placed)"
+   }
+  ],
+  "placedWithNotes": [
+   {
+    "entry": "Fairlawn Avenue, Bathurst Street and a point 148.5 metres of Avenue Road",
+    "notes": [
+     "a point with no direction: placed at its cross street"
+    ]
+   },
+   {
+    "entry": "Glenavy Avenue, Roehampton Avenue and the north end of Glenavy Avenue",
+    "notes": [
+     "Roehampton Avenue matched by the nearest point (115 m)"
+    ]
+   },
+   {
+    "entry": "Joyce Parkway (north leg), Caledonia Road and Eugene Street",
+    "notes": [
+     "\"north leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "Joyce Parkway (south leg), Caledonia Road and Eugene Street",
+    "notes": [
+     "\"south leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "Duncairn Road, The Donway West and Bond Avenue",
+    "notes": [
+     "Bond Avenue matched by the nearest point (116 m)"
+    ]
+   },
+   {
+    "entry": "Fairview Mall Drive, Don Mills Road and Shapprd Avenue East",
+    "notes": [
+     "Shapprd Avenue East matched by a typo"
+    ]
+   },
+   {
+    "entry": "Glencairn Avenue, Caledonia Road and a point 38.1 metres east of Westgrove Crescent",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Glendora Avenue, Yonge Street and a point 28.6 metres east of Dudley Avenue",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Green Meadows Circle, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Green Valley Road, May Tree Road and the southeast end of Green Valley Drive",
+    "notes": [
+     "\"the southeast end of Green Valley Drive\": this street's end"
+    ]
+   },
+   {
+    "entry": "Harlock Boulevard, Sheppard Avenue West and a point 48.6 metres south of Harlock Boulevard",
+    "notes": [
+     "Harlock Boulevard matched by the nearest point (0 m)",
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Glendora Avenue, Willowdale Avenue and a point 80.5 metres east of Craigmore Crescent",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Greenfield Avenue, A point 67.4 metres west of Dudley Avenue and a point 273.3 metres east of Wilfred Avenue",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Farm Greenway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Glengrove Avenue, Dalemount Avenue and a point 95.7 metres west of Dufferin Street",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Hillside Road (NY), Whitefield Avenue and the north end of Hillside Road",
+    "notes": [
+     "Whitefield Avenue matched by a typo",
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Hillside Road (NY), Riverside Drive and the south end of Hillside Road",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Lansdowne Avenue (NY), Playfair Avenue and Wingold Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Lansing Square, Sheppard Avenue East and the south end of Lansing Square",
+    "notes": [
+     "Sheppard Avenue East matched by the nearest point (100 m)"
+    ]
+   },
+   {
+    "entry": "Concorde Gate, Concorde Place and Wynford Don Valley Parkway Northbound Ramp",
+    "notes": [
+     "Wynford Don Valley Parkway Northbound Ramp matched by a ramp to it"
+    ]
+   },
+   {
+    "entry": "Kathrose Drive, Brian Drive and Victoria Park Avenue",
+    "notes": [
+     "Victoria Park Avenue matched by the nearest point (77 m)"
+    ]
+   },
+   {
+    "entry": "Fashion Roseway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Hathor Crescent, Hathor Crescent and the east end of Hathor Crescent",
+    "notes": [
+     "Hathor Crescent matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Havenbrook Boulevard, Don Mills Road and Manor Park Court",
+    "notes": [
+     "Manor Park Court matched by spacing"
+    ]
+   },
+   {
+    "entry": "English Ivyway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Hollyberry Trail, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Forest Laneway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Holmes Avenue, Yonge Street and Bayview Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Kempsell Crescent, Kempsell Crescent and the northeast end of Kempsell Crescent",
+    "notes": [
+     "Kempsell Crescent matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Edengarth Court, Flemington Road and the east end of Flemington Road",
+    "notes": [
+     "\"the east end of Flemington Road\": this street's end"
+    ]
+   },
+   {
+    "entry": "Hearst Circle, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Gorman Park Road (southerly leg), Almore Avenue and Bainbridge Avenue",
+    "notes": [
+     "\"southerly leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "Gypsy Roseway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Horsham Avenue, Bathurst Street and Yonge Street",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Hounslow Avenue, Bathurst Street and Horsham Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Jenny Wrenway, Edgar Woods Road (north intersection) and Jenny Wrenway",
+    "notes": [
+     "Jenny Wrenway matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Knob Hill Drive, Weston Road and a point 87.5 metres north of Oak Street",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Edmonton Drive, Muirhead Road and Pinto Drive/Chipwood Crescent",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Gorman Park Road (northerly leg), Sheppard Avenue West and Reiner Road",
+    "notes": [
+     "\"northerly leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "Elfindale Crescent, Havenbrook Boulevard (west intersection) and Havenbrook Boulevard (west intersection)",
+    "notes": [
+     "the same corner twice: the crescent between its corners"
+    ]
+   },
+   {
+    "entry": "Cocksfield Avenue, The west end of Cocksfield Avenue and Hove Street (south intersection)",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "David Dunlap Circle, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Franklin Avenue (NY), Gwendolen Crescent and a point 183.2 metres east of Radine Road",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Hallsport Crescent (westerly leg), Agate Road and Bunnell Crescent",
+    "notes": [
+     "\"westerly leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "Hallsport Crescent (easterly leg), Agate Road and Bunnell Crescent",
+    "notes": [
+     "\"easterly leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "John Drury Drive, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Codsell Avenue, Dufferin Street and a point 51.6 metres east of Codsell Avenue",
+    "notes": [
+     "Codsell Avenue matched by the nearest point (0 m)",
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Coldstream Avenue, Dalemount Avenue and a point 38.4 metres east of Westgrove Crescent",
+    "notes": [
+     "the street is interrupted: jumped a gap",
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Cranborne Avenue, O'Connor Drive and Eglinton Avenue East",
+    "notes": [
+     "O'Connor Drive matched by the nearest point (24 m)"
+    ]
+   },
+   {
+    "entry": "De Boers Drive, Shappard Avenue West and William R. Allen Road",
+    "notes": [
+     "Shappard Avenue West matched by a typo"
+    ]
+   },
+   {
+    "entry": "Elliotwood Court, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Franklin Avenue (NY), Walker Road and a point 38.8 metres east of Walker Road",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Grandview Way, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Grangemill Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Hi Mount Drive, Burbank Drive and the east end of Himont Drive",
+    "notes": [
+     "\"the east end of Himont Drive\": this street's end"
+    ]
+   },
+   {
+    "entry": "Hurlingham Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Joicey Boulevard (Ny), Bathurst Street and a point 43.4 metres south of Brooke Avenue",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Glen Park Avenue, Dufferin Street (south intersection) and Glencairn Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Hidden Trail, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Hysel Rroad, Lawnside Drive and Rustic Road",
+    "notes": [
+     "spelled \"HYSEL ROAD\" on the centreline"
+    ]
+   },
+   {
+    "entry": "Jonesville Crescent, Victoria Park Avenue and the southwest end of Jonesville Crescent",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Creekside Road, Clearcrest Avenue and the north end of Clearcrest Avenue",
+    "notes": [
+     "\"the north end of Clearcrest Avenue\": this street's end"
+    ]
+   },
+   {
+    "entry": "Candle Liteway, Antibes Drive (west intersection) and the north end of Candle Liteway (west leg)",
+    "notes": [
+     "\"the north end of Candle Liteway (west leg)\": this street's end"
+    ]
+   },
+   {
+    "entry": "Candle Liteway, Antibes Drive (east intersection) and the north end of Candle Liteway (east leg)",
+    "notes": [
+     "\"the north end of Candle Liteway (east leg)\": this street's end"
+    ]
+   },
+   {
+    "entry": "Strawflower Mews, Finch Avenue West and the south end of Strawflower Mews",
+    "notes": [
+     "Finch Avenue West matched by a typo"
+    ]
+   },
+   {
+    "entry": "Cane Grassway, Jane Street and the west end of Cane Grassway",
+    "notes": [
+     "spelled \"DUNE GRASSWAY\" on the centreline",
+     "Jane Street matched by the nearest point (97 m)"
+    ]
+   },
+   {
+    "entry": "Abbeywood Trail, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Canuck Avenue, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Bagot Court, Varna Drive and the south end of Bagot Court",
+    "notes": [
+     "Varna Drive matched by the nearest point (58 m)"
+    ]
+   },
+   {
+    "entry": "Buckingham Avenue, Mildenhall Road and a point 39.6 metres east iof St. Ives Avenue",
+    "notes": [
+     "St. Ives Avenue matched by the nearest point (45 m)"
+    ]
+   },
+   {
+    "entry": "Buckland Road, Sheppard Avenue West and the south end of Buckland Road",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Balaby Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Brandy Court, Banburry Road and the west end of Brandy Court",
+    "notes": [
+     "Banburry Road matched by a typo"
+    ]
+   },
+   {
+    "entry": "Blake Avenue, Grantbrook Street and the east end of Blake Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Paul Markway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Carl Hall Road, John Drury Drive and the southeast end of Carl Hall Road",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Burnett Avenue, A point 164.8 metres west of Addington Avenue and Burndale Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Cheltenham Avenue, Mildenhall Road and St. Ives Crescent",
+    "notes": [
+     "St. Ives Crescent matched by the nearest point (9 m)"
+    ]
+   },
+   {
+    "entry": "Dallimore Circle, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Aldershot Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Byng Avenue, Bayview Avenue and Yonge Street",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Benjamin Boake Trail, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Caldy Court, Carluke Crescent and the south end of Caldy Court",
+    "notes": [
+     "Carluke Crescent matched by the nearest point (17 m)"
+    ]
+   },
+   {
+    "entry": "Ames Circle, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Bond Avenue, Leslie Street and a point 65.9 metres east of Scardale Road",
+    "notes": [
+     "Scardale Road matched by a typo",
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Bond Avenue, Duncairn Road and a point 53.3 metres east of Duncairn Road",
+    "notes": [
+     "Duncairn Road matched by the nearest point (116 m)",
+     "Duncairn Road matched by the nearest point (116 m)"
+    ]
+   },
+   {
+    "entry": "Brookdale Avenue, Bathurst Street and a point 141 metres east of Avenue Road",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Lorraine Drive, The north end of Lorraine Drive and Finch Avenue West",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Lotherton Pathway, Lotherton Pathway and the south end of Lotherton Pathway",
+    "notes": [
+     "Lotherton Pathway matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Overland Drive, Leslie Street and a point 43.9 metres northeast of Tottenham Road",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Post Road, Banbury Road and a point 227.3 metres west of Banbury Road",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Ravenscroft Circle, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Robert Woodhead Crescent, Sheppard Avenue West and Robert Woodhead Crescent",
+    "notes": [
+     "Robert Woodhead Crescent matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Senlac Road, Poyntz Avenue and Sheppard Avenue West",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Lovilla Boulevard, Walsh Weston Road Northbound Ramp and Ann Arbour Road",
+    "notes": [
+     "Walsh Weston Road Northbound Ramp matched by a ramp to it"
+    ]
+   },
+   {
+    "entry": "Mosedale Crescent, Mosedale Crescent and the northwest end of Mosedale Crescent",
+    "notes": [
+     "Mosedale Crescent matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Southbourne Avenue, Bathurst Street and Northmount Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Tangle Briarway, Tangle Briarway and the south end of Tangle Briarway",
+    "notes": [
+     "Tangle Briarway matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Treadgold Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Marlington Crescenet, Chalkfarm Drive (southeast intersection) and Chalkfarm Drive (northwest intersection)",
+    "notes": [
+     "spelled \"MARLINGTON CRESCENT\" on the centreline"
+    ]
+   },
+   {
+    "entry": "Northwood Drive, Tobruk Crescent and Conacher Drive",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Rochester Avenue, Lewis Crescent and St. Ives Crescent",
+    "notes": [
+     "Lewis Crescent matched by a typo"
+    ]
+   },
+   {
+    "entry": "Sagebrush Lane, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Strathallan Wood, Alexandra Wood and a point 20.5 metres west of Proudfoot Avenue",
+    "notes": [
+     "Proudfoot Avenue matched by the nearest point (23 m)"
+    ]
+   },
+   {
+    "entry": "Rockland Drive, Covewood Street and Syndor Road",
+    "notes": [
+     "Syndor Road matched by a typo"
+    ]
+   },
+   {
+    "entry": "Torresdale Avenue, Steeles Avenue West and the south end of Torresdale Avenue",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Oakburn Place, The west end of Oakburn Place and the east end of Oakburn Place",
+    "notes": [
+     "spelled \"TANBURN PLACE\" on the centreline"
+    ]
+   },
+   {
+    "entry": "Lytton Boulevard, Bathurst Street and a point 207.8 metres east of Alexandra Wood",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Sam Frustaglio Drive, Denison Road East and a point 43.5 metres northwest of Margaret Rose Court",
+    "notes": [
+     "Denison Road East matched by the nearest point (20 m)"
+    ]
+   },
+   {
+    "entry": "Shelborne Avenue, Dalemount Avenue and Sagueney Avenue",
+    "notes": [
+     "Sagueney Avenue matched by a typo"
+    ]
+   },
+   {
+    "entry": "Tedder Street, Thurodale Avenue and Stewart Smith Drive",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Ternhill Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "San Vitoway, Whitebread Crescent and the south end of San Vitoway",
+    "notes": [
+     "Whitebread Crescent matched by a typo"
+    ]
+   },
+   {
+    "entry": "Shoreham Court, Shoreham Drive and the north end of Shoreman Court",
+    "notes": [
+     "\"the north end of Shoreman Court\": this street's end"
+    ]
+   },
+   {
+    "entry": "Toffoli Place, Caswell Drive and the south end of Caswell Drive",
+    "notes": [
+     "\"the south end of Caswell Drive\": this street's end"
+    ]
+   },
+   {
+    "entry": "Old Leslie Street, Sheppard Avenue East (west intersection) and Sheppard Avenue East (middle intersection)",
+    "notes": [
+     "the same corner twice: the crescent between its corners"
+    ]
+   },
+   {
+    "entry": "St. Germain Avenue, Bathurst Street and a point 80.5 metres east of Falkirk Street",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "St. Ives Crescent, Rochester Avenue and Cheltenham Avenue",
+    "notes": [
+     "Cheltenham Avenue matched by the nearest point (9 m)"
+    ]
+   },
+   {
+    "entry": "Sunnydene Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "The Wishbone, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Olive Avenue (NY), Estelle Avenue and Yonge Street",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Plateau Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Sandringham Drive, Bathurst Street and the east end of Sandringham Drive",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Sandringham Drive, Tresillian Road and the south end of Sandringham Drive",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Nootka Crescent, Shawnee Cicle (northwest intersection) and Shawnee Circle (southeast intersection)",
+    "notes": [
+     "Shawnee Cicle matched by a typo"
+    ]
+   },
+   {
+    "entry": "Rajah Street, Ranee Avenue and the north end of Rajah Street",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Skymark Drive, Don Mills Road and Finch Avenue West",
+    "notes": [
+     "Finch Avenue West matched by a typo"
+    ]
+   },
+   {
+    "entry": "Sweetwood Gate, Hollyberry Trail (southwest intersection) and Hollyberry Trail (southwest intersection)",
+    "notes": [
+     "the same corner twice: the crescent between its corners"
+    ]
+   },
+   {
+    "entry": "Three Valleys Drive, Three Valleys Drive and the east end of Three Valleys Drive",
+    "notes": [
+     "Three Valleys Drive matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Norden Crescent, Langbourne Place (northwest intersection) and Langbourne Place (southwest intersection)",
+    "notes": [
+     "the same corner twice: the crescent between its corners"
+    ]
+   },
+   {
+    "entry": "Montana Avenue, Falstaff Avenue and a point 50.6 metres north of Falstaff Avenue",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Norman Wesley Way, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "North Hills Terrace, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Bob Yuill Drive, east and south sides, Isaac Devins Boulevard and a point 54 metres west of Mary Chapman Boulevard",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Venetian Crescent, Driftwood Avenue and Yewtree Bloulevard",
+    "notes": [
+     "Yewtree Bloulevard matched by a typo"
+    ]
+   },
+   {
+    "entry": "Vernham Court, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Wood Avenue, Lawrence Bayview South Ramp and St. Aubyns Crescent",
+    "notes": [
+     "Lawrence Bayview South Ramp matched by a ramp to it"
+    ]
+   },
+   {
+    "entry": "Le Page Court, Keele Street and the east end of Le Page Court",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Trethewey Drive, Jane Street and a point 13.6 metres southeast of Todd Baylis Boulevard",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Verobeach Boulevard, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Leacroft Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Via Torre Drive, Touchstone Drive (north intersection) and Touchstone Drive (east intersection)",
+    "notes": [
+     "the same corner twice: the crescent between its corners"
+    ]
+   },
+   {
+    "entry": "Wycliffe Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Vicora Linkway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Victory Drive, Keele Street and Wilson Avenue",
+    "notes": [
+     "Wilson Avenue matched by the nearest point (125 m)"
+    ]
+   },
+   {
+    "entry": "Wyegate Court, Wilket Road (north intersection) and Wilket Road (north intersection)",
+    "notes": [
+     "the same corner twice: the crescent between its corners"
+    ]
+   },
+   {
+    "entry": "Leila Lane, Varna Drive and the south end of Leila Lane",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Leona Drive, Sheppard Avenue East and Anndale Drive",
+    "notes": [
+     "the street is interrupted: jumped a gap"
+    ]
+   },
+   {
+    "entry": "Lesmill Road, York Mills Road and Leslie Road",
+    "notes": [
+     "Leslie Road matched by a ramp to it"
+    ]
+   },
+   {
+    "entry": "Walker Road, A point 56.5 metres north of Stuart Avenue and a point 40.5 metres south of Gwendolen Avenue",
+    "notes": [
+     "a point past where the street goes"
+    ]
+   },
+   {
+    "entry": "Wild Briarway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Wild Gingerway, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Uphill Avenue, Church Street and Pelmo Crescent",
+    "notes": [
+     "Church Street matched by the nearest point (104 m)"
+    ]
+   },
+   {
+    "entry": "Wilket Road, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Joyce Parkway (south leg), north side, Eugene Street and Caledonia Road",
+    "notes": [
+     "\"south leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "Joyce Parkway (south leg), south side, A point 45 metres east of Eugene Street and Caledonia Road",
+    "notes": [
+     "\"south leg\": the whole street"
+    ]
+   },
+   {
+    "entry": "Wanless Crescent, Lawrence Avenue West and Buckingham Avenue",
+    "notes": [
+     "Lawrence Avenue West matched by a typo",
+     "Buckingham Avenue matched by the nearest point (10 m)"
+    ]
+   },
+   {
+    "entry": "York Ridge Road, York Ridge Road and the west end of York Ridge Road",
+    "notes": [
+     "York Ridge Road matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "York Ridge Road, York Ridge Road and the east end of York Ridge Road",
+    "notes": [
+     "York Ridge Road matched by the nearest point (0 m)"
+    ]
+   },
+   {
+    "entry": "Larabee Crescent, The entire length",
+    "notes": [
+     "entire street"
+    ]
+   },
+   {
+    "entry": "Valley Woods Roa, Brookbanks Drive and York Mills Road",
+    "notes": [
+     "spelled \"VALLEY WOODS ROAD\" on the centreline"
+    ]
+   }
+  ]
+ },
+ "tickets2025": {
+  "note": "Parking Tickets 2025: tickets placed by house number on the centreline's address ranges (a ticket written \"OPP\" on the other side). The schedules changed after (1494-2025, December 2025: routes added and moved, Yonge Street north of St. Clair among them), so a 2025 ticket can be off today's routes.",
+  "northYork": {
+   "tickets": 27003,
+   "placed": 22321,
+   "onRule": 21883,
+   "onListed": 20708,
+   "onExempt": 237,
+   "outside": 201,
+   "hours": {
+    "12": 1,
+    "13": 1,
+    "15": 1,
+    "16": 1,
+    "18": 1,
+    "22": 4,
+    "02": 11927,
+    "03": 8382,
+    "04": 5169,
+    "05": 1494,
+    "01": 8,
+    "06": 5,
+    "09": 3,
+    "07": 3,
+    "00": 1,
+    "08": 2
+   },
+   "months": {
+    "10": 3,
+    "11": 4,
+    "12": 11112,
+    "01": 6261,
+    "02": 4309,
+    "03": 5305,
+    "04": 2,
+    "05": 5,
+    "06": 2
+   },
+   "exemptExamples": {
+    "St Dennis Dr": 101,
+    "Whitburn Cres": 36,
+    "Forest Manor Rd": 29,
+    "Tippett Rd": 24,
+    "Curlew Dr": 17,
+    "Ardwick Blvd": 8,
+    "Dovehouse Ave": 8,
+    "Maxwell St": 5,
+    "Embla St": 3,
+    "Sam Frustaglio Dr": 3,
+    "Denrock Dr": 1,
+    "Densley Ave": 1,
+    "Melrose Ave": 1
+   },
+   "onRulePct": 98,
+   "onListedPct": 92.8,
+   "hours2to5Pct": 99.9
+  },
+  "snowRoutes": {
+   "tickets": 3638,
+   "placed": 3350,
+   "onRule": 3130,
+   "dates": {
+    "20250124": 1,
+    "20250127": 1,
+    "20250213": 1459,
+    "20250214": 122,
+    "20250215": 2,
+    "20250216": 718,
+    "20250217": 521,
+    "20250218": 260,
+    "20250219": 269,
+    "20250220": 127,
+    "20250221": 50,
+    "20250222": 38,
+    "20250223": 19,
+    "20250224": 19,
+    "20250225": 15,
+    "20250226": 11,
+    "20250227": 4,
+    "20250303": 2
+   },
+   "offExamples": {
+    "Yonge St": 173,
+    "Church St": 11,
+    "Oxton Ave": 10,
+    "Gerrard St E": 9,
+    "Kingston Rd": 6,
+    "Queen St E": 5,
+    "Beverley St": 3,
+    "Marigold Ave": 1,
+    "Mount Pleasant Rd": 1,
+    "Orton Park Rd": 1
+   },
+   "onRulePct": 93.4
+  }
+ },
+ "output": {
+  "blocks": 12540,
+  "blockSides": 25045,
+  "bothRules": 171,
+  "bytes": 5696494,
+  "gzipBytes": 649191
+ }
+}

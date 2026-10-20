@@ -115,6 +115,11 @@
     "maxzoom": 13,
     "bytes": 5625314
   },
+  "toronto": {
+    "build": "20261018",
+    "maxzoom": 13,
+    "bytes": 9434902
+  },
   "washington-dc": {
     "build": "20261018",
     "maxzoom": 13,

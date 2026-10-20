@@ -845,3 +845,52 @@ describe('Madison winter watches (alternate side parking, quiet until the City t
     expect(JSON.parse(mem['curb:subs'][EP]).spot.nextSweepISO).toBe('2026-12-03T07:00:00.000Z');   // Dec 3: odd, enforced
   });
 });
+
+describe('Toronto watches (snow routes while a Major Snowstorm Condition is declared; the North York night ban)', () => {
+  const days = (from, n) => { const o = []; for (let t = Date.parse(from + 'T12:00Z'), i = 0; i < n; i++, t += 864e5) o.push(new Date(t).toISOString().slice(0, 10)); return o; };
+  // a snow route as the page saves it: every day of the season in two lists (from today on), all day, flags 1, 4 and 8
+  const S1 = { dates: days('2026-11-01', 91), fromhour: '0', tohour: '24', week1: '0', week2: '0', week3: '0', week4: '0', week5: '0', holidays: '0', flags: 13 };
+  const S2 = { ...S1, dates: days('2027-01-31', 90) };
+  const snow = { corridor: 'Queen St W', blockside: 'South', city: 'toronto', cnn: '10784605', sideKey: 'L', rule: S1, rules: [S1, S2],
+    nextSweepISO: '2026-12-01T05:00:00.000Z', leadMinutes: 30, level: 'normal' };   // saved for Dec 1, midnight in Toronto
+  const night = (d) => ({ weekday: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][d], fromhour: '2', tohour: '6', week1: '1', week2: '1', week3: '1', week4: '1', week5: '1', holidays: '0', months: [1, 2, 3, 12], flags: 33 });
+  const ny = { corridor: 'Kenneth Ave', blockside: 'West', city: 'toronto', cnn: '437100', sideKey: 'L', rule: night(3), rules: [0, 1, 2, 3, 4, 5, 6].map(night),
+    nextSweepISO: '2026-12-02T07:00:00.000Z', leadMinutes: 30, level: 'normal' };     // Wed Dec 2, 2 AM in Toronto
+  const rec = (spot, notified = {}) => JSON.stringify({ subscription: SUB, spot, notified, savedAt: Date.parse('2026-11-20T20:00:00Z') });
+  afterEach(() => CITIES.toronto.place.setWinter({ state: 'waiting' }));
+
+  it('a snow route sends nothing while no snowstorm is declared', async () => {
+    mem['curb:subs'] = { [EP]: rec(snow) };
+    for (const t of ['2026-12-01T02:30:00Z', '2026-12-01T12:00:00Z', '2026-12-02T02:30:00Z']) { vi.setSystemTime(Date.parse(t)); await run(bearer()); }
+    expect(send).not.toHaveBeenCalled();
+  });
+  it('once declared: one push (what happened, move off the snow route, towing), then nothing while it lasts', async () => {
+    CITIES.toronto.place.setWinter({ state: 'on', from: '2026-12-01', at: '2026-12-01T20:00:00Z', reason: 'Toronto declared a Major Snowstorm Condition.' });
+    mem['curb:subs'] = { [EP]: rec(snow) };
+    vi.setSystemTime(Date.parse('2026-12-01T20:10:00Z'));   // 3:10 PM
+    await run(bearer());
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(send.mock.calls[0][1])).toMatchObject({ title: 'Move your car off Queen St W', tag: 'curb-winter', url: '/toronto?b=10784605&side=South',
+      body: 'Toronto declared a Major Snowstorm Condition. Queen St W is a snow route: no parking until the City ends it. Parked cars get towed.', requireInteraction: true });
+    expect(JSON.parse(mem['curb:subs'][EP]).notified).toEqual({ winter: '2026-12-01' });
+    // the next ticks, that evening and the days after (the stored day moves on each midnight): nothing more
+    for (const t of ['2026-12-01T20:25:00Z', '2026-12-02T02:30:00Z', '2026-12-02T05:10:00Z', '2026-12-02T05:25:00Z', '2026-12-03T02:30:00Z', '2026-12-03T05:10:00Z']) {
+      vi.setSystemTime(Date.parse(t)); await run(bearer());
+    }
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(mem['curb:subs'][EP]).spot.nextSweepISO).toBe('2026-12-03T05:00:00.000Z');
+  });
+  it('the North York ban: the night push in its own words, every night', async () => {
+    mem['curb:subs'] = { [EP]: rec(ny) };
+    vi.setSystemTime(Date.parse('2026-12-02T02:30:00Z'));   // 9:30 PM Dec 1
+    await run(bearer());
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(send.mock.calls[0][1])).toMatchObject({ title: 'Move your car tonight', body: 'Kenneth Ave (West): no parking 2 to 6 AM.', url: '/toronto?b=437100&side=West' });
+    vi.setSystemTime(Date.parse('2026-12-02T11:10:00Z'));   // 6:10 AM: the night is over, the watch moves to the next
+    await run(bearer());
+    expect(JSON.parse(mem['curb:subs'][EP]).spot.nextSweepISO).toBe('2026-12-03T07:00:00.000Z');
+    vi.setSystemTime(Date.parse('2026-12-03T02:30:00Z'));   // 9:30 PM Dec 2
+    await run(bearer());
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+});
