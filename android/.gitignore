@@ -1,0 +1,8 @@
+# build outputs (bubblewrap build); the signing key lives in ../private/android/ and never here
+*.apk
+*.aab
+*.idsig
+.gradle/
+build/
+app/build/
+local.properties
