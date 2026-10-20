@@ -26,7 +26,6 @@ async function visit({ at, answer = 'allow', person = true, seen = false, app = 
   const p = await ctx.newPage();
   await p.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const errors = []; p.on('pageerror', (e) => errors.push(e.message));
-  const asked = [];
   // count the page's own location requests, answer them like the browser would (a refusal: code 1)
   await p.evaluateOnNewDocument((cfg) => {
     if (cfg.person) { Object.defineProperty(navigator, 'webdriver', { get: () => false }); }
@@ -47,11 +46,18 @@ async function visit({ at, answer = 'allow', person = true, seen = false, app = 
   p.on('request', (r) => (/\/data\/[a-z-]+\/segments\.json/.test(r.url()) ? r.respond({ status: 200, contentType: 'application/json', body: '{"b":[]}' }) : r.continue()));
   await p.goto(SITE + path, { waitUntil: 'load', timeout: 45000 });
   await new Promise((r) => setTimeout(r, 3500));
-  const out = await p.evaluate(() => ({ path: location.pathname, asked: (window.__asked || []).filter((o) => !o.curbSilent).length,
-    toast: document.getElementById('toast')?.classList.contains('show') ? document.getElementById('toast').textContent : '',
-    link: document.querySelector('#toast a')?.getAttribute('href') || '', stored: (() => { try { return localStorage.getItem('curbCityAsk'); } catch (_) { return 'x'; } })(),
-    center: window.map ? [map.getCenter().lat, map.getCenter().lng] : null }));
-  return { p, ctx, out, errors };
+  // a visit that opens a city is a second page load: read once it has settled (on a slow runner it may still be loading)
+  let out = null;
+  for (let i = 0; i < 10 && !out; i++) {
+    try {
+      await p.waitForFunction(() => document.readyState === 'complete', { timeout: 10000 });
+      out = await p.evaluate(() => ({ path: location.pathname, asked: (window.__asked || []).filter((o) => !o.curbSilent).length,
+        toast: document.getElementById('toast')?.classList.contains('show') ? document.getElementById('toast').textContent : '',
+        link: document.querySelector('#toast a')?.getAttribute('href') || '', stored: (() => { try { return localStorage.getItem('curbCityAsk'); } catch (_) { return 'x'; } })(),
+        center: window.map ? [map.getCenter().lat, map.getCenter().lng] : null }));
+    } catch (e) { if (!/context|navigat|detached/i.test(String(e && e.message))) throw e; await new Promise((r) => setTimeout(r, 1000)); }
+  }
+  return { p, ctx, out: out || {}, errors };
 }
 
 try {
