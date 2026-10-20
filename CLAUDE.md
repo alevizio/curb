@@ -299,8 +299,9 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   panel" under Saved alerts below; its line says "2 on · Normal", "None on yet" or, in red, "Off in iPhone
   Settings"), How CURB works (opens the welcome explainer), Neighborhoods (`/n/`),
   Sweeping holidays (`/holidays`), Parking tickets (`/tickets`), Cities (`/cities`), About (`/about`). The App Store item
-  (`#imGet`) lights up with "Android app · Google Play, coming soon" (`#imPlay`) under it, as every App Store link on the
-  site has a Google Play one (owner, 2026-10-20; hidden in the iPhone app). The welcome card no longer opens by itself on a first visit (owner,
+  (`#imGet`) lights up with "Android beta · Join on Google Play" (`#imPlay`) under it: every App Store link on the site
+  has "Android beta: join on Google Play" under it, to /android (android.html: the three steps to join the open beta on
+  Google Play; owner, 2026-10-20; hidden in the iPhone app). The welcome card no longer opens by itself on a first visit (owner,
   2026-10-18): a first visit lands on the map, and the logo or How CURB works opens it. The old buried `lp-link` to /tickets in the Layers panel
   was removed; don't re-add scattered page links. Opens/closes like the Layers panel
   (outside-click + Esc, mirrored via `closeInfoMenu`).
