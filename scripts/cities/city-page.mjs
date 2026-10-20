@@ -9,12 +9,17 @@
 // app (alerts come from a Home Screen web app, as in Boston). The basemap is the parchment style drawn live from the
 // city's vector file (scripts/cities/basemap-city.mjs), not PNG tiles.
 //
+// A public city (scripts/cities/public.mjs) is indexed: a real title and description from its facts, a canonical URL, its
+// share card and a small JSON-LD block, and its welcome card and menu link to its readable page (/<id>/about,
+// scripts/cities/city-pages.mjs). Every other city stays a preview: noindex and "(preview)" in its title.
+//
 // Also writes manifest-<id>.json and the page's rewrite in vercel.json (/<id> → /<id>.html).
 // Run after a city's data changes: node scripts/cities/configs.mjs && node scripts/cities/city-page.mjs [id ...]
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import '../../lib/city-configs.js';
+import { isPublic, seoWords, jsonLd } from './public.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const src = fs.readFileSync(ROOT + 'index.html', 'utf8');
@@ -42,10 +47,12 @@ function cityPage(id) {
     portal = c.portal || (c.sources || []).flatMap((x) => [x.page, x.url]).find(readable) || c.scheduleUrl || '';
   const words = c.words || {};
   const bm = BASEMAPS[id];   // its vector basemap, if built
+  const pub = isPublic(id);   // a public city (scripts/cities/public.mjs), else a preview
   // A city that offers French (city.json languages + words_fr): lib/i18n-fr.js translates the page, and the ⓘ menu
   // switches language. The city's own sentences go in as phrases, the way the page composes them.
   const french = (c.languages || []).includes('fr') && c.words_fr;
   const frWords = french ? [[words.rule, c.words_fr.rule], [' Tap where you parked for the rules.', ' Touchez la bordure où vous êtes stationné pour voir les règles.'],
+    ...(pub ? [[' Built on the City\'s open data.', ' Fait avec les données ouvertes de la Ville.']] : []),
     [words.afterpass, c.words_fr.afterpass], [words.dataNotes, c.words_fr.dataNotes]].filter(([en, f]) => en && f) : [];
   // A city with a winter rule (city.json `winter`: Madison) gets lib/winter-ui.js: the plate under the day chips, tonight's
   // sides on the map and in the sheet, and alerts that can be on before the City turns the rule on (design A, 2026-10-18).
@@ -78,15 +85,25 @@ function cityPage(id) {
   const what = words.what || 'street sweeping', sweeps = what === 'street sweeping';
   const What = what.replace(/\b\w/g, (ch) => ch.toUpperCase()), Cap = what.charAt(0).toUpperCase() + what.slice(1);
   const noRule = sweeps ? 'No street-sweeping schedule here' : `No ${what} rule here`;
+  // A public city: indexed, with its own title, description and JSON-LD; a preview says so.
+  const seo = seoWords(c), mapWord = pub ? 'map' : 'preview';
+  const ld = { '@context': 'https://schema.org', '@type': 'WebApplication', name: `CURB ${name}`, url,
+    applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any (web browser)',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, isAccessibleForFree: true,
+    description: seo.description, image: `https://curb.guide/og-${id}.png?v=1`,
+    areaServed: { '@type': 'City', name: c.region ? `${name}, ${c.region}` : name },
+    publisher: { '@type': 'Organization', name: 'CURB', url: 'https://curb.guide/' } };
 
   const edits = [
     // ---- head --------------------------------------------------------------------------------------
-    ['title + noindex', '<title>SF Street Cleaning Map: When Tickets Actually Land | CURB</title>',
-      `<title>${esc(name)} ${sweeps ? 'Street Cleaning' : esc(What)} Map (preview) | CURB</title>\n<meta name="robots" content="noindex">`],
-    ['description', /<meta name="description" content="[^"]*">/,
-      `<meta name="description" content="${esc(name)} ${sweeps ? 'street sweeping, block by block: every swept curb colored by its next sweep' : `${esc(what)}, block by block: tonight's side of every curb`}, from the City's open data. A CURB preview.">`],
+    ['title + noindex', '<title>SF Street Cleaning Map: When Tickets Actually Land | CURB</title>', pub ? `<title>${esc(seo.title)}</title>`
+      : `<title>${esc(name)} ${sweeps ? 'Street Cleaning' : esc(What)} Map (preview) | CURB</title>\n<meta name="robots" content="noindex">`],
+    ['description', /<meta name="description" content="[^"]*">/, pub ? `<meta name="description" content="${esc(seo.description)}">`
+      : `<meta name="description" content="${esc(name)} ${sweeps ? 'street sweeping, block by block: every swept curb colored by its next sweep' : `${esc(what)}, block by block: tonight's side of every curb`}, from the City's open data. A CURB preview.">`],
     ['canonical', '<link rel="canonical" href="https://curb.guide/">', `<link rel="canonical" href="${url}">`],
-    ['no SF app schema', /<script type="application\/ld\+json">[\s\S]*?<\/script>\n/, ''],
+    ['no SF app schema', /<script type="application\/ld\+json">[\s\S]*?<\/script>\n/, pub ? `<script type="application/ld+json">\n${jsonLd(ld)}\n</script>\n` : ''],
+    // Safari's App Store banner offers the San Francisco app: not on a city's page (its links are hidden below too)
+    ['no SF app banner', '<meta name="apple-itunes-app" content="app-id=6780998238">\n', ''],
     ['card titles', 'Know where to park in SF', `Know where to park in ${esc(name)}`, 2],
     ['card description', '<meta property="og:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts. From SF open data.">',
       `<meta property="og:description" content="${sweeps ? 'Street sweeping block by block, with alerts before the sweeper comes' : `${esc(Cap)} block by block, with an alert the night your side closes`}. From ${esc(name)} open data.">`],
@@ -101,7 +118,8 @@ function cityPage(id) {
       `<meta name="twitter:image:alt" content="CURB ${esc(name)}: Know where to park in ${esc(name)}">`],
     ['info button words', 'data-tip="Alerts, guide, tickets &amp; about"', 'data-tip="Alerts, guide &amp; about"'],
     // ---- body: words and menus ---------------------------------------------------------------------
-    ['h1', /<h1 class="srh">[^<]*<\/h1>/, `<h1 class="srh">${esc(name)} ${sweeps ? 'street cleaning map: sweeping schedules' : `${esc(what)} map: tonight's side`} by block (a CURB preview)</h1>`],
+    ['h1', /<h1 class="srh">[^<]*<\/h1>/, pub ? `<h1 class="srh">${esc(name)} ${esc(seo.term)} map: ${sweeps ? 'the next sweep' : 'tonight\'s side'} on every block, with alerts</h1>`
+      : `<h1 class="srh">${esc(name)} ${sweeps ? 'street cleaning map: sweeping schedules' : `${esc(what)} map: tonight's side`} by block (a CURB preview)</h1>`],
     ['map label', '<main id="map" aria-label="San Francisco parking map">', `<main id="map" aria-label="${esc(name)} parking map">`],
     // SF's three pages: here the neighborhood list (in the welcome card), when the city has one
     ['SF pages → neighborhoods', /<a class="im-item" href="\/n\/" role="menuitem">[\s\S]*?<a class="im-item" href="\/tickets" role="menuitem">[\s\S]*?<\/a>/,
@@ -118,8 +136,8 @@ function cityPage(id) {
     ['no truck routes', '<button class="ltile" id="routeToggle" aria-pressed="false">', '<button class="ltile" id="routeToggle" aria-pressed="false" style="display:none">'],
     ['no layer tiles heading', '<div class="lp-sec">Map details</div>', '<div class="lp-sec" style="display:none">Map details</div>'],
     ['no permit areas', '<div class="lp-sec">Permit areas</div>\n    <div class="arearow">', '<div class="lp-sec" style="display:none">Permit areas</div>\n    <div class="arearow" style="display:none">'],
-    ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/,
-      `<p>${esc(rule)} Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>`],
+    ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/, pub ? `<p>${esc(rule)} Tap where you parked for the rules. Built on the City's open data.</p>`
+      : `<p>${esc(rule)} Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>`],
     ['neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, hoods.length ? `<nav class="whoods" aria-label="${sweeps ? 'Street cleaning' : esc(Cap)} by neighborhood"><p>${sweeps ? 'Street cleaning' : esc(Cap)} by neighborhood</p><ul>`
       + hoods.map((h) => `<li><a href="/${id}?bbox=${h.bbox}" data-bbox="${h.bbox}">${esc(h.name)}</a></li>`).join('') + '</ul></nav>' : ''],
     ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);\n})();\n", `  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);
@@ -186,7 +204,7 @@ function addCityBasemap(){
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}
   hint.style.opacity='0';hint.style.visibility='hidden';
   lastRows=data; segBounds=b;
-  if(!data.length&&!noCovToasted){noCovToasted=true; toast(${js(`${noRule}. This preview covers ${name}.`)});}
+  if(!data.length&&!noCovToasted){noCovToasted=true; toast(${js(`${noRule}. This ${mapWord} covers ${name}.`)});}
   drawSegments(data);
   tryPendingOpen();
 }
@@ -265,9 +283,9 @@ function freqLabel(weeks){`],
   }catch(_){}
 }
 `],
-    ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", js(`${noRule}. This preview covers ${name}.`)],
+    ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", js(`${noRule}. This ${mapWord} covers ${name}.`)],
     ['the city is the city', 'L.latLngBounds([[37.685,-122.56],[37.84,-122.34]])', 'L.latLngBounds(PLACE.BOUNDS)'],
-    ['outside words', "You're outside San Francisco, and this map only covers San Francisco.", `You're outside ${name}, and this preview only covers ${name}.`],
+    ['outside words', "You're outside San Francisco, and this map only covers San Francisco.", `You're outside ${name}, and this ${mapWord} only covers ${name}.`],
     ['one tap opens a block', "map.on('click',e=>{ userPicked(); if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});",
       "map.on('click',e=>{ userPicked(); placeYou(e.latlng.lat,e.latlng.lng,ovMode);});"
       + `\nconst ovSide=o=>{ const by={}; let side=null; (o.rules||[]).forEach(r=>{(by[sideKeyOf(r)]=by[sideKeyOf(r)]||[]).push(r);});
@@ -349,6 +367,12 @@ if(CAN_HOVER){
   ];
 
   if (perDay.every((n) => !n)) edits.push(['no day chips without sweeping', '<div class="dayrow" aria-label="Filter by sweep day">', '<div class="dayrow" aria-label="Filter by sweep day" style="display:none">']);
+  // A public city has its own readable page (scripts/cities/city-pages.mjs): the welcome card and the menu's About open it
+  if (pub) edits.push(
+    ['welcome: the city\'s how it works', '<a class="wabout" href="/about">How it works →</a>', `<a class="wabout" href="/${id}/about">How it works →</a>`],
+    ['About: the city\'s page', '<a class="im-item" href="/about" role="menuitem">', `<a class="im-item" href="/${id}/about" role="menuitem">`],
+    ['About: the city\'s words', '<b>About CURB</b><small>What it does &amp; data sources</small>', `<b>About CURB</b><small>${esc(name)}'s rules &amp; data sources</small>`],
+  );
   // ---- winter alternate side parking (lib/winter-ui.js): hooks where the page decides colors, the sheet and alerts ----
   if (winter) edits.push(
     ['winter: map status', 'rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns);', 'rows.forEach(r=>{const ns=nextSweep(r);const st=window.WINTER?WINTER.statusFor(r,ns):statusFor(ns);'],
@@ -391,8 +415,9 @@ if(CAN_HOVER){
   fs.writeFileSync(`${ROOT}${id}.html`, out);
   // the city's Home Screen web app (iPhone alerts)
   const manifest = JSON.parse(fs.readFileSync(ROOT + 'manifest-boston.json', 'utf8'));
-  Object.assign(manifest, { name: `CURB ${name} (preview)`, short_name: `CURB ${name}`.slice(0, 12),
-    description: `${name} ${what}, block by block. A preview on the City's open data.`, start_url: `/${id}`, scope: '/', id: `/${id}` });
+  Object.assign(manifest, { name: pub ? `CURB ${name}` : `CURB ${name} (preview)`, short_name: `CURB ${name}`.slice(0, 12),
+    description: pub ? `${name} ${seo.term}, block by block, from the City's open data.` : `${name} ${what}, block by block. A preview on the City's open data.`,
+    start_url: `/${id}`, scope: '/', id: `/${id}` });
   fs.writeFileSync(`${ROOT}manifest-${id}.json`, JSON.stringify(manifest, null, 2) + '\n');
   // curb.guide/<id> serves the page: its rewrite in vercel.json, next to Boston's
   const vercel = JSON.parse(fs.readFileSync(ROOT + 'vercel.json', 'utf8'));

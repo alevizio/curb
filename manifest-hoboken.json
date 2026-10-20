@@ -1,7 +1,7 @@
 {
-  "name": "CURB Hoboken (preview)",
+  "name": "CURB Hoboken",
   "short_name": "CURB Hoboken",
-  "description": "Hoboken street sweeping, block by block. A preview on the City's open data.",
+  "description": "Hoboken alternate side parking, block by block, from the City's open data.",
   "start_url": "/hoboken",
   "scope": "/",
   "display": "standalone",

@@ -1,7 +1,7 @@
 {
-  "name": "CURB Glendale (preview)",
+  "name": "CURB Glendale",
   "short_name": "CURB Glendal",
-  "description": "Glendale street sweeping, block by block. A preview on the City's open data.",
+  "description": "Glendale street sweeping, block by block, from the City's open data.",
   "start_url": "/glendale",
   "scope": "/",
   "display": "standalone",

@@ -1,7 +1,7 @@
 {
-  "name": "CURB Denver (preview)",
+  "name": "CURB Denver",
   "short_name": "CURB Denver",
-  "description": "Denver street sweeping, block by block. A preview on the City's open data.",
+  "description": "Denver street sweeping, block by block, from the City's open data.",
   "start_url": "/denver",
   "scope": "/",
   "display": "standalone",

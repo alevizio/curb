@@ -50,6 +50,10 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/check-alerts-panel.mjs http://localhost:3077
+      - name: First visit (opens the visitor's city, asks once, never a crawler or the iPhone app) and the other cities' pins
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/check-first-visit.mjs http://localhost:3077
       - name: A dropped Leaflet or time core request retries, then says CURB didn't load
         env:
           CHROME_PATH: /usr/bin/google-chrome

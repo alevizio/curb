@@ -1,7 +1,7 @@
 {
-  "name": "CURB Berkeley (preview)",
+  "name": "CURB Berkeley",
   "short_name": "CURB Berkele",
-  "description": "Berkeley street sweeping, block by block. A preview on the City's open data.",
+  "description": "Berkeley street sweeping, block by block, from the City's open data.",
   "start_url": "/berkeley",
   "scope": "/",
   "display": "standalone",

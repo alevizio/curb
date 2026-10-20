@@ -1,7 +1,7 @@
 {
-  "name": "CURB Unincorporated LA County (preview)",
+  "name": "CURB Unincorporated LA County",
   "short_name": "CURB Unincor",
-  "description": "Unincorporated LA County street sweeping, block by block. A preview on the City's open data.",
+  "description": "Unincorporated LA County street sweeping, block by block, from the City's open data.",
   "start_url": "/la-county",
   "scope": "/",
   "display": "standalone",

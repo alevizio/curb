@@ -1,7 +1,7 @@
 {
-  "name": "CURB Montréal (preview)",
+  "name": "CURB Montréal",
   "short_name": "CURB Montréa",
-  "description": "Montréal street sweeping, block by block. A preview on the City's open data.",
+  "description": "Montréal street cleaning, block by block, from the City's open data.",
   "start_url": "/montreal",
   "scope": "/",
   "display": "standalone",

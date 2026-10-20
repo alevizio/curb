@@ -1,7 +1,7 @@
 {
-  "name": "CURB Sacramento (preview)",
+  "name": "CURB Sacramento",
   "short_name": "CURB Sacrame",
-  "description": "Sacramento street sweeping, block by block. A preview on the City's open data.",
+  "description": "Sacramento street sweeping, block by block, from the City's open data.",
   "start_url": "/sacramento",
   "scope": "/",
   "display": "standalone",

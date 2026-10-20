@@ -1,7 +1,7 @@
 {
-  "name": "CURB Paterson (preview)",
+  "name": "CURB Paterson",
   "short_name": "CURB Paterso",
-  "description": "Paterson street sweeping, block by block. A preview on the City's open data.",
+  "description": "Paterson street cleaning, block by block, from the City's open data.",
   "start_url": "/paterson",
   "scope": "/",
   "display": "standalone",

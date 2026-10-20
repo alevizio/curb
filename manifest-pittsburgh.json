@@ -1,7 +1,7 @@
 {
-  "name": "CURB Pittsburgh (preview)",
+  "name": "CURB Pittsburgh",
   "short_name": "CURB Pittsbu",
-  "description": "Pittsburgh street sweeping, block by block. A preview on the City's open data.",
+  "description": "Pittsburgh street cleaning, block by block, from the City's open data.",
   "start_url": "/pittsburgh",
   "scope": "/",
   "display": "standalone",

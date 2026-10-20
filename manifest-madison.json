@@ -1,7 +1,7 @@
 {
-  "name": "CURB Madison (preview)",
+  "name": "CURB Madison",
   "short_name": "CURB Madison",
-  "description": "Madison street sweeping, block by block. A preview on the City's open data.",
+  "description": "Madison street sweeping, block by block, from the City's open data.",
   "start_url": "/madison",
   "scope": "/",
   "display": "standalone",

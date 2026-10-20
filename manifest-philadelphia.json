@@ -1,7 +1,7 @@
 {
-  "name": "CURB Philadelphia (preview)",
+  "name": "CURB Philadelphia",
   "short_name": "CURB Philade",
-  "description": "Philadelphia street sweeping, block by block. A preview on the City's open data.",
+  "description": "Philadelphia street cleaning, block by block, from the City's open data.",
   "start_url": "/philadelphia",
   "scope": "/",
   "display": "standalone",

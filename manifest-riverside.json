@@ -1,7 +1,7 @@
 {
-  "name": "CURB Riverside (preview)",
+  "name": "CURB Riverside",
   "short_name": "CURB Riversi",
-  "description": "Riverside street sweeping, block by block. A preview on the City's open data.",
+  "description": "Riverside street sweeping, block by block, from the City's open data.",
   "start_url": "/riverside",
   "scope": "/",
   "display": "standalone",

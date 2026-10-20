@@ -1,7 +1,7 @@
 {
-  "name": "CURB Washington, DC (preview)",
+  "name": "CURB Washington, DC",
   "short_name": "CURB Washing",
-  "description": "Washington, DC street sweeping, block by block. A preview on the City's open data.",
+  "description": "Washington, DC street cleaning, block by block, from the City's open data.",
   "start_url": "/washington-dc",
   "scope": "/",
   "display": "standalone",
