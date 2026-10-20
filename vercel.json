@@ -301,6 +301,10 @@
       "destination": "/support.html"
     },
     {
+      "source": "/android",
+      "destination": "/android.html"
+    },
+    {
       "source": "/holidays",
       "destination": "/holidays.html"
     }

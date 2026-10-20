@@ -712,6 +712,7 @@ const staticUrls = [
   ['https://curb.guide/changelog', 'weekly', '0.5', 'changelog.html'],
   ['https://curb.guide/n/', 'weekly', '0.7', 'n/index.html'],
   ['https://curb.guide/support', 'monthly', '0.5', 'support.html'],
+  ['https://curb.guide/android', 'monthly', '0.5', 'android.html'],
   ['https://curb.guide/privacy', 'yearly', '0.3', 'privacy.html'],
 ];
 const hoodUrls = hoods.map((h) => [`https://curb.guide/n/${slug(h.hood)}`, 'monthly', '0.6', `n/${slug(h.hood)}.html`]);

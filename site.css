@@ -18,7 +18,7 @@
 html.curb-ios-app body>header.sn-nav{padding-top:0!important;position:sticky!important;z-index:600!important;
   top:calc(env(safe-area-inset-top,0px) + 8px);margin-top:calc(env(safe-area-inset-top,0px) + 8px)!important}
 html.curb-ios-app .sn-nav a[href*="apps.apple.com"],html.curb-ios-app .sn-foot a[href*="apps.apple.com"]{display:none}  /* already in the app */
-html.curb-ios-app a[href*="play.google.com"]{display:none}  /* an iPhone app names no other store */
+html.curb-ios-app a[href*="play.google.com"],html.curb-ios-app a[href="/android"]{display:none}  /* an iPhone app names no other store */
 .sn-mast{margin:0;padding:0 16px 0 28px;height:64px;display:flex;align-items:center;gap:11px}
 .sn-logo{display:inline-flex;align-items:center;flex:none;text-decoration:none}
 .sn-logo img{height:42px;width:auto;display:block}
@@ -46,7 +46,7 @@ html.curb-ios-app a[href*="play.google.com"]{display:none}  /* an iPhone app nam
 .sn-cta:active{transform:translate(2px,2px);box-shadow:none}
 .sn-cta.sn-ghost{background:transparent;color:var(--_ink);box-shadow:none;margin-left:0}
 .sn-cta.sn-ghost:hover{background:rgba(23,21,15,.06)}
-/* the App Store button with the Android app under it, "coming soon" until Google approves it */
+/* the App Store button with the Android beta (/android) under it */
 .sn-apps{display:inline-flex;flex-direction:column;align-items:center;margin-left:9px;gap:1px}
 .sn-apps .sn-cta.sn-ghost{padding:5px 13px 3px}
 .sn-soon{font-size:11px;font-weight:700;line-height:1.2;color:var(--_soft);text-decoration:none;white-space:nowrap}

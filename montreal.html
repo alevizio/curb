@@ -740,9 +740,9 @@
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.54c-.03-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.15-2.76.83-3.48.83-.72 0-1.83-.81-3.01-.79-1.55.02-2.98.9-3.78 2.29-1.61 2.79-.41 6.92 1.15 9.19.76 1.11 1.67 2.35 2.86 2.31 1.15-.05 1.58-.74 2.97-.74 1.39 0 1.78.74 3 .72 1.24-.02 2.02-1.12 2.78-2.24.88-1.29 1.24-2.54 1.26-2.6-.03-.01-2.41-.93-2.43-3.7ZM14.77 5.6c.64-.78 1.07-1.85.95-2.93-.92.04-2.04.61-2.7 1.38-.59.69-1.11 1.79-.97 2.85 1.03.08 2.08-.52 2.72-1.3Z"/></svg></span>
           <span class="im-tx"><b>Get the iOS app</b><small>CURB on the App Store</small></span>
         </a>
-        <a class="im-item" id="imPlay" style="display:none" href="https://play.google.com/store/apps/details?id=guide.curb.android" target="_blank" rel="noopener" role="menuitem">
+        <a class="im-item" id="imPlay" style="display:none" href="/android" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></svg></span>
-          <span class="im-tx"><b>Android app</b><small>Google Play, coming soon</small></span>
+          <span class="im-tx"><b>Android beta</b><small>Join on Google Play</small></span>
         </a>
         <button class="im-item" id="imGuide" role="menuitem">
           <span class="im-ic" aria-hidden="true" style="display:flex;gap:3px"><i class="d" style="background:var(--green)"></i><i class="d" style="background:var(--amber)"></i><i class="d" style="background:var(--red)"></i></span>
@@ -3193,7 +3193,7 @@ function closeInfoMenu(){
     const light=id=>{
       if(rate){ rate.href='https://apps.apple.com/app/id'+id+'?action=write-review'; rate.style.display=''; }
       if(get && !window.__curbNativePush){ get.href='https://apps.apple.com/app/id'+id; get.style.display='';
-        const play=document.getElementById('imPlay'); if(play)play.style.display=''; }  // Google Play, coming soon, under it
+        const play=document.getElementById('imPlay'); if(play)play.style.display=''; }  // the Android beta (/android) under it
     };
     let rec=null; try{ rec=JSON.parse(localStorage.getItem('curbAppId')||'null'); }catch(_){}
     if(rec&&rec.id){ light(rec.id); return; }

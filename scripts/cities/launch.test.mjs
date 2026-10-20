@@ -131,6 +131,38 @@ describe('the generated pages are current', () => {
   });
 });
 
+describe('the Android beta (owner, 2026-10-20)', () => {
+  const page = read('android.html'), site = read('site.js'), press = read('press.html');
+  it('/android: the three steps to join on Google Play, routed and in the sitemap', () => {
+    expect(routed('/android')).toEqual({ source: '/android', destination: '/android.html' });
+    expect(sitemap).toContain('<loc>https://curb.guide/android</loc>');
+    expect(page).toContain('<link rel="canonical" href="https://curb.guide/android">');
+    expect(page).not.toContain('noindex');
+    expect(page).toContain('anyone can join');
+    const steps = [...page.matchAll(/<li>\s*<h2>([^<]+)<\/h2>[\s\S]*?<a href="([^"]+)"/g)].map((m) => [m[1], m[2]]);
+    expect(steps).toEqual([
+      ['Join the CURB Android beta group', 'https://groups.google.com/g/curb-android-beta'],
+      ['Become a tester on Google Play', 'https://play.google.com/apps/testing/guide.curb.android'],
+      ['Install CURB from Google Play', 'https://play.google.com/store/apps/details?id=guide.curb.android'],
+    ]);
+    expect(page).toContain('It needs a Google account.');
+    expect(page).toContain('It\'s the same map with the same alerts. Send feedback to <a href="mailto:hello@curb.guide">hello@curb.guide</a>.');
+    const text = page.replace(/<style[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, ' ');
+    expect(text).not.toMatch(/\s[—–]\s|\s-\s|\w—\w/);
+    expect(page).not.toMatch(/<em\b|<i>[^<]+<\/i>/);
+  });
+  it('every App Store link has "Android beta: join on Google Play" to /android under it', () => {
+    expect(home).toMatch(/id="imGet"[\s\S]*?<\/a>\n\s*<a class="im-item" id="imPlay" style="display:none" href="\/android" role="menuitem">[\s\S]*?<b>Android beta<\/b><small>Join on Google Play<\/small>/);
+    expect(home).toMatch(/id="iosGet"[^\n]*\n\s*<a class="ios-play" id="iosPlay" href="\/android">Android beta: join on Google Play<\/a>/);
+    expect(home).toContain('Get the free iPhone app</a><a class="ios-play" href="/android">Android beta: join on Google Play</a></div>');
+    expect(site).toContain("var ANDROID = '/android', BETA = 'Android beta: join on Google Play';");
+    expect(site).toContain('+ links([[ANDROID, BETA]], 1)');   // the More and phone menus
+    expect(site.match(/'<a class="sn-(?:soon|fplay)" href="' \+ ANDROID \+ '"/g)).toHaveLength(2);   // the nav, the footer
+    expect(press.match(/App Store<\/a>\.(?:<\/li>)?\s*(?:<li>)?<a href="\/android">Android beta: join on Google Play<\/a>/g)).toHaveLength(2);
+    for (const [f, t] of [['index.html', home], ['site.js', site], ['press.html', press]]) expect(t, f).not.toMatch(/coming soon/i);
+  });
+});
+
 describe('words a person reads', () => {
   it('no dash used as punctuation and no italics in what the launch wrote (the cities\' own words and source names aside)', () => {
     const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
