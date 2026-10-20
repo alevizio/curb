@@ -9,7 +9,7 @@ The Android app is a Trusted Web Activity of curb.guide (package `guide.curb.and
 **Website:** https://curb.guide · **Email:** hello@curb.guide · **Privacy policy:** https://curb.guide/privacy
 
 **Graphics** (in `play/`): app icon `icon-512.png` (512 x 512), feature graphic `feature-graphic.jpg` (1024 x 500),
-phone screenshots `screenshot-1.png` to `screenshot-3.png` (1080 x 2160, real screens from the app).
+phone screenshots `screenshot-1.png` to `screenshot-3.png` (1080 x 1920, 9:16 as Play requires; real screens from the app on the emulator, demo mode status bar).
 
 ## Full description (4000 max)
 ```
@@ -56,10 +56,14 @@ CURB is on Android: every San Francisco curb colored by its next sweep, when tic
 - **Content rating:** questionnaire category "All other app types"; no violence, sexual content, profanity, drugs, gambling or user interaction (no chat, no user content shared). Expected rating: Everyone.
 - **Target audience:** 18 and over (it's for drivers). Not designed for children.
 - **News app:** no. **Government app:** no (independent; the description says so and names the sources). **Financial features:** none. **Health:** none.
-- **Data safety:**
-  - Collected, not shared, encrypted in transit, optional: *Device or other IDs* (the anonymous push subscription, only if alerts are on; purpose: app functionality) and *App activity, other actions* (the block and sweep time picked for an alert; app functionality). Users can delete it: Turn off on the alert removes the block and time.
-  - Collected, not shared, required: *App info and performance, crash logs and diagnostics* (anonymous error reports: message, page, coarse device type; purpose: analytics) and *App activity, app interactions* (cookieless aggregate page views and feature counts; analytics).
-  - Not collected: location (the locate button uses it on the phone only), name, email, contacts, photos, financial data.
+- **Data safety** (owner's picks, 20-Oct-2026): collects data, nothing shared, all encrypted in transit, no accounts.
+  - *Location, precise* (optional, app functionality, not ephemeral): the block you set an alert for, kept with the alert, plus the area the map loads after you tap locate. The locate fix itself never leaves the phone.
+  - *Device or other IDs* (optional, app functionality): the anonymous push subscription, only if alerts are on.
+  - *App activity, other actions* (optional, app functionality): the alert settings picked (intensity, voice).
+  - *App activity, app interactions* (required, analytics): cookieless aggregate page views and feature counts.
+  - *App info and performance, crash logs and diagnostics* (required, analytics): anonymous error reports (message, page, coarse device type).
+  - Deletion: yes. Turn off on an alert removes the block and sweep time at once (from 20-Oct-2026 a turned-off watch keeps only unreadable keys, `offKeys` in api/_store.js); the anonymous push endpoint stays, with nothing to send, as /privacy says.
+  - Not collected: name, email, contacts, photos, financial data.
 
 ## Signing and the site link
 - Play App Signing (Google keeps the app signing key). Upload key: `../private/android/curb-upload.keystore`, alias `upload`, password in the macOS Keychain item "CURB Android upload keystore". Never commit it.
