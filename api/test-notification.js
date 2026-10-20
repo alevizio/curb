@@ -69,8 +69,10 @@ export default async function handler(req, res) {
     const plan = (which === 'all' ? touchpointsFor(level, spot.nextSweepISO, spot) : [which]).map((tp) => {
       const mins = tp === 'lead' ? 30 : tp === 'morn' ? 120 : undefined;
       const r = renderOne(spot, tp, { level, voice, mins });
-      const when = `${dayName(fireAt[r.key], city.tz)} ${localHour(new Date(fireAt[r.key]).toISOString(), city.tz)}`;
-      return { key: r.key, tag: testTag(r.key), title: `Test · ${LABEL[r.key]} (${when})`, body: `${r.title}. ${r.body}`, urgent: r.urgent };
+      // a declared rule's push (Toronto's snow routes) comes when the City declares it, at no set time
+      const title = r.key === 'winter' ? 'Test · When the City declares it'
+        : `Test · ${LABEL[r.key]} (${dayName(fireAt[r.key], city.tz)} ${localHour(new Date(fireAt[r.key]).toISOString(), city.tz)})`;
+      return { key: r.key, tag: testTag(r.key), title, body: `${r.title}. ${r.body}`, urgent: r.urgent };
     });
 
     if (dryRun) { res.status(200).json({ ok: true, dryRun: true, level, voice, which, plan }); return; }

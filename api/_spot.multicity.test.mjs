@@ -28,7 +28,11 @@ describe('saved rules', () => {
   });
   it('mark a City crew sweep (16), so the City\'s other holidays stop its alerts too', () => {
     expect(sanitizeRule({ ...sf, flags: 18 }).flags).toBe(16);
-    expect(sanitizeRule({ ...sf, flags: 32 }).flags).toBeUndefined();
+    expect(sanitizeRule({ ...sf, flags: 64 }).flags).toBeUndefined();   // a flag with no meaning is dropped
+  });
+  it('mark a no parking rule that is not a sweep (32: Toronto\'s North York night ban), so its night push says no parking', () => {
+    expect(sanitizeRule({ ...sf, flags: 35 }).flags).toBe(33);          // holidays too (1) and no parking (32); towable (2) is not kept
+    expect(sanitizeRule({ ...sf, flags: 32 }).flags).toBe(32);
   });
   it('mark a winter rule (Madison\'s alternate side parking) and keep a whole season of its dates', () => {
     const odd = [];

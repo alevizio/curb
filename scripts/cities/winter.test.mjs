@@ -27,6 +27,19 @@ describe('the winter switch', () => {
   });
 });
 
+describe('the switch for a declared rule (Toronto\'s snow routes: all day while the City declares it)', () => {
+  const toronto = { tz: 'America/Toronto', winter: { from: '2026-11-01', to: '2027-04-30', start: 0, end: 24, declared: true } };
+  it('turns on from the day it is switched, and off when the City ends it', () => {
+    const now = Date.parse('2027-01-26T23:30:00Z');   // 6:30 PM Jan 26 in Toronto
+    expect(comingNight(now, toronto)).toBe('2027-01-26');
+    expect(switchTo('on', { now, city: toronto, reason: 'Toronto declared a Major Snowstorm Condition.' }))
+      .toEqual({ state: 'on', from: '2027-01-26', at: '2027-01-26T23:30:00.000Z', reason: 'Toronto declared a Major Snowstorm Condition.' });
+    expect(switchTo('on', { now, city: toronto, from: '2027-01-27' }).from).toBe('2027-01-27');   // declared from tomorrow
+    expect(switchTo('waiting', { now, city: toronto })).toEqual({ state: 'waiting' });
+    expect(() => switchTo('on', { now, city: toronto, from: '2027-05-02' })).toThrow(/outside the season/);
+  });
+});
+
 // A city's side-switching nights are listed ahead (Madison's season, Milwaukee's year), so a rebuild must come before they
 // run out: this fails in time to rebuild, 60 days before a year's list ends, or by mid-September after a season ends.
 describe('the listed nights', () => {
