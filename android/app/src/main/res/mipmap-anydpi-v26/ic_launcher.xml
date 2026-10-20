@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <!-- The cube on the cream of the iOS icon, inside the 66dp safe zone so no launcher shape cuts it. Drawn from
-     icons/logo.svg; replaces Bubblewrap's maskable layer, which a launcher drew cropped inside a pink ring. -->
+     icons/logo.svg; replaces Bubblewrap's maskable layer, whose cube a round mask cut at the top and bottom. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
     <foreground android:drawable="@mipmap/ic_launcher_foreground" />

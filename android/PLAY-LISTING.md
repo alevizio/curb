@@ -81,8 +81,8 @@ back with `git checkout` after it):
   `DelegationService.java`) answers Chrome's location check at once. The library's own handler shows the Android prompt from a
   background service, which Android 10 and later block, so a location request on the page waited forever.
 - The launcher icon: `mipmap-anydpi-v26/ic_launcher.xml` (cream `ic_launcher_background` in values/colors.xml plus
-  `ic_launcher_foreground.png`, the cube inside the 66dp safe zone, drawn from icons/logo.svg). Bubblewrap's template drew the
-  maskable icon cropped inside a pink ring.
+  `ic_launcher_foreground.png`, the cube inside the 66dp safe zone, drawn from icons/logo.svg). With Bubblewrap's template a round
+  mask cut the cube's top and bottom. (A colored ring around an icon in the Pixel dock is the launcher marking a suggested app.)
 - The splash images (`drawable-*/splash.png`): the logo alone on transparent. Bubblewrap's carry the icon's own cream, a lighter
   square on the splash background.
 
