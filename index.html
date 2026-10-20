@@ -38,6 +38,12 @@
 <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#C1121F">
+<!-- The Android app (a Trusted Web Activity) opens the page with its android-app:// referrer; a page reached by a link inside
+     the app has lost it, so the tab remembers. In the app the status bar is cream like the page (owner, 20-Oct-2026):
+     Chrome colors it from this tag, not from the app. -->
+<script>{let a=document.referrer.startsWith('android-app://guide.curb.android');
+try{if(a)sessionStorage.setItem('curbAndroidApp','1');else a=sessionStorage.getItem('curbAndroidApp')==='1';}catch(_){}
+window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]').content='#F2ECDF';}</script>
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -1808,7 +1814,7 @@ function openSheet(group, activeKey){
       ${canRemind?`<button class="btn alt" id="calBtn">${ICONS.cal} Calendar${calPref?'<span class="vsep" id="calMore" title="Change calendar type">▾</span>':''}</button>`:''}
       ${canRemind?`<div class="calchoice" id="calChoice" hidden>
         <button class="btn alt" id="calGoogle">Google Calendar</button>
-        <button class="btn alt" id="calICS">Apple / .ics</button>
+        <button class="btn alt" id="calICS">${/Android/i.test(navigator.userAgent)?'Calendar file (.ics)':'Apple / .ics'}</button>
       </div>
       <div class="calchoice" id="alertOff" hidden>
         <button class="btn alt" id="alertOffYes">Turn off alerts</button>
@@ -1942,6 +1948,28 @@ document.addEventListener('keydown',e=>{
   if(document.getElementById('welcome').classList.contains('open')||up('layersPanel')||up('infoMenu')||up('sug'))return;
   const sh=document.getElementById('sheet'); if(sh.classList.contains('open'))document.getElementById('sheetClose').click();
 });
+// Android's back button closes the open menu, panel or sheet, top one first, instead of leaving CURB: each one opened by a
+// tap adds a history entry for back to spend. Chrome's back button skips an entry a page adds without a tap, so none is
+// added when one opens by itself (a shared link's sheet): back leaves then, as before.
+if(/Android/i.test(navigator.userAgent)){
+  const open=id=>document.getElementById(id).classList.contains('open'), shown=id=>!document.getElementById(id).hidden;
+  const LAYERS=[  // top first: [element, is it up, close it]
+    ['sug',shown,hideSug],['infoMenu',shown,closeInfoMenu],['layersPanel',shown,closeLayersPanel],
+    ['alertsPanel',open,closeAlertsPanel],['iosHint',open,hideIosHint],['welcome',open,markOnboarded],
+    ['sheet',open,()=>document.getElementById('sheetClose').click()]];
+  const upCount=()=>LAYERS.filter(([id,up])=>up(id)).length, held=()=>(history.state&&history.state.curbBack)||0;
+  let selfBack=false;
+  const sync=()=>{const n=upCount(), d=held();
+    if(n>d&&(!navigator.userActivation||navigator.userActivation.isActive))for(let i=d+1;i<=n;i++)history.pushState({curbBack:i},'');
+    else if(n<d&&!selfBack){selfBack=true;history.go(n-d);}};  // closed with its own button: give the entries back
+  if(held())history.replaceState(null,'');  // a reload with a panel open
+  addEventListener('popstate',()=>{
+    if(selfBack){selfBack=false;sync();return;}  // one opened while that was under way
+    for(const [id,up,close] of LAYERS){if(upCount()<=held())break; if(up(id))close();}
+  });
+  const mo=new MutationObserver(sync);
+  LAYERS.forEach(([id])=>mo.observe(document.getElementById(id),{attributes:true,attributeFilter:['class','hidden']}));
+}
 document.getElementById('shareBtn').innerHTML=ICONS.share;
 document.getElementById('centerBtn').innerHTML=ICONS.center;
 // Peek↔tall as a compositor-only slide (FLIP) instead of animating max-height (which re-laid out the
@@ -1983,7 +2011,9 @@ function downloadICS(street,block,ns){
     'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:Move your car in 30 min','END:VALARM',
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download='sweep-reminder.ics';
+  // one name per street and day: Chrome on Android asked "Download file again?" for every reminder after the first
+  const p=sfParts(ns.start), z=n=>String(n).padStart(2,'0'), slug=street.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download=`sweep-${slug||'reminder'}-${p.y}-${z(p.mo)}-${z(p.da)}.ics`;
   document.body.appendChild(a); a.click(); a.remove();
   toast('Reminder downloaded. Open it to add to your calendar.');
 }
@@ -2699,6 +2729,7 @@ document.getElementById('locate').onclick=()=>{
 function locateFailed(code,detail){
   const app=!!window.__curbNativeGeoInstalled;
   toast(code===1?(app?'Location is off for CURB. Turn it on in Settings › CURB › Location, or tap where you parked.'
+      :window.__curbAndroidApp?'Location is off for CURB. Turn it on in Settings › Apps › CURB › Permissions, or tap where you parked.'
       :isIOS()?'Location is blocked. Allow Safari Websites in Settings › Privacy › Location Services, or tap where you parked.'
       :"Location is blocked for this site. Allow it in your browser's site settings, or tap where you parked.")
     :code===2?"Can't find your location right now. Try again, or tap where you parked."

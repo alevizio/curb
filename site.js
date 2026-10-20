@@ -2,6 +2,14 @@
    every back-of-map page, and wires the dropdown / mobile menu / active-state. One source of truth. */
 (function () {
   if (window.__curbChrome) return; window.__curbChrome = 1;
+  // The Android app's status bar is cream like the page, as on the map (index.html): Chrome colors it from this tag.
+  try {
+    if (document.referrer.indexOf('android-app://guide.curb.android') === 0 || sessionStorage.getItem('curbAndroidApp') === '1') {
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (!tc) { tc = document.createElement('meta'); tc.name = 'theme-color'; document.head.appendChild(tc); }
+      tc.content = '#F2ECDF';
+    }
+  } catch (e) {}
   // Vercel Speed Insights — anonymous real-user web vitals (no cookies); served by Vercel at the edge.
   // Injected here so every back-of-map page (incl. generated /n/ pages) gets it from one source.
   if (!window.si) {
