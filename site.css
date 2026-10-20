@@ -18,6 +18,7 @@
 html.curb-ios-app body>header.sn-nav{padding-top:0!important;position:sticky!important;z-index:600!important;
   top:calc(env(safe-area-inset-top,0px) + 8px);margin-top:calc(env(safe-area-inset-top,0px) + 8px)!important}
 html.curb-ios-app .sn-nav a[href*="apps.apple.com"],html.curb-ios-app .sn-foot a[href*="apps.apple.com"]{display:none}  /* already in the app */
+html.curb-ios-app a[href*="play.google.com"]{display:none}  /* an iPhone app names no other store */
 .sn-mast{margin:0;padding:0 16px 0 28px;height:64px;display:flex;align-items:center;gap:11px}
 .sn-logo{display:inline-flex;align-items:center;flex:none;text-decoration:none}
 .sn-logo img{height:42px;width:auto;display:block}
@@ -45,7 +46,12 @@ html.curb-ios-app .sn-nav a[href*="apps.apple.com"],html.curb-ios-app .sn-foot a
 .sn-cta:active{transform:translate(2px,2px);box-shadow:none}
 .sn-cta.sn-ghost{background:transparent;color:var(--_ink);box-shadow:none;margin-left:0}
 .sn-cta.sn-ghost:hover{background:rgba(23,21,15,.06)}
-@media (max-width:1000px){.sn-cta.sn-ghost{display:none}}
+/* the App Store button with the Android app under it, "coming soon" until Google approves it */
+.sn-apps{display:inline-flex;flex-direction:column;align-items:center;margin-left:9px;gap:1px}
+.sn-apps .sn-cta.sn-ghost{padding:5px 13px 3px}
+.sn-soon{font-size:11px;font-weight:700;line-height:1.2;color:var(--_soft);text-decoration:none;white-space:nowrap}
+.sn-soon:hover{color:var(--_ink);text-decoration:underline;text-underline-offset:2px}
+@media (max-width:1000px){.sn-cta.sn-ghost,.sn-apps{display:none}}
 .sn-burger{display:none;margin-left:auto;width:44px;height:44px;align-items:center;justify-content:center;
   background:var(--_sign);color:var(--_ink);border:2.5px solid var(--_ink);border-radius:11px;box-shadow:3px 3px 0 var(--_ink);cursor:pointer}
 .sn-burger svg{width:21px;height:21px}
@@ -79,6 +85,9 @@ html.curb-ios-app .sn-nav a[href*="apps.apple.com"],html.curb-ios-app .sn-foot a
   border-radius:11px;font-weight:800;font-size:13.5px;color:var(--_ink);text-decoration:none}
 .sn-foot .sn-fapp:hover{border-color:var(--_ink);background:rgba(23,21,15,.05)}
 .sn-foot .sn-fapp .sn-ext{opacity:.5}
+.sn-foot .sn-fplay{display:block;width:max-content;margin-top:9px;font-weight:700;font-size:13px;color:var(--_soft);text-decoration:none}
+.sn-foot .sn-fplay:hover{color:var(--_ink);text-decoration:underline;text-underline-offset:3px}
+.sn-foot .sn-fplay .sn-ext{opacity:.5}
 .sn-foot .sn-fcol h4{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(23,21,15,.45);margin:0 0 11px}
 .sn-foot .sn-fcol a{display:block;padding:5px 0;font-weight:700;font-size:14px;color:var(--_ink);text-decoration:none}
 .sn-foot .sn-fcol a:hover{text-decoration:underline;text-underline-offset:3px}

@@ -13,6 +13,8 @@
   var path = location.pathname.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/+$/, '') || '/';
   var GH = 'https://github.com/alevizio/curb';
   var APP = 'https://apps.apple.com/us/app/curb-sf-street-parking/id6780998238';
+  // Under every App Store link, the Android app (owner, 2026-10-20): it opens once Google approves it.
+  var PLAY = 'https://play.google.com/store/apps/details?id=guide.curb.android';
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // The Boston preview's pages (/boston/…, scripts/cities/boston-pages.mjs) get Boston's links; the iOS app is SF only.
   var BOS = path === '/boston' || path.indexOf('/boston/') === 0;
@@ -60,7 +62,8 @@
   var chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
   var burgerIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
   var extLinks = '<hr><a href="' + GH + '" rel="noopener">' + svg('m9 18-6-6 6-6M15 6l6 6-6 6') + '<span>Open source</span>' + ext + '</a>'
-    + (APPS ? '<a href="' + APP + '" rel="noopener">' + svg('M11 18.5h2', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/>') + '<span>Get the app</span>' + ext + '</a>' : '');
+    + (APPS ? '<a href="' + APP + '" rel="noopener">' + svg('M11 18.5h2', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/>') + '<span>Get the app</span>' + ext + '</a>'
+      + '<a href="' + PLAY + '" rel="noopener">' + svg('M7 4.5v15l12-7.5-12-7.5Z') + '<span>Google Play, coming soon</span>' + ext + '</a>' : '');
 
   var nav =
     '<header class="sn-nav">' +
@@ -72,7 +75,8 @@
             '<div class="sn-pop" hidden>' + links(secondary, 1) + extLinks + '</div>' +
           '</div>' +
         '</nav>' +
-        (APPS ? '<a class="sn-cta sn-ghost" href="' + APP + '" rel="noopener">Download iOS app</a>' : '') +
+        (APPS ? '<span class="sn-apps"><a class="sn-cta sn-ghost" href="' + APP + '" rel="noopener">Download iOS app</a>'
+          + '<a class="sn-soon" href="' + PLAY + '" rel="noopener">Google Play, coming soon</a></span>' : '') +
         '<a class="sn-cta" href="' + HOME + '">Open the map</a>' +
         '<button class="sn-burger" type="button" aria-label="Menu" aria-haspopup="true" aria-expanded="false">' + burgerIcon + '</button>' +
         '<div class="sn-menu" hidden>' + links(mapLink, 1) + links(primary, 1) + '<hr>' + links(secondary, 1) + extLinks + '</div>' +
@@ -98,7 +102,8 @@
       '<b>Public Works</b>\' sweeping schedules, the City\'s street centerlines and the <b>Curb Lab</b>\'s curb signs.'
   } : {
     tag: 'Know where to park in San Francisco — block by block, including the part no sign tells you.',
-    app: '<a class="sn-fapp" href="' + APP + '" rel="noopener">Download the iOS app' + ext + '</a>',
+    app: '<a class="sn-fapp" href="' + APP + '" rel="noopener">Download the iOS app' + ext + '</a>'
+      + '<a class="sn-fplay" href="' + PLAY + '" rel="noopener">Google Play, coming soon' + ext + '</a>',
     explore: '<a href="/">Map</a><a href="/n/">Neighborhoods</a><a href="/holidays">Sweeping holidays</a><a href="/tickets">The ticket economy</a><a href="/cities">Cities</a><a href="/about">About</a>',
     more: '<a href="/support">Support CURB</a><a href="/press">Press kit</a><a href="/changelog">Changelog</a><a href="/privacy">Privacy</a>',
     data: '<a href="https://datasf.org" rel="noopener">Data: DataSF</a>',
