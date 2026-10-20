@@ -1,0 +1,21 @@
+[
+  {
+    "number": 41,
+    "title": "City request: Austin, TX",
+    "body": "Someone asked for CURB in **Austin, TX** with the form on [curb.guide/cities](https://curb.guide/cities).\n\n- City: Austin\n- State, province or country: Texas\n- Does the city publish its street sweeping or parking schedule? Yes\n- Link to that data: none given\n\n<!-- city-request key=\"austin|TX\" -->\n<!-- city-request-id 9a9a9a9a-0000-4000-8000-000000000041 -->",
+    "labels": [{ "name": "city request" }]
+  },
+  {
+    "number": 7,
+    "title": "City request: Denver",
+    "body": "Filed by hand, before the form existed.",
+    "labels": [{ "name": "city request" }]
+  },
+  {
+    "number": 50,
+    "title": "Add a city request form",
+    "body": "A pull request, which the issues API lists too.",
+    "pull_request": { "url": "https://api.github.com/repos/alevizio/curb/pulls/50" },
+    "labels": [{ "name": "city request" }]
+  }
+]

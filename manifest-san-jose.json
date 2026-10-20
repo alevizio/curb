@@ -1,7 +1,7 @@
 {
-  "name": "CURB San Jose (preview)",
+  "name": "CURB San Jose",
   "short_name": "CURB San Jos",
-  "description": "San Jose street sweeping, block by block. A preview on the City's open data.",
+  "description": "San Jose street sweeping, block by block, from the City's open data.",
   "start_url": "/san-jose",
   "scope": "/",
   "display": "standalone",

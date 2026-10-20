@@ -1,0 +1,13 @@
+{
+  "since": 1792497600000,
+  "total": 7,
+  "requests": [
+    { "id": "0b2f6c3e-1d4a-4c8e-9a51-7f3e2d1c0a01", "ts": 1792500100000, "city": "Portland", "region": "Oregon", "publishes": "yes", "link": "https://www.portland.gov/transportation/street-cleaning" },
+    { "id": "0b2f6c3e-1d4a-4c8e-9a51-7f3e2d1c0a02", "ts": 1792500200000, "city": "portland", "region": "OR", "publishes": "unsure", "link": "" },
+    { "id": "0b2f6c3e-1d4a-4c8e-9a51-7f3e2d1c0a03", "ts": 1792500300000, "city": "Austin", "region": "Texas", "publishes": "no", "link": "" },
+    { "id": "0b2f6c3e-1d4a-4c8e-9a51-7f3e2d1c0a04", "ts": 1792500400000, "city": "St. Louis", "region": "Missouri", "publishes": "not-a-choice", "link": "" },
+    { "id": "0b2f6c3e-1d4a-4c8e-9a51-7f3e2d1c0a05", "ts": 1792500500000, "city": "Lyon", "region": "France", "publishes": "unsure", "link": "" },
+    { "id": "0b2f6c3e-1d4a-4c8e-9a51-7f3e2d1c0a06", "ts": 1792500600000, "city": "Saint Louis", "region": "MO", "publishes": "yes", "link": "https://www.stlouis-mo.gov/government/departments/street/" },
+    { "id": "0b2f6c3e-1d4a-4c8e-9a51-7f3e2d1c0a07", "ts": 1792500700000, "city": "Austin", "region": "", "publishes": "yes", "link": "https://data.austintexas.gov/" }
+  ]
+}

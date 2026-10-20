@@ -1,7 +1,7 @@
 {
-  "name": "CURB Los Angeles (preview)",
+  "name": "CURB Los Angeles",
   "short_name": "CURB Los Ang",
-  "description": "Los Angeles street sweeping, block by block. A preview on the City's open data.",
+  "description": "Los Angeles street sweeping, block by block, from the City's open data.",
   "start_url": "/los-angeles",
   "scope": "/",
   "display": "standalone",

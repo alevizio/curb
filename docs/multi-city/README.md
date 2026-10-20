@@ -20,9 +20,12 @@ city we are looking at. Read this file first.
 | Boston | Prototype at curb.guide/boston (2026-10-16): map, sheet, calendar, sweep alerts, six Curb Lab layers | Ale | Sign data covers 15% of swept curbs and was last published 2026-05-07. See [boston.md](boston.md) |
 | Buenos Aires | Researched. A volunteer wants to run it | A local maintainer | The City publishes the rule for every curb side, but under a license that forbids commercial use. It is not a street sweeping city, so the map has to draw other rule types, and it needs Spanish. See [buenos-aires.md](buenos-aires.md) |
 
-Previews at curb.guide/&lt;id&gt; since 2026-10-18 (unlisted, noindex): map, sheet, calendar and sweep alerts, built by
-[city-build.md](city-build.md). Each city's page (docs/multi-city/&lt;id&gt;.md) has the data, the checks and the questions
-for the City.
+Public at curb.guide/&lt;id&gt; since 2026-10-20 (previews from 2026-10-18): map, sheet, calendar and sweep alerts, built by
+[city-build.md](city-build.md), each with a readable page at curb.guide/&lt;id&gt;/about and a card on
+[curb.guide/cities](https://curb.guide/cities), which also takes requests for new cities (filed as public GitHub issues
+labeled "city request"). Which cities are public is one list, `scripts/cities/public.mjs`: a city built but not on it stays
+a preview (noindex, unlisted), as Boston does. Each city's page (docs/multi-city/&lt;id&gt;.md) has the data, the checks and
+the questions for the City.
 
 | City | Built from | What is in the way |
 |---|---|---|
@@ -173,8 +176,9 @@ it is Ale's design call before any code.
 ## Decisions that are Ale's
 
 1. **Address of a city.** `curb.guide/boston` (recommended, reasons above) or `boston.curb.guide`.
-2. **How people switch city.** A city picker in the info menu, plus a prompt when the phone is clearly in
-   another city.
+2. **How people switch city.** Decided 2026-10-20: a first visit to curb.guide asks for the location once (the browser's
+   own prompt) and opens the city the visitor is in; the locate button offers another city's map when it finds you there;
+   zoomed out, every map shows pins for the other cities; Cities in the ⓘ menu and the site nav opens curb.guide/cities.
 3. **Colors and words for rules that are not sweeping** (phase 2).
 4. **Language.** Buenos Aires needs Spanish for the whole interface and for the alert voices. This is the
    largest single cost of that city after the new rule types.

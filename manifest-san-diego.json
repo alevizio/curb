@@ -1,7 +1,7 @@
 {
-  "name": "CURB San Diego (preview)",
+  "name": "CURB San Diego",
   "short_name": "CURB San Die",
-  "description": "San Diego street sweeping, block by block. A preview on the City's open data.",
+  "description": "San Diego street sweeping, block by block, from the City's open data.",
   "start_url": "/san-diego",
   "scope": "/",
   "display": "standalone",

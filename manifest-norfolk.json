@@ -1,7 +1,7 @@
 {
-  "name": "CURB Norfolk (preview)",
+  "name": "CURB Norfolk",
   "short_name": "CURB Norfolk",
-  "description": "Norfolk street sweeping, block by block. A preview on the City's open data.",
+  "description": "Norfolk street sweeping, block by block, from the City's open data.",
   "start_url": "/norfolk",
   "scope": "/",
   "display": "standalone",

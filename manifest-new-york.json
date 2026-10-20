@@ -1,7 +1,7 @@
 {
-  "name": "CURB New York City (preview)",
+  "name": "CURB New York City",
   "short_name": "CURB New Yor",
-  "description": "New York City street sweeping, block by block. A preview on the City's open data.",
+  "description": "New York City alternate side parking, block by block, from the City's open data.",
   "start_url": "/new-york",
   "scope": "/",
   "display": "standalone",

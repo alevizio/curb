@@ -1,0 +1,55 @@
+name: city-requests
+run-name: ${{ github.event_name == 'workflow_dispatch' && (inputs.dry_run && 'dry run' || 'manual run') || 'file city requests' }}
+
+# "Request a city" on curb.guide/cities (api/city-request.js) keeps each request in Upstash. Every 30 minutes this files
+# the new ones as public issues on this repo (scripts/cities/city-requests.mjs): one issue per city, labeled
+# "city request", and a "+1" comment for each later request for the same city. An issue carries the city, the region, the
+# answer and the data link as plain text: never the requester's email (the GET it reads leaves emails out) or IP (never
+# stored). What was filed is kept in the Actions cache, and every issue and comment names its request, so nothing is filed
+# twice. Secret: CRON_SECRET (the same one the monitor and the sweep alert backup use); without it the run does nothing.
+on:
+  schedule:
+    - cron: '11,41 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: read the requests and print the issues, file nothing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: city-requests
+  cancel-in-progress: false
+
+jobs:
+  file:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/cities
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/cache/restore@v6
+        with:
+          path: .city-requests
+          key: city-requests-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: city-requests-
+      - name: File new city requests as issues
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GITHUB_TOKEN: ${{ github.token }}
+          FLAGS: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '--dry-run' || '' }}
+        run: node scripts/cities/city-requests.mjs --memory .city-requests/memory.json $FLAGS
+      # a real run keeps what it filed; a dry run reads that memory but never replaces it
+      - uses: actions/cache/save@v6
+        if: always() && hashFiles('.city-requests/memory.json') != '' && (github.event_name == 'schedule' || !inputs.dry_run)
+        with:
+          path: .city-requests
+          key: city-requests-${{ github.run_id }}-${{ github.run_attempt }}

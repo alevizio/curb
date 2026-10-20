@@ -61,6 +61,8 @@ the block sheet and alerts.
    English, the whole interface and the alert texts, written by someone who lives there.
 7. **Basemap** tiles for the city's bounds.
 8. **Page and links**: `curb.guide/<city>`, its manifest, a line in the monitor.
+9. **Going public**: one line in `scripts/cities/public.mjs`, then the generators it lists (configs, city pages, the
+   readable pages and /cities, the sitemap). Until then the city is a preview: noindex and unlisted.
 
 ## 4. Before it goes live
 

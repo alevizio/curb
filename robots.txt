@@ -8,6 +8,9 @@ User-agent: meta-webindexer
 # refuses crawlers. The /b/ and /n/ pages themselves stay crawlable.
 Disallow: /?b=
 Disallow: /?bbox=
+# The same for the city maps' neighborhood links (/<city>?bbox=…, in each city's welcome card). Their shared block links
+# (/<city>?b=…) stay open: a city has no /b/ pages, so they are what a link preview reads.
+Disallow: /*?bbox=
 # /b/ share cards take their og:image from /api/og; the longer Allow wins over Disallow: /api/
 Allow: /api/og
 Disallow: /api/

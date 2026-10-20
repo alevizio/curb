@@ -1,7 +1,7 @@
 {
-  "name": "CURB Saint Paul (preview)",
+  "name": "CURB Saint Paul",
   "short_name": "CURB Saint P",
-  "description": "Saint Paul street sweeping, block by block. A preview on the City's open data.",
+  "description": "Saint Paul street sweeping, block by block, from the City's open data.",
   "start_url": "/saint-paul",
   "scope": "/",
   "display": "standalone",

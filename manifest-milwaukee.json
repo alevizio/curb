@@ -1,7 +1,7 @@
 {
-  "name": "CURB Milwaukee (preview)",
+  "name": "CURB Milwaukee",
   "short_name": "CURB Milwauk",
-  "description": "Milwaukee night parking, block by block. A preview on the City's open data.",
+  "description": "Milwaukee night parking, block by block, from the City's open data.",
   "start_url": "/milwaukee",
   "scope": "/",
   "display": "standalone",

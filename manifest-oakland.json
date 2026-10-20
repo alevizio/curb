@@ -1,7 +1,7 @@
 {
-  "name": "CURB Oakland (preview)",
+  "name": "CURB Oakland",
   "short_name": "CURB Oakland",
-  "description": "Oakland street sweeping, block by block. A preview on the City's open data.",
+  "description": "Oakland street sweeping, block by block, from the City's open data.",
   "start_url": "/oakland",
   "scope": "/",
   "display": "standalone",

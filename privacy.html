@@ -1,11 +1,11 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Privacy — CURB</title>
-<meta name="description" content="CURB stores no accounts and no cookies. The only personal thing saved is your anonymous push-alert subscription, so we can warn you before street sweeping. Remove it any time.">
+<meta name="description" content="CURB stores no accounts and no cookies. It saves your anonymous push-alert subscription, so it can warn you before street sweeping, and an email only if you leave one with a city request. Remove either any time.">
 <link rel="canonical" href="https://curb.guide/privacy">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Privacy — CURB">
-<meta property="og:description" content="No accounts, no ads, no cookies, no tracking. CURB only stores your anonymous push-alert subscription — remove it any time.">
+<meta property="og:description" content="No accounts, no ads, no cookies, no tracking. CURB stores your anonymous push-alert subscription, and an email only if you leave one with a city request. Remove either any time.">
 <meta property="og:url" content="https://curb.guide/privacy">
 <meta property="og:image" content="https://curb.guide/og.png?v=3">
 <meta name="twitter:card" content="summary_large_image">
@@ -61,6 +61,18 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
     already got), or turn off notifications for curb.guide in your browser or phone settings. A subscription the
     browser has revoked is deleted the next time CURB tries to send to it.</p>
 
+  <h2>Your location</h2>
+  <p>On your first visit, curb.guide asks your browser for your location, once. It is used on your phone only, to
+    open the map for your city, and is <b>never sent to us or stored</b>. Say no and nothing changes: the map stays on
+    San Francisco, and CURB won't ask again. The locate button works the same way: your location only moves the map.</p>
+
+  <h2>City requests</h2>
+  <p>If you ask for your city on <a href="/cities">curb.guide/cities</a>, the city, the region, your answer and the link
+    you give become a <b>public issue</b> on CURB's <a href="https://github.com/alevizio/curb/issues" rel="noopener">GitHub</a>.
+    Your email, if you leave one, <b>stays private</b>: it is used only to tell you when your city is live. Your IP address
+    isn't stored with the request. This is the only other thing CURB keeps, and only if you send it. To have a request or
+    your email deleted, write to <a href="mailto:hello@curb.guide">hello@curb.guide</a>.</p>
+
   <h2>Analytics</h2>
   <p>We count anonymous, aggregate page views with <b>cookieless</b> analytics (Vercel Web Analytics) — no
     cookies, no cross-site identifiers, no individual profiles. It tells us "the tickets page got N views,"
@@ -77,7 +89,8 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   <h2>Where the data comes from</h2>
   <p>Everything CURB shows is public record from <a href="https://datasf.org" rel="noopener">DataSF</a> and
     SFMTA — sweeping schedules, citations, permit areas, meters. CURB aggregates it; it never tracks
-    enforcement or live activity. The posted street sign is always the source of truth.</p>
+    enforcement or live activity. In the other cities it comes from each city's own open data, listed on
+    <a href="/cities">curb.guide/cities</a>. The posted street sign is always the source of truth.</p>
 
   <h2>Open source</h2>
   <p>The whole app is open source under the MIT license — you can read exactly what it does on

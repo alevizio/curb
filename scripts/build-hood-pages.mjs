@@ -2,8 +2,9 @@
 // Generate the neighborhood street-cleaning SEO pages from data/stats.json.
 //   n/<slug>.html   — one editorial page per SF neighborhood
 //   n/index.html    — the directory of all neighborhoods
-// Plus refreshed <url> entries in sitemap.xml, and the home page's neighborhood links (the
-// hoods:start/end block in index.html). Each hood page lists its blocks from data/schedules.json.
+// Plus refreshed <url> entries in sitemap.xml (the public cities' pages too: scripts/cities/public.mjs), and the home
+// page's neighborhood links (the hoods:start/end block in index.html). Each hood page lists its blocks from
+// data/schedules.json.
 //
 // Each page targets "street cleaning in <hood>" long-tail queries with REAL stats
 // (volume, fines, when tickets actually happen, heaviest streets, 5yr surge) — not a
@@ -13,13 +14,25 @@
 //
 // Run: npm run build:hoodpages   (Node 18+, no deps)
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync, openSync, readSync, closeSync } from 'node:fs';
 import { slug, pagedHoods } from '../lib/hoods.js';   // MIN_TICKETS floor lives there (shared with /b/ links)
 import { schedShort } from '../api/block.js';         // same schedule wording as the /b/ pages
 import { gitDate, today } from './lastmod.mjs';
 import { HOLIDAY_SCHEDULE_BLOCKS } from './build-holidays-page.mjs'; // the /holidays page's count, so the FAQ agrees
+import { PUBLIC } from './cities/public.mjs';          // the cities in the sitemap
 
 const ROOT = new URL('../', import.meta.url);
+// The day a city's data was built ("YYYY-MM-DD"): its segments.json starts with _meta.generated, so the file's first bytes
+// tell it (Chicago's is 20 MB); the whole file is read only if they don't.
+function cityDataDate(id) {
+  const file = new URL(`data/${id}/segments.json`, ROOT);
+  try {
+    const fd = openSync(file, 'r'), buf = Buffer.alloc(4096);
+    const n = readSync(fd, buf, 0, buf.length, 0); closeSync(fd);
+    const m = /"generated"\s*:\s*"(\d{4}-\d{2}-\d{2})/.exec(buf.toString('utf8', 0, n));
+    return m ? m[1] : String(JSON.parse(readFileSync(file, 'utf8'))._meta.generated).slice(0, 10);
+  } catch { return null; }
+}
 const stats = JSON.parse(readFileSync(new URL('data/stats.json', ROOT), 'utf8'));
 
 const FINE = 105;           // current SF street-cleaning fine (2026)
@@ -699,13 +712,21 @@ const staticUrls = [
   ['https://curb.guide/changelog', 'weekly', '0.5', 'changelog.html'],
   ['https://curb.guide/n/', 'weekly', '0.7', 'n/index.html'],
   ['https://curb.guide/support', 'monthly', '0.5', 'support.html'],
+  ['https://curb.guide/android', 'monthly', '0.5', 'android.html'],
   ['https://curb.guide/privacy', 'yearly', '0.3', 'privacy.html'],
 ];
 const hoodUrls = hoods.map((h) => [`https://curb.guide/n/${slug(h.hood)}`, 'monthly', '0.6', `n/${slug(h.hood)}.html`]);
+// The public cities (scripts/cities/public.mjs): /cities, each city's map and its readable page (scripts/cities/
+// city-page.mjs, city-pages.mjs), dated by the city's data (segments.json _meta.generated, the build the map shows); /cities
+// by the newest of them. Boston and any other preview stay out: they are noindex.
+const cityDates = Object.fromEntries(PUBLIC.map((id) => [id, cityDataDate(id)]));
+const newest = Object.values(cityDates).filter(Boolean).sort().pop() || null;
+const cityUrls = [['https://curb.guide/cities', 'weekly', '0.8', null, newest],
+  ...PUBLIC.flatMap((id) => [[`https://curb.guide/${id}`, 'weekly', '0.7', null, cityDates[id]], [`https://curb.guide/${id}/about`, 'monthly', '0.6', null, cityDates[id]]])];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticUrls, ...hoodUrls].map(([loc, freq, pri, file]) => {
-  const mod = changed.has(file) ? today() : gitDate(file);
+${[...staticUrls, ...hoodUrls, ...cityUrls].map(([loc, freq, pri, file, date]) => {
+  const mod = date !== undefined ? date : changed.has(file) ? today() : gitDate(file);
   return `  <url>
     <loc>${loc}</loc>${mod ? `
     <lastmod>${mod}</lastmod>` : ''}
@@ -718,4 +739,4 @@ ${[...staticUrls, ...hoodUrls].map(([loc, freq, pri, file]) => {
 writeFileSync(new URL('sitemap.xml', ROOT), sitemap);
 
 const usingDetail = Object.keys(detail).length > 0;
-console.error(`[hoodpages] wrote ${written} hood pages + index + sitemap (${5 + hoodUrls.length} urls). per-hood detail: ${usingDetail ? 'YES' : 'NO (citywide fallback)'}${removed.length ? `. deleted stale: ${removed.join(', ')}` : ''}`);
+console.error(`[hoodpages] wrote ${written} hood pages + index + sitemap (${staticUrls.length + hoodUrls.length + cityUrls.length} urls). per-hood detail: ${usingDetail ? 'YES' : 'NO (citywide fallback)'}${removed.length ? `. deleted stale: ${removed.join(', ')}` : ''}`);

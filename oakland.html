@@ -4,10 +4,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Oakland Street Cleaning Map (preview) | CURB</title>
-<meta name="robots" content="noindex">
-<meta name="description" content="Oakland street sweeping, block by block: every swept curb colored by its next sweep, from the City's open data. A CURB preview.">
+<title>Oakland Street Sweeping Map: Schedules by Block | CURB</title>
+<meta name="description" content="Oakland street sweeping, block by block: every curb colored by its next sweep. A missed sweep is a $72 ticket. Free, with alerts, from the City's open data.">
 <link rel="canonical" href="https://curb.guide/oakland">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"CURB Oakland","url":"https://curb.guide/oakland","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"description":"Oakland street sweeping, block by block: every curb colored by its next sweep. A missed sweep is a $72 ticket. Free, with alerts, from the City's open data.","image":"https://curb.guide/og-oakland.png?v=1","areaServed":{"@type":"City","name":"Oakland, California"},"publisher":{"@type":"Organization","name":"CURB","url":"https://curb.guide/"}}
+</script>
 <!-- Social cards: og.png is a static 1200x630 asset regenerated via `npm run og` (og/template-home.html). URLs must stay absolute. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
@@ -37,7 +39,6 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-itunes-app" content="app-id=6780998238">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -253,7 +254,8 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .infobtn:active{transform:translate(2px,2px);box-shadow:none}
   .infobtn[aria-expanded="true"]{background:var(--ink);color:var(--paper)}
   .infomenu{position:absolute;right:0;top:calc(100% + 8px);width:272px;background:var(--paper);
-    border:2.5px solid var(--ink);border-radius:17px;box-shadow:var(--shadow);padding:8px;z-index:700}
+    border:2.5px solid var(--ink);border-radius:17px;box-shadow:var(--shadow);padding:8px;z-index:700;
+    max-height:calc(100dvh - 96px - env(safe-area-inset-top));overflow-y:auto;overscroll-behavior:contain}  /* short phones scroll it */
   /* the open menu lives in .top (600): lift it over the phone layers button (620), which covered its bottom on short screens */
   .top:has(#infoMenu:not([hidden])){z-index:630}
   .im-head{font-family:'Anton',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px 9px;display:flex;align-items:center;gap:8px}
@@ -339,6 +341,19 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
     z-index:900;  /* over the 800 cards too (Sweep alerts panel, iOS hint): their own actions toast */background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 15px;border-radius:13px;
     max-width:88vw;text-align:center;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
   .toast.show{opacity:1}
+  /* a toast with a link (the offer of another city's map): it takes taps while it shows */
+  .toast.act{pointer-events:auto}
+  .toast a{color:var(--paper);font-weight:800;text-decoration:underline;text-underline-offset:3px;display:inline-block;padding:4px 0}
+  /* the other maps, zoomed out: a pin per city (a tap opens it), merged into a numbered pin when they crowd */
+  .cpin{display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+  .cpin i{flex:none;width:16px;height:16px;border-radius:50%;corner-shape:round;background:var(--paper);border:3px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
+  .cpin b{flex:none;min-width:26px;height:26px;padding:0 6px;border-radius:13px;display:grid;place-items:center;background:var(--ink);color:var(--paper);
+    font-family:'Anton',sans-serif;font-weight:400;font-size:14px;line-height:1;border:2px solid var(--paper);box-shadow:2px 2px 0 rgba(23,21,15,.35)}
+  .cpin span{font-size:12px;font-weight:800;color:var(--ink);background:rgba(253,250,242,.92);border-radius:6px;padding:2px 6px;box-shadow:0 0 0 1.5px rgba(23,21,15,.25)}
+  .cpin.nolbl span{display:none}
+  .cpin:hover span,.cpin:focus-visible span{display:inline;box-shadow:0 0 0 2px var(--ink)}
+  .leaflet-marker-icon.cpin:focus-visible{outline:none}
+  .leaflet-marker-icon.cpin:focus-visible i,.leaflet-marker-icon.cpin:focus-visible b{outline:3px solid var(--meter);outline-offset:2px}
 
   .hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:550;background:var(--paper);
     border:2.5px solid var(--ink);border-radius:17px;box-shadow:var(--shadow);padding:16px 20px;text-align:center;
@@ -370,6 +385,8 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .welcome .wabout{display:block;width:100%;margin-top:9px;text-align:center;font-size:14px;font-weight:800;
     text-decoration:none;color:var(--ink);border:2.5px solid var(--ink);border-radius:15px;padding:11px;background:transparent}
   .welcome .wabout:hover{background:rgba(23,21,15,.05)}
+  .welcome .wcities{margin-top:11px;font-size:13px;text-align:center}
+  .welcome .wcities a{color:var(--ink);font-weight:800;text-underline-offset:3px;white-space:nowrap}
   .welcome .wfoot{margin-top:14px;font-size:11.5px;font-weight:600;color:var(--ink-soft);line-height:1.4;text-align:center}
   .welcome .wfoot a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px}
   /* neighborhood links: the home page's crawlable path to every /n/ page. The card keeps its old
@@ -545,6 +562,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .ios-note{font-size:11.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
   .ios-get{display:flex;justify-content:center;align-items:center;text-decoration:none;margin:12px 0 2px;width:100%}
   .ios-or{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:14px 0 0}
+  .ios-play{display:block;text-align:center;font-size:12px;font-weight:700;color:var(--ink-soft);margin:7px 0 0;text-underline-offset:2px}
   /* Sweep alerts panel (ⓘ menu → Sweep alerts): the iOS hint's bottom card, scrolling when 5 curbs outgrow it */
   .apanel .ios-card{max-height:calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
   .ap-stat{display:flex;gap:8px;align-items:center;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:2px 0 4px}
@@ -694,7 +712,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<h1 class="srh">Oakland street cleaning map: sweeping schedules by block (a CURB preview)</h1>
+<h1 class="srh">Oakland street sweeping map: the next sweep on every block, with alerts</h1>
 <main id="map" aria-label="Oakland parking map"></main>
 
 <div class="top">
@@ -724,6 +742,10 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.54c-.03-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.15-2.76.83-3.48.83-.72 0-1.83-.81-3.01-.79-1.55.02-2.98.9-3.78 2.29-1.61 2.79-.41 6.92 1.15 9.19.76 1.11 1.67 2.35 2.86 2.31 1.15-.05 1.58-.74 2.97-.74 1.39 0 1.78.74 3 .72 1.24-.02 2.02-1.12 2.78-2.24.88-1.29 1.24-2.54 1.26-2.6-.03-.01-2.41-.93-2.43-3.7ZM14.77 5.6c.64-.78 1.07-1.85.95-2.93-.92.04-2.04.61-2.7 1.38-.59.69-1.11 1.79-.97 2.85 1.03.08 2.08-.52 2.72-1.3Z"/></svg></span>
           <span class="im-tx"><b>Get the iOS app</b><small>CURB on the App Store</small></span>
         </a>
+        <a class="im-item" id="imPlay" style="display:none" href="/android" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></svg></span>
+          <span class="im-tx"><b>Android beta</b><small>Join on Google Play</small></span>
+        </a>
         <button class="im-item" id="imGuide" role="menuitem">
           <span class="im-ic" aria-hidden="true" style="display:flex;gap:3px"><i class="d" style="background:var(--green)"></i><i class="d" style="background:var(--amber)"></i><i class="d" style="background:var(--red)"></i></span>
           <span class="im-tx"><b>How CURB works</b><small>Curb colors, sweeping &amp; alerts</small></span>
@@ -732,9 +754,13 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
           <span class="im-tx"><b>Neighborhoods</b><small>Street cleaning by Oakland neighborhood</small></span>
         </button>
-        <a class="im-item" href="/about" role="menuitem">
+        <a class="im-item" href="/cities" role="menuitem">
+          <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z"/><path d="M9 4v14M15 6v14"/></svg></span>
+          <span class="im-tx"><b>Cities</b><small>CURB in more cities, or ask for yours</small></span>
+        </a>
+        <a class="im-item" href="/oakland/about" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
-          <span class="im-tx"><b>About CURB</b><small>What it does &amp; data sources</small></span>
+          <span class="im-tx"><b>About CURB</b><small>Oakland's rules &amp; data sources</small></span>
         </a>
         <div class="im-mini" role="group" aria-label="More actions">
           <button class="im-m" id="imShare" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg><span>Share</span></button>
@@ -805,14 +831,15 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
-  <p>Each side of the street has its own posted sweeping day, one for the odd house numbers and one for the even, most often the 1st and 3rd or the 2nd and 4th time that weekday comes in the month; main streets are swept at night. Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>
+  <p>Each side of the street has its own posted sweeping day, one for the odd house numbers and one for the even, most often the 1st and 3rd or the 2nd and 4th time that weekday comes in the month; main streets are swept at night. Tap where you parked for the rules. Built on the City's open data.</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps soon</span>
     <span class="k"><i style="background:var(--red)"></i>move it now</span>
   </div>
   <button class="btn-go" id="welcomeGo">Show me the map</button>
-  <a class="wabout" href="/about">How it works →</a>
+  <a class="wabout" href="/oakland/about">How it works →</a>
+  <p class="wcities">CURB also maps other cities. <a href="/cities">See them all →</a></p>
   <nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul><li><a href="/oakland?bbox=-122.29353,37.801152,-122.27847,37.807873" data-bbox="-122.29353,37.801152,-122.27847,37.807873">Acorn</a></li><li><a href="/oakland?bbox=-122.295058,37.797336,-122.280554,37.804993" data-bbox="-122.295058,37.797336,-122.280554,37.804993">Acorn Industrial</a></li><li><a href="/oakland?bbox=-122.261241,37.808613,-122.248613,37.817383" data-bbox="-122.261241,37.808613,-122.248613,37.817383">Adams Point</a></li><li><a href="/oakland?bbox=-122.210383,37.782507,-122.196017,37.792101" data-bbox="-122.210383,37.782507,-122.196017,37.792101">Allendale</a></li><li><a href="/oakland?bbox=-122.186654,37.756049,-122.170392,37.765865" data-bbox="-122.186654,37.756049,-122.170392,37.765865">Arroyo Viejo</a></li><li><a href="/oakland?bbox=-122.197253,37.765865,-122.172091,37.772633" data-bbox="-122.197253,37.765865,-122.172091,37.772633">Bancroft Business</a></li><li><a href="/oakland?bbox=-122.214791,37.786324,-122.203287,37.792814" data-bbox="-122.214791,37.786324,-122.203287,37.792814">Bartlett</a></li><li><a href="/oakland?bbox=-122.241276,37.796393,-122.233784,37.802082" data-bbox="-122.241276,37.796393,-122.233784,37.802082">Bella Vista</a></li><li><a href="/oakland?bbox=-122.194824,37.725471,-122.179661,37.740589" data-bbox="-122.194824,37.725471,-122.179661,37.740589">Brookfield Village</a></li><li><a href="/oakland?bbox=-122.270992,37.834608,-122.260131,37.85277" data-bbox="-122.270992,37.834608,-122.260131,37.85277">Bushrod</a></li><li><a href="/oakland?bbox=-122.170392,37.748364,-122.158815,37.761752" data-bbox="-122.170392,37.748364,-122.158815,37.761752">Castlemont</a></li><li><a href="/oakland?bbox=-122.274646,37.794741,-122.263314,37.802304" data-bbox="-122.274646,37.794741,-122.263314,37.802304">Chinatown</a></li><li><a href="/oakland?bbox=-122.268905,37.796312,-122.25938,37.802894" data-bbox="-122.268905,37.796312,-122.25938,37.802894">Civic Center</a></li><li><a href="/oakland?bbox=-122.289933,37.816952,-122.27669,37.82781" data-bbox="-122.289933,37.816952,-122.27669,37.82781">Clawson</a></li><li><a href="/oakland?bbox=-122.254614,37.799727,-122.233452,37.810221" data-bbox="-122.254614,37.799727,-122.233452,37.810221">Cleveland Heights</a></li><li><a href="/oakland?bbox=-122.253854,37.789335,-122.236779,37.800627" data-bbox="-122.253854,37.789335,-122.236779,37.800627">Clinton</a></li><li><a href="/oakland?bbox=-122.198835,37.754127,-122.187571,37.761647" data-bbox="-122.198835,37.754127,-122.187571,37.761647">Coliseum</a></li><li><a href="/oakland?bbox=-122.221016,37.729505,-122.176553,37.77125" data-bbox="-122.221016,37.729505,-122.176553,37.77125">Coliseum Industrial Complex</a></li><li><a href="/oakland?bbox=-122.195169,37.725471,-122.183127,37.737488" data-bbox="-122.195169,37.725471,-122.183127,37.737488">Columbia Gardens</a></li><li><a href="/oakland?bbox=-122.173769,37.744705,-122.161842,37.75362" data-bbox="-122.173769,37.744705,-122.161842,37.75362">Cox</a></li><li><a href="/oakland?bbox=-122.218639,37.794145,-122.203327,37.800657" data-bbox="-122.218639,37.794145,-122.203327,37.800657">Dimond</a></li><li><a href="/oakland?bbox=-122.277685,37.800903,-122.262271,37.811892" data-bbox="-122.277685,37.800903,-122.262271,37.811892">Downtown</a></li><li><a href="/oakland?bbox=-122.163075,37.737507,-122.155055,37.742134" data-bbox="-122.163075,37.737507,-122.155055,37.742134">Durant Manor</a></li><li><a href="/oakland?bbox=-122.216661,37.737365,-122.164795,37.773291" data-bbox="-122.216661,37.737365,-122.164795,37.773291">East 14th Street Business</a></li><li><a href="/oakland?bbox=-122.257517,37.78817,-122.24602,37.795712" data-bbox="-122.257517,37.78817,-122.24602,37.795712">East Peralta</a></li><li><a href="/oakland?bbox=-122.176989,37.760016,-122.163932,37.769162" data-bbox="-122.176989,37.760016,-122.163932,37.769162">Eastmont</a></li><li><a href="/oakland?bbox=-122.172091,37.762686,-122.153705,37.776352" data-bbox="-122.172091,37.762686,-122.153705,37.776352">Eastmont Hills</a></li><li><a href="/oakland?bbox=-122.181479,37.741617,-122.171124,37.748196" data-bbox="-122.181479,37.741617,-122.171124,37.748196">Elmhurst Park</a></li><li><a href="/oakland?bbox=-122.20645,37.772633,-122.195897,37.782507" data-bbox="-122.20645,37.772633,-122.195897,37.782507">Fairfax</a></li><li><a href="/oakland?bbox=-122.205961,37.771663,-122.195897,37.772687" data-bbox="-122.205961,37.771663,-122.195897,37.772687">Fairfax Business</a></li><li><a href="/oakland?bbox=-122.261729,37.841342,-122.252293,37.853742" data-bbox="-122.261729,37.841342,-122.252293,37.853742">Fairview Park</a></li><li><a href="/oakland?bbox=-122.195815,37.751283,-122.182345,37.758582" data-bbox="-122.195815,37.751283,-122.182345,37.758582">Fitchburg</a></li><li><a href="/oakland?bbox=-122.157261,37.74076,-122.145345,37.74893" data-bbox="-122.157261,37.74076,-122.145345,37.74893">Foothill Square</a></li><li><a href="/oakland?bbox=-122.215823,37.76922,-122.203088,37.780173" data-bbox="-122.215823,37.76922,-122.203088,37.780173">Fremont</a></li><li><a href="/oakland?bbox=-122.195897,37.769832,-122.176374,37.777895" data-bbox="-122.195897,37.769832,-122.176374,37.777895">Frick</a></li><li><a href="/oakland?bbox=-122.227965,37.769386,-122.216188,37.777619" data-bbox="-122.227965,37.769386,-122.216188,37.777619">Fruitvale Station</a></li><li><a href="/oakland?bbox=-122.283063,37.836661,-122.275855,37.843498" data-bbox="-122.283063,37.836661,-122.275855,37.843498">Gaskill</a></li><li><a href="/oakland?bbox=-122.233452,37.798767,-122.2149,37.813584" data-bbox="-122.233452,37.798767,-122.2149,37.813584">Glenview</a></li><li><a href="/oakland?bbox=-122.289194,37.836711,-122.281858,37.850479" data-bbox="-122.289194,37.836711,-122.281858,37.850479">Golden Gate</a></li><li><a href="/oakland?bbox=-122.25439,37.809973,-122.239231,37.822032" data-bbox="-122.25439,37.809973,-122.239231,37.822032">Grand Lake</a></li><li><a href="/oakland?bbox=-122.219152,37.778954,-122.207422,37.787929" data-bbox="-122.219152,37.778954,-122.207422,37.787929">Harrington</a></li><li><a href="/oakland?bbox=-122.194838,37.76083,-122.176989,37.77113" data-bbox="-122.194838,37.76083,-122.176989,37.77113">Havenscourt</a></li><li><a href="/oakland?bbox=-122.236828,37.776211,-122.22274,37.784346" data-bbox="-122.236828,37.776211,-122.22274,37.784346">Hawthorne</a></li><li><a href="/oakland?bbox=-122.18904,37.759581,-122.181121,37.765187" data-bbox="-122.18904,37.759581,-122.181121,37.765187">Hegenberger</a></li><li><a href="/oakland?bbox=-122.187205,37.744635,-122.174321,37.752941" data-bbox="-122.187205,37.744635,-122.174321,37.752941">Highland</a></li><li><a href="/oakland?bbox=-122.23793,37.79537,-122.233065,37.799776" data-bbox="-122.23793,37.79537,-122.233065,37.799776">Highland Park</a></li><li><a href="/oakland?bbox=-122.240163,37.788706,-122.226776,37.796605" data-bbox="-122.240163,37.788706,-122.226776,37.796605">Highland Terrace</a></li><li><a href="/oakland?bbox=-122.278684,37.81261,-122.268024,37.827038" data-bbox="-122.278684,37.81261,-122.268024,37.827038">Hoover/Foster</a></li><li><a href="/oakland?bbox=-122.1698,37.739647,-122.156775,37.748364" data-bbox="-122.1698,37.739647,-122.156775,37.748364">Iveywood</a></li><li><a href="/oakland?bbox=-122.250309,37.796183,-122.23527,37.803282" data-bbox="-122.250309,37.796183,-122.23527,37.803282">Ivy Hill</a></li><li><a href="/oakland?bbox=-122.216643,37.775649,-122.204183,37.785405" data-bbox="-122.216643,37.775649,-122.204183,37.785405">Jefferson</a></li><li><a href="/oakland?bbox=-122.247812,37.809164,-122.232518,37.817895" data-bbox="-122.247812,37.809164,-122.232518,37.817895">Lakeshore</a></li><li><a href="/oakland?bbox=-122.267604,37.800867,-122.260814,37.808095" data-bbox="-122.267604,37.800867,-122.260814,37.808095">Lakeside</a></li><li><a href="/oakland?bbox=-122.161842,37.739063,-122.148442,37.749862" data-bbox="-122.161842,37.739063,-122.148442,37.749862">Las Palmas</a></li><li><a href="/oakland?bbox=-122.205906,37.786738,-122.194818,37.796131" data-bbox="-122.205906,37.786738,-122.194818,37.796131">Laurel</a></li><li><a href="/oakland?bbox=-122.207277,37.801806,-122.193524,37.810744" data-bbox="-122.207277,37.801806,-122.193524,37.810744">Lincoln Highlands</a></li><li><a href="/oakland?bbox=-122.205181,37.759644,-122.194043,37.765007" data-bbox="-122.205181,37.759644,-122.194043,37.765007">Lockwood-Tevis</a></li><li><a href="/oakland?bbox=-122.278817,37.824261,-122.266159,37.836294" data-bbox="-122.278817,37.824261,-122.266159,37.836294">Longfellow</a></li><li><a href="/oakland?bbox=-122.2353,37.7989,-122.226676,37.804295" data-bbox="-122.2353,37.7989,-122.226676,37.804295">Lynn</a></li><li><a href="/oakland?bbox=-122.204183,37.772633,-122.186941,37.786709" data-bbox="-122.204183,37.772633,-122.186941,37.786709">Maxwell Park</a></li><li><a href="/oakland?bbox=-122.289541,37.812676,-122.274008,37.822735" data-bbox="-122.289541,37.812676,-122.274008,37.822735">McClymonds</a></li><li><a href="/oakland?bbox=-122.234106,37.784289,-122.221646,37.793547" data-bbox="-122.234106,37.784289,-122.221646,37.793547">Meadow Brook</a></li><li><a href="/oakland?bbox=-122.218525,37.763657,-122.204958,37.772644" data-bbox="-122.218525,37.763657,-122.204958,37.772644">Melrose</a></li><li><a href="/oakland?bbox=-122.259652,37.793736,-122.249134,37.800722" data-bbox="-122.259652,37.793736,-122.249134,37.800722">Merritt</a></li><li><a href="/oakland?bbox=-122.188471,37.775396,-122.171819,37.784522" data-bbox="-122.188471,37.775396,-122.171819,37.784522">Mills College</a></li><li><a href="/oakland?bbox=-122.183838,37.769162,-122.164022,37.780353" data-bbox="-122.183838,37.769162,-122.164022,37.780353">Millsmont</a></li><li><a href="/oakland?bbox=-122.227788,37.818339,-122.19411,37.83915" data-bbox="-122.227788,37.818339,-122.19411,37.83915">Montclair</a></li><li><a href="/oakland?bbox=-122.213935,37.824833,-122.207059,37.830694" data-bbox="-122.213935,37.824833,-122.207059,37.830694">Montclair Business</a></li><li><a href="/oakland?bbox=-122.268024,37.82232,-122.256651,37.829525" data-bbox="-122.268024,37.82232,-122.256651,37.829525">Mosswood</a></li><li><a href="/oakland?bbox=-122.238553,37.77328,-122.22655,37.782533" data-bbox="-122.238553,37.77328,-122.22655,37.782533">North Kennedy Tract</a></li><li><a href="/oakland?bbox=-122.1785,37.731908,-122.165975,37.744048" data-bbox="-122.1785,37.731908,-122.165975,37.744048">North Stonehurst</a></li><li><a href="/oakland?bbox=-122.272708,37.810806,-122.260602,37.816803" data-bbox="-122.272708,37.810806,-122.260602,37.816803">Northgate/Waverly</a></li><li><a href="/oakland?bbox=-122.292468,37.804577,-122.275827,37.81376" data-bbox="-122.292468,37.804577,-122.275827,37.81376">Oak Center</a></li><li><a href="/oakland?bbox=-122.164903,37.751281,-122.147645,37.768899" data-bbox="-122.164903,37.751281,-122.147645,37.768899">Oak Knoll-Golf Links</a></li><li><a href="/oakland?bbox=-122.235946,37.779854,-122.225513,37.785186" data-bbox="-122.235946,37.779854,-122.225513,37.785186">Oak Tree</a></li><li><a href="/oakland?bbox=-122.26401,37.811887,-122.252247,37.824393" data-bbox="-122.26401,37.811887,-122.252247,37.824393">Oakland Avenue/Harrison Street</a></li><li><a href="/oakland?bbox=-122.218242,37.806469,-122.19759,37.821681" data-bbox="-122.218242,37.806469,-122.19759,37.821681">Oakmore</a></li><li><a href="/oakland?bbox=-122.280554,37.79884,-122.272973,37.80673" data-bbox="-122.280554,37.79884,-122.272973,37.80673">Old City</a></li><li><a href="/oakland?bbox=-122.286118,37.840937,-122.276973,37.850809" data-bbox="-122.286118,37.840937,-122.276973,37.850809">Paradise Park</a></li><li><a href="/oakland?bbox=-122.22274,37.783194,-122.214801,37.793221" data-bbox="-122.22274,37.783194,-122.214801,37.793221">Patten</a></li><li><a href="/oakland?bbox=-122.221336,37.782271,-122.213111,37.790614" data-bbox="-122.221336,37.782271,-122.213111,37.790614">Peralta Hacienda</a></li><li><a href="/oakland?bbox=-122.265342,37.7891,-122.253636,37.797804" data-bbox="-122.265342,37.7891,-122.253636,37.797804">Peralta/Laney</a></li><li><a href="/oakland?bbox=-122.258668,37.819568,-122.243388,37.834459" data-bbox="-122.258668,37.819568,-122.243388,37.834459">Piedmont Avenue</a></li><li><a href="/oakland?bbox=-122.271022,37.815704,-122.259978,37.824261" data-bbox="-122.271022,37.815704,-122.259978,37.824261">Pill Hill</a></li><li><a href="/oakland?bbox=-122.310132,37.804993,-122.288769,37.826438" data-bbox="-122.310132,37.804993,-122.288769,37.826438">Prescott</a></li><li><a href="/oakland?bbox=-122.283693,37.785461,-122.25176,37.801152" data-bbox="-122.283693,37.785461,-122.25176,37.801152">Produce and Waterfront</a></li><li><a href="/oakland?bbox=-122.290501,37.80947,-122.272708,37.816952" data-bbox="-122.290501,37.80947,-122.272708,37.816952">Ralph Bunche</a></li><li><a href="/oakland?bbox=-122.24602,37.783417,-122.231628,37.793832" data-bbox="-122.24602,37.783417,-122.231628,37.793832">Rancho San Antonio</a></li><li><a href="/oakland?bbox=-122.200621,37.783792,-122.177221,37.806423" data-bbox="-122.200621,37.783792,-122.177221,37.806423">Redwood Heights</a></li><li><a href="/oakland?bbox=-122.226776,37.790967,-122.218639,37.800013" data-bbox="-122.226776,37.790967,-122.218639,37.800013">Reservoir Hill</a></li><li><a href="/oakland?bbox=-122.257581,37.832746,-122.241789,37.851936" data-bbox="-122.257581,37.832746,-122.241789,37.851936">Rockridge</a></li><li><a href="/oakland?bbox=-122.225871,37.772997,-122.212901,37.783788" data-bbox="-122.225871,37.772997,-122.212901,37.783788">Saint Elizabeth</a></li><li><a href="/oakland?bbox=-122.277308,37.805294,-122.269009,37.81261" data-bbox="-122.277308,37.805294,-122.269009,37.81261">San Pablo Gateway</a></li><li><a href="/oakland?bbox=-122.27772,37.834608,-122.266159,37.847764" data-bbox="-122.27772,37.834608,-122.266159,37.847764">Santa Fe</a></li><li><a href="/oakland?bbox=-122.224575,37.783788,-122.216959,37.798767" data-bbox="-122.224575,37.783788,-122.216959,37.798767">Sausal Creek</a></li><li><a href="/oakland?bbox=-122.219011,37.791759,-122.210669,37.798411" data-bbox="-122.219011,37.791759,-122.210669,37.798411">School</a></li><li><a href="/oakland?bbox=-122.202948,37.763675,-122.189023,37.771663" data-bbox="-122.202948,37.763675,-122.189023,37.771663">Seminary</a></li><li><a href="/oakland?bbox=-122.265674,37.834448,-122.251291,37.844742" data-bbox="-122.265674,37.834448,-122.251291,37.844742">Shafter</a></li><li><a href="/oakland?bbox=-122.142704,37.730786,-122.129137,37.740606" data-bbox="-122.142704,37.730786,-122.129137,37.740606">Sheffield</a></li><li><a href="/oakland?bbox=-122.183127,37.725171,-122.170516,37.73583" data-bbox="-122.183127,37.725171,-122.170516,37.73583">Sobrante Park</a></li><li><a href="/oakland?bbox=-122.236263,37.769656,-122.223735,37.775562" data-bbox="-122.236263,37.769656,-122.223735,37.775562">South Kennedy</a></li><li><a href="/oakland?bbox=-122.310132,37.801019,-122.29353,37.808734" data-bbox="-122.310132,37.801019,-122.29353,37.808734">South Prescott</a></li><li><a href="/oakland?bbox=-122.181722,37.731126,-122.170254,37.739121" data-bbox="-122.181722,37.731126,-122.170254,37.739121">South Stonehurst</a></li><li><a href="/oakland?bbox=-122.267134,37.827588,-122.252386,37.836832" data-bbox="-122.267134,37.827588,-122.252386,37.836832">Temescal</a></li><li><a href="/oakland?bbox=-122.163297,37.747392,-122.150816,37.760932" data-bbox="-122.163297,37.747392,-122.150816,37.760932">Toler Heights</a></li><li><a href="/oakland?bbox=-122.24519,37.804295,-122.221598,37.81459" data-bbox="-122.24519,37.804295,-122.221598,37.81459">Trestle Glen</a></li><li><a href="/oakland?bbox=-122.233119,37.793547,-122.224156,37.800474" data-bbox="-122.233119,37.793547,-122.224156,37.800474">Tuxedo</a></li><li><a href="/oakland?bbox=-122.217345,37.793724,-122.194616,37.809992" data-bbox="-122.217345,37.793724,-122.194616,37.809992">Upper Diamond</a></li><li><a href="/oakland?bbox=-122.215675,37.78958,-122.204006,37.796556" data-bbox="-122.215675,37.78958,-122.204006,37.796556">Upper Peralta Creek</a></li><li><a href="/oakland?bbox=-122.248752,37.832213,-122.217521,37.852643" data-bbox="-122.248752,37.832213,-122.217521,37.852643">Upper Rockridge</a></li><li><a href="/oakland?bbox=-122.178776,37.749897,-122.165698,37.760016" data-bbox="-122.178776,37.749897,-122.165698,37.760016">Webster</a></li><li><a href="/oakland?bbox=-122.206599,37.767623,-122.197253,37.771831" data-bbox="-122.206599,37.767623,-122.197253,37.771831">Wentworth Holland</a></li><li><a href="/oakland?bbox=-122.187415,37.748638,-122.177977,37.75631" data-bbox="-122.187415,37.748638,-122.177977,37.75631">Woodland</a></li></ul></nav>
   <p class="wfoot">Free, no account. Built on <a href="https://www.oaklandca.gov/Public-Safety-Streets/Streets/Street-Sweeping/Map-Your-Streets-Sweeping" target="_blank" rel="noopener">Oakland's open data</a>. The posted sign always wins.</p>
 </div>
@@ -1221,7 +1248,7 @@ async function loadViewport(){
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}
   hint.style.opacity='0';hint.style.visibility='hidden';
   lastRows=data; segBounds=b;
-  if(!data.length&&!noCovToasted){noCovToasted=true; toast("No street-sweeping schedule here. This preview covers Oakland.");}
+  if(!data.length&&!noCovToasted){noCovToasted=true; toast("No street-sweeping schedule here. This map covers Oakland.");}
   drawSegments(data);
   tryPendingOpen();
 }
@@ -2630,6 +2657,53 @@ document.getElementById('imAlerts').onclick=openAlertsPanel;
 document.getElementById('apClose').onclick=closeAlertsPanel;
 document.getElementById('alertsPanel').addEventListener('click',e=>{ if(e.target.id==='alertsPanel')closeAlertsPanel(); });
 
+/* ---------- the other maps: San Francisco and the public cities (owner, 2026-10-20) ---------- */
+// Every map CURB has, for a first visit (open the visitor's city), the locate button (offer that city's map) and the pins
+// once a map is zoomed out past its city. San Francisco's entry is this page's; the cities between the markers are
+// written by scripts/cities/configs.mjs from scripts/cities/public.mjs: don't edit them here.
+const CITY_MAPS=[{"id":"sf","name":"San Francisco","region":"California","path":"/","center":[37.7749,-122.4194],"bounds":[[37.685,-122.56],[37.84,-122.34]]},
+/* cities:start */
+{"id":"new-york","name":"New York City","region":"New York","path":"/new-york","center":[40.7835,-73.9765],"bounds":[[40.498323,-74.254958],[40.915111,-73.700021]]},
+{"id":"chicago","name":"Chicago","region":"Illinois","path":"/chicago","center":[41.8985,-87.6559],"bounds":[[41.645,-87.847],[42.023,-87.524]]},
+{"id":"los-angeles","name":"Los Angeles","region":"California","path":"/los-angeles","center":[34.0635,-118.301],"bounds":[[33.72424,-118.64078],[34.32274,-118.16039]]},
+{"id":"milwaukee","name":"Milwaukee","region":"Wisconsin","path":"/milwaukee","center":[42.99,-87.895],"bounds":[[42.9208,-88.0677],[43.1948,-87.8671]]},
+{"id":"montreal","name":"Montréal","region":"Quebec","path":"/montreal","center":[45.5249,-73.5901],"bounds":[[45.4314,-73.7537],[45.7018,-73.4791]]},
+{"id":"denver","name":"Denver","region":"Colorado","path":"/denver","center":[39.745,-104.95],"bounds":[[39.6144,-105.1099],[39.9141,-104.5997]]},
+{"id":"oakland","name":"Oakland","region":"California","path":"/oakland","center":[37.8135,-122.2555],"bounds":[[37.72554,-122.303556],[37.853888,-122.138676]]},
+{"id":"la-county","name":"Unincorporated LA County","region":"California","path":"/la-county","center":[34.0352,-118.1598],"bounds":[[33.84663,-118.25645],[34.21669,-117.83765]]},
+{"id":"madison","name":"Madison","region":"Wisconsin","path":"/madison","center":[43.088,-89.355],"bounds":[[42.9996,-89.5716],[43.1719,-89.2339]]},
+{"id":"philadelphia","name":"Philadelphia","region":"Pennsylvania","path":"/philadelphia","center":[39.9905,-75.155],"bounds":[[39.9047,-75.2553],[40.0575,-75.0395]]},
+{"id":"riverside","name":"Riverside","region":"California","path":"/riverside","center":[33.961,-117.3915],"bounds":[[33.8676,-117.5284],[34.0237,-117.2738]]},
+{"id":"saint-paul","name":"Saint Paul","region":"Minnesota","path":"/saint-paul","center":[44.9395,-93.146],"bounds":[[44.8858,-93.2128],[44.997,-92.9994]]},
+{"id":"pittsburgh","name":"Pittsburgh","region":"Pennsylvania","path":"/pittsburgh","center":[40.462,-79.948],"bounds":[[40.3717,-80.0794],[40.4983,-79.8741]]},
+{"id":"san-diego","name":"San Diego","region":"California","path":"/san-diego","center":[32.7172,-117.16],"bounds":[[32.5438,-117.2815],[33.0529,-116.9278]]},
+{"id":"paterson","name":"Paterson","region":"New Jersey","path":"/paterson","center":[40.9165,-74.1718],"bounds":[[40.8847,-74.2095],[40.945,-74.1272]]},
+{"id":"san-jose","name":"San Jose","region":"California","path":"/san-jose","center":[37.3455,-121.8332],"bounds":[[37.2414,-122.0174],[37.4358,-121.7889]]},
+{"id":"washington-dc","name":"Washington, DC","region":"District of Columbia","path":"/washington-dc","center":[38.918,-77.025],"bounds":[[38.7932,-77.1166],[38.9953,-76.9095]]},
+{"id":"somerville","name":"Somerville","region":"Massachusetts","path":"/somerville","center":[42.3876,-71.0995],"bounds":[[42.3733,-71.1346],[42.4174,-71.0776]]},
+{"id":"santa-monica","name":"Santa Monica","region":"California","path":"/santa-monica","center":[34.011,-118.4654],"bounds":[[33.9958,-118.5172],[34.0519,-118.4468]]},
+{"id":"glendale","name":"Glendale","region":"California","path":"/glendale","center":[34.1469,-118.2469],"bounds":[[34.1173,-118.3065],[34.2234,-118.2261]]},
+{"id":"berkeley","name":"Berkeley","region":"California","path":"/berkeley","center":[37.8765,-122.29],"bounds":[[37.8463,-122.3198],[37.9049,-122.2346]]},
+{"id":"norfolk","name":"Norfolk","region":"Virginia","path":"/norfolk","center":[36.8802,-76.2884],"bounds":[[36.8209,-76.3294],[36.9692,-76.1771]]},
+{"id":"sacramento","name":"Sacramento","region":"California","path":"/sacramento","center":[38.5785,-121.4688],"bounds":[[38.438,-121.5608],[38.6856,-121.3629]]},
+{"id":"hoboken","name":"Hoboken","region":"New Jersey","path":"/hoboken","center":[40.744,-74.0305],"bounds":[[40.7304,-74.0485],[40.763,-74.0178]]},
+/* cities:end */
+];
+// The map whose bounds hold a point, the smallest when two overlap (Hoboken inside New York's box, Santa Monica inside
+// Los Angeles'), or null; `but` leaves one out (this page's own city).
+function mapAt(lat,lng,but){
+  let best=null, ba=Infinity;
+  for(const m of CITY_MAPS){
+    if(m.id===but)continue;
+    const [[s,w],[n,e]]=m.bounds;
+    if(lat<s||lat>n||lng<w||lng>e)continue;
+    const a=(n-s)*(e-w); if(a<ba){ba=a;best=m;}
+  }
+  return best;
+}
+// A fix this coarse (an IP guess, a phone with Precise Location off) can't pick a city.
+const CITY_FIX_MAX=20000;
+
 /* ---------- locate / tap ---------- */
 // Live geolocation permission ('granted'|'prompt'|'denied'; '' until the Permissions API answers, or
 // where it's missing). Read synchronously on tap: getCurrentPosition must not wait on the async query.
@@ -2714,7 +2788,14 @@ let accRing=null;
 function outsideCity(lat,lng){return !L.latLngBounds(PLACE.BOUNDS).contains([lat,lng]);}
 function placeFix(p,quiet){
   const c=p.coords, acc=c.accuracy;
-  if(outsideCity(c.latitude,c.longitude)){ if(!quiet)toast("You're outside Oakland, and this preview only covers Oakland. Search a street or tap a curb."); return; }
+  if(outsideCity(c.latitude,c.longitude)){
+    if(quiet)return;
+    // inside another map's bounds (a public city, or San Francisco from a city's page): offer that map
+    const there=acc>CITY_FIX_MAX?null:mapAt(c.latitude,c.longitude,CITY);
+    if(there)toastLink("You're outside "+CITY_NAME[CITY]+", in "+there.name+".",there.path,'Open the '+there.name+' map');
+    else toast("You're outside Oakland, and this map only covers Oakland. Search a street or tap a curb.");
+    return;
+  }
   if(!(acc>ACC_MAX)){  // unknown (null/0/NaN) is trusted, as before
     placeYou(c.latitude,c.longitude,true,null,quiet);
     if(pendingOpen&&!quiet){pendingOpen.loc=true;locBusy(true);}  // stay busy until the block opens
@@ -2796,6 +2877,36 @@ async function openCurb(cnn,side){
     // curbSilent: the iOS app (build 7+) never shows a permission prompt for this request.
     {enableHighAccuracy:true,timeout:window.__curbNativeGeoInstalled?15000:8000,maximumAge:60000,curbSilent:true});
 })();
+/* First visit to curb.guide (owner, 2026-10-20): ask for the visitor's location once per device, right away, with the
+   browser's own prompt (no card of ours). Inside a public city's bounds, open that city's map; in San Francisco, or with no
+   answer, stay here quietly (in SF the map centers on them, as a later visit's launch does); outside every map, stay and say
+   so, with the cities page. Only on this page, only for a person: never a crawler or an automated browser, never the
+   iPhone app (its own prompt and the launch locate above stay as they are), never a shared block or a framed view, and
+   never a later visit (curbOnboarded is written after this script on a first visit; curbCityAsk is ours). */
+const FIRST_VISIT=(()=>{try{return !localStorage.getItem('curbOnboarded')&&!localStorage.getItem('curbCityAsk');}catch(_){return false;}})();
+const IS_BOT=navigator.webdriver===true||/(?:bot|crawler|spider)\/|\+https?:\/\/|googlebot|bingbot|googleother|inspectiontool|storebot|adsbot|mediapartners|lighthouse|headlesschrome|bingpreview|facebookexternalhit|meta-external|meta-webindexer|bytespider|petalbot|applebot|yandex|baiduspider|duckduckbot|slurp|gptbot|claudebot|perplexity|ccbot|amazonbot|ahrefs|semrush/i.test(navigator.userAgent||'');
+(function firstVisitCity(){
+  if(!FIRST_VISIT||IS_BOT||EMBED||CITY!=='sf'||location.pathname!=='/')return;
+  if(QS.get('bbox')||QS.get('b'))return;  // a neighborhood view or a shared block came first: ask on a plain visit
+  if(window.__curbNativeGeoInstalled||window.__curbNativePush)return;  // the iPhone app
+  if(!navigator.geolocation)return;
+  try{localStorage.setItem('curbCityAsk','1');}catch(_){return;}  // asked once; where that can't be kept, never asked
+  const gen=whereGen; let moved=false; const onDrag=()=>{moved=true;}; map.once('dragstart',onDrag);
+  navigator.geolocation.getCurrentPosition(p=>{
+    map.off('dragstart',onDrag);
+    const c=p.coords; if(!(c.accuracy<=CITY_FIX_MAX))return;
+    const m=mapAt(c.latitude,c.longitude), mine=!moved&&whereGen===gen;  // still the map they opened, untouched
+    if(m&&m.id!=='sf'){
+      track('first_visit_city');
+      if(mine)location.replace(m.path);
+      else toastLink("You're in "+m.name+".",m.path,'Open the '+m.name+' map');  // they've started here: offer it instead
+      return;
+    }
+    if(m){ if(mine)placeFix(p,true); return; }
+    track('first_visit_elsewhere');
+    toastLink("CURB isn't in your area yet.",'/cities','See the cities, or request yours');
+  },()=>{},{enableHighAccuracy:true,timeout:20000,maximumAge:600000});
+})();
 /* Open the block at a point once curb data that COVERS the point is drawn. segCache can still hold the
    previous view's rows (a far fix opened a stale, wrong block), and the new view's fetch only starts
    after the fly + moveend debounce and needs two Socrata round trips — so wait on loadViewport (up to
@@ -2827,7 +2938,7 @@ function tryPendingOpen(){
   const n=nearestSeg(po.lat,po.lng);
   // A search/link cnn fallback skips the cap: big parcels' address points sit >80 m from their block.
   if(n&&(po.cnnHint||n.d<=NEAR_M))return openPending(n);
-  endPendingOpen(lastRows.length?'No swept curb within 80 m. Tap your block on the map.':"No street-sweeping schedule here. This preview covers Oakland.");
+  endPendingOpen(lastRows.length?'No swept curb within 80 m. Tap your block on the map.':"No street-sweeping schedule here. This map covers Oakland.");
 }
 function openPending(n){endPendingOpen();openSheet(n.group,n.side.key);}
 function endPendingOpen(msg){const po=pendingOpen; if(!po)return; pendingOpen=null; if(po.loc)locBusy(false); if(msg)toast(msg);}
@@ -2863,6 +2974,54 @@ if(CAN_HOVER){
   });
   map.on('mouseout movestart zoomstart',hideOvTip);
 }
+
+/* ---------- the other maps, zoomed out (owner, 2026-10-20) ---------- */
+// Zoomed out past the city (the maps aren't bounded), a pin for every other map in CITY_MAPS; a tap opens it, and pins
+// closer than a thumb merge into a numbered one that zooms in on them. Under them, from zoom 7 out, Natural Earth's
+// outlines (basemap/north-america.json, scripts/cities/hub-map.mjs, loaded the first time), so the pins sit on a map: a
+// city's own basemap only covers its streets.
+const PIN_ZOOM=9, OUTLINE_ZOOM=7, PIN_GAP=34;
+let pinLayer=null, outlines=null, outlinesP=null;
+map.createPane('outlines').style.zIndex=250;  // over the basemap (200), under the curbs (400)
+map.getPane('outlines').style.pointerEvents='none';
+function drawOutlines(){
+  if(EMBED||map.getZoom()>OUTLINE_ZOOM){ if(outlines&&map.hasLayer(outlines))map.removeLayer(outlines); return; }
+  if(outlines){ if(!map.hasLayer(outlines))outlines.addTo(map); return; }
+  if(outlinesP)return;
+  outlinesP=fetch('/basemap/north-america.json?v=1').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(g=>{
+    const o={pane:'outlines',interactive:false}, ll=r=>r.map(([lo,la])=>[la,lo]);
+    outlines=L.layerGroup([
+      L.rectangle([[5,-140],[66,-50]],{...o,stroke:false,fillColor:'#E3D8C2',fillOpacity:1}),
+      L.polygon(g.land.map(p=>p.map(ll)),{...o,color:'#17150F',opacity:.45,weight:1,fillColor:'#FBF7EF',fillOpacity:1}),
+      L.polyline(g.states.map(ll),{...o,color:'#17150F',opacity:.2,weight:1}),
+    ]);
+    if(map.getZoom()<=OUTLINE_ZOOM)outlines.addTo(map);
+  }).catch(e=>{outlinesP=null;console.warn('outlines:',e&&e.message);});
+}
+function drawCityPins(){
+  if(pinLayer){map.removeLayer(pinLayer);pinLayer=null;}
+  if(EMBED||map.getZoom()>PIN_ZOOM)return;
+  const groups=[];
+  for(const m of CITY_MAPS){
+    if(m.id===CITY)continue;
+    const p=map.latLngToLayerPoint(m.center), g=groups.find(x=>x.p.distanceTo(p)<PIN_GAP);
+    if(g)g.list.push(m); else groups.push({p,list:[m]});
+  }
+  // names to the right of their pins, left off where they would cover another pin or name
+  const boxes=groups.map(g=>[g.p.x-15,g.p.y-15,g.p.x+15,g.p.y+15]), hit=(a,b)=>a[0]<b[2]&&b[0]<a[2]&&a[1]<b[3]&&b[1]<a[3];
+  pinLayer=L.layerGroup(groups.map((g,i)=>{
+    const one=g.list.length===1, m=g.list[0], label=one?m.name:m.name+' +'+(g.list.length-1);
+    const box=[g.p.x+12,g.p.y-11,g.p.x+20+label.length*7.4,g.p.y+11];
+    const shown=!boxes.some((b,j)=>j!==i&&hit(box,b)); if(shown)boxes.push(box);
+    const at=one?m.center:L.latLngBounds(g.list.map(x=>x.center)).getCenter();
+    const mk=L.marker(at,{keyboard:true,title:one?'Open the '+m.name+' map':g.list.map(x=>x.name).join(', '),
+      icon:L.divIcon({className:'cpin'+(shown?'':' nolbl'),html:(one?'<i></i>':'<b>'+g.list.length+'</b>')+'<span>'+esc(label)+'</span>',iconSize:[one?16:26,one?16:26],iconAnchor:[one?8:13,one?8:13]})});
+    return mk.on('click',()=>{ if(one){track('city_pin');location.assign(m.path);}
+      else map.flyToBounds(L.latLngBounds(g.list.map(x=>x.center)).pad(.5),{maxZoom:PIN_ZOOM,duration:.6}); });
+  })).addTo(map);
+}
+map.on('zoomend',()=>{drawOutlines();drawCityPins();});
+map.whenReady(()=>{drawOutlines();drawCityPins();});
 
 /* ---------- day filter + today's date ---------- */
 let dayChips=[];
@@ -3062,7 +3221,8 @@ function closeInfoMenu(){
     if(!rate&&!get) return;
     const light=id=>{
       if(rate){ rate.href='https://apps.apple.com/app/id'+id+'?action=write-review'; rate.style.display=''; }
-      if(get && !window.__curbNativePush){ get.href='https://apps.apple.com/app/id'+id; get.style.display=''; }
+      if(get && !window.__curbNativePush){ get.href='https://apps.apple.com/app/id'+id; get.style.display='';
+        const play=document.getElementById('imPlay'); if(play)play.style.display=''; }  // the Android beta (/android) under it
     };
     let rec=null; try{ rec=JSON.parse(localStorage.getItem('curbAppId')||'null'); }catch(_){}
     if(rec&&rec.id){ light(rec.id); return; }
@@ -3326,7 +3486,14 @@ async function doSearch(){
 
 /* ---------- misc ---------- */
 let tt=null;
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),4200);}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('act');t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),4200);}
+// A toast with one link (another city's map, the cities page): it takes taps, and stays longer than a plain one.
+function toastLink(m,href,label){
+  const t=document.getElementById('toast'), a=document.createElement('a');
+  a.href=href; a.textContent=label;
+  t.textContent=m+' '; t.appendChild(a); t.classList.add('show','act');
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show','act'),8000);
+}
 let mvt=null;
 map.on('moveend',()=>{clearTimeout(mvt);mvt=setTimeout(loadViewport,250);});
 map.whenReady(()=>setTimeout(loadViewport,400));

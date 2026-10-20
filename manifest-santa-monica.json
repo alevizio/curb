@@ -1,7 +1,7 @@
 {
-  "name": "CURB Santa Monica (preview)",
+  "name": "CURB Santa Monica",
   "short_name": "CURB Santa M",
-  "description": "Santa Monica street sweeping, block by block. A preview on the City's open data.",
+  "description": "Santa Monica street sweeping, block by block, from the City's open data.",
   "start_url": "/santa-monica",
   "scope": "/",
   "display": "standalone",

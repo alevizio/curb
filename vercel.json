@@ -173,6 +173,106 @@
       "destination": "/milwaukee.html"
     },
     {
+      "source": "/cities",
+      "destination": "/cities.html"
+    },
+    {
+      "source": "/berkeley/about",
+      "destination": "/berkeley/about.html"
+    },
+    {
+      "source": "/chicago/about",
+      "destination": "/chicago/about.html"
+    },
+    {
+      "source": "/denver/about",
+      "destination": "/denver/about.html"
+    },
+    {
+      "source": "/glendale/about",
+      "destination": "/glendale/about.html"
+    },
+    {
+      "source": "/hoboken/about",
+      "destination": "/hoboken/about.html"
+    },
+    {
+      "source": "/la-county/about",
+      "destination": "/la-county/about.html"
+    },
+    {
+      "source": "/los-angeles/about",
+      "destination": "/los-angeles/about.html"
+    },
+    {
+      "source": "/madison/about",
+      "destination": "/madison/about.html"
+    },
+    {
+      "source": "/milwaukee/about",
+      "destination": "/milwaukee/about.html"
+    },
+    {
+      "source": "/montreal/about",
+      "destination": "/montreal/about.html"
+    },
+    {
+      "source": "/new-york/about",
+      "destination": "/new-york/about.html"
+    },
+    {
+      "source": "/norfolk/about",
+      "destination": "/norfolk/about.html"
+    },
+    {
+      "source": "/oakland/about",
+      "destination": "/oakland/about.html"
+    },
+    {
+      "source": "/paterson/about",
+      "destination": "/paterson/about.html"
+    },
+    {
+      "source": "/philadelphia/about",
+      "destination": "/philadelphia/about.html"
+    },
+    {
+      "source": "/pittsburgh/about",
+      "destination": "/pittsburgh/about.html"
+    },
+    {
+      "source": "/riverside/about",
+      "destination": "/riverside/about.html"
+    },
+    {
+      "source": "/sacramento/about",
+      "destination": "/sacramento/about.html"
+    },
+    {
+      "source": "/saint-paul/about",
+      "destination": "/saint-paul/about.html"
+    },
+    {
+      "source": "/san-diego/about",
+      "destination": "/san-diego/about.html"
+    },
+    {
+      "source": "/san-jose/about",
+      "destination": "/san-jose/about.html"
+    },
+    {
+      "source": "/santa-monica/about",
+      "destination": "/santa-monica/about.html"
+    },
+    {
+      "source": "/somerville/about",
+      "destination": "/somerville/about.html"
+    },
+    {
+      "source": "/washington-dc/about",
+      "destination": "/washington-dc/about.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },
@@ -199,6 +299,10 @@
     {
       "source": "/support",
       "destination": "/support.html"
+    },
+    {
+      "source": "/android",
+      "destination": "/android.html"
     },
     {
       "source": "/holidays",

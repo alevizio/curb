@@ -23,6 +23,8 @@ Street-cleaning tickets are $105 (2026).
   visualized — yearly fines, violation types, hour-of-day, neighborhood totals,
   five-year surge
 - [About + FAQ](https://curb.guide/about): how it works, data sources, methodology
+- [Cities](https://curb.guide/cities): CURB's maps of more cities (Los Angeles, New York, Chicago, Montréal and
+  others), each from its own open data, with a page on how its rule works at curb.guide/<city>/about
 
 ## Data (public JSON, no key required)
 
