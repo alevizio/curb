@@ -104,6 +104,8 @@ export default async function handler(req, res) {
   const v = validate(parseBody(req));
   if (v.spam) { answer(req, res, 200, { ok: true }); return; }   // looks accepted; nothing is stored
   if (v.error) { answer(req, res, 400, { error: v.error, ...(v.error !== 'body' ? { field: v.error } : {}), message: v.message }); return; }
+  // A preview deployment shares the live store, where a request becomes a public GitHub issue: say yes, keep nothing
+  if (process.env.VERCEL_ENV === 'preview') { answer(req, res, 200, { ok: true }); return; }
   if (!storeReady()) { answer(req, res, 503, { error: 'store', message: 'Requests are closed for a moment. Try again later.' }); return; }
   const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
   try {

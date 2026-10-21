@@ -117,6 +117,15 @@ describe('POST', () => {
     expect(stored()).toEqual([]);
     expect(cmds.n).toBe(0);
   });
+  it('on a preview deployment a good request looks accepted and nothing is stored; mistakes still say so', async () => {
+    process.env.VERCEL_ENV = 'preview';
+    try {
+      expect((await run(post(GOOD))).body).toEqual({ ok: true });
+      expect(stored()).toEqual([]);
+      expect(cmds.n).toBe(0);
+      expect((await run(post({ ...GOOD, city: '' }))).body.field).toBe('city');
+    } finally { delete process.env.VERCEL_ENV; }
+  });
   it('one request a minute per IP, across instances; others are not held up', async () => {
     expect((await run(post(GOOD, '5.5.5.5'))).statusCode).toBe(200);
     const again = await run(post({ ...GOOD, city: 'Eugene' }, '5.5.5.5'));
