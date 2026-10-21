@@ -3230,6 +3230,7 @@ function closeInfoMenu(){
     const rate=null, get=null;  // the iPhone app is San Francisco only
     if(!rate&&!get) return;
     const light=id=>{
+      if(window.__curbAndroidApp) return;  // the App Store and the Android beta mean nothing inside the Android app
       if(rate){ rate.href='https://apps.apple.com/app/id'+id+'?action=write-review'; rate.style.display=''; }
       if(get && !window.__curbNativePush){ get.href='https://apps.apple.com/app/id'+id; get.style.display='';
         const play=document.getElementById('imPlay'); if(play)play.style.display=''; }  // the Android beta (/android) under it

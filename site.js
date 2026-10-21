@@ -2,14 +2,15 @@
    every back-of-map page, and wires the dropdown / mobile menu / active-state. One source of truth. */
 (function () {
   if (window.__curbChrome) return; window.__curbChrome = 1;
-  // The Android app's status bar is cream like the page, as on the map (index.html): Chrome colors it from this tag.
-  try {
-    if (document.referrer.indexOf('android-app://guide.curb.android') === 0 || sessionStorage.getItem('curbAndroidApp') === '1') {
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (!tc) { tc = document.createElement('meta'); tc.name = 'theme-color'; document.head.appendChild(tc); }
-      tc.content = '#F2ECDF';
-    }
-  } catch (e) {}
+  // In the Android app (as on the map, index.html): the status bar is cream like the page, since Chrome colors it from
+  // this tag, and the app store links are left out.
+  var ANDROID_APP = false;
+  try { ANDROID_APP = document.referrer.indexOf('android-app://guide.curb.android') === 0 || sessionStorage.getItem('curbAndroidApp') === '1'; } catch (e) {}
+  if (ANDROID_APP) {
+    var tc = document.querySelector('meta[name="theme-color"]');
+    if (!tc) { tc = document.createElement('meta'); tc.name = 'theme-color'; document.head.appendChild(tc); }
+    tc.content = '#F2ECDF';
+  }
   // Vercel Speed Insights — anonymous real-user web vitals (no cookies); served by Vercel at the edge.
   // Injected here so every back-of-map page (incl. generated /n/ pages) gets it from one source.
   if (!window.si) {
@@ -30,7 +31,7 @@
   var CITY = !BOS && document.body.getAttribute('data-city') || '';
   var CITY_NAME = esc(document.body.getAttribute('data-city-name') || ''), CITY_DATA = document.body.getAttribute('data-city-data') || '';
   var HOME = BOS ? '/boston' : CITY ? '/' + CITY : '/';
-  var APPS = !BOS && !CITY;
+  var APPS = !BOS && !CITY && !ANDROID_APP;
 
   function on(href) {
     var h = href.replace(/\/+$/, '') || '/';
