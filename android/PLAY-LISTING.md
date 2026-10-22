@@ -12,8 +12,12 @@ The Android app is a Trusted Web Activity of curb.guide (package `guide.curb.and
 phone screenshots `screenshot-1.png` to `screenshot-3.png` (1080 x 1920, 9:16 as Play requires; real screens from the app on the emulator, demo mode status bar).
 
 ## Full description (4000 max)
+Sources and the government disclaimer were added on 22-Oct-2026: Play rejected the closed test under Misleading Claims, "Missing Source Link for Government Information" (the Full description must link the official source of every piece of government information and say plainly that CURB does not represent a government entity). Keep both in any rewrite.
+
 ```
 Your street cleaning sign says 9 to 11am. The tickets say 9:12am.
+
+NOT A GOVERNMENT APP. CURB is independent and does not represent any government entity. It is not affiliated with or endorsed by the City and County of San Francisco, the SFMTA or San Francisco Public Works. It shows public City data, and every source is linked at the end.
 
 CURB is a free map of San Francisco street parking rules, and the only one that shows you WHEN tickets actually get written, not just when the sign says you're at risk.
 
@@ -37,7 +41,20 @@ MOVE YOUR CAR ALERTS
 A NOTE ON HONESTY
 CURB reads the patterns in public data so you don't have to. But the posted physical sign is always the final authority. CURB never overrides it, and neither should you.
 
-CURB is independent and not affiliated with the City and County of San Francisco or the SFMTA. Its data comes from DataSF and SFMTA public records.
+OFFICIAL SOURCES
+• Street Sweeping Schedule (San Francisco Public Works, on DataSF): https://data.sf.gov/d/yhqp-riqs
+• Parking Citations & Fines (SFMTA, on DataSF): https://data.sf.gov/d/ab4h-6ztd
+• Street cleaning citations with GPS, 2024 to mid 2026 (SFMTA, public records request 26-5453): https://sanfrancisco.nextrequest.com/requests/26-5453
+• Sweeper GPS and routes (San Francisco Public Works, public records request 26-5451): https://sanfrancisco.nextrequest.com
+• Parking regulations and permit areas (SFMTA, on DataSF): https://data.sf.gov/d/hi6h-neyh
+• Parking Meters (SFMTA, on DataSF): https://data.sf.gov/d/8vzz-qzz9
+• Meter Operating Schedules and color curb (SFMTA, on DataSF): https://data.sf.gov/d/6cqg-dxku
+• White passenger loading zones (the City's curb zones map, SF GIS): https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services/Curb_Zones_with_All_Policies/FeatureServer/0
+• Schools (SFUSD, on DataSF): https://data.sf.gov/d/7e7j-59qk
+• Addresses (City and County of San Francisco, on DataSF): https://data.sf.gov/d/3mea-di5p
+• Neighborhoods (SF Planning, on DataSF): https://data.sf.gov/d/j2bu-swwd
+• Holiday enforcement (SFMTA): https://www.sfmta.com/getting-around/drive-park/holiday-enforcement-schedule
+• Parking rules (SFMTA): https://www.sfmta.com/getting-around/drive-park/how-avoid-parking-tickets
 
 Built by one person in San Francisco who got tired of the parking math.
 

@@ -55,15 +55,17 @@ export const ORDINANCE = 'https://city.milwaukee.gov/ImageLibrary/Groups/ccClerk
 // the exception streets in blue alternate only then, and through highways and bus routes (red) have "No overnight parking on
 // either side of the street 2:00 a.m. - 6:00 a.m. from December 1 to March 1". The window's date is the morning's
 // (lib/city.js); which side is closed that morning comes from the evening before (the date "before midnight":
-// city.json winter.night = 'evening').
+// city.json winter.night = 'evening'). DPW Open Records, 2026-10-22: the winter restriction "begins at 8:00 p.m. on
+// December 1 and remains in effect through March 1, inclusive" (101-27-8: "After 8 p.m. as of December 1 to March 1
+// inclusive"), so its first morning is December 2 and its last March 1.
 export const YEAR = { from: '2026-10-01', to: '2027-10-31' };
-export const WINTER = { from: '2026-12-01', to: '2027-03-01' };
+export const WINTER = { from: '2026-12-02', to: '2027-03-01' };
 export const HOURS = { start: 2, end: 6 };
 // Flags: 1 = runs on holidays, 2 = towable, 4 = a side-switching rule shown as tonight's side (lib/city.js; Milwaukee's
 // switch, data/milwaukee/winter.json, is on: the ordinance applies every night), 8 = both sides closed (the winter ban).
 // Towing: MCO 101-25-1-a lets the City tow any car parked against 101-27. The alternate rule doesn't run on Sunday mornings
-// or the holiday mornings (101-27-7-a), left out of its lists, so it carries no flag 1. The winter ban keeps those mornings:
-// the City's page states it with no exception, the cautious reading (a question for the City).
+// or the holiday mornings (101-27-7-a), left out of its lists, so it carries no flag 1. Nor does the winter ban (DPW Open
+// Records, 2026-10-22: through highways and bus routes "will be exempt ... on Sunday mornings and holiday mornings").
 const ALTERNATE_FLAGS = 6;
 const BAN_FLAGS = 14;
 
@@ -139,13 +141,13 @@ const isoAt = (t) => new Date(t).toISOString().slice(0, 10);
 //   odd, even     the year (YEAR): the standard rule
 //   wodd, weven   winter only (WINTER): the blue exception streets
 //   sodd, seven   the year but winter: through highways and bus routes, outside their winter ban
-//   ban           every winter morning, Sundays and holidays too: the through highway and bus route ban, both sides
+//   ban           the winter mornings (WINTER): the through highway and bus route ban, both sides
 export function nightLists(holidays = HOLIDAYS) {
   const L = { odd: [], even: [], wodd: [], weven: [], sodd: [], seven: [], ban: [] };
   for (let t = Date.parse(YEAR.from + 'T12:00:00Z'); t <= Date.parse(YEAR.to + 'T12:00:00Z'); t += DAY) {
     const iso = isoAt(t), winter = iso >= WINTER.from && iso <= WINTER.to;
-    if (winter) L.ban.push(iso);
     if (new Date(t).getUTCDay() === 0 || holidays[iso]) continue;
+    if (winter) L.ban.push(iso);
     const p = +isoAt(t - DAY).slice(8, 10) % 2 ? 'odd' : 'even';
     L[p].push(iso);
     L[(winter ? 'w' : 's') + p].push(iso);
@@ -546,7 +548,7 @@ async function build() {
         + 'the list is named for the side cars park on that night, from the date of the evening before, so the odd side carries "even"), '
         + 'or [-1, 2, 6, 0, 0, 2, "all"] for the winter night ban on through highways and bus routes (both sides); '
         + 'flags 2 = towable, 4 = a side-switching rule shown as tonight\'s side (data/milwaukee/winter.json), 8 = both sides closed; '
-        + 'lists are named for the side cars park on that night: odd/even all year, wodd/weven winter only, sodd/seven all year but winter, ban every winter morning' },
+        + 'lists are named for the side cars park on that night: odd/even all year, wodd/weven winter only, sodd/seven all year but winter, ban the winter mornings (none on Sundays or holiday mornings)' },
     dates: lists,
     b: blocks });
   fs.writeFileSync(OUT + 'segments.json', body);
@@ -559,7 +561,7 @@ async function build() {
       classes, coverRule: `a centerline takes a class when that layer runs along ${COVER * 100}% of it (red first, then green, then blue)`,
       partial: { count: partialCount, examples: partial } },
     winter: { year: `${YEAR.from} to ${YEAR.to} (mornings), ${HOURS.start} to ${HOURS.end} AM, except Sunday mornings and the holiday mornings`,
-      winter: `${WINTER.from} to ${WINTER.to}: blue streets alternate, through highways and bus routes have no night parking (every morning)`,
+      winter: `${WINTER.from} to ${WINTER.to}: blue streets alternate, through highways and bus routes have no night parking (but Sunday and holiday mornings)`,
       dates: Object.fromEntries(Object.entries(lists).map(([k, v]) => [k, v.length])),
       alternate: { segments: winter.segments, blockSides: winter.sides, winterOnlyStreets: winter.winterOnlyStreets },
       ban: winter.ban },
