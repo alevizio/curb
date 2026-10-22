@@ -79,11 +79,13 @@ describe('the nights', () => {
     expect(L.wodd.length + L.sodd.length).toBe(L.odd.length);
     expect(L.weven.length + L.seven.length).toBe(L.even.length);
   });
-  it('bans night parking on red streets every winter morning, Sundays and holidays too (the cautious reading)', () => {
+  it('bans night parking on red streets on the winter mornings but Sundays and holidays (DPW, 2026-10-22)', () => {
     expect(L.ban[0]).toBe(WINTER.from);
     expect(L.ban[L.ban.length - 1]).toBe(WINTER.to);
-    expect(L.ban).toHaveLength(90);
-    expect(L.ban).toContain('2026-12-06');   // a Sunday
+    expect(L.ban).toHaveLength(71);   // 90 winter mornings, less 13 Sundays and 6 holiday mornings
+    expect(L.ban).not.toContain('2026-12-06');   // a Sunday
+    expect(L.ban).not.toContain('2026-12-25');   // Christmas
+    expect(L.ban).toEqual([...L.wodd, ...L.weven].sort());   // the mornings the blue streets alternate
   });
   it('starts winter after 8 PM on December 1 (DPW, 2026-10-22): its first morning is December 2', () => {
     expect(WINTER.from).toBe('2026-12-02');

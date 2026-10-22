@@ -128,8 +128,8 @@ open data portal and the DPW listing are open to scripts.
   when cars park on the even side) and the even side's names `odd`: `[-1, 2, 6, 0, 0, 6, "odd"|"even"]`, flags 2 (towable) and
   4 (a side-switching rule). Blue streets name `wodd`/`weven` (winter only). On a red street both sides get the winter ban
   `[-1, 2, 6, 0, 0, 14, "ban"]` (flag 8: both sides close) and, where the sides are known, the standard rule outside winter
-  (`sodd`/`seven`). The alternate rules carry no flag 1: the free mornings are simply not listed. The ban lists every winter
-  morning, Sundays and holidays included: the City's page states it with no exception (the cautious reading; see Gaps).
+  (`sodd`/`seven`). The alternate rules carry no flag 1: the free mornings are simply not listed. The ban lists the winter
+  mornings but Sundays and holidays, which DPW confirmed are free on through highways and bus routes too (Gaps, item 6).
 - **The City line**: 289 streets on the City line keep only the curb inside the City (the line runs down their middle, within
   4 m of the midpoint; judged 5 m off the centerline). Left out: 2,380 green, 170 private, 34 unofficial, 19 outside the City,
   6 with no address ranges.
@@ -170,7 +170,8 @@ sides. An alert carries a side's dates from today on, up to 96 (about six months
    6 AM, December 1 to March 1. DPW answered on 2026-10-22 (Laura Vargas, DPW Open Records): it "begins at 8:00 p.m. on
    December 1 and remains in effect through March 1, inclusive". The data's winter mornings are December 2 to March 1.
 6. Sunday mornings on red streets: the ordinance's Sunday exception covers all of 101-27, the ban included; the City's page
-   states the ban with no exception. The data keeps the ban every winter morning (the cautious reading) until the City says.
+   states the ban with no exception. DPW answered on 2026-10-22: through highways and bus routes "will be exempt from the
+   overnight winter parking restrictions on Sunday mornings and holiday mornings". The data frees those mornings.
 7. W Howard Ave 8400 to 9980: the listing bans the even side only, the map both.
 8. The exception layers are CAD lines with no street ids, matched by geometry (93 partial matches).
 9. Streets on the City line: only Milwaukee's curb gets a rule; the neighbor's rule is not shown.
@@ -192,4 +193,4 @@ sides. An alert carries a side's dates from today on, up to 96 (about six months
 Sent 2026-10-19 (as five questions, to the Unified Call Center for DPW Parking Services); DPW Open Records answered on
 2026-10-22: question 2 as in gap 5; no machine readable feed of snow emergencies (5); the Exception Streets map's data is
 `TwoSidedParking_view` on services1.arcgis.com/5ly0cVV70qsN8Soc, not by segment or side (3); no credit line wanted. The
-answer to question 1 came back missing, so we asked again the same day.
+answer to question 1 came back missing, so we asked again the same day, and DPW answered it within hours (gap 6).
