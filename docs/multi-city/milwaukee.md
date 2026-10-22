@@ -165,9 +165,10 @@ sides. An alert carries a side's dates from today on, up to 96 (about six months
 2. Streets signed for one side in winter, and other posted night rules: on the signs and the City's lookup by address only.
 3. Snow emergencies and announced plowing: no schedule and no public feed (text alerts only).
 4. Blue streets on the morning of December 1: the ordinance's "March 1 to November 30" frees the night of November 30; the
-   City's page says alternate side starts December 1. The data follows the City's page.
+   City's page says alternate side starts December 1. Settled by item 5: their first alternate morning is December 2.
 5. The ban's first and last night: 101-27-8 says "After 8 p.m. as of December 1 to March 1 inclusive"; the City's pages say 2 to
-   6 AM, December 1 to March 1. The data follows the City (mornings December 1 to March 1).
+   6 AM, December 1 to March 1. DPW answered on 2026-10-22 (Laura Vargas, DPW Open Records): it "begins at 8:00 p.m. on
+   December 1 and remains in effect through March 1, inclusive". The data's winter mornings are December 2 to March 1.
 6. Sunday mornings on red streets: the ordinance's Sunday exception covers all of 101-27, the ban included; the City's page
    states the ban with no exception. The data keeps the ban every winter morning (the cautious reading) until the City says.
 7. W Howard Ave 8400 to 9980: the listing bans the even side only, the map both.
@@ -187,3 +188,8 @@ sides. An alert carries a side's dates from today on, up to 96 (about six months
 5. Is there a machine readable feed of snow emergencies and announced plowing?
 6. Could the streets signed for one side in winter be published?
 7. Could parking citations (date, time, block, violation) be published, for "when tickets usually land"?
+
+Sent 2026-10-19 (as five questions, to the Unified Call Center for DPW Parking Services); DPW Open Records answered on
+2026-10-22: question 2 as in gap 5; no machine readable feed of snow emergencies (5); the Exception Streets map's data is
+`TwoSidedParking_view` on services1.arcgis.com/5ly0cVV70qsN8Soc, not by segment or side (3); no credit line wanted. The
+answer to question 1 came back missing, so we asked again the same day.

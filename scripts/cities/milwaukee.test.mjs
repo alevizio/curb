@@ -82,8 +82,14 @@ describe('the nights', () => {
   it('bans night parking on red streets every winter morning, Sundays and holidays too (the cautious reading)', () => {
     expect(L.ban[0]).toBe(WINTER.from);
     expect(L.ban[L.ban.length - 1]).toBe(WINTER.to);
-    expect(L.ban).toHaveLength(91);
+    expect(L.ban).toHaveLength(90);
     expect(L.ban).toContain('2026-12-06');   // a Sunday
+  });
+  it('starts winter after 8 PM on December 1 (DPW, 2026-10-22): its first morning is December 2', () => {
+    expect(WINTER.from).toBe('2026-12-02');
+    expect(L.ban).not.toContain('2026-12-01');
+    expect(L.seven).toContain('2026-12-01');   // the night of Nov 30 (even) still follows the standard rule
+    expect(L.weven).not.toContain('2026-12-01');
   });
   it('writes the rules as listed dates, named once', () => {
     expect(alternateRule('even')).toEqual([-1, 2, 6, 0, 0, 6, 'even']);   // towable side-switching rule

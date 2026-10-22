@@ -55,9 +55,11 @@ export const ORDINANCE = 'https://city.milwaukee.gov/ImageLibrary/Groups/ccClerk
 // the exception streets in blue alternate only then, and through highways and bus routes (red) have "No overnight parking on
 // either side of the street 2:00 a.m. - 6:00 a.m. from December 1 to March 1". The window's date is the morning's
 // (lib/city.js); which side is closed that morning comes from the evening before (the date "before midnight":
-// city.json winter.night = 'evening').
+// city.json winter.night = 'evening'). DPW Open Records, 2026-10-22: the winter restriction "begins at 8:00 p.m. on
+// December 1 and remains in effect through March 1, inclusive" (101-27-8: "After 8 p.m. as of December 1 to March 1
+// inclusive"), so its first morning is December 2 and its last March 1.
 export const YEAR = { from: '2026-10-01', to: '2027-10-31' };
-export const WINTER = { from: '2026-12-01', to: '2027-03-01' };
+export const WINTER = { from: '2026-12-02', to: '2027-03-01' };
 export const HOURS = { start: 2, end: 6 };
 // Flags: 1 = runs on holidays, 2 = towable, 4 = a side-switching rule shown as tonight's side (lib/city.js; Milwaukee's
 // switch, data/milwaukee/winter.json, is on: the ordinance applies every night), 8 = both sides closed (the winter ban).

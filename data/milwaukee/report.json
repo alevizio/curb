@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T07:13:15.246Z",
+ "generated": "2026-10-22T14:57:47.623Z",
  "centerlines": {
   "fetched": 17649,
   "official": 17445,
@@ -277,15 +277,15 @@
  },
  "winter": {
   "year": "2026-10-01 to 2027-10-31 (mornings), 2 to 6 AM, except Sunday mornings and the holiday mornings",
-  "winter": "2026-12-01 to 2027-03-01: blue streets alternate, through highways and bus routes have no night parking (every morning)",
+  "winter": "2026-12-02 to 2027-03-01: blue streets alternate, through highways and bus routes have no night parking (every morning)",
   "dates": {
    "odd": 165,
    "even": 161,
    "wodd": 36,
-   "weven": 36,
+   "weven": 35,
    "sodd": 129,
-   "seven": 125,
-   "ban": 91
+   "seven": 126,
+   "ban": 90
   },
   "alternate": {
    "segments": 10091,
@@ -488,7 +488,7 @@
  "output": {
   "blocks": 15040,
   "blockSides": 29793,
-  "bytes": 4041691,
-  "gzipBytes": 500817
+  "bytes": 4041678,
+  "gzipBytes": 500816
  }
 }
