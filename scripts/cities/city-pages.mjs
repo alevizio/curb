@@ -167,8 +167,8 @@ export function aboutPage(f) {
   const seo = seoWords(c);
   // a holiday changes nothing where every rule runs on holidays too (Toronto's winter rules): no holiday table there
   const showHolidays = holidays.length > 0 && (f.sweeps || !f.nonWinter || f.flagged < f.nonWinter);
-  const long = `${name} ${Term}: Rules${showHolidays ? ', Fines and Holidays' : ' and Fines'} | CURB`;
-  const title = long.length <= 60 ? long : `${name} ${Term} Rules | CURB`;
+  const long = `${name} ${seo.Term}: Rules${showHolidays ? ', Fines and Holidays' : ' and Fines'} | CURB`;
+  const title = long.length <= 60 ? long : `${name} ${seo.Term} Rules | CURB`;
   const description = `How ${term} works in ${name}, in plain words: the rule, the fine${c.tow && c.tow !== 'no' ? ' and towing' : ''}, ${showHolidays ? 'the holidays ' : ''}and where CURB's map gets its data.`;
   const ld = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'CURB', item: 'https://curb.guide/' },
