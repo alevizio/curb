@@ -792,7 +792,7 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
       body:JSON.stringify({city:city,region:region,publishes:pub?pub.value:'unsure',link:link,email:email,website:f.website.value})})
       .then(function(r){ return r.json().catch(function(){return {};}).then(function(d){return {r:r,d:d};}); })
       .then(function(x){
-        if(x.r.ok){ f.reset(); say('Thanks. Your request is in, and it shows up on GitHub within the hour.',true); return; }
+        if(x.r.ok){ f.reset(); say('Thanks. Your request is in, and it shows up on GitHub within a few hours.',true); return; }
         if(x.d&&x.d.field&&document.getElementById('rq-'+x.d.field)){ err('rq-'+x.d.field,x.d.message||'Check this one.'); document.getElementById('rq-'+x.d.field).focus(); return; }
         say(x.r.status===429?'One request a minute, please. Try again soon.':(x.d&&x.d.message)||'Couldn\'t send it. Try again.',false);
       })
