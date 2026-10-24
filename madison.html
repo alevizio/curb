@@ -600,6 +600,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .ap-help ul{margin:6px 0 0 16px}
   .ap-help li{margin-top:4px}
   .ap-help b{color:var(--ink)}
+  .ap-play{margin-top:12px}
   .im-tx small.bad{color:var(--red-text)}
   @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -2530,6 +2531,9 @@ function renderAlertsPanel(){
     ?`<div class="ap-confirm"><button class="btn alt ap-x" id="apAllYes" type="button">Turn off all ${list.length}</button><button class="btn alt" id="apAllNo" type="button">Keep them</button></div>`
     :`<button class="ap-alloff" id="apAllOff" type="button"${AP.busyAll?' disabled':''}>${AP.busyAll?'Turning off…':'Turn off all alerts'}</button>`;
   h+=apHelp(app);
+  // SF's map in Android Chrome, not the Android app (that is the beta, and it opens on SF): a line to its steps (/android)
+  if(CITY==='sf'&&!window.__curbAndroidApp&&/Android/.test(navigator.userAgent))
+    h+=`<a class="ios-play ap-play" id="apPlay" href="/android">Prefer an app? CURB for Android is in beta. Join the test →</a>`;
   // A redraw keeps the help open and the focus where it was (by id, a row's action, a dial, the help), else on
   // Close: a turned-off row or a Turn off all that is gone must not drop the focus out of the dialog.
   const body=document.getElementById('apBody'), f=document.activeElement, help=body.querySelector('.ap-help');

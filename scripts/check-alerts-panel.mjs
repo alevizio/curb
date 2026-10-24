@@ -9,7 +9,8 @@
 // on another side alone), a style change re-saving every curb (one save each) and snapping back when a save
 // fails, Turn off all (confirm, one DELETE / {off:true} naming no side), Show on map opening that side's sheet,
 // a failed schedule load, the app's denied-settings answer (status card, no reports), "Send me a test" saying
-// so when notifications are off, and iPhone Safari pointing at the app.
+// so when notifications are off, iPhone Safari pointing at the app, and Android Chrome (only there, never in the
+// Android app) pointing at the Play beta.
 //
 //   npx -y serve . -l 3211 &   node scripts/check-alerts-panel.mjs http://localhost:3211 [--shots dir]
 // Needs puppeteer-core (like scripts/monitor/browser.mjs) and Chrome (CHROME_PATH or the default).
@@ -68,9 +69,11 @@ function installFakes(native) {
   try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbIosHintShown', '1'); } catch (_) { /* ignore */ }
 }
 
-async function openPage(native, ctl, { ua } = {}) {
+async function openPage(native, ctl, { ua, androidApp } = {}) {
   const page = await browser.newPage();
   if (ua) await page.setUserAgent(ua);
+  // the Android app's tab: the page's head script reads the flag its android-app:// referrer left
+  if (androidApp) await page.evaluateOnNewDocument(() => sessionStorage.setItem('curbAndroidApp', '1'));
   await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: SHOTS ? 3 : 1 });
   page.__posts = []; page.__tests = []; page.__lines = []; page.__sideQueries = 0;
   page.on('pageerror', (e) => check(`no page errors (${native ? 'app' : 'web'})`, false, e.message));
@@ -145,6 +148,7 @@ try {
   check('…and the focus is inside it, on Close (a modal: Tab must not reach the map behind)', await page.evaluate(() => document.activeElement && document.activeElement.id === 'apClose'), await page.evaluate(() => document.activeElement && (document.activeElement.id || document.activeElement.tagName)));
   check('empty state: how to add one, 0 of 5, no Turn off all, no save sent', (await text(page, '.ap-empty')).startsWith('No alerts on yet.') && (await text(page, '.ap-sec span:last-child')) === '0 of 5' && !(await page.$('#apAllOff')) && page.__posts.length === 0);
   check('style dials show the saved style (Normal, Cheeky) with what each means', await page.$eval('#alertsPanel [data-k="curbAlertLevel"] [data-v="normal"]', (b) => b.getAttribute('aria-pressed') === 'true') && (await texts(page, '.ap-blurb')).join('|') === 'Night before + 30 min before|Warm, funny, on your side');
+  check('…and no Android beta line (not an Android phone)', !(await page.$('#apPlay')));
   await shot(page, '1-web-empty');
   await page.keyboard.press('Escape');
   check('Esc closes it and gives the focus back to ⓘ', !(await isOpen(page)) && await page.evaluate(() => document.activeElement && document.activeElement.id === 'infoBtn'));
@@ -301,7 +305,23 @@ try {
   await openPanel(ios);
   check('iPhone Safari: alerts need the app, with the App Store link', (await text(ios, '.ap-warn b')).startsWith('Alerts need the app') && (await ios.$eval('.ap-warn a.ios-get', (a) => a.href)).includes('apps.apple.com/app/id6780998238'));
   check('…and no test button (it could only open the install hint, under the panel)', !(await ios.$('#apTest')));
+  check('…and no Android beta line', !(await ios.$('#apPlay')));
   await ios.close();
+
+  // ---------------- Android Chrome, and the Android app ----------------
+  const ANDROID = 'Mozilla/5.0 (Linux; Android 16; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36';
+  const droid = await openPage(false, ctl, { ua: ANDROID });
+  await seed(droid, row('7735000', 'West'), row('5910000', 'South'));
+  await openPanel(droid);
+  check('Android Chrome: a line under the help to the Play beta (/android)', (await text(droid, '#apPlay')) === 'Prefer an app? CURB for Android is in beta. Join the test →'
+    && await droid.$eval('#apPlay', (a) => new URL(a.href).pathname === '/android' && a.previousElementSibling.classList.contains('ap-help')));
+  await droid.$eval('#apPlay', (a) => a.scrollIntoView({ block: 'end' }));
+  await shot(droid, '9-android-beta-line');
+  await droid.close();
+  const twa = await openPage(false, ctl, { ua: ANDROID, androidApp: true });
+  await openPanel(twa);
+  check('…but not inside the Android app (it is the beta)', await twa.evaluate(() => window.__curbAndroidApp === true) && !(await twa.$('#apPlay')) && !!(await twa.$('.ap-help')));
+  await twa.close();
 } catch (e) {
   check('run', false, e.stack || e.message);
 } finally {
