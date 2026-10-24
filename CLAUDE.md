@@ -215,8 +215,10 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   by scripts/cities/hub-map.mjs) with a pin per city, the cities by state or province, "In progress", and "Request a city":
   POST /api/city-request (api/city-request.js: strict checks, a honeypot, one per IP a minute via claimSlot, 60 an hour,
   a capped Upstash list, no IP stored; bearer GET ?since= without emails), which .github/workflows/city-requests.yml files
-  every 30 min as public GitHub issues labeled "city request" (scripts/cities/city-requests.mjs: one issue per city, "+1"
-  comments, never the email, memory in the Actions cache). index.html's CITY_MAPS (SF + the public cities, written between
+  every 30 min (GitHub runs it every 3 to 5 hours in practice, so the page's thank-you says "within a few hours") as public
+  GitHub issues labeled "city request" (scripts/cities/city-requests.mjs: one issue per city, opening with an @mention of the
+  repo's owner, the only way GitHub emails him about a bot's issue since he doesn't watch the repo; "+1" comments, never the
+  email, memory in the Actions cache). index.html's CITY_MAPS (SF + the public cities, written between
   its cities:start/end markers by scripts/cities/configs.mjs) drives three things on every map page: a FIRST visit to
   curb.guide (no curbOnboarded / curbCityAsk) asks for location once with the browser's prompt and opens the city whose
   bounds hold the fix (the smallest box when two overlap), stays on SF quietly in SF or on a refusal, and toasts "CURB

@@ -4,14 +4,16 @@
 //   one issue per city, titled "City request: Portland, OR" and labeled "city request", its body the city, the region, the
 //   answer to "does your city publish its schedule?" and the data link as plain text: never the email (the GET this reads
 //   leaves emails out), the IP (never stored) or any free text. A request for a city with an open issue adds a "+1" comment
-//   to it instead of a second issue.
+//   to it instead of a second issue. Each new issue @mentions the repo's owner: an issue a bot opens emails only the repo's
+//   watchers and the people it names, and the mention also brings that issue's +1s to the owner's inbox.
 // What was filed is remembered between runs (--memory, kept in the Actions cache like winter-watch.yml), and every issue and
 // comment carries its request's id (<!-- city-request-id … -->), so a request is never filed twice, even if the cache is lost.
 //
 //   node scripts/cities/city-requests.mjs --memory .city-requests/memory.json [--dry-run]
 //   node scripts/cities/city-requests.mjs --dry-run --requests <file.json> --issues <file.json>   (fixtures: no network at all)
-// Env: CRON_SECRET (reads GET /api/city-request), GITHUB_TOKEN + GITHUB_REPOSITORY (files the issues), CITY_REQUESTS_SITE
-// (default https://curb.guide). --dry-run prints what it would file and files, comments and remembers nothing.
+// Env: CRON_SECRET (reads GET /api/city-request), GITHUB_TOKEN + GITHUB_REPOSITORY (files the issues; its owner is the one
+// @mentioned), CITY_REQUESTS_SITE (default https://curb.guide). --dry-run prints what it would file and files, comments and
+// remembers nothing.
 import fs from 'node:fs';
 import { dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -81,9 +83,10 @@ const facts = (req) => [
 ].join('\n');
 const idMark = (req) => `<!-- city-request-id ${req.id} -->`;
 
-/** The new issue for a city: its facts, how +1s work, and the markers (the city's key, the request's id). */
-export function issueBody(req) {
-  return `Someone asked for CURB in **${placeName(req)}** with the form on [curb.guide/cities](https://curb.guide/cities).
+/** The new issue for a city: its facts, how +1s work, and the markers (the city's key, the request's id). It opens with
+ *  `mention` (the repo's owner) when given, so GitHub emails them about it. */
+export function issueBody(req, mention = '') {
+  return `${mention ? `@${mention} someone` : 'Someone'} asked for CURB in **${placeName(req)}** with the form on [curb.guide/cities](https://curb.guide/cities).
 
 ${facts(req)}
 
@@ -118,10 +121,11 @@ export function findIssue(issues, req) {
 
 /**
  * File the requests: each one not yet filed opens its city's issue or adds a +1 to it. `gh(method, path, body)` is the
- * GitHub REST API (a fake in tests); `memory` = { since, seen } from the last run, updated in place.
+ * GitHub REST API (a fake in tests); `memory` = { since, seen } from the last run, updated in place; `mention` = the login
+ * each new issue @mentions.
  * Returns what it did: [{ type: 'create' | 'comment' | 'skip', id, issue?, title? }].
  */
-export async function fileRequests({ requests, gh, memory, dryRun = false, log = () => {} }) {
+export async function fileRequests({ requests, gh, memory, dryRun = false, mention = '', log = () => {} }) {
   const seen = new Set(memory.seen || []), cold = !seen.size;   // cold: no memory (a first run, or the cache was lost)
   const done = [], made = new Set();   // made: the issues this run opened (no comments to read yet)
   let issues = null;   // the open "city request" issues, read once, when there is something to file
@@ -150,7 +154,7 @@ export async function fileRequests({ requests, gh, memory, dryRun = false, log =
       if (!dryRun) await gh('POST', `/issues/${issue.number}/comments`, { body: plusOneBody(req) });
       done.push({ type: 'comment', id: req.id, issue: issue.number, body: plusOneBody(req) });
     } else {
-      const title = titleOf(req), body = issueBody(req);
+      const title = titleOf(req), body = issueBody(req, mention);
       log(`${dryRun ? 'would open' : 'open'} "${title}"`);
       let number = 0;
       if (!dryRun) {
@@ -222,7 +226,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     if ((!GITHUB_TOKEN || !GITHUB_REPOSITORY) && requests.length) throw new Error('reading and filing issues needs GITHUB_TOKEN and GITHUB_REPOSITORY');
     gh = github(GITHUB_TOKEN, GITHUB_REPOSITORY);
   }
-  const done = await fileRequests({ requests, gh, memory, dryRun: dryRun || !!issuesFile, log: (m) => console.log(m) });
+  const mention = (process.env.GITHUB_REPOSITORY || '').split('/')[0];   // the repo's owner
+  const done = await fileRequests({ requests, gh, memory, dryRun: dryRun || !!issuesFile, mention, log: (m) => console.log(m) });
   if (dryRun || issuesFile) for (const d of done.filter((x) => x.type !== 'skip')) console.log(`\n--- ${d.type === 'create' ? d.title : `+1 on #${d.issue}`}\n${d.body}`);
   console.log(`${done.filter((d) => d.type === 'create').length} opened, ${done.filter((d) => d.type === 'comment').length} +1${dryRun ? ' (dry run: nothing sent)' : ''}`);
   remember();

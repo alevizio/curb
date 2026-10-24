@@ -87,6 +87,10 @@ describe('what an issue says', () => {
     expect(body).toContain('<!-- city-request key="portland|OR" -->');
     expect(plus.startsWith('+1: another request for **Portland, OR**.')).toBe(true);
   });
+  it('a new issue opens with an @mention of the repo\'s owner when given (GitHub emails them)', () => {
+    expect(issueBody(req, 'alevizio').startsWith('@alevizio someone asked for CURB in **Portland, OR** with the form')).toBe(true);
+    expect(issueBody(req).startsWith('Someone asked for CURB in **Portland, OR** with the form')).toBe(true);
+  });
 });
 
 describe('filing', () => {
@@ -131,6 +135,13 @@ describe('filing', () => {
     await fileRequests({ requests: [], gh, memory: {} });
     expect(calls).toEqual([]);
   });
+  it('every issue it opens @mentions the owner; its +1 comments don\'t (the mention already brings them)', async () => {
+    const { gh, writes } = fakeGitHub();
+    await fileRequests({ requests: clone(REQUESTS), gh, memory: {}, mention: 'alevizio' });
+    const w = writes();
+    expect(w.filter((c) => c.path === '/issues').map((c) => c.body.body.split(' asked ')[0])).toEqual(Array(3).fill('@alevizio someone'));
+    expect(w.filter((c) => /comments$/.test(c.path)).some((c) => c.body.body.includes('@alevizio'))).toBe(false);
+  });
 });
 
 describe('the workflow (.github/workflows/city-requests.yml)', () => {
@@ -148,10 +159,11 @@ describe('the workflow (.github/workflows/city-requests.yml)', () => {
 });
 
 describe('the command, on fixtures', () => {
-  it('--dry-run with fixture files prints the issues it would file and sends nothing', () => {
+  it('--dry-run with fixture files prints the issues it would file (each @mentioning the repo\'s owner) and sends nothing', () => {
     const out = execFileSync(process.execPath, [HERE + 'city-requests.mjs', '--dry-run', '--requests', HERE + 'fixtures/city-requests.json', '--issues', HERE + 'fixtures/city-request-issues.json'],
-      { encoding: 'utf8', env: { PATH: process.env.PATH, CITY_REQUESTS_SITE: 'http://127.0.0.1:9' } });
+      { encoding: 'utf8', env: { PATH: process.env.PATH, CITY_REQUESTS_SITE: 'http://127.0.0.1:9', GITHUB_REPOSITORY: 'alevizio/curb' } });
     expect(out).toContain('would open "City request: Portland, OR"');
+    expect(out).toContain('@alevizio someone asked for CURB in **Portland, OR**');
     expect(out).toContain('would comment +1 on #41 (City request: Austin, TX)');
     expect(out).toContain('3 opened, 3 +1 (dry run: nothing sent)');
     expect(out).not.toMatch(/@example|secret/);
