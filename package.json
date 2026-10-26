@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
-    "@upstash/qstash": "^2.12.0",
+    "@upstash/qstash": "^2.12.1",
     "@upstash/redis": "^1.39.0",
     "satori": "^0.34.1",
     "web-push": "^3.6.7"
