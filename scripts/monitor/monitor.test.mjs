@@ -69,25 +69,47 @@ describe('smoke checks', () => {
     const f = mockFetch({
       'https://data.sfgov.org/resource/yhqp-riqs.json': { status: 301, headers: { location: 'https://data.sf.gov/resource/yhqp-riqs.json', 'access-control-allow-origin': 'https://data.sfgov.org' } },
     });
-    const out = await checkDataSF(f, { SWEEP: 'https://data.sfgov.org/resource/yhqp-riqs.json' });
+    const out = await checkDataSF(f, { SWEEP: 'https://data.sfgov.org/resource/yhqp-riqs.json' }, 0);
     expect(out.every((r) => r.status === 'fail')).toBe(true);
     expect(out[0].detail).toContain('301');
   });
 
   it('a dataset that answers 200 but without CORS for curb.guide fails (browsers would block it)', async () => {
     const f = mockFetch({ 'https://data.sf.gov/resource/a.json': { status: 200, headers: {}, body: [{ x: 1 }] } });
-    const [r] = await checkDataSF(f, { METER: 'https://data.sf.gov/resource/a.json' });
+    const [r] = await checkDataSF(f, { METER: 'https://data.sf.gov/resource/a.json' }, 0);
     expect(r.status).toBe('fail');
     expect(r.detail).toContain('CORS');
   });
 
+  const healthy = mockFetch({
+    'https://data.sf.gov/resource/a.json?%24select': { status: 200, headers: { 'access-control-allow-origin': '*' }, body: [{ count: '811' }] },
+    'https://data.sf.gov/resource/a.json': { status: 200, headers: { 'access-control-allow-origin': '*' }, body: [{ cnn: '1' }] },
+  });
+
   it('a healthy dataset + spatial count passes', async () => {
-    const f = mockFetch({
-      'https://data.sf.gov/resource/a.json?%24select': { status: 200, headers: { 'access-control-allow-origin': '*' }, body: [{ count: '811' }] },
-      'https://data.sf.gov/resource/a.json': { status: 200, headers: { 'access-control-allow-origin': '*' }, body: [{ cnn: '1' }] },
-    });
-    const out = await checkDataSF(f, { SWEEP: 'https://data.sf.gov/resource/a.json' });
+    const out = await checkDataSF(healthy, { SWEEP: 'https://data.sf.gov/resource/a.json' });
     expect(out.map((r) => r.status)).toEqual(['ok', 'ok']);
+  });
+
+  it('REPLAY 26 Oct 2026 (#52): seconds of "fetch failed" pass on the second try, so no issue opens', async () => {
+    let calls = 0;
+    const f = async (url, opts) => { if (++calls <= 2) throw new TypeError('fetch failed'); return healthy(url, opts); };
+    const out = await checkDataSF(f, { SWEEP: 'https://data.sf.gov/resource/a.json' }, 0);
+    expect(out.map((r) => r.status)).toEqual(['ok', 'ok']);
+    expect(out[0].detail).toBe('second try; first: request failed: fetch failed');
+    expect(out[1].detail).toBe('811 curb rows in the test area; second try; first: request failed: fetch failed');
+  });
+
+  it('a DataSF outage fails both tries; a healthy run never waits for a second', async () => {
+    let calls = 0;
+    const down = async () => { calls++; throw new TypeError('fetch failed'); };
+    const out = await checkDataSF(down, { SWEEP: 'https://data.sf.gov/resource/a.json' }, 0);
+    expect(out.map((r) => [r.status, r.detail])).toEqual([['fail', 'request failed: fetch failed'], ['fail', 'request failed: fetch failed']]);
+    expect(calls).toBe(4);
+    calls = 0;
+    const counted = async (url, opts) => { calls++; return healthy(url, opts); };
+    await checkDataSF(counted, { SWEEP: 'https://data.sf.gov/resource/a.json' }, 60e3);   // would time the test out if it waited
+    expect(calls).toBe(2);
   });
 
   it('basemap: an empty SELF_BASEMAP or a non-image tile fails', async () => {

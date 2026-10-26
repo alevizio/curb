@@ -23,6 +23,7 @@ export const ALERTS_MAX_AGE_MIN = 40;       // the sender runs every 15 min (QSt
 export const ALERTS_BACKUP_MAX_AGE_MIN = 480; // before QStash ever runs: the GitHub backup alone (worst gap seen 414 min)
 export const ERROR_SPIKE = 25;               // errors per 30 min that mean "something broke for many"
 export const DIGEST_MIN = 3;                 // nightly: only groups seen at least this often
+export const DATASF_RETRY_MS = 30000;        // a failed DataSF check runs once more after this (#35, #49, #52 were seconds-long blips)
 
 // Which reports mean something broke, per kind, from index.html's reporters (the error / rejection
 // listeners and every curbReport call). The rest is the visitor's own choice or device: blocked location,
@@ -84,8 +85,19 @@ export async function checkHome(f) {
   return { result: ok('home page'), page };
 }
 
-/** Every dataset the app uses must answer a browser-style CORS request directly (no redirect). */
-export async function checkDataSF(f, data) {
+/** Every dataset the app uses must answer a browser-style CORS request directly (no redirect). Anything
+ *  that fails is checked once more after retryMs, so a few seconds of DataSF trouble doesn't open an
+ *  issue; a real outage fails both tries. A pass on the second try says so in its detail. */
+export async function checkDataSF(f, data, retryMs = DATASF_RETRY_MS) {
+  const first = await checkDataSFOnce(f, data);
+  const failed = new Map(first.filter((r) => r.status === 'fail').map((r) => [r.name, r.detail]));
+  if (!failed.size) return first;
+  await new Promise((res) => setTimeout(res, retryMs));
+  return (await checkDataSFOnce(f, data)).map((r) => r.status === 'ok' && failed.has(r.name)
+    ? ok(r.name, [r.detail, `second try; first: ${failed.get(r.name)}`].filter(Boolean).join('; ')) : r);
+}
+
+async function checkDataSFOnce(f, data) {
   const out = [];
   for (const [name, url] of Object.entries(data)) {
     const label = `DataSF ${name}`;
