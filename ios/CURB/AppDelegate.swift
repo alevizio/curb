@@ -18,12 +18,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         _ = center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
             MainActor.assumeIsolated { ReviewPrompt.shared.enteredBackground() }
         }
+        // Save Parking Spot runs with no page to ask for the push token, so keep a fresh one (iOS can rotate it): with
+        // notifications already allowed this asks nothing, and the token lands in didRegister below.
+        Task { @MainActor in
+            if await UNUserNotificationCenter.current().notificationSettings().authorizationStatus.allowsNotifications {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
         return true
     }
 
     func application(_ application: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let hex = deviceToken.map { String(format: "%02x", $0) }.joined()
+        CurbDevice.saveToken(hex)
         PushRouter.shared.deliverDeviceToken(hex)
     }
 

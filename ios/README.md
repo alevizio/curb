@@ -11,6 +11,8 @@ experience: same Leaflet map, same search, same bottom sheet, same layers, same 
 - SwiftUI app shell.
 - `WKWebView` loading `https://curb.guide`.
 - Native Core Location bridge for the web UI's locate button.
+- Shortcuts actions (1.0.6): Save Parking Spot and Clear Parking Spot (`CURB/Parking.swift`), which a CarPlay or
+  Bluetooth automation runs to auto-save where you park; the Sweep alerts screen sets them up.
 - Native loading/error states.
 - External handoff for Google/Apple links that should leave the app.
 - Existing iOS privacy strings for location/calendar prompts used by the web UI.

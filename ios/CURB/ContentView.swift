@@ -72,9 +72,11 @@ private struct CurbWebView: UIViewRepresentable {
         configuration.userContentController.addUserScript(Self.appChromeScript)
         configuration.userContentController.addUserScript(Self.shareScript)
         configuration.userContentController.addUserScript(Self.pushScript)
+        configuration.userContentController.addUserScript(Self.autoParkScript)
         configuration.userContentController.add(context.coordinator.locationBridge, name: "curbLocation")
         configuration.userContentController.add(context.coordinator.shareBridge, name: "curbShare")
         configuration.userContentController.add(context.coordinator.pushBridge, name: "curbPush")
+        configuration.userContentController.add(context.coordinator.autoParkBridge, name: "curbAutoPark")
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
@@ -99,6 +101,7 @@ private struct CurbWebView: UIViewRepresentable {
         context.coordinator.locationBridge.webView = webView
         context.coordinator.shareBridge.webView = webView
         context.coordinator.pushBridge.webView = webView
+        context.coordinator.autoParkBridge.webView = webView
         // Notification-tap deep links: navigate the live web view; consume any cold-start link.
         PushRouter.shared.navigate = { [weak webView] url in webView?.load(URLRequest(url: url)) }
         context.coordinator.lastReloadToken = reloadToken
@@ -385,6 +388,40 @@ private struct CurbWebView: UIViewRepresentable {
         forMainFrameOnly: true
     )
 
+    // Auto-save where you park (1.0.6): the Sweep alerts panel's setup and saved spot. The page feature-detects
+    // __curbAutoPark; each call resolves with the native answer, matched by id (AutoParkBridge.reply).
+    private static let autoParkScript = WKUserScript(
+        source: """
+        (function () {
+          var h = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.curbAutoPark;
+          if (!h) return;
+          var n = 0, waiting = {};
+          window.__curbAutoParkResult = function (id, r) {
+            var f = waiting[id];
+            delete waiting[id];
+            if (f) f(r || {});
+          };
+          // prefs = the panel's { level, voice }: the car's next park saves its alerts with them
+          function call(op, prefs) {
+            return new Promise(function (resolve) {
+              var id = String(++n), m = { op: op, id: id };
+              if (prefs) { m.level = String(prefs.level || ''); m.voice = String(prefs.voice || ''); }
+              waiting[id] = resolve;
+              h.postMessage(m);
+            });
+          }
+          window.__curbAutoPark = {
+            status: function (prefs) { return call('status', prefs); },    // { notifications, location, token, car? }
+            prepare: function (prefs) { return call('prepare', prefs); },  // asks for what isn't decided yet, then status
+            clear: function () { return call('clear'); },      // forgets the saved spot, turns its alerts off
+            openShortcuts: function () { h.postMessage({ op: 'shortcuts' }); }
+          };
+        })();
+        """,
+        injectionTime: .atDocumentStart,
+        forMainFrameOnly: true
+    )
+
     func updateUIView(_ webView: WKWebView, context: Context) {
         if context.coordinator.lastReloadToken != reloadToken {
             context.coordinator.lastReloadToken = reloadToken
@@ -398,6 +435,7 @@ private struct CurbWebView: UIViewRepresentable {
         let locationBridge = LocationBridge()
         let shareBridge = ShareBridge()
         let pushBridge = PushBridge()
+        let autoParkBridge = AutoParkBridge()
         var lastReloadToken: UUID?
         private var downloadDestination: URL?
         private var documentController: UIDocumentInteractionController?
@@ -1022,6 +1060,43 @@ private final class PushBridge: NSObject, WKScriptMessageHandler, PushTokenRecei
         guard let data = try? JSONSerialization.data(withJSONObject: result),
               let json = String(data: data, encoding: .utf8) else { return }
         webView?.evaluateJavaScript("window.__curbNativePushResult && window.__curbNativePushResult(\(json));")
+    }
+}
+
+// The Sweep alerts panel's auto-park (autoParkScript → Parking.swift): status, prepare, clear, and opening Shortcuts,
+// where the user makes the automations that run Save / Clear Parking Spot.
+@MainActor
+private final class AutoParkBridge: NSObject, WKScriptMessageHandler {
+    weak var webView: WKWebView?
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "curbAutoPark", let body = message.body as? [String: Any], let op = body["op"] as? String else { return }
+        let id = body["id"] as? String ?? ""
+        if let level = body["level"] as? String, let voice = body["voice"] as? String {
+            CurbDevice.saveStyle(level: level, voice: voice)   // the panel's Intensity and Voice, for the car's next park
+        }
+        switch op {
+        case "shortcuts":
+            if let url = URL(string: "shortcuts://") { UIApplication.shared.open(url) }
+        case "status":
+            Task { @MainActor in self.reply(id, await AutoPark.status()) }
+        case "prepare":
+            Task { @MainActor in self.reply(id, await AutoPark.prepare()) }
+        case "clear":
+            Task { @MainActor in
+                await ParkingService.clear()
+                self.reply(id, ["ok": true])
+            }
+        default:
+            break
+        }
+    }
+
+    /// Resolves the page's call `id` (both values JSON-encoded, never spliced in raw).
+    private func reply(_ id: String, _ result: [String: Any]) {
+        guard let data = try? JSONSerialization.data(withJSONObject: [id, result]),
+              let args = String(data: data, encoding: .utf8) else { return }
+        webView?.evaluateJavaScript("window.__curbAutoParkResult && window.__curbAutoParkResult.apply(null, \(args));")
     }
 }
 

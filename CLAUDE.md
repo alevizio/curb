@@ -441,7 +441,8 @@ Files now present for the push feature:
   watch keeps `offKeys`, HMACs of the side (keyed with VAPID_PRIVATE_KEY, one per way `sameSide` matches), never
   the side itself. Before that it kept `offSide` in plain text: still matched, and the sender's next run rewrites
   each one (`scrubOffSides`, counted as `scrubbed` in its run record).
-  THE CAR SLOT: auto-park (`atBase`, `api/parked.js`; latent, nothing calls enable-auto-park today) tags its
+  THE CAR SLOT: auto-park (`atBase`, `api/parked.js`; latent on the web, nothing calls enable-auto-park today; the
+  iPhone app's Save Parking Spot uses it through `parkIosCar`, see Native iOS below) tags its
   watch `car: true` and writes the slot already holding `car: true`, else the slot `pickSlot` gives it (409
   when 5 sides are live: parked.js says so, no "Alerts armed" push), so it follows the car and never
   overwrites a side the user armed. After its write it re-reads the slots and turns off another armed watch
@@ -530,6 +531,26 @@ push alongside Web Push:
   test pushes are `curb-test*`, so keep notify-core TAGS on that prefix), never on the first open (an open =
   one stay in the foreground), once per app version, never over a sheet or system prompt.
   `ios/CURB/ReviewPrompt.test.mjs` checks the tag contract and compiles the policy with swiftc when present.
+- Auto-save where you park (1.0.6; owner, 2026-10-29: "lets add the feature", after a competitor's CarPlay/Bluetooth
+  auto-save): `ios/CURB/Parking.swift` holds two App Intents, Save Parking Spot and Clear Parking Spot, that a Shortcuts
+  automation runs when the car's CarPlay or Bluetooth disconnects / connects (`CurbShortcuts` puts them in Shortcuts with
+  no setup). Save takes an optional Location, else gets a fix itself (`OneShotLocation`; While Using was enough with the
+  action run from Shortcuts in the iOS 27 simulator; a locked phone is untested until a device run), and POSTs
+  {token, lat, lng, level, voice} to `api/parked-ios.js`. The token is the APNs token the AppDelegate now keeps in
+  UserDefaults (`CurbDevice`, refreshed at every launch when notifications are allowed); level / voice are the panel's
+  Alert style, which the page hands over and the app keeps. The server picks the block (`api/_park.js`, shared with
+  parked.js), builds the watch a sheet would (sanitizeSpot, alertAnchors) and saves it with `parkIosCar`: the car's own
+  watch (`atBase`), unless an armed watch the user set on that side covers it (left byte for byte, and the car's watch goes
+  off). Clear is `disarmIosCar` (the car's watch only, its tag kept). The coordinates are never stored. The app shows the
+  answer as a local notification (tag `curb-parked`, url = the block) and keeps the spot (`CarSpot`) for the page.
+  The panel's side: `autoParkScript` / AutoParkBridge (`window.__curbAutoPark`: status, prepare, clear, openShortcuts,
+  answered by id) and `apAutoPark` in index.html (SF's map, app builds with the bridge only): the car's row comes through
+  the same `alertSides` path as a curb's (key = blockside || sideKey); the steps follow the iOS version (`iosMajor`: iOS 27
+  folded automations into shortcuts, so +, Edit, then a trigger from the Automation actions; before it, the Automation
+  tab), and Bluetooth must name the car (iOS 27's default is Any Device, so AirPods would save spots). Gaps: the page's
+  "N of 5" doesn't count the car's watch (a 6th save gets the server's 409), a style change reaches the car's watch at its
+  next park, SF only (DataSF). Checked by api/_parked-ios.test.mjs, ios/CURB/ContentView.test.mjs and the auto-park part
+  of scripts/check-alerts-panel.mjs.
 
 ### What's DONE vs TODO
 DONE (all of it, end-to-end):

@@ -163,6 +163,54 @@ describe('push bridge (pushScript)', () => {
   });
 });
 
+describe('auto-park bridge (autoParkScript, 1.0.6)', () => {
+  const withAutoPark = () => {
+    const p = page();
+    p.posted.curbAutoPark = [];
+    p.g.webkit.messageHandlers.curbAutoPark = { postMessage: (m) => p.posted.curbAutoPark.push(m) };
+    p.run(JS.autoParkScript);
+    return p;
+  };
+
+  it('is missing on a build without the handler, so the page shows no auto-park', () => {
+    const { g, run } = page();
+    run(JS.autoParkScript);
+    expect(g.__curbAutoPark).toBeUndefined();
+  });
+
+  it('answers each call by its id, even out of order', async () => {
+    const { g, posted } = withAutoPark();
+    const status = g.__curbAutoPark.status(), prepare = g.__curbAutoPark.prepare();
+    expect(posted.curbAutoPark).toEqual([{ op: 'status', id: '1' }, { op: 'prepare', id: '2' }]);
+    g.__curbAutoParkResult('2', { notifications: 'authorized', location: 'whenInUse', token: true });
+    g.__curbAutoParkResult('1', { notifications: 'notDetermined', location: 'notDetermined', token: false });
+    expect(await prepare).toMatchObject({ token: true });
+    expect(await status).toMatchObject({ token: false });
+  });
+
+  it('never leaves a call hanging on an empty answer, and opening Shortcuts waits for nothing', async () => {
+    const { g, posted } = withAutoPark();
+    const clear = g.__curbAutoPark.clear();
+    g.__curbAutoParkResult('1');
+    expect(await clear).toEqual({});
+    expect(g.__curbAutoPark.openShortcuts()).toBeUndefined();
+    expect(posted.curbAutoPark.at(-1)).toEqual({ op: 'shortcuts' });
+  });
+
+  it('hands the panel\'s Alert style to native, which keeps it for the car\'s next park', () => {
+    const { g, posted } = withAutoPark();
+    g.__curbAutoPark.status({ level: 'intense', voice: 'drill' });
+    g.__curbAutoPark.prepare();
+    expect(posted.curbAutoPark).toEqual([{ op: 'status', id: '1', level: 'intense', voice: 'drill' }, { op: 'prepare', id: '2' }]);
+    expect(SWIFT).toMatch(/if let level = body\["level"\] as\? String, let voice = body\["voice"\] as\? String \{\s*CurbDevice\.saveStyle/);
+  });
+
+  it('native passes the id and the answer JSON-encoded, never spliced in raw', () => {
+    expect(SWIFT).toMatch(/JSONSerialization\.data\(withJSONObject: \[id, result\]\)/);
+    expect(SWIFT).toMatch(/__curbAutoParkResult\.apply\(null, \\\(args\)\)/);
+  });
+});
+
 describe('entitlements', () => {
   it('Time Sensitive notifications (1.0.5): the server marks the act-now pushes time-sensitive', () => {
     const ent = readFileSync(new URL('./CURB.entitlements', import.meta.url), 'utf8');

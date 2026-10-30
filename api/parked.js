@@ -7,12 +7,9 @@
 // injection), and we NEVER persist the raw lat/lng — only the resolved block (one-spot privacy).
 import webpush from 'web-push';
 import { resolveToken, claimSlot, getSub, saveSub, deleteSub, storeReady, MAX_WATCHES } from './_store.js';
-import { inSfBbox, polygonAround, pickParkedSpot } from './_geo.js';
-import { sanitizeRules } from './_spot.js';
-import '../lib/sweep-core.js';
-const { sfWallToInstant, fmtHour, DAYLBL } = globalThis;
+import { inSfBbox } from './_geo.js';
+import { parkedWatchAt } from './_park.js';
 
-const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
 const RATE_MS = 60000; // ≤1 park per minute per token
 
 export default async function handler(req, res) {
@@ -32,51 +29,34 @@ export default async function handler(req, res) {
     const la = Number(lat), lo = Number(lng);
     if (!inSfBbox(la, lo)) { res.status(400).json({ error: 'coords outside SF' }); return; }
 
-    // Nearest swept segments around the point — numbers-only POLYGON, fixed trusted host (no SSRF).
-    const where = `intersects(line,'${polygonAround(la, lo, 60)}')`;
-    const url = `${SWEEP}?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line&$where=${encodeURIComponent(where)}&$limit=200`;
-    let rows = [];
-    try {
-      const r = await fetch(url, { headers: { 'User-Agent': 'curb-parked' } });
-      if (r.ok) rows = await r.json();
-    } catch { /* fall through → no block found */ }
-
-    const spot = pickParkedSpot(rows, la, lo);
-    if (!spot) { res.status(200).json({ ok: false, note: 'no swept block found near you' }); return; }
+    // Nearest swept block around the point (api/_park.js), as the watch to arm.
+    const found = await parkedWatchAt(la, lo);
+    if (!found) { res.status(200).json({ ok: false, note: 'no swept block found near you' }); return; }
 
     const sub = await getSub(rec.endpoint);
     if (!sub || !sub.subscription) { res.status(410).json({ error: 'subscription gone' }); return; }
 
-    // Build + persist the watch (carries the recurring rule → forever-watch). saveSub stamps a fresh
+    // Persist the watch (carries the recurring rule → forever-watch). saveSub stamps a fresh
     // savedAt (this IS live data); its de-dupe entries name the sweep they fired for, so a new sweep fires.
     // atBase: the car's watch (tagged car:true, else the slot a page save would get) follows the car, as
     // the single watch did before multi-watch (a new watch per park would pile up and keep alerting for
     // every spot the car has left); a watch the user set on that same side is turned off so it doesn't push
     // twice. Other watches are left alone, so with 5 sides already armed there is no room: say so.
-    const ns = spot.ns;
-    const prev = new Date(Date.UTC(ns.y, ns.mo - 1, ns.da) - 864e5);
-    const eve = sfWallToInstant(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate(), 20);
-    const newSpot = {
-      corridor: spot.corridor, limits: spot.limits, blockside: spot.blockside,
-      nextSweepISO: ns.start.toISOString(), leadMinutes: 30,
-      rule: spot.rule, rules: sanitizeRules(spot.rules), cnn: spot.cnn, sideKey: spot.sideKey,
-      ...(+eve < +ns.start ? { eveningISO: eve.toISOString() } : {}),
-    };
+    const newSpot = found.watch;
     const saved = await saveSub(sub.subscription, newSpot, { atBase: true });
     if (saved.full) { res.status(409).json({ ok: false, error: 'alert limit reached', max: MAX_WATCHES }); return; }
 
     // Confirmation push (best-effort; prune a dead endpoint).
     if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
       webpush.setVapidDetails(VAPID_SUBJECT || 'mailto:you@example.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-      const body = `${spot.corridor || 'This block'}: next sweep ${DAYLBL[ns.dow]} ${fmtHour(ns.fromH)}. Alerts armed.`;
       try {
         // an immediate confirmation: worthless (and names a stale spot) if delivered hours later
-        await webpush.sendNotification(sub.subscription, JSON.stringify({ title: '🚗 Parked', body, url: '/', tag: 'curb-parked' }), { TTL: 3600 });
+        await webpush.sendNotification(sub.subscription, JSON.stringify({ title: '🚗 Parked', body: found.body, url: '/', tag: 'curb-parked' }), { TTL: 3600 });
       } catch (err) {
         if (err.statusCode === 410 || err.statusCode === 404) await deleteSub(rec.endpoint);
       }
     }
-    res.status(200).json({ ok: true, corridor: spot.corridor, nextSweepISO: newSpot.nextSweepISO });
+    res.status(200).json({ ok: true, corridor: found.spot.corridor, nextSweepISO: newSpot.nextSweepISO });
   } catch (e) {
     console.error('parked failed:', e);
     res.status(500).json({ error: 'internal error' });

@@ -51,6 +51,20 @@ Built by one person in San Francisco who got tired of the parking math.
 Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB stores an anonymous push token with the curb you picked.
 ```
 
+## What's New (v1.0.6)
+DRAFT for Ale's OK, not submitted. Build 11. Inside the app: two App Intents, Save Parking Spot and Clear Parking Spot
+(ios/CURB/Parking.swift), and the bridge the Sweep alerts screen uses to set them up and show the saved spot. The screen
+itself comes from curb.guide; its auto-park section shows only in builds that have the bridge.
+```
+Auto-save where you park:
+
+• New Shortcuts actions: Save Parking Spot and Clear Parking Spot. Run them when your car's CarPlay or Bluetooth disconnects and connects, and CURB saves the block you parked on and turns on its sweep alerts by itself.
+• Set it up in the ⓘ menu, Sweep alerts, Auto-save where you park. San Francisco for now.
+• The saved spot shows there too, with its next sweep, Show on map and Clear.
+
+The posted sign is always the final authority.
+```
+
 ## What's New (v1.0.5)
 Build 10 (Xcode Cloud 61). Submitted to App Review word for word on 11 Oct 2026, automatic release. Inside the app: the move-your-car alerts are Time Sensitive (the
 entitlement; the server marks the 30 min and "move it tonight" pushes) and the Sweep alerts screen can open CURB's
@@ -147,13 +161,16 @@ PUSH NOTIFICATIONS
 Push is used solely for optional "move your car" street-sweeping reminders that the user explicitly opts into per block. Users choose an intensity (Light = 30 min before; Normal = also the night before; Intense = also the morning of) and a copy "voice." A "Send me a test" button sends a single test notification to the user's OWN device only (rate-limited; it cannot target any other device). The app supports both web push and native APNs push. No marketing or promotional notifications are sent. Push has been built and verified end-to-end (test push returned APNs status 200).
 
 LOCATION
-Location is used only when the user taps the locate button, to center the map and look up the nearby blocks. CURB's server never stores it.
+Location is used only when the user taps the locate button, to center the map and look up the nearby blocks, or when the user's own Save Parking Spot automation runs (below), to find the block they parked on. CURB's server never stores it.
 
 DISCLAIMER
 CURB surfaces patterns in public data as guidance only. The app clearly states that the posted physical street sign is always the final authority.
 
 TIME SENSITIVE (new in 1.0.5)
 Only the reminders that ask the user to move the car now are marked Time Sensitive: the one 30 minutes before the sweep, and the evening one before an early-morning sweep. The night-before and morning reminders stay at the normal level. Users can turn Time Sensitive off for CURB in iOS Settings, as for any app.
+
+AUTO-SAVE WHERE YOU PARK (new in 1.0.6)
+Two optional Shortcuts actions (App Intents): Save Parking Spot and Clear Parking Spot. Nothing runs on its own: the user makes an automation in the Shortcuts app (CarPlay, or a Bluetooth device, Disconnects / Connects) that runs them. Save Parking Spot sends the parked location once to curb.guide, which finds the nearest swept block in San Francisco and turns on that block's sweep reminders for this device's push token; it keeps the block, never the coordinates. Clear Parking Spot turns those reminders off. Outside San Francisco the action says so and saves nothing. To try it anywhere: in Shortcuts, add the CURB action Save Parking Spot to a new shortcut, set its Location to "Valencia St and 20th St, San Francisco", and run it. A "Parked" notification names the block and its next sweep, and the spot shows in the app under ⓘ, Sweep alerts.
 ```
 
 ## App Privacy (questionnaire answers)

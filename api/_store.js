@@ -416,11 +416,11 @@ export async function getSub(endpoint) {
 const KEY_IOS = 'curb:apns';
 
 /** Upsert an APNs device token + one saved spot. Mirrors saveSub (see saveWatch; `legacy` = a page from
- *  before multi-watch, in the app's web view). → { slot } | { full }. */
-export async function saveIosSub(token, spot, { legacy = false } = {}) {
+ *  before multi-watch, in the app's web view; `atBase` = the car's watch, see parkIosCar). → { slot } | { full }. */
+export async function saveIosSub(token, spot, { legacy = false, atBase = false } = {}) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
-  return saveWatch(KEY_IOS, token, spot, { legacy },
+  return saveWatch(KEY_IOS, token, spot, { legacy, atBase },
     (n, out, notified) => ({ ...(n ? {} : { token }), spot: out, notified, savedAt: Date.now(), platform: 'ios' }));
 }
 
@@ -473,6 +473,27 @@ export async function disarmIosSub(token, side = null) {
   const r = redis();
   if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
   await disarmWatches(KEY_IOS, await readWatches(KEY_IOS, token), side);
+}
+
+/** The iPhone app's Save Parking Spot (api/parked-ios.js): the car's watch moves to `spot` (saveWatch's `atBase`: the
+ *  watch tagged car: true, else a free slot), unless the user already turned alerts on for that side from its sheet. That
+ *  watch then covers the car, so it is left exactly as it is (the page still shows it on, and Clear Parking Spot never
+ *  touches it), and the car's watch, still on the curb the car came from, goes off. → { slot, covered } | { full: true }. */
+export async function parkIosCar(token, spot) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  const mine = (await readWatches(KEY_IOS, token)).find((s) => armed(s) && !s.rec.car && sameSide(s.rec.spot, spot));
+  if (mine) { await disarmIosCar(token); return { slot: mine.n, covered: true }; }
+  return saveIosSub(token, spot, { atBase: true });
+}
+
+/** Clear Parking Spot (the car drove off): turn off the car's watch only. It keeps its car tag, so the next park writes the
+ *  same slot. The watches the user armed are never touched. → true when one was on. */
+export async function disarmIosCar(token) {
+  const r = redis();
+  if (!r) throw new Error('store not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+  const car = (await readWatches(KEY_IOS, token)).find((s) => armed(s) && s.rec.car);
+  return car ? casUpdate(KEY_IOS, car.field, (rec) => (rec.car && rec.spot ? disarmRec(rec) : null)) : false;
 }
 
 /** Record that we already pushed one iOS watch (its hash `field`) for a given sweep time (per-window de-dupe). */

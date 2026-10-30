@@ -69,7 +69,21 @@ function installFakes(native) {
   try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbIosHintShown', '1'); } catch (_) { /* ignore */ }
 }
 
-async function openPage(native, ctl, { ua, androidApp } = {}) {
+// The app's auto-park bridge (1.0.6): answers like AutoParkBridge (status / prepare → { notifications, location, token,
+// car? }, clear → { ok }), after the real autoParkScript from ContentView.swift. window.__parkStatus is what it answers.
+function installAutoPark(car) {
+  window.__parkPosts = [];
+  window.__parkStatus = { notifications: 'authorized', location: 'whenInUse', token: true, ...(car ? { car } : {}) };
+  window.webkit.messageHandlers.curbAutoPark = { postMessage: (m) => {
+    window.__parkPosts.push(JSON.parse(JSON.stringify(m)));
+    if (m.op === 'shortcuts') return;
+    if (m.op === 'clear') delete window.__parkStatus.car;
+    const r = m.op === 'clear' ? { ok: true } : JSON.parse(JSON.stringify(window.__parkStatus));
+    setTimeout(() => window.__curbAutoParkResult(m.id, r), 20);
+  } };
+}
+
+async function openPage(native, ctl, { ua, androidApp, autoPark } = {}) {
   const page = await browser.newPage();
   if (ua) await page.setUserAgent(ua);
   // the Android app's tab: the page's head script reads the flag its android-app:// referrer left
@@ -108,6 +122,7 @@ async function openPage(native, ctl, { ua, androidApp } = {}) {
   });
   await page.evaluateOnNewDocument(installFakes, native);
   if (native === 7) await page.evaluateOnNewDocument(APP7.pushScript);
+  if (autoPark !== undefined) { await page.evaluateOnNewDocument(installAutoPark, autoPark); await page.evaluateOnNewDocument(APP7.autoParkScript); }
   await page.goto(BASE + '/', { waitUntil: 'load', timeout: 45000 });
   await page.waitForFunction(() => typeof drawSegments === 'function' && typeof openAlertsPanel === 'function', { timeout: 20000 });
   await page.evaluate(() => { window.curbReport = (k, d) => window.__reports.push([k, d]); });
@@ -149,6 +164,7 @@ try {
   check('empty state: how to add one, 0 of 5, no Turn off all, no save sent', (await text(page, '.ap-empty')).startsWith('No alerts on yet.') && (await text(page, '.ap-sec span:last-child')) === '0 of 5' && !(await page.$('#apAllOff')) && page.__posts.length === 0);
   check('style dials show the saved style (Normal, Cheeky) with what each means', await page.$eval('#alertsPanel [data-k="curbAlertLevel"] [data-v="normal"]', (b) => b.getAttribute('aria-pressed') === 'true') && (await texts(page, '.ap-blurb')).join('|') === 'Night before + 30 min before|Warm, funny, on your side');
   check('…and no Android beta line (not an Android phone)', !(await page.$('#apPlay')));
+  check('…and no auto-park (only the iPhone app can run Shortcuts actions)', !(await page.$('.ap-auto')));
   await shot(page, '1-web-empty');
   await page.keyboard.press('Escape');
   check('Esc closes it and gives the focus back to ⓘ', !(await isOpen(page)) && await page.evaluate(() => document.activeElement && document.activeElement.id === 'infoBtn'));
@@ -255,6 +271,7 @@ try {
   await openPanel(app);
   check('app: "On this iPhone", the check goes through the bridge with the multi marker', (await text(app, '#apKicker')) === 'On this iPhone' && await app.evaluate(() => { const s = window.__nativePosts.at(-1).spot || {}; return s.cnn === '5910000' && s.multi === 1; }));
   check('…"Notifications are on for CURB"', (await text(app, '.ap-stat')) === 'Notifications are on for CURB');
+  check('…an app before 1.0.6 shows no auto-park', !(await app.$('.ap-auto')) && !(await app.$('.ap-car')));
   const night = await rowText(app, '9130000|East', '.ap-ping');
   check('a night sweep pings once, at 9 PM the evening before', /^Pings you (tonight|tomorrow|(Sun|Mon|Tue|Wed|Thu|Fri|Sat) \d{1,2}\/\d{1,2}) 9 PM$/.test(night), night);
   await shot(app, '4-app-on');
@@ -299,6 +316,61 @@ try {
   await sleep(500);
   check('app Turn off all: one {off:true} naming no side, the list empties', await app.evaluate(() => { const s = window.__nativePosts.at(-1).spot || {}; return s.off === true && !s.cnn && !s.sideKey && !s.corridor; }) && !(await app.$('.ap-row')) && (await toast(app)) === 'All alerts off.');
   await app.close();
+
+  // ---------------- auto-save where you park (the app from 1.0.6, its real autoParkScript) ----------------
+  const IPHONE = (v) => `Mozilla/5.0 (iPhone; CPU iPhone OS ${v}_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`;
+  const fresh = await openPage(7, ctl, { autoPark: null, ua: IPHONE(27) });
+  await openPanel(fresh);
+  const steps27 = await text(fresh, '.ap-auto ol');
+  check('auto-park, nothing saved yet: the section, its steps open, and Open Shortcuts',
+    (await text(fresh, '.ap-auto summary')) === 'Set it up ▸' && await fresh.$eval('.ap-auto', (d) => d.open) && !!(await fresh.$('#apShortcuts')));
+  check('…iOS 27 steps (automations live in shortcuts: +, Edit, a trigger from Automation), Bluetooth naming the car',
+    steps27.startsWith('Open Shortcuts, tap +, then Edit.') && steps27.includes('Bluetooth and choose your car') && steps27.includes('Disconnected')
+    && steps27.includes('Save Parking Spot') && steps27.includes('Clear Parking Spot'), steps27);
+  check('…the panel hands the app its Alert style when it opens', await fresh.evaluate(() => JSON.stringify(window.__parkPosts[0]) === '{"op":"status","id":"1","level":"normal","voice":"cheeky"}'));
+  await fresh.$eval('.ap-auto', (d) => d.scrollIntoView({ block: 'center' }));
+  await shot(fresh, '10-app-autopark-setup');
+  await tap(fresh, '#apShortcuts');
+  await sleep(200);
+  check('Open Shortcuts: asks for what isn\'t decided yet (prepare, with the style), then opens Shortcuts', await fresh.evaluate(() => window.__parkPosts.slice(-2).map((m) => m.op).join() === 'prepare,shortcuts' && window.__parkPosts.at(-2).level === 'normal'));
+  await fresh.evaluate(() => { window.__parkStatus.notifications = 'denied'; });
+  await tap(fresh, '#apShortcuts');
+  await sleep(200);
+  check('…notifications off for CURB: says so instead of opening Shortcuts', (await toast(fresh)).startsWith('Notifications are off for CURB') && await fresh.evaluate(() => window.__parkPosts.at(-1).op === 'prepare'));
+  await fresh.close();
+  const older = await openPage(7, ctl, { autoPark: null, ua: IPHONE(26) });
+  await openPanel(older);
+  const steps26 = await text(older, '.ap-auto ol');
+  check('…iOS 26 and earlier: the Automation tab, Disconnects, Run Immediately', steps26.startsWith('Open Shortcuts, tap Automation, then +.')
+    && steps26.includes('Bluetooth and choose your car') && steps26.includes('Disconnects and Run Immediately'), steps26);
+  await older.close();
+
+  const r = row('7735000', 'West');
+  const car = { corridor: r.corridor, limits: r.limits, blockside: 'West', cnn: r.cnn, sideKey: r.cnnrightleft, nextSweepISO: new Date(Date.now() + 864e5).toISOString(),
+    url: '/b/7735000?side=West', covered: false, savedAt: Date.now() - 60e3 };
+  const parked = await openPage(7, ctl, { autoPark: car });
+  await openPanel(parked);
+  check('auto-park, a saved spot: its row like a curb\'s (the side, its next sweep from the page\'s schedule, when it pings, when it was saved)',
+    (await text(parked, '.ap-car .ap-nm')) === '🚗 Kansas St, West side' && (await text(parked, '.ap-car .ap-next')).startsWith('Next sweep')
+    && (await texts(parked, '.ap-car .ap-ping')).some((t) => t.startsWith('Pings you')) && (await texts(parked, '.ap-car .ap-ping')).some((t) => t.startsWith('Saved today')),
+    (await texts(parked, '.ap-car div')).join(' | '));
+  check('…the steps fold under "How auto-save works"', (await text(parked, '.ap-auto summary')) === 'How auto-save works ▸' && !(await parked.$eval('.ap-auto', (d) => d.open)));
+  await parked.$eval('.ap-car', (d) => d.scrollIntoView({ block: 'center' }));
+  await shot(parked, '11-app-autopark-car');
+  await tap(parked, '#alertsPanel [data-k="curbAlertLevel"] [data-v="intense"]');
+  await sleep(900);
+  check('a style change goes to the app for the car\'s next park', await parked.evaluate(() => { const m = window.__parkPosts.at(-1); return m.op === 'status' && m.level === 'intense' && m.voice === 'cheeky'; }));
+  await tap(parked, '#apCarClear');
+  await sleep(300);
+  check('Clear: the app forgets the spot (clear), the row goes, and it says so', await parked.evaluate(() => window.__parkPosts.some((m) => m.op === 'clear')) && !(await parked.$('.ap-car'))
+    && (await toast(parked)) === 'Parking spot cleared.' && await parked.$eval('.ap-auto', (d) => d.open));
+  await closePanel(parked);
+  await parked.evaluate((c) => { window.__parkStatus.car = c; }, car);   // parked again
+  await openPanel(parked);
+  await tap(parked, '#apCarShow');
+  await parked.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 8000 }).catch(() => {});
+  check('Show on map: the panel closes and the car\'s side opens', !(await isOpen(parked)) && await parked.evaluate(() => !!sheetSpot && sheetSpot.cnn === '7735000' && sheetSpot.sideKey === 'West'));
+  await parked.close();
 
   // ---------------- iPhone Safari (not the app, not installed) ----------------
   const ios = await openPage(false, ctl, { ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1' });

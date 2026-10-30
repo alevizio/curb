@@ -609,6 +609,14 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .ap-help ul{margin:6px 0 0 16px}
   .ap-help li{margin-top:4px}
   .ap-help b{color:var(--ink)}
+  .ap-auto{margin-top:10px;font-size:12px;color:var(--ink-soft);line-height:1.45}
+  .ap-auto summary{cursor:pointer;list-style:none;font-weight:800;color:var(--ink)}
+  .ap-auto summary::-webkit-details-marker{display:none}
+  .ap-auto p{margin:6px 0 0}
+  .ap-auto ol{margin:6px 0 0 18px;padding:0}
+  .ap-auto li{margin-top:4px}
+  .ap-auto b{color:var(--ink)}
+  .ap-auto .btn{margin-top:10px}
   .ap-play{margin-top:12px}
   .im-tx small.bad{color:var(--red-text)}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -2443,7 +2451,7 @@ async function sendTestPush(spot, tb){
 // re-saves the first curb, a same-sweep save like a sheet's daily refresh: in the app, its answer is the only
 // way to learn that iOS blocks CURB's notifications (denied-settings: no prompt, nothing arrives), and a push
 // token iOS rotated reaches the server again. The other curbs get a sheet's daily refresh (refreshWatch).
-const AP={gen:0,sides:{},loaded:false,err:false,check:'',confirmAll:false,busyAll:false,offing:new Set()};
+const AP={gen:0,sides:{},loaded:false,err:false,check:'',confirmAll:false,busyAll:false,offing:new Set(),park:null,parkBusy:false};
 const AP_LEVELS={light:['Light','Just the heads-up 30 min before'],normal:['Normal','Night before + 30 min before'],intense:['Intense','Night before, morning of + 30 min before']};
 const AP_VOICES={cheeky:['Cheeky','Warm, funny, on your side'],drill:['Drill','Loud. Urgent. MOVE THE CAR.'],deadpan:['Deadpan','Dry. The receipts do the talking']};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2522,6 +2530,52 @@ function apRow(a,level){
     +(AP.offing.has(alertId(a))?`<button class="btn alt ap-x busy" type="button" data-act="off" aria-busy="true">Turning off…</button>`
       :`<button class="btn alt ap-x" type="button" data-act="off">Turn off</button>`)+`</div></div>`;
 }
+// Auto-save where you park (the app from 1.0.6, on SF's map): Save Parking Spot, an action a Shortcuts automation runs
+// when the car's CarPlay or Bluetooth disconnects, keeps the car's spot on the phone (AP.park.car, from
+// __curbAutoPark.status()) and arms its own alerts on the server. Its row reads like a curb's; the steps make the two
+// automations. `covered`: alerts were already on for that curb from its sheet, so those alert instead.
+function apCar(){
+  const c=AP.park&&AP.park.car;
+  return c&&/^\d{1,12}$/.test(c.cnn)?{cnn:c.cnn,sideKey:c.blockside||c.sideKey||'C',corridor:c.corridor,limits:c.limits,blockside:c.blockside}:null;
+}
+// "today 2:14 PM", "yesterday 6:05 PM", "Tue 10/27 9:12 AM" (SF time, like the pings)
+function savedWhen(t){
+  const p=sfParts(new Date(t)), d=sfDaysUntil(p.y,p.mo,p.da);
+  return (d===0?'today':d===-1?'yesterday':DAYLBL[new Date(Date.UTC(p.y,p.mo-1,p.da)).getUTCDay()]+' '+p.mo+'/'+p.da)+' '+pingTime(t);
+}
+// the Alert style the car's next park saves its alerts with (the app keeps it: the automation runs with no page)
+const apStyle=()=>({level:getAlertLevel(),voice:getAlertVoice()});
+function apAutoPark(level){
+  if(!window.__curbAutoPark||CITY!=='sf')return '';
+  const c=AP.park&&AP.park.car, car=apCar();
+  let h=`<div class="ap-sec"><span>Auto-save where you park</span></div>`;
+  if(car){
+    const x=AP.sides[alertId(car)], rp=x&&x.armNs?relPhrase(x.armNs):null;
+    h+=`<div class="ap-row ap-car"><div class="ap-nm">🚗 ${esc(alertLabel(car,[car]))}</div>`
+      +(car.limits?`<div class="ap-lim">${esc(fmtLimits(car.limits))}</div>`:'')
+      +(rp?`<div class="ap-next ${rp.cls}">Next sweep ${esc(rp.txt)}</div>`+(c.covered?'':`<div class="ap-ping">${ICONS.bell}<span>${esc(pingLine(x.spot,level))}</span></div>`)
+        :`<div class="ap-next">${!AP.loaded?'Loading the schedule…':'No sweep coming up here.'}</div>`)
+      +`<div class="ap-ping"><span>Saved ${esc(savedWhen(c.savedAt))}${c.covered?'. Your alerts for this curb cover it.':''}</span></div>`
+      +`<div class="ap-acts"><button class="btn alt" type="button" id="apCarShow">Show on map</button>`
+      +`<button class="btn alt ap-x${AP.parkBusy?' busy':''}" type="button" id="apCarClear"${AP.parkBusy?' aria-busy="true"':''}>${AP.parkBusy?'Clearing…':'Clear'}</button></div></div>`;
+  }
+  // iOS 27 folded automations into shortcuts (+, Edit, then a trigger from the Automation actions); before it they
+  // had their own tab. The app's web view says which iOS it is. Bluetooth must name the car, else AirPods count too.
+  const ios27=iosMajor()>=27;
+  return h+`<details class="ap-auto" data-car="${car?1:0}"${car?'':' open'}><summary>${car?'How auto-save works':'Set it up'} ▸</summary>`
+    +`<p>When your car's CarPlay or Bluetooth disconnects, CURB saves the block you parked on and turns on its sweep alerts. When it connects again, the spot clears.</p>`
+    +(ios27?`<ol><li>Open <b>Shortcuts</b>, tap <b>+</b>, then <b>Edit</b>.</li>`
+      +`<li>Under <b>Automation</b>, pick <b>CarPlay</b>, or <b>Bluetooth</b> and choose your car, and set it to <b>Disconnected</b>.</li>`
+      +`<li>Add the CURB action <b>Save Parking Spot</b>.</li>`
+      +`<li>Make one more for <b>Connected</b> with <b>Clear Parking Spot</b>.</li></ol>`
+      :`<ol><li>Open <b>Shortcuts</b>, tap <b>Automation</b>, then <b>+</b>.</li>`
+      +`<li>Pick <b>CarPlay</b>, or <b>Bluetooth</b> and choose your car. Choose <b>Disconnects</b> and <b>Run Immediately</b>.</li>`
+      +`<li>Add the CURB action <b>Save Parking Spot</b>.</li>`
+      +`<li>Make one more for <b>Connects</b> with <b>Clear Parking Spot</b>.</li></ol>`)
+    +`<button class="btn ios-get" id="apShortcuts" type="button">Open Shortcuts</button></details>`;
+}
+// The iPhone's iOS version from the web view's user agent ("iPhone OS 27_0"), 0 when it doesn't say
+function iosMajor(){const m=/OS (\d+)_\d/.exec(navigator.userAgent);return m?+m[1]:0;}
 function apHelp(app){
   return `<details class="ap-help"><summary>Not getting alerts? ▸</summary><ul>`
     +(app?`<li>In <b>Settings → Notifications → CURB</b>, keep Allow Notifications on, with Lock Screen and Banners.</li>`
@@ -2543,6 +2597,7 @@ function renderAlertsPanel(){
     +`<div class="ap-sec"><span>Your curbs</span><span>${list.length} of ${MAX_ALERTS}</span></div>`
     +(list.length?`<div class="ap-list">${list.map(a=>apRow(a,level)).join('')}</div>`
       :`<div class="ap-empty"><b>No alerts on yet.</b> Tap the curb where you parked, then <b>Sweep alerts</b>. You can have alerts on for up to ${MAX_ALERTS} curbs.</div>`)
+    +apAutoPark(level)
     +`<div class="ap-sec"><span>Alert style${list.length>1?' · all curbs':''}</span></div><div class="ap-style">`
     +seg('curbAlertLevel',level,AP_LEVELS,'Intensity')+`<div class="ap-blurb">${(AP_LEVELS[level]||AP_LEVELS.normal)[1]}</div>`
     +seg('curbAlertVoice',voice,AP_VOICES,'Voice')+`<div class="ap-blurb">${(AP_VOICES[voice]||AP_VOICES.cheeky)[1]}</div></div>`
@@ -2558,13 +2613,15 @@ function renderAlertsPanel(){
     h+=`<a class="ios-play ap-play" id="apPlay" href="/android">Prefer an app? CURB for Android is in beta. Join the test →</a>`;
   // A redraw keeps the help open and the focus where it was (by id, a row's action, a dial, the help), else on
   // Close: a turned-off row or a Turn off all that is gone must not drop the focus out of the dialog.
-  const body=document.getElementById('apBody'), f=document.activeElement, help=body.querySelector('.ap-help');
+  const body=document.getElementById('apBody'), f=document.activeElement, help=body.querySelector('.ap-help'), auto=body.querySelector('.ap-auto');
   const had=!!f&&body.contains(f);
   const fsel=!had?'':f.id?'#'+f.id:f.dataset.act?`.ap-row[data-id="${CSS.escape(f.closest('.ap-row').dataset.id)}"] [data-act="${f.dataset.act}"]`
-    :f.dataset.v?`[data-k="${f.closest('[data-k]').dataset.k}"] [data-v="${f.dataset.v}"]`:f.tagName==='SUMMARY'?'.ap-help summary':'';
-  const helpOpen=!!(help&&help.open);
+    :f.dataset.v?`[data-k="${f.closest('[data-k]').dataset.k}"] [data-v="${f.dataset.v}"]`:f.tagName==='SUMMARY'?(f.closest('.ap-auto')?'.ap-auto summary':'.ap-help summary'):'';
+  // the auto-park steps keep how the user left them while a saved spot neither comes nor goes (they start open with none)
+  const helpOpen=!!(help&&help.open), autoWas=auto&&{open:auto.open,car:auto.dataset.car};
   body.innerHTML=h;
   if(helpOpen)body.querySelector('.ap-help').open=true;
+  const autoNew=body.querySelector('.ap-auto'); if(autoNew&&autoWas&&autoWas.car===autoNew.dataset.car)autoNew.open=autoWas.open;
   if(had)((fsel&&body.querySelector(fsel))||document.getElementById('apClose')).focus();
   body.querySelectorAll('.ap-row').forEach(row=>{
     const id=row.dataset.id, a=savedAlerts()[id]; if(!a)return;
@@ -2593,12 +2650,37 @@ function renderAlertsPanel(){
   const get=body.querySelector('a.ios-get'); if(get)get.onclick=()=>track('ios_app_offer_tap');
   // back from Settings, visibilitychange re-checks and this card turns into "Notifications are on"
   const set=document.getElementById('apSettings'); if(set)set.onclick=()=>{track('alerts_open_settings');window.__curbOpenSettings();};
+  // auto-park: asks for notifications (and location) if not decided yet, so the first automation run can save the spot
+  const sc=document.getElementById('apShortcuts');
+  if(sc)sc.onclick=async()=>{
+    if(AP.parkBusy)return; AP.parkBusy=true; track('autopark_setup');
+    let s=null; try{s=await window.__curbAutoPark.prepare(apStyle());}catch(_){}
+    AP.parkBusy=false; if(s)AP.park=s; renderAlertsPanel();
+    if(s&&s.notifications==='denied'){toast('Notifications are off for CURB. Turn them on in Settings → Notifications → CURB first.');return;}
+    window.__curbAutoPark.openShortcuts();
+  };
+  const cs=document.getElementById('apCarShow');
+  if(cs)cs.onclick=()=>{const car=apCar();if(!car)return;closeAlertsPanel();userPicked();showEveryCurb();openCurb(car.cnn,car.sideKey);};
+  const cc=document.getElementById('apCarClear');
+  if(cc)cc.onclick=async()=>{
+    if(AP.parkBusy)return; AP.parkBusy=true; renderAlertsPanel();
+    try{await window.__curbAutoPark.clear();if(AP.park)AP.park.car=null;toast('Parking spot cleared.');track('autopark_clear');}
+    catch(_){toast("Couldn't clear the spot, try again.");}
+    finally{AP.parkBusy=false;renderAlertsPanel();}
+  };
 }
 async function loadAlertsPanel(){
   const gen=++AP.gen, list=liveAlerts();
-  if(list.length){
+  // the car's spot from Save Parking Spot (the app from 1.0.6) first, so its schedule loads with the curbs'; an app that
+  // doesn't answer within 1.5 s just shows no car row
+  if(window.__curbAutoPark&&CITY==='sf'){
+    AP.park=await Promise.race([window.__curbAutoPark.status(apStyle()).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),1500))]);
+    if(gen!==AP.gen)return;
+  }
+  const car=apCar(), all=car?[...list,car]:list;
+  if(all.length){
     await loadEnforcement();  // the ticket-time tip rides in each spot, as from a sheet
-    try{const s=await alertSides(list);if(gen===AP.gen)AP.sides=s;}catch(_){if(gen===AP.gen)AP.err=true;}
+    try{const s=await alertSides(all);if(gen===AP.gen)AP.sides=s;}catch(_){if(gen===AP.gen)AP.err=true;}
   }
   if(gen!==AP.gen)return;
   AP.loaded=true;
@@ -2627,6 +2709,7 @@ function apSetStyle(k,v){
   _apStyleT=setTimeout(async()=>{
     const was=_apStyleWas, level=getAlertLevel(), voice=getAlertVoice(); _apStyleWas=null;
     if(level===was.level&&voice===was.voice)return;
+    if(window.__curbAutoPark)window.__curbAutoPark.status({level,voice}).catch(()=>{});  // the car's next park uses it
     const todo=liveAlerts().map(a=>AP.sides[alertId(a)]).filter(x=>x&&x.spot).map(x=>({...x.spot,level,voice}));
     if(!todo.length){if(liveAlerts().length)toast("Saved. Each curb's alerts switch to it when you next open that curb.");return;}
     const rs=await Promise.all(todo.map(reArm));  // sent one after another (webQueue / _nativeQ)
