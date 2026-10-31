@@ -555,7 +555,12 @@ push alongside Web Push:
 - The little car (owner, 2026-10-30: "a little car that shows you where you parked", then "share where you parked if you're
   parking for someone else"): one car marker on the map (`CAR`, `drawCar` in index.html), halfway along a curb side by length
   (`lineMid`: a block drawn as one straight line has no middle vertex), on the side the map draws (`sideSigns`, shared with
-  drawSegments). It shows the app's auto-saved car (SF, `ownCar` from `__curbAutoPark.status()` at launch, on every return to
+  drawSegments). Owner, 2026-10-31 ("more gta 2 style like looked from above", picked bold red): `carTop` draws it seen from
+  above in sign red, turned along the curb with traffic (the line's right side faces the way it was drawn, the left side the
+  other way; `lineMid` gives the curb's heading), and the ink shadow sits on the unturned box so it always falls down right.
+  Then "let pick the style of the car", "have them all": five cars (`CAR_STYLES` a to e, D the default, E is C bigger) in a
+  "Your car" row on the car's own curb sheet only (`syncCarPick`), kept on the device (localStorage curbCarStyle); a shared
+  link carries the sender's pick (`&car=<style>`, the recipient sees that car; `&car=1` from older links shows D). It shows the app's auto-saved car (SF, `ownCar` from `__curbAutoPark.status()` at launch, on every return to
   the page, and when the panel reads, prepares or clears it), or, winning over it, the spot a shared link names. The sheet's
   Share where I parked sends "I parked on <street> (<cross streets>), <side> side. Next sweep <when>." with
   `/<city page>?b=<cnn>&side=<side key>&car=1`; `carLink` puts the car there for that visit only (nothing saved). The

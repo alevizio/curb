@@ -531,10 +531,17 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .btn:active{transform:translateY(2px);box-shadow:none}
   .btn.alt{background:var(--paper);color:var(--ink)}
   .btn.park-share{flex-basis:100%;font-size:13px;padding:10px}
-  /* the little car where you parked (carLink / the app's auto-park): a signage disc like the city pins */
-  .car-pin{display:grid;place-items:center;border-radius:50%;corner-shape:round;background:var(--paper);border:2.5px solid var(--ink);
-    box-shadow:2px 2px 0 var(--ink);color:var(--ink);cursor:pointer}
-  .car-pin .ic{width:18px;height:18px}
+  /* the little car where you parked (carLink / the app's auto-park): seen from above, parked along the curb. The shadow
+     sits on the box, not the turned car, so it always falls down and right like the rest of the ink shadows */
+  .car-pin{display:grid;place-items:center;cursor:pointer;filter:drop-shadow(2px 2px 0 var(--ink))}
+  .car-pin svg{width:18px;height:34px;transform:rotate(var(--deg,0deg))}
+  .car-pin svg.big{width:23px;height:43px}
+  /* the sheet's "Your car" row on the car's curb side: the five cars, upright */
+  .car-pick{flex-basis:100%;margin-top:2px}
+  .car-pick[hidden]{display:none}
+  .car-pick .seg button{padding:5px 9px;line-height:0}
+  .car-pick svg{width:11px;height:21px}
+  .car-pick svg.big{width:13px;height:25px}
   .btn.on{background:var(--green);color:var(--ink);border-color:var(--ink)}
   .btn.full{background:var(--paper);color:var(--ink-soft);border-style:dashed;box-shadow:none}
   .btn.busy{opacity:.65;pointer-events:none}
@@ -1862,6 +1869,8 @@ function openSheet(group, activeKey){
       </div>
       <div class="alertnote" id="alertNote" hidden></div>`:''}
       <button class="btn alt park-share" id="parkShareBtn">${ICONS.car} Share where I parked</button>
+      <div class="acfg-row car-pick" id="carPick" data-cnn="${group.cnn}" data-key="${active.key}" hidden><span class="acfg-lbl">Your car</span>
+        <div class="seg" role="group" aria-label="Your car">${Object.keys(CAR_STYLES).map(k=>`<button type="button" data-v="${k}" aria-label="${CAR_STYLES[k][2]}" title="${CAR_STYLES[k][2]}">${carTop(0,k)}</button>`).join('')}</div></div>
     </div>
     ${canRemind?`<details class="alertcfg" id="alertCfg">
       <summary><span>Alert style</span><b class="acfg-st">${alertOn?'On · '+getAlertLevel():'Customize ▸'}</b></summary>
@@ -1937,13 +1946,15 @@ function openSheet(group, activeKey){
     shareOut(text,url,'Link copied. Text it to whoever asked.','block_shared');
   };
   // Share where I parked (owner, 2026-10-30: you parked a car for someone): the curb side and the sweep to move it
-  // before, with a map link that opens that side with the little car on it (&car=1, see carLink)
+  // before, with a map link that opens that side with the sender's car on it (&car=<style>, see carLink)
   document.getElementById('parkShareBtn').onclick=()=>{
-    const url=location.origin+(CITY_PAGE[CITY]||'/')+'?b='+encodeURIComponent(group.cnn)+'&side='+encodeURIComponent(active.key)+'&car=1';
+    const url=location.origin+(CITY_PAGE[CITY]||'/')+'?b='+encodeURIComponent(group.cnn)+'&side='+encodeURIComponent(active.key)+'&car='+myCarStyle();
     const text=`I parked on ${group.corridor||'this block'} (${fmtLimits(group.limits)})${active.blockside?', '+(SIDE_ABBR[active.blockside]||active.blockside)+' side':''}.`
       +(armNs?` Next sweep ${sweepWords(armNs,new Date()).when}${armNs.holiday?' (holiday schedule)':''}.`:'');
     shareOut(text,url,'Link copied. Send it to whoever needs the car.','parked_shared');
   };
+  document.querySelectorAll('#carPick button').forEach(b=>{b.onclick=()=>setCarStyle(b.dataset.v);});
+  syncCarPick();
   // Tapping another side's row makes it the active side (re-renders the sheet around it).
   document.querySelectorAll('#sheetBody .srow.tap').forEach(el=>{
     const go=()=>openSheet(group, el.dataset.side);
@@ -2783,7 +2794,7 @@ document.getElementById('alertsPanel').addEventListener('click',e=>{ if(e.target
 // One car on the map: the spot a "Share where I parked" link names (carLink, for that visit only), else the car the
 // app's auto-park saved (AP.park.car, SF's map). Both name a block and its side, never the exact spot, so the car sits
 // halfway along that curb side, where the map draws it. A tap opens that side's sheet.
-const CAR={link:null,own:null,on:'',marker:null};
+const CAR={link:null,own:null,on:'',marker:null,at:null,deg:0};
 async function carRows(cnn){
   return (await PLACE.load()).filter(b=>String(b.c)===String(cnn)).flatMap(PLACE.rowsOf);
 }
@@ -2791,7 +2802,7 @@ async function drawCar(){
   const c=CAR.link||CAR.own, id=c?c.cnn+'|'+c.side:'';
   if(id===CAR.on)return;
   CAR.on=id;
-  if(CAR.marker){map.removeLayer(CAR.marker);CAR.marker=null;}
+  if(CAR.marker){map.removeLayer(CAR.marker);CAR.marker=null;CAR.at=null;syncCarPick();}
   if(!c)return;
   try{
     const rows=await carRows(c.cnn), geom=rows.find(r=>r.line&&r.line.coordinates);
@@ -2800,23 +2811,56 @@ async function drawCar(){
     const arr=Object.values(sides);
     const s=arr.find(x=>x.key===c.side)||arr.find(x=>String(x.blockside||'').toLowerCase()===c.side.toLowerCase());
     if(!s)return;  // the city no longer lists that side
-    const ll=offsetLine(geom.line.coordinates.map(p=>[p[1],p[0]]),OFFSET,sideSigns(arr)[s.key]);
-    CAR.marker=L.marker(lineMid(ll),{keyboard:true,title:'Where you parked: '+(geom.corridor||'this block'),zIndexOffset:500,
-      icon:L.divIcon({className:'car-pin',html:ICONS.car,iconSize:[34,34],iconAnchor:[17,17]})})
+    const sign=sideSigns(arr)[s.key], mid=lineMid(offsetLine(geom.line.coordinates.map(p=>[p[1],p[0]]),OFFSET,sign));
+    // parked with traffic: the right side of the line faces the way it was drawn, the left side the other way
+    CAR.deg=Math.round(mid.deg+(sign<0?180:0)); CAR.at={cnn:String(c.cnn),key:s.key};
+    CAR.marker=L.marker(mid.at,{keyboard:true,title:'Where you parked: '+(geom.corridor||'this block'),zIndexOffset:500,icon:carIcon()})
       .on('click',()=>{userPicked();showEveryCurb();openCurb(c.cnn,s.key);}).addTo(map);
+    syncCarPick();
   }catch(_){if(CAR.on===id)CAR.on='';}  // the next refresh tries again
 }
-// halfway along a curb side by length (its middle point is an end on a block drawn as one straight line)
+// halfway along a curb side by length (its middle point is an end on a block drawn as one straight line), and the way
+// the curb runs there in degrees clockwise from north
 function lineMid(ll){
   const cos=Math.cos(ll[0][0]*Math.PI/180)||1, len=[];
   for(let i=1;i<ll.length;i++)len.push(Math.hypot((ll[i][1]-ll[i-1][1])*cos,ll[i][0]-ll[i-1][0]));
   let half=len.reduce((a,b)=>a+b,0)/2;
   for(let i=0;i<len.length;i++){
-    if(half<=len[i]&&len[i]>0){const t=half/len[i],a=ll[i],b=ll[i+1];return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}
+    if(half<=len[i]&&len[i]>0){const t=half/len[i],a=ll[i],b=ll[i+1];
+      return {at:[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],deg:Math.atan2((b[1]-a[1])*cos,b[0]-a[0])*180/Math.PI};}
     half-=len[i];
   }
-  return ll[ll.length-1];
+  return {at:ll[ll.length-1],deg:0};
 }
+// the cars to pick from (owner, 2026-10-31: "let pick the style of the car", "have them all"): body, roof, name; D by
+// default, E is C drawn bigger. A shared link shows the sender's car; your pick is kept on this device
+const CAR_STYLES={a:['var(--pop-blue)','var(--paper)','Pale blue car'],b:['var(--pop-blue)','var(--pop-blue)','Pale blue car, solid roof'],
+  c:['var(--disc-blue)','var(--pop-blue)','Bold blue car'],d:['var(--sign-red)','var(--pop-red)','Bold red car'],e:['var(--disc-blue)','var(--pop-blue)','Bigger bold blue car']};
+function myCarStyle(){try{const v=localStorage.getItem('curbCarStyle');if(CAR_STYLES[v])return v;}catch(_){}return 'd';}
+const carStyle=()=>(CAR.link&&CAR.link.style)||myCarStyle();  // the car on the map: a link's, else yours
+const carIcon=()=>L.divIcon({className:'car-pin',html:carTop(CAR.deg,carStyle()),iconSize:[48,48],iconAnchor:[24,24]});
+function setCarStyle(k){
+  try{localStorage.setItem('curbCarStyle',k);}catch(_){}
+  if(CAR.link)CAR.link.style=k;
+  if(CAR.marker)CAR.marker.setIcon(carIcon());
+  syncCarPick(); track('car_style_'+k);
+}
+// the sheet's "Your car" row shows on the curb side the car is on, with the car on the map pressed
+function syncCarPick(){
+  const el=document.getElementById('carPick'); if(!el)return;
+  el.hidden=!(CAR.at&&el.dataset.cnn===CAR.at.cnn&&el.dataset.key===CAR.at.key);  // CAR.at is set only with a car on the map
+  const k=carStyle(); el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===k)));
+}
+// the car seen from above, nose up, turned by deg: wheels, body, windshield, roof, rear window, head and tail lights
+const carTop=(deg,k)=>`<svg viewBox="0 0 18 34"${k==='e'?' class="big"':''} style="--deg:${deg}deg" aria-hidden="true" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round">`
+  +'<g fill="var(--ink)" stroke="none"><rect x=".6" y="6" width="3" height="5.5" rx="1"/><rect x="14.4" y="6" width="3" height="5.5" rx="1"/>'
+  +'<rect x=".6" y="22.5" width="3" height="5.5" rx="1"/><rect x="14.4" y="22.5" width="3" height="5.5" rx="1"/></g>'
+  +`<rect x="2.2" y="1" width="13.6" height="32" rx="4.5" fill="${CAR_STYLES[k][0]}"/>`
+  +'<path d="M4.2 10.6Q9 8.7 13.8 10.6L12.7 14.2H5.3Z" fill="var(--ink)"/>'
+  +`<rect x="5.3" y="14.2" width="7.4" height="8.6" rx="1.2" fill="${CAR_STYLES[k][1]}"/>`
+  +'<path d="M5.3 22.8H12.7L13.5 26Q9 27.4 4.5 26Z" fill="var(--ink)"/>'
+  +'<g stroke="none"><rect x="4.1" y="2.3" width="3" height="1.6" rx=".7" fill="var(--pop-amber)"/><rect x="10.9" y="2.3" width="3" height="1.6" rx=".7" fill="var(--pop-amber)"/>'
+  +'<rect x="4.1" y="30.1" width="3" height="1.4" rx=".6" fill="var(--pop-red)"/><rect x="10.9" y="30.1" width="3" height="1.4" rx=".6" fill="var(--pop-red)"/></g></svg>';
 // the app's car, from what the app last said (AP.park); a status that didn't answer leaves the car as it was
 function ownCar(){const c=apCar();CAR.own=c?{cnn:c.cnn,side:c.sideKey}:null;drawCar();}
 async function refreshOwnCar(){
@@ -2827,10 +2871,10 @@ async function refreshOwnCar(){
 refreshOwnCar();
 // the automation saves or clears the spot while the page sleeps: look again each time it comes back
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshOwnCar();});
-/* A "Share where I parked" link: /?b=<cnn>&side=<side key>&car=1. deepLink opens the side; this puts the car on it. */
+/* A "Share where I parked" link: /?b=<cnn>&side=<side key>&car=<style>. deepLink opens the side; this puts the car on it. */
 (function carLink(){
-  const b=QS.get('b'); if(QS.get('car')!=='1'||!b||!/^[A-Za-z0-9_.:-]{1,40}$/.test(b))return;
-  CAR.link={cnn:b,side:QS.get('side')||''}; drawCar();
+  const b=QS.get('b'), v=QS.get('car'); if(!/^(1|[a-e])$/.test(v||'')||!b||!/^[A-Za-z0-9_.:-]{1,40}$/.test(b))return;
+  CAR.link={cnn:b,side:QS.get('side')||'',style:v==='1'?'d':v}; drawCar();  // &car=1: a link sent before the styles
 })();
 
 /* ---------- the other maps: San Francisco and the public cities (owner, 2026-10-20) ---------- */

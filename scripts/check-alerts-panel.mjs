@@ -131,6 +131,10 @@ async function openPage(native, ctl, { ua, androidApp, autoPark, path = '/' } = 
   await page.evaluate(() => { window.curbReport = (k, d) => window.__reports.push([k, d]); });
   return page;
 }
+// the sheet's "Your car" row and the car on the map
+const carPick = (page) => page.evaluate(() => { const el = document.getElementById('carPick'), svg = CAR.marker && CAR.marker.getElement().querySelector('svg');
+  return { shown: !!el && !el.hidden, n: el ? el.querySelectorAll('button').length : 0, pressed: el ? [...el.querySelectorAll('button[aria-pressed=true]')].map((b) => b.dataset.v).join() : '',
+    body: svg ? svg.querySelector(':scope > rect').getAttribute('fill') : '', big: !!svg && svg.classList.contains('big'), saved: localStorage.getItem('curbCarStyle') }; });
 const text = (page, sel) => page.$eval(sel, (e) => e.textContent.replace(/\s+/g, ' ').trim()).catch(() => '');
 const texts = (page, sel) => page.$$eval(sel, (es) => es.map((e) => e.textContent.replace(/\s+/g, ' ').trim()));
 const tap = (page, sel) => page.$eval(sel, (e) => e.click());
@@ -360,14 +364,28 @@ try {
     drawSegments(await carRows('7735000'));   // the curb sides as the map draws them
     const side = (k) => segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === k).side.latlngs;
     const w = side('West');
-    return { west: map.distance(m, lineMid(w)), east: map.distance(m, lineMid(side('East'))), ends: Math.min(map.distance(m, w[0]), map.distance(m, w.at(-1))), title: CAR.marker.getElement().title };
+    const deg = parseFloat(CAR.marker.getElement().querySelector('svg').style.getPropertyValue('--deg'));
+    return { west: map.distance(m, lineMid(w).at), east: map.distance(m, lineMid(side('East')).at), ends: Math.min(map.distance(m, w[0]), map.distance(m, w.at(-1))), title: CAR.marker.getElement().title,
+      deg, turn: ((deg - lineMid(w).deg) % 360 + 360) % 360 };
   });
   check('the app\'s saved car: a little car on the map at launch, halfway along its curb side (West, not East, not an end)',
     !!pin && pin.west < 0.5 && pin.east > 5 && pin.ends > 50 && pin.title === 'Where you parked: Kansas St', JSON.stringify(pin));
+  check('…parked along the curb with traffic: West is the line\'s left side here (L), so the car faces against the way the line runs',
+    !!pin && Math.abs(pin.turn - 180) < 1, JSON.stringify(pin));
   await shot(parked, '12-app-car-on-map');
   await parked.evaluate(() => CAR.marker.fire('click'));
   await parked.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 8000 }).catch(() => {});
   check('…a tap on the car opens its side', await parked.evaluate(() => !!sheetSpot && sheetSpot.cnn === '7735000' && sheetSpot.sideKey === 'West'));
+  let cp = await carPick(parked);
+  check('…its sheet has the "Your car" row: five cars, the bold red D pressed and on the map', cp.shown && cp.n === 5 && cp.pressed === 'd' && cp.body === 'var(--sign-red)' && !cp.big, JSON.stringify(cp));
+  await tap(parked, '#carPick [data-v="e"]');
+  cp = await carPick(parked);
+  check('…picking E: the car on the map turns bold blue and bigger, E pressed, kept on this device', cp.shown && cp.pressed === 'e' && cp.body === 'var(--disc-blue)' && cp.big && cp.saved === 'e', JSON.stringify(cp));
+  await shot(parked, '14-pick-your-car');
+  await parked.evaluate(() => openSheet(segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === 'East').group, 'East'));
+  check('…the other side\'s sheet has no "Your car" row', !(await carPick(parked)).shown);
+  await parked.evaluate(() => openSheet(segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === 'West').group, 'West'));
+  await parked.evaluate(() => localStorage.removeItem('curbCarStyle'));
   await openPanel(parked);
   check('auto-park, a saved spot: its row like a curb\'s (the side, its next sweep from the page\'s schedule, when it pings, when it was saved)',
     (await text(parked, '.ap-car .ap-nm')) === '🚗 Kansas St, West side' && (await text(parked, '.ap-car .ap-next')).startsWith('Next sweep')
@@ -399,8 +417,10 @@ try {
   await linked.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 10000 }).catch(() => {});
   await linked.waitForSelector('.car-pin', { timeout: 8000 }).catch(() => {});
   const lpin = await linked.evaluate(() => { const m = CAR.marker && CAR.marker.getLatLng(), o = segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === 'West');
-    return m && o ? map.distance(m, lineMid(o.side.latlngs)) : -1; });
+    return m && o ? map.distance(m, lineMid(o.side.latlngs).at) : -1; });
   check('a Share where I parked link: its side\'s sheet opens with the little car on that side', lpin >= 0 && lpin < 0.5 && await linked.evaluate(() => sheetSpot.sideKey === 'West'), String(lpin));
+  cp = await carPick(linked);
+  check('…a link sent before the car styles (&car=1) shows the bold red D, with the "Your car" row on that sheet', cp.shown && cp.pressed === 'd' && cp.body === 'var(--sign-red)', JSON.stringify(cp));
   await shot(linked, '13-shared-car-link');
   await linked.evaluate(() => { Object.defineProperty(navigator, 'share', { configurable: true, value: async (d) => { window.__shared = d; } }); });
   await tap(linked, '#parkShareBtn');
@@ -408,12 +428,18 @@ try {
   const ps = await linked.evaluate(() => window.__shared);
   check('Share where I parked: the side, its next sweep, and a link that opens it with the car',
     !!ps && /^I parked on Kansas St \(16th St to 17th St\), West side\. Next sweep \w{3} \d+\/\d+, 9AM to 11AM\.$/.test(ps.text)
-    && ps.url === new URL(BASE).origin + '/?b=7735000&side=West&car=1', JSON.stringify(ps));
+    && ps.url === new URL(BASE).origin + '/?b=7735000&side=West&car=d', JSON.stringify(ps));
   await tap(linked, '#shareBtn');
   await sleep(100);
   const bs = await linked.evaluate(() => window.__shared);
   check('…Share this block still sends the block\'s rules and its /b/ link', !!bs && bs.url.endsWith('/b/7735000?side=West') && bs.text.startsWith('Kansas St (16th St to 17th St): sweeps '), JSON.stringify(bs));
   await linked.close();
+  const blue = await openPage(false, ctl, { path: '/?b=7735000&side=West&car=c' });
+  await blue.waitForSelector('.car-pin', { timeout: 8000 }).catch(() => {});
+  await blue.waitForFunction(() => { const el = document.getElementById('carPick'); return el && !el.hidden; }, { timeout: 8000 }).catch(() => {});
+  cp = await carPick(blue);
+  check('a link from someone who picked C shows their bold blue car', cp.shown && cp.pressed === 'c' && cp.body === 'var(--disc-blue)' && !cp.big, JSON.stringify(cp));
+  await blue.close();
 
   // ---------------- iPhone Safari (not the app, not installed) ----------------
   const ios = await openPage(false, ctl, { ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1' });
