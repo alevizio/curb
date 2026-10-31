@@ -10,7 +10,9 @@
 // fails, Turn off all (confirm, one DELETE / {off:true} naming no side), Show on map opening that side's sheet,
 // a failed schedule load, the app's denied-settings answer (status card, no reports), "Send me a test" saying
 // so when notifications are off, iPhone Safari pointing at the app, and Android Chrome (only there, never in the
-// Android app) pointing at the Play beta.
+// Android app) pointing at the Play beta. The little car: the app's auto-saved car on the map (on its side, a tap
+// opens it, Clear removes it, a park while the page slept shows on return), a "Share where I parked" link
+// (?car=1) putting the car on its side, and the sheet's Share where I parked / Share this block texts.
 //
 //   npx -y serve . -l 3211 &   node scripts/check-alerts-panel.mjs http://localhost:3211 [--shots dir]
 // Needs puppeteer-core (like scripts/monitor/browser.mjs) and Chrome (CHROME_PATH or the default).
@@ -83,13 +85,13 @@ function installAutoPark(car) {
   } };
 }
 
-async function openPage(native, ctl, { ua, androidApp, autoPark } = {}) {
+async function openPage(native, ctl, { ua, androidApp, autoPark, path = '/' } = {}) {
   const page = await browser.newPage();
   if (ua) await page.setUserAgent(ua);
   // the Android app's tab: the page's head script reads the flag its android-app:// referrer left
   if (androidApp) await page.evaluateOnNewDocument(() => sessionStorage.setItem('curbAndroidApp', '1'));
   await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: SHOTS ? 3 : 1 });
-  page.__posts = []; page.__tests = []; page.__lines = []; page.__sideQueries = 0;
+  page.__posts = []; page.__tests = []; page.__lines = []; page.__carQueries = []; page.__sideQueries = 0;
   page.on('pageerror', (e) => check(`no page errors (${native ? 'app' : 'web'})`, false, e.message));
   await page.setRequestInterception(true);
   const json = (r, body, status = 200) => r.respond({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
@@ -107,6 +109,7 @@ async function openPage(native, ctl, { ua, androidApp, autoPark } = {}) {
         return json(r, ROWS.filter((x) => ids.includes(x.cnn)).map(({ line, ...x }) => x));
       }
       const one = where.match(/cnn='(\d+)'/);
+      if (one && sel.includes('cnnrightleft')) { page.__carQueries.push(one[1]); return json(r, ROWS.filter((y) => y.cnn === one[1])); }  // the little car's block
       if (one) { page.__lines.push(one[1]); const x = ROWS.find((y) => y.cnn === one[1]); return json(r, x ? [{ line: x.line }] : []); }
       if (where.includes('intersects(line')) return json(r, ROWS);
       return json(r, []);
@@ -123,7 +126,7 @@ async function openPage(native, ctl, { ua, androidApp, autoPark } = {}) {
   await page.evaluateOnNewDocument(installFakes, native);
   if (native === 7) await page.evaluateOnNewDocument(APP7.pushScript);
   if (autoPark !== undefined) { await page.evaluateOnNewDocument(installAutoPark, autoPark); await page.evaluateOnNewDocument(APP7.autoParkScript); }
-  await page.goto(BASE + '/', { waitUntil: 'load', timeout: 45000 });
+  await page.goto(BASE + path, { waitUntil: 'load', timeout: 45000 });
   await page.waitForFunction(() => typeof drawSegments === 'function' && typeof openAlertsPanel === 'function', { timeout: 20000 });
   await page.evaluate(() => { window.curbReport = (k, d) => window.__reports.push([k, d]); });
   return page;
@@ -327,7 +330,9 @@ try {
   check('…iOS 27 steps (automations live in shortcuts: +, Edit, a trigger from Automation), Bluetooth naming the car',
     steps27.startsWith('Open Shortcuts, tap +, then Edit.') && steps27.includes('Bluetooth and choose your car') && steps27.includes('Disconnected')
     && steps27.includes('Save Parking Spot') && steps27.includes('Clear Parking Spot'), steps27);
-  check('…the panel hands the app its Alert style when it opens', await fresh.evaluate(() => JSON.stringify(window.__parkPosts[0]) === '{"op":"status","id":"1","level":"normal","voice":"cheeky"}'));
+  check('the page asks the app for its car at launch, without a style', await fresh.evaluate(() => JSON.stringify(window.__parkPosts[0]) === '{"op":"status","id":"1"}'));
+  check('…the panel hands the app its Alert style when it opens', await fresh.evaluate(() => JSON.stringify(window.__parkPosts.find((m) => m.level)) === '{"op":"status","id":"2","level":"normal","voice":"cheeky"}'));
+  check('…no car saved, no car on the map', !(await fresh.$('.car-pin')));
   await fresh.$eval('.ap-auto', (d) => d.scrollIntoView({ block: 'center' }));
   await shot(fresh, '10-app-autopark-setup');
   await tap(fresh, '#apShortcuts');
@@ -349,6 +354,20 @@ try {
   const car = { corridor: r.corridor, limits: r.limits, blockside: 'West', cnn: r.cnn, sideKey: r.cnnrightleft, nextSweepISO: new Date(Date.now() + 864e5).toISOString(),
     url: '/b/7735000?side=West', covered: false, savedAt: Date.now() - 60e3 };
   const parked = await openPage(7, ctl, { autoPark: car });
+  await parked.waitForSelector('.car-pin', { timeout: 8000 }).catch(() => {});
+  const pin = await parked.evaluate(async () => {
+    const m = CAR.marker && CAR.marker.getLatLng(); if (!m) return null;
+    drawSegments(await carRows('7735000'));   // the curb sides as the map draws them
+    const side = (k) => segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === k).side.latlngs;
+    const w = side('West');
+    return { west: map.distance(m, lineMid(w)), east: map.distance(m, lineMid(side('East'))), ends: Math.min(map.distance(m, w[0]), map.distance(m, w.at(-1))), title: CAR.marker.getElement().title };
+  });
+  check('the app\'s saved car: a little car on the map at launch, halfway along its curb side (West, not East, not an end)',
+    !!pin && pin.west < 0.5 && pin.east > 5 && pin.ends > 50 && pin.title === 'Where you parked: Kansas St', JSON.stringify(pin));
+  await shot(parked, '12-app-car-on-map');
+  await parked.evaluate(() => CAR.marker.fire('click'));
+  await parked.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 8000 }).catch(() => {});
+  check('…a tap on the car opens its side', await parked.evaluate(() => !!sheetSpot && sheetSpot.cnn === '7735000' && sheetSpot.sideKey === 'West'));
   await openPanel(parked);
   check('auto-park, a saved spot: its row like a curb\'s (the side, its next sweep from the page\'s schedule, when it pings, when it was saved)',
     (await text(parked, '.ap-car .ap-nm')) === '🚗 Kansas St, West side' && (await text(parked, '.ap-car .ap-next')).startsWith('Next sweep')
@@ -364,13 +383,37 @@ try {
   await sleep(300);
   check('Clear: the app forgets the spot (clear), the row goes, and it says so', await parked.evaluate(() => window.__parkPosts.some((m) => m.op === 'clear')) && !(await parked.$('.ap-car'))
     && (await toast(parked)) === 'Parking spot cleared.' && await parked.$eval('.ap-auto', (d) => d.open));
+  check('…and the car leaves the map', !(await parked.$('.car-pin')) && await parked.evaluate(() => !CAR.marker));
   await closePanel(parked);
-  await parked.evaluate((c) => { window.__parkStatus.car = c; }, car);   // parked again
+  await parked.evaluate((c) => { window.__parkStatus.car = c; document.dispatchEvent(new Event('visibilitychange')); }, car);   // parked again while the page slept
+  await parked.waitForSelector('.car-pin', { timeout: 8000 }).catch(() => {});
+  check('parked again while the page slept: back on the page, the car is on the map', !!(await parked.$('.car-pin')));
   await openPanel(parked);
   await tap(parked, '#apCarShow');
   await parked.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 8000 }).catch(() => {});
   check('Show on map: the panel closes and the car\'s side opens', !(await isOpen(parked)) && await parked.evaluate(() => !!sheetSpot && sheetSpot.cnn === '7735000' && sheetSpot.sideKey === 'West'));
   await parked.close();
+
+  // ---------------- a "Share where I parked" link, and the sheet's share buttons (web) ----------------
+  const linked = await openPage(false, ctl, { path: '/?b=7735000&side=West&car=1' });
+  await linked.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 10000 }).catch(() => {});
+  await linked.waitForSelector('.car-pin', { timeout: 8000 }).catch(() => {});
+  const lpin = await linked.evaluate(() => { const m = CAR.marker && CAR.marker.getLatLng(), o = segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === 'West');
+    return m && o ? map.distance(m, lineMid(o.side.latlngs)) : -1; });
+  check('a Share where I parked link: its side\'s sheet opens with the little car on that side', lpin >= 0 && lpin < 0.5 && await linked.evaluate(() => sheetSpot.sideKey === 'West'), String(lpin));
+  await shot(linked, '13-shared-car-link');
+  await linked.evaluate(() => { Object.defineProperty(navigator, 'share', { configurable: true, value: async (d) => { window.__shared = d; } }); });
+  await tap(linked, '#parkShareBtn');
+  await sleep(100);
+  const ps = await linked.evaluate(() => window.__shared);
+  check('Share where I parked: the side, its next sweep, and a link that opens it with the car',
+    !!ps && /^I parked on Kansas St \(16th St to 17th St\), West side\. Next sweep \w{3} \d+\/\d+, 9AM to 11AM\.$/.test(ps.text)
+    && ps.url === new URL(BASE).origin + '/?b=7735000&side=West&car=1', JSON.stringify(ps));
+  await tap(linked, '#shareBtn');
+  await sleep(100);
+  const bs = await linked.evaluate(() => window.__shared);
+  check('…Share this block still sends the block\'s rules and its /b/ link', !!bs && bs.url.endsWith('/b/7735000?side=West') && bs.text.startsWith('Kansas St (16th St to 17th St): sweeps '), JSON.stringify(bs));
+  await linked.close();
 
   // ---------------- iPhone Safari (not the app, not installed) ----------------
   const ios = await openPage(false, ctl, { ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1' });

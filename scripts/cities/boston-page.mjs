@@ -415,6 +415,8 @@ document.getElementById('routeToggle').onclick=function(){`],
   }catch(_){}
 }
 `],
+  ['the little car from the file', /async function carRows\(cnn\)\{[\s\S]*?\n\}\n/,
+    'async function carRows(cnn){\n  return (await BOS.load()).filter(b=>String(b.c)===String(cnn)).flatMap(BOS.rowsOf);\n}\n'],
   ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", "'No street-sweeping schedule here. This preview covers Boston.'"],
   // location allowed on curb.guide (for the SF map) carries over to /boston: a fix outside Boston stays put
   ['the city is Boston', 'L.latLngBounds([[37.685,-122.56],[37.84,-122.34]])', 'L.latLngBounds(BOS.BOUNDS)'],

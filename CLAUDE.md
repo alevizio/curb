@@ -363,7 +363,8 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   (`.sheet.open`, `.tall` expands via the grab button); order is verdict → where(+center
   icon) → 🎯 callout → actions → chips → sides → `<details>` data-notes. Exactly TWO
   actions: 🔔 Sweep alerts (the one filled primary) and Calendar (one button; first tap
-  shows a Google/.ics chooser, remembered in `curbCalPref`, ▾ reopens it). UI glyphs are
+  shows a Google/.ics chooser, remembered in `curbCalPref`, ▾ reopens it). Under them, one full-width outline row: Share where I parked
+  (owner, 2026-10-30; see "The little car" under Native iOS). UI glyphs are
   inline SVGs (`ICONS`) — emoji only in toasts/push copy. The date chip IS the today
   filter (toggles `dayFilter` to today).
   DENSITY RULES (2026-06-12 de-dup pass — each number appears ONCE): side rows use
@@ -551,6 +552,15 @@ push alongside Web Push:
   "N of 5" doesn't count the car's watch (a 6th save gets the server's 409), a style change reaches the car's watch at its
   next park, SF only (DataSF). Checked by api/_parked-ios.test.mjs, ios/CURB/ContentView.test.mjs and the auto-park part
   of scripts/check-alerts-panel.mjs.
+- The little car (owner, 2026-10-30: "a little car that shows you where you parked", then "share where you parked if you're
+  parking for someone else"): one car marker on the map (`CAR`, `drawCar` in index.html), halfway along a curb side by length
+  (`lineMid`: a block drawn as one straight line has no middle vertex), on the side the map draws (`sideSigns`, shared with
+  drawSegments). It shows the app's auto-saved car (SF, `ownCar` from `__curbAutoPark.status()` at launch, on every return to
+  the page, and when the panel reads, prepares or clears it), or, winning over it, the spot a shared link names. The sheet's
+  Share where I parked sends "I parked on <street> (<cross streets>), <side> side. Next sweep <when>." with
+  `/<city page>?b=<cnn>&side=<side key>&car=1`; `carLink` puts the car there for that visit only (nothing saved). The
+  block's rows come from `carRows` (DataSF here; the city and Boston generators swap in the city's file). Never the exact
+  spot: the app keeps only the block. Checked in scripts/check-alerts-panel.mjs.
 
 ### What's DONE vs TODO
 DONE (all of it, end-to-end):

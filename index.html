@@ -539,6 +539,11 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   @media (hover:hover){.btn:hover{transform:translateY(-1px)}}
   .btn:active{transform:translateY(2px);box-shadow:none}
   .btn.alt{background:var(--paper);color:var(--ink)}
+  .btn.park-share{flex-basis:100%;font-size:13px;padding:10px}
+  /* the little car where you parked (carLink / the app's auto-park): a signage disc like the city pins */
+  .car-pin{display:grid;place-items:center;border-radius:50%;corner-shape:round;background:var(--paper);border:2.5px solid var(--ink);
+    box-shadow:2px 2px 0 var(--ink);color:var(--ink);cursor:pointer}
+  .car-pin .ic{width:18px;height:18px}
   .btn.on{background:var(--green);color:var(--ink);border-color:var(--ink)}
   .btn.full{background:var(--paper);color:var(--ink-soft);border-style:dashed;box-shadow:none}
   .btn.busy{opacity:.65;pointer-events:none}
@@ -1561,6 +1566,16 @@ function sideNext(rows){
   rows.forEach(r=>{const ns=nextSweep(r);const st=statusFor(ns); if(st.rank>rank||(st.rank===rank&&ns&&best&&+ns.start<+best.start)){rank=st.rank;color=st.color;best=ns;bestRow=r}});
   return {best,bestRow,rank,color};
 }
+// which way each curb side sits off the block's centerline (offsetLine's sign): DataSF's right / left, a lone side on it
+function sideSigns(arr){
+  const signs={};
+  if(arr.length===1){signs[arr[0].key]=0;}
+  else{
+    arr.forEach((s,i)=>{signs[s.key]= s.lr==='R'?1 : s.lr==='L'?-1 : (i===0?-1:1);});
+    if(arr.length===2){const v=Object.values(signs); if(v[0]===v[1]) signs[arr[1].key]=-(v[0]||1);}
+  }
+  return signs;
+}
 function drawSegments(rows){
   segLayer.clearLayers(); segCache=[]; segCacheAll=[];
   const byCnn={};
@@ -1574,12 +1589,7 @@ function drawSegments(rows){
     grp.rows.forEach(r=>{const k=sideKeyOf(r);
       (sides[k]=sides[k]||{key:k,blockside:r.blockside,lr:r.cnnrightleft,rows:[]}).rows.push(r)});
     const arr=Object.values(sides);
-    const signs={};
-    if(arr.length===1){signs[arr[0].key]=0;}
-    else{
-      arr.forEach((s,i)=>{signs[s.key]= s.lr==='R'?1 : s.lr==='L'?-1 : (i===0?-1:1);});
-      if(arr.length===2){const v=Object.values(signs); if(v[0]===v[1]) signs[arr[1].key]=-(v[0]||1);}
-    }
+    const signs=sideSigns(arr);
     const group={cnn:grp.cnn, corridor:grp.rows[0].corridor, limits:grp.rows[0].limits, sides:[]};
     arr.forEach(s=>{
       // Day filter is a VISIBILITY lens only: it decides whether a side is drawn, but
@@ -1687,6 +1697,7 @@ function previewHtml(group, side){
 /* ---------- bottom sheet ---------- */
 // Drawn glyphs (stroke style matches the search/nav icons) — emoji stays only in toasts/push copy.
 const ICONS={
+  car:'<svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path fill="var(--pop-blue)" d="M1.5 7.25c0-.69.56-1.25 1.25-1.25h8.5c.69 0 1.25.56 1.25 1.25v2.5a.75.75 0 0 1-.75.75H2.25a.75.75 0 0 1-.75-.75z"/><path d="M3 6l1.1-2.6c.16-.39.54-.65.97-.65h3.86c.43 0 .81.26.97.65L11 6M2.75 10.5v1.25M11.25 10.5v1.25"/><circle cx="4" cy="8.25" r=".55" fill="currentColor"/><circle cx="10" cy="8.25" r=".55" fill="currentColor"/></svg>',
   share:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg>',
   bell:'<svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-green)" d="M11 6.125c0 -1.06087 -0.4214 -2.07828 -1.17157 -2.82843C9.07828 2.54643 8.06087 2.125 7 2.125s-2.07828 0.42143 -2.82843 1.17157C3.42143 4.04672 3 5.06413 3 6.125v3.25c0 0.39782 -0.15804 0.7794 -0.43934 1.0607s-0.66284 0.4393 -1.06066 0.4393h11c-0.3978 0 -0.7794 -0.158 -1.0607 -0.4393S11 9.77282 11 9.375v-3.25Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M3.63265 0.260417c0.20135 0.280365 0.1373 0.670875 -0.14307 0.872233 -0.69259 0.49741 -1.25691 1.15246 -1.64633 1.91105 -0.38942 0.75859 -0.59277 1.59895 -0.59325 2.45165 -0.0002 0.34518 -0.280176 0.62485 -0.625354 0.62465C0.279468 6.1198 -0.000195384 5.83982 0 5.49465c0.000595272 -1.05101 0.251236 -2.0868 0.731219 -3.02181C1.2112 1.53784 1.90675 0.730443 2.76042 0.117354c0.28036 -0.2013534 0.67087 -0.1373022 0.87223 0.143063ZM7 1.5c-1.22663 0 -2.40301 0.48728 -3.27037 1.35463C2.86228 3.72199 2.375 4.89837 2.375 6.125v3.25c0 0.23206 -0.09219 0.45462 -0.25628 0.61872 -0.1641 0.16408 -0.38666 0.25628 -0.61872 0.25628 -0.34518 0 -0.625 0.2798 -0.625 0.625s0.27982 0.625 0.625 0.625h11c0.3452 0 0.625 -0.2798 0.625 -0.625s-0.2798 -0.625 -0.625 -0.625c-0.2321 0 -0.4546 -0.0922 -0.6187 -0.25628 -0.1641 -0.1641 -0.2563 -0.38665 -0.2563 -0.61872v-3.25c0 -1.22663 -0.4873 -2.40301 -1.3546 -3.27037C9.40301 1.98728 8.22663 1.5 7 1.5Zm3.375 7.875c0 0.30467 0.0654 0.6026 0.1885 0.875H3.43649c0.12308 -0.2724 0.18851 -0.57033 0.18851 -0.875v-3.25c0 -0.89511 0.35558 -1.75355 0.98851 -2.38649C5.24645 3.10558 6.10489 2.75 7 2.75c0.89511 0 1.75355 0.35558 2.38649 0.98851 0.63291 0.63294 0.98851 1.49138 0.98851 2.38649v3.25ZM6 12.5c-0.41421 0 -0.75 0.3358 -0.75 0.75s0.33579 0.75 0.75 0.75h2c0.41421 0 0.75 -0.3358 0.75 -0.75s-0.33579 -0.75 -0.75 -0.75H6ZM11.2396 0.117354c-0.2804 -0.2013534 -0.6709 -0.1373022 -0.8722 0.143063 -0.2014 0.280365 -0.1373 0.670875 0.143 0.872233 0.6926 0.49741 1.2569 1.15246 1.6463 1.91105 0.3895 0.75859 0.5928 1.59895 0.5933 2.45165 0.0002 0.34518 0.2802 0.62485 0.6254 0.62465 0.3451 -0.0002 0.6248 -0.28018 0.6246 -0.62535 -0.0006 -1.05101 -0.2512 -2.0868 -0.7312 -3.02181 -0.48 -0.935 -1.1756 -1.742397 -2.0292 -2.355486Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>',
   cal:'<svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-blue)" d="M2 2.625c-0.26522 0 -0.51957 0.10536 -0.70711 0.29289C1.10536 3.10543 1 3.35978 1 3.625v8.25c0 0.2652 0.10536 0.5196 0.29289 0.7071 0.18754 0.1875 0.44189 0.2929 0.70711 0.2929h10c0.2652 0 0.5196 -0.1054 0.7071 -0.2929S13 12.1402 13 11.875v-8.25c0 -0.26522 -0.1054 -0.51957 -0.2929 -0.70711 -0.1875 -0.18753 -0.4419 -0.29289 -0.7071 -0.29289H2Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M3.5 0.25c0.34518 0 0.625 0.279822 0.625 0.625V2h5.75V0.875c0 -0.345178 0.2798 -0.625 0.625 -0.625s0.625 0.279822 0.625 0.625V2H12c0.431 0 0.8443 0.1712 1.149 0.47595 0.3048 0.30475 0.476 0.71807 0.476 1.14905v8.25c0 0.431 -0.1712 0.8443 -0.476 1.149 -0.3047 0.3048 -0.718 0.476 -1.149 0.476H2c-0.43098 0 -0.8443 -0.1712 -1.149049 -0.476C0.546205 12.7193 0.375 12.306 0.375 11.875v-8.25c0 -0.43098 0.171205 -0.8443 0.475951 -1.14905C1.1557 2.1712 1.56902 2 2 2h0.875V0.875c0 -0.345178 0.27982 -0.625 0.625 -0.625Zm6.375 3v0.625c0 0.34518 0.2798 0.625 0.625 0.625s0.625 -0.27982 0.625 -0.625V3.25H12c0.0995 0 0.1948 0.03951 0.2652 0.10983 0.0703 0.07033 0.1098 0.16571 0.1098 0.26517v8.25c0 0.0995 -0.0395 0.1948 -0.1098 0.2652 -0.0704 0.0703 -0.1657 0.1098 -0.2652 0.1098H2c-0.09946 0 -0.19484 -0.0395 -0.26517 -0.1098 -0.07032 -0.0704 -0.10983 -0.1657 -0.10983 -0.2652v-8.25c0 -0.09946 0.03951 -0.19484 0.10983 -0.26517C1.80516 3.28951 1.90054 3.25 2 3.25h0.875v0.625c0 0.34518 0.27982 0.625 0.625 0.625s0.625 -0.27982 0.625 -0.625V3.25h5.75ZM3.5 8c0 -0.41421 0.33579 -0.75 0.75 -0.75h2v-2c0 -0.41421 0.33579 -0.75 0.75 -0.75s0.75 0.33579 0.75 0.75v2h2c0.4142 0 0.75 0.33579 0.75 0.75s-0.3358 0.75 -0.75 0.75h-2v2c0 0.4142 -0.33579 0.75 -0.75 0.75s-0.75 -0.3358 -0.75 -0.75v-2h-2c-0.41421 0 -0.75 -0.33579 -0.75 -0.75Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>',
@@ -1734,6 +1745,17 @@ function alertSpotFor(group, side, armNs, armRow){
 // the spot of the side the sheet shows (null when it can't arm), so a Turn off from the Sweep alerts panel
 // repaints the sheet only when it is about that side
 let sheetSpot=null;
+// The share sheet (in the app, its native one), else the link to the clipboard; `event` is counted once it went out
+async function shareOut(text,url,copied,event){
+  try{
+    if(navigator.share)await navigator.share({title:'CURB',text,url});
+    else{await navigator.clipboard.writeText(url);toast(copied);}
+    track(event);  // native share resolved, or clipboard copy succeeded (AbortError skips this)
+  }catch(err){
+    if(err&&err.name==='AbortError')return;  // user closed the share sheet
+    try{await navigator.clipboard.writeText(url);toast('Link copied.');}catch(_){prompt('Copy this link:',url);}
+  }
+}
 function openSheet(group, activeKey){
   const active=group.sides.find(s=>s.key===activeKey)||group.sides[0];
   const ns=active.ns, now=new Date();
@@ -1857,6 +1879,7 @@ function openSheet(group, activeKey){
         <button class="btn alt" id="alertOffNo">Keep them on</button>
       </div>
       <div class="alertnote" id="alertNote" hidden></div>`:''}
+      <button class="btn alt park-share" id="parkShareBtn">${ICONS.car} Share where I parked</button>
     </div>
     ${canRemind?`<details class="alertcfg" id="alertCfg">
       <summary><span>Alert style</span><b class="acfg-st">${alertOn?'On · '+getAlertLevel():'Customize ▸'}</b></summary>
@@ -1929,14 +1952,15 @@ function openSheet(group, activeKey){
     const e=enfFor(group.cnn, normDay(r0.weekday));
     const text=`${group.corridor||'This block'} (${fmtLimits(group.limits)}): sweeps ${isHolidayRow(r0)?'on holidays':DAYLBL[normDay(r0.weekday)]||r0.weekday} ${fmtHour(r0.fromhour)} to ${fmtHour(r0.tohour)}`
       +(e?`, tickets usually ~${fmtMin(e.avg)}`:'');
-    try{
-      if(navigator.share)await navigator.share({title:'CURB',text,url});
-      else{await navigator.clipboard.writeText(url);toast('Link copied. Text it to whoever asked.');}
-      track('block_shared');  // native share resolved, or clipboard copy succeeded (AbortError skips this)
-    }catch(err){
-      if(err&&err.name==='AbortError')return;  // user closed the share sheet
-      try{await navigator.clipboard.writeText(url);toast('Link copied.');}catch(_){prompt('Copy this link:',url);}
-    }
+    shareOut(text,url,'Link copied. Text it to whoever asked.','block_shared');
+  };
+  // Share where I parked (owner, 2026-10-30: you parked a car for someone): the curb side and the sweep to move it
+  // before, with a map link that opens that side with the little car on it (&car=1, see carLink)
+  document.getElementById('parkShareBtn').onclick=()=>{
+    const url=location.origin+(CITY_PAGE[CITY]||'/')+'?b='+encodeURIComponent(group.cnn)+'&side='+encodeURIComponent(active.key)+'&car=1';
+    const text=`I parked on ${group.corridor||'this block'} (${fmtLimits(group.limits)})${active.blockside?', '+(SIDE_ABBR[active.blockside]||active.blockside)+' side':''}.`
+      +(armNs?` Next sweep ${sweepWords(armNs,new Date()).when}${armNs.holiday?' (holiday schedule)':''}.`:'');
+    shareOut(text,url,'Link copied. Send it to whoever needs the car.','parked_shared');
   };
   // Tapping another side's row makes it the active side (re-renders the sheet around it).
   document.querySelectorAll('#sheetBody .srow.tap').forEach(el=>{
@@ -2545,6 +2569,8 @@ function savedWhen(t){
 }
 // the Alert style the car's next park saves its alerts with (the app keeps it: the automation runs with no page)
 const apStyle=()=>({level:getAlertLevel(),voice:getAlertVoice()});
+// what the app says about auto-park (status, with the Alert style when given), or null if it doesn't answer within 1.5 s
+function parkStatus(style){return Promise.race([window.__curbAutoPark.status(style).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),1500))]);}
 function apAutoPark(level){
   if(!window.__curbAutoPark||CITY!=='sf')return '';
   const c=AP.park&&AP.park.car, car=apCar();
@@ -2655,7 +2681,7 @@ function renderAlertsPanel(){
   if(sc)sc.onclick=async()=>{
     if(AP.parkBusy)return; AP.parkBusy=true; track('autopark_setup');
     let s=null; try{s=await window.__curbAutoPark.prepare(apStyle());}catch(_){}
-    AP.parkBusy=false; if(s)AP.park=s; renderAlertsPanel();
+    AP.parkBusy=false; if(s){AP.park=s;ownCar();} renderAlertsPanel();
     if(s&&s.notifications==='denied'){toast('Notifications are off for CURB. Turn them on in Settings → Notifications → CURB first.');return;}
     window.__curbAutoPark.openShortcuts();
   };
@@ -2664,7 +2690,7 @@ function renderAlertsPanel(){
   const cc=document.getElementById('apCarClear');
   if(cc)cc.onclick=async()=>{
     if(AP.parkBusy)return; AP.parkBusy=true; renderAlertsPanel();
-    try{await window.__curbAutoPark.clear();if(AP.park)AP.park.car=null;toast('Parking spot cleared.');track('autopark_clear');}
+    try{await window.__curbAutoPark.clear();if(AP.park)AP.park.car=null;ownCar();toast('Parking spot cleared.');track('autopark_clear');}
     catch(_){toast("Couldn't clear the spot, try again.");}
     finally{AP.parkBusy=false;renderAlertsPanel();}
   };
@@ -2674,8 +2700,9 @@ async function loadAlertsPanel(){
   // the car's spot from Save Parking Spot (the app from 1.0.6) first, so its schedule loads with the curbs'; an app that
   // doesn't answer within 1.5 s just shows no car row
   if(window.__curbAutoPark&&CITY==='sf'){
-    AP.park=await Promise.race([window.__curbAutoPark.status(apStyle()).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),1500))]);
+    AP.park=await parkStatus(apStyle());
     if(gen!==AP.gen)return;
+    if(AP.park)ownCar();
   }
   const car=apCar(), all=car?[...list,car]:list;
   if(all.length){
@@ -2774,6 +2801,62 @@ document.addEventListener('visibilitychange',()=>{
 document.getElementById('imAlerts').onclick=openAlertsPanel;
 document.getElementById('apClose').onclick=closeAlertsPanel;
 document.getElementById('alertsPanel').addEventListener('click',e=>{ if(e.target.id==='alertsPanel')closeAlertsPanel(); });
+
+/* ---------- the little car: where you parked (owner, 2026-10-30) ---------- */
+// One car on the map: the spot a "Share where I parked" link names (carLink, for that visit only), else the car the
+// app's auto-park saved (AP.park.car, SF's map). Both name a block and its side, never the exact spot, so the car sits
+// halfway along that curb side, where the map draws it. A tap opens that side's sheet.
+const CAR={link:null,own:null,on:'',marker:null};
+async function carRows(cnn){
+  const r=await fetchRetry(SWEEP+`?$select=cnn,corridor,line,blockside,cnnrightleft&$where=cnn='${cnn}'&$limit=50`);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+async function drawCar(){
+  const c=CAR.link||CAR.own, id=c?c.cnn+'|'+c.side:'';
+  if(id===CAR.on)return;
+  CAR.on=id;
+  if(CAR.marker){map.removeLayer(CAR.marker);CAR.marker=null;}
+  if(!c)return;
+  try{
+    const rows=await carRows(c.cnn), geom=rows.find(r=>r.line&&r.line.coordinates);
+    if(CAR.on!==id||!geom)return;
+    const sides={}; rows.forEach(r=>{const k=sideKeyOf(r);sides[k]=sides[k]||{key:k,blockside:r.blockside,lr:r.cnnrightleft};});
+    const arr=Object.values(sides);
+    const s=arr.find(x=>x.key===c.side)||arr.find(x=>String(x.blockside||'').toLowerCase()===c.side.toLowerCase());
+    if(!s)return;  // the city no longer lists that side
+    const ll=offsetLine(geom.line.coordinates.map(p=>[p[1],p[0]]),OFFSET,sideSigns(arr)[s.key]);
+    CAR.marker=L.marker(lineMid(ll),{keyboard:true,title:'Where you parked: '+(geom.corridor||'this block'),zIndexOffset:500,
+      icon:L.divIcon({className:'car-pin',html:ICONS.car,iconSize:[34,34],iconAnchor:[17,17]})})
+      .on('click',()=>{userPicked();showEveryCurb();openCurb(c.cnn,s.key);}).addTo(map);
+  }catch(_){if(CAR.on===id)CAR.on='';}  // the next refresh tries again
+}
+// halfway along a curb side by length (its middle point is an end on a block drawn as one straight line)
+function lineMid(ll){
+  const cos=Math.cos(ll[0][0]*Math.PI/180)||1, len=[];
+  for(let i=1;i<ll.length;i++)len.push(Math.hypot((ll[i][1]-ll[i-1][1])*cos,ll[i][0]-ll[i-1][0]));
+  let half=len.reduce((a,b)=>a+b,0)/2;
+  for(let i=0;i<len.length;i++){
+    if(half<=len[i]&&len[i]>0){const t=half/len[i],a=ll[i],b=ll[i+1];return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}
+    half-=len[i];
+  }
+  return ll[ll.length-1];
+}
+// the app's car, from what the app last said (AP.park); a status that didn't answer leaves the car as it was
+function ownCar(){const c=apCar();CAR.own=c?{cnn:c.cnn,side:c.sideKey}:null;drawCar();}
+async function refreshOwnCar(){
+  if(!window.__curbAutoPark||CITY!=='sf')return;
+  const s=await parkStatus();
+  if(s){AP.park=s;ownCar();}
+}
+refreshOwnCar();
+// the automation saves or clears the spot while the page sleeps: look again each time it comes back
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshOwnCar();});
+/* A "Share where I parked" link: /?b=<cnn>&side=<side key>&car=1. deepLink opens the side; this puts the car on it. */
+(function carLink(){
+  const b=QS.get('b'); if(QS.get('car')!=='1'||!b||!/^\d{1,12}$/.test(b))return;
+  CAR.link={cnn:b,side:QS.get('side')||''}; drawCar();
+})();
 
 /* ---------- the other maps: San Francisco and the public cities (owner, 2026-10-20) ---------- */
 // Every map CURB has, for a first visit (open the visitor's city), the locate button (offer that city's map) and the pins
