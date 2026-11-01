@@ -134,7 +134,7 @@ async function openPage(native, ctl, { ua, androidApp, autoPark, path = '/' } = 
 // the sheet's "Your car" row and the car on the map
 const carPick = (page) => page.evaluate(() => { const el = document.getElementById('carPick'), svg = CAR.marker && CAR.marker.getElement().querySelector('svg');
   return { shown: !!el && !el.hidden, n: el ? el.querySelectorAll('button').length : 0, pressed: el ? [...el.querySelectorAll('button[aria-pressed=true]')].map((b) => b.dataset.v).join() : '',
-    body: svg ? svg.querySelector(':scope > rect').getAttribute('fill') : '', big: !!svg && svg.classList.contains('big'), saved: localStorage.getItem('curbCarStyle') }; });
+    body: svg ? svg.querySelector(':scope > rect').getAttribute('fill') : '', saved: localStorage.getItem('curbCarStyle') }; });
 const text = (page, sel) => page.$eval(sel, (e) => e.textContent.replace(/\s+/g, ' ').trim()).catch(() => '');
 const texts = (page, sel) => page.$$eval(sel, (es) => es.map((e) => e.textContent.replace(/\s+/g, ' ').trim()));
 const tap = (page, sel) => page.$eval(sel, (e) => e.click());
@@ -377,10 +377,10 @@ try {
   await parked.waitForFunction(() => document.getElementById('sheet').classList.contains('open') && sheetSpot && sheetSpot.cnn === '7735000', { timeout: 8000 }).catch(() => {});
   check('…a tap on the car opens its side', await parked.evaluate(() => !!sheetSpot && sheetSpot.cnn === '7735000' && sheetSpot.sideKey === 'West'));
   let cp = await carPick(parked);
-  check('…its sheet has the "Your car" row: five cars, the bold red D pressed and on the map', cp.shown && cp.n === 5 && cp.pressed === 'd' && cp.body === 'var(--sign-red)' && !cp.big, JSON.stringify(cp));
-  await tap(parked, '#carPick [data-v="e"]');
+  check('…its sheet has the "Your car" row: seven cars, the bold red D pressed and on the map', cp.shown && cp.n === 7 && cp.pressed === 'd' && cp.body === 'var(--sign-red)', JSON.stringify(cp));
+  await tap(parked, '#carPick [data-v="k"]');
   cp = await carPick(parked);
-  check('…picking E: the car on the map turns bold blue and bigger, E pressed, kept on this device', cp.shown && cp.pressed === 'e' && cp.body === 'var(--disc-blue)' && cp.big && cp.saved === 'e', JSON.stringify(cp));
+  check('…picking K: the car on the map turns into the silver surf wagon, K pressed, kept on this device', cp.shown && cp.pressed === 'k' && cp.body === 'var(--gray)' && cp.saved === 'k', JSON.stringify(cp));
   await shot(parked, '14-pick-your-car');
   await parked.evaluate(() => openSheet(segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === 'East').group, 'East'));
   check('…the other side\'s sheet has no "Your car" row', !(await carPick(parked)).shown);
@@ -434,12 +434,21 @@ try {
   const bs = await linked.evaluate(() => window.__shared);
   check('…Share this block still sends the block\'s rules and its /b/ link', !!bs && bs.url.endsWith('/b/7735000?side=West') && bs.text.startsWith('Kansas St (16th St to 17th St): sweeps '), JSON.stringify(bs));
   await linked.close();
-  const blue = await openPage(false, ctl, { path: '/?b=7735000&side=West&car=c' });
-  await blue.waitForSelector('.car-pin', { timeout: 8000 }).catch(() => {});
-  await blue.waitForFunction(() => { const el = document.getElementById('carPick'); return el && !el.hidden; }, { timeout: 8000 }).catch(() => {});
-  cp = await carPick(blue);
-  check('a link from someone who picked C shows their bold blue car', cp.shown && cp.pressed === 'c' && cp.body === 'var(--disc-blue)' && !cp.big, JSON.stringify(cp));
-  await blue.close();
+  const taxi = await openPage(false, ctl, { path: '/?b=7735000&side=West&car=h' });
+  await taxi.waitForSelector('.car-pin', { timeout: 8000 }).catch(() => {});
+  await taxi.waitForFunction(() => { const el = document.getElementById('carPick'); return el && !el.hidden; }, { timeout: 8000 }).catch(() => {});
+  cp = await carPick(taxi);
+  check('a link from someone who picked the taxi shows their taxi', cp.shown && cp.pressed === 'h' && cp.body === 'var(--taxi)', JSON.stringify(cp));
+  const apart = await taxi.evaluate(async () => {
+    const gap = () => { const s = (k) => segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === k);
+      const p = (k) => map.latLngToContainerPoint(lineMid(s(k).side.latlngs).at); return s('West') && s('East') ? p('West').distanceTo(p('East')) : -1; };
+    map.setZoom(16, { animate: false }); await new Promise((r) => setTimeout(r, 400));
+    const car = map.latLngToContainerPoint(CAR.marker.getLatLng()), w = segCacheAll.find((x) => x.group.cnn === '7735000' && x.side.blockside === 'West');
+    return { z16: gap(), car: w ? car.distanceTo(map.latLngToContainerPoint(lineMid(w.side.latlngs).at)) : -1, z: map.getZoom() };
+  });
+  check('zoomed out to 16, a street\'s two curbs are drawn apart (12 px, where 5 m would be 5) and the car stays on its curb',
+    apart.z === 16 && apart.z16 > 11 && apart.car >= 0 && apart.car < 1, JSON.stringify(apart));
+  await taxi.close();
 
   // ---------------- iPhone Safari (not the app, not installed) ----------------
   const ios = await openPage(false, ctl, { ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1' });

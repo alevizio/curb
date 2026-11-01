@@ -95,6 +95,9 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
 - Curb sides are drawn as two lines offset ~5 m (OFFSET) perpendicular to the
   centerline, signed by cnnrightleft (R=+1, L=-1; fallback alternate). offsetLine()
   uses a local equirectangular projection. Single-side blocks draw one centered line.
+  Zoomed out, 5 m would merge both curbs into one line, so `sideOffset()` holds each curb
+  at least SIDE_MIN_PX off the centerline (z15 3 px, z16 6, z17 8; owner, 2026-11-01: "so we
+  can clearly see both sides"), and a zoomend redraws the curbs and moves the car.
 - "Next sweep" math = nextSweep(): iterates up to 70 days, matches weekday +
   Nth-occurrence-of-month flag, skips today's window if already past.
 - Holiday model (2026-10-05, from the street-cleaning tickets on 8 minor holidays Oct 2025 to Sep 2026; the
@@ -558,9 +561,10 @@ push alongside Web Push:
   drawSegments). Owner, 2026-10-31 ("more gta 2 style like looked from above", picked bold red): `carTop` draws it seen from
   above in sign red, turned along the curb with traffic (the line's right side faces the way it was drawn, the left side the
   other way; `lineMid` gives the curb's heading), and the ink shadow sits on the unturned box so it always falls down right.
-  Then "let pick the style of the car", "have them all": five cars (`CAR_STYLES` a to e, D the default, E is C bigger) in a
-  "Your car" row on the car's own curb sheet only (`syncCarPick`), kept on the device (localStorage curbCarStyle); a shared
-  link carries the sender's pick (`&car=<style>`, the recipient sees that car; `&car=1` from older links shows D). It shows the app's auto-saved car (SF, `ownCar` from `__curbAutoPark.status()` at launch, on every return to
+  Then "let pick the style of the car": owner, 2026-11-01 ("design a few different cars") picked the red D plus six new
+  shapes, pickup F, van G, taxi H, convertible I, sports car J, surf wagon K (`CAR_STYLES`, name + drawing; A, B, C and E
+  were color swaps of D, dropped), in a "Your car" row on the car's own curb sheet only (`syncCarPick`), kept on the device (localStorage curbCarStyle); a shared
+  link carries the sender's pick (`&car=<style>`, the recipient sees that car; `&car=1` and the dropped a, b, c, e show D). It shows the app's auto-saved car (SF, `ownCar` from `__curbAutoPark.status()` at launch, on every return to
   the page, and when the panel reads, prepares or clears it), or, winning over it, the spot a shared link names. The sheet's
   Share where I parked sends "I parked on <street> (<cross streets>), <side> side. Next sweep <when>." with
   `/<city page>?b=<cnn>&side=<side key>&car=1`; `carLink` puts the car there for that visit only (nothing saved). The

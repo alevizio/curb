@@ -96,7 +96,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
     --green-text:#157A44; --amber-text:#8F5A06; --red-text:#C1121F;
     /* pop icon accents (alevizio.github.io/icons core/pop, inlined) + authentic sign palette */
     --pop-green:#9FE3B5; --pop-blue:#BFD9F2; --pop-red:#F6A39C; --pop-amber:#F3D9A4;
-    --sign-red:#C1121F; --sign-green:#0B6E4F; --sign-white:#FFFDF6; --disc-blue:#1D69A5;
+    --sign-red:#C1121F; --sign-green:#0B6E4F; --sign-white:#FFFDF6; --disc-blue:#1D69A5; --taxi:#F2C230;
     --shadow:5px 5px 0 var(--ink);
   }
   :focus-visible{outline:3px solid var(--meter);outline-offset:2px}
@@ -544,13 +544,11 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
      sits on the box, not the turned car, so it always falls down and right like the rest of the ink shadows */
   .car-pin{display:grid;place-items:center;cursor:pointer;filter:drop-shadow(2px 2px 0 var(--ink))}
   .car-pin svg{width:18px;height:34px;transform:rotate(var(--deg,0deg))}
-  .car-pin svg.big{width:23px;height:43px}
-  /* the sheet's "Your car" row on the car's curb side: the five cars, upright */
+  /* the sheet's "Your car" row on the car's curb side: the cars, upright */
   .car-pick{flex-basis:100%;margin-top:2px}
   .car-pick[hidden]{display:none}
   .car-pick .seg button{padding:5px 9px;line-height:0}
   .car-pick svg{width:11px;height:21px}
-  .car-pick svg.big{width:13px;height:25px}
   .btn.on{background:var(--green);color:var(--ink);border-color:var(--ink)}
   .btn.full{background:var(--paper);color:var(--ink-soft);border-style:dashed;box-shadow:none}
   .btn.busy{opacity:.65;pointer-events:none}
@@ -967,6 +965,10 @@ const LOADRULES="https://data.sf.gov/resource/6cqg-dxku.json"; // metered color-
 // are defined in lib/sweep-core.js (loaded just before this script) and live on globalThis.
 const MIN_ZOOM_DATA=15;
 const OFFSET=5; // metres each side of centreline
+// zoomed out, 5 m puts both curbs of a street inside one 5px line (owner, 2026-11-01: "so we can clearly see both sides"):
+// hold each curb at least this many px off the centreline; from z18 the 5 m is wider
+const SIDE_MIN_PX={15:3,16:6,17:8};
+function sideOffset(lat){const z=map.getZoom(); return Math.max(OFFSET,(SIDE_MIN_PX[z]||0)*156543.03*Math.cos(lat*Math.PI/180)/2**z);}
 // Web Push: VAPID *public* key (safe to ship to the client). Matches VAPID_PRIVATE_KEY on the server.
 const VAPID_PUBLIC_KEY="BNh-13Y456HR3O_-AvNP_kEIIui1YvbEumSFLF0l-VD94H_qtGpAQPush_WycVNXYbnt6s9UVC8FXI9-crT-8Ao";
 // Cookieless custom events (Vercel Web Analytics). No-op until the dashboard toggle is on
@@ -1590,7 +1592,7 @@ function drawSegments(rows){
   Object.values(byCnn).forEach(grp=>{
     const geom=grp.rows.find(r=>r.line&&r.line.coordinates);
     if(!geom)return;
-    const center=geom.line.coordinates.map(c=>[c[1],c[0]]);
+    const center=geom.line.coordinates.map(c=>[c[1],c[0]]), off=sideOffset(center[0][0]);
     // group rows by curb side
     const sides={};
     grp.rows.forEach(r=>{const k=sideKeyOf(r);
@@ -1605,7 +1607,7 @@ function drawSegments(rows){
       // counts on the weekday its next sweep falls, within the coming week (lib/sweep-core.js sweepsOnDay).
       if(dayFilter!=null&&!s.rows.some(r=>sweepsOnDay(r,dayFilter)))return;
       const {best,bestRow,rank,color}=sideNext(s.rows);
-      const ll=offsetLine(center, OFFSET, signs[s.key]);
+      const ll=offsetLine(center, off, signs[s.key]);
       const side={key:s.key, blockside:s.blockside, rows:s.rows, row:bestRow, ns:best, color, latlngs:ll, mid:ll[Math.floor(ll.length/2)]};
       group.sides.push(side);
       segCacheAll.push({group, side});  // routes layer reads this — color toggles never starve it
@@ -1888,7 +1890,7 @@ function openSheet(group, activeKey){
       <div class="alertnote" id="alertNote" hidden></div>`:''}
       <button class="btn alt park-share" id="parkShareBtn">${ICONS.car} Share where I parked</button>
       <div class="acfg-row car-pick" id="carPick" data-cnn="${group.cnn}" data-key="${active.key}" hidden><span class="acfg-lbl">Your car</span>
-        <div class="seg" role="group" aria-label="Your car">${Object.keys(CAR_STYLES).map(k=>`<button type="button" data-v="${k}" aria-label="${CAR_STYLES[k][2]}" title="${CAR_STYLES[k][2]}">${carTop(0,k)}</button>`).join('')}</div></div>
+        <div class="seg" role="group" aria-label="Your car">${Object.keys(CAR_STYLES).map(k=>`<button type="button" data-v="${k}" aria-label="${CAR_STYLES[k][0]}" title="${CAR_STYLES[k][0]}">${carTop(0,k)}</button>`).join('')}</div></div>
     </div>
     ${canRemind?`<details class="alertcfg" id="alertCfg">
       <summary><span>Alert style</span><b class="acfg-st">${alertOn?'On · '+getAlertLevel():'Customize ▸'}</b></summary>
@@ -2836,7 +2838,8 @@ async function drawCar(){
     const arr=Object.values(sides);
     const s=arr.find(x=>x.key===c.side)||arr.find(x=>String(x.blockside||'').toLowerCase()===c.side.toLowerCase());
     if(!s)return;  // the city no longer lists that side
-    const sign=sideSigns(arr)[s.key], mid=lineMid(offsetLine(geom.line.coordinates.map(p=>[p[1],p[0]]),OFFSET,sign));
+    const sign=sideSigns(arr)[s.key], line=geom.line.coordinates.map(p=>[p[1],p[0]]), mid=lineMid(offsetLine(line,sideOffset(line[0][0]),sign));
+    CAR.line=line; CAR.sign=sign;
     // parked with traffic: the right side of the line faces the way it was drawn, the left side the other way
     CAR.deg=Math.round(mid.deg+(sign<0?180:0)); CAR.at={cnn:String(c.cnn),key:s.key};
     CAR.marker=L.marker(mid.at,{keyboard:true,title:'Where you parked: '+(geom.corridor||'this block'),zIndexOffset:500,icon:carIcon()})
@@ -2857,10 +2860,41 @@ function lineMid(ll){
   }
   return {at:ll[ll.length-1],deg:0};
 }
-// the cars to pick from (owner, 2026-10-31: "let pick the style of the car", "have them all"): body, roof, name; D by
-// default, E is C drawn bigger. A shared link shows the sender's car; your pick is kept on this device
-const CAR_STYLES={a:['var(--pop-blue)','var(--paper)','Pale blue car'],b:['var(--pop-blue)','var(--pop-blue)','Pale blue car, solid roof'],
-  c:['var(--disc-blue)','var(--pop-blue)','Bold blue car'],d:['var(--sign-red)','var(--pop-red)','Bold red car'],e:['var(--disc-blue)','var(--pop-blue)','Bigger bold blue car']};
+// the cars to pick from (owner, 2026-10-31: "let pick the style of the car"; 2026-11-01: "design a few different cars", the
+// red D and six new ones): name, then the car seen from above, nose up, on an 18x34 grid over the wheels. D by default.
+// A shared link shows the sender's car (a, b, c and e, dropped 11-01, show D); your pick is kept on this device
+const CAR_WHEELS='<g fill="var(--ink)" stroke="none"><rect x=".6" y="6" width="3" height="5.5" rx="1"/><rect x="14.4" y="6" width="3" height="5.5" rx="1"/>'
+  +'<rect x=".6" y="22.5" width="3" height="5.5" rx="1"/><rect x="14.4" y="22.5" width="3" height="5.5" rx="1"/></g>';
+const carLights=(f,r)=>`<g stroke="none"><rect x="4.1" y="${f}" width="3" height="1.6" rx=".7" fill="var(--pop-amber)"/><rect x="10.9" y="${f}" width="3" height="1.6" rx=".7" fill="var(--pop-amber)"/>`
+  +`<rect x="4.1" y="${r}" width="3" height="1.4" rx=".6" fill="var(--pop-red)"/><rect x="10.9" y="${r}" width="3" height="1.4" rx=".6" fill="var(--pop-red)"/></g>`;
+const CAR_STYLES={
+  d:['Bold red car','<rect x="2.2" y="1" width="13.6" height="32" rx="4.5" fill="var(--sign-red)"/><path d="M4.2 10.6Q9 8.7 13.8 10.6L12.7 14.2H5.3Z" fill="var(--ink)"/>'
+    +'<rect x="5.3" y="14.2" width="7.4" height="8.6" rx="1.2" fill="var(--pop-red)"/><path d="M5.3 22.8H12.7L13.5 26Q9 27.4 4.5 26Z" fill="var(--ink)"/>'+carLights(2.3,30.1)],
+  f:['Pickup','<rect x="2.2" y="1" width="13.6" height="32" rx="3.2" fill="var(--sign-green)"/><path d="M4.2 8.2Q9 6.6 13.8 8.2L12.8 11.4H5.2Z" fill="var(--ink)"/>'
+    +'<rect x="5.2" y="11.4" width="7.6" height="5.2" rx="1" fill="var(--sign-green)"/><path d="M5.2 16.6H12.8L13.2 18H4.8Z" fill="var(--ink)"/>'
+    +'<rect x="4" y="19.4" width="10" height="11.8" rx=".8" fill="var(--ink)" fill-opacity=".28" stroke-width="1.1"/><path d="M4.2 23.4H13.8M4.2 27.3H13.8" stroke-width=".8" stroke-opacity=".55"/>'+carLights(2.3,31.3)],
+  g:['Van','<rect x="2.3" y="1" width="13.4" height="32" rx="2.6" fill="var(--pop-green)"/><path d="M4 4.4Q9 3 14 4.4L13.3 7.4H4.7Z" fill="var(--ink)"/>'
+    +'<rect x="4.4" y="8.4" width="9.2" height="22.6" rx="1.6" fill="var(--sign-white)"/>'
+    +'<g fill="var(--ink)" stroke="none"><rect x="7.4" y="11" width="3.2" height="3" rx=".6"/><rect x="7.4" y="17.6" width="3.2" height="3" rx=".6"/><rect x="7.4" y="24.2" width="3.2" height="3" rx=".6"/></g>'+carLights(1.9,31.1)],
+  h:['Taxi','<rect x="2.2" y="1" width="13.6" height="32" rx="4.5" fill="var(--taxi)"/><path d="M4.2 10.6Q9 8.7 13.8 10.6L12.7 14.2H5.3Z" fill="var(--ink)"/>'
+    +'<rect x="5.3" y="14.2" width="7.4" height="8.6" rx="1.2" fill="var(--taxi)"/><rect x="6.3" y="16.6" width="5.4" height="3.2" rx=".8" fill="var(--sign-white)" stroke-width="1.1"/>'
+    +'<path d="M5.3 22.8H12.7L13.5 26Q9 27.4 4.5 26Z" fill="var(--ink)"/>'
+    +'<g stroke="none"><rect x="2.9" y="17.2" width="1.6" height="1.6" fill="var(--ink)"/><rect x="2.9" y="18.8" width="1.6" height="1.6" fill="var(--sign-white)"/>'
+    +'<rect x="13.5" y="17.2" width="1.6" height="1.6" fill="var(--ink)"/><rect x="13.5" y="18.8" width="1.6" height="1.6" fill="var(--sign-white)"/></g>'+carLights(2.3,30.1)],
+  i:['Convertible','<rect x="2.2" y="1" width="13.6" height="32" rx="4.5" fill="var(--meter)"/><path d="M4.4 10.8Q9 9.4 13.6 10.8L13.2 12.6H4.8Z" fill="var(--ink)"/>'
+    +'<rect x="4.6" y="12.6" width="8.8" height="11.6" rx="2" fill="var(--ink)"/>'
+    +'<g stroke="none" fill="var(--pop-amber)"><rect x="5.6" y="14.2" width="3" height="3.6" rx="1"/><rect x="9.4" y="14.2" width="3" height="3.6" rx="1"/><rect x="5.6" y="19.4" width="6.8" height="3.2" rx="1"/></g>'
+    +'<rect x="4.4" y="24.6" width="9.2" height="2.6" rx="1.2" fill="var(--ink-soft)"/>'+carLights(2.3,30.1)],
+  j:['Sports car','<path d="M5 1.3Q9 .4 13 1.3L15.8 7.5V30Q15.8 33 12.8 33H5.2Q2.2 33 2.2 30V7.5Z" fill="var(--amber)"/>'
+    +'<path d="M4.6 14.2Q9 12.6 13.4 14.2L12.6 17.4H5.4Z" fill="var(--ink)"/><rect x="5.4" y="17.4" width="7.2" height="5.4" rx="1.4" fill="var(--amber)"/>'
+    +'<path d="M5.4 22.8H12.6L13 24.8Q9 25.8 5 24.8Z" fill="var(--ink)"/>'
+    +'<g fill="var(--ink)" stroke="none"><rect x="7.2" y="1.4" width="1.3" height="12.6"/><rect x="9.5" y="1.4" width="1.3" height="12.6"/><rect x="7.2" y="25.4" width="1.3" height="2.8"/>'
+    +'<rect x="9.5" y="25.4" width="1.3" height="2.8"/><rect x="7.2" y="30.2" width="1.3" height="2.6"/><rect x="9.5" y="30.2" width="1.3" height="2.6"/><rect x="1.4" y="28.2" width="15.2" height="2" rx=".6"/></g>'
+    +carLights(2.4,31)],
+  k:['Surf wagon','<rect x="2.2" y="1" width="13.6" height="32" rx="3.6" fill="var(--gray)"/><path d="M4.2 8.6Q9 6.9 13.8 8.6L12.8 12H5.2Z" fill="var(--ink)"/>'
+    +'<rect x="5.2" y="12" width="7.6" height="15" rx="1" fill="var(--gray)"/><path d="M5.2 27H12.8L13.4 29.4Q9 30.4 4.6 29.4Z" fill="var(--ink)"/><path d="M5 13V26M13 13V26" stroke-width="1"/>'
+    +'<path d="M9 5.8C11.6 9 11.8 24 10.4 30.4H7.6C6.2 24 6.4 9 9 5.8Z" fill="var(--sign-white)" stroke-width="1.1"/><path d="M9 7.6V29" stroke="var(--sign-red)" stroke-width="1"/>'+carLights(2.3,30.1)],
+};
 function myCarStyle(){try{const v=localStorage.getItem('curbCarStyle');if(CAR_STYLES[v])return v;}catch(_){}return 'd';}
 const carStyle=()=>(CAR.link&&CAR.link.style)||myCarStyle();  // the car on the map: a link's, else yours
 const carIcon=()=>L.divIcon({className:'car-pin',html:carTop(CAR.deg,carStyle()),iconSize:[48,48],iconAnchor:[24,24]});
@@ -2876,16 +2910,8 @@ function syncCarPick(){
   el.hidden=!(CAR.at&&el.dataset.cnn===CAR.at.cnn&&el.dataset.key===CAR.at.key);  // CAR.at is set only with a car on the map
   const k=carStyle(); el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===k)));
 }
-// the car seen from above, nose up, turned by deg: wheels, body, windshield, roof, rear window, head and tail lights
-const carTop=(deg,k)=>`<svg viewBox="0 0 18 34"${k==='e'?' class="big"':''} style="--deg:${deg}deg" aria-hidden="true" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round">`
-  +'<g fill="var(--ink)" stroke="none"><rect x=".6" y="6" width="3" height="5.5" rx="1"/><rect x="14.4" y="6" width="3" height="5.5" rx="1"/>'
-  +'<rect x=".6" y="22.5" width="3" height="5.5" rx="1"/><rect x="14.4" y="22.5" width="3" height="5.5" rx="1"/></g>'
-  +`<rect x="2.2" y="1" width="13.6" height="32" rx="4.5" fill="${CAR_STYLES[k][0]}"/>`
-  +'<path d="M4.2 10.6Q9 8.7 13.8 10.6L12.7 14.2H5.3Z" fill="var(--ink)"/>'
-  +`<rect x="5.3" y="14.2" width="7.4" height="8.6" rx="1.2" fill="${CAR_STYLES[k][1]}"/>`
-  +'<path d="M5.3 22.8H12.7L13.5 26Q9 27.4 4.5 26Z" fill="var(--ink)"/>'
-  +'<g stroke="none"><rect x="4.1" y="2.3" width="3" height="1.6" rx=".7" fill="var(--pop-amber)"/><rect x="10.9" y="2.3" width="3" height="1.6" rx=".7" fill="var(--pop-amber)"/>'
-  +'<rect x="4.1" y="30.1" width="3" height="1.4" rx=".6" fill="var(--pop-red)"/><rect x="10.9" y="30.1" width="3" height="1.4" rx=".6" fill="var(--pop-red)"/></g></svg>';
+// the car seen from above, nose up, turned by deg
+const carTop=(deg,k)=>`<svg viewBox="0 0 18 34" style="--deg:${deg}deg" aria-hidden="true" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round">${CAR_WHEELS+CAR_STYLES[k][1]}</svg>`;
 // the app's car, from what the app last said (AP.park); a status that didn't answer leaves the car as it was
 function ownCar(){const c=apCar();CAR.own=c?{cnn:c.cnn,side:c.sideKey}:null;drawCar();}
 async function refreshOwnCar(){
@@ -2898,8 +2924,8 @@ refreshOwnCar();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshOwnCar();});
 /* A "Share where I parked" link: /?b=<cnn>&side=<side key>&car=<style>. deepLink opens the side; this puts the car on it. */
 (function carLink(){
-  const b=QS.get('b'), v=QS.get('car'); if(!/^(1|[a-e])$/.test(v||'')||!b||!/^\d{1,12}$/.test(b))return;
-  CAR.link={cnn:b,side:QS.get('side')||'',style:v==='1'?'d':v}; drawCar();  // &car=1: a link sent before the styles
+  const b=QS.get('b'), v=QS.get('car'); if(!/^(1|[a-k])$/.test(v||'')||!b||!/^\d{1,12}$/.test(b))return;
+  CAR.link={cnn:b,side:QS.get('side')||'',style:CAR_STYLES[v]?v:'d'}; drawCar();  // &car=1 (before the styles) or a dropped style: D
 })();
 
 /* ---------- the other maps: San Francisco and the public cities (owner, 2026-10-20) ---------- */
@@ -3246,6 +3272,11 @@ function drawCityPins(){
   })).addTo(map);
 }
 map.on('zoomend',()=>{drawOutlines();drawCityPins();});
+// the curbs sit further apart zoomed out (sideOffset): redraw them and move the car the moment the zoom lands
+map.on('zoomend',()=>{
+  if(!ovMode&&lastRows.length&&map.getZoom()>=MIN_ZOOM_DATA)drawSegments(lastRows);
+  if(CAR.marker)CAR.marker.setLatLng(lineMid(offsetLine(CAR.line,sideOffset(CAR.line[0][0]),CAR.sign)).at);
+});
 map.whenReady(()=>{drawOutlines();drawCityPins();});
 
 /* ---------- day filter + today's date ---------- */
