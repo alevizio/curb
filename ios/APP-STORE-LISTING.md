@@ -1,20 +1,20 @@
 # CURB — App Store Connect listing (paste-ready)
 
-**Name:** CURB
-**Subtitle** (≤30): `SF street-sweep parking map`
+**Name** (≤30): `CURB: Street Parking Map` (Ale's pick, 1 Nov 2026, live with 1.0.6; was `CURB: SF Street Parking`)
+**Subtitle** (≤30): `Sweeping alerts for 25 cities` (was `SF street-sweep parking map`). 25 = SF plus the 24 public city maps, never Boston or Somerville
 **Category:** Navigation (primary), Utilities (secondary) · **Price:** Free · **Age:** 4+
 **Support URL:** https://curb.guide
 
 **Promotional text** (≤170, editable anytime without review):
-`Over a million SF tickets mapped: on a typical block the posted 2-hour street-cleaning window is really about 20 minutes. See your block's real ticket time. Free.`
+`New: CURB saves where you park by itself and puts a little car on that curb, so you know when to move it. Pick your car, or share where you parked.` (set 1 Nov 2026)
 
-**Keywords** (≤100 chars):
+**Keywords** (≤100 chars; words already in the name and subtitle left out, since Apple joins them):
 ```
-street cleaning,sweeping,parking,SF,tickets,RPP,meters,reminder,alert,curb,SFMTA,permit,citation
+cleaning,SF,tickets,reminder,citation,permit,los angeles,oakland,nyc,chicago,toronto,alternate side
 ```
 
 ## Description
-Updated 13 Oct 2026 with the full records file (both tabs). 1.0.5 went to review with the 3 Oct text, so paste this with the next version.
+Saved in App Store Connect on 1 Nov 2026 with 1.0.6 (the 13 Oct full records file text plus the MORE CITIES section).
 ```
 Your street-cleaning sign says 9 to 11am. The tickets say 9:12am.
 
@@ -37,6 +37,16 @@ MOVE-YOUR-CAR ALERTS
 • Native iOS push, plus a one-tap calendar (.ics) sweep event
 • No more "I forgot it was Tuesday"
 
+MORE CITIES
+CURB now maps 24 more cities block by block, from each city's open data, with alerts before the rule starts:
+• Oakland, Berkeley, San Jose, Sacramento, Los Angeles, Unincorporated LA County, Santa Monica, Glendale, Riverside, San Diego, Denver, Saint Paul and Norfolk: street sweeping
+• New York City and Hoboken: alternate side parking
+• Philadelphia, Pittsburgh, Paterson, Washington DC and Montréal (in French or English): street cleaning
+• Chicago and Madison: street sweeping and winter rules
+• Milwaukee: night parking and winter rules
+• Toronto: winter parking
+Zoom out and tap a city pin, or open Cities in the ⓘ menu.
+
 THE SCALE OF IT
 • $105 street-cleaning fine in 2026
 • 24M total parking citations in SF since 2008
@@ -52,10 +62,11 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ```
 
 ## What's New (v1.0.6)
-Build 11 (Xcode Cloud 63). Submitted 29 Oct 2026 with manual release (Ale releases after his car test). Rejected 1 Nov
+Build 11 (Xcode Cloud 63). Submitted 29 Oct 2026 with manual release; on 1 Nov Ale switched it to release automatically once approved. Rejected 1 Nov
 under 2.3.7 for "FREE." in screenshot 4 (never say free in screenshots); label changed to "NO SIGNUP." and resubmitted
 the same day. The text below was saved in App Store Connect on 1 Nov while Waiting for Review, adding the web changes
-the app already shows (the car, Share where I parked, the car picker, curbs apart when zoomed out). Inside the app: two
+the app already shows (the car, Share where I parked, the car picker, curbs apart when zoomed out), then the 25 cities line.
+Screenshots 7 ("YOUR CAR, ON ITS CURB.") and 8 ("ONE MAP. 25 CITIES.", the New York map) were made 1 Nov in the set's style on screenshot 4 as the template; the files are in private/appstore-screenshots-2026-11-01/. Inside the app: two
 App Intents, Save Parking Spot and Clear Parking Spot (ios/CURB/Parking.swift), and the bridge the Sweep alerts screen
 uses to set them up and show the saved spot. The screen itself comes from curb.guide; its auto-park section shows only
 in builds that have the bridge.
@@ -68,6 +79,7 @@ Auto-save where you park, and your car on the map:
 • A little car sits on the curb where you parked. Tap that curb to pick yours: red car, pickup, van, taxi, convertible, sports car or surf wagon.
 • Share where I parked, on every curb: it sends the side, the next sweep and a link that opens the map with the car on it. Handy when you park someone else's car.
 • Zoomed out, both sides of a street now show as two lines, so you can tell them apart.
+• Now in 25 cities, from Oakland and Los Angeles to New York, Chicago, Toronto and Montréal. Zoom out and tap a city pin, or open Cities in the ⓘ menu.
 
 The posted sign is always the final authority.
 ```
