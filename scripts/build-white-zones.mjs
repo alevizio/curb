@@ -14,28 +14,42 @@ const log = (...a) => console.error('[white-zones]', ...a);
 async function getJSON(base, params) {
   const u = new URL(base);
   Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
+  let why = '';
   for (let i = 0; i < 4; i++) {
     try {
       const r = await fetch(u, { headers: { 'User-Agent': 'curb-guide-build' } });
-      if (r.ok) return await r.json();
-    } catch (e) { /* retry */ }
+      if (r.ok) { const d = await r.json(); if (!d.error) return d; why = d.error.message; } // ArcGIS errors come back as 200
+      else why = 'HTTP ' + r.status;
+    } catch (e) { why = e.message; }
     await new Promise(s => setTimeout(s, 1500 * (i + 1)));
   }
-  throw new Error('fetch failed: ' + u);
+  throw new Error(`fetch failed (${why}): ${u}`);
 }
+
+const fs = await import('node:fs');
+const url = new URL('../data/white-zones.json', import.meta.url);
 
 // ---- 1) page through Digital Curb passenger/accessible-loading policies ----
 log('fetching Digital Curb loading policies…');
 const FIELDS = 'CZ_ID,ST_NAME,X_STREET_1,X_STREET_2,SIDE_ST,LENGTH_FT,PCY_CAT,DAYS_WEEK,TOD_ST_STR,TOD_ED_STR,MX_STAY,MX_STAY_UN,NHOOD';
 const feats = [];
-for (let off = 0; ; off += 2000) {
-  const d = await getJSON(CURBS, {
-    where: "PCY_CAT IN ('Passenger Loading','Accessible Loading')",
-    outFields: FIELDS, f: 'geojson', resultRecordCount: 2000, resultOffset: off,
-  });
-  feats.push(...(d.features || []));
-  log(`  +${(d.features || []).length} (${feats.length})`);
-  if (!(d.features || []).length || !d.properties?.exceededTransferLimit && (d.features || []).length < 2000) break;
+try {
+  for (let off = 0; ; off += 2000) {
+    const d = await getJSON(CURBS, {
+      where: "PCY_CAT IN ('Passenger Loading','Accessible Loading')",
+      outFields: FIELDS, f: 'geojson', resultRecordCount: 2000, resultOffset: off,
+    });
+    feats.push(...(d.features || []));
+    log(`  +${(d.features || []).length} (${feats.length})`);
+    if (!(d.features || []).length || !d.properties?.exceededTransferLimit && (d.features || []).length < 2000) break;
+  }
+} catch (e) {
+  // SFMTA pulled this layer on 2026-11-01 (the replacement needs a token): keep the last
+  // snapshot so the rest of the monthly refresh still runs.
+  if (!fs.existsSync(url)) throw e;
+  log(e.message);
+  console.log(`::warning::Digital Curb unavailable, kept the white-zones snapshot from ${JSON.parse(fs.readFileSync(url))._meta.generated}`);
+  process.exit(0);
 }
 
 // ---- 2) group policy rows by curb zone; merge identical time windows across days ----
@@ -110,8 +124,6 @@ for (const z of zones.values()) {
     sch: schoolish ? (school || 'school zone') : null, spec, sched, line: z.line });
 }
 
-const fs = await import('node:fs');
-const url = new URL('../data/white-zones.json', import.meta.url);
 const doc = { _meta: { generated: new Date().toISOString(),
   source: 'SFMTA Digital Curb (ArcGIS Curb_Zones_with_All_Policies) + MTA.colorcurb + DataSF schools',
   note: 'Passenger + accessible loading curb zones. Snapshot of an undocumented public feed — signs govern.' },

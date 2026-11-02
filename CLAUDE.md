@@ -358,6 +358,9 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   MTA.colorcurb point layer (25m). Drawn as white polylines with ink casing under the
   dots. This is the data hi6h-neyh's title excludes; re-check quarterly whether SFMTA
   ships the promised public CDS Curbs API (none as of June 2026) and migrate when live.
+  2026-11-01: SFMTA removed that layer (their map now reads a token-only
+  services.sfmta.com digitalcurb MapServer), so build:whitezones keeps the last snapshot
+  (Oct 23, 1975 zones) with an Actions warning instead of failing the monthly refresh.
 - **Enforcement overlay** (`ENF`/`enfFor`): lazy-loads `data/enforcement.json`; sheet shows
   a 🎯 callout + per-side line, tooltip shows a compact `tip-enf`. Keyed by cnn → JS dow.
   Degrades silently if the JSON is absent (e.g. before deploy). Rebuild with
