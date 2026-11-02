@@ -52,15 +52,22 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ```
 
 ## What's New (v1.0.6)
-DRAFT for Ale's OK, not submitted. Build 11. Inside the app: two App Intents, Save Parking Spot and Clear Parking Spot
-(ios/CURB/Parking.swift), and the bridge the Sweep alerts screen uses to set them up and show the saved spot. The screen
-itself comes from curb.guide; its auto-park section shows only in builds that have the bridge.
+Build 11 (Xcode Cloud 63). Submitted 29 Oct 2026 with manual release (Ale releases after his car test). Rejected 1 Nov
+under 2.3.7 for "FREE." in screenshot 4 (never say free in screenshots); label changed to "NO SIGNUP." and resubmitted
+the same day. The text below was saved in App Store Connect on 1 Nov while Waiting for Review, adding the web changes
+the app already shows (the car, Share where I parked, the car picker, curbs apart when zoomed out). Inside the app: two
+App Intents, Save Parking Spot and Clear Parking Spot (ios/CURB/Parking.swift), and the bridge the Sweep alerts screen
+uses to set them up and show the saved spot. The screen itself comes from curb.guide; its auto-park section shows only
+in builds that have the bridge.
 ```
-Auto-save where you park:
+Auto-save where you park, and your car on the map:
 
 • New Shortcuts actions: Save Parking Spot and Clear Parking Spot. Run them when your car's CarPlay or Bluetooth disconnects and connects, and CURB saves the block you parked on and turns on its sweep alerts by itself.
 • Set it up in the ⓘ menu, Sweep alerts, Auto-save where you park. San Francisco for now.
 • The saved spot shows there too, with its next sweep, Show on map and Clear.
+• A little car sits on the curb where you parked. Tap that curb to pick yours: red car, pickup, van, taxi, convertible, sports car or surf wagon.
+• Share where I parked, on every curb: it sends the side, the next sweep and a link that opens the map with the car on it. Handy when you park someone else's car.
+• Zoomed out, both sides of a street now show as two lines, so you can tell them apart.
 
 The posted sign is always the final authority.
 ```
