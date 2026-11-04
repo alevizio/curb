@@ -25,7 +25,7 @@ vi.mock('@upstash/redis', () => ({
   },
 }));
 
-const { default: handler, normalize, cleanSrc, coarseClient, isCrawler, group } = await import('./client-error.js');
+const { default: handler, normalize, cleanSrc, coarseClient, isCrawler, staleDesktop, group } = await import('./client-error.js');
 
 // A controllable clock: the per-client limit lives in module memory, so every test starts a minute later.
 vi.useFakeTimers({ toFake: ['Date'] });
@@ -146,6 +146,79 @@ describe('crawlers are not visitors', () => {
   });
 });
 
+// 2026-10-30 to 11-01: a scraper on residential proxies (~40 countries) loaded the map all night; its failed DataSF
+// loads were 668 of the week's 677 reports. Its agents, exactly as the request log recorded them:
+describe('the late-2023 scraper and other reports that are not CURB visitors', () => {
+  const AT = Date.parse('2026-11-01T07:27:00Z');
+  const SCRAPER = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0',
+  ];
+  // Visitors the same week, current browsers and an old phone that can't update its Chrome
+  const PEOPLE = [
+    IPHONE,
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:157.0) Gecko/20100101 Firefox/157.0',
+    'Mozilla/5.0 (Android 17; Mobile; rv:157.0) Gecko/157.0 Firefox/157.0',
+    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/156.0.8078.54 Mobile/15E148 Safari/604.1',
+  ];
+  const LOAD = { k: 'event:data-load', msg: 'Failed to fetch', page: '/', app: 'web' };
+
+  it('staleDesktop: the scraper\'s desktops yes, current browsers and phones no', () => {
+    for (const ua of SCRAPER) expect(staleDesktop(ua, AT), ua).toBe(true);
+    for (const ua of PEOPLE) expect(staleDesktop(ua, AT), ua).toBe(false);
+    // a desktop counts as stale from 30 versions back: Chrome 129 (Sep 2024) is fine in Sep 2026, not in mid-2027
+    const C129 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36';
+    expect(staleDesktop(C129, Date.parse('2026-09-27T12:00:00Z'))).toBe(false);
+    expect(staleDesktop(C129, Date.parse('2027-06-01T12:00:00Z'))).toBe(true);
+    expect(staleDesktop(undefined, AT)).toBe(false);
+  });
+
+  it('drops the scraper\'s app events, Lightpanda\'s included, and keeps a person\'s', () => {
+    for (const ua of SCRAPER) expect(normalize(LOAD, ua, AT, 'US'), ua).toBeNull();
+    expect(normalize({ ...LOAD, msg: 'fetch error' }, 'Lightpanda/1.0', AT, 'US')).toBeNull();
+    expect(normalize({ k: 'event:block-open-timeout', msg: 'link', page: '/santa-monica' }, SCRAPER[4], AT, 'ID')).toBeNull();
+    for (const ua of PEOPLE) expect(normalize(LOAD, ua, AT, 'US'), ua).toMatchObject({ k: 'event:data-load' });
+  });
+
+  it('keeps a script error from an old desktop browser: that can be a real bug', () => {
+    expect(normalize(REPORT, SCRAPER[0], AT, 'US')).toMatchObject({ k: 'error' });
+  });
+
+  it('drops app events sent from outside the US and Canada, never a script error', () => {
+    expect(normalize(LOAD, PEOPLE[1], AT, 'PK')).toBeNull();
+    expect(normalize(LOAD, PEOPLE[1], AT, 'CA')).not.toBeNull();
+    expect(normalize(LOAD, PEOPLE[1], AT, '')).not.toBeNull(); // no country header (a preview, a test): kept
+    expect(normalize(REPORT, PEOPLE[1], AT, 'PK')).toMatchObject({ k: 'error' });
+  });
+
+  it('drops a script error the browser pinned on a page\'s line 1 (its own injected code), not one in our scripts', () => {
+    const wallet = { k: 'error', msg: "TypeError: undefined is not an object (evaluating 'window.ethereum.emit')", src: 'https://curb.guide/', line: 1, col: 16, stack: 'global code@https://curb.guide/:1:16', page: '/' };
+    expect(normalize(wallet, IPHONE, AT, 'US')).toBeNull();
+    expect(normalize({ ...wallet, msg: 'SyntaxError: No identifiers allowed directly after numeric literal', src: 'https://curb.guide/san-diego' }, IPHONE, AT, 'US')).toBeNull();
+    expect(normalize({ ...wallet, line: 3362 }, IPHONE, AT, 'US')).not.toBeNull();
+    expect(normalize({ ...wallet, src: 'https://curb.guide/lib/city.js' }, IPHONE, AT, 'US')).not.toBeNull();
+  });
+
+  it('drops a failure of the browser\'s own push service, keeps CURB\'s own save failures', () => {
+    const push = { k: 'event:push-save-failed', msg: 'web Registration failed - push service error', page: '/san-jose' };
+    expect(normalize(push, PEOPLE[1], AT, 'US')).toBeNull();
+    expect(normalize({ ...push, msg: 'web Registration failed - push service not available' }, PEOPLE[1], AT, 'US')).toBeNull();
+    expect(normalize({ ...push, msg: 'web save failed (500)' }, PEOPLE[1], AT, 'US')).toMatchObject({ k: 'event:push-save-failed' });
+  });
+});
+
 describe('helpers', () => {
   it('cleanSrc keeps our paths and strips queries', () => {
     expect(cleanSrc('https://curb.guide/lib/sweep-core.js?v=2')).toBe('/lib/sweep-core.js');
@@ -211,6 +284,16 @@ describe('handler', () => {
     // and it does not use up the address's slot: a visitor behind the same address still gets through
     await handler(post(REPORT, '9.9.9.9'), mockRes());
     expect(storedMsgs()).toHaveLength(1);
+  });
+  it('POST reads the request\'s country: an app event from abroad stores nothing and spends no Redis command', async () => {
+    const event = { k: 'event:data-load', msg: 'Failed to fetch', page: '/', app: 'web' };
+    const abroad = post(event, '7.7.7.7'); abroad.headers['x-vercel-ip-country'] = 'bd';
+    await handler(abroad, mockRes());
+    expect(storedMsgs()).toEqual([]);
+    expect(cmds.n).toBe(0);
+    const home = post(event, '7.7.7.8'); home.headers['x-vercel-ip-country'] = 'US';
+    await handler(home, mockRes());
+    expect(storedMsgs()).toEqual(['Failed to fetch']);
   });
 
   it('POST ignores oversized or malformed bodies without failing', async () => {

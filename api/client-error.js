@@ -49,14 +49,38 @@ const CRAWLER = new RegExp([
   'meta-external', 'meta-webindexer', 'facebookexternalhit', 'bytespider', 'tiktokspider',
   'googleother', 'google-inspectiontool', 'storebot-google', 'chrome-lighthouse', 'bingpreview',
   'chatgpt-user', 'amzn-user', 'aspiegelbot', '360spider', 'gtmetrix', 'headlesschrome',
+  'lightpanda', // a headless browser for scrapers ("Lightpanda/1.0"); its failed loads read "fetch error"
 ].join('|'), 'i');
 export const isCrawler = (ua) => CRAWLER.test(String(ua || ''));
+
+/** True for a desktop Chrome, Edge or Firefox 30 or more major versions (about 2.3 years) behind the current one.
+ *  Both ship a version every 4 weeks and update themselves, so a desktop that far behind is a script wearing an old
+ *  user agent. From 2026-10-30 to 11-01 a scraper on residential proxies in ~40 countries loaded the map all night
+ *  with ten late-2023 desktop agents (Chrome 118 to 120, Edge 119 and 120, Firefox 120 and 121) and Lightpanda; its
+ *  failed DataSF loads were 668 of the week's 677 reports and opened five false "broken" alerts. Phones are left
+ *  out: an old Android phone keeps its last Chrome (Android 7 stops at 119). */
+export function staleDesktop(ua, now = Date.now()) {
+  const s = String(ua || '');
+  if (/Android|iPhone|iPad|iPod|Mobile/.test(s)) return false;
+  const firefox = /Firefox\/(\d+)/.exec(s), m = firefox || /Chrome\/(\d+)/.exec(s); // Edge, Opera, Brave: Chrome's number
+  if (!m) return false;
+  const [v0, t0] = firefox ? [121, Date.UTC(2023, 11, 19)] : [120, Date.UTC(2023, 11, 5)]; // a known release of each
+  return +m[1] <= v0 + Math.floor((now - t0) / (28 * 864e5)) - 30;
+}
+
+// CURB's maps are all in the US and Canada, so an app event (a map load that failed, a block that never opened, a
+// locate) sent from anywhere else is not a driver on one of them: 90% of the scraper's reports came from abroad. The
+// country is the request's (Vercel's x-vercel-ip-country), only read here, never stored. Script errors count from anywhere.
+const MAP_COUNTRIES = new Set(['US', 'CA']);
+// The browser's own push service failed (Chrome: "Registration failed - push service error", e.g. Brave with Google's
+// push messaging off, or a network that blocks it). The page tells the visitor; nothing in CURB can fix it.
+const PUSH_SERVICE = /push service (?:error|not available)/i;
 
 const EXTENSION_MSG = /\bruntime\.(?:sendMessage|connect)\(\)|Extension context invalidated/;
 const EXTENSION_URL = /\b(?:safari-web-extension|safari-extension|chrome-extension|moz-extension|webkit-masked-url):\/\//;
 
 /** Validate + normalize a raw report. Returns null for junk / noise we never want to store. */
-export function normalize(body, ua, now = Date.now()) {
+export function normalize(body, ua, now = Date.now(), country = '') {
   if (!body || typeof body !== 'object') return null;
   if (isCrawler(ua)) return null; // not a visitor; checked before any rate-limit or store call
   const k = clip(body.k, 40);
@@ -69,6 +93,11 @@ export function normalize(body, ua, now = Date.now()) {
   // calls the extension APIs (runtime.*), and a stack inside an extension's code is the extension's.
   if (EXTENSION_MSG.test(msg) || EXTENSION_URL.test(String(body.stack || ''))) return null;
   const toInt = (v) => (Number.isFinite(+v) ? Math.max(0, Math.min(1e7, Math.trunc(+v))) : 0);
+  // Line 1 of every CURB page is its doctype, so a script error pinned there is code the browser itself put in the
+  // page (Firefox for iPhone's own scripts, a crypto wallet's window.ethereum), not ours.
+  if (k === 'error' && src && !src.endsWith('.js') && toInt(body.line) === 1) return null;
+  if (k.startsWith('event:') && (staleDesktop(ua, now) || (country && !MAP_COUNTRIES.has(country)))) return null;
+  if (k === 'event:push-save-failed' && PUSH_SERVICE.test(msg)) return null;
   return {
     ts: now,
     k,
@@ -140,7 +169,8 @@ export default async function handler(req, res) {
 
   // Always answer 204: a beacon never reads the response, and errors here must not cascade.
   try {
-    const entry = normalize(parseBody(req), req.headers['user-agent']);
+    const entry = normalize(parseBody(req), req.headers['user-agent'], Date.now(),
+      String(req.headers['x-vercel-ip-country'] || '').toUpperCase());
     // The IP is only hashed into short-lived rate-limit keys inside claimSlot, never stored with the entry.
     const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
     if (entry && localSlot(ip) && await claimSlot(`errip|${ip}`, IP_GAP_MS) && await underErrorRate()) {
