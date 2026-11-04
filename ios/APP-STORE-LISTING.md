@@ -69,7 +69,8 @@ the app already shows (the car, Share where I parked, the car picker, curbs apar
 Screenshots 7 ("YOUR CAR, ON ITS CURB.") and 8 ("ONE MAP. 25 CITIES.", the New York map) were made 1 Nov in the set's style on screenshot 4 as the template; the files are in private/appstore-screenshots-2026-11-01/. Inside the app: two
 App Intents, Save Parking Spot and Clear Parking Spot (ios/CURB/Parking.swift), and the bridge the Sweep alerts screen
 uses to set them up and show the saved spot. The screen itself comes from curb.guide; its auto-park section shows only
-in builds that have the bridge.
+in builds that have the bridge. Approved 3 Nov 2026 at 19:39 UTC and released automatically: the App Store lookup lists
+1.0.6 with that release time.
 ```
 Auto-save where you park, and your car on the map:
 
