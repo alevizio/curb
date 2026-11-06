@@ -488,6 +488,21 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .crule i{flex:none;width:16px;height:6px;border-radius:4px;border:1px solid rgba(23,21,15,.35);transform:translateY(-1px)}
   .crule b{font-weight:800}
   .crsrc{font-size:11px;color:var(--ink-soft);margin-top:2px}
+  .pk-seg{display:inline-flex;flex:none;border:2px solid var(--ink);border-radius:13px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);background:var(--paper)}
+  .pk-seg button{border:0;background:transparent;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;padding:6px 11px;color:var(--ink);cursor:pointer}
+  .pk-seg button.on{background:var(--ink);color:var(--paper)}
+  .pk-seg button:focus-visible{outline:2px solid var(--meter);outline-offset:-3px}
+  .pk-pick{position:relative;display:inline-block}
+  .pk-pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+  body:not(.parking) .pk-chip,body:not(.parking) #parkLegend{display:none}
+  body.parking .dayrow>#dateChip,body.parking .dayrow>.dchip[data-day],body.parking .layers,body.parking .legend2:not(#parkLegend),body.parking .hint{display:none!important}
+  .pk-chip[hidden]{display:none}
+  .pk-sub{font-size:14px;font-weight:700;margin-top:6px;line-height:1.3}
+  .pk-bar{position:relative;display:flex;height:16px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;background:var(--paper);margin-top:8px}
+  .pk-bar i{display:block;height:100%}
+  .pk-at{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:var(--ink)}
+  .pk-ticks{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--ink-soft);margin:3px 0 6px}
+  .pk-eye{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px}
   .chip.rpp .rppgo{margin-left:auto;color:var(--meter);font-weight:800;white-space:nowrap;flex:none}
   .adisc{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 3px;border-radius:12px;
     background:var(--disc-blue);color:#fff;font-family:'Anton',sans-serif;font-size:10.5px;font-style:normal}
@@ -1324,6 +1339,7 @@ function overviewStyle(b,ow){
   return {color,weight:ow,opacity:.8};
 }
 async function drawOverview(){
+  if(window.PARK&&PARK.on)return;
   try{await ensureOverview();}catch(e){return;}  // on failure the "find your spot" hint stays
   if(!ovMode)return;  // street detail took over while overview.json loaded (a deep link on a slow network)
   buildOverviewLines();
@@ -1963,6 +1979,7 @@ function openSheet(group, activeKey){
     map.fitBounds(L.polyline(active.latlngs).getBounds(),
       {maxZoom:18,paddingTopLeft:[50,90],paddingBottomRight:[50,Math.round(innerHeight*0.44)]});  // reserve the peek sheet
   };
+  if(window.PARK&&PARK.on)PARK.decorate(group,active);
   const _sf=document.getElementById('signfixLink'); if(_sf)_sf.onclick=()=>{try{track('sign_report');}catch(_){}};
   const _enf=document.getElementById('enfBtn');
   if(_enf&&ae)_enf.onclick=()=>toast(`Estimated from ~${ae.n} street-cleaning tickets on this block over ~2 years (SFMTA citations via DataSF). Earliest seen ${fmtMin(ae.lo)}. The posted sign is the source of truth.`);
@@ -3227,7 +3244,7 @@ function nearestSeg(lat,lng,cnnHint){
   pool.forEach(o=>{const d=distSqToLineMeters(lat,lng,o.side.latlngs); if(d<bd){bd=d;best=o}});
   return best&&{group:best.group,side:best.side,d:Math.sqrt(bd)};
 }
-map.on('click',e=>{ userPicked(); placeYou(e.latlng.lat,e.latlng.lng,ovMode);});
+map.on('click',e=>{ if(window.PARK&&PARK.on){PARK.tap(e);return;} userPicked(); placeYou(e.latlng.lat,e.latlng.lng,ovMode);});
 const ovSide=o=>{ const by={}; let side=null; (o.rules||[]).forEach(r=>{(by[sideKeyOf(r)]=by[sideKeyOf(r)]||[]).push(r);});
   for(const k in by){ const {best,bestRow}=sideNext(by[k]); if(best&&(!side||+best.start<+side.ns.start))side={key:k,blockside:by[k][0].blockside,rows:by[k],row:bestRow,ns:best,mid:o.a}; }
   return side; };
@@ -3350,6 +3367,7 @@ function renderRpp(rp){
   slot.removeAttribute('role'); slot.removeAttribute('tabindex'); slot.onclick=null; slot.onkeydown=null;
 }
 async function loadCurbRules(cnn,side){
+  if(window.PARK&&PARK.on)return;  // Parking mode lists the signs of the curb itself (lib/boston-parking-ui.js)
   const meter=document.getElementById('headMeter'), list=document.getElementById('curbRules');
   renderRpp(null); if(meter)meter.style.display='none'; if(list){list.hidden=true;list.innerHTML='';}
   const lr=side&&side.rows&&side.rows[0]&&side.rows[0].cnnrightleft; if(!cnn||!lr)return;
@@ -3837,5 +3855,7 @@ document.getElementById('iosHint').addEventListener('click',e=>{ if(e.target.id=
   // Home-Screen install — the iOS Web Push prerequisite; one of the most valuable funnel events.
   window.addEventListener('appinstalled', () => { try { if (window.va) window.va('event', { name: 'pwa_install' }); } catch (_) {} });
 </script>
+<script src="/lib/boston-parking.js?v=b1085577"></script>
+<script src="/lib/boston-parking-ui.js?v=be0c0bc2"></script>
 </body>
 </html>

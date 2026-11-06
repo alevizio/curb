@@ -2,7 +2,8 @@
 // the page loads with no errors, the citywide overview draws each block's real line, the data comes with its fixes
 // (data/boston/fixes.json), street zoom draws curb sides from data/boston/, a block opens its sheet with Boston's season
 // line, an address search opens the right side of the street, a location outside Boston (allowed on curb.guide for the
-// SF map) never flies the map off Boston, and the pages next to the map (/boston/about, /boston/fixes) load.
+// SF map) never flies the map off Boston, the pages next to the map (/boston/about, /boston/fixes) load, and Parking mode
+// colors curbs by the chosen time and says what applies.
 // Views change with animate:false: Leaflet drops a setView issued during another zoom animation.
 // Usage: node scripts/check-boston.mjs [site] [--shots dir]   (default site http://localhost:3077, `npm run dev`)
 import { createRequire } from 'node:module';
@@ -298,6 +299,66 @@ try {
   });
   check(notes.status() === 200 && pics.logo === '/boston' && pics.asks >= 8 && pics.all >= 10 && pics.shown === pics.all,
     `/boston/notes loads with Boston's nav, ${pics.asks} answers and every picture (${pics.shown} of ${pics.all})`);
+
+  // Parking mode (lib/boston-parking-ui.js): opens on Sweeping, a switch or ?view=parking turns it on, curbs take the rule at
+  // the chosen time, and a tap says what applies and until when. Tue 10 Nov 2026 2 PM: an ordinary weekday afternoon.
+  const pk = await b.newPage();
+  await pk.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  watch(pk);
+  await pk.evaluateOnNewDocument(() => { try { localStorage.setItem('curbOnboarded', '1'); localStorage.setItem('curbFirstSheet', '1'); } catch (_) {} });
+  await pk.goto(SITE + '/boston', { waitUntil: 'load' });
+  check(await pk.evaluate(() => window.PARK && !PARK.on && !document.body.classList.contains('parking') && getComputedStyle(document.getElementById('pkNow')).display === 'none'),
+    'the Boston page opens on Sweeping, with the Parking switch next to the date chip');
+  await pk.goto(SITE + '/boston?view=parking&at=2026-11-10T14:00', { waitUntil: 'load' });
+  const countLines = () => pk.evaluate(() => { let n = 0; map.eachLayer((l) => { if (l instanceof L.Polyline && l.options.lineCap === 'butt') n++; }); return n; });
+  const waitLines = (min = 1) => pk.waitForFunction((m) => { let n = 0; map.eachLayer((l) => { if (l instanceof L.Polyline && l.options.lineCap === 'butt') n++; }); return n >= m; }, { timeout: 30000, polling: 200 }, min).catch(() => {});
+  const settle = () => new Promise((r) => setTimeout(r, 900));
+  await waitLines(500); await settle();
+  const view = await pk.evaluate(() => ({ on: PARK.on, rows: document.querySelectorAll('#parkLegend .lst').length, sweep: map.hasLayer(segLayer), over: map.hasLayer(overviewLayer),
+    legend: getComputedStyle(document.querySelector('.legend2:not(#parkLegend)')).display, layers: getComputedStyle(document.querySelector('.layers')).display }));
+  check(view.on && view.rows === 7 && !view.sweep && !view.over && view.legend === 'none' && view.layers === 'none', '?view=parking opens Parking mode: seven states in the legend, no sweeping lines or layers button');
+  const opening = await countLines();
+  check(opening > 500 && opening < 8000, `the opening view draws its curbs without the stubs (${opening} lines)`);
+  const tapCurb = async (ll) => {
+    await pk.evaluate((c) => { document.getElementById('sheet').classList.remove('open', 'tall'); map.setView(c, 17, { animate: false }); }, ll);
+    await settle(); await waitLines(); await settle();
+    const pt = await pk.evaluate((c) => { const q = map.latLngToContainerPoint(c), r = document.getElementById('map').getBoundingClientRect(); return [q.x + r.left, q.y + r.top]; }, ll);
+    await pk.touchscreen.tap(pt[0], pt[1]);
+    await pk.waitForFunction(() => document.getElementById('sheet').classList.contains('open'), { timeout: 8000, polling: 100 }).catch(() => {});
+    await settle();
+    return pk.evaluate(() => ({ head: document.querySelector('#sheetBody .head')?.textContent || '', kicker: document.querySelector('#sheetBody .kicker')?.textContent || '',
+      meter: document.getElementById('headMeter')?.style.display === 'none' ? '' : document.getElementById('headMeter')?.innerText || '', where: document.querySelector('#sheetBody .where')?.innerText || '',
+      bar: document.querySelectorAll('#sheetBody .pk-bar i').length, blocks: document.querySelectorAll('#sheetBody .pk-now-block').length, rules: document.querySelectorAll('#curbRules .crule').length,
+      alerts: !!document.getElementById('alertBtn'), text: document.getElementById('sheetBody').innerText }));
+  };
+  const newbury = await tapCurb([42.35052, -71.0794]);
+  check(newbury.head === 'Pay until 8 PM' && /3\.75/.test(newbury.meter) && /Newbury St/.test(newbury.where), `a metered curb says what to pay and until when (${newbury.head}, ${newbury.meter.trim()})`);
+  check(newbury.bar >= 2 && newbury.blocks === 1 && newbury.rules >= 3 && /Also posted on this stretch/i.test(newbury.text) && /sign on the street wins/.test(newbury.text), `its sheet shows the day and the other signs on record (${newbury.bar} parts, ${newbury.rules} signs)`);
+  check(newbury.alerts && /Next sweep/.test(newbury.text), 'a swept curb keeps Sweep alerts and its next sweep');
+  const pick = (when) => pk.evaluate((w) => { const i = document.getElementById('pkPickInput'); i.value = w; i.dispatchEvent(new Event('change', { bubbles: true })); }, when);
+  const sheetNow = () => pk.evaluate(() => ({ head: document.querySelector('#sheetBody .head')?.textContent || '', kicker: document.querySelector('#sheetBody .kicker')?.textContent || '', blocks: document.querySelectorAll('#sheetBody .pk-now-block').length }));
+  await pick('2026-11-08T14:00'); await settle();
+  const sunday = await sheetNow();
+  check(/Sun 2 PM/.test(sunday.kicker) && !/^Pay/.test(sunday.head) && sunday.blocks === 1, `Pick moves the open sheet: on a Sunday the meter is off (${sunday.head})`);
+  await pick('2026-11-11T14:00'); await settle();
+  check(!/^Pay/.test((await sheetNow()).head), 'on a City holiday (Veterans Day) the meter is off too');
+  await pick('2026-11-10T14:00'); await settle();
+  await pk.evaluate(() => document.getElementById('sheetClose').click());
+  const heron = await pk.evaluate(async () => { const d = BOS_PARK.decode(await (await fetch('/data/boston/zones.json')).json()), z = d.zones.find((x) => x.name.startsWith('Heron St') && !x.short && x.rs >= 0); return z.g[Math.floor(z.g.length / 2)]; });
+  const unswept = await tapCurb(heron);
+  check(/Heron St/.test(unswept.where) && !unswept.alerts && /no sweeping schedule/.test(unswept.text) && unswept.bar >= 1, `a curb with no sweeping schedule gets the smaller sheet (${unswept.where.trim()}: ${unswept.head})`);
+  await pk.evaluate(() => document.getElementById('sheetClose').click());
+  await pk.evaluate(() => map.setView([42.3505, -71.0795], 16, { animate: false })); await settle(); await waitLines(); await settle();
+  const before = await countLines();
+  await pk.evaluate(() => document.querySelector('#parkLegend [data-pk="paid"]').click()); await settle();
+  const without = await countLines();
+  await pk.evaluate(() => document.querySelector('#parkLegend [data-pk="paid"]').click()); await settle();
+  check(without < before && (await countLines()) === before, `the legend hides and shows a state (${before} lines, ${without} without paid)`);
+  await pk.evaluate(() => document.getElementById('pkSweep').click()); await settle();
+  const back = await pk.evaluate(() => ({ on: PARK.on, sweep: map.hasLayer(segLayer), url: location.search, chip: getComputedStyle(document.getElementById('pkNow')).display, sides: segCache.length }));
+  check(!back.on && back.sweep && !/view|at=/.test(back.url) && back.chip === 'none', 'the switch goes back to Sweeping, with its lines and a clean link');
+  if (SHOTS) await pk.screenshot({ path: SHOTS + '/boston-parking.png' });
+  await pk.close();
 
   check(!errors.length, 'no page errors' + (errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''));
   check(!bad.length, 'no failed or SF requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));

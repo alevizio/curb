@@ -11,10 +11,12 @@
 // Run after index.html or data/boston/ changes: node scripts/cities/boston-page.mjs
 
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const src = fs.readFileSync(ROOT + 'index.html', 'utf8');
+const ver = (f) => createHash('sha1').update(fs.readFileSync(ROOT + f)).digest('hex').slice(0, 8);
 const data = JSON.parse(fs.readFileSync(ROOT + 'data/boston/segments.json', 'utf8'));
 
 // Blocks swept per weekday, for the day-chip heads-up (index.html DAY_BLOCKS is SF's).
@@ -94,6 +96,21 @@ const edits = [
   .crule i{flex:none;width:16px;height:6px;border-radius:4px;border:1px solid rgba(23,21,15,.35);transform:translateY(-1px)}
   .crule b{font-weight:800}
   .crsrc{font-size:11px;color:var(--ink-soft);margin-top:2px}
+  .pk-seg{display:inline-flex;flex:none;border:2px solid var(--ink);border-radius:13px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);background:var(--paper)}
+  .pk-seg button{border:0;background:transparent;font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;padding:6px 11px;color:var(--ink);cursor:pointer}
+  .pk-seg button.on{background:var(--ink);color:var(--paper)}
+  .pk-seg button:focus-visible{outline:2px solid var(--meter);outline-offset:-3px}
+  .pk-pick{position:relative;display:inline-block}
+  .pk-pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+  body:not(.parking) .pk-chip,body:not(.parking) #parkLegend{display:none}
+  body.parking .dayrow>#dateChip,body.parking .dayrow>.dchip[data-day],body.parking .layers,body.parking .legend2:not(#parkLegend),body.parking .hint{display:none!important}
+  .pk-chip[hidden]{display:none}
+  .pk-sub{font-size:14px;font-weight:700;margin-top:6px;line-height:1.3}
+  .pk-bar{position:relative;display:flex;height:16px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;background:var(--paper);margin-top:8px}
+  .pk-bar i{display:block;height:100%}
+  .pk-at{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:var(--ink)}
+  .pk-ticks{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--ink-soft);margin:3px 0 6px}
+  .pk-eye{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px}
   .chip.rpp .rppgo{`],
   ['Boston layer state', 'let routeOn=false;\n', `let routeOn=false;
 // Boston's other Curb Lab layers: free parking with a time limit, snow emergency curbs, no stopping and no parking
@@ -244,6 +261,7 @@ async function loadRpp(poly, my){
   // the sheet reads the rules posted on its block side from data/boston/rules.json (matched to sides by
   // scripts/cities/boston.mjs): the meter badge, the permit chip, then one line per other rule
   ['Boston posted rules', /async function loadMeterBlock\(latlngs,cnn\)\{[\s\S]*?\n\}\n(?=function refreshToday)/, `async function loadCurbRules(cnn,side){
+  if(window.PARK&&PARK.on)return;  // Parking mode lists the signs of the curb itself (lib/boston-parking-ui.js)
   const meter=document.getElementById('headMeter'), list=document.getElementById('curbRules');
   renderRpp(null); if(meter)meter.style.display='none'; if(list){list.hidden=true;list.innerHTML='';}
   const lr=side&&side.rows&&side.rows[0]&&side.rows[0].cnnrightleft; if(!cnn||!lr)return;
@@ -504,6 +522,11 @@ if(CAN_HOVER){
   ['no App Store links', "const rate=document.getElementById('imRate'), get=document.getElementById('imGet');", 'const rate=null, get=null;  // the iPhone app is San Francisco only'],
   ['share words', "text:'Free SF street-parking map: every block colored by its next street sweep, plus when tickets actually land.',url:'https://curb.guide'",
     "text:'Boston street sweeping, block by block: every swept curb colored by its next sweep.',url:'https://curb.guide/boston'"],
+  // ---- Parking mode (lib/boston-parking.js, lib/boston-parking-ui.js): where the page hands over ------------------
+  ['Parking mode: a map tap', "map.on('click',e=>{ userPicked();", "map.on('click',e=>{ if(window.PARK&&PARK.on){PARK.tap(e);return;} userPicked();"],
+  ['Parking mode: no sweeping overview', 'async function drawOverview(){\n', 'async function drawOverview(){\n  if(window.PARK&&PARK.on)return;\n'],
+  ['Parking mode: the sheet', "  const _sf=document.getElementById('signfixLink');", "  if(window.PARK&&PARK.on)PARK.decorate(group,active);\n  const _sf=document.getElementById('signfixLink');"],
+  ['Parking mode: its script', '</body>', `<script src="/lib/boston-parking.js?v=${ver('lib/boston-parking.js')}"></script>\n<script src="/lib/boston-parking-ui.js?v=${ver('lib/boston-parking-ui.js')}"></script>\n</body>`],
 ];
 
 let out = src;

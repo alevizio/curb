@@ -105,6 +105,17 @@ Questions for the City, from building it:
 11. The schedule spells 10 street names differently from SAM (typos, Yawkey Way for Jersey St) and lists 10
     pedestrian street blocks (Downtown Crossing, Faneuil Hall Marketplace): fix them at the source? (`/boston/fixes`)
 
+## Parking mode
+
+A Sweeping | Parking switch on the Boston page, off by default. In Parking, each curb is colored by what applies at the chosen time (Now, Tonight, tomorrow morning, Pick), and a tap says what applies and until when. Data: `data/boston/zones.json`. Rules: `lib/boston-parking.js`. Map and sheet: `lib/boston-parking-ui.js`.
+
+A curb says one of seven things: Clear, Paid or time limit, Permit or placard, No parking, Sweeping now, Check the sign, or No sign on record. The City's records need care, so the order of the rules matters, and it comes from comparing 56 stretches with Street View:
+
+- One record often lists every sign on a block without saying where each one stands. On a stretch over 15 m, a hydrant, bus stop or accessible sign is a note, and a meter wins while it's running.
+- A plain all-day "No Parking" on a long stretch looked wrong on 8 of 13 stretches (usually one sign near a corner), so it says Check the sign. "No Stopping" held up on 8 of 10.
+- Clear needs every sign on the record read: both wrong Clears in the check had an unreadable photo on the record.
+- 64% of curb length has no readable sign, and that stays No sign on record.
+
 ## Short version
 
 - Boston can reach level 2 (map, block sheet, alerts) from public data.

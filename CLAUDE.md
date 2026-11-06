@@ -208,6 +208,12 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   + boston/fixes.html (/boston/fixes) + boston/notes.html (/boston/notes, the page to share; pictures in boston/img/), GENERATED like boston.html, with Boston's nav from site.js; share card:
   og/template-boston.html → og-boston.png (`npm run og:boston`); check: scripts/check-boston.mjs; basemap:
   `CITY=boston bash scripts/build-basemap.sh` → basemap/boston/. See docs/multi-city/boston.md.
+  Parking mode (the Sweeping | Parking switch; ?view=parking opens it, ?at=2026-11-10T14:00 at that Boston time): each curb
+  colored by the rule at the chosen time, and a tap says what applies and until when. Data: data/boston/zones.json
+  (scripts/cities/boston-zones.mjs, one sign at a time). Rules: lib/boston-parking.js, in the order a street check set; don't
+  loosen them without another check (one City record often lists every sign on a block, and many have an unreadable photo).
+  Map and sheet: lib/boston-parking-ui.js, handed over at the page's map tap, overview and sheet (the last edits in
+  boston-page.mjs). Its lines are its own: the page keeps drawing sweeping into a layer that's off the map.
 - The other cities (curb.guide/<id>), every city after Boston, built the same way
   (docs/multi-city/city-build.md, the spec the city builds follow). Which are PUBLIC is one list, scripts/cities/public.mjs
   (24 since 2026-10-20; Boston stays hidden until its contact replies, Toronto is one line away): a public city's page is
