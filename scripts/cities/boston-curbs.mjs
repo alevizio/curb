@@ -57,6 +57,8 @@ export function classifyPolicy(p) {
   const out = [];
   for (const r of rules) {
     const { users, except, purposes } = of(r);
+    // a motorcycle meter ($0.50/hr on Newbury St, next to the cars' $3.75) is not what a car pays
+    if (r.activity === 'parking' && users.includes('motorcycle')) continue;
     if (r.activity === 'parking' && Array.isArray(p.rates) && p.rates.length) {
       const rt = p.rates[0], zone = /zone id\s*(\d+)/i.exec(p.name || '');
       out.push(['paid', { rate: rt.rate_unit === 'hour' ? rt.rate / 100 : null, max: maxMinutes(r), when, ...(zone ? { zone: zone[1] } : {}) }]);

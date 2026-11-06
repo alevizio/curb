@@ -50,6 +50,12 @@ describe('accessible, loading and short term curbs', () => {
 });
 
 describe('paid parking', () => {
+  it('leaves out a motorcycle meter, which is not what a car pays', () => {
+    const p = policy([rule('parking', { user_classes: ['motorcycle'], max_stay: 12, max_stay_unit: 'hour' })],
+      [span({ days_of_week: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'], time_of_day_start: '08:00', time_of_day_end: '20:00' })],
+      { rates: [{ rate: 50, rate_unit: 'hour' }] });
+    expect(classifyPolicy(p)).toEqual([]);
+  });
   it('keeps the hourly rate, the time limit and the ParkBoston zone', () => {
     const p = policy([rule('parking', { max_stay: 2, max_stay_unit: 'hour' })], [span({ time_of_day_start: '08:00', time_of_day_end: '20:00' })],
       { name: 'Park Boston Zone ID 4123', rates: [{ rate: 200, rate_unit: 'hour' }] });

@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T17:34:50.803Z",
+ "generated": "2026-11-06T07:13:37.164Z",
  "schedule": {
   "rows": 3758,
   "matched": 3599,
@@ -13,7 +13,7 @@
   "zones": 54185,
   "unreadableOnly": 14309,
   "noPolicy": 11426,
-  "paid": 2578,
+  "paid": 2562,
   "permit": 4834,
   "accessible": 1568,
   "loading": 2660,

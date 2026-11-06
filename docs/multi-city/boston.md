@@ -40,7 +40,7 @@ What the numbers say (`data/boston/report.json`, 2026-10-16):
   the sign's weeks are those of the other side of the street: odd and even swapped in the schedule, in the
   sign reading, or in where the curb zone was drawn.
 - Curb Lab layers on the map (six tiles): 4,834 resident permit (residents only, or everyone else's time limit),
-  1,568 accessible, 2,660 loading (commercial, passenger, bus, rideshare, valet, short term), 2,578 paid (rate and
+  1,568 accessible, 2,660 loading (commercial, passenger, bus, rideshare, valet, short term), 2,562 paid (rate and
   ParkBoston zone), 1,294 free time limits, 4,244 snow emergency, 15,061 no stopping or no parking (bus stops, rush
   hour, school and game days). Many signs are coded as exceptions ("no parking except resident permit"), which the
   first build missed: it had 1,510 permit and 56 accessible. Hydrant stubs are left out. A tapped curb lists the
