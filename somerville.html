@@ -456,6 +456,12 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   .holcard .hh{font-family:'Anton',sans-serif;font-size:18px;line-height:1;text-transform:uppercase;color:var(--green-text);margin:1px 0 2px}
   .holcard .hs{font-size:12px;font-weight:700;color:var(--ink);line-height:1.3}
   .holcard .hs b{color:var(--green-text)}
+  .hillcard{display:flex;gap:11px;align-items:flex-start;margin:9px 0 2px;border:2px solid var(--amber);border-radius:15px;padding:10px 12px;background:rgba(224,138,30,.10)}
+  .hillcard .hic{flex:none;width:34px;height:34px;display:grid;place-items:center;color:var(--amber-text)}
+  .hillcard .hic svg{width:30px;height:30px}
+  .hillcard .hh{font-family:'Anton',sans-serif;font-size:18px;line-height:1;text-transform:uppercase;color:var(--amber-text);margin:1px 0 3px}
+  .hillcard .hs{font-size:12px;font-weight:700;color:var(--ink);line-height:1.3}
+  .hillcard .ho{font-size:11.5px;font-weight:600;color:var(--ink-soft);line-height:1.3;margin-top:3px}
   /* a side's posted holiday schedule, worded like its sign ("HOLIDAYS 4 TO 6AM"): a mini street-cleaning badge */
   .holrow{display:flex;align-items:center;flex-wrap:wrap;gap:4px 7px;margin:5px 0 2px;font-size:11.5px;font-weight:600;color:var(--ink-soft)}
   .holsign{display:inline-block;background:var(--sign-white);color:var(--sign-red);border:1.5px solid var(--sign-red);border-radius:6px;
@@ -1164,6 +1170,17 @@ function routeFor(cnn){
   const n=ROUTES.blocks[cnn]; if(n==null)return null;
   return {num:n, name:(ROUTES.routeNames&&ROUTES.routeNames[n])||('Route '+n)};
 }
+/* ---------- hills (precomputed; data/grades.json) ---------- */
+// GRADES.b[cnn] = how steep the block is and which way it climbs (scripts/build-grades.mjs); lib/hill.js turns that and
+// the side into which way to turn the wheels. SF only: the other cities' pages never start this load.
+let GRADES=null, gradesLoad=null;
+function loadGrades(){
+  return gradesLoad||(gradesLoad=(async()=>{try{const r=await fetch('data/grades.json'); if(r.ok)GRADES=await r.json();}catch(_){}})());
+}
+function hillCard(cnn,lr){
+  const h=GRADES&&typeof hillAdvice==='function'?hillAdvice(GRADES.b[cnn],lr):null;
+  return h?`<div class="hillcard"><span class="hic" aria-hidden="true">${ICONS.hill}</span><div><div class="hh">${h.title}</div><div class="hs">${h.main}</div>${h.other?`<div class="ho">${h.other}</div>`:''}<div class="ho">${h.rule}</div></div></div>`:'';
+}
 // stable, distinct color per route number (golden-angle hue) — the same route reads the same everywhere
 function routeColor(n){return `hsl(${(n*137.508)%360|0} 68% 42%)`;}
 function fmtMin(m){let h=Math.floor(m/60),mm=m%60;const ap=h>=12?'pm':'am';h=h%12;if(h===0)h=12;return h+':'+String(mm).padStart(2,'0')+ap;}
@@ -1678,6 +1695,7 @@ function previewHtml(group, side){
 /* ---------- bottom sheet ---------- */
 // Drawn glyphs (stroke style matches the search/nav icons) — emoji stays only in toasts/push copy.
 const ICONS={
+  hill:'<svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path fill="var(--pop-amber)" d="M1.2 11.7 12.8 3.5v8.2Z"/><circle cx="4.2" cy="7.3" r="1.75" fill="var(--paper)"/></svg>',
   car:'<svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path fill="var(--pop-blue)" d="M1.5 7.25c0-.69.56-1.25 1.25-1.25h8.5c.69 0 1.25.56 1.25 1.25v2.5a.75.75 0 0 1-.75.75H2.25a.75.75 0 0 1-.75-.75z"/><path d="M3 6l1.1-2.6c.16-.39.54-.65.97-.65h3.86c.43 0 .81.26.97.65L11 6M2.75 10.5v1.25M11.25 10.5v1.25"/><circle cx="4" cy="8.25" r=".55" fill="currentColor"/><circle cx="10" cy="8.25" r=".55" fill="currentColor"/></svg>',
   share:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg>',
   bell:'<svg class="ic" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><g><path fill="var(--pop-green)" d="M11 6.125c0 -1.06087 -0.4214 -2.07828 -1.17157 -2.82843C9.07828 2.54643 8.06087 2.125 7 2.125s-2.07828 0.42143 -2.82843 1.17157C3.42143 4.04672 3 5.06413 3 6.125v3.25c0 0.39782 -0.15804 0.7794 -0.43934 1.0607s-0.66284 0.4393 -1.06066 0.4393h11c-0.3978 0 -0.7794 -0.158 -1.0607 -0.4393S11 9.77282 11 9.375v-3.25Z" stroke-width="1"></path><path fill="currentColor" fill-rule="evenodd" d="M3.63265 0.260417c0.20135 0.280365 0.1373 0.670875 -0.14307 0.872233 -0.69259 0.49741 -1.25691 1.15246 -1.64633 1.91105 -0.38942 0.75859 -0.59277 1.59895 -0.59325 2.45165 -0.0002 0.34518 -0.280176 0.62485 -0.625354 0.62465C0.279468 6.1198 -0.000195384 5.83982 0 5.49465c0.000595272 -1.05101 0.251236 -2.0868 0.731219 -3.02181C1.2112 1.53784 1.90675 0.730443 2.76042 0.117354c0.28036 -0.2013534 0.67087 -0.1373022 0.87223 0.143063ZM7 1.5c-1.22663 0 -2.40301 0.48728 -3.27037 1.35463C2.86228 3.72199 2.375 4.89837 2.375 6.125v3.25c0 0.23206 -0.09219 0.45462 -0.25628 0.61872 -0.1641 0.16408 -0.38666 0.25628 -0.61872 0.25628 -0.34518 0 -0.625 0.2798 -0.625 0.625s0.27982 0.625 0.625 0.625h11c0.3452 0 0.625 -0.2798 0.625 -0.625s-0.2798 -0.625 -0.625 -0.625c-0.2321 0 -0.4546 -0.0922 -0.6187 -0.25628 -0.1641 -0.1641 -0.2563 -0.38665 -0.2563 -0.61872v-3.25c0 -1.22663 -0.4873 -2.40301 -1.3546 -3.27037C9.40301 1.98728 8.22663 1.5 7 1.5Zm3.375 7.875c0 0.30467 0.0654 0.6026 0.1885 0.875H3.43649c0.12308 -0.2724 0.18851 -0.57033 0.18851 -0.875v-3.25c0 -0.89511 0.35558 -1.75355 0.98851 -2.38649C5.24645 3.10558 6.10489 2.75 7 2.75c0.89511 0 1.75355 0.35558 2.38649 0.98851 0.63291 0.63294 0.98851 1.49138 0.98851 2.38649v3.25ZM6 12.5c-0.41421 0 -0.75 0.3358 -0.75 0.75s0.33579 0.75 0.75 0.75h2c0.41421 0 0.75 -0.3358 0.75 -0.75s-0.33579 -0.75 -0.75 -0.75H6ZM11.2396 0.117354c-0.2804 -0.2013534 -0.6709 -0.1373022 -0.8722 0.143063 -0.2014 0.280365 -0.1373 0.670875 0.143 0.872233 0.6926 0.49741 1.2569 1.15246 1.6463 1.91105 0.3895 0.75859 0.5928 1.59895 0.5933 2.45165 0.0002 0.34518 0.2802 0.62485 0.6254 0.62465 0.3451 -0.0002 0.6248 -0.28018 0.6246 -0.62535 -0.0006 -1.05101 -0.2512 -2.0868 -0.7312 -3.02181 -0.48 -0.935 -1.1756 -1.742397 -2.0292 -2.355486Z" clip-rule="evenodd" stroke-width="1"></path></g></svg>',
@@ -1843,6 +1861,7 @@ function openSheet(group, activeKey){
     ${aSched}
     ${_holRow}
     ${_holNote}
+    <div id="hillSlot">${hillCard(group.cnn,_ar&&_ar.cnnrightleft)}</div>
     ${enfHtml}
     ${rtHtml}
     <div class="afterpass">${PLACE.seasonText(_ar&&_ar.months)?'Swept '+PLACE.seasonText(_ar.months)+'. ':''}April 1 to December 31. $50 ticket, and the car can be towed. No sweeping on City holidays.</div>
@@ -1883,9 +1902,11 @@ function openSheet(group, activeKey){
     ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins. Temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>Schedules come from the City's street sweeping pages, one per street side or stretch, placed on MassGIS street centerlines; the odd side of each block comes from MassGIS address points. The day sweeps match the City's 2025 sweeping contract, and the City's reminder tool at 13 addresses. Sweep alerts and calendar reminders run on Somerville time: an overnight sweep gets one alert around 9 PM the evening before.</p>
+      <p>Schedules come from the City's street sweeping pages, one per street side or stretch, placed on MassGIS street centerlines; the odd side of each block comes from MassGIS address points. The day sweeps match the City's 2025 sweeping contract, and the City's reminder tool at 13 addresses. Sweep alerts and calendar reminders run on Somerville time: an overnight sweep gets one alert around 9 PM the evening before.</p>${GRADES&&GRADES.b[group.cnn]?'<p>Hill grades are measured from USGS elevation data, so treat them as close, not exact.</p>':''}
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
+  // the sheet can open before data/grades.json lands (a block link, right after parking): fill the card in then
+  if(gradesLoad&&!GRADES)gradesLoad.then(()=>{if(sheetSpot!==spot)return;const el=document.getElementById('hillSlot');if(el)el.innerHTML=hillCard(group.cnn,_ar&&_ar.cnnrightleft);});
 
   if(canRemind){
     const doCal=k=>{try{localStorage.setItem('curbCalPref',k);}catch(_){}

@@ -122,6 +122,18 @@ describe('Save Parking Spot (iPhone app)', () => {
     expect(w(0).spot).toMatchObject({ level: normLevel(), voice: normVoice() });
   });
 
+  it('on a steep block, adds how to curb the wheels, with both moves on a two way street: GPS cannot tell the side', async () => {
+    datasf.mockImplementationOnce(async () => ({ ok: true, json: async () => [{ ...ROW, cnn: '3370000', corridor: 'Buena Vista Ave West' }] }));
+    const r = await park();
+    expect(r.code).toBe(200);
+    expect(r.body.body).toMatch(/^Buena Vista Ave West: next sweep .+ Alerts armed\. Steep block\. Facing downhill: wheels toward the curb\. Facing uphill: wheels away, tire touching it\.$/);
+  });
+
+  it('a flat block\'s answer has no hill line', async () => {
+    const r = await park();
+    expect(r.body.body).toMatch(/^Haight St: next sweep .+ Alerts armed\.$/);
+  });
+
   it('never stores the coordinates, only the block', async () => {
     await park();
     const stored = JSON.stringify(mem);

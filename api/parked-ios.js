@@ -9,7 +9,7 @@
 // raw lat/lng are never stored, only the block they resolve to.
 import { parkIosCar, disarmIosCar, hasIosSub, claimSlot, storeReady, MAX_WATCHES } from './_store.js';
 import { inSfBbox } from './_geo.js';
-import { parkedWatchAt } from './_park.js';
+import { parkedWatchAt, parkedHillLine } from './_park.js';
 import { sanitizeSpot } from './_spot.js';
 import { cityOf } from '../lib/cities.js';
 import '../lib/sweep-core.js';
@@ -59,11 +59,12 @@ export default async function handler(req, res) {
     const saved = await parkIosCar(tok, w);
     if (saved.full) { res.status(409).json({ ok: false, error: 'alert limit reached', max: MAX_WATCHES }); return; }
 
+    const hill = parkedHillLine(w.cnn);
     res.status(200).json({
       ok: true,
       covered: Boolean(saved.covered),
       title: '🚗 Parked',
-      body: saved.covered ? found.line + ' Your alerts are already on here.' : found.body,
+      body: (saved.covered ? found.line + ' Your alerts are already on here.' : found.body) + (hill ? ' ' + hill : ''),
       // the block's page, naming the side (letters only, as the alerts' own deep link)
       url: cityOf(w).blockLink(w.cnn, /^[A-Za-z]{1,12}$/.test(w.blockside || '') ? w.blockside : ''),
       spot: { corridor: w.corridor, limits: w.limits, blockside: w.blockside, cnn: w.cnn, sideKey: w.sideKey, nextSweepISO: w.nextSweepISO },

@@ -1,11 +1,19 @@
 // The auto-park core shared by api/parked.js (a web-push Shortcut) and api/parked-ios.js (the iPhone app's Save Parking
 // Spot): the swept block nearest a parked point, as the watch to arm. No store and no push here.
+import { createRequire } from 'node:module';
 import { polygonAround, pickParkedSpot } from './_geo.js';
 import { sanitizeRules } from './_spot.js';
 import '../lib/sweep-core.js';
-const { sfWallToInstant, fmtHour, DAYLBL } = globalThis;
+import '../lib/hill.js';
+const { sfWallToInstant, fmtHour, DAYLBL, hillAlert } = globalThis;
+const require = createRequire(import.meta.url);
 
 const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
+
+/** The hill sentence for the Parked alert (lib/hill.js), or '' on a flat block. A missing file must not cost the alert. */
+export function parkedHillLine(cnn) {
+  try { return hillAlert(require('../data/grades.json').b[cnn]) || ''; } catch { return ''; }
+}
 
 /** The swept block nearest (la, lo), which the caller has already checked is in SF → { spot (pickParkedSpot's), watch
  *  (the spot to save: it carries the side's recurring rules, so the watch re-arms itself), line ("Haight St: next sweep

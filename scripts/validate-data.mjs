@@ -74,6 +74,10 @@ try {
   const sw = load('sweeps.json');
   check('sweeps.json', 'meta.blocks', sw._meta?.blocks, 50, 400);
   check('sweeps.json', 'keyed entries', Object.keys(sw).filter((k) => k !== '_meta').length, 50, 400);
+
+  // grades.json — how steep each swept block is, for the hill reminder (scripts/build-grades.mjs, a local build)
+  const gr = load('grades.json');
+  check('grades.json', 'blocks at the minimum grade', Object.keys(gr.b || {}).length, 6500, 8500);
 } catch (e) {
   errors.push(`failed to read/parse a data file: ${e.message}`);
 }

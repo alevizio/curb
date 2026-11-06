@@ -58,6 +58,10 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/check-load-guard.mjs http://localhost:3077
+      - name: The hill reminder (both sides of a steep block, a flat block, a late file, another city's page)
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/check-hill-sheet.mjs http://localhost:3077
       - name: Keep screenshots
         if: always()
         uses: actions/upload-artifact@v7

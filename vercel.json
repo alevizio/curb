@@ -6,6 +6,9 @@
     "api/block.js": {
       "includeFiles": "data/{schedules,enforcement,routes}.json"
     },
+    "api/parked-ios.js": {
+      "includeFiles": "data/grades.json"
+    },
     "api/send-notifications.js": {
       "maxDuration": 60,
       "includeFiles": "{data/schedules.json,data/*/winter.json}"
