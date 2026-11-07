@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // data/grades.json: how steep each swept SF block is and which way it climbs, for the hill reminder (lib/hill.js). San
 // Francisco tickets a car on a grade over 3% whose wheels aren't curbed (Transportation Code 7.2.35), about 30,000 tickets
-// a year (owner, 2026-11-06, after one of his own: "Could we have a reminder in the streets needed to park in grades").
+// a year (owner, 2026-11-06, after one of the owner's own: "Could we have a reminder in the streets needed to park in grades").
 //
 // Elevation is USGS 3DEP (1 m lidar in SF), five points along each block. The grade is the steepest quarter of the block,
 // not end to end: on six blocks with a City figure it came within 0.3 points (22nd St, Church to Vicksburg: City 31.5%,

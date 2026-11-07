@@ -202,7 +202,7 @@ const bosSides=rows=>new Set(rows.map(r=>r.cnn+r.cnnrightleft)).size;
 `],
   ['no SF ticket, sweeper or route files', /loadEnforcement\(\);[^\n]*\nloadSweeps\(\);[^\n]*\nloadRoutes\(\);[^\n]*\n/, ''],
   ['no SF hill file', /loadGrades\(\);[^\n]*\n/, ''],
-  ['no SF hill words', '<script src="/lib/hill.js?v=1"></script>\n', ''],
+  ['no SF hill words', '<script src="/lib/hill.js?v=2"></script>\n', ''],
   // ---- Boston's curb layers (the Curb Lab's curbs.json) ----------------------------------------------
   ['Boston permit layer', /async function loadRpp\(poly, my\)\{[\s\S]*?\n\}\n(?=function nearestRpp)/, `// Boston: curb zones from the City's Curb Lab (data/boston/curbs.json), drawn for the viewport.
 let BCURBS=null;

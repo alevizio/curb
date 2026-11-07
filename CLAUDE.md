@@ -168,7 +168,7 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   map layer + adds the block sheet's "<route> sweeper route" line (loadRoutes/routeFor, keyed by
   cnn like ENF/SWP). Local build (needs `pip install xlrd` + the .xls set via CURB_SWEEP_SCHEDULE_XLS;
   NOT in the data-refresh CI, like build:enforcement). The layer's run DIRECTION stays inferred.
-- scripts/build-grades.mjs + data/grades.json + lib/hill.js — the hill reminder (owner, 2026-11-06, after his own $48 ticket: "Could we
+- scripts/build-grades.mjs + data/grades.json + lib/hill.js — the hill reminder (owner, 2026-11-06, after the owner's own $48 ticket: "Could we
   have a reminder in the streets needed to park in grades and how to"). SF tickets a car on a grade over 3% with its wheels not curbed
   (TRC7.2.35): 32,659 tickets from Nov 2025 to Nov 2026. b[cnn] = [grade in tenths, 1 rises along the sweeping line / -1 falls / 0 both, way:
   B, F with the line, T against it, '' unknown], blocks at 2.5% or more only (7,550 of 12,242). Grade = the steepest quarter of five USGS 3DEP
@@ -176,7 +176,9 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   `oneway` in 3psu-pn9h: F runs with ITS line, T against it (196 of 198 blocks on Oak, Fell, Pine, Bush, Franklin, Gough). cnnrightleft is relative to
   the sweeping line (37,009 of 37,017 rows agree with blockside). Checked against the tickets: 98.9% of those on CURB's blocks land on a flagged block;
   12% land on blocks CURB doesn't show (no sweeping), which get no reminder. The sheet's card (`hillCard`) says one move for that side, with a line for
-  anyone facing the other way. The iPhone Parked alert (api/parked-ios.js, a server answer, so no App Store release) gives one move only on a one way
+  anyone facing the other way, and draws it (`hillScene`, owner, 2026-11-07: "a little drawing of the wheels and where they need to face", "maybe animated", then picked "just the wheels" over a car on a little hill): a
+  street sign with the two front tires from above, nose up as a driver sees the turn, turning and, facing uphill, rolling back to the curb, on a 5 s loop whose rest is the move itself, so reduced motion still shows it. The curb
+  is on the driver's left only on the left side of a one way street (`curbHand`; 208 of 208 sides on Oak, Fell, Pine, Bush, Franklin, Gough). A block with no one facing draws both. The iPhone Parked alert (api/parked-ios.js, a server answer, so no App Store release) gives one move only on a one way
   street, both on a two way one: GPS can't tell the side, and pickParkedSpot saves the side swept soonest, not the car's. Local build (`npm run
   build:grades`), not in the data-refresh CI; samples are cached in private/grade-samples.json. SF only: the city and Boston pages drop its script and load.
 - api/block.js + sitemap-blocks.xml (scripts/build-block-sitemap.mjs, `npm run build:blocksitemap`) —

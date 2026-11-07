@@ -237,7 +237,7 @@ const placeSides=rows=>new Set(rows.map(r=>r.cnn+r.cnnrightleft)).size;
 `],
     ['no SF ticket, sweeper or route files', /loadEnforcement\(\);[^\n]*\nloadSweeps\(\);[^\n]*\nloadRoutes\(\);[^\n]*\n/, ''],
     ['no SF hill file', /loadGrades\(\);[^\n]*\n/, ''],
-    ['no SF hill words', '<script src="/lib/hill.js?v=1"></script>\n', ''],
+    ['no SF hill words', '<script src="/lib/hill.js?v=2"></script>\n', ''],
     ['no SF meter or permit lookups in the sheet', '  loadMeterBlock(active.latlngs, group.cnn);\n  loadRppBlock(active.latlngs, active.mid, group.cnn);\n', ''],
     ['no SF permit-area list', "buildAreaDrop(document.getElementById('areaDropPanel'),'Browse an area…');", ''],
     ['no SF permit-area fetch', /  \(async\(\)=>\{\n    try\{\n      const r=await fetch\(RPP\+`\?\$select=rpparea1,count\(\*\) as n[\s\S]*?\}\)\(\);\n/, ''],
