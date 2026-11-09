@@ -276,7 +276,10 @@ try {
   const app = await openPage(7, ctl);
   await seed(app, row('5910000', 'South'), row('9130000', 'East'));
   await openPanel(app);
-  check('app: "On this iPhone", the check goes through the bridge with the multi marker', (await text(app, '#apKicker')) === 'On this iPhone' && await app.evaluate(() => { const s = window.__nativePosts.at(-1).spot || {}; return s.cnn === '5910000' && s.multi === 1; }));
+  // the route (the bridge, the multi marker) is what's checked: which seeded curb needs a check save depends on the date
+  // (asserting the last one was 5910000 failed on main 2026-11-09, when only 9130000's saved sweep was out of date)
+  const appGot = await app.evaluate(() => ({ kicker: document.getElementById('apKicker').textContent, posts: window.__nativePosts.map((m) => ({ op: m.op, cnn: m.spot && m.spot.cnn, multi: m.spot && m.spot.multi })) }));
+  check('app: "On this iPhone", the check goes through the bridge with the multi marker', appGot.kicker === 'On this iPhone' && appGot.posts.some((m) => ['5910000', '9130000'].includes(m.cnn) && m.multi === 1), JSON.stringify(appGot));
   check('…"Notifications are on for CURB"', (await text(app, '.ap-stat')) === 'Notifications are on for CURB');
   check('…an app before 1.0.6 shows no auto-park', !(await app.$('.ap-auto')) && !(await app.$('.ap-car')));
   const night = await rowText(app, '9130000|East', '.ap-ping');
