@@ -102,6 +102,14 @@ try {
 
   v = await visit({ at: 'chicago', app: true });
   check(v.out.path === '/' && v.out.asked === 0, `the iPhone app (native location bridge) is never asked or sent anywhere (${v.out.asked} asks)`);
+  // in the app the home indicator's inset can land after the first layout: the bar grows by its padding alone, and what
+  // sits on the bar (the layers button) has to rise with it (2026-11-09: it sat 20px into the bar on an iPhone 18 Pro)
+  await (await v.p.createCDPSession()).send('Emulation.setSafeAreaInsetsOverride', { insets: { bottom: 34 } });
+  await new Promise((r) => setTimeout(r, 500));
+  const bar = await v.p.evaluate(() => ({ top: document.getElementById('mapbar').getBoundingClientRect().top,
+    h: document.getElementById('mapbar').offsetHeight, layers: document.getElementById('layersBtn').getBoundingClientRect().bottom,
+    barH: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--barH')) }));
+  check(bar.barH === bar.h && bar.layers < bar.top, `the layers button stays above the bottom bar when the safe area lands late (bar ${bar.h}px from ${bar.top}, --barH ${bar.barH}, button ends at ${bar.layers})`);
   await v.ctx.close();
 
   v = await visit({ at: 'chicago', path: '/?b=13065000' });

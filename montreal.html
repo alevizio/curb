@@ -3662,7 +3662,8 @@ function closeDayMenu(){const m=document.getElementById('dayMenu');if(!m||m.hidd
   menu.addEventListener('click',e=>{if(e.target.closest('.dchip,.datechip'))setTimeout(closeDayMenu,120);});
   document.addEventListener('click',e=>{if(!menu.hidden&&!menu.contains(e.target)&&!btn.contains(e.target))closeDayMenu();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){closeDayMenu();btn.focus();}});
-  new ResizeObserver(es=>{for(const e of es)document.documentElement.style.setProperty('--barH',e.target.offsetHeight+'px');}).observe(bar);
+  // the border box: in the app the home indicator's inset lands after the first layout and grows only the bar's padding
+  new ResizeObserver(es=>{for(const e of es)document.documentElement.style.setProperty('--barH',e.target.offsetHeight+'px');}).observe(bar,{box:'border-box'});
 })();
 /* SF weather on the date chip — Open-Meteo (free, keyless); degrades silently if it fails.
    Icons drawn in the app's duotone icon language: pop-color fill + currentColor detail. */
