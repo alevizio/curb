@@ -44,6 +44,25 @@ const ok = res.head === 'Sweeping now' && res.alertBtn && res.calBtn && res.spot
 console.log(ok ? '✅ sweeping now: alert + calendar arm the next sweep' : '❌ sweeping now: buttons missing or armed for the wrong sweep');
 if (!ok) process.exitCode = 1;
 
+// 2026-11-09, seen in the Android app: the sheet is its own scroller and kept its place from one card to the next,
+// so a block opened after reading down the last one showed the middle of the card and no verdict.
+const scroll = await p.evaluate(async () => {
+  const s = document.getElementById('sheet'), hit = segCacheAll.find((x) => String(x.group.cnn) === '4695000' && /west/i.test(x.side.blockside || ''));
+  const wait = () => new Promise((r) => setTimeout(r, 100));
+  s.scrollTop = 200; await wait();
+  const scrolled = s.scrollTop;
+  document.getElementById('sheetClose').click(); await wait();
+  openSheet(hit.group, hit.side.key); await wait();
+  const reopened = s.scrollTop;
+  s.scrollTop = 200; await wait();
+  openSheet(hit.group, hit.group.sides.find((x) => x !== hit.side).key); await wait();
+  return { scrolled, reopened, switched: s.scrollTop };
+});
+console.log(JSON.stringify(scroll));
+const okScroll = scroll.scrolled > 100 && scroll.reopened === 0 && scroll.switched === 0;
+console.log(okScroll ? '✅ a card opens at its verdict, wherever the last one was left' : '❌ a card opens scrolled to where the last one was left');
+if (!okScroll) process.exitCode = 1;
+
 // Owner decision 2026-10-05: a sweep starting after midnight reads by the night people think in. 4th St, King
 // to Berry (cnn 269000): NorthEast side Tue + Thu 12 to 2 AM, SouthWest side Mon, Wed, Fri 12 to 2 AM.
 async function nightSheet(target, ne) {

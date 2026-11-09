@@ -2191,6 +2191,7 @@ function openSheet(group, activeKey){
   });
   fillRange(group.cnn);
   const sheetEl=document.getElementById('sheet');
+  sheetEl.scrollTop=0;  // the sheet is the scroller and outlives each card: without this the next one opened where the last was left, verdict out of view
   peekRO.disconnect(); const _pk=document.getElementById('peekBox'); if(_pk)peekRO.observe(_pk); sizePeek();
   finishSheetSlide();  // settle a peek↔tall slide still in flight before changing state
   if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
