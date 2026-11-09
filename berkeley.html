@@ -748,6 +748,139 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
     /* zoom lives bottomright on desktop (see map init) — clear the attribution strip */
     .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin:0 16px 30px 0}
   }
+
+  /* ---- Option B (owner, 2026-11-09: "ok lets ship it"; the CURB mobile layout canvas, rows B and "B · every case").
+     One search pill, a bottom bar with the colors and the day lens, a right-hand stack, a shorter block card. ---- */
+  /* the search pill: logo, a light magnifier, the field, locate, a divider, the menu as three plain lines */
+  .barrow{gap:2px;height:50px;padding:0 3px 0 7px;background:var(--paper);border:2px solid var(--ink);border-radius:25px;box-shadow:3px 3px 0 var(--ink)}
+  .barrow .logo{height:46px}
+  .barrow .clogo{height:32px}
+  .barrow .field{border:0;box-shadow:none;background:transparent;border-radius:0;height:46px}
+  .field:focus-within{outline:none}
+  .barrow:has(#q:focus){outline:3px solid var(--meter);outline-offset:2px}
+  .field>svg.ic{margin-left:4px;width:16px;height:16px;opacity:.45;filter:grayscale(1)}
+  #q{padding:0 4px 0 7px}
+  .field .loc{border-left:0;width:40px;border-radius:12px}
+  .field .loc:active{background:rgba(23,21,15,.08);color:var(--ink)}
+  .infowrap{display:flex;align-items:center}
+  .infowrap::before{content:'';width:1.5px;height:24px;background:rgba(23,21,15,.2);margin-right:1px}
+  .infobtn{width:42px;height:46px;border:0;background:transparent;box-shadow:none;border-radius:12px}
+  .infobtn:active{transform:none;background:rgba(23,21,15,.08)}
+  .infobtn[aria-expanded="true"]{background:rgba(23,21,15,.1);color:var(--ink)}
+  /* the day row now lives in the bar's day menu */
+  .daymenu{position:absolute;right:0;bottom:calc(100% + 10px);width:258px;background:var(--paper);border:2.5px solid var(--ink);
+    border-radius:17px;box-shadow:var(--shadow);padding:10px;z-index:5}
+  .daymenu[hidden]{display:none}
+  .daymenu .dayrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0;padding:0;overflow:visible}
+  .daymenu .datechip{grid-column:1/-1;box-shadow:none;padding:10px 11px;font-size:13px}
+  .daymenu .dchip{box-shadow:none;padding:9px 0;text-align:center}
+  /* the bottom bar */
+  .mapbar{position:fixed;left:0;right:0;bottom:0;z-index:600;background:var(--paper);border-top:2px solid var(--ink);
+    border-radius:22px 22px 0 0;box-shadow:0 -3px 0 rgba(23,21,15,.1);padding:9px 12px calc(10px + env(safe-area-inset-bottom))}
+  .mapbar:has(.daymenu:not([hidden])){z-index:640}  /* the open day menu sits over the right-hand stack */
+  .mb-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .mb-leg{min-width:0}
+  .mb-daywrap{position:relative;flex:none}
+  .mb-day{height:36px;padding:0 10px 0 13px;border:1.5px solid var(--ink);border-radius:18px;background:var(--sign-white);
+    font:inherit;font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink)}
+  .mb-day svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .mb-day.on,.mb-day[aria-expanded="true"]{background:var(--ink);color:var(--paper)}
+  .mb-day[hidden]{display:none}
+  .mb-date{margin:5px 0 0 6px;font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+  .mb-date:empty{display:none}
+  .mapbar .legend2{position:static;background:transparent;border:0;box-shadow:none;padding:0;flex-direction:row;flex-wrap:wrap;gap:0 1px;align-items:center}
+  .mapbar .lst{font-size:13.5px;padding:7px 6px}
+  .mapbar .lst i{width:16px;height:5px}
+  .mapbar .lsx{display:none}
+  .mapbar #ovlLeg:not(:empty){margin:0;padding:0;border:0;flex-direction:row;flex-wrap:wrap}
+  .mapbar .rtday{margin:0;border:0;padding:4px 6px}
+  /* the right-hand stack: your car (once saved), then the layers */
+  .layers{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .carbtn{width:46px;height:46px;border-radius:23px;border:2px solid var(--ink);background:var(--ink);box-shadow:3px 3px 0 var(--ink-soft);
+    display:grid;place-items:center;cursor:pointer;padding:0}
+  .carbtn svg{width:14px;height:26px}
+  .carbtn[hidden]{display:none}
+  /* your car's status under the search */
+  .carpill{pointer-events:auto;align-self:flex-start;display:flex;flex-direction:column;padding:0;border:2px solid var(--ink);
+    border-radius:20px;background:var(--ink);color:var(--paper);box-shadow:3px 3px 0 var(--ink-soft);overflow:hidden;font:inherit;
+    text-align:left;cursor:pointer;max-width:100%}
+  .carpill[hidden]{display:none}
+  .cp-main{display:flex;align-items:center;gap:9px;min-height:42px;padding:0 6px 0 13px}
+  .cp-main>svg{width:11px;height:21px;flex:none}
+  .cp-k{font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+  .cp-t{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cp-c{flex:none;height:28px;padding:0 10px;border-radius:14px;font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.02em;
+    display:flex;align-items:center;text-transform:uppercase;background:var(--amber);color:var(--ink)}
+  .cp-c.red{background:var(--red);color:#fff} .cp-c.green{background:var(--pop-green);color:var(--ink)}
+  .cp-hill{display:flex;align-items:center;gap:10px;padding:0 12px 0 0;background:#F7E6C6;color:var(--ink);border-top:2px solid var(--ink);
+    font-size:13px;font-weight:800;min-height:36px}
+  .cp-hill .hic{width:40px;align-self:stretch;display:flex;align-items:center}
+  /* the block card */
+  .verdict .head{font-size:46px}
+  @media (max-width:380px){.verdict .head{font-size:40px}}
+  .verdict .headrow{padding-right:92px}  /* clear of Share and Close */
+  .where{margin:8px 0 0;flex-wrap:wrap;gap:6px 8px}
+  .where .wtxt{flex:0 1 auto}
+  .hmeter{padding:3px 7px;font-size:11px;border-radius:6px}
+  .peek>.chips .chip{margin-top:8px}
+  .sheettools{gap:8px}
+  .sheettools .centerico,.sheettools .sheet-close{width:38px;height:38px;border-radius:19px;border-width:1.5px;box-shadow:none;background:var(--sign-white)}
+  .sharechoice{position:absolute;top:58px;right:14px;z-index:4;display:flex;flex-direction:column;gap:8px;padding:10px;width:236px;
+    background:var(--paper);border:2.5px solid var(--ink);border-radius:17px;box-shadow:var(--shadow)}
+  .sharechoice[hidden]{display:none}
+  .sharechoice .btn{width:100%;justify-content:flex-start;font-size:14px;padding:11px 12px}
+  .holcard{margin:10px 0 0;padding:8px 11px;border-width:1.5px;border-radius:12px}
+  .holcard .hh{font-size:16px}
+  .hillstrip{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0 0;padding:0 10px 0 0;border:1.5px solid var(--amber);border-radius:12px;
+    background:#F7E6C6;overflow:hidden;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+  .hillstrip>.hic{flex:none;width:50px;align-self:stretch;display:flex;align-items:center;border-right:1.5px solid var(--amber)}
+  .hillstrip .hst{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;padding:6px 0}
+  .hillstrip .hst b{font-size:14px;font-weight:800}
+  .hillstrip .hst small{font-size:12px;font-weight:600;color:var(--ink-soft)}
+  .hillstrip .chev{width:12px;height:12px;flex:none;fill:none;stroke:var(--amber-text);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  /* the wheels picture sits flush in a white column; the column carries the curb on down (.cr right, .cl left) */
+  .hic.cr{background:linear-gradient(to right,var(--sign-white) 86.1%,#D5D6D1 86.1%)}
+  .hic.cl{background:linear-gradient(to right,#D5D6D1 13.9%,var(--sign-white) 13.9%)}
+  .hsc svg{border:0;border-radius:0;background:transparent}
+  .hillcard{padding:0 12px 0 0;gap:12px;border-width:1.5px;border-radius:12px;overflow:hidden;align-items:stretch}
+  .hillcard .hic{width:84px;gap:0;border-right:1.5px solid var(--amber);align-content:start}
+  .hillcard .hic.two{width:66px}
+  .hillcard .htx{padding:10px 0}
+  .facts{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);margin:12px 0 0;padding:10px 0;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+  .facts>div{display:flex;flex-direction:column;gap:3px;padding:0 8px;border-left:1px solid rgba(23,21,15,.18);min-width:0}
+  .facts>div:first-child{border-left:0;padding-left:0}
+  .facts .fl{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap}
+  .facts .fv{font-size:15.5px;font-weight:800;line-height:1.15}
+  .fv.red,.fv.tk{color:var(--red-text)} .fv.amber{color:var(--amber-text)} .fv.green{color:var(--green-text)}
+  .peek .afterpass{margin:10px 0 0;font-size:12.5px}
+  .verdict.now~.afterpass{padding:9px 11px;border:1.5px solid var(--red);border-radius:12px;background:rgba(193,18,31,.09);color:var(--ink);font-weight:700}
+  .secl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:24px 0 8px}
+  .secl+.hillcard,.secl+.enf,.secl+.rtline{margin-top:0}
+  .secl+.enf{border:0;background:transparent;box-shadow:none;padding:0;width:100%}  /* under the fold: lines, not boxes */
+  .sheet p,.sheet .hs,.sheet .ho,.afterpass,.asched,.toast,.mb-date,.holcard .hs,.hillstrip small{text-wrap:pretty}
+  @media (max-width:767px){
+    .mapbar{left:0;right:0}
+    .layers{left:auto;right:12px;top:auto;bottom:calc(var(--barH,104px) + 14px)}
+    .layersbtn{width:46px;height:46px;padding:0;border-radius:23px;justify-content:center;box-shadow:3px 3px 0 var(--ink);background:var(--paper)}
+    .layersbtn .lb-txt,#layerBadges{display:none}
+    .layersbtn .ic{width:20px;height:20px}
+    .layers .layerspanel{top:auto;bottom:calc(100% + 8px);left:auto;right:0}
+    .leaflet-control-zoom.leaflet-bar{display:none}  /* pinch, like Apple and Google Maps */
+    body:has(.sheet.open) .toast{bottom:auto;top:calc(140px + env(safe-area-inset-top))}  /* never over the card's buttons */
+    .leaflet-bottom{bottom:var(--barH,104px)}
+    .toast{bottom:calc(var(--barH,104px) + 14px)}
+    .sheet{max-height:var(--peek,46dvh)}
+    .sheet.tall{max-height:84dvh}
+    .sheet .actions{position:static;margin:12px 0 0;padding:0;border-top:0;background:transparent}
+    .sheettools #centerBtn{display:none}
+    .actions>.btn{flex:1 1 0}
+    .actions>#alertBtn{flex-grow:1.5}
+  }
+  @media (min-width:768px){
+    .top{width:min(480px,calc(100vw - 200px))}
+    .mapbar{left:16px;right:auto;bottom:30px;border:2px solid var(--ink);border-radius:16px;box-shadow:var(--shadow);padding:8px 10px}
+    .layers{flex-direction:row;align-items:flex-start}
+  }
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -771,7 +904,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
     </div>
     <div class="infowrap">
       <button class="infobtn" id="infoBtn" aria-label="Sweep alerts, info and other pages" aria-haspopup="true" aria-expanded="false" data-tip="Alerts, guide &amp; about" data-tip-pos="b">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.3" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="7.8" r="1.35" fill="currentColor"/><path d="M12 11.1v5.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <div class="infomenu" id="infoMenu" hidden role="menu" aria-label="Info and pages">
         <button class="im-item" id="imAlerts" role="menuitem">
@@ -811,6 +944,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
       </div>
     </div>
   </div>
+  <button class="carpill" id="carPill" type="button" hidden></button>
   <div class="dayrow" aria-label="Filter by sweep day">
     <button class="datechip" id="dateChip" aria-pressed="false" data-tip="Show only today's sweeping" data-tip-pos="b"></button>
     <button class="dchip on" data-day="all">All</button>
@@ -826,6 +960,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 
 <!-- layers control: everything map-related lives in one corner, Google-Maps style -->
 <div class="layers">
+  <button class="carbtn" id="carBtn" type="button" hidden aria-label="Show my car"></button>
   <button class="layersbtn" id="layersBtn" aria-expanded="false" aria-haspopup="true" aria-label="Map layers" data-tip="Map layers &amp; permit areas" data-tip-pos="b">
     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
     <span class="lb-txt">Layers</span><span id="layerBadges"></span>
@@ -850,11 +985,20 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   </div>
 </div>
 
+<!-- the bottom bar (owner, 2026-11-09, option B): the curb colors, the day lens and today; a block's card grows out of it.
+     The legend and the day row are moved in at load (initMapBar), so the city page edits still find them where they were. -->
+<div class="mapbar" id="mapbar">
+  <div class="mb-row"><span class="mb-leg" id="mbLegSlot"></span>
+    <span class="mb-daywrap"><button class="mb-day" id="dayBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dayMenu"><span id="dayBtnLbl">Any day</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="daymenu" id="dayMenu" hidden role="group" aria-label="Show the curbs swept on one day"></div></span></div>
+  <p class="mb-date" id="barDate"></p>
+</div>
+
 <!-- curb-color legend: always on the map (bottom-left), rows tap to show/hide -->
 <div class="legend2" aria-label="Map legend">
   <button class="lst on" data-st="green" aria-pressed="true" data-tip="Tap to show / hide"><i style="background:var(--green)"></i>Clear</button>
-  <button class="lst on" data-st="amber" aria-pressed="true"><i style="background:var(--amber)"></i>Soon · within 24h</button>
-  <button class="lst on" data-st="red" aria-pressed="true"><i style="background:var(--red)"></i>Now · under 3h</button>
+  <button class="lst on" data-st="amber" aria-pressed="true"><i style="background:var(--amber)"></i>Soon<span class="lsx"> · within 24h</span></button>
+  <button class="lst on" data-st="red" aria-pressed="true"><i style="background:var(--red)"></i>Now<span class="lsx"> · under 3h</span></button>
   <div id="ovlLeg"></div>
   <div class="rtday" id="rtDayLeg" hidden role="note"><span class="sw" aria-hidden="true"></span><span id="rtDayLbl">Truck route</span></div>
 </div>
@@ -896,6 +1040,10 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
     <button class="centerico" id="shareBtn" aria-label="Share this block" data-tip="Share this block" data-tip-pos="b"></button>
     <button class="centerico" id="centerBtn" aria-label="Center map on this block" data-tip="Center on this block" data-tip-pos="b"></button>
     <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
+  </div>
+  <div class="sharechoice" id="shareChoice" hidden>
+    <button class="btn alt" id="shareBlockBtn" type="button">Share this block</button>
+    <button class="btn alt park-share" id="parkShareBtn" type="button">Share where I parked</button>
   </div>
   <div id="sheetBody"></div>
 </div>
@@ -1197,20 +1345,32 @@ function loadGrades(){
 // Facing downhill they turn into the curb; facing uphill they turn away and roll back until the tire touches it (.hsc in the styles).
 const HILL_TIRE='<g class="hw"><rect x="-5.5" y="-13" width="11" height="26" rx="3.3" fill="var(--ink)"/><path d="M-4-10.7H4M-4-7.65H4M-4-4.6H4M-4-1.53H4M-4 1.53H4M-4 4.6H4M-4 7.65H4M-4 10.7H4" stroke="var(--gray)" stroke-width="1.1" stroke-linecap="round"/></g>';
 function hillScene(facing,curb){
+  // owner, 2026-11-09: no UPHILL/DOWNHILL band and no CURB label, a thin curb with no edge line; the card's white column
+  // carries the curb on down to the bottom (.hic.cr / .hic.cl)
   const flip=curb==='left'?' transform="matrix(-1 0 0 1 72 0)"':'';
   const [stem,head]=facing==='uphill'?['M27 42V34Q27 29 22 29H15','M16 22.5 7.5 29 16 35.5Z']:['M27 42V34Q27 29 32 29H39','M38 22.5 46.5 29 38 35.5Z'];
-  return `<div class="hsc ${facing}"><svg viewBox="0 0 72 94" aria-hidden="true"><g${flip}><rect x="53.1" width="19" height="94" fill="#D5D6D1"/><path d="M53.1 0V94" stroke="var(--ink)" stroke-width="1.8"/>`
+  return `<div class="hsc ${facing}"><svg viewBox="0 16 72 70" aria-hidden="true"><g${flip}><rect x="62" y="0" width="10" height="94" fill="#D5D6D1"/>`
     +`<g class="hpair"><path d="M12 62H42" stroke="var(--ink)" stroke-width="3.4"/><circle cx="27" cy="62" r="4.6" fill="var(--sign-white)" stroke="var(--ink)" stroke-width="2.6"/>`
     +`<g transform="translate(12 62)">${HILL_TIRE}</g><g transform="translate(42 62)">${HILL_TIRE}</g>`
-    +`<g class="harr"><path d="${stem}" fill="none" stroke="var(--sign-red)" stroke-width="3.8"/><path d="${head}" fill="var(--sign-red)"/></g></g></g>`
-    +`<rect width="72" height="17" fill="var(--ink)"/><text x="36" y="13" text-anchor="middle" font-size="11.5" letter-spacing=".5" fill="var(--sign-white)">${facing.toUpperCase()}</text>`
-    +`<text transform="translate(${curb==='left'?13:66.2} 60) rotate(-90)" text-anchor="middle" font-size="8" letter-spacing=".8" fill="var(--ink)">CURB</text></svg></div>`;
+    +`<g class="harr"><path d="${stem}" fill="none" stroke="var(--sign-red)" stroke-width="3.8"/><path d="${head}" fill="var(--sign-red)"/></g></g></g></svg></div>`;
 }
+// a block side's hill advice (lib/hill.js), or null on a flat block, before data/grades.json lands, or off SF
+const hillFor=(cnn,lr)=>GRADES&&typeof hillAdvice==='function'?hillAdvice(GRADES.b[cnn],lr):null;
+// the picture in its white column, the curb carried down the side it's on (the strip and the car pill)
+const hillPic=h=>h.facing?`<span class="hic ${h.curb==='left'?'cl':'cr'}" aria-hidden="true">${hillScene(h.facing,h.curb)}</span>`:'';
 function hillCard(cnn,lr){
-  const h=GRADES&&typeof hillAdvice==='function'?hillAdvice(GRADES.b[cnn],lr):null;
+  const h=hillFor(cnn,lr);
   if(!h)return '';
   const pics=(h.facing?[h.facing]:['downhill','uphill']).map(f=>hillScene(f,h.curb)).join('');
-  return `<div class="hillcard"><div class="hic${h.facing?'':' two'}" aria-hidden="true">${pics}</div><div><div class="hh">${h.title}</div><div class="hs">${h.main}</div>${h.other?`<div class="ho">${h.other}</div>`:''}<div class="ho">${h.rule}</div></div></div>`;
+  return `<h2 class="secl">On this hill</h2><div class="hillcard"><div class="hic${h.facing?'':' two'} ${h.curb==='left'?'cl':'cr'}" aria-hidden="true">${pics}</div><div class="htx"><div class="hh">${h.title}</div><div class="hs">${h.main}</div>${h.other?`<div class="ho">${h.other}</div>`:''}<div class="ho">${h.rule}</div></div></div>`;
+}
+// The one-row strip at the top of the sheet (owner, 2026-11-09: "make the steep block smaller"): the move and the rule; a tap
+// pulls the sheet up to the full card. Empty without a grade, like the card.
+function hillStrip(cnn,lr){
+  const h=hillFor(cnn,lr);
+  if(!h)return '';
+  return `<button type="button" class="hillstrip" id="hillStripBtn">${hillPic(h)}`
+    +`<span class="hst"><b>${h.strip}</b><small>${h.stripSub}</small></span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>`;
 }
 // stable, distinct color per route number (golden-angle hue) — the same route reads the same everywhere
 function routeColor(n){return `hsl(${(n*137.508)%360|0} 68% 42%)`;}
@@ -1830,7 +1990,7 @@ function openSheet(group, activeKey){
   const as=swpFor(group.cnn, active.row&&normDay(active.row.weekday));
   // Real DPW sweeper route for this block (records #26-5451). Block-level, like the enforcement/sweeper lines.
   const rt=routeFor(group.cnn);
-  const rtHtml=rt?`<div class="rtline"><svg class="ic" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg><span class="rsw" style="background:${routeColor(rt.num)}"></span><b>${rt.name}</b> sweeper route <span class="rmut">· DPW route map</span></div>`:'';
+  const rtHtml=rt?`<h2 class="secl">The sweeper</h2><div class="rtline"><svg class="ic" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg><span class="rsw" style="background:${routeColor(rt.num)}"></span><b>${rt.name}</b> sweeper route <span class="rmut">· DPW route map</span></div>`:'';
   let enfHtml='';
   if(ae){
     const fromMin=active.row?parseInt(active.row.fromhour,10)*60:ae.avg;
@@ -1840,7 +2000,7 @@ function openSheet(group, activeKey){
     const etxt=(lead!=null&&lead>0)
       ? `The city's GPS shows the sweeper passing <b>~${fmtMin(as.avg)}</b>, then tickets land <b>~${fmtMin(ae.avg)}</b>, ${lead} min later.`
       : `Tickets here usually land <b>~${fmtMin(ae.avg)}</b>, ${intoTxt} into the window.`;
-    enfHtml=`<button class="enf" id="enfBtn" type="button" aria-label="Where this estimate comes from">
+    enfHtml=`<h2 class="secl">When tickets land</h2><button class="enf" id="enfBtn" type="button" aria-label="Where this estimate comes from">
       <span class="tgt" aria-hidden="true">${ICONS.target}</span>
       <span class="etxt">${etxt}<span class="enfsrc">where from?</span></span>
     </button>`;
@@ -1877,6 +2037,18 @@ function openSheet(group, activeKey){
   const _hr=(active.rows||[]).find(isHolidayRow);
   const _holRow=_hr&&!(ns&&ns.holiday)&&!_holSched&&!_holNone?`<div class="holrow">${holSign(_hr)}<span>on city holidays, when regular sweeps stop</span></div>`:'';
 
+  const _facts=[], _sweeping=!!ns&&now>=ns.start&&now<ns.end;
+  if(ns){
+    _facts.push(['Sweeps',(ns.holiday?'Holiday':DAYLBL[ns.dow])+' '+badgeWin(ns.fromH,ns.toH).replace(' TO ',' to '),'']);
+    if(_sweeping){const m=Math.max(1,Math.round((ns.end-now)/6e4));_facts.push(['Ends in',m<60?m+' min':Math.floor(m/60)+' hr'+(m%60?' '+m%60+' min':''),'red']);}
+    else if(_arp.rel)_facts.push([/^in /.test(_arp.rel)?'In':'When',_arp.rel.replace(/^in /,''),_arp.cls]);
+  }
+  const _cfg=window.CURB_CITY&&window.CITY_CONFIGS&&CITY_CONFIGS[CURB_CITY];
+  if(ae)_facts.push(['Tickets','~'+fmtMin(ae.avg),'tk']);
+  else if(_cfg&&_cfg.fine)_facts.push(['Fine',_cfg.fine,'']);
+  const _other=others.filter(o=>o.ns).sort((a,b)=>a.ns.start-b.ns.start)[0];
+  if(_other)_facts.push([others.length>1?'Other sides':'Other side',sweepWords(_other.ns,now).head,'']);
+  const factsHtml=_facts.length?`<div class="facts">${_facts.map(([l,v,c])=>`<div><span class="fl">${l}</span><span class="fv ${c}">${v}</span></div>`).join('')}</div>`:'';
   const calPref=(()=>{try{return localStorage.getItem('curbCalPref')||'';}catch(_){return '';}})();
   // Crowdsourced "Correct a Sign": opens the repo's existing wrong-data issue FORM with this block's
   // context pre-filled (block + what CURB shows), so the reporter just adds the sign + a photo. The
@@ -1885,17 +2057,15 @@ function openSheet(group, activeKey){
   const _repBlock = "Berkeley: "+(group.corridor||'')+(group.limits?' · '+fmtLimits(group.limits):'')+((active&&active.blockside)?' ('+active.blockside+' side)':'')+(group.cnn?'  ·  curb.guide/berkeley?b='+group.cnn:'');
   const _report = `https://github.com/alevizio/curb/issues/new?template=wrong-data.yml&block=${encodeURIComponent(_repBlock)}&app=${encodeURIComponent(_repSched)}`;
   document.getElementById('sheetBody').innerHTML=`
+    <div class="peek" id="peekBox">
     <div class="verdict ${vClass}"><span class="kicker">${kicker}</span>
-      <div class="headrow"><span class="head">${head}</span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb: pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div></div>
-    <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${fmtLimits(group.limits)}</span></span></div>
-    ${aSched}
-    ${_holRow}
-    ${_holNote}
-    <div id="hillSlot">${hillCard(group.cnn,_ar&&_ar.cnnrightleft)}</div>
-    ${enfHtml}
-    ${rtHtml}
-    <div class="afterpass">${PLACE.seasonText(_ar&&_ar.months)?'Swept '+PLACE.seasonText(_ar.months)+'. ':''}All year · not on City holidays (swept on the next scheduled day) · $73 ticket, no tow</div>
+      <div class="headrow"><span class="head">${head}</span></div></div>
+    <div class="where"><span class="wtxt"><span id="rangeSlot">${fmtRange(group.cnn)}</span>${group.corridor||'This block'} <span class="blk">· ${fmtLimits(group.limits)}</span></span><span class="hmeter" id="headMeter" style="display:none" title="Metered curb: pay at the meter; it shows the hours &amp; rates">${METER_ICON}Metered</span></div>
     <div class="chips"><span class="chip rpp" id="rppSlot" style="display:none"></span></div>
+    ${_holNote}
+    <div id="hillStripSlot">${hillStrip(group.cnn,_ar&&_ar.cnnrightleft)}</div>
+    ${factsHtml}
+    <div class="afterpass">${PLACE.seasonText(_ar&&_ar.months)?'Swept '+PLACE.seasonText(_ar.months)+'. ':''}All year · not on City holidays (swept on the next scheduled day) · $73 ticket, no tow</div>
     ${canRemind?'<hr class="shdiv">':''}
     <div class="actions">
       ${canRemind?`<button class="btn ${alertOn?'on':''}" id="alertBtn">${alertOn?'✓ Alerts on':ICONS.bell+' Sweep alerts'}</button>`:''}
@@ -1909,10 +2079,17 @@ function openSheet(group, activeKey){
         <button class="btn alt" id="alertOffNo">Keep them on</button>
       </div>
       <div class="alertnote" id="alertNote" hidden></div>`:''}
-      <button class="btn alt park-share" id="parkShareBtn">${ICONS.car} Share where I parked</button>
+    </div>
+    </div>
+    <div id="hillSlot">${hillCard(group.cnn,_ar&&_ar.cnnrightleft)}</div>
+    ${enfHtml}
+    ${rtHtml}
+    ${ns||others.length?'<h2 class="secl">Schedule</h2>':''}
+    ${aSched}
+    ${_holRow}
+    ${sidesBlock}
       <div class="acfg-row car-pick" id="carPick" data-cnn="${group.cnn}" data-key="${active.key}" hidden><span class="acfg-lbl">Your car</span>
         <div class="seg" role="group" aria-label="Your car">${Object.keys(CAR_STYLES).map(k=>`<button type="button" data-v="${k}" aria-label="${CAR_STYLES[k][0]}" title="${CAR_STYLES[k][0]}">${carTop(0,k)}</button>`).join('')}</div></div>
-    </div>
     ${canRemind?`<details class="alertcfg" id="alertCfg">
       <summary><span>Alert style</span><b class="acfg-st">${alertOn?'On · '+getAlertLevel():'Customize ▸'}</b></summary>
       <div class="acfg-row" data-k="curbAlertLevel" data-def="normal">
@@ -1929,14 +2106,14 @@ function openSheet(group, activeKey){
       </div>
       <button class="btn alt acfg-test" id="testPushBtn" type="button">${ICONS.bell} Send me a test</button>
     </details>`:''}
-    ${sidesBlock}
     <details class="noted">
       <summary>The <b>posted sign</b> wins. Temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
       <p>The City's Residential Street Sweeping Schedule (Public Works; streets A to G and numbered streets from February 2018, H to Z from September 2025), 2,479 block sides placed on the City's street centerline by house number; the City's address points tell which side holds the odd numbers. The schedule says only AM or PM: the hours are the ones on the posted signs. Blocks that opted out of the program are not swept and are left off. Sweep alerts and calendar reminders run on Berkeley time: an overnight sweep gets one alert around 9 PM the evening before.</p>${GRADES&&GRADES.b[group.cnn]?'<p>Hill grades are measured from USGS elevation data, so treat them as close, not exact.</p>':''}
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
   // the sheet can open before data/grades.json lands (a block link, right after parking): fill the card in then
-  if(gradesLoad&&!GRADES)gradesLoad.then(()=>{if(sheetSpot!==spot)return;const el=document.getElementById('hillSlot');if(el)el.innerHTML=hillCard(group.cnn,_ar&&_ar.cnnrightleft);});
+  if(gradesLoad&&!GRADES)gradesLoad.then(()=>{if(sheetSpot!==spot)return;const el=document.getElementById('hillSlot');if(el)el.innerHTML=hillCard(group.cnn,_ar&&_ar.cnnrightleft);
+    const st=document.getElementById('hillStripSlot');if(st)st.innerHTML=hillStrip(group.cnn,_ar&&_ar.cnnrightleft);});
 
   if(canRemind){
     const doCal=k=>{try{localStorage.setItem('curbCalPref',k);}catch(_){}
@@ -1977,8 +2154,12 @@ function openSheet(group, activeKey){
   const _sf=document.getElementById('signfixLink'); if(_sf)_sf.onclick=()=>{try{track('sign_report');}catch(_){}};
   const _enf=document.getElementById('enfBtn');
   if(_enf&&ae)_enf.onclick=()=>toast(`Estimated from ~${ae.n} street-cleaning tickets on this block over ~2 years (SFMTA citations via DataSF). Earliest seen ${fmtMin(ae.lo)}. The posted sign is the source of truth.`);
+  // One Share in the header (owner, 2026-11-09): it asks, this block or where I parked
+  const _choice=document.getElementById('shareChoice'); _choice.hidden=true;
+  document.getElementById('shareBtn').onclick=e=>{e.stopPropagation();_choice.hidden=!_choice.hidden;document.getElementById('shareBtn').setAttribute('aria-expanded',!_choice.hidden);};
   // Share: the block gets a real URL (/b/<cnn>, server-rendered card for unfurls).
-  document.getElementById('shareBtn').onclick=async()=>{
+  document.getElementById('shareBlockBtn').onclick=async()=>{
+    _choice.hidden=true;
     // the side travels too: both curb sides sit exactly as far from the block's midpoint, so without it the
     // recipient's map picked either one, and could show the other side's verdict than the one shared
     const url=location.origin+'/berkeley?b='+group.cnn+(active.blockside?'&side='+encodeURIComponent(active.blockside):'');
@@ -1991,6 +2172,7 @@ function openSheet(group, activeKey){
   // Share where I parked (owner, 2026-10-30: you parked a car for someone): the curb side and the sweep to move it
   // before, with a map link that opens that side with the sender's car on it (&car=<style>, see carLink)
   document.getElementById('parkShareBtn').onclick=()=>{
+    _choice.hidden=true;
     const url=location.origin+(CITY_PAGE[CITY]||'/')+'?b='+encodeURIComponent(group.cnn)+'&side='+encodeURIComponent(active.key)+'&car='+myCarStyle();
     const text=`I parked on ${group.corridor||'this block'} (${fmtLimits(group.limits)})${active.blockside?', '+(SIDE_ABBR[active.blockside]||active.blockside)+' side':''}.`
       +(armNs?` Next sweep ${sweepWords(armNs,new Date()).when}${armNs.holiday?' (holiday schedule)':''}.`:'');
@@ -2006,6 +2188,7 @@ function openSheet(group, activeKey){
   });
   fillRange(group.cnn);
   const sheetEl=document.getElementById('sheet');
+  peekRO.disconnect(); const _pk=document.getElementById('peekBox'); if(_pk)peekRO.observe(_pk); sizePeek();
   finishSheetSlide();  // settle a peek↔tall slide still in flight before changing state
   if(!sheetEl.classList.contains('open')){  // fresh open starts at peek; side-switches keep the height
     sheetEl.classList.remove('tall');
@@ -2039,7 +2222,7 @@ document.addEventListener('keydown',e=>{
   if(document.getElementById('alertsPanel').classList.contains('open')){closeAlertsPanel();return;}
   if(document.getElementById('iosHint').classList.contains('open')){hideIosHint();return;}
   const up=id=>{const x=document.getElementById(id);return x&&!x.hidden;};
-  if(document.getElementById('welcome').classList.contains('open')||up('layersPanel')||up('infoMenu')||up('sug'))return;
+  if(document.getElementById('welcome').classList.contains('open')||up('layersPanel')||up('infoMenu')||up('sug')||up('dayMenu'))return;
   const sh=document.getElementById('sheet'); if(sh.classList.contains('open'))document.getElementById('sheetClose').click();
 });
 // Android's back button closes the open menu, panel or sheet, top one first, instead of leaving CURB: each one opened by a
@@ -2048,7 +2231,7 @@ document.addEventListener('keydown',e=>{
 if(/Android/i.test(navigator.userAgent)){
   const open=id=>document.getElementById(id).classList.contains('open'), shown=id=>!document.getElementById(id).hidden;
   const LAYERS=[  // top first: [element, is it up, close it]
-    ['sug',shown,hideSug],['infoMenu',shown,closeInfoMenu],['layersPanel',shown,closeLayersPanel],
+    ['sug',shown,hideSug],['infoMenu',shown,closeInfoMenu],['dayMenu',shown,()=>closeDayMenu()],['layersPanel',shown,closeLayersPanel],
     ['alertsPanel',open,closeAlertsPanel],['iosHint',open,hideIosHint],['welcome',open,markOnboarded],
     ['sheet',open,()=>document.getElementById('sheetClose').click()]];
   const upCount=()=>LAYERS.filter(([id,up])=>up(id)).length, held=()=>(history.state&&history.state.curbBack)||0;
@@ -2065,6 +2248,30 @@ if(/Android/i.test(navigator.userAgent)){
   LAYERS.forEach(([id])=>mo.observe(document.getElementById(id),{attributes:true,attributeFilter:['class','hidden']}));
 }
 document.getElementById('shareBtn').innerHTML=ICONS.share;
+document.getElementById('shareBtn').setAttribute('aria-haspopup','true');
+document.getElementById('shareBlockBtn').innerHTML=ICONS.share+' Share this block';
+document.getElementById('parkShareBtn').innerHTML=ICONS.car+' Share where I parked';
+// Option B's peek (owner, 2026-11-09): the sheet opens exactly as tall as its first look, the verdict down to the buttons,
+// and follows it as parts fill in late (the permit chip, the meter, the hill strip). Phones only: the desktop card fits it all.
+const PEEK_MQ=matchMedia('(max-width:767px)');
+function sizePeek(){
+  const s=document.getElementById('sheet'), b=document.getElementById('peekBox');
+  if(!b||!PEEK_MQ.matches){s.style.removeProperty('--peek');return;}
+  const pb=parseFloat(getComputedStyle(s).paddingBottom)||0;
+  const want=b.offsetTop+b.offsetHeight+pb+4;
+  s.style.setProperty('--peek',Math.round(Math.min(innerHeight*.78,Math.max(160,want)))+'px');
+}
+const peekRO=new ResizeObserver(()=>sizePeek());
+addEventListener('resize',sizePeek);
+// the hill strip pulls the sheet up to the full card
+document.getElementById('sheetBody').addEventListener('click',e=>{
+  if(!e.target.closest('#hillStripBtn'))return;
+  const s=document.getElementById('sheet');
+  if(!s.classList.contains('tall'))document.getElementById('grabBtn').click();
+  setTimeout(()=>{const h=document.getElementById('hillSlot');if(h)s.scrollTo({top:Math.max(0,h.offsetTop-14),behavior:'smooth'});},360);
+});
+document.addEventListener('click',e=>{const c=document.getElementById('shareChoice');
+  if(!c.hidden&&!c.contains(e.target)&&!e.target.closest('#shareBtn')){c.hidden=true;document.getElementById('shareBtn').setAttribute('aria-expanded','false');}});
 document.getElementById('centerBtn').innerHTML=ICONS.center;
 // Peek↔tall as a compositor-only slide (FLIP) instead of animating max-height (which re-laid out the
 // sheet every frame — janky in the iOS WKWebView). Growing: take the new height at once, start offset
@@ -2837,6 +3044,7 @@ document.getElementById('alertsPanel').addEventListener('click',e=>{ if(e.target
 // app's auto-park saved (AP.park.car, SF's map). Both name a block and its side, never the exact spot, so the car sits
 // halfway along that curb side, where the map draws it. A tap opens that side's sheet.
 const CAR={link:null,own:null,on:'',marker:null,at:null,deg:0};
+const CARINFO={rows:null,lr:'',cnn:'',key:''};  // the car's side and its rules, for the status pill (updateCarPill)
 async function carRows(cnn){
   return (await PLACE.load()).filter(b=>String(b.c)===String(cnn)).flatMap(PLACE.rowsOf);
 }
@@ -2845,6 +3053,7 @@ async function drawCar(){
   if(id===CAR.on)return;
   CAR.on=id;
   if(CAR.marker){map.removeLayer(CAR.marker);CAR.marker=null;CAR.at=null;syncCarPick();}
+  CARINFO.rows=null; updateCarPill();
   if(!c)return;
   try{
     const rows=await carRows(c.cnn), geom=rows.find(r=>r.line&&r.line.coordinates);
@@ -2860,8 +3069,28 @@ async function drawCar(){
     CAR.marker=L.marker(mid.at,{keyboard:true,title:'Where you parked: '+(geom.corridor||'this block'),zIndexOffset:500,icon:carIcon()})
       .on('click',()=>{userPicked();showEveryCurb();openCurb(c.cnn,s.key);}).addTo(map);
     syncCarPick();
+    Object.assign(CARINFO,{rows:rows.filter(r=>sideKeyOf(r)===s.key&&r.weekday),lr:s.lr,cnn:String(c.cnn),key:s.key}); updateCarPill();
   }catch(_){if(CAR.on===id)CAR.on='';}  // the next refresh tries again
 }
+// Option B (owner, 2026-11-09): the car's status under the search, from anywhere on the map: when to move it and how long
+// is left, and on a steep block which way to turn the wheels. A tap opens its side; the car button flies to it.
+function updateCarPill(){
+  const pill=document.getElementById('carPill'), btn=document.getElementById('carBtn');
+  const on=!!(CAR.marker&&CAR.at), now=new Date();
+  btn.hidden=!on;
+  let ns=null; if(on&&CARINFO.rows)CARINFO.rows.forEach(r=>{const n=nextSweep(r);if(n&&(!ns||n.start<ns.start))ns=n;});
+  if(!on||!ns){pill.hidden=true;return;}
+  const sw=now>=ns.start&&now<ns.end, rp=relPhrase(ns), own=!CAR.link, by=sweepWords(ns,now).head;
+  const h=hillFor(CARINFO.cnn,CARINFO.lr);
+  pill.setAttribute('aria-label',(own?'Your car':'The car')+': '+(sw?'sweeping now':'move by '+by+', '+rp.rel)+(h?'. '+h.strip.replace(/\u00a0/g,' '):'')+'. Open its side');
+  pill.innerHTML=`<span class="cp-main">${carTop(0,carStyle())}<span class="cp-k">${own?'Your car':'The car'}</span><span class="cp-t">${sw?'Sweeping now':'Move by '+by}</span><span class="cp-c ${rp.cls}">${sw?'now':rp.rel.replace(/^in /,'')}</span></span>`
+    +(h?`<span class="cp-hill">${hillPic(h)}<span>${h.strip}</span></span>`:'');
+  pill.hidden=false;
+}
+document.getElementById('carPill').onclick=()=>{if(!CAR.at)return;userPicked();showEveryCurb();openCurb(CAR.at.cnn,CAR.at.key);};
+document.getElementById('carBtn').innerHTML=`<svg viewBox="0 0 18 34" aria-hidden="true" stroke="var(--paper)" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2" width="13" height="30" rx="5" fill="var(--sign-red)"/><rect x="4.5" y="8" width="9" height="5" rx="1.6" fill="var(--paper)"/></svg>`;
+document.getElementById('carBtn').onclick=()=>{if(CAR.marker)map.flyTo(CAR.marker.getLatLng(),Math.max(map.getZoom(),17),{duration:.6});};
+setInterval(updateCarPill,60e3);
 // halfway along a curb side by length (its middle point is an end on a block drawn as one straight line), and the way
 // the curb runs there in degrees clockwise from north
 function lineMid(ll){
@@ -3334,6 +3563,8 @@ function setDayFilter(v){
   });
   const dc=document.getElementById('dateChip'), today=(v!==null&&v===todaySF());
   dc.classList.toggle('on',today); dc.setAttribute('aria-pressed',today);
+  const db=document.getElementById('dayBtn'), dl=document.getElementById('dayBtnLbl');
+  if(dl)dl.textContent=v==null?'Any day':today?'Today':DAYLBL[v]; if(db)db.classList.toggle('on',v!=null);
   updateRouteDay();  // route follows the day filter — keep its legend label in sync
   drawSegments(lastRows);
   if(ovMode)drawOverview();  // recolor the citywide view too
@@ -3405,8 +3636,25 @@ function refreshToday(){
   const p=sfTodayParts(), d=todaySF();  // the chip shows SF's today, wherever the device is
   document.getElementById('dateChip').innerHTML='Today · '+DAYLBL[d]+' '+MONLBL[p.mo-1]+' '+p.da
     +(wx?' · '+WXICON[wx.i]+' '+wx.t+'°':'');
+  const bd=document.getElementById('barDate');
+  if(bd)bd.textContent=DAYLBL[d]+' '+MONLBL[p.mo-1]+' '+p.da+(wx?' · '+wx.t+'°':'')+' · Tap a curb for its rules';
   dayChips.forEach(b=>b.classList.toggle('today',b.dataset.day!=='all'&&parseInt(b.dataset.day,10)===d));
 }
+/* Option B's bottom bar (owner, 2026-11-09): the curb colors and the day lens sit together, since both decide which curbs
+   the map shows. The legend and the day row move in here at load; the day chips open from "Any day". */
+function closeDayMenu(){const m=document.getElementById('dayMenu');if(!m||m.hidden)return;m.hidden=true;document.getElementById('dayBtn').setAttribute('aria-expanded','false');}
+(function initMapBar(){
+  const bar=document.getElementById('mapbar'), slot=document.getElementById('mbLegSlot'), leg=document.querySelector('.legend2');
+  if(leg&&slot)slot.appendChild(leg);
+  const menu=document.getElementById('dayMenu'), btn=document.getElementById('dayBtn'), row=document.querySelector('.dayrow');
+  if(row&&menu)menu.appendChild(row);
+  if(!row||row.style.display==='none')btn.hidden=true;  // a city page with nothing swept has no day lens
+  btn.onclick=e=>{e.stopPropagation();if(menu.hidden){menu.hidden=false;btn.setAttribute('aria-expanded','true');}else closeDayMenu();};
+  menu.addEventListener('click',e=>{if(e.target.closest('.dchip,.datechip'))setTimeout(closeDayMenu,120);});
+  document.addEventListener('click',e=>{if(!menu.hidden&&!menu.contains(e.target)&&!btn.contains(e.target))closeDayMenu();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){closeDayMenu();btn.focus();}});
+  new ResizeObserver(es=>{for(const e of es)document.documentElement.style.setProperty('--barH',e.target.offsetHeight+'px');}).observe(bar);
+})();
 /* SF weather on the date chip — Open-Meteo (free, keyless); degrades silently if it fails.
    Icons drawn in the app's duotone icon language: pop-color fill + currentColor detail. */
 let wx=null;

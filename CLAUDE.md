@@ -181,6 +181,11 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   is on the driver's left only on the left side of a one way street (`curbHand`; 208 of 208 sides on Oak, Fell, Pine, Bush, Franklin, Gough). A block with no one facing draws both. The iPhone Parked alert (api/parked-ios.js, a server answer, so no App Store release) gives one move only on a one way
   street, both on a two way one: GPS can't tell the side, and pickParkedSpot saves the side swept soonest, not the car's. Local build (`npm run
   build:grades`), not in the data-refresh CI; samples are cached in private/grade-samples.json. SF only: the city and Boston pages drop its script and load.
+  The grade itself is never shown (owner, 2026-11-09: "they don't care much about the percentage of incline, thats more internal, but yes mention
+  the 3% rule"): the card says "Steep block" or "Sloped block" and "SF requires this on blocks steeper than 3%". The picture has no UPHILL band, no
+  CURB label and a thin curb with no edge line; it sits flush in a white column that carries the curb to the card's bottom (.hic.cr/.cl). The sheet's
+  first look has a one-row strip (`hillStrip`, hillAdvice's strip + stripSub) that pulls the sheet up to the full card; the car pill repeats the move.
+  Bump lib/hill.js?v= (and the two generators' 'no SF hill words' edit) whenever the page reads a new field from it.
 - api/block.js + sitemap-blocks.xml (scripts/build-block-sitemap.mjs, `npm run build:blocksitemap`) —
   /b/<cnn> server-rendered block share/landing pages, ~10.5k long-tail SEO pages. NO DataSF call at
   request time: they read `data/schedules.json` (scripts/build-schedules.mjs, `npm run build:schedules`,
@@ -302,6 +307,30 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
 - Persist the user's saved spot/schedule (localStorage is fine post-deploy; note it
   is intentionally NOT used in the in-chat artifact version).
 
+## Option B layout (owner, 2026-11-09: "ok lets ship it") — supersedes the corner layout, the day row and the sheet order below
+Designed on the "CURB mobile layout" canvas (rows B and "B · every case"). Every element id and handler kept; markup moves, styles change.
+- **Search pill** (`.barrow`): logo, a light gray magnifier, `#q`, `#locate` (no border), a divider, `#infoBtn` as three plain lines (no circle,
+  owner: "can the hamburger menu not be in a circle"). Focus rings sit on the whole pill.
+- **Bottom bar** (`#mapbar`): the curb legend (`.legend2`, moved in at load by `initMapBar`; its " · within 24h" words are `.lsx`, hidden there),
+  `#dayBtn` "Any day ▾" and `#barDate` (today, the weather, "Tap a curb for its rules"). The day row (`.dayrow`: the date chip + the day chips) is
+  moved into `#dayMenu`, a popover over the button; `setDayFilter` names the lens on the button. Moved at load so the city/Boston generators
+  still find the markup where it was (the winter plate edit needs the day row to end `.top`). Its height feeds `--barH` (layers, toast,
+  attribution sit above it). Desktop: the bar floats bottom-left; the sheet covers it while open.
+- **Right-hand stack** (phones): `.layers` holds `#carBtn` (only with a car on the map; flies to it) over a round icon-only `#layersBtn`; the
+  panel opens upward. No +/- on phones (pinch). Desktop keeps the layers top-right and the zoom bottom-right.
+- **Car pill** (`#carPill`, under the search): "YOUR CAR" (or "THE CAR" from a shared link) · "Move by <head>" · the countdown, plus a second
+  row with the wheels move on a graded block. Reads the car side's rows (SF's `carRows` now selects the schedule; the city pages' rows carry
+  it) into `CARINFO`; `updateCarPill` runs after `drawCar` and every minute. A tap opens the car's side.
+- **Block card** (`openSheet`): `.peek` = verdict (46px) · the block with the meter chip · the permit chips · holiday card · hill strip ·
+  `.facts` (SWEEPS · IN or ENDS IN · TICKETS, else the city's FINE from CITY_CONFIGS · OTHER SIDE; a fact CURB lacks drops out) · the
+  afterpass line (a red strip while `.verdict.now`) · Sweep alerts + Calendar (no longer sticky). Then labelled sections (`.secl`): On this
+  hill, When tickets land, The sweeper, Schedule (`.asched` + holiday row + other sides), the car row, Alert style, notes. The phone peek is
+  measured (`sizePeek`, a ResizeObserver on `#peekBox`: verdict to buttons, clamped), `.tall` stays 84dvh. One Share in the header opens
+  `#shareChoice` (Share this block / Share where I parked); `#centerBtn` is hidden on phones. The first-sheet tip moves to the top while a
+  card is open. Snippets the generators match (the afterpass line, `${aSched}\n    ${_holRow}`, the chips div, the meter/permit loads, the
+  data notes, the calendar button) are byte-for-byte unchanged: rerun both generators after any template edit.
+- **Copy**: no widows (`text-wrap:pretty` on sheet text and the bar, non-breaking spaces before the last word of fixed lines).
+
 ## UI features added 2026-06-09 (constraints — don't regress)
 - **Basemap style**: Google tiles are styled with `MAP_STYLE` ("Parchment Draft" from
   styledmap.com, passed via createSession `styles`). Roads are deliberately neutral
@@ -341,7 +370,7 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   kept in sync by `updateRouteDay()` (called from the route toggle + `setDayFilter`). In "All"
   day mode the route shows today's run, so the label appends "today" — don't let All mode
   imply an all-days route (there is no such thing; one run per day per corridor).
-- **Corner layout (Google-Maps style — don't re-scatter)**: top-left = logo + search + info
+- **Corner layout (Google-Maps style — don't re-scatter; superseded on 2026-11-09 by Option B above: pill, bottom bar, right-hand stack)**: top-left = logo + search + info
   ⓘ button + ONE day-chip row; top-right = the `.layers` control (button + `#layersPanel`).
   The panel is a Google-style 2-col TILE GRID (`.lgrid`/`.ltile`: preview symbol + label;
   active tile fills ink) — previews ALWAYS show the layer's true map appearance.
@@ -384,7 +413,7 @@ The calendar reminder (＋Reminder button → .ics with a 30-min VALARM) already
   a 🎯 callout + per-side line, tooltip shows a compact `tip-enf`. Keyed by cnn → JS dow.
   Degrades silently if the JSON is absent (e.g. before deploy). Rebuild with
   `npm run build:enforcement`.
-- **Sheet structure (post-distill, don't regress)**: mobile opens at a 46dvh PEEK
+- **Sheet structure (post-distill; reordered on 2026-11-09 by Option B above, the density rules still hold)**: mobile opens at a 46dvh PEEK
   (`.sheet.open`, `.tall` expands via the grab button); order is verdict → where(+center
   icon) → 🎯 callout → actions → chips → sides → `<details>` data-notes. Exactly TWO
   actions: 🔔 Sweep alerts (the one filled primary) and Calendar (one button; first tap

@@ -49,9 +49,10 @@ async function openSide(p, cnn, side) {
 const p = await opened();
 await p.waitForFunction(() => typeof GRADES !== 'undefined' && GRADES, { timeout: 15000 });
 const even = await openSide(p, BUENA_VISTA, 'northwest');
-check('838 Buena Vista, the even side, faces uphill', /STEEP BLOCK, 8\.8%/i.test(even) && /Facing uphill on this side: wheels away from the curb/.test(even) && /Facing downhill\? Wheels toward the curb/.test(even) && /over 3%\. Ticket: \$48/.test(even), even);
+check('838 Buena Vista, the even side, faces uphill (and the card never shows the grade itself)', /STEEP BLOCK/i.test(even) && !/\d\.\d%/.test(even) && /Facing uphill on this side: wheels away from the curb/.test(even) && /Facing downhill\? Wheels toward the curb/.test(even) && /steeper than 3%\. Ticket:\s\$48/.test(even), even);
 // the picture: which move, the hand the curb is on, whether it moves, and the angle its wheels rest at when nothing animates them
-const picture = () => p.evaluate(() => [...document.querySelectorAll('.hsc')].map((el) => ({
+// the card's picture; the strip at the top of the sheet draws the same move once more (Option B, 2026-11-09), checked below
+const picture = () => p.evaluate(() => [...document.querySelectorAll('.hillcard .hsc')].map((el) => ({
   move: el.classList.contains('uphill') ? 'uphill' : 'downhill',
   leftCurb: !!el.querySelector('g[transform^="matrix(-1"]'),
   moving: el.getAnimations({ subtree: true }).length > 0,
@@ -60,6 +61,8 @@ const picture = () => p.evaluate(() => [...document.querySelectorAll('.hsc')].ma
 const upPic = await picture();
 check('its picture turns the wheels away from a curb on the right, and moves', upPic.length === 1 && upPic[0].move === 'uphill' && !upPic[0].leftCurb && upPic[0].moving, upPic);
 if (SHOTS) await p.screenshot({ path: `${SHOTS}/hill-uphill.png` });
+const strip = await p.evaluate(() => { const b = document.getElementById('hillStripBtn'); return b ? { text: b.innerText.replace(/\s+/g, ' ').trim(), pics: [...b.querySelectorAll('.hsc')].map((el) => el.className) } : null; });
+check('the sheet\'s first look has the one-row strip: the move, the 3% rule, the same picture, no grade', !!strip && /^Turn wheels away from the curb Steep block\. SF rule over 3%, \$48 ticket$/.test(strip.text) && strip.pics.length === 1 && /uphill/.test(strip.pics[0]), strip);
 const odd = await openSide(p, BUENA_VISTA, 'southeast');
 check('the odd side of that block faces downhill', /Facing downhill on this side: wheels toward the curb/.test(odd) && /Facing uphill\? Wheels away/.test(odd), odd);
 const downPic = await picture();

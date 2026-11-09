@@ -426,6 +426,8 @@ try {
   check('…a link sent before the car styles (&car=1) shows the bold red D, with the "Your car" row on that sheet', cp.shown && cp.pressed === 'd' && cp.body === 'var(--sign-red)', JSON.stringify(cp));
   await shot(linked, '13-shared-car-link');
   await linked.evaluate(() => { Object.defineProperty(navigator, 'share', { configurable: true, value: async (d) => { window.__shared = d; } }); });
+  await tap(linked, '#shareBtn');   // one Share in the header asks which (owner, 2026-11-09)
+  await sleep(150);
   await tap(linked, '#parkShareBtn');
   await sleep(100);
   const ps = await linked.evaluate(() => window.__shared);
@@ -433,6 +435,8 @@ try {
     !!ps && /^I parked on Kansas St \(16th St to 17th St\), West side\. Next sweep \w{3} \d+\/\d+, 9AM to 11AM\.$/.test(ps.text)
     && ps.url === new URL(BASE).origin + '/?b=7735000&side=West&car=d', JSON.stringify(ps));
   await tap(linked, '#shareBtn');
+  await sleep(150);
+  await tap(linked, '#shareBlockBtn');
   await sleep(100);
   const bs = await linked.evaluate(() => window.__shared);
   check('…Share this block still sends the block\'s rules and its /b/ link', !!bs && bs.url.endsWith('/b/7735000?side=West') && bs.text.startsWith('Kansas St (16th St to 17th St): sweeps '), JSON.stringify(bs));
