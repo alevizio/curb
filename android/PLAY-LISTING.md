@@ -10,7 +10,7 @@ The Android app is a Trusted Web Activity of curb.guide (package `guide.curb.and
 
 **Graphics** (in `play/`): app icon `icon-512.png` (512 x 512), feature graphic `feature-graphic.jpg` (1024 x 500),
 phone screenshots `screenshot-1.png` to `screenshot-4.png` (1080 x 1920, 9:16 as Play requires; real screens from the app on the emulator, demo mode status bar).
-The four show the map first layout and were retaken on 9-Nov-2026: the map, a block card, the same card with alerts on, the layers panel open. Sent for review that day with "Don't label assets" in the AI asset declaration (they are unedited captures of the real app).
+The four show the map first layout and were retaken on 9-Nov-2026: the map, a block card, the same card with alerts on, the layers panel open. Sent for review that day with "Don't label assets" in the AI asset declaration (they are unedited captures of the real app) and published the same day (Publishing overview: "Last published on November 9, 2026").
 
 ## Full description (4000 max)
 Sources and the government disclaimer were added on 22-Oct-2026: Play rejected the closed test under Misleading Claims, "Missing Source Link for Government Information" (the Full description must link the official source of every piece of government information and say plainly that CURB does not represent a government entity). Keep both in any rewrite.

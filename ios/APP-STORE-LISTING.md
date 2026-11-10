@@ -66,8 +66,19 @@ Build 12. Nothing changed inside the app: the version exists to carry new screen
 takes with a new version. The map first layout they show (search pill, bottom bar, facts card, car pill) comes from
 curb.guide and is already in 1.0.6. The set is ten shots in the 6.5" slot (1242 x 2688): the eight headlines of 1.0.6
 on new captures, with 8 ("ONE MAP. 25 CITIES.") now a map of the US with a dot per city, then a steep block and a
-permit area. Files and tools are in private/store-screenshots-2026-11-09/. The What's New text is Ale's call and is
-not written here yet.
+permit area. Files and tools are in private/store-screenshots-2026-11-09/. Headlines 9 and 10 (the owner's picks,
+9 Nov 2026): "SF HILLS · $48 TICKET / CURB YOUR WHEELS" and "PERMIT AREAS / FIND YOUR PERMIT AREA". The text below
+is the owner's pick of the same day. Not in App Store Connect yet.
+```
+A new look, with more map.
+
+• Search sits in one pill at the top.
+• A bottom bar holds the legend, the day filter and today's date.
+• The block card opens with the answer first: when it sweeps, how long you have, when tickets land.
+• Your car gets its own pill with the time to move it.
+• On steep San Francisco blocks, a reminder to curb your wheels.
+• One map for 25 cities.
+```
 
 ## What's New (v1.0.6)
 Build 11 (Xcode Cloud 63). Submitted 29 Oct 2026 with manual release; on 1 Nov Ale switched it to release automatically once approved. Rejected 1 Nov
