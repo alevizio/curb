@@ -325,7 +325,8 @@ Designed on the "CURB mobile layout" canvas (rows B and "B · every case"). Ever
   `.facts` (SWEEPS · IN or ENDS IN · TICKETS, else the city's FINE from CITY_CONFIGS · OTHER SIDE; a fact CURB lacks drops out) · the
   afterpass line (a red strip while `.verdict.now`) · Sweep alerts + Calendar (no longer sticky). Then labelled sections (`.secl`): On this
   hill, When tickets land, The sweeper, Schedule (`.asched` + holiday row + other sides), the car row, Alert style, notes. The phone peek is
-  measured (`sizePeek`, a ResizeObserver on `#peekBox`: verdict to buttons, clamped), `.tall` stays 84dvh. One Share in the header opens
+  measured (`sizePeek`, a ResizeObserver on `#peekBox`: verdict to buttons, clamped; it ends `PEEK_GAP` 24 px under the buttons on every
+  phone, never the sheet's own bottom padding, which carries the iPhone app's home indicator: owner, 2026-11-09), `.tall` stays 84dvh. One Share in the header opens
   `#shareChoice` (Share this block / Share where I parked); `#centerBtn` is hidden on phones. The first-sheet tip moves to the top while a
   card is open. Snippets the generators match (the afterpass line, `${aSched}\n    ${_holRow}`, the chips div, the meter/permit loads, the
   data notes, the calendar button) are byte-for-byte unchanged: rerun both generators after any template edit.

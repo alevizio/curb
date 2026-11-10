@@ -63,6 +63,20 @@ const okScroll = scroll.scrolled > 100 && scroll.reopened === 0 && scroll.switch
 console.log(okScroll ? '✅ a card opens at its verdict, wherever the last one was left' : '❌ a card opens scrolled to where the last one was left');
 if (!okScroll) process.exitCode = 1;
 
+// Owner pick 2026-11-09: the closed card ends 24 px under its buttons on every phone. Inside the iPhone app the sheet's
+// bottom padding carries the home indicator (20 + 34 px); the peek used to add it and showed the next section's label.
+const peek = await p.evaluate(() => {
+  const s = document.getElementById('sheet'), box = document.getElementById('peekBox');
+  s.style.paddingBottom = '54px'; sizePeek();
+  const got = parseFloat(s.style.getPropertyValue('--peek')), want = box.offsetTop + box.offsetHeight + 24;
+  s.style.paddingBottom = ''; sizePeek();
+  return { got, want, clamp: Math.round(innerHeight * .78) };
+});
+console.log(JSON.stringify(peek));
+const okPeek = peek.want < peek.clamp && Math.abs(peek.got - peek.want) <= 1;
+console.log(okPeek ? '✅ the closed card ends 24 px under its buttons, whatever the bottom inset' : '❌ the closed card grows with the sheet\'s bottom padding');
+if (!okPeek) process.exitCode = 1;
+
 // Owner decision 2026-10-05: a sweep starting after midnight reads by the night people think in. 4th St, King
 // to Berry (cnn 269000): NorthEast side Tue + Thu 12 to 2 AM, SouthWest side Mon, Wed, Fri 12 to 2 AM.
 async function nightSheet(target, ne) {

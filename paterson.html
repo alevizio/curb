@@ -2257,12 +2257,13 @@ document.getElementById('shareBlockBtn').innerHTML=ICONS.share+' Share this bloc
 document.getElementById('parkShareBtn').innerHTML=ICONS.car+' Share where I parked';
 // Option B's peek (owner, 2026-11-09): the sheet opens exactly as tall as its first look, the verdict down to the buttons,
 // and follows it as parts fill in late (the permit chip, the meter, the hill strip). Phones only: the desktop card fits it all.
-const PEEK_MQ=matchMedia('(max-width:767px)');
+// It ends PEEK_GAP under the buttons on every phone (owner, 2026-11-09): the sheet's own 20 px + 4, never its measured bottom
+// padding, which adds the home indicator's 34 px inside the iPhone app and showed the next section's label there.
+const PEEK_MQ=matchMedia('(max-width:767px)'), PEEK_GAP=24;
 function sizePeek(){
   const s=document.getElementById('sheet'), b=document.getElementById('peekBox');
   if(!b||!PEEK_MQ.matches){s.style.removeProperty('--peek');return;}
-  const pb=parseFloat(getComputedStyle(s).paddingBottom)||0;
-  const want=b.offsetTop+b.offsetHeight+pb+4;
+  const want=b.offsetTop+b.offsetHeight+PEEK_GAP;
   s.style.setProperty('--peek',Math.round(Math.min(innerHeight*.78,Math.max(160,want)))+'px');
 }
 const peekRO=new ResizeObserver(()=>sizePeek());
