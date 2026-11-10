@@ -20,7 +20,16 @@ const b = await puppeteer.launch({ executablePath: CHROME, headless: true, args:
 const origin = new URL(SITE).origin;
 
 // One fresh visitor (a new browser context: empty storage), at a place, answering the prompt `answer`.
-async function visit({ at, answer = 'allow', person = true, seen = false, app = false, path = '/' }) {
+// Leaflet comes from cdnjs: when neither the page's tag nor its one retry gets it, the page has no map and shows its own
+// "didn't load" card (check-load-guard's subject, not this one's), so that visitor is thrown away and another one visits.
+async function visit(who, tries = 3) {
+  const v = await visitOnce(who);
+  if (!v.out.noLeaflet) return v;
+  await v.ctx.close();
+  if (tries > 1) return visit(who, tries - 1);
+  throw new Error('Leaflet never loaded from cdnjs, in three visits: nothing to check (' + v.errors.slice(0, 2).join(' | ') + ')');
+}
+async function visitOnce({ at, answer = 'allow', person = true, seen = false, app = false, path = '/' }) {
   const ctx = await b.createBrowserContext();
   if (answer === 'allow') await ctx.overridePermissions(origin, ['geolocation']);
   const p = await ctx.newPage();
@@ -54,7 +63,8 @@ async function visit({ at, answer = 'allow', person = true, seen = false, app = 
       out = await p.evaluate(() => ({ path: location.pathname, asked: (window.__asked || []).filter((o) => !o.curbSilent).length,
         toast: document.getElementById('toast')?.classList.contains('show') ? document.getElementById('toast').textContent : '',
         link: document.querySelector('#toast a')?.getAttribute('href') || '', stored: (() => { try { return localStorage.getItem('curbCityAsk'); } catch (_) { return 'x'; } })(),
-        center: window.map ? [map.getCenter().lat, map.getCenter().lng] : null }));
+        // `map` is the page's own const: without Leaflet its script stopped before it, and reading it would throw
+        noLeaflet: !window.L, center: window.L && window.map ? [map.getCenter().lat, map.getCenter().lng] : null }));
     } catch (e) { if (!/context|navigat|detached/i.test(String(e && e.message))) throw e; await new Promise((r) => setTimeout(r, 1000)); }
   }
   return { p, ctx, out: out || {}, errors };
