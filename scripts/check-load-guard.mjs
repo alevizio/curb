@@ -16,14 +16,14 @@ const check = (name, cond, detail = '') => { if (!cond) failures++; console.log(
 async function run(lib, failTimes) {
   const p = await b.newPage();
   await p.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
-  const errors = []; let asked = 0, reloads = -1;
+  const errors = [], urls = new Set(); let asked = 0, reloads = -1;
   p.on('pageerror', (e) => errors.push(e.message));
   p.on('framenavigated', (f) => { if (f === p.mainFrame()) reloads++; });
   await p.setBypassServiceWorker(true);   // a controlling worker would answer the time core from its cache, unseen here
   await p.setRequestInterception(true);
   p.on('request', (r) => {
     if (r.url().includes('/api/client-error')) return r.respond({ status: 204 });   // never write to a real log
-    if (LIBS[lib](r.url()) && asked++ < failTimes) return r.abort('failed');
+    if (LIBS[lib](r.url())) { urls.add(r.url()); if (asked++ < failTimes) return r.abort('failed'); }
     r.continue();
   });
   await p.goto(SITE + '/', { waitUntil: 'load' });
@@ -45,14 +45,16 @@ async function run(lib, failTimes) {
   }
   const after = await state();
   await p.close();
-  return { s, after, errors, asked, reloaded };
+  return { s, after, errors, asked, urls: urls.size, reloaded };
 }
 
 for (const lib of Object.keys(LIBS)) {
   const once = await run(lib, 1);
+  // One retry = two URLs, the tag's own and its retry=1. Counted by URL, not by request: Chrome 157 fetches a script
+  // written by document.write twice (and runs it once), so the request count depends on the browser's version.
   check(`${lib} fails once: the retry loads it, the app starts, no message`,
-    once.asked === 2 && !once.s.msg && once.s.L === 'object' && once.s.core === 'function' && once.s.map && !once.errors.length,
-    JSON.stringify({ asked: once.asked, ...once.s, errors: once.errors }));
+    once.urls === 2 && !once.s.msg && once.s.L === 'object' && once.s.core === 'function' && once.s.map && !once.errors.length,
+    JSON.stringify({ asked: once.asked, urls: once.urls, ...once.s, errors: once.errors }));
   // Fails on the first load (script tag + retry), loads on the reload the button triggers.
   const gone = await run(lib, 2);
   check(`${lib} fails for good: the message shows, focused, with the page behind it inert`, gone.s.msg && gone.s.visible && gone.s.focused && gone.s.inert && !gone.s.hint, JSON.stringify(gone.s));
