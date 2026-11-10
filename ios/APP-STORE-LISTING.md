@@ -61,6 +61,14 @@ Built by one person in San Francisco who got tired of the parking math.
 Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB stores an anonymous push token with the curb you picked.
 ```
 
+## What's New (v1.0.7)
+Build 12. Nothing changed inside the app: the version exists to carry new screenshots, which App Store Connect only
+takes with a new version. The map first layout they show (search pill, bottom bar, facts card, car pill) comes from
+curb.guide and is already in 1.0.6. The set is ten shots in the 6.5" slot (1242 x 2688): the eight headlines of 1.0.6
+on new captures, with 8 ("ONE MAP. 25 CITIES.") now a map of the US with a dot per city, then a steep block and a
+permit area. Files and tools are in private/store-screenshots-2026-11-09/. The What's New text is Ale's call and is
+not written here yet.
+
 ## What's New (v1.0.6)
 Build 11 (Xcode Cloud 63). Submitted 29 Oct 2026 with manual release; on 1 Nov Ale switched it to release automatically once approved. Rejected 1 Nov
 under 2.3.7 for "FREE." in screenshot 4 (never say free in screenshots); label changed to "NO SIGNUP." and resubmitted
