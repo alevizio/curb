@@ -6,7 +6,7 @@
 **Support URL:** https://curb.guide
 
 **Promotional text** (≤170, editable anytime without review):
-`New: CURB saves where you park by itself and puts a little car on that curb, so you know when to move it. Pick your car, or share where you parked.` (set 1 Nov 2026)
+`New look, more map. Search in one pill, the answer first on every block card, and one map for 25 cities.` (the owner's pick, set 10 Nov 2026 with 1.0.7; was `New: CURB saves where you park by itself and puts a little car on that curb, so you know when to move it. Pick your car, or share where you parked.`, set 1 Nov 2026)
 
 **Keywords** (≤100 chars; words already in the name and subtitle left out, since Apple joins them):
 ```
@@ -62,13 +62,18 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ```
 
 ## What's New (v1.0.7)
-Build 12. Nothing changed inside the app: the version exists to carry new screenshots, which App Store Connect only
+Build 12 (Xcode Cloud 64). Submitted 10 Nov 2026, about 11:48 AM PT, releasing automatically to everyone once
+approved (the owner's pick). Nothing changed inside the app: the version exists to carry new screenshots, which App Store Connect only
 takes with a new version. The map first layout they show (search pill, bottom bar, facts card, car pill) comes from
 curb.guide and is already in 1.0.6. The set is ten shots in the 6.5" slot (1242 x 2688): the eight headlines of 1.0.6
 on new captures, with 8 ("ONE MAP. 25 CITIES.") now a map of the US with a dot per city, then a steep block and a
 permit area. Files and tools are in private/store-screenshots-2026-11-09/. Headlines 9 and 10 (the owner's picks,
 9 Nov 2026): "SF HILLS · $48 TICKET / CURB YOUR WHEELS" and "PERMIT AREAS / FIND YOUR PERMIT AREA". The text below
-is the owner's pick of the same day. Not in App Store Connect yet.
+is the owner's pick of the same day. In App Store Connect since 10 Nov 2026: the version, the ten shots in order,
+build 64, this text and the new promotional text. Shots 1, 5 and 6 went up as JPEG copies of the same pictures
+(private/store-screenshots-2026-11-09/appstore-jpg/): Media Manager left their PNGs on "processing" for good. When
+an upload sticks there, remove it and upload again one file at a time, or as a JPEG; files that did process can be
+added back from Browse Assets.
 ```
 A new look, with more map.
 
