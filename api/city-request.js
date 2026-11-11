@@ -5,13 +5,16 @@
 //         letters and basic punctuation, the link is https only, every field has a length cap. `website` is a honeypot: a
 //         filled one is answered like a success and dropped. One request a minute per client IP (claimSlot; the IP is only
 //         hashed into that short-lived key, never stored) and a global hourly cap. Stored in a capped Upstash list with a
-//         random id and the time, nothing else about the sender.
+//         random id and the time, nothing else about the sender. A request for a city that already has a map
+//         (api/_live-cities.js) is not a request: answered { ok, live: { name, url } } for the page to link the map (a
+//         form post goes to that city's card on /cities), nothing stored, nothing filed, no slot used.
 //   GET   Authorization: Bearer CRON_SECRET. ?since=<ms epoch, default 24 h ago> → the requests newer than that, oldest
 //         first, without emails (?emails=1 adds them, for the owner, to say when a city is live).
 //         .github/workflows/city-requests.yml reads it and files each request as a public GitHub issue
 //         (scripts/cities/city-requests.mjs): the city, region, answer and link, never the email.
 import { randomUUID } from 'node:crypto';
 import { pushCityRequest, readCityRequests, underCityRequestRate, claimSlot, storeReady } from './_store.js';
+import { liveCity } from './_live-cities.js';
 
 const MAX_BODY = 2048;
 const LIMITS = { city: 60, region: 60, link: 300, email: 254 };
@@ -74,11 +77,11 @@ function parseBody(req) {
   if (isForm(req)) return Object.fromEntries(new URLSearchParams(s));
   try { return JSON.parse(s); } catch { return null; }
 }
-// JSON for the page; a form post without JavaScript goes back to the form, saying how it went
-function answer(req, res, status, body) {
+// JSON for the page; a form post without JavaScript goes back to the form, saying how it went (or to `to`)
+function answer(req, res, status, body, to) {
   if (isForm(req)) {
     res.statusCode = 303;
-    res.setHeader('Location', `/cities?request=${status === 200 ? 'sent' : 'check'}#request`);
+    res.setHeader('Location', to || `/cities?request=${status === 200 ? 'sent' : 'check'}#request`);
     res.end();
     return;
   }
@@ -104,6 +107,9 @@ export default async function handler(req, res) {
   const v = validate(parseBody(req));
   if (v.spam) { answer(req, res, 200, { ok: true }); return; }   // looks accepted; nothing is stored
   if (v.error) { answer(req, res, 400, { error: v.error, ...(v.error !== 'body' ? { field: v.error } : {}), message: v.message }); return; }
+  // A city that already has a map: point to it, keep nothing
+  const live = liveCity(v.entry.city, v.entry.region);
+  if (live) { answer(req, res, 200, { ok: true, live: { name: live.name, url: live.url } }, `/cities#${live.id}`); return; }
   // A preview deployment shares the live store, where a request becomes a public GitHub issue: say yes, keep nothing
   if (process.env.VERCEL_ENV === 'preview') { answer(req, res, 200, { ok: true }); return; }
   if (!storeReady()) { answer(req, res, 503, { error: 'store', message: 'Requests are closed for a moment. Try again later.' }); return; }

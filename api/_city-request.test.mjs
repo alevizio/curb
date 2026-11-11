@@ -1,5 +1,6 @@
 // Tests for "Request a city" (api/city-request.js) with an in-memory Upstash mock: the checks, the honeypot, the per-IP and
-// hourly limits, the capped list, and the bearer GET the issue filer reads (no emails unless asked).
+// hourly limits, the capped list, a city that already has a map, and the bearer GET the issue filer reads (no emails
+// unless asked).
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 process.env.KV_REST_API_URL = 'https://fake.upstash.io';
@@ -167,6 +168,32 @@ describe('POST', () => {
     expect(stored()[0]).toMatchObject({ city: 'Portland', publishes: 'no' });
     const bad = await run(post('city=%40spam&publishes=no', '7.7.7.8', 'application/x-www-form-urlencoded'));
     expect(bad.headers.location).toBe('/cities?request=check#request');
+  });
+  it('a city that already has a map is answered with its link: nothing stored, no Redis command, no minute used', async () => {
+    const res = await run(post({ ...GOOD, city: 'Paterson', region: 'New jersey', link: '' }, '8.8.8.8'));
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ ok: true, live: { name: 'Paterson', url: '/paterson' } });
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect(stored()).toEqual([]);
+    expect(cmds.n).toBe(0);
+    expect((await run(post({ ...GOOD, city: 'San Francisco', region: 'CA' }, '8.8.8.8'))).body.live).toEqual({ name: 'San Francisco', url: '/' });
+    expect((await run(post(GOOD, '8.8.8.8'))).statusCode).toBe(200);   // the same visitor can still ask for another city
+    expect(stored().map((e) => e.city)).toEqual(['Portland']);
+  });
+  it('the same name in another state is a request like any other', async () => {
+    const res = await run(post({ ...GOOD, city: 'Glendale', region: 'Arizona' }, '8.8.4.4'));
+    expect(res.body).toEqual({ ok: true });
+    expect(stored()[0]).toMatchObject({ city: 'Glendale', region: 'Arizona' });
+  });
+  it('without JavaScript, a city that already has a map goes to its card on /cities', async () => {
+    const res = await run(post('city=Paterson&region=NJ&publishes=unsure&link=&email=&website=', '7.7.7.9', 'application/x-www-form-urlencoded'));
+    expect(res.statusCode).toBe(303);
+    expect(res.headers.location).toBe('/cities#paterson');
+    expect(stored()).toEqual([]);
+  });
+  it('the honeypot and the field checks come first', async () => {
+    expect((await run(post({ ...GOOD, city: 'Paterson', region: 'NJ', website: 'buy now' }))).body).toEqual({ ok: true });
+    expect((await run(post({ ...GOOD, city: 'Paterson', region: 'NJ', link: 'http://insecure.example' }))).body.field).toBe('link');
   });
 });
 

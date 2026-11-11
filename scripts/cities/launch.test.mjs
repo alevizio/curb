@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { PUBLIC, IN_PROGRESS, seoWords, ruleTerm } from './public.mjs';
 import { cityFacts, aboutPage, hubPage } from './city-pages.mjs';
 import { project, W, H } from './hub-map.mjs';
+import { LIVE } from '../../api/_live-cities.js';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const read = (f) => readFileSync(ROOT + f, 'utf8');
@@ -101,6 +102,12 @@ describe('/cities', () => {
     expect(hub).toMatch(/name="website" tabindex="-1"/);
     expect(hub).toContain('Only to tell you when it\'s live. Never published.');
     expect(hub).toMatch(/<input type="radio" name="publishes" value="unsure" checked> Not sure/);
+  });
+  it('answers a request for a city that already has a map with a link to it, and every such city has a card to land on', () => {
+    expect(hub).toContain("say(c.name+' is already on CURB.',true)");
+    expect(hub).toContain("a.textContent='Open the '+c.name+' map'");
+    expect(hub).toContain('if(x.r.ok&&x.d&&x.d.live){ sayLive(x.d.live); return; }');
+    for (const c of LIVE) expect(hub, c.id).toContain(`<article class="ccard" id="${c.id}">`);   // /cities#<id>, the no-JavaScript answer
   });
 });
 

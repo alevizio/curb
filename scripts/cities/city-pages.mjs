@@ -335,6 +335,7 @@ const HUB_CSS = `
   .fnote a{color:var(--ink);font-weight:800;text-underline-offset:3px}
   .fmsg{font-weight:800;font-size:15px;border-radius:11px;padding:12px 14px}
   .fmsg:empty{display:none}
+  .fmsg a{display:block;margin-top:4px;color:inherit;text-underline-offset:3px}
   .fmsg.ok{background:rgba(31,158,90,.14);color:var(--green-text);border:2px solid var(--green)}
   .fmsg.bad{background:rgba(193,18,31,.07);color:var(--red-text);border:2px solid var(--red)}
 `;
@@ -400,6 +401,9 @@ const HUB_SCRIPT = `<script>
   var NAME=/^[\\p{L}\\p{M}][\\p{L}\\p{M} .,'’()-]*$/u;
   function err(id,text){ var el=document.getElementById(id), e=document.getElementById(id+'-err'); el.setAttribute('aria-invalid',text?'true':'false'); e.textContent=text||''; return !text; }
   function say(text,ok){ msg.textContent=text; msg.className='fmsg '+(ok?'ok':'bad'); }
+  /* the city already has a map: say so and link it; the form keeps what was typed */
+  function sayLive(c){ var a=document.createElement('a'); a.href=/^\\/[a-z-]*$/.test(c.url)?c.url:'/cities'; a.textContent='Open the '+c.name+' map';
+    say(c.name+' is already on CURB.',true); msg.appendChild(a); }
   f.addEventListener('submit',function(e){
     e.preventDefault(); msg.textContent=''; msg.className='fmsg';
     var city=f.city.value.trim(), region=f.region.value.trim(), link=f.link.value.trim(), email=f.email.value.trim();
@@ -416,6 +420,7 @@ const HUB_SCRIPT = `<script>
       body:JSON.stringify({city:city,region:region,publishes:pub?pub.value:'unsure',link:link,email:email,website:f.website.value})})
       .then(function(r){ return r.json().catch(function(){return {};}).then(function(d){return {r:r,d:d};}); })
       .then(function(x){
+        if(x.r.ok&&x.d&&x.d.live){ sayLive(x.d.live); return; }
         if(x.r.ok){ f.reset(); say('Thanks. Your request is in, and it shows up on GitHub within a few hours.',true); return; }
         if(x.d&&x.d.field&&document.getElementById('rq-'+x.d.field)){ err('rq-'+x.d.field,x.d.message||'Check this one.'); document.getElementById('rq-'+x.d.field).focus(); return; }
         say(x.r.status===429?'One request a minute, please. Try again soon.':(x.d&&x.d.message)||'Couldn\\'t send it. Try again.',false);
