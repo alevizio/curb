@@ -777,9 +777,9 @@ html,body{min-height:100%;overflow-x:clip;-webkit-overflow-scrolling:touch}
   var NAME=/^[\p{L}\p{M}][\p{L}\p{M} .,'’()-]*$/u;
   function err(id,text){ var el=document.getElementById(id), e=document.getElementById(id+'-err'); el.setAttribute('aria-invalid',text?'true':'false'); e.textContent=text||''; return !text; }
   function say(text,ok){ msg.textContent=text; msg.className='fmsg '+(ok?'ok':'bad'); }
-  /* the city already has a map: say so and link it; the form keeps what was typed */
-  function sayLive(c){ var a=document.createElement('a'); a.href=/^\/[a-z-]*$/.test(c.url)?c.url:'/cities'; a.textContent='Open the '+c.name+' map';
-    say(c.name+' is already on CURB.',true); msg.appendChild(a); }
+  /* the city already has a map, or (c.map) is a community on one: say so and link it; the form keeps what was typed */
+  function sayLive(c){ var a=document.createElement('a'); a.href=/^\/[a-z-]*$/.test(c.url)?c.url:'/cities'; a.textContent='Open the '+(c.map||c.name)+' map';
+    say(c.map?c.name+' is on CURB\'s '+c.map+' map.':c.name+' is already on CURB.',true); msg.appendChild(a); }
   f.addEventListener('submit',function(e){
     e.preventDefault(); msg.textContent=''; msg.className='fmsg';
     var city=f.city.value.trim(), region=f.region.value.trim(), link=f.link.value.trim(), email=f.email.value.trim();

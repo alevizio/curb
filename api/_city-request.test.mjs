@@ -177,6 +177,13 @@ describe('POST', () => {
     expect(stored()).toEqual([]);
     expect(cmds.n).toBe(0);
     expect((await run(post({ ...GOOD, city: 'San Francisco', region: 'CA' }, '8.8.8.8'))).body.live).toEqual({ name: 'San Francisco', url: '/' });
+    // a community on a live map: its own name, and the map it is on
+    const hood = await run(post({ ...GOOD, city: 'Florence Graham', region: 'Ca', link: '' }, '8.8.8.8'));
+    expect(hood.body).toEqual({ ok: true, live: { name: 'Florence-Graham', url: '/la-county', map: 'LA County' } });
+    const form = await run(post('city=Florence+Graham&region=Ca&publishes=yes&link=&email=&website=', '8.8.8.8', 'application/x-www-form-urlencoded'));
+    expect(form.headers.location).toBe('/cities#la-county');
+    expect(stored()).toEqual([]);
+    expect(cmds.n).toBe(0);
     expect((await run(post(GOOD, '8.8.8.8'))).statusCode).toBe(200);   // the same visitor can still ask for another city
     expect(stored().map((e) => e.city)).toEqual(['Portland']);
   });

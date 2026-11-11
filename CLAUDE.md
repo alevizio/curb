@@ -243,7 +243,9 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   POST /api/city-request (api/city-request.js: strict checks, a honeypot, one per IP a minute via claimSlot, 60 an hour,
   a capped Upstash list, no IP stored; bearer GET ?since= without emails; a request naming a city that already has a map,
   found by name and state in api/_live-cities.js, is answered with "<City> is already on CURB." and a link to its map,
-  nothing stored or filed: owner, 2026-11-10, after a request for Paterson, NJ), which .github/workflows/city-requests.yml files
+  nothing stored or filed: owner, 2026-11-10, after a request for Paterson, NJ; the same for a community a live map covers,
+  listed by hand in that file's COMMUNITIES (nine on the LA County map; never one that is also a city CURB lacks, like Arcadia):
+  "<Community> is on CURB's LA County map.": owner, 2026-11-11, after a request for Florence Graham, CA), which .github/workflows/city-requests.yml files
   every 30 min (GitHub runs it every 3 to 5 hours in practice, so the page's thank-you says "within a few hours") as public
   GitHub issues labeled "city request" (scripts/cities/city-requests.mjs: one issue per city, opening with an @mention of the
   repo's owner, the only way GitHub emails him about a bot's issue since he doesn't watch the repo; "+1" comments, never the

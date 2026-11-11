@@ -1,7 +1,8 @@
 // Tests for the live-city lookup behind "Request a city" (api/_live-cities.js): which names count as a city CURB already
 // has, and that its list and name folding stay in step with the public list and the issue filer.
+import fs from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { LIVE, liveCity } from './_live-cities.js';
+import { LIVE, PLACES, liveCity } from './_live-cities.js';
 import { PUBLIC } from '../scripts/cities/public.mjs';
 import { regionCode, cityKey } from '../scripts/cities/city-requests.mjs';
 
@@ -17,6 +18,42 @@ describe('the live list', () => {
   it('folds a name the way the issue filer does', () => {
     for (const c of LIVE) expect(c.keys.has(cityKey(c.name)), c.id).toBe(true);
     expect(id('St. Paul', 'Minnesota')).toBe('saint-paul');
+  });
+});
+
+describe('a community on a live map', () => {
+  const FLORENCE = { id: 'la-county', name: 'Florence-Graham', url: '/la-county', map: 'LA County' };
+  it('is one of that map\'s neighborhoods, and never shares a name with a live city', () => {
+    for (const p of PLACES) {
+      const hoods = JSON.parse(fs.readFileSync(new URL(`../data/${p.id}/city.json`, import.meta.url), 'utf8')).neighborhoods.map((h) => h.name);
+      expect(hoods, p.name).toContain(p.hood);
+      expect(LIVE.some((c) => c.keys.has([...p.keys][0])), p.name).toBe(false);
+    }
+  });
+  it('is answered with its own name and the map it is on', () => {
+    expect(liveCity('Florence Graham', 'Ca')).toEqual(FLORENCE);   // the request of 2026-11-11, as typed
+    for (const [city, region] of [['Florence-Graham', ''], ['florence graham, CA', ''], ['Florence Graham California', ''], ['Florence-Graham', 'CA, USA']]) {
+      expect(liveCity(city, region), `${city} | ${region}`).toEqual(FLORENCE);
+    }
+    expect(liveCity('Florence-Firestone')).toEqual({ ...FLORENCE, name: 'Florence-Firestone' });
+    expect(liveCity('East LA', 'California')).toEqual({ ...FLORENCE, name: 'East LA' });
+    expect(liveCity('East Los Angeles')?.name).toBe('East Los Angeles');
+    expect(liveCity('Los Nietos', 'CA')?.map).toBe('LA County');
+    expect(liveCity('Hacienda Heights')?.id).toBe('la-county');
+  });
+  it('a city keeps its own answer, with no map named', () => {
+    expect(liveCity('LA County', 'California')).toEqual({ id: 'la-county', name: 'Unincorporated LA County', url: '/la-county' });
+    expect(liveCity('Los Angeles', 'CA')).toEqual({ id: 'los-angeles', name: 'Los Angeles', url: '/los-angeles' });
+  });
+  it('the same name elsewhere, a city the map only borders, or part of a name is a request like any other', () => {
+    expect(id('Willowbrook', 'Illinois')).toBeNull();
+    expect(id('Florence', 'CA')).toBeNull();
+    expect(id('Florence Graham', 'Texas')).toBeNull();
+    expect(id('Whittier', 'CA')).toBeNull();
+    expect(id('Arcadia', 'CA')).toBeNull();
+    expect(id('San Gabriel', 'CA')).toBeNull();
+    expect(id('South San Gabriel', 'CA')).toBeNull();
+    expect(id('Rowland Heights Park')).toBeNull();
   });
 });
 

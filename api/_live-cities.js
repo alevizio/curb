@@ -7,6 +7,10 @@
 // Jersey"), has to be the live city's: Glendale, Arizona is a request like any other. With none typed, the name alone
 // decides. The folding matches scripts/cities/city-requests.mjs (the issue filer, which is not deployed, so it can't be
 // imported here); the test holds the two together.
+//
+// The LA County map is not one city but the unincorporated communities around Los Angeles, and people ask for those by
+// name ("Florence Graham, CA", 2026-11-11). PLACES holds the ones the map covers; a request for one is answered with
+// that community's name and the map it is on.
 import '../lib/city-configs.js';
 
 const plain = (s) => String(s || '').replace(/\./g, '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -39,6 +43,33 @@ export const LIVE = [
   keys: new Set([cityKey(c.name), ...(ALIASES[c.id] || [])]),
 }));
 
+// The communities a map covers, by the neighborhood the map files them under (data/<id>/city.json `neighborhoods`; the
+// test checks each is there) → the names people type. `map` is how the answer names the map. Left out on purpose: the
+// LA County areas named after a city CURB has no map for (Arcadia, the San Gabriel ones), so a request for that city is
+// never mistaken for them.
+const COMMUNITIES = {
+  'la-county': {
+    map: 'LA County',
+    places: {
+      'East Los Angeles': ['East Los Angeles', 'East LA'],
+      'Florence-Firestone': ['Florence-Firestone', 'Florence-Graham'],
+      'South Whittier': ['South Whittier'],
+      'West Whittier/Los Nietos': ['West Whittier', 'Los Nietos', 'West Whittier-Los Nietos'],
+      Willowbrook: ['Willowbrook'],
+      'Hacienda Heights': ['Hacienda Heights'],
+      'East Rancho Dominguez': ['East Rancho Dominguez'],
+      'Rowland Heights': ['Rowland Heights'],
+      'North Whittier': ['North Whittier'],
+    },
+  },
+};
+export const PLACES = Object.entries(COMMUNITIES).flatMap(([id, { map, places }]) => {
+  const { region, code, url } = LIVE.find((c) => c.id === id);
+  return Object.entries(places).flatMap(([hood, names]) => names.map((name) => (
+    { id, name, region, code, url, map, hood, keys: new Set([cityKey(name)]) })));
+});
+const FINDABLE = [...LIVE, ...PLACES];   // a city's own name wins over a community's
+
 const isRegion = (p, c) => p === plain(c.region) || p === c.code.toLowerCase();
 const isCountry = (p, c) => COUNTRY_US.has(p) || (p === 'canada' && CANADA.has(c.code));
 // The typed state, province or country words agree with the city's: none typed (or only its country), or one of them is
@@ -48,12 +79,13 @@ function regionAgrees(parts, c) {
   return !typed.length || typed.some((p) => isRegion(p, c));
 }
 
-/** The live city a request names, as { id, name, url }, or null: the request is for somewhere CURB doesn't cover yet. */
+/** The live city a request names, as { id, name, url }, or the community on a live map, as { id, name, url, map } (id and
+ *  url are the map's, name the community's), or null: the request is for somewhere CURB doesn't cover yet. */
 export function liveCity(city, region = '') {
   const regionParts = String(region || '').split(',');
   // `tail`: words typed after the name with no comma. They must be the city's own state or country ("Paterson NJ"), so
   // "Oakland Park" is never Oakland.
-  const find = (name, tail, parts) => LIVE.find((c) => c.keys.has(cityKey(name))
+  const find = (name, tail, parts) => FINDABLE.find((c) => c.keys.has(cityKey(name))
     && (!tail || isRegion(tail, c) || isCountry(tail, c)) && regionAgrees(parts, c));
   const [head, ...after] = String(city || '').split(',');
   const words = plain(head).split(' ');
@@ -62,5 +94,5 @@ export function liveCity(city, region = '') {
   for (let k = words.length; !hit && k >= 1; k--) {
     hit = find(words.slice(0, k).join(' '), words.slice(k).join(' '), [...after, ...regionParts]);
   }
-  return hit ? { id: hit.id, name: hit.name, url: hit.url } : null;
+  return hit ? { id: hit.id, name: hit.name, url: hit.url, ...(hit.map ? { map: hit.map } : {}) } : null;
 }

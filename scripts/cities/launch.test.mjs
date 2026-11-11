@@ -104,8 +104,9 @@ describe('/cities', () => {
     expect(hub).toMatch(/<input type="radio" name="publishes" value="unsure" checked> Not sure/);
   });
   it('answers a request for a city that already has a map with a link to it, and every such city has a card to land on', () => {
-    expect(hub).toContain("say(c.name+' is already on CURB.',true)");
-    expect(hub).toContain("a.textContent='Open the '+c.name+' map'");
+    // a city: "<City> is already on CURB."; a community on a live map: "<Community> is on CURB's <map> map."
+    expect(hub).toContain("say(c.map?c.name+' is on CURB\\'s '+c.map+' map.':c.name+' is already on CURB.',true)");
+    expect(hub).toContain("a.textContent='Open the '+(c.map||c.name)+' map'");
     expect(hub).toContain('if(x.r.ok&&x.d&&x.d.live){ sayLive(x.d.live); return; }');
     for (const c of LIVE) expect(hub, c.id).toContain(`<article class="ccard" id="${c.id}">`);   // /cities#<id>, the no-JavaScript answer
   });

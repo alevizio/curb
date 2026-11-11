@@ -7,7 +7,8 @@
 //         hashed into that short-lived key, never stored) and a global hourly cap. Stored in a capped Upstash list with a
 //         random id and the time, nothing else about the sender. A request for a city that already has a map
 //         (api/_live-cities.js) is not a request: answered { ok, live: { name, url } } for the page to link the map (a
-//         form post goes to that city's card on /cities), nothing stored, nothing filed, no slot used.
+//         form post goes to that city's card on /cities), nothing stored, nothing filed, no slot used. The same for a
+//         community a live map covers (Florence-Graham, on the LA County map): { ok, live: { name, url, map } }.
 //   GET   Authorization: Bearer CRON_SECRET. ?since=<ms epoch, default 24 h ago> → the requests newer than that, oldest
 //         first, without emails (?emails=1 adds them, for the owner, to say when a city is live).
 //         .github/workflows/city-requests.yml reads it and files each request as a public GitHub issue
@@ -109,7 +110,10 @@ export default async function handler(req, res) {
   if (v.error) { answer(req, res, 400, { error: v.error, ...(v.error !== 'body' ? { field: v.error } : {}), message: v.message }); return; }
   // A city that already has a map: point to it, keep nothing
   const live = liveCity(v.entry.city, v.entry.region);
-  if (live) { answer(req, res, 200, { ok: true, live: { name: live.name, url: live.url } }, `/cities#${live.id}`); return; }
+  if (live) {
+    const { id, ...where } = live;   // { name, url }, plus `map` for a community on a live map
+    answer(req, res, 200, { ok: true, live: where }, `/cities#${id}`); return;
+  }
   // A preview deployment shares the live store, where a request becomes a public GitHub issue: say yes, keep nothing
   if (process.env.VERCEL_ENV === 'preview') { answer(req, res, 200, { ok: true }); return; }
   if (!storeReady()) { answer(req, res, 503, { error: 'store', message: 'Requests are closed for a moment. Try again later.' }); return; }
