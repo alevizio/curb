@@ -63,7 +63,7 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 
 ## What's New (v1.0.7)
 Build 12 (Xcode Cloud 64). Submitted 10 Nov 2026, about 11:48 AM PT, releasing automatically to everyone once
-approved (the owner's pick). Nothing changed inside the app: the version exists to carry new screenshots, which App Store Connect only
+approved (the owner's pick). Approved and released 11 Nov 2026 (on the App Store from 1:37 PM PT). Nothing changed inside the app: the version exists to carry new screenshots, which App Store Connect only
 takes with a new version. The map first layout they show (search pill, bottom bar, facts card, car pill) comes from
 curb.guide and is already in 1.0.6. The set is ten shots in the 6.5" slot (1242 x 2688): the eight headlines of 1.0.6
 on new captures, with 8 ("ONE MAP. 25 CITIES.") now a map of the US with a dot per city, then a steep block and a
