@@ -272,7 +272,8 @@ describe('the committed data', () => {
     expect(city).toMatchObject({ id: 'lodi', name: 'Lodi', region: 'New Jersey', tz: 'America/New_York', holidays: {}, holidayRule: 'all', fine: 'up to $50', tow: 'no',
       fineSource: CODE_URL, scheduleUrl: CODE_URL, agency: 'Borough of Lodi' });
     expect(city.sources).toHaveLength(2);
-    expect(Object.keys(city.words)).toEqual(['rule', 'afterpass', 'dataNotes']);
+    expect(Object.keys(city.words)).toEqual(['rule', 'afterpass', 'dataNotes', 'source']);
+    expect(city.words.source).toBe('the Borough\'s parking code');
     expect(city.words.afterpass).toMatch(/the sign on your side wins/);
     expect(JSON.stringify(city.words)).not.toMatch(/[—–]/);
   });

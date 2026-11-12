@@ -64,6 +64,7 @@ A **rule** is one of:
   that follows the City's declaration, all day on both sides while the switch is on, with one alert when it turns on: Toronto's
   snow routes, `start: 0, end: 24`, see toronto.md); `words.what` names what a map without sweeping is about ("night parking"),
   `words.tagline` what it shows of each curb (its descriptions and share card), `words.alerts` the data notes' sentence on alerts,
+  `words.source` what the share card's "from …" names when it is not the City's open data (Lodi: "the Borough's parking code"),
   and `credit` (with `creditUrl`) a credit line the City asks for, shown in the menu and the welcome card.
 - `dates`: local dates `"YYYY-MM-DD"`, for cities that publish dates instead of a pattern (Chicago, Saint Paul,
   Norfolk). List every date the build knows, at least through the end of the current season. When thousands of sides

@@ -787,6 +787,7 @@ async function main() {
       rule: 'No parking on the side of the street the Borough\'s schedule names during its street sweeping hours: on most blocks one day a week, 9 AM to 3 PM, on some for one hour.',
       afterpass: 'Each side has its own day, and the sign on your side wins. A fine of up to $50. The Code calls the schedule off when the Borough\'s sweepers are not running.',
       dataNotes: 'Days and hours come from the Borough of Lodi\'s Code (section 560-38, Schedule II: No Parking Certain Hours, read November 2026), laid row by row onto the State\'s street centerlines. The Code names each stretch in words, so where a rule starts or ends partway down a block the map shows the whole block or none of it. Sides the Code restricts in other ways (all day with an exception, school or business hours) are not shown, and the Code names no holidays.',
+      source: 'the Borough\'s parking code',   // the share card's "from …": Lodi has no open data portal (owner, 2026-11-11)
     },
   };
 
