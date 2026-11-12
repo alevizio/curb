@@ -264,7 +264,10 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   zone, holidays, map view, fine), read by lib/city.js on the page and by lib/cities.js for alerts; lib/city.js =
   makeCity(config) (the city's time core + data helpers; useCity answers SF's time names in the city's time, like
   lib/city-boston.js); <id>.html GENERATED from index.html by scripts/cities/city-page.mjs (checked edits like
-  boston-page.mjs; never hand-edit; it also writes manifest-<id>.json and the page's vercel.json rewrite); basemap:
+  boston-page.mjs; never hand-edit; it also writes manifest-<id>.json and the page's vercel.json rewrite; a city page has
+  no layers yet, so SF's tiles and the Layers button are hidden and only `#carBtn` stays in the right-hand stack: owner,
+  2026-11-11, "Layers is empty"; a city whose city.json has `words.source`, Lodi's "the Borough's parking code", says that
+  wherever the others say "<City> open data"); basemap:
   scripts/cities/basemap-city.mjs → basemap/cities/<id>.pmtiles (one vector file per city, z0-13, the parchment style
   drawn live by MapLibre from basemap/cities/style.json; no PNG tiles, thousands of files a city, and never CARTO,
   whose keyless tiles say "API KEY REQUIRED"); share card: scripts/cities/og-city.mjs → og-<id>.png; check:

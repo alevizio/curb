@@ -46,6 +46,9 @@ function cityPage(id) {
   const name = c.name, url = 'https://curb.guide/' + id,
     portal = c.portal || (c.sources || []).flatMap((x) => [x.page, x.url]).find(readable) || c.scheduleUrl || '';
   const words = c.words || {};
+  // Where the schedule comes from, when it is not the City's open data (city.json words.source: Lodi's "the Borough's
+  // parking code"): the page, its descriptions and its manifest say that instead, like the share card (og-city.mjs).
+  const source = words.source ? esc(words.source) : '';
   const bm = BASEMAPS[id];   // its vector basemap, if built
   const pub = isPublic(id);   // a public city (scripts/cities/public.mjs), else a preview
   // A city that offers French (city.json languages + words_fr): lib/i18n-fr.js translates the page, and the ⓘ menu
@@ -109,14 +112,14 @@ function cityPage(id) {
     ['title + noindex', '<title>SF Street Cleaning Map: When Tickets Actually Land | CURB</title>', pub ? `<title>${esc(seo.title)}</title>`
       : `<title>${esc(name)} ${sweeps ? 'Street Cleaning' : esc(What)} Map (preview) | CURB</title>\n<meta name="robots" content="noindex">`],
     ['description', /<meta name="description" content="[^"]*">/, pub ? `<meta name="description" content="${esc(seo.description)}">`
-      : `<meta name="description" content="${esc(name)} ${sweeps ? 'street sweeping, block by block: every swept curb colored by its next sweep' : `${esc(what)}, block by block: ${esc(shows)}`}, from the City's open data. A CURB preview.">`],
+      : `<meta name="description" content="${esc(name)} ${sweeps ? 'street sweeping, block by block: every swept curb colored by its next sweep' : `${esc(what)}, block by block: ${esc(shows)}`}, from ${source || "the City's open data"}. A CURB preview.">`],
     ['canonical', '<link rel="canonical" href="https://curb.guide/">', `<link rel="canonical" href="${url}">`],
     ['no SF app schema', /<script type="application\/ld\+json">[\s\S]*?<\/script>\n/, pub ? `<script type="application/ld+json">\n${jsonLd(ld)}\n</script>\n` : ''],
     // Safari's App Store banner offers the San Francisco app: not on a city's page (its links are hidden below too)
     ['no SF app banner', '<meta name="apple-itunes-app" content="app-id=6780998238">\n', ''],
     ['card titles', 'Know where to park in SF', `Know where to park in ${esc(name)}`, 2],
     ['card description', '<meta property="og:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts. From SF open data.">',
-      `<meta property="og:description" content="${sweeps ? 'Street sweeping block by block, with alerts before the sweeper comes' : `${esc(Cap)} block by block, ${alertsWord}`}. From ${esc(name)} open data.">`],
+      `<meta property="og:description" content="${sweeps ? 'Street sweeping block by block, with alerts before the sweeper comes' : `${esc(Cap)} block by block, ${alertsWord}`}. From ${source || `${esc(name)} open data`}.">`],
     ['card description (X)', '<meta name="twitter:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts.">',
       `<meta name="twitter:description" content="${esc(name)} ${sweeps ? 'street sweeping block by block, with alerts before the sweeper comes' : `${esc(what)} block by block, ${alertsWord}`}.">`],
     ['card url', '<meta property="og:url" content="https://curb.guide/">', `<meta property="og:url" content="${url}">`],
@@ -137,18 +140,20 @@ function cityPage(id) {
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
           <span class="im-tx"><b>Neighborhoods</b><small>${sweeps ? 'Street cleaning' : esc(Cap)} by ${esc(name)} neighborhood</small></span>
         </button>` : ''],
-    ['menu footer link', '<a href="https://datasf.org" target="_blank" rel="noopener">SF open data</a>', `<a href="${esc(portal)}" target="_blank" rel="noopener">${esc(name)} open data</a>`],
+    ['menu footer link', '<a href="https://datasf.org" target="_blank" rel="noopener">SF open data</a>', `<a href="${esc(portal)}" target="_blank" rel="noopener">${source ? source.charAt(0).toUpperCase() + source.slice(1) : `${esc(name)} open data`}</a>`],
     ['menu footer', 'Built on SF open data (DataSF). The posted sign is always the final word.',
-      `${credit ? esc(credit) : `Built on ${esc(name)} open data.`} The posted sign is always the final word.`],
-    // no layers yet: SF's four tiles and its permit areas are hidden (their handlers are SF code)
+      `${credit ? esc(credit) : `Built on ${source || `${esc(name)} open data`}.`} The posted sign is always the final word.`],
+    // no layers yet: SF's four tiles and its permit areas are hidden (their handlers are SF code), and so is the button
+    // that opens them, which would open an empty panel (2026-11-11). The button over it for the saved car stays.
+    ['no layers button', '<button class="layersbtn" id="layersBtn" aria-expanded="false"', '<button class="layersbtn" id="layersBtn" style="display:none" aria-expanded="false"'],
     ['no permit tile', '<button class="ltile" id="rppToggle" aria-pressed="false">', '<button class="ltile" id="rppToggle" aria-pressed="false" style="display:none">'],
     ['no loading tile', '<button class="ltile" id="loadToggle" aria-pressed="false">', '<button class="ltile" id="loadToggle" aria-pressed="false" style="display:none">'],
     ['no meter tile', '<button class="ltile" id="meterToggle" aria-pressed="false">', '<button class="ltile" id="meterToggle" aria-pressed="false" style="display:none">'],
     ['no truck routes', '<button class="ltile" id="routeToggle" aria-pressed="false">', '<button class="ltile" id="routeToggle" aria-pressed="false" style="display:none">'],
     ['no layer tiles heading', '<div class="lp-sec">Map details</div>', '<div class="lp-sec" style="display:none">Map details</div>'],
     ['no permit areas', '<div class="lp-sec">Permit areas</div>\n    <div class="arearow">', '<div class="lp-sec" style="display:none">Permit areas</div>\n    <div class="arearow" style="display:none">'],
-    ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/, pub ? `<p>${esc(rule)} Tap where you parked for the rules. Built on the City's open data.</p>`
-      : `<p>${esc(rule)} Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>`],
+    ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/, pub ? `<p>${esc(rule)} Tap where you parked for the rules. Built on ${source || "the City's open data"}.</p>`
+      : `<p>${esc(rule)} Tap where you parked for the rules. <b>A preview</b>, built on ${source || "the City's open data"}.</p>`],
     ['neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, hoods.length ? `<nav class="whoods" aria-label="${sweeps ? 'Street cleaning' : esc(Cap)} by neighborhood"><p>${sweeps ? 'Street cleaning' : esc(Cap)} by neighborhood</p><ul>`
       + hoods.map((h) => `<li><a href="/${id}?bbox=${h.bbox}" data-bbox="${h.bbox}">${esc(h.name)}</a></li>`).join('') + '</ul></nav>' : ''],
     ['neighborhood links frame the map', "  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);\n})();\n", `  if(!EMBED&&!onboarded())setTimeout(()=>{try{localStorage.setItem('curbOnboarded','1');}catch(_){}},0);
@@ -162,7 +167,7 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
 ` : ''}`],
     ['welcome footer', /<p class="wfoot">[\s\S]*?<\/p>/,
       credit ? `<p class="wfoot">Free, no account. <a href="${esc(c.creditUrl || portal)}" target="_blank" rel="noopener">${esc(credit.replace(/\.$/, ''))}</a>. The posted sign always wins.</p>`
-        : `<p class="wfoot">Free, no account. Built on <a href="${esc(portal)}" target="_blank" rel="noopener">${esc(name)}'s open data</a>. The posted sign always wins.</p>`],
+        : `<p class="wfoot">Free, no account. Built on <a href="${esc(portal)}" target="_blank" rel="noopener">${source || `${esc(name)}'s open data`}</a>. The posted sign always wins.</p>`],
     // ---- scripts: the city's time core and data (lib/city.js) -----------------------------------------
     ['load the city', '<script src="/lib/sweep-core.js?v=8"></script>',
       `<script src="/lib/sweep-core.js?v=8"></script>\n<script>window.CURB_CITY=${js(id)};</script>\n<script src="/lib/city-configs.js?v=${CONFIGS_V}"></script>\n<script src="/lib/city.js?v=${CITY_V}"></script>`
@@ -437,7 +442,7 @@ if(CAN_HOVER){
   // the city's Home Screen web app (iPhone alerts)
   const manifest = JSON.parse(fs.readFileSync(ROOT + 'manifest-boston.json', 'utf8'));
   Object.assign(manifest, { name: pub ? `CURB ${name}` : `CURB ${name} (preview)`, short_name: `CURB ${name}`.slice(0, 12),
-    description: pub ? `${name} ${seo.term}, block by block, from the City's open data.` : `${name} ${what}, block by block. A preview on the City's open data.`,
+    description: pub ? `${name} ${seo.term}, block by block, from ${words.source || "the City's open data"}.` : `${name} ${what}, block by block. A preview on ${words.source || "the City's open data"}.`,
     start_url: `/${id}`, scope: '/', id: `/${id}` });
   fs.writeFileSync(`${ROOT}manifest-${id}.json`, JSON.stringify(manifest, null, 2) + '\n');
   // curb.guide/<id> serves the page: its rewrite in vercel.json, next to Boston's

@@ -6,13 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Lodi Street Cleaning Map (preview) | CURB</title>
 <meta name="robots" content="noindex">
-<meta name="description" content="Lodi street sweeping, block by block: every swept curb colored by its next sweep, from the City's open data. A CURB preview.">
+<meta name="description" content="Lodi street sweeping, block by block: every swept curb colored by its next sweep, from the Borough's parking code. A CURB preview.">
 <link rel="canonical" href="https://curb.guide/lodi">
 <!-- Social cards: og.png is a static 1200x630 asset regenerated via `npm run og` (og/template-home.html). URLs must stay absolute. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
 <meta property="og:title" content="CURB: Know where to park in Lodi">
-<meta property="og:description" content="Street sweeping block by block, with alerts before the sweeper comes. From Lodi open data.">
+<meta property="og:description" content="Street sweeping block by block, with alerts before the sweeper comes. From the Borough's parking code.">
 <meta property="og:url" content="https://curb.guide/lodi">
 <meta property="og:image" content="https://curb.guide/og-lodi.png?v=1">
 <meta property="og:image:width" content="1200">
@@ -936,8 +936,8 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
           <a class="im-m" id="imRate" style="display:none" target="_blank" rel="noopener" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z"/></svg><span>Rate</span></a>
         </div>
         <div class="im-foot">
-          <div class="im-flinks"><a href="https://ecode360.com/13641874" target="_blank" rel="noopener">Lodi open data</a><a href="https://github.com/alevizio/curb" target="_blank" rel="noopener">Open source</a><a href="/privacy">Privacy</a></div>
-          Free &amp; open source. Built on Lodi open data. The posted sign is always the final word.
+          <div class="im-flinks"><a href="https://ecode360.com/13641874" target="_blank" rel="noopener">The Borough's parking code</a><a href="https://github.com/alevizio/curb" target="_blank" rel="noopener">Open source</a><a href="/privacy">Privacy</a></div>
+          Free &amp; open source. Built on the Borough's parking code. The posted sign is always the final word.
         </div>
       </div>
     </div>
@@ -959,7 +959,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 <!-- layers control: everything map-related lives in one corner, Google-Maps style -->
 <div class="layers">
   <button class="carbtn" id="carBtn" type="button" hidden aria-label="Show my car"></button>
-  <button class="layersbtn" id="layersBtn" aria-expanded="false" aria-haspopup="true" aria-label="Map layers" data-tip="Map layers &amp; permit areas" data-tip-pos="b">
+  <button class="layersbtn" id="layersBtn" style="display:none" aria-expanded="false" aria-haspopup="true" aria-label="Map layers" data-tip="Map layers &amp; permit areas" data-tip-pos="b">
     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
     <span class="lb-txt">Layers</span><span id="layerBadges"></span>
   </button>
@@ -1010,7 +1010,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
-  <p>No parking on the side of the street the Borough's schedule names during its street sweeping hours: on most blocks one day a week, 9 AM to 3 PM, on some for one hour. Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>
+  <p>No parking on the side of the street the Borough's schedule names during its street sweeping hours: on most blocks one day a week, 9 AM to 3 PM, on some for one hour. Tap where you parked for the rules. <b>A preview</b>, built on the Borough's parking code.</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps soon</span>
@@ -1020,7 +1020,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
   <a class="wabout" href="/about">How it works →</a>
   <p class="wcities">CURB also maps other cities. <a href="/cities">See them all →</a></p>
   
-  <p class="wfoot">Free, no account. Built on <a href="https://ecode360.com/13641874" target="_blank" rel="noopener">Lodi's open data</a>. The posted sign always wins.</p>
+  <p class="wfoot">Free, no account. Built on <a href="https://ecode360.com/13641874" target="_blank" rel="noopener">the Borough's parking code</a>. The posted sign always wins.</p>
 </div>
 
 <!-- Shown only when Leaflet or the time core never loaded (see the retry right after their script tags). -->
