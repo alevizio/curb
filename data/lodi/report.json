@@ -1,0 +1,436 @@
+{
+ "generated": "2026-11-12",
+ "inputs": {
+  "codeRows": 338,
+  "codeRead": "2026-11-11",
+  "centerlines": 2201,
+  "centerlinesInLodi": 853
+ },
+ "output": {
+  "blocks": 496,
+  "sides": 879,
+  "rules": 925,
+  "sizeBytes": 150493
+ },
+ "season": {
+  "from": null,
+  "to": null,
+  "note": "The Code gives no season: the schedule is shown all year."
+ },
+ "skipped": {},
+ "checks": {
+  "cityLimitOneSide": 22,
+  "noCrossStreet": 0,
+  "noOddSide": 48,
+  "oneSideOnly": 113,
+  "twoDaysOneSide": 16,
+  "twoWindowsOneDay": 3
+ },
+ "codeRows": {
+  "applied": 295,
+  "setAside": [
+   {
+    "key": "Arnot Place|West|All; except 9:00 a.m. to 3:00 p.m., Wednesday|Entire length",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Columbia Lane|North|All; except 9:00 a.m. to 3:00 p.m., Friday|From Main Street to Hancock Street",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Contant Avenue|North|All; except 9:00 a.m. to 3:00 p.m., Wednesday|From Westervelt Place to Corabelle Avenue",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Davis Drive|West|All/All, except Tuesday, 9:00 a.m. to 3:00 p.m.|Between St. Joseph Boulevard and Union Street",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "East Place|West|4:00 p.m. to __, Monday to Friday|From Washington Street to James Street",
+    "why": "the hours or the day are blank in the Code"
+   },
+   {
+    "key": "Green Court|East|All; except 9:00 a.m. to 3:00 p.m., Thursday|Entire length",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Hoehn Street|West|All; except 9:00 a.m. to 3:00 p.m., Tuesday|From 125 feet north of Union Street to Church Street",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Hope Street|East|8:00 a.m. to 8:00 p.m., all days except for Thursday|Between the southerly sideline of Route No. 46 and the northerly sideline of Eastgate Court",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "James Place|West|All/All except Tuesday, 6:00 a.m. to 7:00 p.m.|Between St. Joseph Boulevard and Union Street",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "James Street|South|All; except 9:00 a.m. to 3:00 p.m., Tuesday|From Prospect Street to Brookside Avenue",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "John Street|North|All; except 9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Leo Place|West|All; except 9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Liberty Lane|East|4:00 p.m. to __, Monday to Friday|Entire length",
+    "why": "the hours or the day are blank in the Code"
+   },
+   {
+    "key": "Liberty Street|North|All; except 9:00 a.m. to 10:00 a.m., Tuesday|From Liberty Lane to Prospect Street",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Liberty Street|North|All; except 9:00 a.m. to 3:00 p.m., Tuesday|From Prospect Street east to terminus",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Louis Street|East|All; except 9:00 a.m. to 3:00 p.m., Thursday|From 100 feet north of Union Street to St. Joseph Boulevard",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Mitchell Street|North|All; except 9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Money Street|West|All; except 9:00 a.m. to 3:00 p.m., Tuesday|From Route 46 to John Street",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "North Savoie Street|West|All; except 9:00 a.m. to 3:00 p.m., Thursday|From MacArthur Avenue to Route 46",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Pine Street|West|All; except 9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Putnam Street|West|8:00 a.m. to 4:00 p.m., except Saturday, Sunday, and holidays|From Outwater Lane to Hamilton Avenue",
+    "why": "weekday hours with exceptions (weekends, holidays): not a weekly sweeping window"
+   },
+   {
+    "key": "Short Street|West|All; except Friday 9:00 a.m. to 3:00 p.m.|From Garibaldi Avenue to MacArthur Avenue",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Sidney Street|North|7:00 a.m. to 5:00 p.m., Monday through Friday; 7:00 a.m. to 12:00 noon, Saturday; except holidays|From 50 feet east of Money Street, east for 100 feet",
+    "why": "weekday hours with exceptions (weekends, holidays): not a weekly sweeping window"
+   },
+   {
+    "key": "Sidney Street|North|All; except 9:00 a.m. to 3:00 p.m., Tuesday|From Main Street to Money Street",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "St. Joseph's Plaza|East|9:00 a.m. to 3:00 p.m., Monday|Continuation of East Place entire length",
+    "why": "location unreadable"
+   },
+   {
+    "key": "St. Joseph's Plaza|South|9:00 a.m. to 3:00 p.m., Thursday|Continuation of Spring Street entire length",
+    "why": "location unreadable"
+   },
+   {
+    "key": "St. Joseph's Plaza|West|9:00 a.m. to 3:00 p.m., Thursday|Continuation of East Place entire length",
+    "why": "location unreadable"
+   },
+   {
+    "key": "Victor Street|East|8:00 a.m. to 5:00 p.m., except Saturday, Sunday and holidays|From Kennedy Drive south to terminus",
+    "why": "weekday hours with exceptions (weekends, holidays): not a weekly sweeping window"
+   },
+   {
+    "key": "Washington Street|North|All; except 9:00 a.m. to 3:00 p.m., Tuesday|Brookside Avenue to East Place",
+    "why": "reads \"All\" with an exception: the Code does not say what applies in the excepted hours"
+   },
+   {
+    "key": "Washington Street|South|4:00 p.m. to _____, Monday to Friday|From the entrance to Acme East to Liberty Lane",
+    "why": "the hours or the day are blank in the Code"
+   },
+   {
+    "key": "Westervelt Place|West|9:00 a.m. to 10:00 a.m., _______|From Park Street to First Street",
+    "why": "the hours or the day are blank in the Code"
+   },
+   {
+    "key": "Woodside Avenue|West|7:30 a.m. to 4:00 p.m., except Saturday, Sunday, and holidays|Kipp Avenue to Terrace Avenue",
+    "why": "weekday hours with exceptions (weekends, holidays): not a weekly sweeping window"
+   }
+  ],
+  "notApplied": [
+   {
+    "key": "Aida Court|North|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "notes": [
+     "a block runs the way the Code names the side: side unclear there, not shown"
+    ]
+   },
+   {
+    "key": "Aida Court|South|9:00 a.m. to 3:00 p.m., Friday|Entire length",
+    "notes": [
+     "a block runs the way the Code names the side: side unclear there, not shown"
+    ]
+   },
+   {
+    "key": "Arnot Place|East|9:00 a.m. to 3:00 p.m., Wednesday|Entire length",
+    "notes": [
+     "a block runs the way the Code names the side: side unclear there, not shown"
+    ]
+   },
+   {
+    "key": "Hoehn Street|East|9:00 a.m. to 3:00 p.m., Tuesday|From 125 feet north of Union Street to Church Street",
+    "notes": [
+     "125 feet from Union St measured in a straight line",
+     "on a block that side is in a neighboring town: not shown"
+    ]
+   },
+   {
+    "key": "Massey Street|East|9:00 a.m. to 3:00 p.m., Tuesday|From Union Street to a point 118 feet north of Union Street",
+    "notes": [
+     "118 feet from Union St measured in a straight line",
+     "no block has its middle inside the stretch (shorter than a block)"
+    ]
+   },
+   {
+    "key": "Massey Street|West|9:00 a.m. to 3:00 p.m., Thursday|From Union Street to a point 140 feet north of Union Street",
+    "notes": [
+     "140 feet from Union St measured in a straight line",
+     "no block has its middle inside the stretch (shorter than a block)"
+    ]
+   },
+   {
+    "key": "Putnam Street|West|9:00 a.m. to 3:00 p.m., Friday|Hamilton Avenue to Kimmig Avenue",
+    "notes": [
+     "Kimmig Ave is nowhere near the street in the State's layer",
+     "a limit could not be placed: the stretch is not shown"
+    ]
+   },
+   {
+    "key": "Robert Court|East|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "notes": [
+     "a block runs the way the Code names the side: side unclear there, not shown"
+    ]
+   },
+   {
+    "key": "Robert Court|West|9:00 a.m. to 3:00 p.m., Thursday|Entire length",
+    "notes": [
+     "a block runs the way the Code names the side: side unclear there, not shown"
+    ]
+   },
+   {
+    "key": "South Savoie Street|East|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "notes": [
+     "no S Savoie St coded to Lodi in the State's layer"
+    ]
+   },
+   {
+    "key": "South Savoie Street|West|9:00 a.m. to 3:00 p.m., Thursday|Entire length",
+    "notes": [
+     "no S Savoie St coded to Lodi in the State's layer"
+    ]
+   }
+  ],
+  "notes": [
+   {
+    "key": "Adams Place|South|9:00 a.m. to 3:00 p.m., Thursday|From 150 feet east of South Main Street to Prospect Street",
+    "blocks": 1,
+    "notes": [
+     "150 feet from S Main St measured in a straight line"
+    ]
+   },
+   {
+    "key": "Brookside Avenue|East|9:00 a.m. to 3:00 p.m., Thursday|Entire length",
+    "blocks": 2,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Brookside Avenue|West|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "blocks": 2,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Charles Street|South|9:00 a.m. to 3:00 p.m., Wednesday|From Passaic Street to Westervelt Place and from Westminster Place to Harrison Avenue",
+    "blocks": 4,
+    "notes": [
+     "Passaic St is not on the street in the layer: read as Passaic Ave, the one Passaic that meets it"
+    ]
+   },
+   {
+    "key": "Church Street|North|9:00 a.m. to 3:00 p.m., Thursday|From Massey Street to Hoehn Street",
+    "blocks": 7,
+    "notes": [
+     "Hoehn St does not meet the street in the layer: placed at its nearest point (12 m away)"
+    ]
+   },
+   {
+    "key": "Church Street|South|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "blocks": 11,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Columbia Lane|South|9:00 a.m. to 3:00 p.m., Friday|From Hancock Street to Mill Street",
+    "blocks": 1,
+    "notes": [
+     "Hancock St does not meet the street in the layer: placed at its nearest point (40 m away)"
+    ]
+   },
+   {
+    "key": "Columbia Lane|South|9:00 a.m. to 3:00 p.m., Friday|From Main Street to Hancock Street",
+    "blocks": 1,
+    "notes": [
+     "Hancock St does not meet the street in the layer: placed at its nearest point (40 m away)"
+    ]
+   },
+   {
+    "key": "Hamilton Avenue|North|9:00 a.m. to 3:00 p.m., Friday|Entire length",
+    "blocks": 8,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Hamilton Avenue|North|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "blocks": 8,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Hamilton Avenue|South|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "blocks": 8,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Hamilton Avenue|South|9:00 a.m. to 3:00 p.m., Friday|Entire length",
+    "blocks": 8,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "James Street|North|9:00 a.m. to 3:00 p.m., Tuesday|From Prospect Street to Brookside Avenue",
+    "blocks": 3,
+    "notes": [
+     "Brookside Ave does not meet the street in the layer: placed at its nearest point (61 m away)"
+    ]
+   },
+   {
+    "key": "Liberty Street|South|9:00 a.m. to 10:00 a.m., Tuesday|From Liberty Lane to Prospect Street",
+    "blocks": 2,
+    "notes": [
+     "Liberty Ln meets the street in more than one place (68 m apart): the middle is used"
+    ]
+   },
+   {
+    "key": "Louis Street|West|9:00 a.m. to 3:00 p.m., Thursday|From 100 feet north of Union Street to St. Joseph Boulevard",
+    "blocks": 1,
+    "notes": [
+     "100 feet from Union St measured in a straight line"
+    ]
+   },
+   {
+    "key": "Massey Street|East|9:00 a.m. to 3:00 p.m., Tuesday|From 118 feet north of Union Street to Church Street",
+    "blocks": 2,
+    "notes": [
+     "118 feet from Union St measured in a straight line"
+    ]
+   },
+   {
+    "key": "Massey Street|West|9:00 a.m. to 3:00 p.m., Thursday|From 140 feet north of Union Street to Church Street",
+    "blocks": 2,
+    "notes": [
+     "140 feet from Union St measured in a straight line"
+    ]
+   },
+   {
+    "key": "Redstone Lane|North|9:00 a.m. to 3:00 p.m., Wednesday|Entire length",
+    "blocks": 5,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Redstone Lane|South|9:00 a.m. to 3:00 p.m., Friday|Entire length",
+    "blocks": 5,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Sherman Avenue|North|9:00 a.m. to 3:00 p.m., Friday|Entire length",
+    "blocks": 2,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Sherman Avenue|South|9:00 a.m. to 3:00 p.m., Tuesday|Entire length",
+    "blocks": 2,
+    "notes": [
+     "the street's Lodi blocks are in separate pieces: the row is on all of them"
+    ]
+   },
+   {
+    "key": "Union Street|North|9:00 a.m. to 3:00 p.m., Tuesday|From 400 feet east of Main Street to Massey Street",
+    "blocks": 1,
+    "notes": [
+     "400 feet from Main St measured in a straight line"
+    ]
+   },
+   {
+    "key": "Washington Street|South|9:00 a.m. to 3:00 p.m., Tuesday|Brookside Avenue to East Place",
+    "blocks": 3,
+    "notes": [
+     "Brookside Ave does not meet the street in the layer: placed at its nearest point (85 m away)"
+    ]
+   },
+   {
+    "key": "Westervelt Place|West|9:00 a.m. to 3:00 p.m., Monday|From Fredrick Street to Park Street and from First Street to Corabelle Avenue",
+    "blocks": 8,
+    "notes": [
+     "Park St is not on the street in the layer: read as Park Ave, the one Park that meets it"
+    ]
+   }
+  ]
+ },
+ "assumptions": [
+  "Schedule II (§ 560-38) is the street sweeping schedule: its paragraph C suspends it \"when the street sweepers of the Borough of Lodi are not operable\".",
+  "A row applies every week, all year: the Code gives no season, no week of the month and no holiday.",
+  "A stretch covers every block whose middle lies between its two limits. Distances in feet are measured in a straight line from the cross street; a stretch shorter than a block is not shown.",
+  "Where the Code and the State spell a street differently, the State's name is used: Arlene Grove = Arlene Grv, First St = 1st St, Longvalley Rd = Long Valley Rd, St Joseph Blvd = Saint Joseph Blvd, Fredrick St = Frederick St, Route 46 = Us Hwy 46, Route No 46 = Us Hwy 46, Jefferson St = Jefferson Ave, Madison St = Madison Ave, Marion St = Marion Ave, Vreeland Ave = Vreeland St, St Joseph Plz = East Pl.",
+  "Jefferson, Madison and Marion \"Street\" in the Code are the State's Jefferson, Madison and Marion Avenue; \"Vreeland Avenue\" (east side) and \"Vreeland Street\" (west side) are the State's one Vreeland St.",
+  "On James Street, \"St. Joseph Plaza\" is read as East Place: the Code's own rows call the plaza the continuation of East Place, and the State has no plaza.",
+  "A limit the State does not have on that street is read as the one street with the same name and another type that crosses it (each case is in codeRows.notes); with none, or more than one, the stretch is not shown.",
+  "Marion Pepe Drive: \"Inner Circle\" is the curb facing the middle of the loop, \"Outer Circle\" the other; the East and West rows \"From Terhune Avenue to Circle\" are the straight block before the loop.",
+  "On a street along the Borough line, only the side coded to Lodi gets the rule."
+ ],
+ "unverified": [
+  "No block has been checked against the posted signs.",
+  "Towing: Article II names a fine and no tow; shown as no towing.",
+  "Holidays: none are named in the Code, so none are listed and nothing is skipped on a holiday.",
+  "The 1965 Article I (§ 560-24, \"Schedule 10: Alternate Side of Street Parking\") lists about 40 streets on weekdays 8 AM to 5 PM with no side: not shown; it may be superseded by Schedule II.",
+  "Rows the build could not place are listed under codeRows.notApplied; rows it set aside under codeRows.setAside.",
+  "Streets whose Lodi blocks are in separate pieces, where an \"Entire length\" row is on every piece: Brookside Ave, Church St, Hamilton Ave, Redstone Ln, Sherman Ave.",
+  "A side with two windows on one day, from two rows that overlap (both are shown): 1st St."
+ ],
+ "questionsForCity": [
+  "Is Schedule II (§ 560-38) the schedule the sweepers and the signs follow today? Is there a published map or list besides the Code?",
+  "What do the rows that read \"All; except <day and hours>\" mean on the street: no parking at all times except then, or the reverse?",
+  "Which holidays suspend the schedule, and is it suspended in winter or for snow?",
+  "Is § 560-24 (Schedule 10, alternate side parking, 1965) still enforced?",
+  "Three rows have blank hours or days (East Place, Liberty Lane, Washington Street south side; Westervelt Place west side): what do the signs say?",
+  "Are Jefferson, Madison and Marion \"Street\" in the schedule the avenues of the same names? Is South Savoie Street today's Savoie Street?",
+  "Can a car be towed for a street sweeping violation?",
+  "First Street, south side: one row says Wednesday 9 to 10 AM from Passaic Avenue to Harrison Avenue, another Wednesday 9 AM to 3 PM from Passaic Avenue to South Corabelle Avenue. Which is posted?",
+  "Putnam Street, west side: the Friday row runs \"Hamilton Avenue to Kimmig Avenue\". Where is that stretch? And James Street, south side, runs \"From St. Joseph Plaza\": is that the corner of East Place?",
+  "Marion Pepe Drive: is the \"Inner Circle\" the curb around the island of the loop?"
+ ]
+}

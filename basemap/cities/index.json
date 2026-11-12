@@ -29,6 +29,11 @@
     "maxzoom": 13,
     "bytes": 14797075
   },
+  "lodi": {
+    "build": "20261111",
+    "maxzoom": 13,
+    "bytes": 5616312
+  },
   "los-angeles": {
     "build": "20261018",
     "maxzoom": 13,

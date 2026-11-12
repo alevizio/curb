@@ -284,6 +284,10 @@
       "destination": "/toronto/about.html"
     },
     {
+      "source": "/lodi",
+      "destination": "/lodi.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },
