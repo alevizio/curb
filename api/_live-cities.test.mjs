@@ -12,6 +12,10 @@ describe('the live list', () => {
   it('is San Francisco plus exactly the public cities', () => {
     expect(LIVE.map((c) => c.id).sort()).toEqual(['sf', ...PUBLIC].sort());
   });
+  it('leaves out a city that is built but not public: a request for it is still a request', () => {
+    const previews = Object.values(globalThis.CITY_CONFIGS).filter((c) => !PUBLIC.includes(c.id));
+    for (const c of previews) expect(id(c.name, c.region), c.id).toBe(null);
+  });
   it('knows every live city\'s state or province by the code the issue filer uses', () => {
     for (const c of LIVE) expect(c.code, c.id).toBe(regionCode(c.region));
   });
