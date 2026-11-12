@@ -3,7 +3,8 @@
 // (scripts/cities/city-pages.mjs), a place on curb.guide/cities and in sitemap.xml (scripts/build-hood-pages.mjs), and
 // curb.guide sends a first visit there when the visitor is inside its bounds (index.html CITY_MAPS, written by
 // scripts/cities/configs.mjs). Every other built city stays a preview: noindex, "(preview)" in its title, unlisted.
-// Boston (built by hand, boston-page.mjs) stays hidden until its contact replies.
+// Boston is public too (owner, 2026-11-12), but built by hand (boston-page.mjs, boston-pages.mjs), with no city.json: its
+// place in CITY_MAPS, on /cities, in the sitemap and in "Request a city" comes from BOSTON below, never from PUBLIC.
 //
 // Making a built city public is one line here, then run, in order:
 //   node scripts/cities/configs.mjs && node scripts/cities/city-page.mjs && node scripts/cities/boston-page.mjs \
@@ -22,6 +23,10 @@ export const IN_PROGRESS = [
 ];
 
 export const isPublic = (id) => PUBLIC.includes(id);
+
+/** Boston's entry among the maps: what a built city's city.json says, kept here by hand. The bounds are its swept blocks'
+ *  box (data/boston/segments.json), which also holds Cambridge and Brookline; Somerville's own, smaller box wins there. */
+export const BOSTON = { id: 'boston', name: 'Boston', region: 'Massachusetts', center: [42.3550, -71.0656], bounds: [[42.24, -71.18], [42.40, -70.99]] };
 
 /** Whether a city's map is about street sweeping (every city so far) or another rule (Milwaukee: words.what). */
 export const sweepsIn = (c) => !(c.words && c.words.what && c.words.what !== 'street sweeping');

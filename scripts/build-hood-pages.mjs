@@ -19,7 +19,7 @@ import { slug, pagedHoods } from '../lib/hoods.js';   // MIN_TICKETS floor lives
 import { schedShort } from '../api/block.js';         // same schedule wording as the /b/ pages
 import { gitDate, today } from './lastmod.mjs';
 import { HOLIDAY_SCHEDULE_BLOCKS } from './build-holidays-page.mjs'; // the /holidays page's count, so the FAQ agrees
-import { PUBLIC } from './cities/public.mjs';          // the cities in the sitemap
+import { PUBLIC, BOSTON } from './cities/public.mjs';  // the cities in the sitemap
 
 const ROOT = new URL('../', import.meta.url);
 // The day a city's data was built ("YYYY-MM-DD"): its segments.json starts with _meta.generated, so the file's first bytes
@@ -718,11 +718,14 @@ const staticUrls = [
 const hoodUrls = hoods.map((h) => [`https://curb.guide/n/${slug(h.hood)}`, 'monthly', '0.6', `n/${slug(h.hood)}.html`]);
 // The public cities (scripts/cities/public.mjs): /cities, each city's map and its readable page (scripts/cities/
 // city-page.mjs, city-pages.mjs), dated by the city's data (segments.json _meta.generated, the build the map shows); /cities
-// by the newest of them. Boston and any other preview stay out: they are noindex.
-const cityDates = Object.fromEntries(PUBLIC.map((id) => [id, cityDataDate(id)]));
+// by the newest of them. Boston, built by hand, also has /boston/fixes (/boston/notes stays out: it is noindex). A preview
+// stays out: it is noindex.
+const cityIds = [...PUBLIC, BOSTON.id];
+const cityDates = Object.fromEntries(cityIds.map((id) => [id, cityDataDate(id)]));
 const newest = Object.values(cityDates).filter(Boolean).sort().pop() || null;
 const cityUrls = [['https://curb.guide/cities', 'weekly', '0.8', null, newest],
-  ...PUBLIC.flatMap((id) => [[`https://curb.guide/${id}`, 'weekly', '0.7', null, cityDates[id]], [`https://curb.guide/${id}/about`, 'monthly', '0.6', null, cityDates[id]]])];
+  ...cityIds.flatMap((id) => [[`https://curb.guide/${id}`, 'weekly', '0.7', null, cityDates[id]], [`https://curb.guide/${id}/about`, 'monthly', '0.6', null, cityDates[id]]]),
+  [`https://curb.guide/${BOSTON.id}/fixes`, 'monthly', '0.6', null, cityDates[BOSTON.id]]];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[...staticUrls, ...hoodUrls, ...cityUrls].map(([loc, freq, pri, file, date]) => {

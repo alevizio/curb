@@ -1,4 +1,4 @@
-// Headless check of the Boston preview (boston.html, built by scripts/cities/boston-page.mjs) on a phone screen:
+// Headless check of the Boston map (boston.html, built by scripts/cities/boston-page.mjs) on a phone screen:
 // the page loads with no errors, the citywide overview draws each block's real line, the data comes with its fixes
 // (data/boston/fixes.json), street zoom draws curb sides from data/boston/, a block opens its sheet with Boston's season
 // line, an address search opens the right side of the street, a location outside Boston (allowed on curb.guide for the
@@ -364,4 +364,4 @@ try {
   check(!bad.length, 'no failed or SF requests' + (bad.length ? ': ' + bad.slice(0, 4).join(' | ') : ''));
 } finally { await b.close(); }
 if (fails.length) { console.error(`\n${fails.length} check(s) failed`); process.exit(1); }
-console.log('\nBoston preview OK');
+console.log('\nBoston map OK');

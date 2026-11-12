@@ -4,10 +4,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Boston Street Cleaning Map (preview) | CURB</title>
-<meta name="robots" content="noindex">
-<meta name="description" content="Boston street sweeping, block by block: every swept curb colored by its next sweep, from the City's open data. A CURB preview.">
+<title>Boston Street Cleaning Map: Schedules by Block | CURB</title>
+<meta name="description" content="Boston street cleaning, block by block: every curb colored by its next sweep. A missed sweep is a $40 ticket. Free, with alerts, from the City's open data.">
 <link rel="canonical" href="https://curb.guide/boston">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"CURB Boston","url":"https://curb.guide/boston","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"description":"Boston street cleaning, block by block: every curb colored by its next sweep. A missed sweep is a $40 ticket. Free, with alerts, from the City's open data.","image":"https://curb.guide/og-boston.png?v=1","areaServed":{"@type":"City","name":"Boston, Massachusetts"},"publisher":{"@type":"Organization","name":"CURB","url":"https://curb.guide/"}}
+</script>
 <!-- Social cards: og.png is a static 1200x630 asset regenerated via `npm run og` (og/template-home.html). URLs must stay absolute. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
@@ -37,7 +39,6 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
 <link rel="icon" sizes="any" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-itunes-app" content="app-id=6780998238">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -907,7 +908,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<h1 class="srh">Boston street cleaning map: sweeping schedules by block (a CURB preview)</h1>
+<h1 class="srh">Boston street cleaning map: sweeping schedules by block</h1>
 <main id="map" aria-label="Boston parking map"></main>
 
 <div class="top">
@@ -1048,7 +1049,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
-  <p>Every swept curb in Boston, colored by its <b>next street sweep</b>. Tap where you parked for the rules. <b>A preview</b>, built on the City's open data.</p>
+  <p>Every swept curb in Boston, colored by its <b>next street sweep</b>. Tap where you parked for the rules. Built on the City's open data.</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps soon</span>
@@ -1504,7 +1505,7 @@ async function loadViewport(){
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}
   hint.style.opacity='0';hint.style.visibility='hidden';
   lastRows=data; segBounds=b;
-  if(!data.length&&!noCovToasted){noCovToasted=true; toast('No street-sweeping schedule here. This preview covers Boston.');}
+  if(!data.length&&!noCovToasted){noCovToasted=true; toast('No street-sweeping schedule here. This map covers Boston.');}
   drawSegments(data);
   tryPendingOpen();
   if(rppOn) loadRpp(null, my); else {rppLayer.clearLayers();rppCache=[];}
@@ -3250,6 +3251,7 @@ const CITY_MAPS=[{"id":"sf","name":"San Francisco","region":"California","path":
 {"id":"madison","name":"Madison","region":"Wisconsin","path":"/madison","center":[43.088,-89.355],"bounds":[[42.9996,-89.5716],[43.1719,-89.2339]]},
 {"id":"philadelphia","name":"Philadelphia","region":"Pennsylvania","path":"/philadelphia","center":[39.9905,-75.155],"bounds":[[39.9047,-75.2553],[40.0575,-75.0395]]},
 {"id":"riverside","name":"Riverside","region":"California","path":"/riverside","center":[33.961,-117.3915],"bounds":[[33.8676,-117.5284],[34.0237,-117.2738]]},
+{"id":"boston","name":"Boston","region":"Massachusetts","path":"/boston","center":[42.355,-71.0656],"bounds":[[42.24,-71.18],[42.4,-70.99]]},
 {"id":"saint-paul","name":"Saint Paul","region":"Minnesota","path":"/saint-paul","center":[44.9395,-93.146],"bounds":[[44.8858,-93.2128],[44.997,-92.9994]]},
 {"id":"pittsburgh","name":"Pittsburgh","region":"Pennsylvania","path":"/pittsburgh","center":[40.462,-79.948],"bounds":[[40.3717,-80.0794],[40.4983,-79.8741]]},
 {"id":"san-diego","name":"San Diego","region":"California","path":"/san-diego","center":[32.7172,-117.16],"bounds":[[32.5438,-117.2815],[33.0529,-116.9278]]},
@@ -3369,7 +3371,7 @@ function placeFix(p,quiet){
     // inside another map's bounds (a public city, or San Francisco from a city's page): offer that map
     const there=acc>CITY_FIX_MAX?null:mapAt(c.latitude,c.longitude,CITY);
     if(there)toastLink("You're outside "+CITY_NAME[CITY]+", in "+there.name+".",there.path,'Open the '+there.name+' map');
-    else toast("You're outside Boston, and this preview only covers Boston. Search a street or tap a curb.");
+    else toast("You're outside Boston, and this map only covers Boston. Search a street or tap a curb.");
     return;
   }
   if(!(acc>ACC_MAX)){  // unknown (null/0/NaN) is trusted, as before
@@ -3514,7 +3516,7 @@ function tryPendingOpen(){
   const n=nearestSeg(po.lat,po.lng);
   // A search/link cnn fallback skips the cap: big parcels' address points sit >80 m from their block.
   if(n&&(po.cnnHint||n.d<=NEAR_M))return openPending(n);
-  endPendingOpen(lastRows.length?'No swept curb within 80 m. Tap your block on the map.':'No street-sweeping schedule here. This preview covers Boston.');
+  endPendingOpen(lastRows.length?'No swept curb within 80 m. Tap your block on the map.':'No street-sweeping schedule here. This map covers Boston.');
 }
 function openPending(n){endPendingOpen();openSheet(n.group,n.side.key);}
 function endPendingOpen(msg){const po=pendingOpen; if(!po)return; pendingOpen=null; if(po.loc)locBusy(false); if(msg)toast(msg);}

@@ -1,10 +1,11 @@
 // The multi-city launch (owner, 2026-10-20), checked on the committed files: every public city (scripts/cities/public.mjs) is
-// indexable, routed, in the sitemap, on /cities and in index.html's CITY_MAPS; Boston and every other preview stay hidden;
-// the generated readable pages and the hub are what their generator writes now.
+// indexable, routed, in the sitemap, on /cities and in index.html's CITY_MAPS; so is Boston, built by hand and public since
+// 2026-11-12 (owner), with /boston/notes still unlisted; every preview stays hidden; the generated readable pages and the hub
+// are what their generator writes now.
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { PUBLIC, IN_PROGRESS, seoWords, ruleTerm } from './public.mjs';
+import { PUBLIC, BOSTON, IN_PROGRESS, seoWords, ruleTerm } from './public.mjs';
 import { cityFacts, aboutPage, hubPage } from './city-pages.mjs';
 import { project, W, H } from './hub-map.mjs';
 import { LIVE } from '../../api/_live-cities.js';
@@ -14,17 +15,18 @@ const read = (f) => readFileSync(ROOT + f, 'utf8');
 const json = (f) => JSON.parse(read(f));
 const BUILT = readdirSync(ROOT + 'data', { withFileTypes: true })
   .filter((d) => d.isDirectory() && existsSync(`${ROOT}data/${d.name}/city.json`) && existsSync(`${ROOT}data/${d.name}/segments.json`)).map((d) => d.name);
-const PREVIEWS = [...new Set(['boston', ...BUILT.filter((id) => !PUBLIC.includes(id))])];   // Boston (built by hand), and any city built but not public
+const PREVIEWS = BUILT.filter((id) => !PUBLIC.includes(id));   // any city built but not public
 const sitemap = read('sitemap.xml'), vercel = json('vercel.json'), hub = read('cities.html'), home = read('index.html');
 const routed = (src) => vercel.rewrites.find((r) => r.source === src);
 const dataDate = (id) => String(json(`data/${id}/segments.json`)._meta.generated).slice(0, 10);
 
 describe('the list', () => {
-  it('names only built cities, once each, and holds Boston back', () => {
+  it('names only built cities, once each; Boston, built by hand, is public on its own', () => {
     expect(new Set(PUBLIC).size).toBe(PUBLIC.length);
     for (const id of PUBLIC) expect(BUILT, id).toContain(id);
     expect(PUBLIC).not.toContain('boston');
-    expect(PREVIEWS).toContain('boston');
+    expect(PREVIEWS).not.toContain('boston');
+    expect(BOSTON.id).toBe('boston');
   });
 });
 
@@ -70,7 +72,47 @@ describe('the weather in the bottom bar', () => {
   });
 });
 
-describe('a preview (Boston, and any city not public yet)', () => {
+describe('Boston (public since 2026-11-12, owner)', () => {
+  const page = read('boston.html');
+  it('an indexable map with its own title, description, canonical, card and JSON-LD', () => {
+    expect(page).not.toContain('noindex');
+    expect(page).not.toMatch(/\(preview\)|a CURB preview|This preview/i);
+    const title = page.match(/<title>([^<]+)<\/title>/)[1];
+    expect(title).toBe('Boston Street Cleaning Map: Schedules by Block | CURB');
+    expect(title.length).toBeLessThanOrEqual(60);
+    expect(page).toContain('<link rel="canonical" href="https://curb.guide/boston">');
+    expect(page).toContain('<meta property="og:image" content="https://curb.guide/og-boston.png?v=1">');
+    expect(existsSync(`${ROOT}og-boston.png`)).toBe(true);
+    const ld = JSON.parse(page.match(/<script type="application\/ld\+json">\n([^\n]+)\n<\/script>/)[1]);
+    expect(ld).toMatchObject({ '@type': 'WebApplication', url: 'https://curb.guide/boston', name: 'CURB Boston' });
+    expect(page).not.toContain('apple-itunes-app');   // the San Francisco app's banner
+    expect(json('manifest-boston.json').name).toBe('CURB Boston');
+  });
+  it('routed, with its readable pages, in the sitemap dated by its data', () => {
+    for (const f of ['about', 'fixes']) {
+      expect(routed(`/boston/${f}`)).toEqual({ source: `/boston/${f}`, destination: `/boston/${f}.html` });
+      const t = read(`boston/${f}.html`);
+      expect(t, f).not.toContain('noindex');
+      expect(t, f).not.toMatch(/\(preview\)|a CURB preview|This preview/i);
+      expect(t, f).toContain(`<link rel="canonical" href="https://curb.guide/boston/${f}">`);
+    }
+    expect(routed('/boston')).toEqual({ source: '/boston', destination: '/boston.html' });
+    for (const loc of ['https://curb.guide/boston', 'https://curb.guide/boston/about', 'https://curb.guide/boston/fixes'])
+      expect(sitemap, loc).toMatch(new RegExp(`<loc>${loc}</loc>\\s*<lastmod>${dataDate('boston')}</lastmod>`));
+  });
+  it('/boston/notes, written for the City, stays noindex and out of the sitemap and /cities', () => {
+    expect(read('boston/notes.html')).toContain('<meta name="robots" content="noindex">');
+    expect(sitemap).not.toContain('https://curb.guide/boston/notes');
+    expect(hub).not.toContain('/boston/notes');
+  });
+  it('has its card and pin on /cities, under Massachusetts', () => {
+    expect(hub).toContain('<article class="ccard" id="boston">');
+    expect(hub).toContain('href="/boston/about">How it works</a>');
+    expect(hub).toMatch(/<a class="pin[^"]*" href="\/boston"/);
+  });
+});
+
+describe('a preview (any city built but not public yet)', () => {
   for (const id of PREVIEWS) {
     it(`${id}: noindex, unlisted, not in the sitemap, /cities or CITY_MAPS`, () => {
       expect(read(`${id}.html`)).toMatch(/<meta name="robots" content="noindex">/);
@@ -80,16 +122,13 @@ describe('a preview (Boston, and any city not public yet)', () => {
       expect(home).not.toContain(`"id":"${id}"`);
     });
   }
-  it('Boston\'s own pages stay noindex', () => {
-    for (const f of ['boston/about.html', 'boston/fixes.html', 'boston/notes.html']) expect(read(f), f).toContain('<meta name="robots" content="noindex">');
-  });
 });
 
 describe('/cities', () => {
-  it('is routed, in the sitemap, and lists San Francisco and every public city with its map and page', () => {
+  it('is routed, in the sitemap, and lists San Francisco, Boston and every public city with its map and page', () => {
     expect(routed('/cities')).toEqual({ source: '/cities', destination: '/cities.html' });
     expect(sitemap).toContain('<loc>https://curb.guide/cities</loc>');
-    expect(hub).toContain(`Know where to park in ${PUBLIC.length + 1} cities`);
+    expect(hub).toContain(`Know where to park in ${PUBLIC.length + 2} cities`);
     for (const id of PUBLIC) {
       expect(hub, id).toContain(`<article class="ccard" id="${id}">`);
       expect(hub, id).toContain(`href="/${id}/about">How it works</a>`);
@@ -132,11 +171,13 @@ describe('the generated pages are current', () => {
   it('cities.html is what it writes now', () => {
     expect(hub === hubPage(facts), 'cities.html: run node scripts/cities/city-pages.mjs').toBe(true);
   });
-  it('index.html\'s CITY_MAPS is San Francisco then every public city, biggest map first (scripts/cities/configs.mjs)', () => {
+  it('index.html\'s CITY_MAPS is San Francisco then every public city and Boston, biggest map first (scripts/cities/configs.mjs)', () => {
     const block = home.match(/\/\* cities:start \*\/\n([\s\S]*?)\/\* cities:end \*\//)[1];
     const ids = [...block.matchAll(/"id":"([a-z-]+)"/g)].map((m) => m[1]);
-    const blocks = Object.fromEntries(PUBLIC.map((id) => [id, json(`data/${id}/segments.json`).b.length]));
-    expect(ids).toEqual([...PUBLIC].sort((a, b) => blocks[b] - blocks[a] || a.localeCompare(b)));
+    const all = [...PUBLIC, BOSTON.id];
+    const blocks = Object.fromEntries(all.map((id) => [id, json(`data/${id}/segments.json`).b.length]));
+    expect(ids).toEqual(all.sort((a, b) => blocks[b] - blocks[a] || a.localeCompare(b)));
+    expect(block).toContain(JSON.stringify({ id: BOSTON.id, name: BOSTON.name, region: BOSTON.region, path: '/boston', center: BOSTON.center, bounds: BOSTON.bounds }));
     for (const id of PUBLIC) {
       const c = json(`data/${id}/city.json`);
       expect(block).toContain(JSON.stringify({ id, name: c.name, region: c.region, path: '/' + id, center: c.center, bounds: c.bounds }));

@@ -56,11 +56,11 @@ describe('the map at a point', () => {
     expect(mapAt(...AT.eastLA)?.id).toBe('la-county');           // unincorporated, inside both LA boxes
     expect(mapAt(...AT.hollywood)?.id).toBe('los-angeles');
     expect(mapAt(...AT.montreal)?.id).toBe('montreal');
+    expect(mapAt(...AT.boston)?.id).toBe('boston');              // public since 2026-11-12
     expect(mapAt(...AT.berkeley)?.id).toBe('berkeley');
     expect(mapAt(...AT.sf)?.id).toBe('sf');
   });
-  it('Boston (hidden) and places CURB doesn\'t map are none; a map can be left out', () => {
-    expect(mapAt(...AT.boston)).toBe(null);
+  it('places CURB doesn\'t map are none; a map can be left out', () => {
     expect(mapAt(...AT.miami)).toBe(null);
     expect(mapAt(...AT.oakland, 'oakland')).toBe(null);
   });
@@ -84,7 +84,7 @@ describe('a first visit', () => {
     const { did } = visit({ at: 'miami' });
     expect(did.replaced).toBe(null);
     expect(did.toast).toEqual({ m: 'CURB isn\'t in your area yet.', href: '/cities', label: 'See the cities, or request yours' });
-    expect(visit({ at: 'boston' }).did.toast.href).toBe('/cities');
+    expect(visit({ at: 'boston' }).did.replaced).toBe('/boston');
   });
   it('a refusal, or a fix too coarse to pick a city: stays, quietly', () => {
     for (const v of [visit({ answer: 'deny' }), visit({ accuracy: 50000 })]) {

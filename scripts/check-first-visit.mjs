@@ -95,7 +95,7 @@ try {
   await v.ctx.close();
 
   v = await visit({ at: 'boston' });
-  check(v.out.path === '/' && /isn't in your area yet/.test(v.out.toast), `Boston stays hidden: a first visit there stays on San Francisco (${v.out.path}, "${v.out.toast}")`);
+  check(v.out.path === '/boston', `a first visit in Boston opens /boston (landed on ${v.out.path})`);
   await v.ctx.close();
 
   v = await visit({ at: 'chicago', answer: 'deny' });

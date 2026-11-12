@@ -1,6 +1,7 @@
 // The cities CURB already has a map for, found by name: "Request a city" (api/city-request.js) answers a request for one
-// with a link to its map instead of filing it. San Francisco plus every public city in lib/city-configs.js: a city that
-// is built but not public yet carries `preview` there and is still a request like any other (Lodi, NJ, 2026-11-11)
+// with a link to its map instead of filing it. San Francisco, every public city in lib/city-configs.js and Boston (built
+// by hand, so not in that file; public since 2026-11-12): a city that is built but not public yet carries `preview`
+// there and is still a request like any other (Lodi, NJ, 2026-11-11)
 // (scripts/cities/public.mjs; api/_live-cities.test.mjs checks both lists agree).
 //
 // A name matches without accents, case or punctuation, with Saint / St. the same, and by a few short names people type
@@ -39,6 +40,7 @@ export const LIVE = [
   { id: 'sf', name: 'San Francisco', region: 'California', url: '/' },
   ...Object.values(globalThis.CITY_CONFIGS).filter((c) => !c.preview)
     .map((c) => ({ id: c.id, name: c.name, region: c.region, url: `/${c.id}` })),
+  { id: 'boston', name: 'Boston', region: 'Massachusetts', url: '/boston' },
 ].map((c) => ({
   ...c,
   code: CODES[c.region] || '',

@@ -9,8 +9,8 @@ import { regionCode, cityKey } from '../scripts/cities/city-requests.mjs';
 const id = (city, region) => liveCity(city, region)?.id ?? null;
 
 describe('the live list', () => {
-  it('is San Francisco plus exactly the public cities', () => {
-    expect(LIVE.map((c) => c.id).sort()).toEqual(['sf', ...PUBLIC].sort());
+  it('is San Francisco, Boston (built by hand) and exactly the public cities', () => {
+    expect(LIVE.map((c) => c.id).sort()).toEqual(['sf', 'boston', ...PUBLIC].sort());
   });
   it('leaves out a city that is built but not public: a request for it is still a request', () => {
     const previews = Object.values(globalThis.CITY_CONFIGS).filter((c) => !PUBLIC.includes(c.id));
@@ -71,6 +71,9 @@ describe('liveCity', () => {
     expect(id('Montreal', 'Québec')).toBe('montreal');
     expect(id('Montréal', 'Canada')).toBe('montreal');
     expect(id('Toronto', 'Ontario, Canada')).toBe('toronto');
+    expect(liveCity('Boston', 'MA')).toEqual({ id: 'boston', name: 'Boston', url: '/boston' });
+    expect(id('boston, massachusetts')).toBe('boston');
+    expect(id('Boston', 'Lincolnshire')).toBeNull();
   });
   it('San Francisco is the home page', () => {
     expect(liveCity('San Francisco', 'CA')).toEqual({ id: 'sf', name: 'San Francisco', url: '/' });

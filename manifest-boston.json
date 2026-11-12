@@ -1,7 +1,7 @@
 {
-  "name": "CURB Boston (preview)",
+  "name": "CURB Boston",
   "short_name": "CURB Boston",
-  "description": "Boston street sweeping and curb rules, block by block. A preview on the City's open data.",
+  "description": "Boston street sweeping and curb rules, block by block. Built on the City's open data.",
   "start_url": "/boston",
   "scope": "/",
   "display": "standalone",

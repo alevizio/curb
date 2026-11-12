@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds boston.html (the Boston preview at curb.guide/boston) from index.html, so Boston gets San Francisco's
+// Builds boston.html (the Boston map at curb.guide/boston, public since 2026-11-12) from index.html, so Boston gets San Francisco's
 // map, sheet and fixes as they are, with only the parts below swapped. Each edit must match exactly where it
 // expects to (the build fails otherwise), and the list doubles as the map of what is still tied to SF
 // (docs/multi-city/README.md, "Tied to San Francisco"). Boston's data: scripts/cities/boston.mjs. Its time and
@@ -13,11 +13,21 @@
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { jsonLd } from './public.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const src = fs.readFileSync(ROOT + 'index.html', 'utf8');
 const ver = (f) => createHash('sha1').update(fs.readFileSync(ROOT + f)).digest('hex').slice(0, 8);
 const data = JSON.parse(fs.readFileSync(ROOT + 'data/boston/segments.json', 'utf8'));
+
+// The words a search result shows, and the page's JSON-LD, like a public city's (city-page.mjs)
+const DESCRIPTION = 'Boston street cleaning, block by block: every curb colored by its next sweep. A missed sweep is a $40 ticket. Free, with alerts, from the City\'s open data.';
+const LD = { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'CURB Boston', url: 'https://curb.guide/boston',
+  applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any (web browser)',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, isAccessibleForFree: true,
+  description: DESCRIPTION, image: 'https://curb.guide/og-boston.png?v=1',
+  areaServed: { '@type': 'City', name: 'Boston, Massachusetts' },
+  publisher: { '@type': 'Organization', name: 'CURB', url: 'https://curb.guide/' } };
 
 // Blocks swept per weekday, for the day-chip heads-up (index.html DAY_BLOCKS is SF's).
 const perDay = [0, 1, 2, 3, 4, 5, 6].map((d) => data.b.filter((b) => b.d.some(([, , rules]) => rules.some((r) => r[0] === d))).length);
@@ -35,12 +45,13 @@ const hoods = Object.entries(data.b.reduce((m, b) => { if (b.h && !NOT_HOODS.has
 
 const edits = [
   // ---- head --------------------------------------------------------------------------------------
-  ['title + noindex', '<title>SF Street Cleaning Map: When Tickets Actually Land | CURB</title>',
-    '<title>Boston Street Cleaning Map (preview) | CURB</title>\n<meta name="robots" content="noindex">'],
+  ['title', '<title>SF Street Cleaning Map: When Tickets Actually Land | CURB</title>',
+    '<title>Boston Street Cleaning Map: Schedules by Block | CURB</title>'],
   ['description', /<meta name="description" content="[^"]*">/,
-    '<meta name="description" content="Boston street sweeping, block by block: every swept curb colored by its next sweep, from the City\'s open data. A CURB preview.">'],
+    `<meta name="description" content="${DESCRIPTION}">`],
   ['canonical', '<link rel="canonical" href="https://curb.guide/">', '<link rel="canonical" href="https://curb.guide/boston">'],
-  ['no SF app schema', /<script type="application\/ld\+json">[\s\S]*?<\/script>\n/, ''],
+  ['Boston app schema', /<script type="application\/ld\+json">[\s\S]*?<\/script>\n/, `<script type="application/ld+json">\n${jsonLd(LD)}\n</script>\n`],
+  ['no SF app banner', '<meta name="apple-itunes-app" content="app-id=6780998238">\n', ''],
   ['card titles', 'Know where to park in SF', 'Know where to park in Boston', 2],
   ['card description', '<meta property="og:description" content="Street parking rules block by block: sweeping schedules, permit zones & move-your-car alerts. From SF open data.">',
     '<meta property="og:description" content="Street parking rules block by block: sweeping schedules, paid and permit curbs. From Boston open data.">'],
@@ -56,7 +67,7 @@ const edits = [
     '<meta name="twitter:image:alt" content="CURB Boston: Know where to park in Boston">'],
   ['info button words', 'data-tip="Alerts, guide, tickets &amp; about"', 'data-tip="Alerts, guide, holidays &amp; about"'],
   // ---- body: words and menus ---------------------------------------------------------------------
-  ['h1', /<h1 class="srh">[^<]*<\/h1>/, '<h1 class="srh">Boston street cleaning map: sweeping schedules by block (a CURB preview)</h1>'],
+  ['h1', /<h1 class="srh">[^<]*<\/h1>/, '<h1 class="srh">Boston street cleaning map: sweeping schedules by block</h1>'],
   ['map label', '<main id="map" aria-label="San Francisco parking map">', '<main id="map" aria-label="Boston parking map">'],
   ['SF pages → Boston data sources', /<a class="im-item" href="\/n\/" role="menuitem">[\s\S]*?<a class="im-item" href="\/tickets" role="menuitem">[\s\S]*?<\/a>/,
     // SF's three pages, Boston's way: the neighborhood list (in the welcome card), the holidays and the map fixes
@@ -124,7 +135,7 @@ map.createPane('curbs').style.zIndex=450;
     'segLayer.clearLayers();rppLayer.clearLayers();loadLayer.clearLayers();meterLayer.clearLayers();routeLayer.clearLayers();limitLayer.clearLayers();snowLayer.clearLayers();stopLayer.clearLayers();'],
   ['no permit areas', '<div class="lp-sec">Permit areas</div>\n    <div class="arearow">', '<div class="lp-sec" style="display:none">Permit areas</div>\n    <div class="arearow" style="display:none">'],
   ['welcome', /<p>Every curb in SF, colored by[\s\S]*?<\/p>/,
-    '<p>Every swept curb in Boston, colored by its <b>next street sweep</b>. Tap where you parked for the rules. <b>A preview</b>, built on the City\'s open data.</p>'],
+    '<p>Every swept curb in Boston, colored by its <b>next street sweep</b>. Tap where you parked for the rules. Built on the City\'s open data.</p>'],
   ['Boston neighborhoods', /<!-- hoods:start[\s\S]*?<!-- hoods:end -->/, '<nav class="whoods" aria-label="Street cleaning by neighborhood"><p>Street cleaning by neighborhood</p><ul>'
     + hoods.map((h) => `<li><a href="/boston?bbox=${h.bbox}" data-bbox="${h.bbox}">${esc(h.name)}</a></li>`).join('') + '</ul></nav>'],
   // SF's neighborhood links open /n/ pages; Boston's frame the map in place (the href is the fallback)
@@ -173,7 +184,7 @@ document.querySelector('.whoods')?.addEventListener('click',e=>{
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}
   hint.style.opacity='0';hint.style.visibility='hidden';
   lastRows=data; segBounds=b;
-  if(!data.length&&!noCovToasted){noCovToasted=true; toast('No street-sweeping schedule here. This preview covers Boston.');}
+  if(!data.length&&!noCovToasted){noCovToasted=true; toast('No street-sweeping schedule here. This map covers Boston.');}
   drawSegments(data);
   tryPendingOpen();
   if(rppOn) loadRpp(null, my); else {rppLayer.clearLayers();rppCache=[];}
@@ -371,7 +382,7 @@ async function drawStops(){
 }
 `],
   // the three new tiles; then, as every layer draws at street zoom, switching one on from the zoomed out overview
-  // (where the preview opens) zooms in to show it: as far as the street view needs there (bosStreetZoom; a fixed z16
+  // (where the map opens) zooms in to show it: as far as the street view needs there (bosStreetZoom; a fixed z16
   // stayed on the overview downtown, so the layer never drew)
   ['Boston layer toggles', "document.getElementById('routeToggle').onclick=function(){", `function bosToggle(id,set,layer,draw,msg){
   document.getElementById(id).onclick=function(){
@@ -437,15 +448,15 @@ document.getElementById('routeToggle').onclick=function(){`],
 `],
   ['the little car from the file', /async function carRows\(cnn\)\{[\s\S]*?\n\}\n/,
     'async function carRows(cnn){\n  return (await BOS.load()).filter(b=>String(b.c)===String(cnn)).flatMap(BOS.rowsOf);\n}\n'],
-  ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", "'No street-sweeping schedule here. This preview covers Boston.'"],
+  ['outside the city', "'No street-sweeping data here. CURB covers San Francisco.'", "'No street-sweeping schedule here. This map covers Boston.'"],
   // location allowed on curb.guide (for the SF map) carries over to /boston: a fix outside Boston stays put
   ['the city is Boston', 'L.latLngBounds([[37.685,-122.56],[37.84,-122.34]])', 'L.latLngBounds(BOS.BOUNDS)'],
-  ['outside Boston words', "You're outside San Francisco, and this map only covers San Francisco.", "You're outside Boston, and this preview only covers Boston."],
-  // the preview opens on the zoomed out overview (the demo view): one tap on a street zooms in AND opens its block
+  ['outside Boston words', "You're outside San Francisco, and this map only covers San Francisco.", "You're outside Boston, and this map only covers Boston."],
+  // the map opens on the zoomed out overview (the demo view): one tap on a street zooms in AND opens its block
   ['one tap opens a block', "map.on('click',e=>{ userPicked(); if(ovMode){map.flyTo(e.latlng,17,{duration:.6});return;} placeYou(e.latlng.lat,e.latlng.lng,false);});",
     "map.on('click',e=>{ userPicked(); placeYou(e.latlng.lat,e.latlng.lng,ovMode);});"
     // ...and on a pointer device, the overview line under the cursor gets the curb lines' tooltip (previewHtml), for its side
-    // with the soonest sweep: the overview has no curb lines to hover, and the preview opens on it
+    // with the soonest sweep: the overview has no curb lines to hover, and the map opens on it
     + `\nconst ovSide=o=>{ const by={}; let side=null; (o.rules||[]).forEach(r=>{(by[sideKeyOf(r)]=by[sideKeyOf(r)]||[]).push(r);});
   for(const k in by){ const {best,bestRow}=sideNext(by[k]); if(best&&(!side||+best.start<+side.ns.start))side={key:k,blockside:by[k][0].blockside,rows:by[k],row:bestRow,ns:best,mid:o.a}; }
   return side; };

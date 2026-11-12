@@ -25,7 +25,7 @@
   // Under every App Store link, the Android beta (owner, 2026-10-20): /android says how to join it on Google Play.
   var ANDROID = '/android', BETA = 'Android beta: join on Google Play';
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  // The Boston preview's pages (/boston/…, scripts/cities/boston-pages.mjs) get Boston's links; the iOS app is SF only.
+  // The Boston map's pages (/boston/…, scripts/cities/boston-pages.mjs) get Boston's links; the iOS app is SF only.
   var BOS = path === '/boston' || path.indexOf('/boston/') === 0;
   // A public city's page (/<id>/about, scripts/cities/city-pages.mjs) names its city on <body>: that city's links, no apps.
   var CITY = !BOS && document.body.getAttribute('data-city') || '';
@@ -102,7 +102,7 @@
     fine: 'The posted street sign is always the source of truth: temporary signs &amp; holidays override everything here. ' +
       'Free &amp; open source (MIT), no accounts, no ads, no cookies. Built on public data from ' + CITY_NAME + '.'
   } : BOS ? {
-    tag: 'Know where to park in Boston, block by block. A preview of CURB, built on the City of Boston\'s open data.',
+    tag: 'Know where to park in Boston, block by block. CURB, built on the City of Boston\'s open data.',
     app: '',
     explore: '<a href="/boston">Map</a><a href="/boston/about">How it works</a><a href="/boston/about#holidays">Sweeping holidays</a><a href="/boston/fixes">Map fixes</a>',
     more: '<a href="/about">About CURB</a><a href="/">San Francisco map</a><a href="/cities">Cities</a><a href="/privacy">Privacy</a>',

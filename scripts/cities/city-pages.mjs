@@ -14,7 +14,7 @@
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { PUBLIC, IN_PROGRESS, ruleTerm, sweepsIn, seoWords, jsonLd } from './public.mjs';
+import { PUBLIC, IN_PROGRESS, BOSTON, ruleTerm, sweepsIn, seoWords, jsonLd } from './public.mjs';
 import { project, W as MAP_W, H as MAP_H } from './hub-map.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -47,6 +47,14 @@ export function cityFacts(id) {
   const covers = [cap(term), ...((winterish || c.winter) && !/winter/i.test(term) ? ['Winter rules'] : [])];  // not twice (Toronto's winter parking)
   return { id, c, name: c.name, region: c.region || '', blocks: seg.b.length, sides, generated: String(seg._meta.generated).slice(0, 10),
     term, sweeps, covers, nonWinter, flagged, path: '/' + id, about: `/${id}/about` };
+}
+
+// Boston's entry on the hub. Built by hand (boston-page.mjs, boston-pages.mjs), it has no city.json: its place and name come
+// from public.mjs's BOSTON, its sources, size and date from its data. Its page at /boston/about is boston-pages.mjs's.
+function bostonFacts() {
+  const seg = read('data/boston/segments.json');
+  return { ...BOSTON, c: { center: BOSTON.center, sources: seg._meta.sources }, blocks: seg.b.length,
+    generated: String(seg._meta.generated).slice(0, 10), covers: ['Street cleaning', 'Paid and permit curbs'], path: '/boston', about: '/boston/about' };
 }
 
 // San Francisco's entry on the hub: its own data (DataSF, live) and pages
@@ -432,10 +440,11 @@ const HUB_SCRIPT = `<script>
 </script>`;
 
 export function hubPage(facts) {
-  const all = [{ ...SF, generated: null }, ...facts];
+  const built = [...facts, bostonFacts()];
+  const all = [{ ...SF, generated: null }, ...built];
   const count = all.length;
   // the pins: San Francisco first (CURB's first city), then the biggest maps, so a merged pin is named after the biggest
-  const order = [all[0], ...facts.slice().sort((a, b) => b.blocks - a.blocks || a.name.localeCompare(b.name))];
+  const order = [all[0], ...built.sort((a, b) => b.blocks - a.blocks || a.name.localeCompare(b.name))];
   const pins = order.map((x) => {
     const center = x.id === 'sf' ? SF.center : x.c.center;
     const [px, py] = project(center[1], center[0]);
