@@ -5,8 +5,13 @@ checks sent as `Origin: https://curb.guide`.
 
 ## Prototype (2026-10-16)
 
-A working preview of CURB for Boston: `boston.html`, served at `curb.guide/boston` (noindex, not linked
-from the San Francisco site). Same map, colors and block sheet as San Francisco.
+CURB for Boston: `boston.html`, served at `curb.guide/boston`. Same map, colors and block sheet as San Francisco.
+A preview (noindex, not linked from the San Francisco site) until 2026-11-12, public since by the owner's call:
+`/boston`, `/boston/about` and `/boston/fixes` are indexed and in the sitemap, Boston has a card and a pin on
+`curb.guide/cities`, a first visit from inside its bounds opens it, and "Request a city" answers that Boston already
+has a map. Its entry is `BOSTON` in `scripts/cities/public.mjs`, kept by hand. `/boston/notes`, written for the City,
+stays noindex and unlisted. Still open: nobody has checked blocks against the posted signs, and the Curb Lab data's
+terms are not stated (question 6 below), so the data notes keep saying it is unofficial and the sign wins.
 
 How it is built:
 
@@ -57,7 +62,7 @@ one shared sender times it on Boston's core (`lib/cities.js`: Eastern time, City
 in the copy and no SF ticket statistics, a 165 day watch age to bridge the December to March break, pushes that
 open `/boston?b=`). On iPhone they need the page added to the Home Screen (`manifest-boston.json`, which opens
 /boston); the CURB app is San Francisco only. One device's saved alerts hold both cities; each page's panel
-resolves its own and sends the other city's curbs to their map. Not in the preview: ticket times (no citation
+resolves its own and sends the other city's curbs to their map. Not on the Boston map: ticket times (no citation
 data), block pages, the iPhone app. The calendar reminder works, in Eastern time.
 
 Like San Francisco's (2026-10-17): the menu has Neighborhoods (the welcome card's list), Sweeping holidays and Map

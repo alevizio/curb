@@ -17,14 +17,14 @@ city we are looking at. Read this file first.
 | City | Status | Who | What is in the way |
 |---|---|---|---|
 | San Francisco | Live at curb.guide and in the App Store | Ale | Nothing |
-| Boston | Prototype at curb.guide/boston (2026-10-16): map, sheet, calendar, sweep alerts, six Curb Lab layers | Ale | Sign data covers 15% of swept curbs and was last published 2026-05-07. See [boston.md](boston.md) |
+| Boston | Public at curb.guide/boston since 2026-11-12 (prototype 2026-10-16): map, sheet, calendar, sweep alerts, six Curb Lab layers | Ale | Sign data covers 15% of swept curbs and was last published 2026-05-07. See [boston.md](boston.md) |
 | Buenos Aires | Researched. A volunteer wants to run it | A local maintainer | The City publishes the rule for every curb side, but under a license that forbids commercial use. It is not a street sweeping city, so the map has to draw other rule types, and it needs Spanish. See [buenos-aires.md](buenos-aires.md) |
 
 Public at curb.guide/&lt;id&gt; since 2026-10-20 (previews from 2026-10-18): map, sheet, calendar and sweep alerts, built by
 [city-build.md](city-build.md), each with a readable page at curb.guide/&lt;id&gt;/about and a card on
 [curb.guide/cities](https://curb.guide/cities), which also takes requests for new cities (filed as public GitHub issues
 labeled "city request"). Which cities are public is one list, `scripts/cities/public.mjs`: a city built but not on it stays
-a preview (noindex, unlisted), as Boston does. Each city's page (docs/multi-city/&lt;id&gt;.md) has the data, the checks and
+a preview (noindex, unlisted). Boston, built by hand before the others, is public through `BOSTON` in the same file. Each city's page (docs/multi-city/&lt;id&gt;.md) has the data, the checks and
 the questions for the City.
 
 | City | Built from | What is in the way |
