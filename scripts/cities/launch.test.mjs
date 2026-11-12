@@ -58,6 +58,18 @@ describe('a public city', () => {
   }
 });
 
+describe('the weather in the bottom bar', () => {
+  it('is the city\'s own, in Celsius in Canada and Fahrenheit everywhere else (owner, 2026-11-11)', () => {
+    for (const id of PUBLIC) {
+      const page = read(`${id}.html`), c = json(`data/${id}/city.json`);
+      const asked = page.match(/api\.open-meteo\.com\/v1\/forecast\?([^']+)'/)[1];
+      const celsius = ['montreal', 'toronto'].includes(id);
+      expect(asked, id).toBe(`latitude=${c.center[0]}&longitude=${c.center[1]}&current=temperature_2m,weather_code${celsius ? '' : '&temperature_unit=fahrenheit'}`);
+    }
+    expect(home).toContain('latitude=37.7749&longitude=-122.4194&current=temperature_2m,weather_code&temperature_unit=fahrenheit');
+  });
+});
+
 describe('a preview (Boston, and any city not public yet)', () => {
   for (const id of PREVIEWS) {
     it(`${id}: noindex, unlisted, not in the sitemap, /cities or CITY_MAPS`, () => {

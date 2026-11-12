@@ -3682,7 +3682,7 @@ const WMO=[[0,'sun'],[1,'sun'],[2,'partly'],[3,'cloud'],[48,'fog'],[67,'rain'],[
 function wxIcon(c){for(const [max,k] of WMO)if(c<=max)return k;return 'cloud';}
 async function fetchWx(){
   try{
-    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=45.5249&longitude=-73.5901&current=temperature_2m,weather_code&temperature_unit=fahrenheit');
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=45.5249&longitude=-73.5901&current=temperature_2m,weather_code');
     if(!r.ok)return;
     const d=await r.json();
     wx={t:Math.round(d.current.temperature_2m),i:wxIcon(+d.current.weather_code)};

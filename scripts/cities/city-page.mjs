@@ -36,6 +36,9 @@ const STYLE_V = fs.existsSync(ROOT + 'basemap/cities/style.json') ? ver('basemap
 const MAPLIBRE = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.0/maplibre-gl.js';
 const PMTILES = 'https://cdn.jsdelivr.net/npm/pmtiles@4.5.0/dist/pmtiles.js';
 const MAPLIBRE_LEAFLET = 'https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js';
+// A city in Canada reads the bottom bar's temperature in Celsius (owner, 2026-11-11); every other city in Fahrenheit.
+const CANADA = new Set(['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario',
+  'Prince Edward Island', 'Quebec', 'Saskatchewan', 'Northwest Territories', 'Nunavut', 'Yukon']);
 
 function cityPage(id) {
   const c = JSON.parse(fs.readFileSync(`${ROOT}data/${id}/city.json`, 'utf8'));
@@ -375,6 +378,7 @@ if(CAN_HOVER){
 }
 `],
     ['weather', 'latitude=37.7749&longitude=-122.4194', `latitude=${c.center[0]}&longitude=${c.center[1]}`],
+    ...(CANADA.has(c.region) ? [['Celsius', '&temperature_unit=fahrenheit', '']] : []),   // the weather service's unit when none is asked for
     ['blocks per weekday', /const DAY_BLOCKS=\[[^\]]*\];/, `const DAY_BLOCKS=${JSON.stringify(perDay)};`],
     ['day heads-up words', /function dayHeadsUp\(v\)\{[\s\S]*?\n\}\n/, `function dayHeadsUp(v){
   const n=DAY_BLOCKS[v]; if(n==null||!n)return;
