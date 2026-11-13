@@ -1,12 +1,12 @@
 # CURB — App Store Connect listing (paste-ready)
 
 **Name** (≤30): `CURB: Street Parking Map` (Ale's pick, 1 Nov 2026, live with 1.0.6; was `CURB: SF Street Parking`)
-**Subtitle** (≤30): `Sweeping alerts for 25 cities` (was `SF street-sweep parking map`). 25 = SF plus the 24 public city maps, never Boston or Somerville
+**Subtitle** (≤30): `Sweeping alerts for 27 cities` (the owner's pick, 13 Nov 2026, goes in with 1.0.8; was `Sweeping alerts for 25 cities`, live since 1.0.6, which left out Boston and Somerville). 27 = SF plus the 26 public city maps, as curb.guide/cities counts them
 **Category:** Navigation (primary), Utilities (secondary) · **Price:** Free · **Age:** 4+
 **Support URL:** https://curb.guide
 
 **Promotional text** (≤170, editable anytime without review):
-`New look, more map. Search in one pill, the answer first on every block card, and one map for 25 cities.` (the owner's pick, set 10 Nov 2026 with 1.0.7; was `New: CURB saves where you park by itself and puts a little car on that curb, so you know when to move it. Pick your car, or share where you parked.`, set 1 Nov 2026)
+`New look, more map. Search in one pill, the answer first on every block card, and one map for 27 cities.` (the owner's pick of 10 Nov 2026 with 1.0.7, the count moved from 25 to 27 on 13 Nov 2026; before that `New: CURB saves where you park by itself and puts a little car on that curb, so you know when to move it. Pick your car, or share where you parked.`, set 1 Nov 2026)
 
 **Keywords** (≤100 chars; words already in the name and subtitle left out, since Apple joins them):
 ```
@@ -14,7 +14,7 @@ cleaning,SF,tickets,reminder,citation,permit,los angeles,oakland,nyc,chicago,tor
 ```
 
 ## Description
-Saved in App Store Connect on 1 Nov 2026 with 1.0.6 (the 13 Oct full records file text plus the MORE CITIES section).
+Saved in App Store Connect on 1 Nov 2026 with 1.0.6 (the 13 Oct full records file text plus the MORE CITIES section). For 1.0.8 (13 Nov 2026) MORE CITIES counts 26 and names Boston and Somerville.
 ```
 Your street-cleaning sign says 9 to 11am. The tickets say 9:12am.
 
@@ -38,10 +38,10 @@ MOVE-YOUR-CAR ALERTS
 • No more "I forgot it was Tuesday"
 
 MORE CITIES
-CURB now maps 24 more cities block by block, from each city's open data, with alerts before the rule starts:
-• Oakland, Berkeley, San Jose, Sacramento, Los Angeles, Unincorporated LA County, Santa Monica, Glendale, Riverside, San Diego, Denver, Saint Paul and Norfolk: street sweeping
+CURB now maps 26 more cities block by block, from each city's open data, with alerts before the rule starts:
+• Oakland, Berkeley, San Jose, Sacramento, Los Angeles, Unincorporated LA County, Santa Monica, Glendale, Riverside, San Diego, Denver, Saint Paul, Somerville and Norfolk: street sweeping
 • New York City and Hoboken: alternate side parking
-• Philadelphia, Pittsburgh, Paterson, Washington DC and Montréal (in French or English): street cleaning
+• Boston, Philadelphia, Pittsburgh, Paterson, Washington DC and Montréal (in French or English): street cleaning
 • Chicago and Madison: street sweeping and winter rules
 • Milwaukee: night parking and winter rules
 • Toronto: winter parking
@@ -59,6 +59,24 @@ CURB reads the patterns in public data so you don't have to. But the posted phys
 Built by one person in San Francisco who got tired of the parking math.
 
 Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB stores an anonymous push token with the curb you picked.
+```
+
+## What's New (v1.0.8)
+Build 13. A version only to carry screenshot 8 again: Boston went public on curb.guide on 12 Nov 2026, the site counts
+27 cities, and the store still said 25. The owner's picks (13 Nov 2026): 27 on the picture, the same number in the
+subtitle, the promotional text and the description, and the version prepared in App Store Connect up to, not past,
+Submit for Review. Nothing changes inside the app. Screenshot 8 now reads "ONE MAP. 27 CITIES." with Boston and
+Somerville on the map (one dot marked 2) and in the list; the other nine shots are the 1.0.7 ones. The file and its
+tool are in private/store-screenshots-2026-11-09/shot8-2026-11-13/ and tools/us-map-2.mjs. The text below is a DRAFT
+until the owner says yes to the words.
+```
+Boston and Somerville join the map.
+
+• Boston: street cleaning block by block, with alerts before it starts.
+• Somerville: street sweeping, with alerts too.
+• One map for 27 cities.
+
+The posted sign is always the final authority.
 ```
 
 ## What's New (v1.0.7)
