@@ -471,14 +471,14 @@ export function hubPage(facts) {
     </div>`).join('\n    ');
   const next = IN_PROGRESS.filter((x) => !PUBLIC.includes(x.id));
   const title = `Street Sweeping Maps for ${count} Cities | CURB`;
-  const description = `Street sweeping and parking rules for ${count} cities, block by block: San Francisco, Los Angeles, New York, Chicago, Montréal and more. Free, from each city's open data.`;
+  const description = `Street sweeping and parking rules for ${count} cities, block by block: San Francisco, Los Angeles, New York, Chicago, Montréal and more. Free, from the schedules each city publishes.`;
   const ld = { '@context': 'https://schema.org', '@type': 'ItemList', name: 'Cities on CURB', numberOfItems: count,
     itemListElement: all.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: `${x.name}${x.region ? ', ' + x.region : ''}`, url: `https://curb.guide${x.path}` })) };
   const body = `  <section class="wrap hero" style="grid-template-columns:1fr">
     <div>
       <div class="k rise d1">CURB cities</div>
       <h1 class="rise d1">Know where to park in ${count} cities<span class="dot">.</span></h1>
-      <p class="sub rise d2" style="max-width:38em">Street sweeping and parking rules, block by block, built on each city's open data.
+      <p class="sub rise d2" style="max-width:38em">Street sweeping and parking rules, block by block, built on the schedules each city publishes.
         Free, no account. Tap a pin, or find your city below. <b>The posted sign always wins.</b></p>
       <div class="ctas rise d3"><a class="btn" href="#list">Find your city</a><a class="btn ghost" href="#request">Request a city</a></div>
     </div>
