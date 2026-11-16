@@ -36,7 +36,7 @@
     "@upstash/qstash": "^2.12.0",
     "@upstash/redis": "^1.39.0",
     "satori": "^0.34.1",
-    "web-push": "^3.6.7"
+    "web-push": "^4.0.0"
   },
   "devDependencies": {
     "vitest": "^5.0.3"
