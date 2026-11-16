@@ -62,13 +62,13 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ```
 
 ## What's New (v1.0.8)
-Build 13. A version only to carry screenshot 8 again: Boston went public on curb.guide on 12 Nov 2026, the site counts
-27 cities, and the store still said 25. The owner's picks (13 Nov 2026): 27 on the picture, the same number in the
-subtitle, the promotional text and the description, and the version prepared in App Store Connect up to, not past,
-Submit for Review. Nothing changes inside the app. Screenshot 8 now reads "ONE MAP. 27 CITIES." with Boston and
-Somerville on the map (one dot marked 2) and in the list; the other nine shots are the 1.0.7 ones. The file and its
-tool are in private/store-screenshots-2026-11-09/shot8-2026-11-13/ and tools/us-map-2.mjs. The text below is a DRAFT
-until the owner says yes to the words.
+Build 13 (Xcode Cloud 65). Submitted 16 Nov 2026, 8:24 AM PT, releasing automatically to everyone once approved (the
+owner's picks of 16 Nov: the words below as drafted, and submit). A version only to carry screenshot 8 again: Boston
+went public on curb.guide on 12 Nov 2026, the site counts 27 cities, and the store still said 25. The owner's picks
+(13 Nov 2026): 27 on the picture and the same number in the subtitle, the promotional text and the description; the
+subtitle change rides with this submission. Nothing changes inside the app. Screenshot 8 now reads "ONE MAP. 27
+CITIES." with Boston and Somerville on the map (one dot marked 2) and in the list; the other nine shots are the 1.0.7
+ones. The file and its tool are in private/store-screenshots-2026-11-09/shot8-2026-11-13/ and tools/us-map-2.mjs.
 ```
 Boston and Somerville join the map.
 
