@@ -14,7 +14,7 @@ cleaning,SF,tickets,reminder,citation,permit,los angeles,oakland,nyc,chicago,tor
 ```
 
 ## Description
-Saved in App Store Connect on 1 Nov 2026 with 1.0.6 (the 13 Oct full records file text plus the MORE CITIES section). For 1.0.8 (13 Nov 2026) MORE CITIES counts 26 and names Boston and Somerville.
+Saved in App Store Connect on 1 Nov 2026 with 1.0.6 (the 13 Oct full records file text plus the MORE CITIES section). For 1.0.8 (13 Nov 2026) MORE CITIES counts 26 and names Boston and Somerville. Its first line said "from each city's open data" until 16 Nov 2026; the owner picked "from the schedules each city publishes", true for the open data portals, Somerville's web pages and a parking code alike (saved in App Store Connect that day).
 ```
 Your street-cleaning sign says 9 to 11am. The tickets say 9:12am.
 
@@ -38,7 +38,7 @@ MOVE-YOUR-CAR ALERTS
 • No more "I forgot it was Tuesday"
 
 MORE CITIES
-CURB now maps 26 more cities block by block, from each city's open data, with alerts before the rule starts:
+CURB now maps 26 more cities block by block, from the schedules each city publishes, with alerts before the rule starts:
 • Oakland, Berkeley, San Jose, Sacramento, Los Angeles, Unincorporated LA County, Santa Monica, Glendale, Riverside, San Diego, Denver, Saint Paul, Somerville and Norfolk: street sweeping
 • New York City and Hoboken: alternate side parking
 • Boston, Philadelphia, Pittsburgh, Paterson, Washington DC and Montréal (in French or English): street cleaning
@@ -62,8 +62,12 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ```
 
 ## What's New (v1.0.8)
-Build 13 (Xcode Cloud 65). Submitted 16 Nov 2026, 8:24 AM PT, releasing automatically to everyone once approved (the
-owner's picks of 16 Nov: the words below as drafted, and submit). A version only to carry screenshot 8 again: Boston
+Build 13 (Xcode Cloud 65). NOT in review: submitted 16 Nov 2026, 8:24 AM PT, then removed from review the same morning
+(App Store Connect shows "Developer Rejected", Apple's name for that) to change the description's source line, both the
+owner's picks. It is held until Thu 19 Nov 2026 (the owner's pick, one review instead of two): if another city goes
+public on the site that day, screenshot 8 and every count here move to 28 first and the owner says submit; if not, it
+goes back in as it is, 27. Release stays automatic once approved (the owner's picks of 16 Nov: the words below as
+drafted). A version only to carry screenshot 8 again: Boston
 went public on curb.guide on 12 Nov 2026, the site counts 27 cities, and the store still said 25. The owner's picks
 (13 Nov 2026): 27 on the picture and the same number in the subtitle, the promotional text and the description; the
 subtitle change rides with this submission. Nothing changes inside the app. Screenshot 8 now reads "ONE MAP. 27
