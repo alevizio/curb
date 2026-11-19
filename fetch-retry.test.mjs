@@ -29,9 +29,22 @@ describe('fetchRetry (map data loads)', () => {
     await expect(fetchRetry('u')).rejects.toThrow('Load failed');
     expect(calls).toHaveLength(2);
   });
-  it('does not retry an HTTP error (it is not a dropped connection)', async () => {
+  it('does not retry a client HTTP error (it is not a dropped connection or a server hiccup)', async () => {
     const { fetchRetry, calls } = load([{ ok: false, status: 400 }]);
     expect((await fetchRetry('u')).status).toBe(400);
+    expect(calls).toHaveLength(1);
+  });
+  it('retries a DataSF server error once, and hands back the second answer', async () => {
+    const { fetchRetry, calls } = load([{ ok: false, status: 500 }, { ok: true, status: 200 }]);
+    expect((await fetchRetry('u')).status).toBe(200);
+    expect(calls).toEqual(['u', 'u']);
+    const twice = load([{ ok: false, status: 503 }, { ok: false, status: 503 }]);
+    expect((await twice.fetchRetry('u')).status).toBe(503);
+    expect(twice.calls).toHaveLength(2);
+  });
+  it('does not retry a server error once the visitor has moved on', async () => {
+    const { fetchRetry, calls } = load([{ ok: false, status: 500 }]);
+    expect((await fetchRetry('u', () => false)).status).toBe(500);
     expect(calls).toHaveLength(1);
   });
   it('does not retry once the visitor has moved on to another area', async () => {

@@ -1454,10 +1454,15 @@ function enterOverviewMode(showHint){
 }
 // A phone's connection can drop for a moment mid-load (Safari says "Load failed", Chrome "Failed to fetch"): 7 of 8
 // data-load reports in late Sep 2026 were that, never an HTTP error. Retry a network failure once after a short
-// pause, and only while the view still wants this area; HTTP errors resolve normally and are not retried.
+// pause, and only while the view still wants this area. A 5xx is DataSF hiccuping (one a week in Nov 2026), so it gets
+// the same one retry; other HTTP errors resolve normally and are not retried.
 async function fetchRetry(url, wanted=()=>true, pause=1200){
-  try{ return await fetch(url); }
-  catch(e){ if(!wanted())throw e; await new Promise(r=>setTimeout(r,pause)); if(!wanted())throw e; return fetch(url); }
+  let r;
+  try{ r=await fetch(url); }
+  catch(e){ if(!wanted())throw e; await new Promise(res=>setTimeout(res,pause)); if(!wanted())throw e; return fetch(url); }
+  if(r.status<500||!wanted())return r;
+  await new Promise(res=>setTimeout(res,pause));
+  return wanted()?fetch(url):r;
 }
 async function loadViewport(){
   const z=map.getZoom(), hint=document.getElementById('hint');
