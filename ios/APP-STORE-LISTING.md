@@ -1,12 +1,12 @@
 # CURB — App Store Connect listing (paste-ready)
 
 **Name** (≤30): `CURB: Street Parking Map` (Ale's pick, 1 Nov 2026, live with 1.0.6; was `CURB: SF Street Parking`)
-**Subtitle** (≤30): `Sweeping alerts for 27 cities` (the owner's pick, 13 Nov 2026, goes in with 1.0.8; was `Sweeping alerts for 25 cities`, live since 1.0.6, which left out Boston and Somerville). 27 = SF plus the 26 public city maps, as curb.guide/cities counts them
+**Subtitle** (≤30): `Sweeping alerts for 28 cities` (28 since 19 Nov 2026, when Lodi went public on the site: the owner's pick of 16 Nov, one version for both; 27 from the owner's pick of 13 Nov 2026, goes in with 1.0.8; was `Sweeping alerts for 25 cities`, live since 1.0.6, which left out Boston and Somerville). 28 = SF plus the 27 public city maps, as curb.guide/cities counts them
 **Category:** Navigation (primary), Utilities (secondary) · **Price:** Free · **Age:** 4+
 **Support URL:** https://curb.guide
 
 **Promotional text** (≤170, editable anytime without review):
-`New look, more map. Search in one pill, the answer first on every block card, and one map for 27 cities.` (the owner's pick of 10 Nov 2026 with 1.0.7, the count moved from 25 to 27 on 13 Nov 2026; before that `New: CURB saves where you park by itself and puts a little car on that curb, so you know when to move it. Pick your car, or share where you parked.`, set 1 Nov 2026)
+`New look, more map. Search in one pill, the answer first on every block card, and one map for 28 cities.` (the owner's pick of 10 Nov 2026 with 1.0.7, the count moved from 25 to 27 on 13 Nov 2026 and to 28 on 19 Nov 2026; before that `New: CURB saves where you park by itself and puts a little car on that curb, so you know when to move it. Pick your car, or share where you parked.`, set 1 Nov 2026)
 
 **Keywords** (≤100 chars; words already in the name and subtitle left out, since Apple joins them):
 ```
@@ -14,7 +14,7 @@ cleaning,SF,tickets,reminder,citation,permit,los angeles,oakland,nyc,chicago,tor
 ```
 
 ## Description
-Saved in App Store Connect on 1 Nov 2026 with 1.0.6 (the 13 Oct full records file text plus the MORE CITIES section). For 1.0.8 (13 Nov 2026) MORE CITIES counts 26 and names Boston and Somerville. Its first line said "from each city's open data" until 16 Nov 2026; the owner picked "from the schedules each city publishes", true for the open data portals, Somerville's web pages and a parking code alike (saved in App Store Connect that day).
+Saved in App Store Connect on 1 Nov 2026 with 1.0.6 (the 13 Oct full records file text plus the MORE CITIES section). For 1.0.8 (13 Nov 2026) MORE CITIES counts 26 and names Boston and Somerville. Its first line said "from each city's open data" until 16 Nov 2026; the owner picked "from the schedules each city publishes", true for the open data portals, Somerville's web pages and a parking code alike (saved in App Store Connect that day). On 19 Nov 2026 Lodi went public on the site: MORE CITIES counts 27 and names Lodi.
 ```
 Your street-cleaning sign says 9 to 11am. The tickets say 9:12am.
 
@@ -38,8 +38,8 @@ MOVE-YOUR-CAR ALERTS
 • No more "I forgot it was Tuesday"
 
 MORE CITIES
-CURB now maps 26 more cities block by block, from the schedules each city publishes, with alerts before the rule starts:
-• Oakland, Berkeley, San Jose, Sacramento, Los Angeles, Unincorporated LA County, Santa Monica, Glendale, Riverside, San Diego, Denver, Saint Paul, Somerville and Norfolk: street sweeping
+CURB now maps 27 more cities block by block, from the schedules each city publishes, with alerts before the rule starts:
+• Oakland, Berkeley, San Jose, Sacramento, Los Angeles, Unincorporated LA County, Santa Monica, Glendale, Riverside, San Diego, Denver, Saint Paul, Somerville, Lodi and Norfolk: street sweeping
 • New York City and Hoboken: alternate side parking
 • Boston, Philadelphia, Pittsburgh, Paterson, Washington DC and Montréal (in French or English): street cleaning
 • Chicago and Madison: street sweeping and winter rules
@@ -64,21 +64,38 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ## What's New (v1.0.8)
 Build 13 (Xcode Cloud 65). NOT in review: submitted 16 Nov 2026, 8:24 AM PT, then removed from review the same morning
 (App Store Connect shows "Developer Rejected", Apple's name for that) to change the description's source line, both the
-owner's picks. It is held until Thu 19 Nov 2026 (the owner's pick, one review instead of two): if another city goes
-public on the site that day, screenshot 8 and every count here move to 28 first and the owner says submit; if not, it
-goes back in as it is, 27. Release stays automatic once approved (the owner's picks of 16 Nov: the words below as
-drafted). A version only to carry screenshot 8 again: Boston
-went public on curb.guide on 12 Nov 2026, the site counts 27 cities, and the store still said 25. The owner's picks
-(13 Nov 2026): 27 on the picture and the same number in the subtitle, the promotional text and the description; the
-subtitle change rides with this submission. Nothing changes inside the app. Screenshot 8 now reads "ONE MAP. 27
-CITIES." with Boston and Somerville on the map (one dot marked 2) and in the list; the other nine shots are the 1.0.7
-ones. The file and its tool are in private/store-screenshots-2026-11-09/shot8-2026-11-13/ and tools/us-map-2.mjs.
+owner's picks. It was held until Thu 19 Nov 2026 (the owner's pick, one review instead of two). That day the Borough of
+Lodi had not answered, so Lodi went public on curb.guide (main ef580d47) and the site counts 28: screenshot 8 and every
+count here move to 28, and it waits for the owner's submit. App Store Connect was signed out on 19 Nov at 9:30 AM PT,
+so none of the 28 changes is in App Store Connect yet. Release stays automatic once approved. Nothing changes inside the
+app. Screenshot 8 now reads "ONE MAP. 28 CITIES." with Lodi in the list and the New York dot marked 5; the other nine
+shots are the 1.0.7 ones. The file and its tool are in private/store-screenshots-2026-11-09/shot8-2026-11-19/
+(8-28-cities.png, a JPEG copy, us-map-3.mjs); 27 was shot8-2026-11-13/.
+
+The words wait for the owner's pick. Recommended (the store still shows 1.0.7, so Boston and Somerville are news too):
+```
+Boston, Somerville and Lodi join the map.
+
+• Boston: street cleaning block by block, with alerts before it starts.
+• Somerville: street sweeping, with alerts too.
+• Lodi, NJ: street sweeping, from the Borough's parking code.
+• One map for 28 cities.
+
+The posted sign is always the final authority.
+```
+Shorter:
+```
+Three more cities: Boston, Somerville and Lodi, NJ. One map for 28 cities, with alerts before the sweeper comes.
+
+The posted sign is always the final authority.
+```
+The 16 Nov words with only the count changed (Lodi unnamed):
 ```
 Boston and Somerville join the map.
 
 • Boston: street cleaning block by block, with alerts before it starts.
 • Somerville: street sweeping, with alerts too.
-• One map for 27 cities.
+• One map for 28 cities.
 
 The posted sign is always the final authority.
 ```
