@@ -192,7 +192,12 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   alertSides, carRows; inline, so the city generators' edits still match), api/_park.js, api/og.js, build-schedules.mjs,
   build-overview.mjs. A fix applies only while the City publishes exactly the rows it was written against (`was`), so a
   City change switches it off; `staleSweepFixes` lists those. The city and Boston generators drop its script tag (bump its
-  ?v= in both edits).
+  ?v= in both edits). Beyond Shotwell's three (by hand), the entries between `scan:start` and `scan:end` are the high
+  confidence sides of `scripts/scan-sf-ticket-days.mjs` (a year of tickets against every side's rows; results in the
+  gitignored private/sf-ticket-scan.json, owner's pick 2026-11-18: all of them), written by `scripts/sf-fixes-from-scan.mjs`,
+  which reads `was` from DataSF at that moment. A side the City doesn't list (`was` empty, `lr` its cnnrightleft) is built
+  from the block's other side. After a rerun: the converter, then build:overview, build:schedules, build:hoodpages,
+  build:blocksitemap.
 - api/block.js + sitemap-blocks.xml (scripts/build-block-sitemap.mjs, `npm run build:blocksitemap`) —
   /b/<cnn> server-rendered block share/landing pages, ~10.5k long-tail SEO pages. NO DataSF call at
   request time: they read `data/schedules.json` (scripts/build-schedules.mjs, `npm run build:schedules`,
