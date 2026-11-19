@@ -214,6 +214,7 @@ const bosSides=rows=>new Set(rows.map(r=>r.cnn+r.cnnrightleft)).size;
   ['no SF ticket, sweeper or route files', /loadEnforcement\(\);[^\n]*\nloadSweeps\(\);[^\n]*\nloadRoutes\(\);[^\n]*\n/, ''],
   ['no SF hill file', /loadGrades\(\);[^\n]*\n/, ''],
   ['no SF hill words', '<script src="/lib/hill.js?v=3"></script>\n', ''],
+  ['no SF schedule fixes', '<script src="/lib/sf-fixes.js?v=1"></script>\n', ''],
   // ---- Boston's curb layers (the Curb Lab's curbs.json) ----------------------------------------------
   ['Boston permit layer', /async function loadRpp\(poly, my\)\{[\s\S]*?\n\}\n(?=function nearestRpp)/, `// Boston: curb zones from the City's Curb Lab (data/boston/curbs.json), drawn for the viewport.
 let BCURBS=null;
@@ -420,7 +421,7 @@ document.getElementById('routeToggle').onclick=function(){`],
     "<p>Sweeping schedules come from Boston Public Works' street sweeping schedule (Analyze Boston), placed on each block by CURB from the street names, cross streets and odd or even side. The season, the holidays (daytime sweeping stops on City holidays, overnight sweeping keeps going) and the fines follow the City's published rules. Paid, resident permit, loading and accessible curbs come from the City's Curb Lab, read from sign photos, and are still a beta. Sweep alerts and calendar reminders run on Boston time: an overnight sweep gets one alert around 9 PM the evening before.</p>"],
   // ---- sweep alerts: the shared sender, each spot with its city (lib/cities.js) --------------------------------
   ['this page is Boston', "const CITY='sf',", "const CITY='boston',"],
-  ['alert curbs from the file', /  const where=`cnn in\(\$\{cnns\.map[\s\S]*?const rows=await r\.json\(\), now=new Date\(\), out=\{\};/,
+  ['alert curbs from the file', /  const where=`cnn in\(\$\{cnns\.map[\s\S]*?const rows=\(window\.applySweepFixes\|\|\(x=>x\)\)\(await r\.json\(\)\), now=new Date\(\), out=\{\};/,
     '  const rows=(await BOS.load()).filter(b=>cnns.includes(String(b.c))).flatMap(BOS.rowsOf), now=new Date(), out={};'],
   ['no SF ticket file for the alerts panel', "    await loadEnforcement();  // the ticket-time tip rides in each spot, as from a sheet\n", ''],
   // iPhone: alerts come from a Home Screen web app (the CURB app is San Francisco only)

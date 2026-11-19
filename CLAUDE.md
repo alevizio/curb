@@ -186,6 +186,13 @@ query using `$select`), which silently broke every browser fetch. Always use `ht
   CURB label and a thin curb with no edge line; it sits flush in a white column that carries the curb to the card's bottom (.hic.cr/.cl). The sheet's
   first look has a one-row strip (`hillStrip`, hillAdvice's strip + stripSub) that pulls the sheet up to the full card; the car pill repeats the move.
   Bump lib/hill.js?v= (and the two generators' 'no SF hill words' edit) whenever the page reads a new field from it.
+- lib/sf-fixes.js — fixes to the City's sweeping rows where its own street cleaning tickets (and a posted sign, when we
+  have one) show a side is wrong (GitHub #66: Shotwell's east side published as Wed 12 to 2 PM, ticketed every Thursday
+  about 8 AM). Every reader of the SF schedule runs its rows through `applySweepFixes`: index.html (loadViewport,
+  alertSides, carRows; inline, so the city generators' edits still match), api/_park.js, api/og.js, build-schedules.mjs,
+  build-overview.mjs. A fix applies only while the City publishes exactly the rows it was written against (`was`), so a
+  City change switches it off; `staleSweepFixes` lists those. The city and Boston generators drop its script tag (bump its
+  ?v= in both edits).
 - api/block.js + sitemap-blocks.xml (scripts/build-block-sitemap.mjs, `npm run build:blocksitemap`) —
   /b/<cnn> server-rendered block share/landing pages, ~10.5k long-tail SEO pages. NO DataSF call at
   request time: they read `data/schedules.json` (scripts/build-schedules.mjs, `npm run build:schedules`,

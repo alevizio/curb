@@ -27,6 +27,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { toHood, hoodAt } from './build-hood-maps.mjs';
 import { slug, pagedHoods } from '../lib/hoods.js';
+import '../lib/sf-fixes.js';
 
 const ROOT = new URL('../', import.meta.url);
 const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
@@ -265,7 +266,7 @@ async function fetchAll() {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const OUT = new URL('data/schedules.json', ROOT);
-  const rows = await fetchAll();
+  const rows = globalThis.applySweepFixes(await fetchAll());  // lib/sf-fixes.js
   const ranges = await fetchRanges();
   const blocks = buildBlocks(rows);
 

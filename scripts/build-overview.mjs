@@ -9,6 +9,8 @@
 //
 // Run: npm run build:overview   (Node 18+, no deps)
 
+import '../lib/sf-fixes.js';
+
 const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
 const DAY = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6, hol:7 }; // hol = the 'Holiday' rows
 const log = (...a) => console.error('[overview]', ...a);
@@ -17,7 +19,7 @@ async function fetchAll() {
   const PAGE = 20000, rows = [];
   for (let offset = 0; ; offset += PAGE) {
     const u = new URL(SWEEP);
-    u.searchParams.set('$select', 'cnn,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line');
+    u.searchParams.set('$select', 'cnn,blockside,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line');
     u.searchParams.set('$order', 'cnn');
     u.searchParams.set('$limit', PAGE);
     u.searchParams.set('$offset', offset);
@@ -56,7 +58,7 @@ function main(rows) {
   return blocks;
 }
 
-const rows = await fetchAll();
+const rows = globalThis.applySweepFixes(await fetchAll());  // lib/sf-fixes.js
 log(`condensing ${rows.length} rows…`);
 const blocks = main(rows);
 const out = {

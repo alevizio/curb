@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const ENF = require('../data/enforcement.json');
 import { renderCard } from './_ogcard.js';
+import '../lib/sf-fixes.js';
 
 const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
 const DAYLBL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -24,9 +25,9 @@ export default async function handler(req, res) {
   const fallback = () => { res.statusCode = 302; res.setHeader('Location', '/og.png'); res.setHeader('Cache-Control', 'public, max-age=600'); res.end(); };
   if (!cnn) return fallback();
   try {
-    const r = await fetch(SWEEP + `?$select=corridor,limits,weekday,fromhour,tohour&$where=cnn='${cnn}'&$limit=20`);
+    const r = await fetch(SWEEP + `?$select=cnn,corridor,limits,blockside,weekday,fromhour,tohour,week1,week2,week3,week4,week5&$where=cnn='${cnn}'&$limit=20`);
     if (!r.ok) return fallback();
-    const rows = await r.json();
+    const rows = globalThis.applySweepFixes(await r.json());
     if (!rows || !rows.length) return fallback();
     // a weekly row: the side's holiday schedule (weekday 'Holiday') only runs on minor holidays
     const r0 = rows.find((x) => !/^hol/i.test(String(x.weekday || '').trim())) || rows[0];

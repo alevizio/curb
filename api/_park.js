@@ -5,7 +5,8 @@ import { polygonAround, pickParkedSpot } from './_geo.js';
 import { sanitizeRules } from './_spot.js';
 import '../lib/sweep-core.js';
 import '../lib/hill.js';
-const { sfWallToInstant, fmtHour, DAYLBL, hillAlert } = globalThis;
+import '../lib/sf-fixes.js';
+const { sfWallToInstant, fmtHour, DAYLBL, hillAlert, applySweepFixes } = globalThis;
 const require = createRequire(import.meta.url);
 
 const SWEEP = 'https://data.sf.gov/resource/yhqp-riqs.json';
@@ -25,7 +26,7 @@ export async function parkedWatchAt(la, lo) {
   let rows = [];
   try {
     const r = await fetch(url, { headers: { 'User-Agent': 'curb-parked' } });
-    if (r.ok) rows = await r.json();
+    if (r.ok) rows = applySweepFixes(await r.json());
   } catch { /* fall through → no block found */ }
 
   const spot = pickParkedSpot(rows, la, lo);

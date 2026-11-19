@@ -1106,6 +1106,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=8"></script>
 <script src="/lib/hill.js?v=3"></script>
+<script src="/lib/sf-fixes.js?v=1"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
      retry URL is the tag's own plus retry=1: Safari reuses a failed load for the same URL instead of asking
@@ -1487,7 +1488,7 @@ async function loadViewport(){
   try{
     const url=SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays,line`
       +`&$where=intersects(line,'${poly}')&$limit=${SEG_CAP}`;
-    const r=await fetchRetry(url, ()=>my===fetchTok); if(!r.ok)throw new Error('HTTP '+r.status); const data=await r.json();  // the data-load report carries it
+    const r=await fetchRetry(url, ()=>my===fetchTok); if(!r.ok)throw new Error('HTTP '+r.status); const data=(window.applySweepFixes||(x=>x))(await r.json());  // the data-load report carries it; lib/sf-fixes.js
     if(my!==fetchTok)return;
     lastRows=data; segBounds=b;
     if(!data.length&&!noCovToasted){noCovToasted=true;
@@ -2787,7 +2788,7 @@ async function alertSides(list){
   const where=`cnn in(${cnns.map(c=>`'${c}'`).join(',')})`;
   const r=await fetchRetry(SWEEP+`?$select=cnn,corridor,limits,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays&$where=${encodeURIComponent(where)}&$limit=500`);
   if(!r.ok)throw new Error('HTTP '+r.status);
-  const rows=await r.json(), now=new Date(), out={};
+  const rows=(window.applySweepFixes||(x=>x))(await r.json()), now=new Date(), out={};
   for(const a of list){
     const block=rows.filter(x=>String(x.cnn)===a.cnn), mine=block.filter(x=>sideKeyOf(x)===a.sideKey);
     if(!mine.length)continue;  // the city no longer lists this side: the row shows no schedule
@@ -3085,7 +3086,7 @@ const CARINFO={rows:null,lr:'',cnn:'',key:''};  // the car's side and its rules,
 async function carRows(cnn){
   const r=await fetchRetry(SWEEP+`?$select=cnn,corridor,line,blockside,cnnrightleft,weekday,fromhour,tohour,week1,week2,week3,week4,week5,holidays&$where=cnn='${cnn}'&$limit=50`);
   if(!r.ok)throw new Error('HTTP '+r.status);
-  return r.json();
+  return (window.applySweepFixes||(x=>x))(await r.json());
 }
 async function drawCar(){
   const c=CAR.link||CAR.own, id=c?c.cnn+'|'+c.side:'';
