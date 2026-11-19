@@ -288,6 +288,10 @@
       "destination": "/lodi.html"
     },
     {
+      "source": "/lodi/about",
+      "destination": "/lodi/about.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },

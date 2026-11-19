@@ -17,7 +17,7 @@ const FIRST = slice('const FIRST_VISIT=', '\n})();\n');
 const PHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 const AT = { sf: [37.7596, -122.4148], chicago: [41.8818, -87.6278], hoboken: [40.744, -74.0305], newark: [40.7357, -74.1724], santaMonica: [34.0195, -118.4912],
   eastLA: [34.0239, -118.172], hollywood: [34.0928, -118.3287], montreal: [45.5017, -73.5673], boston: [42.3601, -71.0589], miami: [25.7617, -80.1918],
-  berkeley: [37.8716, -122.2727], oakland: [37.8044, -122.2712] };
+  berkeley: [37.8716, -122.2727], oakland: [37.8044, -122.2712], lodi: [40.8779, -74.0834] };
 
 function maps() { const g = {}; vm.createContext(g); vm.runInContext(MAPS + '\nthis.mapAt=mapAt; this.CITY_MAPS=CITY_MAPS;', g); return g; }
 
@@ -57,6 +57,7 @@ describe('the map at a point', () => {
     expect(mapAt(...AT.hollywood)?.id).toBe('los-angeles');
     expect(mapAt(...AT.montreal)?.id).toBe('montreal');
     expect(mapAt(...AT.boston)?.id).toBe('boston');              // public since 2026-11-12
+    expect(mapAt(...AT.lodi)?.id).toBe('lodi');                  // public since 2026-11-19, inside New York's wide box
     expect(mapAt(...AT.berkeley)?.id).toBe('berkeley');
     expect(mapAt(...AT.sf)?.id).toBe('sf');
   });

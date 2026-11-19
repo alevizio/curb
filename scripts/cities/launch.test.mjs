@@ -113,6 +113,10 @@ describe('Boston (public since 2026-11-12, owner)', () => {
 });
 
 describe('a preview (any city built but not public yet)', () => {
+  it('is exactly what lib/city-configs.js marks preview, so "Request a city" never calls it live (none since Lodi, 2026-11-19)', () => {
+    const marked = Object.values(globalThis.CITY_CONFIGS).filter((c) => c.preview).map((c) => c.id);
+    expect(marked.sort()).toEqual([...PREVIEWS].sort());
+  });
   for (const id of PREVIEWS) {
     it(`${id}: noindex, unlisted, not in the sitemap, /cities or CITY_MAPS`, () => {
       expect(read(`${id}.html`)).toMatch(/<meta name="robots" content="noindex">/);

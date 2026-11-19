@@ -74,6 +74,9 @@ describe('liveCity', () => {
     expect(liveCity('Boston', 'MA')).toEqual({ id: 'boston', name: 'Boston', url: '/boston' });
     expect(id('boston, massachusetts')).toBe('boston');
     expect(id('Boston', 'Lincolnshire')).toBeNull();
+    expect(liveCity('Lodi', 'NJ')).toEqual({ id: 'lodi', name: 'Lodi', url: '/lodi' });   // public since 2026-11-19
+    expect(id('Lodi Nj')).toBe('lodi');                                                  // the request that started it
+    expect(id('Lodi', 'California')).toBeNull();                                         // a different Lodi
   });
   it('San Francisco is the home page', () => {
     expect(liveCity('San Francisco', 'CA')).toEqual({ id: 'sf', name: 'San Francisco', url: '/' });

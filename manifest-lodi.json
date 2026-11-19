@@ -1,7 +1,7 @@
 {
-  "name": "CURB Lodi (preview)",
+  "name": "CURB Lodi",
   "short_name": "CURB Lodi",
-  "description": "Lodi street sweeping, block by block. A preview on the Borough's parking code.",
+  "description": "Lodi street sweeping, block by block, from the Borough's parking code.",
   "start_url": "/lodi",
   "scope": "/",
   "display": "standalone",

@@ -158,7 +158,7 @@ export function aboutPage(f) {
   const { c, name, term, sweeps } = f, words = c.words || {};
   const Term = cap(term), url = `https://curb.guide${f.about}`;
   const fine = c.fine ? `A ticket is ${c.fine}${TOW[c.tow] ? ', ' + TOW[c.tow] : ''}.` : `CURB doesn't have the amount of a ticket here yet${c.tow === 'yes' ? ', but the car can be towed' : ''}.`;
-  const owner = /\bCounty\b/.test(name) ? 'County' : 'City';
+  const owner = /\bCounty\b/.test(name) ? 'County' : /^Borough of\b/.test(c.agency || '') ? 'Borough' : 'City';
   const holidays = Object.entries(c.holidays || {}).sort(([a], [b]) => a.localeCompare(b));
   const holidayRows = holidays.map(([iso, n]) => `<tr data-iso="${iso}"><td><b>${esc(n)}</b></td><td>${esc(longDay(iso))}</td></tr>`).join('\n        ');
   const sources = (c.sources || []).map((s) => {
@@ -228,7 +228,7 @@ export function aboutPage(f) {
       </div>
       <div class="qa">
         <h3>Is CURB free?</h3>
-        <p>Yes. Free, with no account and no ads, and open source on <a href="https://github.com/alevizio/curb" rel="noopener">GitHub</a>. CURB started in San Francisco; the ${esc(name)} map is built on the ${owner}'s open data.</p>
+        <p>Yes. Free, with no account and no ads, and open source on <a href="https://github.com/alevizio/curb" rel="noopener">GitHub</a>. CURB started in San Francisco; the ${esc(name)} map is built on ${words.source ? esc(words.source) : `the ${owner}'s open data`}.</p>
       </div>
     </div>
   </section>

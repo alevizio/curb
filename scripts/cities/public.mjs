@@ -10,9 +10,9 @@
 //   node scripts/cities/configs.mjs && node scripts/cities/city-page.mjs && node scripts/cities/boston-page.mjs \
 //     && node scripts/cities/city-pages.mjs && npm run build:hoodpages
 export const PUBLIC = [
-  'berkeley', 'chicago', 'denver', 'glendale', 'hoboken', 'la-county', 'los-angeles', 'madison', 'milwaukee', 'montreal',
-  'new-york', 'norfolk', 'oakland', 'paterson', 'philadelphia', 'pittsburgh', 'riverside', 'sacramento', 'saint-paul',
-  'san-diego', 'san-jose', 'santa-monica', 'somerville', 'toronto', 'washington-dc',
+  'berkeley', 'chicago', 'denver', 'glendale', 'hoboken', 'la-county', 'lodi', 'los-angeles', 'madison', 'milwaukee',
+  'montreal', 'new-york', 'norfolk', 'oakland', 'paterson', 'philadelphia', 'pittsburgh', 'riverside', 'sacramento',
+  'saint-paul', 'san-diego', 'san-jose', 'santa-monica', 'somerville', 'toronto', 'washington-dc',
 ];
 
 // On curb.guide/cities under "In progress" until the city is public (a public city leaves this list by itself).
@@ -46,8 +46,10 @@ export function seoWords(c) {
   const tagline = !sweeps && c.words.tagline;
   const long = `${c.name} ${Term} Map: ${sweeps ? 'Schedules by Block' : 'Tonight\'s Side by Block'} | CURB`;
   const title = !tagline && long.length <= 60 ? long : `${c.name} ${Term} Map | CURB`;
-  const fine = c.fine && !tagline ? (sweeps ? `A missed sweep is a ${c.fine} ticket. ` : `The wrong side is a ${c.fine} ticket. `) : '';
-  const description = `${c.name} ${term}, block by block: ${sweeps ? 'every curb colored by its next sweep' : tagline || 'tonight\'s side of every street'}. ${fine}Free, with alerts, from the City's open data.`;
+  const ticket = c.fine && (/^\$/.test(c.fine) ? `a ${c.fine} ticket` : `a ticket of ${c.fine}`);   // Lodi's "up to $50"
+  const fine = ticket && !tagline ? (sweeps ? `A missed sweep is ${ticket}. ` : `The wrong side is ${ticket}. `) : '';
+  // where the schedule comes from: the City's open data, or city.json words.source (Lodi's "the Borough's parking code")
+  const description = `${c.name} ${term}, block by block: ${sweeps ? 'every curb colored by its next sweep' : tagline || 'tonight\'s side of every street'}. ${fine}Free, with alerts, from ${(c.words && c.words.source) || 'the City\'s open data'}.`;
   return { term, Term, title, description };
 }
 /** JSON for a <script type="application/ld+json">: the HTML delimiters as \u escapes, so no value can close the element. */

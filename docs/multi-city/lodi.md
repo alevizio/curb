@@ -1,8 +1,10 @@
 # Lodi
 
 Built 2026-11-11, after a request on /cities for "Lodi, NJ". Data build: `scripts/cities/lodi.mjs` → `data/lodi/`
-(format in [city-build.md](city-build.md)); tests: `scripts/cities/lodi.test.mjs`. A preview: not in
-`scripts/cities/public.mjs`, so the page is noindex and unlisted.
+(format in [city-build.md](city-build.md)); tests: `scripts/cities/lodi.test.mjs`. A preview until 2026-11-19, public
+since (the owner's call, made on 2026-11-12: public if the Borough hadn't answered by then, and it hadn't). It went
+public without the sign check below, so every page says the map comes from the Borough's parking code and that the sign
+on your side wins.
 
 ## How the rule works
 
@@ -87,7 +89,8 @@ are set aside and 11 could not be placed. `segments.json` is 0.15 MB.
    East Place?
 10. Marion Pepe Drive: is the "Inner Circle" the curb around the island of the loop?
 
-## Before it goes public
+## Still open
 
-- A person in Lodi checks at least 20 blocks against the signs ([adding-a-city.md](adding-a-city.md)).
-- One line in `scripts/cities/public.mjs`, then the site's city count (25 today) changes everywhere it is written.
+- A person in Lodi checks at least 20 blocks against the signs ([adding-a-city.md](adding-a-city.md)). Not done before
+  it went public.
+- The Borough's answer to the questions above (emailed 2026-11-11, none by 2026-11-19).

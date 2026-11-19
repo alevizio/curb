@@ -41,6 +41,7 @@ the questions for the City.
 | [Riverside](riverside.md) | Sweeping zones, weeks from the City's 2015 schedule map | 7 of 92 zones have no weeks or hours |
 | [New York](new-york.md) | DOT's broom signs on the street centerline; tickets 93% on the right side, day and minute | 408 block sides not placed; 2027 suspension calendar not out |
 | [Hoboken](hoboken.md) | The alternate side schedule in the Hoboken Code, on the City's street map | The City's page and map lag the Code |
+| [Lodi](lodi.md) | The Borough's Code (§ 560-38, Schedule II) on the State's centerlines | No block checked against the signs yet; 32 rows set aside and 11 not placed; the Borough hasn't answered |
 | [Paterson](paterson.md) | The City's sweeping map on the State's centerlines | The map doesn't say which side is swept on which day: both days show on both sides |
 | [Philadelphia](philadelphia.md) | SweepPHL routes | Signs are posted on some blocks only and the data doesn't say which |
 | [Pittsburgh](pittsburgh.md) | Sweep codes on the City's centerlines | No hours per block: the City's general 8 AM to 2:30 PM window |

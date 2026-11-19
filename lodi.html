@@ -4,10 +4,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Lodi Street Cleaning Map (preview) | CURB</title>
-<meta name="robots" content="noindex">
-<meta name="description" content="Lodi street sweeping, block by block: every swept curb colored by its next sweep, from the Borough's parking code. A CURB preview.">
+<title>Lodi Street Sweeping Map: Schedules by Block | CURB</title>
+<meta name="description" content="Lodi street sweeping, block by block: every curb colored by its next sweep. A missed sweep is a ticket of up to $50. Free, with alerts, from the Borough's parking code.">
 <link rel="canonical" href="https://curb.guide/lodi">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"CURB Lodi","url":"https://curb.guide/lodi","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"description":"Lodi street sweeping, block by block: every curb colored by its next sweep. A missed sweep is a ticket of up to $50. Free, with alerts, from the Borough's parking code.","image":"https://curb.guide/og-lodi.png?v=1","areaServed":{"@type":"City","name":"Lodi, New Jersey"},"publisher":{"@type":"Organization","name":"CURB","url":"https://curb.guide/"}}
+</script>
 <!-- Social cards: og.png is a static 1200x630 asset regenerated via `npm run og` (og/template-home.html). URLs must stay absolute. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CURB">
@@ -883,7 +885,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<h1 class="srh">Lodi street cleaning map: sweeping schedules by block (a CURB preview)</h1>
+<h1 class="srh">Lodi street sweeping map: the next sweep on every block, with alerts</h1>
 <main id="map" aria-label="Lodi parking map"></main>
 
 <div class="top">
@@ -926,9 +928,9 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z"/><path d="M9 4v14M15 6v14"/></svg></span>
           <span class="im-tx"><b>Cities</b><small>CURB in more cities, or ask for yours</small></span>
         </a>
-        <a class="im-item" href="/about" role="menuitem">
+        <a class="im-item" href="/lodi/about" role="menuitem">
           <span class="im-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
-          <span class="im-tx"><b>About CURB</b><small>What it does &amp; data sources</small></span>
+          <span class="im-tx"><b>About CURB</b><small>Lodi's rules &amp; data sources</small></span>
         </a>
         <div class="im-mini" role="group" aria-label="More actions">
           <button class="im-m" id="imShare" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg><span>Share</span></button>
@@ -1010,14 +1012,14 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
-  <p>No parking on the side of the street the Borough's schedule names during its street sweeping hours: on most blocks one day a week, 9 AM to 3 PM, on some for one hour. Tap where you parked for the rules. <b>A preview</b>, built on the Borough's parking code.</p>
+  <p>No parking on the side of the street the Borough's schedule names during its street sweeping hours: on most blocks one day a week, 9 AM to 3 PM, on some for one hour. Tap where you parked for the rules. Built on the Borough's parking code.</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps soon</span>
     <span class="k"><i style="background:var(--red)"></i>move it now</span>
   </div>
   <button class="btn-go" id="welcomeGo">Show me the map</button>
-  <a class="wabout" href="/about">How it works →</a>
+  <a class="wabout" href="/lodi/about">How it works →</a>
   <p class="wcities">CURB also maps other cities. <a href="/cities">See them all →</a></p>
   
   <p class="wfoot">Free, no account. Built on <a href="https://ecode360.com/13641874" target="_blank" rel="noopener">the Borough's parking code</a>. The posted sign always wins.</p>
@@ -1080,7 +1082,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
      stale-while-revalidate, so a fresh page could otherwise run against a cached older core. -->
 <script src="/lib/sweep-core.js?v=8"></script>
 <script>window.CURB_CITY="lodi";</script>
-<script src="/lib/city-configs.js?v=c639a513"></script>
+<script src="/lib/city-configs.js?v=0abc2079"></script>
 <script src="/lib/city.js?v=e7874488"></script>
 <!-- A dropped request for Leaflet or the time core used to leave a dead map and no message. Ask for the
      missing one once more (document.write keeps it in order, ahead of the main script), then say so. The
@@ -1481,7 +1483,7 @@ async function loadViewport(){
   if(map.hasLayer(overviewLayer)){ovrDrawTok++;map.removeLayer(overviewLayer);}
   hint.style.opacity='0';hint.style.visibility='hidden';
   lastRows=data; segBounds=b;
-  if(!data.length&&!noCovToasted){noCovToasted=true; toast("No street-sweeping schedule here. This preview covers Lodi.");}
+  if(!data.length&&!noCovToasted){noCovToasted=true; toast("No street-sweeping schedule here. This map covers Lodi.");}
   drawSegments(data);
   tryPendingOpen();
 }
@@ -3210,6 +3212,7 @@ const CITY_MAPS=[{"id":"sf","name":"San Francisco","region":"California","path":
 {"id":"berkeley","name":"Berkeley","region":"California","path":"/berkeley","center":[37.8765,-122.29],"bounds":[[37.8463,-122.3198],[37.9049,-122.2346]]},
 {"id":"norfolk","name":"Norfolk","region":"Virginia","path":"/norfolk","center":[36.8802,-76.2884],"bounds":[[36.8209,-76.3294],[36.9692,-76.1771]]},
 {"id":"sacramento","name":"Sacramento","region":"California","path":"/sacramento","center":[38.5785,-121.4688],"bounds":[[38.438,-121.5608],[38.6856,-121.3629]]},
+{"id":"lodi","name":"Lodi","region":"New Jersey","path":"/lodi","center":[40.8779,-74.0834],"bounds":[[40.8584,-74.1026],[40.8974,-74.0641]]},
 {"id":"hoboken","name":"Hoboken","region":"New Jersey","path":"/hoboken","center":[40.744,-74.0305],"bounds":[[40.7304,-74.0485],[40.763,-74.0178]]},
 /* cities:end */
 ];
@@ -3317,7 +3320,7 @@ function placeFix(p,quiet){
     // inside another map's bounds (a public city, or San Francisco from a city's page): offer that map
     const there=acc>CITY_FIX_MAX?null:mapAt(c.latitude,c.longitude,CITY);
     if(there)toastLink("You're outside "+CITY_NAME[CITY]+", in "+there.name+".",there.path,'Open the '+there.name+' map');
-    else toast("You're outside Lodi, and this preview only covers Lodi. Search a street or tap a curb.");
+    else toast("You're outside Lodi, and this map only covers Lodi. Search a street or tap a curb.");
     return;
   }
   if(!(acc>ACC_MAX)){  // unknown (null/0/NaN) is trusted, as before
@@ -3462,7 +3465,7 @@ function tryPendingOpen(){
   const n=nearestSeg(po.lat,po.lng);
   // A search/link cnn fallback skips the cap: big parcels' address points sit >80 m from their block.
   if(n&&(po.cnnHint||n.d<=NEAR_M))return openPending(n);
-  endPendingOpen(lastRows.length?'No swept curb within 80 m. Tap your block on the map.':"No street-sweeping schedule here. This preview covers Lodi.");
+  endPendingOpen(lastRows.length?'No swept curb within 80 m. Tap your block on the map.':"No street-sweeping schedule here. This map covers Lodi.");
 }
 function openPending(n){endPendingOpen();openSheet(n.group,n.side.key);}
 function endPendingOpen(msg){const po=pendingOpen; if(!po)return; pendingOpen=null; if(po.loc)locBusy(false); if(msg)toast(msg);}
