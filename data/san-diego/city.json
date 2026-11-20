@@ -79,7 +79,7 @@
  "words": {
   "rule": "Where street sweeping signs are posted, no parking during the hours on the sign, on the days it names: weekly on busier streets, once or twice a month on most residential blocks, every other month on some.",
   "afterpass": "All year · not on City holidays · $83.50 ticket, no tow",
-  "dataNotes": "The City's street sweeping schedule (Stormwater Department, data.sandiego.gov, updated May 5, 2026): the 3,363 blocks with signs, of 28,141 swept; blocks without signs are swept too but get no tickets, so they are left off. The schedule names each side by compass (\"NS\", \"SES\"), drawn on the side of the street line facing that way; where that is unclear, the City's own street sweeping tickets of the past year decide. On 105 blocks whose tickets show the two sides' days reversed, the two are swapped."
+  "dataNotes": "The City's street sweeping schedule (Stormwater Department, data.sandiego.gov, updated May 5, 2026): the 3,363 blocks with signs, of 28,141 swept; blocks without signs are swept too but get no tickets, so they are left off. The schedule names each side by compass (\"NS\", \"SES\"), drawn on the side of the street line facing that way; where that is unclear, the City's own street sweeping tickets of the past year decide. On 105 blocks whose tickets show the two sides' days reversed, the two are swapped; the signs on 15 of them, read in Google Street View in November 2026, agree."
  },
  "neighborhoods": [
   {

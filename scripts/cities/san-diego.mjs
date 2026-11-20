@@ -32,6 +32,9 @@ const CITATIONS = (part) => `https://seshat.datasd.org/parking_citations/parking
 const CITATION_PARTS = ['2025_part2', '2026_part1', '2026_part2'];   // Jul 2025 to the latest (Jul 2026 on 2026-10-18)
 const ADDRESS_URL = 'https://geo.sandag.org/server/rest/directories/downloads/Address_Points.csv';
 const DATASET_PAGE = 'https://data.sandiego.gov/datasets/street-sweeping-schedule/';   // its "Last Updated" date
+// Swapped blocks whose signs were read in Google Street View (2026-11-20, 15 of the 105; every side read agrees with
+// the tickets, none with the City's text): docs/multi-city/san-diego.md "Street View check".
+const STREET_VIEW_CHECKED = 15;
 
 // ---------- the schedule text -----------------------------------------------------------------------
 // "Posted (7am - 10am), NS 1st Thu, SS 1st Wed", "Posted (10am - 1pm), Even Month 3rd Thu (ES), Odd Month 3rd Thu (WS)",
@@ -634,7 +637,7 @@ async function main() {
       afterpass: 'All year · not on City holidays · $83.50 ticket, no tow',
       dataNotes: `The City's street sweeping schedule (Stormwater Department, data.sandiego.gov${updated ? ', updated ' + updated : ''}): the ${k(out.length)} blocks with signs, of ${k(F.length)} swept; blocks without signs are swept too but get no tickets, so they are left off. `
         + 'The schedule names each side by compass ("NS", "SES"), drawn on the side of the street line facing that way; where that is unclear, the City\'s own street sweeping tickets of the past year decide.'
-        + (swapped.size ? ` On ${swapped.size} blocks whose tickets show the two sides' days reversed, the two are swapped.` : ''),
+        + (swapped.size ? ` On ${swapped.size} blocks whose tickets show the two sides' days reversed, the two are swapped; the signs on ${STREET_VIEW_CHECKED} of them, read in Google Street View in November 2026, agree.` : ''),
     },
     neighborhoods: hoods,
   };

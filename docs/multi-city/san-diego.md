@@ -70,9 +70,32 @@ parity. Of 84,201 tickets on posted blocks:
 
 The citation data has no time, so the hours are not checked.
 
+## Records request #26-11035 (closed 2026-11-20)
+
+The City's public records request answer (Stormwater, filed 2026-10-19) sent the street sweeping page, the open data
+page, the GIS layer's rows for the 105 blocks and a holidays PDF. All 105 schedule strings are identical to the open
+data: no sign records, no route sheets with sides, and nothing on questions 2 or 3 below. Files in
+`private/outreach/san-diego-26-11035/` (not in the repo).
+
+## Street View check (2026-11-20)
+
+15 of the 105 swapped blocks, spread across the city (28th St, Girard Ave, Elgin Ave, Palmyra Ave, Buena Vista St,
+Idaho St, Tourmaline St, Figueroa Blvd, Kensington Dr, 35th St, El Paseo Grande, Lincoln Ave, Diamond St, Thomas Ave,
+Frink Ave), signs read in Google Street View (imagery 2018 to 2026):
+
+- 10 blocks, both sides read: every sign has the day CURB shows (the swap), none the City's text.
+- 5 blocks, one side read: that side has the day CURB shows.
+- Palmyra Ave runs east-northeast but the City calls its sides East and West; CURB draws the north curb with even
+  months and the south curb with odd months, as signed.
+- Idaho St's west side has only a 2011 sign (3rd Wednesday, 7 to 10 AM): the day fits CURB, the hours are old.
+
+So the swap stays, and the page's data notes say the signs agree. The evidence (sign crops, Street View positions)
+is outside the repo, in `~/Documents/curb-san-diego-streetview/`. A person on the street is still the open check.
+
 ## Gaps
 
-- The 105 blocks above: the City's text and its tickets disagree. A decision: keep the text (now) or follow the tickets.
+- The 105 blocks above: the City's text and its tickets disagree, and the signs on 15 of them agree with the tickets
+  (Street View check). CURB follows the tickets; the City's data still has the sides swapped.
 - 80 ambiguous sides placed by compass alone, and 58 "Every Tues & Wed" blocks drawn on both sides both days.
 - 2027 holidays are derived (the City posts one year): the same eleven holidays, with Juneteenth on Friday, June 18,
   Independence Day on Monday, July 5, Christmas on Friday, Dec. 24, and New Year's Day 2028 on Friday, Dec. 31, 2027.
@@ -83,7 +106,8 @@ The citation data has no time, so the hours are not checked.
 ## Questions for the City (data@sandiego.gov, swppp@sandiego.gov)
 
 1. On 105 blocks (listed in `report.json`), last year's tickets on both sides are on the side opposite to the schedule.
-   Are the sides swapped in the dataset, or do the signs differ?
+   Are the sides swapped in the dataset, or do the signs differ? (Asked in records request #26-11035, which returned the
+   dataset's own rows. The signs on 15 blocks in Street View agree with the tickets, so the dataset looks swapped.)
 2. "Every Tues & Wed" (El Cajon Blvd, University Ave, Washington St, Normal St): which side is swept which day?
 3. What does "NS" mean on a north to south street (Haines St, Dawes St, Cass St in Pacific Beach)? The tickets point
    to the west side on Haines and Dawes, but the east side on Cass and Everts.
