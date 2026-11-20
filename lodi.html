@@ -1012,7 +1012,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
 
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome to CURB">
   <div class="big wmark"><img class="clogo" src="/icons/logo.svg" alt="" aria-hidden="true"></div>
-  <p>No parking on the side of the street the Borough's schedule names during its street sweeping hours: on most blocks one day a week, 9 AM to 3 PM, on some for one hour. Tap where you parked for the rules. Built on the Borough's parking code.</p>
+  <p>No parking on the side of the street the Borough's schedule names during its street sweeping hours: one day a week, 9 AM to 3 PM. Tap where you parked for the rules. Built on the Borough's parking code.</p>
   <div class="wkey">
     <span class="k"><i style="background:var(--green)"></i>clear</span>
     <span class="k"><i style="background:var(--amber)"></i>sweeps soon</span>
@@ -2115,7 +2115,7 @@ function openSheet(group, activeKey){
     </details>`:''}
     <details class="noted">
       <summary>The <b>posted sign</b> wins. Temporary signs &amp; holidays override. <b class="dn">Data notes ▸</b></summary>
-      <p>Days and hours come from the Borough of Lodi's Code (section 560-38, Schedule II: No Parking Certain Hours, read November 2026), laid row by row onto the State's street centerlines. The Code names each stretch in words, so where a rule starts or ends partway down a block the map shows the whole block or none of it. Sides the Code restricts in other ways (all day with an exception, school or business hours) are not shown, and the Code names no holidays. Sweep alerts and calendar reminders run on Lodi time: an overnight sweep gets one alert around 9 PM the evening before.</p>${GRADES&&GRADES.b[group.cnn]?'<p>Hill grades are measured from USGS elevation data, so treat them as close, not exact.</p>':''}
+      <p>Days and hours come from the Borough of Lodi's Code (section 560-38, Schedule II: No Parking Certain Hours, read November 2026), laid row by row onto the State's street centerlines. The Code names each stretch in words, so where a rule starts or ends partway down a block the map shows the whole block or none of it. Sides the Code restricts in other ways (all day with an exception, school or business hours) are not shown, and the Code names no holidays. On a few stretches the Code gives a shorter window (one hour, or 9 to noon), but the signs there read 9 AM to 3 PM in Google Street View, so the map shows 9 to 3. Sweep alerts and calendar reminders run on Lodi time: an overnight sweep gets one alert around 9 PM the evening before.</p>${GRADES&&GRADES.b[group.cnn]?'<p>Hill grades are measured from USGS elevation data, so treat them as close, not exact.</p>':''}
     </details>
     <div class="signfix"><a href="${_report}" target="_blank" rel="noopener" id="signfixLink">Doesn't match the posted sign? <b>Report a fix →</b></a></div>`;
   // the sheet can open before data/grades.json lands (a block link, right after parking): fill the card in then

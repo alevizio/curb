@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import {
-  LODI, CODE_URL, norm, parseWhen, parseLimit, parseRow, codeRows, whyNot, segmentsOf, axisOf, ringOf, piecesOf, stretch, sideOf, ringSide, applyCode,
+  LODI, CODE_URL, norm, parseWhen, signedHours, parseLimit, parseRow, codeRows, whyNot, segmentsOf, axisOf, ringOf, piecesOf, stretch, sideOf, ringSide, applyCode,
 } from './lodi.mjs';
 
 const P = (i, j) => [-74.09 + i * 0.001, 40.88 + j * 0.001];   // about 84 m a step east, 111 m a step north
@@ -53,6 +53,13 @@ describe('reading the schedule', () => {
     expect(parseWhen('9:00 a.m., Monday')).toBeNull();
     expect(parseWhen('9:00 a.m. to 3:00 p.m.')).toBeNull();                // no day
     expect(parseWhen('9:00 a.m. to 3:00 p.m., Monday and Thursday')).toBeNull();
+  });
+  it('shows a window inside 9 AM to 3 PM as 9 to 3, as the posted signs read (Street View, 2026-11-19)', () => {
+    expect(signedHours({ from: 9, to: 10 })).toEqual([9, 15]);
+    expect(signedHours({ from: 13, to: 14 })).toEqual([9, 15]);
+    expect(signedHours({ from: 9, to: 15 })).toEqual([9, 15]);
+    expect(signedHours({ from: '8:30', to: 10 })).toEqual(['8:30', 10]);   // starts before 9: left as the Code gives it
+    expect(signedHours({ from: 12, to: 16 })).toEqual([12, 16]);
   });
   it('reads a limit: a cross street, a distance from one, the terminus, the circle', () => {
     expect(parseLimit('the terminus')).toEqual({ end: true });
@@ -172,10 +179,17 @@ describe('laying the rows on the blocks', () => {
     expect(r.rows).toEqual([{ key: 'Oak Street|North|9:00 a.m. to 3:00 p.m., Monday|From Birch Avenue to Dogwood Avenue', applied: 2, blocks: 2 }]);
   });
   it('keeps two rows on one side as two rules, and the same rule once', () => {
-    const r = lay(['Oak Street|South|9:00 a.m. to 3:00 p.m., Wednesday|Entire length', 'Oak Street|South|9:00 a.m. to 10:00 a.m., Wednesday|From Ash Avenue to Birch Avenue',
+    const r = lay(['Oak Street|South|9:00 a.m. to 3:00 p.m., Wednesday|Entire length', 'Oak Street|South|8:00 a.m. to 10:00 a.m., Wednesday|From Ash Avenue to Birch Avenue',
       'Oak Street|South|9:00 a.m. to 3:00 p.m., Wednesday|From Ash Avenue to Cedar Avenue']);
-    expect(rules(r, 'oak-1', 'R')).toEqual([[3, 9, 15, 31, 0, 1], [3, 9, 10, 31, 0, 1]]);
+    expect(rules(r, 'oak-1', 'R')).toEqual([[3, 9, 15, 31, 0, 1], [3, 8, 10, 31, 0, 1]]);
     expect(rules(r, 'oak-4', 'R')).toEqual([[3, 9, 15, 31, 0, 1]]);
+  });
+  it('shows a row of one hour as 9 AM to 3 PM, once with a 9 to 3 row of the same day, and says so in the record', () => {
+    const r = lay(['Oak Street|South|9:00 a.m. to 3:00 p.m., Wednesday|Entire length', 'Oak Street|South|10:00 a.m. to 11:00 a.m., Wednesday|From Ash Avenue to Birch Avenue',
+      'Oak Street|North|9:00 a.m. to 10:00 a.m., Monday|Entire length']);
+    expect(rules(r, 'oak-1', 'R')).toEqual([[3, 9, 15, 31, 0, 1]]);
+    expect(rules(r, 'oak-1', 'L')).toEqual([[1, 9, 15, 31, 0, 1]]);
+    expect(r.rows.map((x) => !!x.widened)).toEqual([false, true, true]);
   });
   it('never puts a rule on a side in a neighboring town, or on a highway', () => {
     const features = [oak(1), oak(2), oak(3, 'LR', 'S1100'), oak(4, 'L'), ...AVENUES];
@@ -228,9 +242,9 @@ describe('the committed data', () => {
     expect(side('1b804796-1708-11e3-b5f2-0062151309ff', 'South')).toEqual([at(4)]);
     expect(side('1b804796-1708-11e3-b5f2-0062151309ff', 'North')).toEqual([at(1)]);
   });
-  it('keeps a side\'s two windows, and the two sides of Marion Pepe Drive\'s stem', () => {
+  it('shows First Street\'s two Wednesday rows as its one 9 to 3 sign, and the two sides of Marion Pepe Drive\'s stem', () => {
     expect(block('02f264de-1708-11e3-b5f2-0062151309ff')).toMatchObject({ s: '1st St', l: 'Passaic Ave - Bernice Pl' });
-    expect(side('02f264de-1708-11e3-b5f2-0062151309ff', 'South')).toEqual([at(3, 9, 10), at(3)]);
+    expect(side('02f264de-1708-11e3-b5f2-0062151309ff', 'South')).toEqual([at(3)]);
     expect(side('02f264de-1708-11e3-b5f2-0062151309ff', 'North')).toEqual([at(1)]);
     expect(block('0b6920c6-1708-11e3-b5f2-0062151309ff')).toMatchObject({ s: 'Marion Pepe Dr', l: 'Terhune Ave' });
     expect(side('0b6920c6-1708-11e3-b5f2-0062151309ff', 'West')).toEqual([at(4)]);
@@ -264,7 +278,9 @@ describe('the committed data', () => {
     for (const r of report.codeRows.notApplied) expect(r.notes.length).toBeGreaterThan(0);
     expect(report.output.blocks).toBe(segs.b.length);
     expect(segs.b).toHaveLength(496);
-    expect(report.unverified.join(' ')).toMatch(/No block has been checked against the posted signs/);
+    expect(report.unverified.join(' ')).toMatch(/No one has checked a block on the street. Google Street View/);
+    for (const b of segs.b) for (const [, , rs] of b.d) for (const [, from, to] of rs) expect([from, to]).toEqual([9, 15]);   // every row reads 9 to 3 now
+    expect(report.codeRows.shownAs9to3.length).toBeGreaterThan(0);
   });
   it('gives the city\'s facts as the Code states them', () => {
     expect(Object.keys(city)).toEqual(['id', 'name', 'region', 'tz', 'center', 'zoom', 'bounds', 'holidays', 'holidayRule', 'fine', 'tow', 'fineSource', 'agency',

@@ -432,6 +432,11 @@ export function parseWhen(s) {
   if (!days.length || times.length !== 2 || minutes(times[0]) >= minutes(times[1])) return null;
   return { days, from: times[0], to: times[1] };
 }
+/** The hours a row is shown with: a window inside 9 AM to 3 PM is shown as 9 to 3. The Code gives a shorter one on 16 rows
+ *  (from 1991 and 2005: 9 to 10, 10 to 11, 11 to noon, 1 to 2 PM, 9 to noon), but every such side checked in Google Street
+ *  View on 2026-11-19 (Passaic Avenue, Arnot Street, First Street) is signed 9 AM to 3 PM on the same day (owner,
+ *  2026-11-19). The wider window is the safe error: it can't get anyone ticketed. */
+export const signedHours = ({ from, to }) => (minutes(from) >= 9 * 60 && minutes(to) <= 15 * 60 ? [9, 15] : [from, to]);
 
 /** One end of a stretch: a cross street, a cross street and a distance from it, the street's own end, or its circle. */
 export function parseLimit(s) {
@@ -649,7 +654,9 @@ export function applyCode(rows, segs) {
     if (why) { rec.setAside = why; continue; }
     const street = bySt.get(row.street);
     if (!street) { rec.notes = [`no ${row.street} coded to Lodi in the State's layer`]; continue; }
-    const axis = axisOf(street), rules = row.time.days.map((dow) => [dow, row.time.from, row.time.to, WEEKS, MONTHS, FLAGS]);
+    const [from, to] = signedHours(row.time);
+    if (from !== row.time.from || to !== row.time.to) rec.widened = true;
+    const axis = axisOf(street), rules = row.time.days.map((dow) => [dow, from, to, WEEKS, MONTHS, FLAGS]);
     const seen = new Set(), ring = 'IO'.includes(row.side) ? ringOf(street) : null;
     if (ring && !ring.length) notes.add('the street has no circle in the State\'s layer');
     for (const st of row.stretches) {
@@ -784,9 +791,9 @@ async function main() {
     fine: 'up to $50', tow: 'no', fineSource: CODE_URL,
     agency: 'Borough of Lodi', scheduleUrl: CODE_URL, sources,
     words: {
-      rule: 'No parking on the side of the street the Borough\'s schedule names during its street sweeping hours: on most blocks one day a week, 9 AM to 3 PM, on some for one hour.',
+      rule: 'No parking on the side of the street the Borough\'s schedule names during its street sweeping hours: one day a week, 9 AM to 3 PM.',
       afterpass: 'Each side has its own day, and the sign on your side wins. A fine of up to $50. The Code calls the schedule off when the Borough\'s sweepers are not running.',
-      dataNotes: 'Days and hours come from the Borough of Lodi\'s Code (section 560-38, Schedule II: No Parking Certain Hours, read November 2026), laid row by row onto the State\'s street centerlines. The Code names each stretch in words, so where a rule starts or ends partway down a block the map shows the whole block or none of it. Sides the Code restricts in other ways (all day with an exception, school or business hours) are not shown, and the Code names no holidays.',
+      dataNotes: 'Days and hours come from the Borough of Lodi\'s Code (section 560-38, Schedule II: No Parking Certain Hours, read November 2026), laid row by row onto the State\'s street centerlines. The Code names each stretch in words, so where a rule starts or ends partway down a block the map shows the whole block or none of it. Sides the Code restricts in other ways (all day with an exception, school or business hours) are not shown, and the Code names no holidays. On a few stretches the Code gives a shorter window (one hour, or 9 to noon), but the signs there read 9 AM to 3 PM in Google Street View, so the map shows 9 to 3.',
       source: 'the Borough\'s parking code',   // the share card's "from …": Lodi has no open data portal (owner, 2026-11-11)
     },
   };
@@ -801,7 +808,8 @@ async function main() {
     season: { from: null, to: null, note: 'The Code gives no season: the schedule is shown all year.' },
     skipped: Object.fromEntries(skipped),
     checks,
-    codeRows: { applied: recs.filter((r) => r.applied).length, setAside, notApplied, notes: withNotes },
+    codeRows: { applied: recs.filter((r) => r.applied).length, setAside, notApplied, notes: withNotes,
+      shownAs9to3: recs.filter((r) => r.applied && r.widened).map((r) => r.key) },
     assumptions: [
       'Schedule II (§ 560-38) is the street sweeping schedule: its paragraph C suspends it "when the street sweepers of the Borough of Lodi are not operable".',
       'A row applies every week, all year: the Code gives no season, no week of the month and no holiday.',
@@ -812,9 +820,10 @@ async function main() {
       'A limit the State does not have on that street is read as the one street with the same name and another type that crosses it (each case is in codeRows.notes); with none, or more than one, the stretch is not shown.',
       'Marion Pepe Drive: "Inner Circle" is the curb facing the middle of the loop, "Outer Circle" the other; the East and West rows "From Terhune Avenue to Circle" are the straight block before the loop.',
       'On a street along the Borough line, only the side coded to Lodi gets the rule.',
+      'A row whose window lies inside 9 AM to 3 PM is shown as 9 AM to 3 PM, on its own day and side (codeRows.shownAs9to3): the posted signs on the three such sides checked in Google Street View on 2026-11-19 (Passaic Avenue, Arnot Street, First Street) read 9 AM to 3 PM (owner, 2026-11-19).',
     ],
     unverified: [
-      'No block has been checked against the posted signs.',
+      'No one has checked a block on the street. Google Street View (2026-11-19, imagery 2018 to 2026) was read on 20 sides of 20 streets: every sweeping sign read there (4 of the 20 sides and 5 opposite sides) has CURB\'s day and side, and all read 9 AM to 3 PM; 15 sides showed no sign and one has no imagery. Also seen: John Street\'s north side (no rule here) is signed "No Parking Except Thursday 9AM-3PM" over a resident parking plate, and the dead end of Wisse Street "No Parking Any Time".',
       'Towing: Article II names a fine and no tow; shown as no towing.',
       'Holidays: none are named in the Code, so none are listed and nothing is skipped on a holiday.',
       'The 1965 Article I (§ 560-24, "Schedule 10: Alternate Side of Street Parking") lists about 40 streets on weekdays 8 AM to 5 PM with no side: not shown; it may be superseded by Schedule II.',

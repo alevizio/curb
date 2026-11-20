@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-12",
+ "generated": "2026-11-20",
  "inputs": {
   "codeRows": 338,
   "codeRead": "2026-11-11",
@@ -9,8 +9,8 @@
  "output": {
   "blocks": 496,
   "sides": 879,
-  "rules": 925,
-  "sizeBytes": 150493
+  "rules": 922,
+  "sizeBytes": 150437
  },
  "season": {
   "from": null,
@@ -24,7 +24,7 @@
   "noOddSide": 48,
   "oneSideOnly": 113,
   "twoDaysOneSide": 16,
-  "twoWindowsOneDay": 3
+  "twoWindowsOneDay": 0
  },
  "codeRows": {
   "applied": 295,
@@ -399,6 +399,23 @@
      "Park St is not on the street in the layer: read as Park Ave, the one Park that meets it"
     ]
    }
+  ],
+  "shownAs9to3": [
+   "Arnot Street|South|10:00 a.m. to 11:00 a.m., Wednesday|From Burns Avenue to Farnham Avenue",
+   "Autumn Street|South|11:00 a.m. to 12:00 p.m., Thursday|Entire length",
+   "Avenue C|South|1:00 p.m. to 2:00 p.m., Friday|Entire length",
+   "Borig Place|East|9:00 a.m. to 10:00 a.m., Friday|Keasler Avenue to Hamilton Avenue",
+   "Charles Street|South|9:00 a.m. to 10:00 a.m. Wednesday|From Westervelt Place to Westminster Place",
+   "First Street|South|9:00 a.m. to 10:00 a.m. Wednesday|From Passaic Avenue to Harrison Avenue",
+   "Garibaldi Avenue|South|9:00 a.m. to 12:00 p.m., Friday|Entire length",
+   "Harrison Avenue|East|9:00 a.m. to 10:00 a.m., Monday|Entire length",
+   "Hillside Place|North|9:00 a.m. to 10:00 a.m. Monday|Entire length",
+   "Hillside Place|South|9:00 a.m. to 10:00 a.m. Wednesday|Entire length",
+   "Home Place|South|9:00 a.m. to 10:00 a.m., Wednesday|Entire length",
+   "Liberty Street|South|9:00 a.m. to 10:00 a.m., Tuesday|From Liberty Lane to Prospect Street",
+   "Passaic Avenue|East|9:00 a.m. to 10:00 a.m., Wednesday|From First Street to Frederick Street",
+   "Passaic Avenue|West|9:00 a.m. to 10:00 a.m., Monday|From First Street to Frederick Street",
+   "River Street|West|9:00 a.m. to 10:00 a.m., Monday|Entire length"
   ]
  },
  "assumptions": [
@@ -410,16 +427,16 @@
   "On James Street, \"St. Joseph Plaza\" is read as East Place: the Code's own rows call the plaza the continuation of East Place, and the State has no plaza.",
   "A limit the State does not have on that street is read as the one street with the same name and another type that crosses it (each case is in codeRows.notes); with none, or more than one, the stretch is not shown.",
   "Marion Pepe Drive: \"Inner Circle\" is the curb facing the middle of the loop, \"Outer Circle\" the other; the East and West rows \"From Terhune Avenue to Circle\" are the straight block before the loop.",
-  "On a street along the Borough line, only the side coded to Lodi gets the rule."
+  "On a street along the Borough line, only the side coded to Lodi gets the rule.",
+  "A row whose window lies inside 9 AM to 3 PM is shown as 9 AM to 3 PM, on its own day and side (codeRows.shownAs9to3): the posted signs on the three such sides checked in Google Street View on 2026-11-19 (Passaic Avenue, Arnot Street, First Street) read 9 AM to 3 PM (owner, 2026-11-19)."
  ],
  "unverified": [
-  "No block has been checked against the posted signs.",
+  "No one has checked a block on the street. Google Street View (2026-11-19, imagery 2018 to 2026) was read on 20 sides of 20 streets: every sweeping sign read there (4 of the 20 sides and 5 opposite sides) has CURB's day and side, and all read 9 AM to 3 PM; 15 sides showed no sign and one has no imagery. Also seen: John Street's north side (no rule here) is signed \"No Parking Except Thursday 9AM-3PM\" over a resident parking plate, and the dead end of Wisse Street \"No Parking Any Time\".",
   "Towing: Article II names a fine and no tow; shown as no towing.",
   "Holidays: none are named in the Code, so none are listed and nothing is skipped on a holiday.",
   "The 1965 Article I (§ 560-24, \"Schedule 10: Alternate Side of Street Parking\") lists about 40 streets on weekdays 8 AM to 5 PM with no side: not shown; it may be superseded by Schedule II.",
   "Rows the build could not place are listed under codeRows.notApplied; rows it set aside under codeRows.setAside.",
-  "Streets whose Lodi blocks are in separate pieces, where an \"Entire length\" row is on every piece: Brookside Ave, Church St, Hamilton Ave, Redstone Ln, Sherman Ave.",
-  "A side with two windows on one day, from two rows that overlap (both are shown): 1st St."
+  "Streets whose Lodi blocks are in separate pieces, where an \"Entire length\" row is on every piece: Brookside Ave, Church St, Hamilton Ave, Redstone Ln, Sherman Ave."
  ],
  "questionsForCity": [
   "Is Schedule II (§ 560-38) the schedule the sweepers and the signs follow today? Is there a published map or list besides the Code?",

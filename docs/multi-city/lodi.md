@@ -3,8 +3,8 @@
 Built 2026-11-11, after a request on /cities for "Lodi, NJ". Data build: `scripts/cities/lodi.mjs` → `data/lodi/`
 (format in [city-build.md](city-build.md)); tests: `scripts/cities/lodi.test.mjs`. A preview until 2026-11-19, public
 since (the owner's call, made on 2026-11-12: public if the Borough hadn't answered by then, and it hadn't). It went
-public without the sign check below, so every page says the map comes from the Borough's parking code and that the sign
-on your side wins.
+public without a sign check on the street, so every page says the map comes from the Borough's parking code and that
+the sign on your side wins. A Google Street View check of 20 sides followed the same day (below).
 
 ## How the rule works
 
@@ -13,7 +13,9 @@ on your side wins.
   side, hours and day, and location. Its paragraph C says the regulations "shall be suspended when the street sweepers
   of the Borough of Lodi are not operable", which is what makes it the sweeping schedule.
 - Most rows are **one day a week, 9 AM to 3 PM, one side**: the other side of the same street has another day. A few
-  are one hour (9 to 10, 10 to 11, 11 to noon, 1 to 2 PM) or a morning (9 AM to noon). Monday to Friday only.
+  are one hour (9 to 10, 10 to 11, 11 to noon, 1 to 2 PM) or a morning (9 AM to noon): 16 rows, from 1991 and 2005.
+  The map shows those as 9 AM to 3 PM on the same day and side, as the signs read in Street View (`signedHours`, the
+  owner's pick of 2026-11-19; the report lists them under `codeRows.shownAs9to3`). Monday to Friday only.
 - § 560-27C: no parking "between the hours specified in Schedule II of any day specified therein". § 560-28: a
   penalty of **not more than $50** (or up to 15 days, or both). Article II names no tow.
 - The Code gives no season, no week of the month and no holiday: every row is read as every week, all year.
@@ -53,13 +55,13 @@ on your side wins.
 - **Ids.** `c` is the block's `RCL_NGUID`. `o` is the odd side from the State's parity; `l` the cross streets at each
   end. Rules are flagged 1 (not suspended on holidays): the Code names none.
 
-Result (`data/lodi/report.json`): **496 blocks, 879 sides, 925 rules**. Of the 338 rows read, 295 are on the map, 32
+Result (`data/lodi/report.json`): **496 blocks, 879 sides, 922 rules**. Of the 338 rows read, 295 are on the map, 32
 are set aside and 11 could not be placed. `segments.json` is 0.15 MB.
 
 ## Gaps
 
-1. **No block has been checked against the posted signs.** The Code is the only source; an ordinance can trail the
-   signs by years.
+1. **No block has been checked on the street.** The Code is the only source, checked only in Google Street View (below);
+   an ordinance can trail the signs by years.
 2. **32 rows set aside**: 21 read "All; except 9:00 a.m. to 3:00 p.m., Tuesday" (no parking at all times except then,
    or the reverse: the Code does not say), 4 have blank hours or days, 4 are weekday hours "except Saturday, Sunday,
    and holidays" (not a sweep), 3 have a location the build cannot read. Those sides show nothing.
@@ -71,7 +73,7 @@ are set aside and 11 could not be placed. `segments.json` is 0.15 MB.
 5. **Towing.** Shown as none, from Article II's silence.
 6. Five streets whose Lodi blocks are in separate pieces carry an "Entire length" row on every piece (Brookside Ave,
    Church St, Hamilton Ave, Redstone Ln, Sherman Ave). First Street's south side has two overlapping Wednesday rows
-   (9 to 10 AM and 9 AM to 3 PM): both are shown.
+   (9 to 10 AM and 9 AM to 3 PM): shown as one, 9 to 3, as its sign reads.
 
 ## What to ask the Borough
 
@@ -89,8 +91,24 @@ are set aside and 11 could not be placed. `segments.json` is 0.15 MB.
    East Place?
 10. Marion Pepe Drive: is the "Inner Circle" the curb around the island of the loop?
 
+## Street View check (2026-11-19)
+
+Nobody in Lodi could check the signs, so 20 sides on 20 streets, spread across the Borough (4 with a short window),
+were read in Google Street View (imagery from 2018 to November 2026). The list, the readings and a crop of every sign are
+in the owner's ~/Documents/curb-lodi-streetview/ (not in the repo).
+
+- **Every sweeping sign read has CURB's day and side**: 4 of the 20 sides and 5 opposite sides, no side swapped. They
+  all read "NO PARKING / <DAY> / 9AM-3PM" under a red NO, often over a snow plate; none says street cleaning.
+- **The short windows are signed 9 AM to 3 PM.** Passaic Avenue (Code: Monday 9 to 10), Arnot Street (Wednesday 10 to
+  11) and First Street (Wednesday 9 to 10 beside a 9 to 3 row) are all signed 9 AM to 3 PM, the same day. So the map
+  shows every short window as 9 to 3 (above).
+- 15 sides showed no sign in view (signs are sparse, about one a side, and some imagery is blurred) and Staal Lane has
+  no imagery. Neither proves the rule is gone.
+- Also seen: John Street's north side, where CURB has no rule, is signed "No Parking Except Thursday 9AM-3PM" over
+  "Resident Parking Only Thursday 9:00AM to 4:00PM"; the dead end of Wisse Street "No Parking Any Time". Not on the map.
+
 ## Still open
 
-- A person in Lodi checks at least 20 blocks against the signs ([adding-a-city.md](adding-a-city.md)). Not done before
-  it went public.
+- A person in Lodi checks at least 20 blocks against the signs on the street ([adding-a-city.md](adding-a-city.md)).
+  Street View stands in for it until then.
 - The Borough's answer to the questions above (emailed 2026-11-11, none by 2026-11-19).
