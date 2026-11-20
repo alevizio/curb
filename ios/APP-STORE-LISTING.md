@@ -62,39 +62,24 @@ Free. No ads. No signup. No account. No cookies. If you turn on alerts, CURB sto
 ```
 
 ## What's New (v1.0.8)
-Build 13 (Xcode Cloud 65). NOT in review: submitted 16 Nov 2026, 8:24 AM PT, then removed from review the same morning
-(App Store Connect shows "Developer Rejected", Apple's name for that) to change the description's source line, both the
-owner's picks. It was held until Thu 19 Nov 2026 (the owner's pick, one review instead of two). That day the Borough of
-Lodi had not answered, so Lodi went public on curb.guide (main ef580d47) and the site counts 28: screenshot 8 and every
-count here move to 28, and it waits for the owner's submit. App Store Connect was signed out on 19 Nov at 9:30 AM PT,
-so none of the 28 changes is in App Store Connect yet. Release stays automatic once approved. Nothing changes inside the
-app. Screenshot 8 now reads "ONE MAP. 28 CITIES." with Lodi in the list and the New York dot marked 5; the other nine
-shots are the 1.0.7 ones. The file and its tool are in private/store-screenshots-2026-11-09/shot8-2026-11-19/
-(8-28-cities.png, a JPEG copy, us-map-3.mjs); 27 was shot8-2026-11-13/.
-
-The words wait for the owner's pick. Recommended (the store still shows 1.0.7, so Boston and Somerville are news too):
+Build 13 (Xcode Cloud 65). Submitted 19 Nov 2026, 5:41 PM PT ("Waiting for Review"), releasing automatically to
+everyone once approved. First submitted 16 Nov 2026, 8:24 AM PT, as 27 cities, then removed from review the same
+morning (App Store Connect showed "Developer Rejected", Apple's name for that) to change the description's source
+line, and held until Thu 19 Nov 2026 for Lodi (the owner's picks, one review instead of two). The Borough of Lodi had
+not answered, so Lodi went public on curb.guide (main ef580d47) and every count here moved to 28. The owner's picks of
+19 Nov: the words below (the store still showed 1.0.7, so Boston and Somerville are news too) and "submit once it
+checks out". Read back in App Store Connect after a reload, before submitting: ten shots in the 6.5" slot, the 1.0.7
+ones with 8 now "ONE MAP. 28 CITIES." (Lodi in the list, the New York dot marked 5; 9 and 10 re-added from the Asset
+Library), the subtitle, promotional text and description above, this text, build 65, all users at once, existing
+rating kept. Add for Review listed the Subtitle as a change to the shared app information. Nothing changes inside the
+app. Shot 8 and its tool are in private/store-screenshots-2026-11-09/shot8-2026-11-19/ (8-28-cities.png, a JPEG copy,
+us-map-3.mjs); 27 was shot8-2026-11-13/.
 ```
 Boston, Somerville and Lodi join the map.
 
 • Boston: street cleaning block by block, with alerts before it starts.
 • Somerville: street sweeping, with alerts too.
 • Lodi, NJ: street sweeping, from the Borough's parking code.
-• One map for 28 cities.
-
-The posted sign is always the final authority.
-```
-Shorter:
-```
-Three more cities: Boston, Somerville and Lodi, NJ. One map for 28 cities, with alerts before the sweeper comes.
-
-The posted sign is always the final authority.
-```
-The 16 Nov words with only the count changed (Lodi unnamed):
-```
-Boston and Somerville join the map.
-
-• Boston: street cleaning block by block, with alerts before it starts.
-• Somerville: street sweeping, with alerts too.
 • One map for 28 cities.
 
 The posted sign is always the final authority.
