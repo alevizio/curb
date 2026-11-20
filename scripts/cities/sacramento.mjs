@@ -332,11 +332,12 @@ async function main() {
         + 'rule = [jsDow, fromH, toH, weeksMask (31 = weekly, 1 = the first week of the month), monthsMask (0 = all year), flags (1 = not suspended on holidays)]' },
     b: out }));
 
+  // tow: the City's Recycling & Solid Waste Division, 2026-11-20: "Cars have been towed" (after how many tickets is not known)
   const city = {
     id: 'sacramento', name: 'Sacramento', region: 'California', tz: 'America/Los_Angeles',
     center, zoom: 15, bounds,
     holidays: HOLIDAYS, holidaysSource: 'https://www.cityofsacramento.gov/city-government/holiday-schedule', holidayRule: 'all',
-    fine: '$72.50', tow: 'no', fineSource: 'https://www.cityofsacramento.gov/public-works/parking/citation-services/citation-fines',
+    fine: '$72.50', tow: 'yes', fineSource: 'https://www.cityofsacramento.gov/public-works/parking/citation-services/citation-fines',
     agency: 'City of Sacramento Public Works', scheduleUrl: 'https://www.cityofsacramento.gov/public-works/recycling-solid-waste/Collectionservices/StreetSweeping',
     sources,
     words: {

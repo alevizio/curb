@@ -48,7 +48,7 @@
  "holidaysSource": "https://www.cityofsacramento.gov/city-government/holiday-schedule",
  "holidayRule": "all",
  "fine": "$72.50",
- "tow": "no",
+ "tow": "yes",
  "fineSource": "https://www.cityofsacramento.gov/public-works/parking/citation-services/citation-fines",
  "agency": "City of Sacramento Public Works",
  "scheduleUrl": "https://www.cityofsacramento.gov/public-works/recycling-solid-waste/Collectionservices/StreetSweeping",

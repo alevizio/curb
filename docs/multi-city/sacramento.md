@@ -14,14 +14,16 @@ No page yet. Every number below is in `data/sacramento/report.json`.
   same). **Weekly** on blocks where homes get weekly garbage and organics pickup on that street; **the first week of
   the month** on the others ("1st TUE of the month" on the signs). The signs say "City Services" because the curb is
   kept for sweeping, garbage and leaf collection.
-- **Holidays don't stop it** (an assumption, flags 1 on every rule): the City says residential collection "will occur
+- **Holidays don't stop it** (flags 1 on every rule; confirmed on 2026-11-20 by the City's Recycling & Solid Waste
+  Division, which also confirmed November to January): the City says residential collection "will occur
   on holidays", leaf crews "work rain or shine, including holidays", and meters and time limits are enforced "7 days
   per week, including holidays". Nothing says street sweeping restrictions are off on holidays.
-- **All year** (an assumption, months 0): the signs name no season; sweeping runs February to October and leaf
+- **All year** (months 0, confirmed on 2026-11-20, above): the signs name no season; sweeping runs February to October and leaf
   collection November to January on the same days.
 - **Fine: $72.50**, unverified. The City's fine schedule has no street sweeping line; "No Parking Certain Hours"
   (City Code 10.36.040) is $60, plus the State's $12.50 surcharge. A 2014 street cleaning ticket was $52.50.
-  Tow: none mentioned.
+  Tow: "Cars have been towed" (Recycling & Solid Waste, 2026-11-20; after how many tickets is not known), so the
+  about page says the car can be towed.
 
 ## The data
 
@@ -59,17 +61,18 @@ Rules: `[dow, 8, 12, 31 | 1, 0, 1]`: weekly (31) or the first week (1), all year
 
 - **Weekly or monthly comes from 2018**, the latest the City publishes; today's parking data does not say it.
 - No ticket data, so nothing checks the schedule against enforcement.
-- Holidays and November to January are assumptions (above). The holiday list in `city.json` (the City's 2026 list,
+- Holidays and November to January were assumptions until the City confirmed them on 2026-11-20. The holiday list in `city.json` (the City's 2026 list,
   2027 by its rule, half days left out) suspends nothing, because every rule has flags 1.
-- The fine is inferred from the fine schedule; tow unknown.
+- The fine is inferred from the fine schedule; when a car is towed is unknown.
 - Only 6 neighborhoods have 10 or more blocks; Downtown has 4 restricted segments in the data.
 
 ## Questions for the City (311, sacrecycle@cityofsacramento.org)
 
 1. Is the June 2018 sign inventory still right about which blocks are weekly and which are first week of the month?
-   Could the on-street parking data say it (as it does with "1ST WED" on 31 spaces)?
-2. Are City Services restrictions enforced on City holidays, and from November to January?
-3. Which City Code section and fine does a City Services sign carry? Is a car ever towed?
+   Could the on-street parking data say it (as it does with "1ST WED" on 31 spaces)? (The City is checking, 2026-11-20.)
+2. Are City Services restrictions enforced on City holidays, and from November to January? (Yes, 2026-11-20.)
+3. Which City Code section and fine does a City Services sign carry? Is a car ever towed? (Cars have been towed;
+   the fine and when a car is towed are with Parking, 2026-11-20.)
 4. E St (16th to 17th) has Monday on both sides and I St (800 block) Monday on the north side: data or signs?
 5. Is there a parking citation dataset with date, time and place?
 6. What are the terms of use for the ArcGIS layers (on-street parking, sign inventory, neighborhoods) and the County
