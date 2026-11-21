@@ -47,33 +47,33 @@
  "scheduleUrl": "https://www.cambridgema.gov/services/streetcleaning",
  "sources": [
   {
-   "name": "Traffic Regulation Schedule M, Section 16.7 Street Cleaning (revision 9/15/2014)",
-   "url": "https://www.cambridgema.gov/~/media/Files/Traffic/trafficregulations/schedules/mschedulejuly2014.pdf",
-   "license": "City of Cambridge public record (no license stated)",
-   "fetched": "2026-10-18"
+   "name": "Street Sweeping Schedule (Public Works, 2026)",
+   "url": "https://data.cambridgema.gov/Public-Works/Street-Sweeping-Schedule/uvf3-2xt3",
+   "license": "ODC PDDL",
+   "fetched": "2026-11-21"
+  },
+  {
+   "name": "Master Addresses List (street cleaning district of each address)",
+   "url": "https://data.cambridgema.gov/Addresses/Master-Addresses-List/vup6-kpwv",
+   "license": "ODC PDDL",
+   "fetched": "2026-11-21"
   },
   {
    "name": "Street Centerline",
    "url": "https://data.cambridgema.gov/Basemap/Street-Centerline/3d3q-sfd6",
    "license": "ODC PDDL",
-   "fetched": "2026-10-18"
-  },
-  {
-   "name": "Master Addresses List",
-   "url": "https://data.cambridgema.gov/Addresses/Master-Addresses-List/vup6-kpwv",
-   "license": "ODC PDDL",
-   "fetched": "2026-10-18"
+   "fetched": "2026-11-21"
   },
   {
    "name": "Cambridge Parking Tickets (2025, street cleaning)",
    "url": "https://data.cambridgema.gov/Traffic-Parking-and-Transportation/Cambridge-Parking-Tickets/vnxa-cuyr",
    "license": "ODC PDDL",
-   "fetched": "2026-10-18"
+   "fetched": "2026-11-21"
   }
  ],
  "words": {
-  "rule": "Each side of a residential street is swept once a month, April to December, on the day on its signs (for example \"4th Wednesday\"), usually 8 AM to 2 PM.",
-  "afterpass": "April 1 to December 31. $100 ticket, no tow. A sweep that falls on a City holiday moves to a make-up day, which CURB does not show yet.",
-  "dataNotes": "The only street-by-street table the City publishes is Traffic Regulation Schedule M from 2014, placed on the City's street centerlines. The City's 2025 tickets show that one side of three districts has moved to another week since then, so CURB does not show Cambridge until the City publishes the current table."
+  "rule": "Each side of a residential street is swept once a month, April to December, on the day on its signs (like \"2nd Thursday\"), 8 AM to noon on most streets.",
+  "afterpass": "April to December. $100 ticket, no tow. A sweep that falls on a City holiday moves to a make-up day, and the dates here include it. A few streets post other hours: the sign decides.",
+  "dataNotes": "Dates from the City's 2026 Street Sweeping Schedule (Public Works, on the City's open data), which gives each street cleaning district's odd and even sides their own day, holiday make-up days included. Each block side takes the district of its addresses in the City's Master Addresses List, placed by the City's street centerline address ranges. The City publishes no hours: most streets are 8 AM to noon, so the posted sign decides."
  }
 }

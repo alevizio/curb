@@ -18,7 +18,7 @@ export const PUBLIC = [
 // On curb.guide/cities under "In progress" until the city is public (a public city leaves this list by itself).
 export const IN_PROGRESS = [
   { id: 'toronto', name: 'Toronto', region: 'Ontario', note: 'Being built now.' },
-  { id: 'cambridge', name: 'Cambridge', region: 'Massachusetts', note: 'Waiting on the City\'s data: its only street table is from 2014.' },
+  { id: 'cambridge', name: 'Cambridge', region: 'Massachusetts', note: 'Built from the City\'s 2026 schedule. Being checked before it opens.' },
   { id: 'san-mateo', name: 'San Mateo', region: 'California', note: 'Which streets have posted sweeping signs isn\'t known yet.' },
 ];
 

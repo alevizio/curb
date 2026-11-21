@@ -292,6 +292,10 @@
       "destination": "/lodi/about.html"
     },
     {
+      "source": "/cambridge",
+      "destination": "/cambridge.html"
+    },
+    {
       "source": "/tickets",
       "destination": "/tickets.html"
     },

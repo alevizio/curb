@@ -56,8 +56,9 @@ the questions for the City.
 | [Montréal](montreal.md) | 43k street cleaning signs placed on the Géobase | The sign inventory is thin in six boroughs; the page is in English |
 | [Toronto](toronto.md) | Winter parking: snow routes (no parking while the City declares a Major Snowstorm Condition) and the former North York's 2 to 6 AM ban, from Chapter 950's schedules on the centreline | The declarations have no feed: the switch follows the City's news by hand, told by an email watch |
 
-Not built: [Cambridge](cambridge.md) (the only street table is from 2014, and 2025 tickets contradict it), [San Mateo](san-mateo.md)
-(which streets are posted is not known), and the other snow and winter rule cities (Minneapolis, Winnipeg, Calgary, Edmonton):
+A preview, not public: [Cambridge](cambridge.md), from the City's 2026 district schedule joined to its address list (2025
+tickets: 91.6% on the right block side and day; hours 8 AM to noon on every side, the sign decides). Not built:
+[San Mateo](san-mateo.md) (which streets are posted is not known), and the other snow and winter rule cities (Minneapolis, Winnipeg, Calgary, Edmonton):
 the map now shows a rule that switches sides by date (Madison, Milwaukee) and one that follows a declaration (Toronto), so each
 is a data build plus its words.
 

@@ -1,143 +1,169 @@
 # Cambridge, MA
 
-Researched and built 2026-10-18 (`scripts/cities/cambridge.mjs`, spec in [city-build.md](city-build.md)). **Not shipped:**
-the only street by street table the City publishes is from 2014, and the City's own 2025 tickets show it is no longer
-what the signs say. The build writes `data/cambridge/report.json` and `city.json` and no `segments.json`.
+Researched 2026-10-18; built 2026-11-20 from the City's district schedule (`scripts/cities/cambridge.mjs`, spec in
+[city-build.md](city-build.md)). **A preview** at curb.guide/cambridge: noindex and unlisted, not in `scripts/cities/public.mjs`
+`PUBLIC`.
 
 ## Short version
 
-- Every residential street side is swept once a month, April 1 to December 31, usually 8 AM to 2 PM. $100 ticket
-  since September 2024, no tow. A sweep on a City holiday moves to a make-up day.
-- The street side table (Traffic Regulation Schedule M, 946 rows, revision 9/15/2014) is a PDF. The dataset that
-  replaced it on the open data portal (`uvf3-2xt3`) is private now.
-- Of 2025 street cleaning tickets written at an address, **78% land on a street the 2014 table sweeps that day and
-  hour, 65% on the right side of it, 53% on the right block side.** The City's current pattern (each street cleaning
-  district's odd side on one weekday of one week, its even side on another) explains **94.5%** of the same tickets.
-- In districts B, C and H one side of every street has moved to another week since 2014 (C even: 1st Monday to 2nd
-  Monday; H even: 3rd Monday to 4th Monday; B even: 1st Thursday to 1st Tuesday). The table also lacks streets that
-  get tickets every month (Hurley, Rogers, Bent, Reed, Pacific in East Cambridge and Area 4).
+- Every residential street side is swept once a month, April to December. Signs give the day ("2nd Thursday") and the
+  hours: the City says most streets are 8 AM to noon, a few differ, and drivers should follow the posted signs. $100
+  ticket since September 2024, no tow. A sweep on a City holiday moves to a make-up day.
+- What changed: on 2026-10-22 the City made its Street Sweeping Schedule (`uvf3-2xt3`) public again, updated for 2026:
+  20 rows, one per street cleaning district (A to K, no I) and side (odd or even house numbers), with the day on the
+  signs ("1st Wed") and the date of each month's sweep, April to December, make-up days included. No hours. The Master
+  Addresses List (`vup6-kpwv`) gives every address its district, and the City suggested joining the two. The build does
+  that join on the City's street centerline.
+- 3,515 block sides on 2,062 blocks get a district and its nine dates, 8 AM to noon. 375 sides with an address range are
+  left off: they have no address points, no district on their addresses, or addresses split between districts.
+- Of the 2025 street cleaning tickets placed on a block side, **91.6% land on a side the schedule sweeps that day, 8 to
+  noon** (street level 95.7%, street and side 95.2%). That is over the 90% gate, so `segments.json` ships.
 
 ## How the rule works
 
-From the City's street cleaning page (`cambridgema.gov/services/streetcleaning`, read 2026-10-18) and its 2025 notice:
+From the City's street cleaning page (`cambridgema.gov/services/streetcleaning`, read 2026-10-18), its 2025 notice and the
+schedule dataset's description:
 
-- Public Works sweeps both sides of every residential street once a month, April through December. Signs on each
-  street give the day ("4th Wednesday") and hours. Schedule M has 913 rows at 8 AM to 2 PM and 33 at 7 to 10 AM.
+- Public Works sweeps both sides of every residential street once a month, April through December. Within each district
+  the odd and even sides are swept on different days: twenty slots, every weekday of weeks 1 to 4 once.
+- Hours are on the signs. The City (October 2026): most streets are 8 AM to noon, a few streets differ, follow the posted
+  signs. CURB shows 8 AM to noon everywhere and says the sign decides.
 - Fine $100 per violation since September 1, 2024. Towing was suspended in the 2023 pilot and the 2025 notice says
   "vehicles will not be towed during street cleaning operations".
-- Holidays: the sweep moves to a make-up day. 2026: Patriots' Day to Apr 29, Memorial Day to May 29, Juneteenth to
-  Jun 29, Independence Day (Jul 3) to Jun 30, Labor Day to Aug 31, Indigenous Peoples' Day to Sep 29, Veterans Day to
-  Oct 29, Thanksgiving to Nov 30, Christmas to Dec 29. The day after Thanksgiving and Christmas Eve: no change. Every
-  make-up day is a 5th weekday of a month (days 29 to 31), when no regular sweep is scheduled.
+- Holidays: no sweeping; the sweep moves to a make-up day, a 5th weekday (days 29 to 31) when no regular sweep is
+  scheduled. 2026: Patriots' Day to Apr 29, Memorial Day to May 29, Juneteenth to Jun 29, Independence Day (Jul 3) to
+  Jun 30, Labor Day to Aug 31, Indigenous Peoples' Day to Sep 29, Veterans Day to Oct 29, Thanksgiving to Nov 30,
+  Christmas to Dec 29. The day after Thanksgiving and Christmas Eve: no change.
 - Reminders run on ReCollect, the City's vendor, per address.
 
 ## What the City publishes
 
 | Need | Source | Notes |
 |---|---|---|
-| Street side table | [Schedule M, Section 16.7](https://www.cambridgema.gov/~/media/Files/Traffic/trafficregulations/schedules/mschedulejuly2014.pdf) (PDF, 28 pages) | 946 rows: street, side N/S/E/W, from, to, "4th Wednesday", "8AM-2PM", and install/removal regulation columns (7 rows filled). Revision 9/15/2014 |
-| Former schedule dataset | `uvf3-2xt3` on data.cambridgema.gov | 403, "You must be logged in" |
-| Street cleaning districts | [`qd7s-qntb`](https://data.cambridgema.gov/d/qd7s-qntb) | 14 polygons, districts A to K (no I), the 2011 map, rows updated 2023-04-11, PDDL |
-| District per address | [Master Addresses List `vup6-kpwv`](https://data.cambridgema.gov/d/vup6-kpwv) | 20,874 addresses, `street_sweeping_district`, updated weekly, PDDL |
+| Schedule | [Street Sweeping Schedule `uvf3-2xt3`](https://data.cambridgema.gov/d/uvf3-2xt3) | Public Works, PDDL. 20 rows: district, side (Odd, Even), day ("1st Wed"), a date column per month April to December 2026, and the month of any holiday change. Rows updated 2026-10-22 |
+| District per address | [Master Addresses List `vup6-kpwv`](https://data.cambridgema.gov/d/vup6-kpwv) | 20,881 addresses, `street_sweeping_district` (951 have none), `neighborhood`, updated weekly, PDDL |
 | Street lines | [Street Centerline `3d3q-sfd6`](https://data.cambridgema.gov/d/3d3q-sfd6) | 2,628 segments with node ids and left/right address ranges, PDDL |
-| Tickets | [Cambridge Parking Tickets `vnxa-cuyr`](https://data.cambridgema.gov/d/vnxa-cuyr) | Violation `S1` street cleaning: 16,312 in 2023, 18,118 in 2024, 20,059 in 2025 (Apr 1 to Dec 26). Date, time, and the address or corner typed by the officer. No plates, PDDL |
+| Tickets | [Cambridge Parking Tickets `vnxa-cuyr`](https://data.cambridgema.gov/d/vnxa-cuyr) | Violation `S1` street cleaning: 20,059 in 2025 (Apr 1 to Dec 26), with date, time and the address or corner typed by the officer. No plates. The table ends 2025-12-31: no 2026 tickets yet |
+| District map | [`qd7s-qntb`](https://data.cambridgema.gov/d/qd7s-qntb), and `upm7-2w6p` (named in the schedule's description) | Polygons; not used: the address list is the City's own join |
+| Former street table | [Schedule M, Section 16.7](https://www.cambridgema.gov/~/media/Files/Traffic/trafficregulations/schedules/mschedulejuly2014.pdf) | Revision 9/15/2014. No longer used (see "The 2014 table" below) |
 
 ## What the build does
 
-1. Reads Schedule M with a small PDF reader (the City's file has one text block per cell) into 946 rows; fails if the
-   columns move.
-2. Places each row on the centerline: walks the street from one cross street to the other ("Dead End", "Somerville
-   Line" and "RR Tracks" are the street's ends), mending offset corners and missing pieces of the City's lines. 807
-   rows placed. Left out: 68 rows whose side letter runs along the street (an "N side" on a street that runs north,
-   common in Riverside and East Cambridge, so the side can't be told), 48 whose cross street isn't on the street, 12
-   that list the same side twice with different days (Allen St, Callender St, Concord Ave, Windsor St, and Pleasant
-   St), 5 with no walk, 3 with no cross streets (Eliot St says "None"), 2 for Little Mass Ave, 1 with no day (South St).
-3. Checks every 2025 street cleaning ticket against the placed table, at three levels (street; street and side, from
-   the house number; block side), and against the district pattern.
-4. Writes `segments.json` only if at least 90% of tickets land where the table sweeps, at both the side and block
-   levels (`SHIP_SHARE`). It does not.
+1. Reads the schedule into one list of nine dates per district and side. Every date is checked against the row's day
+   ("1st Wed" in that month): it is that day, or the make-up day the City's page gives for a holiday falling on it. One
+   date is neither (below); it is kept as the City lists it. Fails when the table changes shape (20 rows, districts A to K
+   without I, an odd and an even row each) or when a listed date is a City holiday (CURB would drop it).
+2. Places each address of the Master Addresses List on its street's centerline segment, on the side whose address range
+   holds its number with its parity (the nearer line when two ranges hold it). 20,033 of 20,881 placed: 237 are on
+   streets the centerline doesn't have (Newtowne Ct, Peabody Ter, Graham Pl, Harvard Yard, Gray Gdns and other private
+   ways and campuses), 604 have a number no range holds, 7 no number.
+3. On 11 segments the address points lie on the other side of the line from the one their numbers give (Lincoln Way 19
+   of 20, Walden Mews, Jackson Pl, two blocks of Broadway, Dunstable Rd and others): the ranges are on the wrong sides
+   there, so the sides are swapped (the rule `scripts/cities/norfolk.mjs` uses).
+4. A block side takes the district of at least 75% of its addresses (addresses with no district count against it).
+   3,503 sides have one district on every address, 12 pass by majority (Massachusetts Ave K 78%, Third St A 75%, Huron
+   Ave J 83%, JFK St E 85% and 88%, ...). Left off: 250 sides whose addresses have no district, 32 split (Hampshire St
+   B 2 A 1; Massachusetts Ave G 7 H 4; Binney St A 1 and 3 with none), 89 sides with a range and no address point, and
+   4 sides of segments whose id the centerline uses twice (Main_St_10, Main_St_11, Memoria_Dr_27).
+5. Each side gets one rule: no parking 8 to 12 on its district's nine 2026 dates for its parity
+   (`[-1, 8, 12, 0, 0, 0, [dates]]`), so make-up days are on the map and no holiday rule is guessed.
+6. Checks every 2025 ticket, and writes `segments.json` only if at least 90% of those placed on a block side land on a
+   side the schedule sweeps that day and hour (`SHIP_SHARE`; a side left off the map counts as a miss).
 
 ## The ticket check (2025)
 
-20,059 tickets: 4,866 at a corner (side unknown), 543 on a 5th weekday (a make-up day: no regular sweep exists then),
-648 at a number no centerline range holds. Of the rest:
+The 2026 dates are not 2025's, so each list is read by its day on the signs on 2025's calendar. 20,059 tickets: 4,766 at a
+corner (side unknown), 100 with no house number, 543 on a 5th weekday (make-up days, which only the 2026 dates have),
+648 at a number no centerline range holds within 20. Of the rest:
 
-| Level | Tickets | Where the 2014 table sweeps that day and hour |
+| Level | Tickets | On a side the schedule sweeps that day, 8 to noon |
 |---|---|---|
-| Street | 14,650 | 11,410 (77.9%) |
-| Street and side | 12,398 (1,604 more on sides the build can't tell) | 8,027 (64.7%) |
-| Block side | 14,002 | 7,456 (53.2%) |
-| Their district's day for that side (the current pattern) | 13,216 | 12,492 (94.5%) |
+| Street | 14,650 | 14,023 (95.7%) |
+| Street and side (the house number's parity) | 13,903 | 13,242 (95.2%) |
+| Block side | 14,002 | 12,819 (91.6%) |
 
-By district, street and side level: A 77%, B 59%, C 37%, D 83%, E 91%, F 87%, G 72%, H 40%, J 63%, K 53%.
+Block side misses: 457 on another day, 260 when the other side of the block is swept, 9 on the right day outside 8 to
+noon, and 457 on sides left off the map (229 whose addresses have no district, 133 split, 72 with no address point, 23 on
+the repeated Main St ids).
 
-The pattern the tickets show (most common day, and the share of that district side's tickets on it):
+By district, block side level: A 95.1%, B 97.5%, C 97.7%, D 93.3%, E 96.8%, F 93.5%, G 97.1%, H 93.1%, J 90.2%, K 89.2%.
+By list, the share of its tickets on its own day: from 85.8% (J even, 4th Wed) and 87.2% (K odd, 4th Thu) to 98.9% (E odd,
+2nd Thu).
 
-| District | Odd side | Even side |
-|---|---|---|
-| A | 1st Wed (97%) | 1st Thu (92%) |
-| B | 1st Mon (97%) | 1st Tue (97%) |
-| C | 1st Fri (98%) | 2nd Mon (97%) |
-| D | 2nd Tue (90%) | 2nd Wed (96%) |
-| E | 2nd Thu (99%) | 2nd Fri (95%) |
-| F | 3rd Mon (94%) | 3rd Tue (94%) |
-| G | 3rd Wed (98%) | 3rd Thu (96%) |
-| H | 3rd Fri (92%) | 4th Mon (94%) |
-| J | 4th Tue (95%) | 4th Wed (86%) |
-| K | 4th Thu (86%) | 4th Fri (92%) |
+Where the tickets and the address list disagree most (2025 tickets, block side level):
 
-Twenty slots, every weekday of weeks 1 to 4 once. In 2014 three of them were doubled up instead (B's even side on A's
-1st Thursday, C's even side on B's 1st Monday, H's even side on F's 3rd Monday) and 1st Tuesday, 2nd Monday and 4th
-Monday were nearly empty. On the placed table, 612 of 2,079 block side rules differ from this pattern; most of them in
-B (103 of 252), C (135 of 252) and H (144 of 241).
+- Huron Ave, even side, J (4th Wed): 79 tickets on a 4th Tuesday, J odd's day.
+- Inman St, odd side, D (2nd Tue): 67 tickets on a 1st Monday, B odd's day (the 2014 table had Inman St in B too).
+- Berkshire St, A even (1st Thu): 30 on a 1st Wednesday. Wheeler St, H odd (3rd Fri): 28 on a 4th Tuesday. Concord Ave,
+  K even (4th Fri): 24 on a 4th Monday. Garden St, H odd: 21 on a 4th Thursday. Mt Auburn St, K odd (4th Thu): 18 on a
+  4th Monday.
+- Ticketed sides whose addresses have no district: Pacific St (31), Albany St (30), Green St (24), Bent St (24),
+  Landsdowne St (23), Vassar St (19, plus 65 on its split sides), Sidney St (19), Brookline St (13).
 
-Examples (2025 tickets by house number parity and day):
+## Hours
 
-- Magazine St, Schedule M: E 1st Monday, W 1st Friday. Tickets: odd 1st Friday 69, even **2nd Monday** 59, none on a
-  1st Monday.
-- Inman St, Schedule M: E 1st Thursday 8 to 2, W 1st Monday 7 to 10. Tickets: odd 1st Monday 87, even **1st Tuesday** 23.
-- Raymond St, Schedule M: E 3rd Monday, W 3rd Friday. Tickets: odd 3rd Friday 43, even **4th Monday** 8.
+2025 street cleaning tickets by the hour written: 7 AM 11, 8 AM 12,868, 9 AM 6,629, 10 AM 496, 11 AM 54, 6 PM 1. After
+noon: 1 of 19,370 on regular days (a ticket at 6:47 PM at "1 Cambridge Common"), none of 689 on 5th weekdays. So the map
+uses 8 AM to noon, as the City said. The tickets can't tell noon from 2 PM (they are written right after the sweeper:
+97% between 8 and 10 AM); 8 to noon is the City's word.
 
-Spot check, by hand and not part of the build: the City's reminder tool for one address in each of the 10 districts
-(10 lookups) gives the same odd and even days as the ticket pattern, for 2025 and 2026, 10 of 10.
+Before 8 AM: 11 tickets, 7:27 to 7:59 (Plympton St, Cogswell Ave, Davenport St, Kirkland St, Inman St, Green St, Follen St,
+Garden St). The 2014 table had 33 rows at 7 to 10 AM on 21 streets (Appian Way, Arrow St, Bishop Allen Dr, Broadway,
+Cambridge St, DeWolfe St, Doane St, Dunster St, Hampshire St, Holyoke St, Huron Ave, Inman St, James St, JFK St, Main
+St, Mount Auburn St, Quincy St, Sellers St, Surrey St, Temple St, Third St): 1,892 tickets in 2025 on those streets, one
+before 8 AM (Inman St, 7:58). Those signs may still say 7 AM: the map says 8, and the sign decides.
 
-## What it would take
+## What looked odd in the City's data
 
-Any of these makes Cambridge buildable:
-
-1. **The current Schedule M**, or the street schedule dataset (`uvf3-2xt3`) made public again. The build reads the
-   same PDF layout and its ticket check decides by itself.
-2. **The district pattern, published by the City.** Districts (`qd7s-qntb` and the address list) plus "district A:
-   odd side 1st Wednesday, even side 1st Thursday" and so on would give every block side a rule. The tickets support
-   it at 94.5%. Exceptions on the signs (the 7 to 10 AM stretches: 33 rows in 2014) would still need the City's list.
-3. A decision by the project owner to build from the pattern the tickets show, checked against the City's reminder
-   tool at 10 addresses. Not done here: the reminder tool is only for spot checks, and the pattern is our inference.
+- **District B, even side, September 2026:** listed Sep 8, a 2nd Tuesday. Its day is the 1st Tuesday (Sep 1), Sep 1 is no
+  holiday, and the row's holiday column is empty. Sep 8 is also D odd's day (2nd Tue). Kept as listed; the date has passed.
+- The schedule's description says cars must move "to avoid being ticketed and towed"; the 2023 to 2025 notices say no
+  towing, and the 2026 page does not say. `city.json` keeps `tow: "no"`.
+- The day column's description says holiday changes are marked "H"; no row has one (the month column notes them instead).
+- The centerline uses five ids twice (Main_St_10, Main_St_11, Monsign-O_Hwy_6, Memoria_Dr_27, Memoria_Dr_28), and 11
+  segments have their address ranges on the wrong sides (above).
+- The address list's districts disagree with the tickets on a few streets (above), and 951 addresses have no district,
+  mostly on main roads and campuses (Massachusetts Ave 45, Concord Ave 40, Memorial Dr 38, Alewife Brook Pkwy 37,
+  Larchwood Dr 36, Aberdeen Ave 35).
 
 ## Gaps and assumptions
 
-- Make-up days are not modeled: a holiday shows as no sweep (`holidayRule: "all"`), and the make-up day as nothing.
-- 2027 holidays are the 2026 set by the same rules (observed on a Friday or Monday); the City posts its list each
-  spring. The City page still carries a few 2025 lines (Day after Thanksgiving "Friday November 28th").
-- The 2014 table has typos and short forms ("Fountian Terr", "Riedisel Ave", "Mass Ave"); an alias table in the build
-  turns them into the centerline's names.
-- Ticket locations are typed by officers: 4,866 corners have no side, 648 numbers are in no range.
-- Towing: the 2023 to 2025 notices say no towing; the 2026 page does not say. `city.json` says `tow: "no"`.
+- Hours: 8 AM to noon on every side. A few streets post other hours (the City); the 2014 table's 7 to 10 AM streets
+  may start at 7.
+- 2026 only. After the last date (Dec 29, 2026) a side has no next sweep until the City publishes 2027 and the build runs
+  again, before April 1, 2027.
+- 375 sides are left off (above); 457 of the 2025 tickets fell on them, so some of them are posted.
+- Make-up days are the City's dates; no tickets check them (2025's make-up days are not in the data, and there are no
+  2026 tickets yet).
+- No one has checked blocks on the street against the signs yet (adding-a-city.md asks for 20 before a city goes public).
+- 2027 holidays in `city.json` are the 2026 set by the same rules (observed on a Friday or Monday); they stop nothing
+  until 2027 dates are built.
 
 ## Questions for the City
 
-1. Is there a revision of Schedule M after 9/15/2014? Can the street schedule dataset (`uvf3-2xt3`) be public again?
-2. Is the schedule now one weekday per district and side (as the reminder tool and the 2025 tickets show), and
-   which streets are exceptions (7 to 10 AM, or another day)?
-3. Is the 2011 district map (`qd7s-qntb`) still current? Streets missing from the 2014 table (Hurley St, Rogers St,
-   Bent St, Reed St, Pacific St and others with monthly tickets): which district are they in?
-4. Make-up days: could the yearly list be published as data (date moved from, date moved to, which districts)?
-5. Is towing still suspended in 2026?
-6. In Schedule M some sides are named along the street ("N" on a street that runs north) and some rows list one side
-   twice (Allen St, Callender St, Concord Ave, Windsor St): which side is which?
+1. District B, even side: was September's sweep on Sep 8 or Sep 1?
+2. Which streets post hours other than 8 AM to noon, and could the schedule (or the address list) say so?
+3. Ticketed streets whose addresses have no district (Pacific St, Albany St, Green St, Bent St, Landsdowne St, Vassar St,
+   Sidney St, Brookline St): which district is each side in?
+4. Where the tickets and the address list disagree (Inman St odd side: D in the list, ticketed on 1st Mondays; Huron Ave
+   even side: J even in the list, ticketed on 4th Tuesdays; Berkshire St, Wheeler St, Concord Ave, Garden St, Mt Auburn
+   St), which day is on the signs?
+5. When will the 2027 schedule be published?
+6. Is towing still suspended? The dataset's description says cars are towed.
+7. Which district map is current, `qd7s-qntb` or `upm7-2w6p`?
+
+## The 2014 table (2026-10-18, no longer built)
+
+Before the schedule was public, the only street by street table was Traffic Regulation Schedule M (PDF, 946 rows,
+revision 9/15/2014). The first build read it, placed 807 rows on the centerline, and checked the 2025 tickets: 77.9% on a
+street it swept that day and hour, 64.7% on the right side, 53.2% on the right block side, against 94.5% for the district
+pattern the tickets showed. In districts B, C and H one side of every street had moved to another week since 2014. It
+did not ship. The new build reads the City's schedule instead (the PDF reader is in the git history,
+`scripts/cities/cambridge.mjs` before 2026-11-20). The pattern the tickets showed then is the one the City now publishes,
+20 of 20 slots, and a spot check of the City's reminder tool at one address per district (2026-10-18) agreed 10 of 10.
 
 ## Files
 
-`scripts/cities/cambridge.mjs` (build), `scripts/cities/cambridge.test.mjs` (tests: the PDF reader on real rows, the
-words, the ticket places, the side letters; plus the cached PDF when present), `data/cambridge/city.json`,
-`data/cambridge/report.json`. Downloads in `private/cache/cambridge/` (the PDF, centerline, addresses, 2025 tickets,
-the City page; the spot check's answers in `recollect/`, never used by the build).
+`scripts/cities/cambridge.mjs` (build), `scripts/cities/cambridge.test.mjs` (tests: the schedule's dates with the City's
+20 rows, a side's district, house numbers on the ranges, the tickets' places; plus the cached schedule when present),
+`data/cambridge/segments.json`, `city.json`, `report.json`. Downloads in `private/cache/cambridge/` (gitignored).

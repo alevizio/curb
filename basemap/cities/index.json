@@ -4,6 +4,11 @@
     "maxzoom": 13,
     "bytes": 6613373
   },
+  "cambridge": {
+    "build": "20261120",
+    "maxzoom": 13,
+    "bytes": 6553983
+  },
   "chicago": {
     "build": "20261018",
     "maxzoom": 13,
