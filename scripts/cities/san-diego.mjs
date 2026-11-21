@@ -632,8 +632,9 @@ async function main() {
     fine: '$83.50', tow: 'no', fineSource: 'https://data.sandiego.gov/datasets/parking-citations/',
     agency: 'City of San Diego Stormwater Department', scheduleUrl: 'https://www.sandiego.gov/stormwater/services/streetsweeping',
     sources,
+    // rain: the Stormwater Department's holidays sheet (records request #26-11035, Nov 2026): "Anytime it rains No Sweeping No Citations".
     words: {
-      rule: 'Where street sweeping signs are posted, no parking during the hours on the sign, on the days it names: weekly on busier streets, once or twice a month on most residential blocks, every other month on some.',
+      rule: 'Where street sweeping signs are posted, no parking during the hours on the sign, on the days it names: weekly on busier streets, once or twice a month on most residential blocks, every other month on some. No sweeping or tickets when it rains.',
       afterpass: 'All year · not on City holidays · $83.50 ticket, no tow',
       dataNotes: `The City's street sweeping schedule (Stormwater Department, data.sandiego.gov${updated ? ', updated ' + updated : ''}): the ${k(out.length)} blocks with signs, of ${k(F.length)} swept; blocks without signs are swept too but get no tickets, so they are left off. `
         + 'The schedule names each side by compass ("NS", "SES"), drawn on the side of the street line facing that way; where that is unclear, the City\'s own street sweeping tickets of the past year decide.'

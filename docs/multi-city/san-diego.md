@@ -16,6 +16,9 @@ No page yet. Every number below is in `data/san-diego/report.json`.
   be swept on the next assigned sweeping day." The City's holiday notices list "posted street-sweeping routes" as not
   enforced (Labor Day 2026; the Dec. 23, 2021 notice shows a Saturday holiday observed the Friday before). No make-up
   day: `holidayRule: all`.
+- **Rain:** the Stormwater Department's holidays sheet (records request #26-11035) adds "Anytime it rains No Sweeping No
+  Citations", and that sweeping may stop the day before a storm. The rule line says so; the map can't know when it rains,
+  so alerts are unchanged.
 - **Fine:** $83.50 on every street sweeping ticket (City Code 86.0112(E)) since November 2025, $85.00 from July to
   October 2025, from the City's own citation data. No fine schedule page was found on sandiego.gov. No tow mentioned
   anywhere (unverified).
@@ -74,8 +77,9 @@ The citation data has no time, so the hours are not checked.
 
 The City's public records request answer (Stormwater, filed 2026-10-19) sent the street sweeping page, the open data
 page, the GIS layer's rows for the 105 blocks and a holidays PDF. All 105 schedule strings are identical to the open
-data: no sign records, no route sheets with sides, and nothing on questions 2 or 3 below. Files in
-`private/outreach/san-diego-26-11035/` (not in the repo).
+data: no sign records, no route sheets with sides, and nothing on questions 2 or 3 below. The holidays PDF lists the same
+eleven holidays as the City's page (so 2027 stays derived) and adds that there is no sweeping and no citations when it
+rains. Files in `private/outreach/san-diego-26-11035/` (not in the repo).
 
 ## Street View check (2026-11-20)
 
