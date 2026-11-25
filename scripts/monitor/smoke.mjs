@@ -45,6 +45,9 @@ export const REPORT_KINDS = {
   'event:push-off-failed': (msg) => !DENIED_PUSH.test(msg),
   'event:locate-failed': (msg) => /^code 1\b/.test(msg) && !DENIED_LOCATE.test(msg), // only a code 1 we caused
   'event:locate-coarse': () => false,                     // an approximate fix: a device setting
+  // Leaflet or the time core never came, retry from curb.guide included, while the page itself did: something on the
+  // visitor's side blocks it (a script blocker, a filtering network). When the cause is ours, checkMapScripts fails.
+  'event:load-failed': () => false,
 };
 export const isBreakage = (g) => (Object.hasOwn(REPORT_KINDS, g.k) ? REPORT_KINDS[g.k](String(g.msg)) : true);
 /** Split the error log into breakage and informational groups (total = everything minus informational). */
@@ -68,12 +71,32 @@ async function get(f, url, opts = {}) {
 }
 const moved = (r) => r.status >= 300 && r.status < 400 ? ` → ${r.headers.get('location') || '?'}` : '';
 
-/** Pull the dataset URLs and the basemap template out of the live page source. */
+const LEAFLET_COPY = '/lib/leaflet/leaflet.js'; // curb.guide's own copy, written by the load guard
+/** Pull the dataset URLs, the basemap template and the map's scripts out of the live page source. */
 export function parsePage(html) {
   const data = {};
   for (const m of html.matchAll(/const (SWEEP|METER|RPP|ADDR|LOADRULES)="([^"]+)"/g)) data[m[1]] = m[2];
   const bm = html.match(/const SELF_BASEMAP='([^']*)'/);
-  return { data, basemap: bm ? bm[1] : null, hasMap: html.includes('id="map"') };
+  const src = (re) => html.match(new RegExp(`<script src="([^"]*${re}[^"]*)"></script>`))?.[1];
+  // The map can't start without these: Leaflet from cdnjs, the copy the load guard retries, the time core.
+  const scripts = [src('/leaflet\\.min\\.js'), html.includes(LEAFLET_COPY) && LEAFLET_COPY, src('/lib/sweep-core\\.js')].filter(Boolean);
+  return { data, basemap: bm ? bm[1] : null, hasMap: html.includes('id="map"'), scripts };
+}
+
+/** A visitor's load-failed report is informational (see REPORT_KINDS); this is the check that fails when the map's
+ *  scripts are missing on our side or cdnjs is down for everyone. */
+export async function checkMapScripts(f, scripts) {
+  const name = 'map scripts';
+  if (scripts.length < 3) return fail(name, `found ${scripts.length}/3 in index.html`);
+  const bad = [];
+  for (const s of scripts) {
+    try {
+      const r = await get(f, s.startsWith('/') ? SITE + s : s);
+      const size = r.status === 200 ? (await r.text()).length : 0;
+      if (size < 1000) bad.push(`${s}: HTTP ${r.status}${r.status === 200 ? `, ${size} bytes` : ''}`);
+    } catch (e) { bad.push(`${s}: ${e.message}`); }
+  }
+  return bad.length ? fail(name, bad.join('; ')) : ok(name, `${scripts.length} scripts`);
 }
 
 export async function checkHome(f) {
@@ -267,6 +290,7 @@ export async function runSmoke(f = fetch, now = Date.now()) {
   if (page) {
     await safe('DataSF', () => checkDataSF(f, page.data));
     await safe('basemap tiles', () => checkBasemap(f, page.basemap));
+    await safe('map scripts', () => checkMapScripts(f, page.scripts));
   }
   await safe('SEO pages', () => checkPages(f));
   await safe(ALERTS, () => checkAlertsSender(f, now));

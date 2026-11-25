@@ -51,6 +51,7 @@ window.__curbAndroidApp=a; if(a)document.querySelector('meta[name="theme-color"]
     try{
       msg=String(msg||'').slice(0,300);
       if(!on || sent>=5 || !msg || msg==='Script error.' || seen[k+msg]) return; // 'Script error.' = opaque cross-origin
+      if(window.__curbLoadFailed && k!=='event:load-failed') return; // the load guard's one report already says why the page stopped
       if(src && src.indexOf(location.origin)!==0) return; // extensions / third-party scripts
       seen[k+msg]=1; sent++;
       var body=JSON.stringify({k:k,msg:msg,src:src||'',line:line||0,col:col||0,stack:String(stack||'').slice(0,1200),page:location.pathname,app:app()});
@@ -1100,6 +1101,10 @@ if(window.nextSweep&&!window.PLACE)again('script[src^="/lib/city.js"]');}
 </script>
 <script>
 if(!window.L||!window.nextSweep||!window.PLACE){
+  // One report names the script that never came, and the error reporter drops what follows (the main script stops at its
+  // first use of the map, "L is not defined"), so the log shows a failed load, not a code error (owner, 2026-11-25).
+  window.__curbLoadFailed=1;
+  curbReport('load-failed',[!window.L&&'leaflet',!window.nextSweep&&'time core'].filter(Boolean).join(' + '));
   const card=document.getElementById('loadFail'),go=document.getElementById('loadFailGo');
   for(const el of document.body.children)if(el!==card&&el.tagName!=='SCRIPT')el.inert=true;  // nothing behind it works
   document.getElementById('hint').style.display='none';

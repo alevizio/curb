@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { decide, signature, lastSig, withSig } from './alert.mjs';
-import { parsePage, checkDataSF, checkBasemap, checkPages, checkAlertsSender, judgeAlertsStatus, ALERTS_MAX_AGE_MIN, ALERTS_BACKUP_MAX_AGE_MIN, lit, digest, checkErrorSpike, REPORT_KINDS, isBreakage } from './smoke.mjs';
+import { parsePage, checkMapScripts, checkDataSF, checkBasemap, checkPages, checkAlertsSender, judgeAlertsStatus, ALERTS_MAX_AGE_MIN, ALERTS_BACKUP_MAX_AGE_MIN, lit, digest, checkErrorSpike, REPORT_KINDS, isBreakage } from './smoke.mjs';
 import { normalize, group } from '../../api/client-error.js';
 
 const OPTS = { title: 'curb.guide is broken', mention: 'alevizio', runUrl: 'https://github.com/x/y/actions/runs/1' };
@@ -63,6 +63,21 @@ describe('smoke checks', () => {
     expect(p.data).toEqual({ SWEEP: 'https://data.sf.gov/resource/a.json', METER: 'https://data.sf.gov/resource/b.json' });
     expect(p.basemap).toBe('/basemap/parchment/{z}/{x}/{y}.png');
     expect(p.hasMap).toBe(true);
+  });
+
+  it("parsePage finds the map's scripts in the real index.html, and checkMapScripts fails when one is missing", async () => {
+    const { scripts } = parsePage(readFileSync(new URL('../../index.html', import.meta.url), 'utf8'));
+    expect(scripts).toHaveLength(3);
+    expect(scripts[0]).toMatch(/^https:\/\/cdnjs\.cloudflare\.com\/.*\/leaflet\.min\.js$/);
+    expect(scripts.slice(1).map((s) => s.split('?')[0])).toEqual(['/lib/leaflet/leaflet.js', '/lib/sweep-core.js']);
+    const js = { status: 200, body: 'x'.repeat(5000) };
+    const all = Object.fromEntries(scripts.map((s) => [s.startsWith('/') ? 'https://curb.guide' + s : s, js]));
+    expect((await checkMapScripts(mockFetch(all), scripts)).status).toBe('ok');
+    const gone = { ...all, ['https://curb.guide/lib/leaflet/leaflet.js']: { status: 404, body: '' } };
+    const r = await checkMapScripts(mockFetch(gone), scripts);
+    expect(r.status).toBe('fail');
+    expect(r.detail).toContain('/lib/leaflet/leaflet.js: HTTP 404');
+    expect((await checkMapScripts(mockFetch(all), scripts.slice(1))).status).toBe('fail');
   });
 
   it('REPLAY Sep 2026: the old DataSF host (301, no CORS for curb.guide) fails the check', async () => {
@@ -372,6 +387,7 @@ describe('error log: breakage vs. the visitor\'s own choices', () => {
     expect(b('event:locate-failed', 'code 1 after retry Geolocation has been disabled in this document by permissions policy.')).toBe(true);
     expect(b('event:locate-failed', 'code 3 Timeout expired')).toBe(false);
     expect(b('event:locate-coarse', '±2km')).toBe(false);
+    expect(b('event:load-failed', 'leaflet')).toBe(false);   // blocked on the visitor's side; checkMapScripts covers ours
     expect(b('event:something-new', 'x')).toBe(true);
   });
 

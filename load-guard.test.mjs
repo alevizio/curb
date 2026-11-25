@@ -23,10 +23,26 @@ function page({ L, core }) {
     getElementById: el,
     body: { children: [el('top'), el('map'), el('loadFail'), { tagName: 'SCRIPT', inert: false }] },
   };
-  const window = { L, nextSweep: core };
-  const g = { window, document, location: { reload() {} } };
+  const window = { L, nextSweep: core }, reports = [];
+  const g = { window, document, location: { reload() {} }, curbReport: (k, d) => reports.push([k, d]) };
   vm.createContext(g);
-  return { run: (code) => vm.runInContext(code, g), written, els, get focused() { return focused; } };
+  return { run: (code) => vm.runInContext(code, g), written, els, window, reports, get focused() { return focused; } };
+}
+
+// The error reporter at the top of <head>, on curb.guide, with the beacon captured.
+const REPORTER = HTML.match(/<script>\n(\(function\(\)\{\n  var sent=0[\s\S]*?)<\/script>/)[1];
+function reporter() {
+  const beacons = [], on = {};
+  const g = {
+    location: { hostname: 'curb.guide', origin: 'https://curb.guide', pathname: '/' },
+    navigator: { sendBeacon: (url, body) => beacons.push(JSON.parse(body)) },
+    matchMedia: () => ({ matches: false }),
+    addEventListener: (type, fn) => { on[type] = fn; },
+  };
+  g.window = g;
+  vm.createContext(g);
+  vm.runInContext(REPORTER, g);
+  return { g, beacons, error: (message) => on.error({ message, filename: 'https://curb.guide/', lineno: 1200, colno: 5 }) };
 }
 const writtenSrc = (h) => h.match(/src="([^"]+)"/)[1];
 
@@ -72,5 +88,29 @@ describe('load guard', () => {
     expect(p.els.top.inert && p.els.map.inert).toBe(true);
     expect(p.els.loadFail.inert).toBe(false);
     expect(p.els.hint.style.display).toBe('none');
+  });
+
+  it('still missing: one load-failed report names the script, and the page is marked so the error that follows is dropped', () => {
+    for (const [L, core, which] of [[undefined, () => {}, 'leaflet'], [{}, undefined, 'time core'], [undefined, undefined, 'leaflet + time core']]) {
+      const p = page({ L, core });
+      p.run(message);
+      expect(p.reports).toEqual([['load-failed', which]]);
+      expect(p.window.__curbLoadFailed).toBe(1);
+    }
+    const ok = page({ L: {}, core: () => {} });
+    ok.run(message);
+    expect(ok.reports).toEqual([]);
+    expect(ok.window.__curbLoadFailed).toBeUndefined();
+  });
+
+  it('the error reporter: after a failed load it sends the load-failed report and nothing else', () => {
+    const r = reporter();
+    r.error('ReferenceError: L is not defined');   // a working page still reports script errors
+    expect(r.beacons.map((b) => b.k)).toEqual(['error']);
+    r.g.__curbLoadFailed = 1;
+    r.error('ReferenceError: L is not defined, again');
+    r.g.curbReport('data-load', 'HTTP 503');
+    r.g.curbReport('load-failed', 'leaflet');
+    expect(r.beacons.map((b) => [b.k, b.msg])).toEqual([['error', 'ReferenceError: L is not defined'], ['event:load-failed', 'leaflet']]);
   });
 });
