@@ -92,14 +92,17 @@ describe('Claude step', () => {
   it('error messages are fixed strings, never Claude text', () => {
     expect(() => parseSummary(JSON.stringify({ is_error: true, subtype: 'error_max_turns' }))).toThrow('Claude run failed (error_max_turns)');
     expect(() => parseSummary(JSON.stringify({ is_error: true, subtype: 'success', result: 'Invalid API key \u00b7 Please run /login (sk-ant-oat01-abc_DEF-123)' })))
-      .toThrow('Claude run failed (success): Invalid API key Please run /login (TOKEN)');
+      .toThrow('Claude run failed: Invalid API key Please run /login (TOKEN)');
+    // The Nov 18 to 24 email said "Claude run failed (success): You've hit your 5-hour limit".
+    expect(() => parseSummary(JSON.stringify({ is_error: true, subtype: 'success', result: "You've hit your 5-hour limit · resets 2am (UTC)" })))
+      .toThrow(/^Claude run failed: You've hit your 5-hour limit resets 2am \(UTC\)$/);
     expect(() => parseSummary(JSON.stringify({ result: 'I could not find anything private.' }))).toThrow('Claude answer had no JSON');
     expect(() => parseSummary(JSON.stringify({ result: '{"summary": ["private 2,100 visitors", } oops' }))).toThrow('Claude answer was not valid JSON');
     expect(() => parseSummary('raw private text')).toThrow('Claude output was not valid JSON');
   });
   it('readClaude explains a missing step, keeps the half that worked, and reports both failing', () => {
     const dir = mkdtempSync(join(tmpdir(), 'weekly-'));
-    expect(readClaude(dir)).toEqual({ skipped: 'missing CLAUDE_CODE_OAUTH_TOKEN' });
+    expect(readClaude(dir)).toEqual({ skipped: 'missing ANTHROPIC_API_KEY' });
     writeFileSync(join(dir, 'claude.started'), '');
     expect(readClaude(dir)).toEqual({ error: 'Claude step failed: did not finish' });
     writeFileSync(join(dir, OUT.summary), JSON.stringify({ result: '{"summary":["ok"]}' }));

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// The weekly report's Claude step, two separate `claude -p` runs (CLAUDE_CODE_OAUTH_TOKEN from
-// `claude setup-token`) so web pages never sit next to the private numbers:
+// The weekly report's Claude step, two separate `claude -p` runs (ANTHROPIC_API_KEY, else
+// CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`) so web pages never sit next to the private numbers:
 //   1. search:  WebSearch + WebFetch, told only the week and what CURB is → mentions the free sources
 //               miss (news, blogs, social posts). No facts in this prompt.
 //   2. summary: no tools, given only the week's numbers (no free text from visitors or web pages) →
@@ -81,10 +81,12 @@ function answer(raw) {
   let wrapper;
   try { wrapper = JSON.parse(raw); } catch { throw new Error('Claude output was not valid JSON'); }
   // An is_error result is the CLI's own error text (auth, quota, API), not the model's answer, so a short
-  // scrubbed copy is safe for the public log and says why the step failed.
+  // scrubbed copy is safe for the public log and says why the step failed. The CLI tags an error it answers
+  // itself (a usage limit, a bad key) subtype 'success', which the email printed as "failed (success)".
   if (wrapper?.is_error) {
     const why = String(wrapper.result ?? '').replace(/sk-ant-[\w-]+/g, 'TOKEN').replace(/[^\w .,:;()'/-]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
-    throw new Error(`Claude run failed (${String(wrapper.subtype || 'error').replace(/[^\w-]/g, '').slice(0, 30)})${why ? `: ${why}` : ''}`);
+    const sub = String(wrapper.subtype || 'error').replace(/[^\w-]/g, '').slice(0, 30);
+    throw new Error(`Claude run failed${sub === 'success' ? '' : ` (${sub})`}${why ? `: ${why}` : ''}`);
   }
   const text = String(wrapper?.result ?? '');
   const a = text.indexOf('{'), b = text.lastIndexOf('}');
@@ -120,7 +122,7 @@ const read = (dir, name) => (existsSync(join(dir, name)) ? readFileSync(join(dir
 
 /** The Claude section for the email: { summary, mentions }, or why it is missing. Never throws. */
 export function readClaude(dir) {
-  if (!existsSync(join(dir, STARTED))) return { skipped: 'missing CLAUDE_CODE_OAUTH_TOKEN' };
+  if (!existsSync(join(dir, STARTED))) return { skipped: 'missing ANTHROPIC_API_KEY' };
   const part = (name, parse) => {
     const raw = read(dir, name);
     if (!raw) return { error: 'did not finish' };

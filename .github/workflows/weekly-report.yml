@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 30
     env:
       DIR: ${{ github.workspace }}/../weekly
-      HAS_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+      HAS_CLAUDE: ${{ secrets.ANTHROPIC_API_KEY != '' || secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
     steps:
       - name: Stop if this week's email already went out today
         id: guard
@@ -84,12 +84,16 @@ jobs:
       # Optional, two separate Claude runs (claude.mjs): a web search for mentions that never sees the
       # numbers, then a summary from the numbers with no tools at all. Without the token, or if either
       # fails or runs long, the email goes out without that part. Output goes to files, not the log.
+      # ANTHROPIC_API_KEY, when set, is the only key the step gets: the owner's subscription token is shared
+      # with his own Claude sessions, and its 5-hour limit cost the Nov 18 to 24 email its summary (owner,
+      # 2026-11-25: "Use a separate API key"). Without the API key it falls back to that token.
       - name: Look for mentions with Claude
         if: steps.guard.outputs.sent != 'yes' && env.HAS_CLAUDE == 'true'
         continue-on-error: true
         timeout-minutes: 15
         env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.ANTHROPIC_API_KEY == '' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
         run: |
           touch "$DIR/claude.started"
           npm install -g @anthropic-ai/claude-code > /dev/null
