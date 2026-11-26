@@ -100,12 +100,20 @@ describe('Claude step', () => {
     expect(() => parseSummary(JSON.stringify({ result: '{"summary": ["private 2,100 visitors", } oops' }))).toThrow('Claude answer was not valid JSON');
     expect(() => parseSummary('raw private text')).toThrow('Claude output was not valid JSON');
   });
+  it('a search refused its tools is a failure, not "no mentions" (every CI search until 2026-11-25)', () => {
+    const refused = { subtype: 'success', is_error: false, num_turns: 6, result: '{"mentions": []}',
+      permission_denials: [{ tool_name: 'WebSearch' }, { tool_name: 'WebFetch' }] };
+    expect(() => parseMentions(JSON.stringify(refused))).toThrow('Claude was not allowed to use its tools');
+    expect(parseMentions(JSON.stringify({ ...refused, permission_denials: [] }))).toEqual([]);
+  });
   it('readClaude explains a missing step, keeps the half that worked, and reports both failing', () => {
     const dir = mkdtempSync(join(tmpdir(), 'weekly-'));
     expect(readClaude(dir)).toEqual({ skipped: 'missing ANTHROPIC_API_KEY' });
     writeFileSync(join(dir, 'claude.started'), '');
     expect(readClaude(dir)).toEqual({ error: 'Claude step failed: did not finish' });
     writeFileSync(join(dir, OUT.summary), JSON.stringify({ result: '{"summary":["ok"]}' }));
+    expect(readClaude(dir)).toEqual({ summary: ['ok'], mentions: [], search: { error: 'did not finish' } });
+    writeFileSync(join(dir, OUT.search), JSON.stringify({ result: '{"mentions":[]}' }));
     expect(readClaude(dir)).toEqual({ summary: ['ok'], mentions: [] });
     writeFileSync(join(dir, OUT.search), 'not json');
     writeFileSync(join(dir, OUT.summary), 'also not json');

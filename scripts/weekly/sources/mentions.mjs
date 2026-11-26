@@ -1,12 +1,12 @@
 // Weekly report section: where CURB was mentioned during the report week, from free sources with
 // stable, deterministic answers (a separate Claude web-search step covers the rest of the web).
 //   Hacker News   Algolia search API: stories and comments that link or name curb.guide
-//   Reddit        search RSS, posts only (no comments); Reddit often blocks cloud IPs such as
-//                 GitHub Actions' and allows ~1 anonymous request a minute, so it is ONE request and
-//                 a 403/429 becomes reddit: { blocked: true }, never a failure
 //   Google News   RSS search, kept only when the headline names CURB (see refersToCurb)
 //   Product Hunt  GraphQL API: the launch post (slug curb-7, launched Wed Oct 7 2026), its totals
 //                 right now and the comments written during the week
+// Not Reddit: it ended its RSS feeds on 2026-11-13 (search.rss answers 404 "Not Found", and its .json
+// listings 403 without an API login), which the email showed as "Reddit HTTP 404" for two weeks. Claude's
+// web search covers Reddit, and the owner gets F5Bot alerts for it.
 //
 //   import { collect } from './sources/mentions.mjs'; await collect({ week, env, fetch, now })
 // Env: PH_TOKEN (optional, a Product Hunt API developer token; unset → producthunt: { skipped }).
@@ -14,17 +14,15 @@
 //   { items: [{ source, title, url, date, snippet?, points?, comments?, by?, where? }],
 //     producthunt: { name, tagline, url, votes, comments, dailyRank, weeklyRank, featuredAt,
 //                    launchedAt, asOf, recentComments: [{ author, body, date }] } | null | { skipped } | { error },
-//     reddit?: { blocked: true } | { error }, hackerNews?: { error }, googleNews?: { error },
-//     allTime: { hackerNews?, reddit? } }
-// `by` is the poster's public handle (HN, Reddit), `where` the subreddit or news outlet. The
-// hackerNews / googleNews / reddit keys only appear when that source failed or was blocked.
+//     hackerNews?: { error }, googleNews?: { error }, allTime: { hackerNews? } }
+// `by` is the poster's public handle (HN), `where` the news outlet. The hackerNews / googleNews keys
+// only appear when that source failed.
 // Snippets, titles and comment bodies are third-party text: escape them when rendering.
 import { addDays } from '../week.mjs';
 
 export const DOMAIN = /\bcurb\.guide\b/i;
 export const PH_SLUG = 'curb-7';
 const HN_API = 'https://hn.algolia.com/api/v1/search_by_date';
-const REDDIT_RSS = 'https://www.reddit.com/search.rss';
 const NEWS_RSS = 'https://news.google.com/rss/search';
 const PH_API = 'https://api.producthunt.com/v2/api/graphql';
 const UA = 'curb-weekly-report/1.0 (+https://github.com/alevizio/curb)';
@@ -88,21 +86,6 @@ const tag = (xml, name) => {
   const m = xml.match(new RegExp(`<${name}\\b[^>]*>([\\s\\S]*?)</${name}>`));
   return m ? m[1].replace(/^<!\[CDATA\[([\s\S]*)\]\]>$/, '$1') : '';
 };
-const attr = (xml, name, a) => (xml.match(new RegExp(`<${name}\\b[^>]*\\b${a}="([^"]*)"`)) || [])[1] || '';
-
-/** Reddit search Atom feed → items, keeping only posts that contain curb.guide (search is fuzzy). */
-export function parseRedditFeed(xml) {
-  const entries = String(xml).match(/<entry>[\s\S]*?<\/entry>/g) || [];
-  return entries.filter((e) => DOMAIN.test(decode(e))).map((e) => ({
-    source: 'Reddit',
-    title: plain(tag(e, 'title')),
-    url: decode(attr(e, 'link', 'href')),
-    date: iso(Date.parse(tag(e, 'published') || tag(e, 'updated'))),
-    snippet: excerpt(decode(tag(e, 'content'))), // content is escaped HTML: decode once, then strip
-    by: plain(tag(e, 'name')).replace(/^\/u\//, '') || undefined,
-    where: decode(attr(e, 'category', 'label')) || undefined,
-  }));
-}
 
 /** Google News RSS → items whose headline names CURB. Titles end in " - Outlet"; that goes to `where`. */
 export function parseGoogleNews(xml) {
@@ -176,16 +159,6 @@ async function hackerNews(f, week) {
   return { items: [...parseHN(byDomain), ...parseHN(byWords)], allTime: all.nbHits ?? 0 };
 }
 
-async function reddit(f) {
-  // one request (anonymous limit is ~1/min): link posts to the site and posts that mention it
-  const r = await get(f, `${REDDIT_RSS}?${new URLSearchParams({ q: 'url:curb.guide OR "curb.guide"', sort: 'new', limit: '100' })}`);
-  if (r.status === 403 || r.status === 429) return { blocked: true };
-  if (!r.ok) throw new Error(`Reddit HTTP ${r.status}`);
-  const xml = await r.text();
-  if (!xml.includes('<feed')) return { blocked: true }; // an HTML block page instead of the feed
-  return { items: parseRedditFeed(xml) };
-}
-
 async function googleNews(f, week) {
   // after:/before: keep the search on the week (one spare day each side; mergeItems trims exactly)
   const when = ` after:${addDays(week.days[0], -1)} before:${addDays(week.days[6], 1)}`;
@@ -219,25 +192,21 @@ const settle = (p) => p.then((value) => ({ value }), (e) => ({ error: e?.message
 export async function collect(ctx) {
   const { week, env, fetch: f, now } = ctx;
   const token = env.PH_TOKEN;
-  const [hn, rd, gn, ph] = await Promise.all([
-    settle(hackerNews(f, week)), settle(reddit(f)), settle(googleNews(f, week)),
+  const [hn, gn, ph] = await Promise.all([
+    settle(hackerNews(f, week)), settle(googleNews(f, week)),
     token ? settle(productHunt(f, token, week, now)) : Promise.resolve(null),
   ]);
 
   const section = { items: [], producthunt: null, allTime: {} };
   if (hn.error) section.hackerNews = { error: hn.error }; else section.allTime.hackerNews = hn.value.allTime;
-  if (rd.error) section.reddit = { error: rd.error };
-  else if (rd.value.blocked) section.reddit = { blocked: true };
-  else section.allTime.reddit = rd.value.items.length; // newest 100 search results that really contain curb.guide
   if (gn.error) section.googleNews = { error: gn.error };
   if (!ph) section.producthunt = { skipped: 'missing PH_TOKEN' };
   else if (ph.error) section.producthunt = { error: ph.error };
   else section.producthunt = ph.value.block;
 
-  const worked = [hn, rd, gn, ph].filter((s) => s && !s.error && !s.value?.blocked);
-  if (!worked.length) {
-    throw new Error(`every mention source failed: ${[hn, rd, gn, ph].filter((s) => s?.error).map((s) => s.error).join('; ') || 'Reddit blocked'}`);
+  if (![hn, gn, ph].some((s) => s && !s.error)) {
+    throw new Error(`every mention source failed: ${[hn, gn, ph].filter((s) => s?.error).map((s) => s.error).join('; ')}`);
   }
-  section.items = mergeItems([hn.value?.items, rd.value?.items, gn.value?.items, ph?.value?.item].filter(Boolean), week);
+  section.items = mergeItems([hn.value?.items, gn.value?.items, ph?.value?.item].filter(Boolean), week);
   return section;
 }

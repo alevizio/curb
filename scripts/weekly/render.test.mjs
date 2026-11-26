@@ -481,6 +481,14 @@ describe('rows, badges, links and dark mode', () => {
     expect(html).not.toContain('class="soft">Blog</span>');
     expect(text).toContain('[reddit.com] CURB on the r/sanfrancisco weekly thread');
   });
+  it("a failed Claude web search says so under Mentions, instead of passing for a week with none", async () => {
+    const r = fixture();
+    r.sections.claude = { summary: r.sections.claude.summary, mentions: [], search: { error: 'Claude was not allowed to use its tools' } };
+    const { html, text } = await renderEmail(r);
+    expect(text).toContain("Could not load Claude's web search this week: Claude was not allowed to use its tools");
+    expect(html).toMatch(/Could not load Claude(&#39;|&#x27;|')s web search this week: Claude was not allowed to use its tools/);
+    expect(failures(r)).toContainEqual({ section: 'claude', error: 'Claude was not allowed to use its tools' });
+  });
   it('empty review stars are muted in dark mode', async () => {
     const { html } = await renderEmail(fixture());
     expect(html).toMatch(/<span class="star0"[^>]*>★★<\/span>/); // the 3 star review

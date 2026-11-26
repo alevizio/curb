@@ -88,6 +88,9 @@ function answer(raw) {
     const sub = String(wrapper.subtype || 'error').replace(/[^\w-]/g, '').slice(0, 30);
     throw new Error(`Claude run failed${sub === 'success' ? '' : ` (${sub})`}${why ? `: ${why}` : ''}`);
   }
+  // A refused tool still ends in a clean answer: from 5-Oct to 25-Nov every search was refused WebSearch
+  // (no --allowedTools in CI), answered {"mentions": []} in seconds, and the email said "No mentions found".
+  if (wrapper?.permission_denials?.length) throw new Error('Claude was not allowed to use its tools');
   const text = String(wrapper?.result ?? '');
   const a = text.indexOf('{'), b = text.lastIndexOf('}');
   if (a < 0 || b <= a) throw new Error('Claude answer had no JSON');
@@ -120,7 +123,8 @@ export function parseSummary(raw) {
 
 const read = (dir, name) => (existsSync(join(dir, name)) ? readFileSync(join(dir, name), 'utf8').trim() : '');
 
-/** The Claude section for the email: { summary, mentions }, or why it is missing. Never throws. */
+/** The Claude section for the email: { summary, mentions, search? }, or why it is missing. Never throws.
+ *  `search: { error }` when only the web search failed, so the email says so instead of "No mentions found". */
 export function readClaude(dir) {
   if (!existsSync(join(dir, STARTED))) return { skipped: 'missing ANTHROPIC_API_KEY' };
   const part = (name, parse) => {
@@ -130,7 +134,7 @@ export function readClaude(dir) {
   };
   const m = part(OUT.search, parseMentions), s = part(OUT.summary, parseSummary);
   if (m.error && s.error) return { error: `Claude step failed: ${m.error === s.error ? m.error : `${m.error}; ${s.error}`}` };
-  return { summary: s.value || [], mentions: m.value || [] };
+  return { summary: s.value || [], mentions: m.value || [], ...(m.error && { search: { error: m.error } }) };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

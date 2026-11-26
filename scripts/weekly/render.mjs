@@ -114,7 +114,7 @@ const commitText = (subject) => {
 };
 const SOURCES = { hackernews: 'Hacker News', hn: 'Hacker News', reddit: 'Reddit', bluesky: 'Bluesky', x: 'X', twitter: 'X', mastodon: 'Mastodon', producthunt: 'Product Hunt', youtube: 'YouTube', news: 'News', web: 'Web', blog: 'Blog', github: 'GitHub', claude: 'Claude search' };
 const sourceName = (s) => SOURCES[String(s ?? '').toLowerCase()] || clip(s || 'Web', 20);
-const MENTION_SEARCHES = [['hackerNews', 'Hacker News'], ['googleNews', 'Google News'], ['reddit', 'Reddit']]; // { error } only when that search failed
+const MENTION_SEARCHES = [['hackerNews', 'Hacker News'], ['googleNews', 'Google News']]; // { error } only when that search failed
 // Claude's own 'source' text is a guess; the link's real host is not ('www.reddit.com/r/x' → 'reddit.com')
 const hostOf = (u) => { try { return new URL(String(u)).hostname.replace(/^www\./, ''); } catch { return ''; } };
 const badge = (x) => (x.via === 'claude' ? clip(hostOf(x.url) || 'Web', 30) : sourceName(x.source));
@@ -505,6 +505,7 @@ function mentionsSection(m, claude) {
   out.push(sub('Around the web', !out.length));
   if (!ok(m)) out.push(bad(m) ? cantLoad('the mention search', m) : note('Mention search is not connected yet. These come from Claude only.'));
   else for (const [k, name] of MENTION_SEARCHES) if (bad(m[k])) out.push(cantLoad(`the ${name} search`, m[k], 'margin-bottom:4px;'));
+  if (ok(claude) && bad(claude.search)) out.push(cantLoad("Claude's web search", claude.search, 'margin-bottom:4px;'));
   if (!all.length) out.push(note('No mentions found this week.'));
   else {
     out.push(all.slice(0, cap(10)).map((x) => {
@@ -512,7 +513,6 @@ function mentionsSection(m, claude) {
       return `<div class="line" style="padding:9px 0;border-bottom:1px solid ${C.line};"><span style="display:inline-block;border:1.5px solid ${C.soft};color:${C.soft};border-radius:4px;padding:1px 6px;font-size:10px;line-height:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;" class="soft">${esc(badge(x))}</span>${P(link(`<b>${esc(clip(x.title || x.url, 120))}</b>`, x.url), 'margin-top:4px;')}${x.snippet ? note(esc(clip(x.snippet, 200)), 'font-size:13px;line-height:19px;') : ''}${meta ? note(meta) : ''}</div>`;
     }).join(''));
   }
-  if (ok(m) && m.reddit?.blocked) out.push(note(`Reddit blocks GitHub's servers, so it was not searched. ${link('Search Reddit by hand', 'https://www.reddit.com/search/?q=curb.guide')}.`, 'margin-top:10px;'));
   return card('Mentions', out.join(''));
 }
 
@@ -660,7 +660,7 @@ function renderText(report, needs, missing) {
   sec('Mentions', s.mentions, (m) => {
     const ph = m.producthunt;
     if (ok(ph) && ph.name) L.push(`Product Hunt: ${num(ph.votes)} upvotes, ${num(ph.comments)} comments, #${num(ph.dailyRank)} of the day, #${num(ph.weeklyRank)} of the week`);
-    fails([['Product Hunt', ph], ...MENTION_SEARCHES.map(([k, name]) => [`the ${name} search`, m[k]])]);
+    fails([['Product Hunt', ph], ...MENTION_SEARCHES.map(([k, name]) => [`the ${name} search`, m[k]]), ["Claude's web search", ok(s.claude) ? s.claude.search : null]]);
     const items = [...list(m.items), ...(ok(s.claude) ? list(s.claude.mentions).map((x) => ({ ...x, via: 'claude' })) : [])];
     if (!items.length) L.push('No mentions found this week.');
     for (const x of items.slice(0, 10)) L.push(`[${badge(x)}] ${clip(x.title, 100)}${safeUrl(x.url) ? `\n   ${safeUrl(x.url)}` : ''}`);

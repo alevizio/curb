@@ -236,8 +236,7 @@
           { "author": "Maya R.", "body": "Moved to the Sunset last month and got two tickets in a week. Installing this right now.", "date": "2026-10-07" },
           { "author": "Dev P.", "body": "Love that it reads the actual city data. Any plans for Los Angeles?", "date": "2026-10-08" }
         ]
-      },
-      "reddit": { "blocked": true }
+      }
     },
     "claude": {
       "summary": [

@@ -87,6 +87,8 @@ jobs:
       # ANTHROPIC_API_KEY, when set, is the only key the step gets: the owner's subscription token is shared
       # with his own Claude sessions, and its 5-hour limit cost the Nov 18 to 24 email its summary (owner,
       # 2026-11-25: "Use a separate API key"). Without the API key it falls back to that token.
+      # --tools picks which tools exist, --allowedTools lets them run: CI has no settings that allow them, so
+      # until 2026-11-25 every search was refused WebSearch and answered an empty list in seconds.
       - name: Look for mentions with Claude
         if: steps.guard.outputs.sent != 'yes' && env.HAS_CLAUDE == 'true'
         continue-on-error: true
@@ -98,7 +100,7 @@ jobs:
           touch "$DIR/claude.started"
           npm install -g @anthropic-ai/claude-code > /dev/null
           node scripts/weekly/claude.mjs prompt search --dir "$DIR" \
-            | claude -p --tools WebSearch WebFetch --max-turns 40 --output-format json \
+            | claude -p --tools WebSearch WebFetch --allowedTools WebSearch WebFetch --max-turns 40 --output-format json \
               --no-session-persistence --strict-mcp-config > "$DIR/claude-search.json" 2> /dev/null \
             || echo "mention search did not finish"
           node scripts/weekly/claude.mjs prompt summary --dir "$DIR" \
