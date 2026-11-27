@@ -21,6 +21,8 @@
   }
   var path = location.pathname.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/+$/, '') || '/';
   var GH = 'https://github.com/alevizio/curb';
+  // CURB's Instagram, in every page's footer (owner, 2026-11-27: "Add link of instagram to landing page somewhere").
+  var IG = 'https://www.instagram.com/curb.guide/';
   var APP = 'https://apps.apple.com/us/app/curb-sf-street-parking/id6780998238';
   // Under every App Store link, the Android beta (owner, 2026-10-20): /android says how to join it on Google Play.
   var ANDROID = '/android', BETA = 'Android beta: join on Google Play';
@@ -131,6 +133,7 @@
         '<nav class="sn-fcol" aria-label="Explore"><h4>Explore</h4>' + F.explore + '</nav>' +
         '<nav class="sn-fcol" aria-label="More"><h4>More</h4>' + F.more +
           '<a href="' + GH + '/issues" rel="noopener">Report a bug</a>' +
+          '<a href="' + IG + '" rel="noopener">Instagram</a>' +
         '</nav>' +
         '<nav class="sn-fcol" aria-label="Open"><h4>Open</h4>' +
           '<a href="' + GH + '" rel="noopener">Source on GitHub</a>' + F.data +
